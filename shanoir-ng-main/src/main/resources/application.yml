@@ -1,0 +1,19 @@
+# zuul configuration
+# as url is used: no service discovery with service-id
+zuul:
+  routes:
+    resource:
+      path: /resource/**
+      url: http://localhost:9000
+      sensitive-headers: 
+# spring security configuration
+security:
+  user:
+    password: password
+# redis configuration
+spring:
+  redis:
+    host: localhost
+# logging configuration
+logging:
+  file: shanoir-ng-main.log

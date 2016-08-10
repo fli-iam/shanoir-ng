@@ -1,0 +1,13 @@
+# server configuration
+server:
+  port: 9000
+# spring security configuration
+security:
+  session: NEVER
+# redis configuration
+spring:
+  redis:
+    host: localhost
+# logging configuration
+logging:
+  file: shanoir-ng-resource-server.log

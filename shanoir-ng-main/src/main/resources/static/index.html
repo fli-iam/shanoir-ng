@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+<title>Welcome to Shanoir-NG!</title>
+<link
+        href="css/angular-bootstrap.css"
+        rel="stylesheet">
+<style type="text/css">
+[ng\:cloak], [ng-cloak], .ng-cloak {
+        display: none !important;
+}
+</style>
+</head>
+
+<body ng-app="main" ng-cloak class="ng-cloak">
+	    <h1>Welcome to Shanoir-NG!</h1>
+        <div ng-controller="navigation as nav" class="container">
+                <ul class="nav nav-pills" role="tablist">
+                        <li class="active"><a href="#/">home</a></li>
+                        <li><a href="#/login">login</a></li>
+                        <li ng-show="authenticated"><a href="" ng-click="nav.logout()">logout</a></li>
+                </ul>
+        </div>
+        <div ng-view class="container"></div>
+        <script src="js/angular-bootstrap.js" type="text/javascript"></script>
+        <script src="js/main.js"></script>
+</body>
+</html>
