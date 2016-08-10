@@ -1,2 +1,5 @@
 .DS_Store
 scripts/.DS_Store
+shanoir-ng-main.log
+shanoir-ng-resource-server.log
+target
