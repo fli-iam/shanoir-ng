@@ -1,6 +1,8 @@
 # Dropwizard tutorial
 
 ## Simple tutorial
+http://www.dropwizard.io/0.9.2/docs/getting-started.html
+
 - Compile project
     - mvn package
 - Launch server (executable jar)
@@ -11,6 +13,9 @@ hello-world.yml is the project configuration file. It is loaded by HelloWorldCon
 HelloWorldResource defines REST resource (jersey).
 
 ## Hibernate tutorial
+based on https://dzone.com/articles/getting-started-with-dropwizard-connecting-to-a-da
+     and http://www.dropwizard.io/0.7.1/docs/manual/hibernate.html
+
 - Modify pom.xml
     - comment line 59
     - uncomment line 60 (indicating main class)
