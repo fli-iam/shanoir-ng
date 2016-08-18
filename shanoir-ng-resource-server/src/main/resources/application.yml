@@ -1,6 +1,6 @@
 # server configuration
 server:
-  port: 9000
+  port: 9901
 # spring security configuration
 security:
   session: NEVER
