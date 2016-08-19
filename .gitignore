@@ -4,3 +4,6 @@ shanoir-ng-main.log
 shanoir-ng-resource-server.log
 target
 nginx.conf~
+angular2-quickstart/node_modules/
+angular2-quickstart/typings/
+*.map
