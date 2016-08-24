@@ -7,3 +7,4 @@ target
 angular2-quickstart/node_modules/
 angular2-quickstart/typings/
 *.map
+npm-debug.log
