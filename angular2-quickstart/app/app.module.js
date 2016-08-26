@@ -11,12 +11,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var core_1 = require('@angular/core');
 var platform_browser_1 = require('@angular/platform-browser');
 var forms_1 = require('@angular/forms');
+var http_1 = require('@angular/http');
+// Imports for loading & configuring the in-memory web api
+var http_2 = require('@angular/http');
+var angular2_in_memory_web_api_1 = require('angular2-in-memory-web-api');
+var in_memory_data_service_1 = require('./in-memory-data.service');
 var app_component_1 = require('./app.component');
-var heroes_component_1 = require('./heroes.component');
-var hero_detail_component_1 = require('./hero-detail.component');
-var dashboard_component_1 = require('./dashboard.component');
-var hero_service_1 = require('./hero.service');
 var app_routing_1 = require('./app.routing');
+var heroes_component_1 = require('./heroes.component');
+var dashboard_component_1 = require('./dashboard.component');
+var hero_detail_component_1 = require('./hero-detail.component');
+var hero_service_1 = require('./hero.service');
+var hero_search_component_1 = require('./hero-search.component');
 var AppModule = (function () {
     function AppModule() {
     }
@@ -25,16 +31,20 @@ var AppModule = (function () {
             imports: [
                 platform_browser_1.BrowserModule,
                 forms_1.FormsModule,
-                app_routing_1.routing
+                app_routing_1.routing,
+                http_1.HttpModule
             ],
             declarations: [
                 app_component_1.AppComponent,
                 heroes_component_1.HeroesComponent,
+                dashboard_component_1.DashboardComponent,
                 hero_detail_component_1.HeroDetailComponent,
-                dashboard_component_1.DashboardComponent
+                hero_search_component_1.HeroSearchComponent
             ],
             providers: [
-                hero_service_1.HeroService
+                hero_service_1.HeroService,
+                { provide: http_2.XHRBackend, useClass: angular2_in_memory_web_api_1.InMemoryBackendService },
+                { provide: angular2_in_memory_web_api_1.SEED_DATA, useClass: in_memory_data_service_1.InMemoryDataService } // in-mem server data
             ],
             bootstrap: [app_component_1.AppComponent]
         }), 
