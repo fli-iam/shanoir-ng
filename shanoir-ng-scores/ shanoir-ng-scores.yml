@@ -1,0 +1,269 @@
+---
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Shanoir Challenge Scores Microservice
+  description: Microservice API for the Shanoir challenge scores
+  contact:
+    url: http://shanoir.gforge.inria.fr/doku.php?id=en:us:contact
+security:
+  ???
+basePath: /challengeScores
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  ???
+paths:
+  /score/{processingId}:
+    put:
+      description: Creates/overwrite a score set for the given processing
+      operationId: saveScore
+      parameters:
+        - name: processingId
+          in: path
+          description: id of the processing parent of the score set
+          required: true
+          type: integer
+          format: int64
+        - name: scoreSet
+          in: body
+          description: Score set to save
+          required: true
+          schema:
+            $ref: '#/definitions/ScoreSet'
+      responses:
+        '201':
+          description: score created
+        '204':
+          description: score overwritten
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    get:
+      description: If exists, returns the score set attached to the given processing
+      operationId: findScoreByProcessingId
+      produces:
+        - application/json
+      parameters:
+        -
+          name: processingId
+          in: path
+          description: id of the processing parent of the score set
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: score set
+          schema:
+            $ref: '#/definitions/ScoreSet'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      description: deletes a single score set based on the given processing id
+      operationId: deleteScoreByProcessingId
+      parameters:
+        -
+          name: id
+          in: path
+          description: id of the processing from which to delete the score set
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '204':
+          description: score set deleted
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /scores/{studyId}:
+    get:
+      description: Returns the scores attached to the given study
+      operationId: findScoresByStudyId
+      produces:
+        - application/json
+      parameters:
+        -
+          name: studyId
+          in: path
+          description: id of the study
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: score matrix
+          schema:
+            $ref: '#/definitions/ChallengeScores'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /scores/xls/{studyId}:
+    get:
+      description: Returns the scores attached to the given study, as a Excel file
+      operationId: getXLSScoresByStudyId
+      produces:
+        - binary
+      parameters:
+        -
+          name: studyId
+          in: path
+          description: id of the study
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Challenge scores Excel file
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /metrics:
+    get:
+      description: Returns the metric list
+      operationId: findAllMetrics
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: all metrics
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+		          type: string
+		        NaN:
+		          type: string
+		        posInf:
+		          type: string
+		        negInf:
+		          type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /metric/{metricName}:
+    put:
+      description: Creates a metric
+      operationId: saveMetric
+      parameters:
+        - name: metricName
+          in: path
+          description: name of the metric
+          required: true
+          type: string
+        - name: NaN
+          in: body
+          description: What to do if a value for this metric is NaN, see ...
+          required: false
+          type: string
+        - name: negInf
+          in: body
+          description: What to do if a value for this metric is a negative infinite, see ...
+          required: false
+          type: string
+        - name: posInf
+          in: body
+          description: What to do if a value for this metric a positive infinite, see ...
+          required: false
+          type: string
+      responses:
+        '201':
+          description: metric created
+        '409':
+          description: metric name already exists in database
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      description: deletes a single metric based on its name
+      operationId: deleteMetricByName
+      parameters:
+        -
+          name: metricName
+          in: path
+          description: name of the metric
+          required: true
+          type: string
+      responses:
+        '204':
+          description: metric deleted
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+definitions:
+  ScoreSet:
+    type: array
+    items:
+      $ref: '#/definitions/Score'
+  Score:
+    type: object
+    required:
+      - metric
+      - value
+    properties:
+      metric:
+        type: string
+      value:
+        type: float
+  ChallengeScores:
+    type: array
+    items:
+      $ref: '#/definitions/Metric'
+  Metric:
+    type: object
+    required:
+      - metricName
+      - challengers
+    properties:
+      metricName:
+        type: string
+      challengers:
+        type: array
+        $ref: '#/definitions/Challenger'
+  Challenger:
+    type: object
+    required:
+      - challengerName
+      - subjects
+    properties:
+      challengerName:
+        type: string
+      subjects:
+        type: array
+        $ref: '#/definitions/Subject'
+  Subject:
+    type: object
+    required:
+      - subjectName
+      - score
+    properties:
+      subjectName:
+        type: string
+      score:
+        type: float
+  ErrorModel:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
