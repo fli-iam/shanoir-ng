@@ -1,0 +1,21 @@
+# DataSource settings: set here your own configurations for the database 
+# connection. In this example we have "netgloo_blog" as database name and 
+# "root" as username and password.
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/studycard_sb?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris
+    username: root
+    password: nimda
+    # The SQL dialect makes Hibernate generate better SQL for the chosen database
+    driver-class-name: com.mysql.jdbc.Driver
+  # Show or not log for each sql query
+  jpa:
+    show-sql: false
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update)
+      ddl-auto: update
+      # Naming strategy
+      naming:
+        strategy: org.hibernate.cfg.ImprovedNamingStrategy
+  jooq:
+    sql-dialect: Mysql
