@@ -48,6 +48,20 @@ public class StudyCard {
 	/** The nifti converter of the study card. */
 	private Long niftiConverter;
 
+	public StudyCard() {
+	}
+	
+	public StudyCard(long id, String name, boolean isDisabled, Long studyId, Long acquisitionEquipmentId, Long centerId,
+			Long niftiConverter) {
+		this.id = id;
+		this.name = name;
+		this.isDisabled = isDisabled;
+		this.studyId = studyId;
+		this.acquisitionEquipmentId = acquisitionEquipmentId;
+		this.centerId = centerId;
+		this.niftiConverter = niftiConverter;
+	}
+	
 	/**
 	 * @return the id
 	 */

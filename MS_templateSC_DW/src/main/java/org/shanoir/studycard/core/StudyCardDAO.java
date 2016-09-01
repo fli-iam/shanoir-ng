@@ -45,4 +45,11 @@ public interface StudyCardDAO {
      */
     StudyCard update(StudyCard studyCard);
     
+    /**
+     * Deletes a study card.
+     * 
+     * @param long id the id of the study card to delete.
+     */
+    void delete(long id);
+    
 }

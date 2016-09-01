@@ -2,6 +2,7 @@ package org.shanoir.studycard.resources;
 
 import java.util.List;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -32,15 +33,12 @@ public class StudyCardResource {
 
 	private StudyCardService studyCardService;
 
-	/**
-	 * @param studyCardService the studyCardService to set
-	 */
 	@Inject
-	public void setStudyCardService(StudyCardService studyCardService) {
+	public StudyCardResource(StudyCardService studyCardService) {
 		this.studyCardService = studyCardService;
 	}
 	
-    @GET
+	@GET
     @UnitOfWork
     public List<StudyCard> findAll() {
         return studyCardService.findAll();
@@ -65,6 +63,13 @@ public class StudyCardResource {
     public StudyCard updateStudyCard(StudyCard studyCard, @PathParam("id") LongParam id) {
     	Preconditions.checkArgument(id.get().equals(studyCard.getId()));
         return studyCardService.update(studyCard);
+    }
+    
+    @DELETE
+    @Path("/{id}")
+    @UnitOfWork
+    public void deleteStudyCard(@PathParam("id") LongParam id) {
+        studyCardService.delete(id.get());
     }
     
 }
