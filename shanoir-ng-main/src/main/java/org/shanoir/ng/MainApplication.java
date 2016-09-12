@@ -2,7 +2,6 @@ package org.shanoir.ng;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Arrays;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
