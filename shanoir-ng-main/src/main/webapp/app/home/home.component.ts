@@ -12,7 +12,8 @@ export class HomeComponent {
     constructor(private loginService: LoginService) {
     }
     
-    logout(): void {  
+    logout(event): void {  
+        event.preventDefault();
         this.loginService.logout();
     }
     

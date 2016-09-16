@@ -27,29 +27,29 @@ public class MainApplicationTests {
 
 	@Test
 	public void homePageLoads() {
-		ResponseEntity<String> response = template.getForEntity("http://localhost:"
+		final ResponseEntity<String> response = template.getForEntity("http://localhost:"
 				+ port + "/", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
 	@Test
 	public void userEndpointProtected() {
-		ResponseEntity<String> response = template.getForEntity("http://localhost:"
+		final ResponseEntity<String> response = template.getForEntity("http://localhost:"
 				+ port + "/user", String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
 	public void resourceEndpointProtected() {
-		ResponseEntity<String> response = template.getForEntity("http://localhost:"
+		final ResponseEntity<String> response = template.getForEntity("http://localhost:"
 				+ port + "/resource", String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
 	public void loginSucceeds() {
-		RestTemplate template = new TestRestTemplate("user", "password");
-		ResponseEntity<String> response = template.getForEntity("http://localhost:" + port
+		final RestTemplate template = new TestRestTemplate("user", "password");
+		final ResponseEntity<String> response = template.getForEntity("http://localhost:" + port
 				+ "/user", String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
