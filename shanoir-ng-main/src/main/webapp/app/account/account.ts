@@ -4,5 +4,8 @@ export class Account {
     authorities:Array<string>;
     authenticated = true;
     constructor(account?:{id:number, login:string, authorities:Array<string>}) {
+        if(account) {
+            this.authenticated = false;
+        }
     }
 }

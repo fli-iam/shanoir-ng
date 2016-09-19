@@ -9,6 +9,7 @@ import { AppComponent }   from './app.component';
 import { LoginComponent }   from './login/login.component';
 import { HomeComponent }   from './home/home.component';
 import { LoginService } from './login/login.service';
+import { AccountEventsService } from './account/account.events.service';
 
 @NgModule({
     imports:      [ 
@@ -24,7 +25,8 @@ import { LoginService } from './login/login.service';
         HomeComponent
     ],
     providers: [
-        LoginService
+        LoginService,
+        AccountEventsService
     ],
     bootstrap:    [ AppComponent ]
 })

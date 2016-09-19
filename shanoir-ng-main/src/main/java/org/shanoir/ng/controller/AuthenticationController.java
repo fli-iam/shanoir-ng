@@ -26,11 +26,11 @@ public class AuthenticationController {
 
 	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
 	@ResponseBody
-	public UserDTO authenticate(@RequestBody LoginDTO loginDTO, HttpServletResponse response) {
-        return authenticationService.authenticate(loginDTO, response);
+	public UserDTO authenticate(@RequestBody LoginDTO loginDTO, HttpServletResponse response) throws Exception {
+		return authenticationService.authenticate(loginDTO, response);
 	}
 	
-    @RequestMapping(value = "/logout",method = RequestMethod.GET)
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public void logout(){
         authenticationService.logout();
     }

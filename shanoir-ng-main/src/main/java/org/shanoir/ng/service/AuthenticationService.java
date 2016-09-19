@@ -20,8 +20,9 @@ public interface AuthenticationService {
 	 * @param response HTTP response.
 	 * 
 	 * @return connected user - null if connection fails.
+	 * @throws Exception authentication exception
 	 */
-	UserDTO authenticate(LoginDTO loginDTO, HttpServletResponse response);
+	UserDTO authenticate(LoginDTO loginDTO, HttpServletResponse response) throws Exception;
 	
     /**
      * Logout a user:

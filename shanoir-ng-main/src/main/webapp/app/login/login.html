@@ -1,8 +1,5 @@
 <h2>Login</h2>
-<!--<form [ngFormModel]="loginForm" (submit)=onSubmit()>
-    Login: <input />
-    Password: <input />
-</form>-->
+<span *ngIf="error">{{error}}</span>
 <form [formGroup]="loginForm" (ngSubmit)="login()">
     <div class="field">  
         <label for="email">Login:</label>  

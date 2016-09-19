@@ -39,7 +39,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private UserDetailsService userDetailsService;
 
 	@Override
-	public UserDTO authenticate(final LoginDTO loginDTO, final HttpServletResponse response) {
+	public UserDTO authenticate(final LoginDTO loginDTO, final HttpServletResponse response) throws Exception {
 		final UsernamePasswordAuthenticationToken authenticationToken = 
 				new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), loginDTO.getPassword());
         Authentication authentication = null;
@@ -47,7 +47,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         	authentication = authenticationManager.authenticate(authenticationToken);
         } catch (AuthenticationException e) {
         	LOG.error("Error while authenticating", e);
-        	return null;
+        	throw e;
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
