@@ -49,7 +49,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void authenticate() {
+    public void authenticate() throws Exception {
 
     	final LoginDTO loginDTO = new LoginDTO();
         loginDTO.setLogin("user");
