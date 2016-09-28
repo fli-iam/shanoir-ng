@@ -1,0 +1,95 @@
+# The current commit is based on that simple swagger
+
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: Shanoir Challenge Scores Microservice
+  description: Microservice API for the Shanoir challenge scores
+  contact:
+    url: http://shanoir.gforge.inria.fr/doku.php?id=en:us:contact
+basePath: /challengeScores
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /metric:
+    post:
+      description: Create a metric
+      operationId: saveMetric
+      parameters:
+        - $ref: "#/parameters/metricName"
+        - $ref: "#/parameters/NaN"
+        - $ref: "#/parameters/negInf"
+        - $ref: "#/parameters/posInf"
+      responses:
+        '201':
+          description: metric created
+          schema:
+            $ref: '#/definitions/Metric'
+        '409':
+          description: Metric name already exists in the database
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+parameters:
+  metricName:
+    name: name
+    in: query
+    description: The name of the metric
+    required: true
+    type: string
+  NaN:
+    name: NaN
+    in: query
+    description: What to do if a value for this metric is NaN
+    required: false
+    type: string
+  negInf:
+    name: negInf
+    in: query
+    description: What to do if a value for this metric is a negative infinite
+    required: false
+    type: string
+  posInf:
+    name: posInf
+    in: query
+    description: What to do if a value for this metric a positive infinite
+    required: false
+    type: string
+definitions:
+  Metric:
+    type: object
+    required:
+      - name
+    properties:
+      id:
+        type: number
+        format: int64
+        description: The id of the metric
+      name:
+        type: string
+        description: The name of the metric
+      NaN:
+        type: string
+        description: What to do if a value for this metric is NaN
+      posInf:
+        type: string
+        description: What to do if a value for this metric is a negative infinite
+      negInf:
+        type: string
+        description: What to do if a value for this metric a positive infinite
+  ErrorModel:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string

@@ -1,0 +1,91 @@
+/** CHALLENGE SCORE MICROSERVICE RETURN EXAMPLE
+ *
+ * This is an example of return for the endpoint GET /scores/{studyId}.
+ * Here, there are :
+ *     - 2 metrics           (Dice, Jaccard)
+ *     - 2 challengers       (Julien LOUIS, Michael KAIN)
+ *     - 3 subjects          (Patient1, Patient2, Patient3)
+ */
+
+{
+	[
+		{
+			"metricName": "Dice",
+			"challengers": [
+				{
+					"challengerName": "Julien LOUIS",
+					"subjects": [
+						{
+							"subjectName": "Patient1",
+							0.84571
+						},
+						{
+							"subjectName": "Patient2",
+							0.75512
+						},
+						{
+							"subjectName": "Patient3",
+							0.71452
+						}
+					]
+				},
+				{
+					"challengerName": "Michael KAIN",
+					"subjects": [
+						{
+							"subjectName": "Patient1",
+							0.95471
+						},
+						{
+							"subjectName": "Patient2",
+							0.75457
+						},
+						{
+							"subjectName": "Patient3",
+							0.65478
+						}
+					]
+				}
+			]
+		},
+		{
+			"metricName": "Jaccard",
+			"challengers": [
+				{
+					"challengerName": "Julien LOUIS",
+					"subjects": [
+						{
+							"subjectName": "Patient1",
+							0.45789
+						},
+						{
+							"subjectName": "Patient2",
+							0.75512
+						},
+						{
+							"subjectName": "Patient3",
+							0.98745
+						}
+					]
+				},
+				{
+					"challengerName": "Michael KAIN",
+					"subjects": [
+						{
+							"subjectName": "Patient1",
+							0.95994
+						},
+						{
+							"subjectName": "Patient2",
+							0.87988
+						},
+						{
+							"subjectName": "Patient3",
+							0.0
+						}
+					]
+				}
+			]
+		}
+	]
+}
