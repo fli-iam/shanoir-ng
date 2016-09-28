@@ -55,4 +55,9 @@ public class StudyCardServiceImpl implements StudyCardService {
 		return studyCardDAO.update(studyCard);
 	}
 
+	@Override
+	public void delete(long id) {
+		studyCardDAO.delete(id);
+	}
+
 }

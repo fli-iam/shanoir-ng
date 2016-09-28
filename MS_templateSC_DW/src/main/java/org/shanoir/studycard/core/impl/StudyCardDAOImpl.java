@@ -39,5 +39,13 @@ public class StudyCardDAOImpl extends AbstractDAO<StudyCard> implements StudyCar
     public StudyCard update(StudyCard studyCard) {
     	return persist(studyCard);
     }
+
+	@Override
+	public void delete(long id) {
+		final StudyCard studyCard = get(id);
+		if (studyCard != null) {
+			currentSession().delete(studyCard);
+		}
+	}
     
 }
