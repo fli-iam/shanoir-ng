@@ -1,5 +1,3 @@
-# The current commit is based on that simple swagger
-
 swagger: "2.0"
 info:
   version: "1.0.0"
@@ -14,10 +12,28 @@ consumes:
   - application/json
 produces:
   - application/json
+
 paths:
+  /metrics:
+    get:
+      description: Returns all the available metrics
+      operationId: findAllMetrics
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: all metrics
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Metric'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /metric:
     post:
-      description: Create a metric
+      description: Creates new a metric
       operationId: saveMetric
       parameters:
         - $ref: "#/parameters/metricName"
@@ -30,12 +46,71 @@ paths:
           schema:
             $ref: '#/definitions/Metric'
         '409':
-          description: Metric name already exists in the database
+          description: metric name already exists in the database
         default:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  /metric/{id}:
+    get:
+      description: Gets a single metric based on its id
+      operationId: getMetricById
+      parameters:
+        - $ref: "#/parameters/metricId"
+      responses:
+        '200':
+          description: metric founded
+          schema:
+            $ref: '#/definitions/Metric'
+        '404':
+          description: metric not found
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      description: Creates / updates a metric
+      operationId: createOrUpdateMetric
+      parameters:
+        - $ref: "#/parameters/metricId"
+        - $ref: "#/parameters/metricName"
+        - $ref: "#/parameters/NaN"
+        - $ref: "#/parameters/negInf"
+        - $ref: "#/parameters/posInf"
+      responses:
+        '201':
+          description: metric created
+        '204':
+          description: metric updated
+        '409':
+          description: metric name already exists in the database
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      description: Deletes a single metric based on its id
+      operationId: deleteMetricById
+      parameters:
+        - $ref: "#/parameters/metricId"
+      responses:
+        '204':
+          description: metric deleted
+        '404':
+          description: metric not found
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
 parameters:
+  metricId:
+    name: id
+    in: path
+    description: id of the metric
+    required: true
+    type: integer
+    format: int64
   metricName:
     name: name
     in: query

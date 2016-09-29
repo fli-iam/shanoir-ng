@@ -28,6 +28,16 @@ public class MetricServiceImpl implements MetricService {
 		metricRepository.save(metric);
 	}
 
+	@Override
+	public Metric getMetric(Long id) {
+		return metricRepository.findOne(id);
+	}
+
+	@Override
+	public void deleteMetric(Long id) {
+		metricRepository.delete(id);
+	}
+
 
 
 }

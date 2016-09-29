@@ -12,5 +12,6 @@ public interface MetricService {
 
 	Iterable<Metric> findAll();
 	void saveMetric(Metric metric);
-
+	Metric getMetric(Long id);
+	void deleteMetric(Long id);
 }

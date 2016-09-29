@@ -17,7 +17,7 @@ create table SCORE (
 
 create table METRIC (
 	ID bigint not null auto_increment,
-    NAME varchar(31),
+    NAME varchar(31) unique,
     NAN varchar(31),
     POS_INF varchar(31),
     NEG_INF varchar(31),

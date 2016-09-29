@@ -1,6 +1,8 @@
 package org.shanoir.challengeScores.data.model.mapping.swagerapi;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.shanoir.challengeScores.data.model.Metric;
 
@@ -38,6 +40,20 @@ public class MetricMapper {
 		metric.setNegInf(swaggerMetric.getNegInf());
 		metric.setPosInf(swaggerMetric.getPosInf());
 		return metric;
+	}
+
+	/**
+	 * Convert a List of {@link io.swagger.model.Metric} to a list of {@link org.shanoir.challengeScores.data.model.Metric}
+	 *
+	 * @param metrics
+	 * @return a list of the targeted class
+	 */
+	public static List<io.swagger.model.Metric> modelToSwagger(List<Metric> metrics) {
+		List<io.swagger.model.Metric> swaggerMetrics = new ArrayList<io.swagger.model.Metric>();
+		for (Metric metric : metrics) {
+			swaggerMetrics.add(modelToSwagger(metric));
+		}
+		return swaggerMetrics;
 	}
 
 }
