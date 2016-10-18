@@ -1,0 +1,22 @@
+# server configuration
+server:
+  port: 9990
+# zuul configuration
+# as url is used: no service discovery with service-id
+zuul:
+  routes:
+    resource:
+      path: /resource/**
+      url: http://resource:9901
+      sensitive-headers: 
+# spring security configuration
+security:
+  user:
+    password: password
+# redis configuration
+spring:
+  redis:
+    host: localhost
+# logging configuration
+logging:
+  file: shanoir-ng-front.log

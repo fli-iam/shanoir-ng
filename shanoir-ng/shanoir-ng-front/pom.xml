@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.shanoir-ng</groupId>
+		<artifactId>shanoir-ng</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../shanoir-ng-parent</relativePath>
+	</parent>
+	
+	<artifactId>shanoir-ng-front</artifactId>
+	<packaging>war</packaging>
+
+	<name>shanoir-ng-front</name>
+	<description>Front project for Shanoir-ng</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.8</java.version>
+		<docker.image.prefix>shanoir-ng</docker.image.prefix>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-compiler-plugin</artifactId>
+	            <configuration>
+	                <source>1.8</source>
+	                <target>1.8</target>
+	            </configuration>
+	        </plugin>
+	        <plugin>
+	            <groupId>org.codehaus.mojo</groupId>
+	            <artifactId>exec-maven-plugin</artifactId>
+	            <executions>
+	                <execution>
+	                    <id>exec-npm-install</id>
+	                    <phase>generate-sources</phase>
+	                    <configuration>
+	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
+	                        <executable>npm.cmd</executable>
+	                        <arguments>
+	                            <argument>install</argument>
+	                        </arguments>
+	                    </configuration>
+	                    <goals>
+	                        <goal>exec</goal>
+	                    </goals>
+	                </execution>
+	                <execution>
+	                    <id>exec-npm-run-tsc</id>
+	                    <phase>generate-sources</phase>
+	                    <configuration>
+	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
+	                        <executable>npm.cmd</executable>
+	                        <arguments>
+	                            <argument>run</argument>
+	                            <argument>tsc</argument>
+	                        </arguments>
+	                    </configuration>
+	                    <goals>
+	                        <goal>exec</goal>
+	                    </goals>
+	                </execution>
+	            </executions>
+	        </plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.springframework.boot</groupId> -->
+<!-- 				<artifactId>spring-boot-maven-plugin</artifactId> -->
+<!-- 			</plugin> -->
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.4.11</version>
+				<configuration>
+					<imageName>${project.artifactId}-${docker.image.prefix}</imageName>
+					<dockerDirectory>src/main/docker</dockerDirectory>
+					<resources>
+						<resource>
+							<targetPath>/</targetPath>
+							<directory>${project.build.directory}</directory>
+							<include>${project.build.finalName}.jar</include>
+						</resource>
+					</resources>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<repositories>
+		<repository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>http://repo.spring.io/libs-snapshot-local</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>http://repo.spring.io/libs-milestone-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-releases</id>
+			<name>Spring Releases</name>
+			<url>http://repo.spring.io/libs-release-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+</project>
