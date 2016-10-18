@@ -1,13 +1,20 @@
 package org.shanoir.challengeScores.data.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.JoinColumn;
+import javax.persistence.NamedNativeQuery;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.challengeScores.utils.Utils;
 
 /**
  * A metric is an evaluation method from the SegPerfAnalyser, to evaluate the segmentation quality.
@@ -16,11 +23,14 @@ import javax.persistence.JoinColumn;
  * @author jlouis
  */
 @Entity
+@NamedNativeQuery(name="getLastId", query="SELECT MAX(ID) FROM METRIC")
 public class Metric {
 
 	@Id
-	@GeneratedValue
-	private long id;
+	@NotNull
+	@GeneratedValue(generator = "myGenerator")
+	@GenericGenerator(name = "myGenerator", strategy = "org.shanoir.challengeScores.utils.MetricIdentifierGenerator")
+	private Long id;
 
 	private String name;
 
@@ -36,8 +46,8 @@ public class Metric {
 	/** The study ids for this metric. */
 	@ManyToMany @JoinTable (
 			name = "METRIC_STUDY_REL",
-			joinColumns = @JoinColumn(name="STUDY_ID"),
-			inverseJoinColumns = @JoinColumn(name="METRIC_ID"))
+			joinColumns = @JoinColumn(name="METRIC_ID"),
+			inverseJoinColumns = @JoinColumn(name="STUDY_ID"))
 	private List<Study> studies;
 
 
@@ -49,10 +59,55 @@ public class Metric {
 	}
 
 
+	public Metric(Long id2, String name2, String naN, String negInf2, String posInf2, List<Long> studyIds) {
+		setName(name);
+		setNaN(naN);
+		setNegInf(negInf);
+		setPosInf(posInf);
+		List<Study> studies = new ArrayList<Study>();
+		if (studyIds != null) {
+			for (Long studyId : studyIds) {
+				Study study = new Study(studyId);
+				studies.add(study);
+			}
+		}
+		setStudies(studies);
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj != null && obj instanceof Metric) {
+			Metric other = (Metric) obj;
+			if (this.getId() == null) {
+				return other.getId() == null
+						&& Utils.equals(this.getName(), other.getName())
+						&& Utils.equals(this.getNaN(), other.getNaN())
+						&& Utils.equals(this.getNegInf(), other.getNegInf())
+						&& Utils.equals(this.getPosInf(), other.getPosInf());
+			} else {
+				return this.getId().equals(other.getId());
+			}
+		} else {
+			return false;
+		}
+	}
+
+
+	@Override
+	public int hashCode() {
+		if (id != null) {
+			return id.hashCode();
+		} else {
+			return Arrays.hashCode(new Object[] {name, NaN, negInf, posInf});
+		}
+	}
+
+
 	/**
 	 * @return the id
 	 */
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
@@ -60,7 +115,7 @@ public class Metric {
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

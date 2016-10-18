@@ -2,7 +2,7 @@ package io.swagger.api;
 
 import javax.xml.bind.annotation.XmlTransient;
 
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-09-29T07:31:44.348Z")
+@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-11T09:18:12.164Z")
 
 @javax.xml.bind.annotation.XmlRootElement
 public class ApiResponseMessage {
@@ -15,12 +15,13 @@ public class ApiResponseMessage {
 	int code;
 	String type;
 	String message;
-	
-	public ApiResponseMessage(){}
-	
-	public ApiResponseMessage(int code, String message){
+
+	public ApiResponseMessage() {
+	}
+
+	public ApiResponseMessage(int code, String message) {
 		this.code = code;
-		switch(code){
+		switch (code) {
 		case ERROR:
 			setType("error");
 			break;

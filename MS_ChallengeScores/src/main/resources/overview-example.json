@@ -34,15 +34,15 @@
 					"subjects": [
 						{
 							"subjectName": "Patient1",
-							0.95471
+							"score": 0.95471
 						},
 						{
 							"subjectName": "Patient2",
-							0.75457
+							"score": 0.75457
 						},
 						{
 							"subjectName": "Patient3",
-							0.65478
+							"score": 0.65478
 						}
 					]
 				}
@@ -56,15 +56,15 @@
 					"subjects": [
 						{
 							"subjectName": "Patient1",
-							0.45789
+							"score": 0.45789
 						},
 						{
 							"subjectName": "Patient2",
-							0.75512
+							"score": 0.75512
 						},
 						{
 							"subjectName": "Patient3",
-							0.98745
+							"score": 0.98745
 						}
 					]
 				},
@@ -73,15 +73,15 @@
 					"subjects": [
 						{
 							"subjectName": "Patient1",
-							0.95994
+							"score": 0.95994
 						},
 						{
 							"subjectName": "Patient2",
-							0.87988
+							"score": 0.87988
 						},
 						{
 							"subjectName": "Patient3",
-							0.0
+							"score": 0.0
 						}
 					]
 				}

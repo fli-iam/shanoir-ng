@@ -1,11 +1,12 @@
 package org.shanoir.challengeScores.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.challengeScores.Utils;
 import org.shanoir.challengeScores.data.access.service.MetricService;
 import org.shanoir.challengeScores.data.model.Metric;
 import org.shanoir.challengeScores.data.model.mapping.swagerapi.MetricMapper;
+import org.shanoir.challengeScores.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -14,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import io.swagger.api.MetricApiController;
-import io.swagger.api.MetricsApiController;
+import io.swagger.model.Metrics;
 
 /**
  * Implement the logic for the generated Swagger server api : {@link MetricApiController}
@@ -46,12 +47,8 @@ public class MetricApiDelegate {
 	 * @param posInf
 	 * @return {@link ResponseEntity}
 	 */
-	public ResponseEntity<io.swagger.model.Metric> saveMetric(String name, String naN, String negInf, String posInf) {
-		Metric metric = new Metric();
-		metric.setName(name);
-		metric.setNaN(naN);
-		metric.setNegInf(negInf);
-		metric.setPosInf(posInf);
+	public ResponseEntity<io.swagger.model.Metric> saveMetric(String name, String naN, String negInf, String posInf, List<Long> studyIds) {
+		Metric metric = new Metric(null, name, naN, negInf, posInf, studyIds);
 		try {
 			metricService.saveMetric(metric);
 		} catch (DataIntegrityViolationException e) {
@@ -73,13 +70,8 @@ public class MetricApiDelegate {
 	 * @param posInf
 	 * @return {@link ResponseEntity}
 	 */
-	public ResponseEntity<Void> saveMetric(Long id, String name, String naN, String negInf, String posInf) {
-		Metric metric = new Metric();
-		metric.setId(id);
-		metric.setName(name);
-		metric.setNaN(naN);
-		metric.setNegInf(negInf);
-		metric.setPosInf(posInf);
+	public ResponseEntity<Void> saveMetric(Long id, String name, String naN, String negInf, String posInf, List<Long> studyIds) {
+		Metric metric = new Metric(id, name, naN, negInf, posInf, studyIds);
 		boolean alreadyExistsInDatabase = metricService.getMetric(id) != null;
 		try {
 			metricService.saveMetric(metric);
@@ -141,5 +133,32 @@ public class MetricApiDelegate {
 	public ResponseEntity<List<io.swagger.model.Metric>> findAllMetrics() {
 		List<io.swagger.model.Metric> metrics = MetricMapper.modelToSwagger(Utils.toList(metricService.findAll()));
 		return new ResponseEntity<List<io.swagger.model.Metric>>(metrics, HttpStatus.OK);
+	}
+
+
+	/**
+	 * Delete every metric.
+	 * Implements the logic for the corresponding generated method :
+	 * {@link MetricsApiController#deleteAllMetrics()}
+	 *
+	 * @return {@link ResponseEntity}
+	 */
+	public ResponseEntity<Void> deleteAllMetrics() {
+		metricService.deleteAll();
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+	}
+
+
+	public ResponseEntity<Void> updateAll(Metrics swaggerMetrics) {
+		List<Metric> metrics = new ArrayList<Metric>();
+		for (io.swagger.model.Metric swaggerMetric : swaggerMetrics) {
+			Metric metric = new Metric();
+			metric.setId(swaggerMetric.getId().longValue());
+			metric.setName(swaggerMetric.getName());
+			metrics.add(metric);
+		}
+		//metricService.deleteAll();
+		metricService.saveAll(metrics);
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 }

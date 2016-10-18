@@ -13,5 +13,6 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface MetricRepository extends CrudRepository<Metric, Long> {
 
+	Iterable<Metric> findByStudiesId(Long studyId);
 
 }

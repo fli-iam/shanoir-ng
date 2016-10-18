@@ -10,32 +10,24 @@ import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-09-29T07:31:44.348Z")
+@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-11T09:18:12.164Z")
 
 @Configuration
 public class SwaggerDocumentationConfig {
 
-    ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-            .title("Shanoir Challenge Scores Microservice")
-            .description("Microservice API for the Shanoir challenge scores")
-            .license("")
-            .licenseUrl("")
-            .termsOfServiceUrl("http://shanoir.gforge.inria.fr/doku.php?id&#x3D;en:us:contact")
-            .version("1.0.0")
-            .contact(new Contact("","", ""))
-            .build();
-    }
+	ApiInfo apiInfo() {
+		return new ApiInfoBuilder().title("Shanoir Challenge Scores Microservice")
+				.description("Microservice API for the Shanoir challenge scores").license("").licenseUrl("")
+				.termsOfServiceUrl("http://shanoir.gforge.inria.fr/doku.php?id&#x3D;en:us:contact").version("1.0.0")
+				.contact(new Contact("", "", "")).build();
+	}
 
-    @Bean
-    public Docket customImplementation(){
-        return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                    .apis(RequestHandlerSelectors.basePackage("io.swagger.api"))
-                    .build()
-                .directModelSubstitute(org.joda.time.LocalDate.class, java.sql.Date.class)
-                .directModelSubstitute(org.joda.time.DateTime.class, java.util.Date.class)
-                .apiInfo(apiInfo());
-    }
+	@Bean
+	public Docket customImplementation() {
+		return new Docket(DocumentationType.SWAGGER_2).select()
+				.apis(RequestHandlerSelectors.basePackage("io.swagger.api")).build()
+				.directModelSubstitute(org.joda.time.LocalDate.class, java.sql.Date.class)
+				.directModelSubstitute(org.joda.time.DateTime.class, java.util.Date.class).apiInfo(apiInfo());
+	}
 
 }

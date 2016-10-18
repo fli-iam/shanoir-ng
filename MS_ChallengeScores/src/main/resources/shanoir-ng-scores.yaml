@@ -1,6 +1,4 @@
-# TO BE CORRECTED AND VALIDATED
----
-swagger: '2.0'
+swagger: "2.0"
 info:
   version: "1.0.0"
   title: Shanoir Challenge Scores Microservice
@@ -8,102 +6,103 @@ info:
   contact:
     url: http://shanoir.gforge.inria.fr/doku.php?id=en:us:contact
 basePath: /challengeScores
-schemes:
-  - https
-consumes:
-  - application/json
 produces:
   - application/json
+
 paths:
   /score:
-    post:
-      description: Creates/overwrite a score set for a given subject + owner
-      operationId: saveScoreSet
-      parameters:
-        -
-          name: saveScoreParameters
-          in: body
-          description: Score set to save and parameters
-          required: true
-          type: object
-          schema:
-            $ref: '#/definitions/SaveScoreParams'
-      responses:
-        '201':
-          description: score created
-        '204':
-          description: score overwritten
-        default:
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
     get:
       description: If exists, returns the score set for the given subject + owner
       operationId: findScoreSet
-      produces:
+      parameters:
+        - $ref: "#/parameters/studyId"
+        - $ref: "#/parameters/patientId"
+        - $ref: "#/parameters/ownerId"
+        - $ref: "#/parameters/inputDatasetId"
+      responses:
+        '200':
+          description: score set
+          schema:
+            $ref: "#/definitions/ScoreSet"
+        '404':
+          description: no score set founded
+        '409':
+          description: several score sets founded, see error msg
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    post:
+      description: Creates/overwrite a score set
+      operationId: saveScoreSet
+      consumes:
         - application/json
       parameters:
-        - name: subjectId
+        - $ref: "#/parameters/studyId"
+        - $ref: "#/parameters/patientId"
+        - $ref: "#/parameters/ownerId"
+        - $ref: "#/parameters/inputDatasetId"
+        - name: scoreSet
           in: body
-          description: subject of the score set
+          description: the score set to save
           required: true
-          type: long
-          format: int64
-        - name: ownerId
-          in: body
-          description: owner of the score set
-          required: true
-          type: long
-          format: int64
+          schema:
+            $ref: "#/definitions/ScoreSet"
+      responses:
+        '204':
+          description: scores saved
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    delete:
+      description: Deletes a score set
+      operationId: deleteScoreSet
+      parameters:
+        - $ref: "#/parameters/studyId"
+        - $ref: "#/parameters/patientId"
+        - $ref: "#/parameters/ownerId"
+        - $ref: "#/parameters/inputDatasetId"
+      responses:
+        '204':
+          description: score set deleted
+        '404':
+          description: no score set founded
+        '409':
+          description: several score sets founded, need more data, see error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /score/{segmentedDatasetId}:
+    get:
+      description: If exists, returns the score set
+      operationId: findScoreSetByDatasetId
+      parameters:
+        - $ref: "#/parameters/segmentedDatasetId"
       responses:
         '200':
           description: score set
           schema:
             $ref: '#/definitions/ScoreSet'
+        '404':
+          description: no score set founded
         default:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-    delete:
-      description: deletes a score set based on the given subject + owner
-      operationId: deleteScoreSet
-      parameters:
-        - name: subjectId
-          in: body
-          description: subject of the score set
-          required: true
-          type: integer
-          format: int64
-        - name: ownerId
-          in: body
-          description: owner of the score set
-          required: true
-          type: integer
-          format: int64
-      responses:
-        '204':
-          description: score set deleted
-        default:
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-  /score/{datasetId}:
-    put:
-      description: Creates/overwrite a score set for the given dataset
+    post:
+      description: Creates/overwrite a score set
       operationId: saveScoreSetByDatasetId
+      consumes:
+        - application/json
       parameters:
-        - name: processingId
-          in: path
-          description: id of the dataset from which the score is computed
-          required: true
-          type: integer
-          format: int64
-        - name: scoreSet
-          in: body
-          description: Score set to save
-          required: true
-          schema:
-            $ref: '#/definitions/ScoreSet'
+        - $ref: "#/parameters/segmentedDatasetId"
+        - $ref: "#/parameters/scoreSet"
       responses:
         '201':
           description: score created
@@ -113,58 +112,32 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-    get:
-      description: If exists, returns the score set attached to the given dataset
-      operationId: findScoreByDatasetId
-      produces:
-        - application/json
+    delete:
+      description: If exists, deletes the score set
+      operationId: deleteScoreSetByDatasetId
       parameters:
-        - name: datasetId
-          in: path
-          description: id of the dataset parent of the score set
-          required: true
-          type: long
-          format: int64
+        - $ref: "#/parameters/segmentedDatasetId"
       responses:
-        '200':
+        '204':
           description: score set
           schema:
             $ref: '#/definitions/ScoreSet'
+        '404':
+          description: no score set founded
         default:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-    delete:
-      description: deletes a single score set based on the given dataset id
-      operationId: deleteScoreByDatasetId
-      parameters:
-        -
-          name: id
-          in: path
-          description: id of the dataset from which to delete the score set
-          required: true
-          type: long
-          format: int64
-      responses:
-        '204':
-          description: score set deleted
-        default:
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-  /scores/{studyId}:
+  /score/all/{studyId}:
     get:
       description: Returns the scores attached to the given study
       operationId: findScoresByStudyId
-      produces:
-        - application/json
       parameters:
-        -
-          name: studyId
+        - name: studyId
           in: path
           description: id of the study
           required: true
-          type: long
+          type: integer
           format: int64
       responses:
         '200':
@@ -175,15 +148,14 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /scores/xls/{studyId}:
+  /score/all/xls/{studyId}:
     get:
       description: Returns the scores attached to the given study, as a Excel file
       operationId: getXLSScoresByStudyId
       produces:
-        - binary
+        - application/vnd.ms-excel
       parameters:
-        -
-          name: studyId
+        - name: studyId
           in: path
           description: id of the study
           required: true
@@ -196,136 +168,389 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /metrics:
+  /score/all/reset:
+    post:
+      description: Reset all scores
+      operationId: resetScores
+      parameters:
+        - name: scoreList
+          in: body
+          description: the new data
+          required: true
+          schema:
+            $ref: '#/definitions/ResetObject'
+      responses:
+        '204':
+          description: Database reset
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /metric/all:
     get:
-      description: Returns the metric list
+      description: Returns all the available metrics
       operationId: findAllMetrics
-      produces:
-        - application/json
       responses:
         '200':
           description: all metrics
           schema:
             type: array
             items:
-
-        default:
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-  /metric/{id}:
-    put:
-      description: Creates / updates a metric
-      operationId: saveMetric
-      parameters:
-        - name: id
-          in: path
-          description: id of the metric
-          required: true
-          type: long
-          format: int64
-        - name: name
-          in: body
-          description: The name of the metric
-          required: true
-          type: string
-        - name: NaN
-          in: body
-          description: What to do if a value for this metric is NaN, see ...
-          required: false
-          type: string
-        - name: negInf
-          in: body
-          description: What to do if a value for this metric is a negative infinite, see ...
-          required: false
-          type: string
-        - name: posInf
-          in: body
-          description: What to do if a value for this metric a positive infinite, see ...
-          required: false
-          type: string
-      responses:
-        '201':
-          description: metric created
+              $ref: '#/definitions/Metric'
         default:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
     delete:
-      description: deletes a single metric based on its id
-      operationId: deleteMetricById
-      parameters:
-        - name: id
-          in: path
-          description: id of the metric
-          required: true
-          type: long
-          format: int64
+      description: Deletes all metrics
+      operationId: deleteAllMetrics
       responses:
-        '201':
-          description: metric deleted
+        '204':
+          description: metrics cleared
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      description: Updates the metric list
+      operationId: updateMetrics
+      consumes:
+        - application/json
+      parameters:
+        - name: metrics
+          in: body
+          description: the metrics to save
+          required: true
+          schema:
+            $ref: "#/definitions/Metrics"
+      responses:
+        '204':
+          description: metrics updated
         default:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
   /metric:
     post:
-      description: Creates a metric
+      description: Creates new a metric
       operationId: saveMetric
       parameters:
-        - name: name
-          in: body
-          description: The name of the metric
-          required: true
-          type: string
-        - name: NaN
-          in: body
-          description: What to do if a value for this metric is NaN, see ...
-          required: false
-          type: string
-        - name: negInf
-          in: body
-          description: What to do if a value for this metric is a negative infinite, see ...
-          required: false
-          type: string
-        - name: posInf
-          in: body
-          description: What to do if a value for this metric a positive infinite, see ...
-          required: false
-          type: string
+        - $ref: "#/parameters/metricName"
+        - $ref: "#/parameters/NaN"
+        - $ref: "#/parameters/negInf"
+        - $ref: "#/parameters/posInf"
+        - $ref: "#/parameters/studyIds"
       responses:
         '201':
           description: metric created
           schema:
             $ref: '#/definitions/Metric'
         '409':
-          description: metric name already exists in database
+          description: metric name already exists in the database
         default:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /subject/{subjectId}:
-    put:
-      description: Creates/updates a subject
-      operationId: putSubject
-      produces:
-        - application/json
+  /metric/{id}:
+    get:
+      description: Gets a single metric based on its id
+      operationId: getMetricById
       parameters:
-        - name: subjectId
-          in: path
-          description: id of the subject
+        - $ref: "#/parameters/metricId"
+      responses:
+        '200':
+          description: metric founded
+          schema:
+            $ref: '#/definitions/Metric'
+        '404':
+          description: metric not found
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      description: Creates / updates a metric
+      operationId: createOrUpdateMetric
+      parameters:
+        - $ref: "#/parameters/metricId"
+        - $ref: "#/parameters/metricName"
+        - $ref: "#/parameters/NaN"
+        - $ref: "#/parameters/negInf"
+        - $ref: "#/parameters/posInf"
+        - $ref: "#/parameters/studyIds"
+      responses:
+        '201':
+          description: metric created
+        '204':
+          description: metric updated
+        '409':
+          description: metric name already exists in the database
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      description: Deletes a single metric based on its id
+      operationId: deleteMetricById
+      parameters:
+        - $ref: "#/parameters/metricId"
+      responses:
+        '204':
+          description: metric deleted
+        '404':
+          description: metric not found
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /study:
+    put:
+      description: Saves or updates a study
+      operationId: saveStudy
+      parameters:
+        - name: id
+          in: query
+          description: id of the study
           required: true
           type: integer
           format: int64
+        - name: name
+          in: query
+          description: name of the study
+          required: true
+          type: string
       responses:
         '201':
-          description: subject created
+          description: study created
         '204':
-          description: subject overwritten
+          description: study updated
         default:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  /study/all:
+    delete:
+      description: Deletes all studies
+      operationId: deleteAllStudies
+      responses:
+        '204':
+          description: studies cleared
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      description: Updates the study list
+      operationId: updateStudies
+      consumes:
+        - application/json
+      parameters:
+        - name: studies
+          in: body
+          description: the studies to save
+          required: true
+          schema:
+            $ref: "#/definitions/Studies"
+      responses:
+        '204':
+          description: studies updated
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /challenger:
+    put:
+      description: Saves or updates a challenger
+      operationId: saveChallenger
+      parameters:
+        - name: id
+          in: query
+          description: id of the challenger
+          required: true
+          type: integer
+          format: int64
+        - name: name
+          in: query
+          description: name of the challenger
+          required: true
+          type: string
+      responses:
+        '201':
+          description: challenger created
+        '204':
+          description: challenger updated
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /challenger/all:
+    delete:
+      description: Deletes all challengers
+      operationId: deleteAllChallengers
+      responses:
+        '204':
+          description: challengers cleared
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      description: Updates the challenger list
+      operationId: updateChallengers
+      consumes:
+        - application/json
+      parameters:
+        - name: challengers
+          in: body
+          description: the challengers to save
+          required: true
+          schema:
+            $ref: "#/definitions/Challengers"
+      responses:
+        '204':
+          description: challengers updated
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /patient:
+    put:
+      description: Saves or updates a patient
+      operationId: savePatient
+      parameters:
+        - name: id
+          in: query
+          description: id of the patient
+          required: true
+          type: integer
+          format: int64
+        - name: name
+          in: query
+          description: name of the patient
+          required: true
+          type: string
+      responses:
+        '201':
+          description: patient created
+        '204':
+          description: patient updated
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /patient/all:
+    delete:
+      description: Deletes all patients
+      operationId: deleteAllPatients
+      responses:
+        '204':
+          description: patients cleared
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      description: Updates the patient list
+      operationId: updatePatients
+      consumes:
+        - application/json
+      parameters:
+        - name: patients
+          in: body
+          description: the patients to save
+          required: true
+          schema:
+            $ref: "#/definitions/Patients"
+      responses:
+        '204':
+          description: challengers updated
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+parameters:
+  studyId:
+    name: studyId
+    in: query
+    description: id of the study
+    required: true
+    type: integer
+    format: int64
+  patientId:
+    name: patientId
+    in: query
+    description: patient (subject) of the score set
+    required: true
+    type: integer
+    format: int64
+  ownerId:
+    name: ownerId
+    in: query
+    description: owner of the score set
+    required: true
+    type: integer
+    format: int64
+  inputDatasetId:
+    name: inputDatasetId
+    in: query
+    description: input dataset id (should be the same for many segmentations)
+    required: false
+    type: integer
+    format: int64
+  segmentedDatasetId:
+    name: segmentedDatasetId
+    in: path
+    description: id of the segmentation result dataset
+    required: true
+    type: integer
+    format: int64
+  scoreSet:
+    name: scoreSet
+    in: body
+    description: the score set to save
+    required: true
+    schema:
+        $ref: "#/definitions/ScoreSet"
+  metricId:
+    name: id
+    in: path
+    description: id of the metric
+    required: true
+    type: integer
+    format: int64
+  metricName:
+    name: name
+    in: query
+    description: The name of the metric
+    required: true
+    type: string
+  NaN:
+    name: NaN
+    in: query
+    description: What to do if a value for this metric is NaN
+    required: false
+    type: string
+  negInf:
+    name: negInf
+    in: query
+    description: What to do if a value for this metric is a negative infinite
+    required: false
+    type: string
+  posInf:
+    name: posInf
+    in: query
+    description: What to do if a value for this metric a positive infinite
+    required: false
+    type: string
+  studyIds:
+    name: studyIds
+    description: ids of the involved studies
+    in: query
+    required: false
+    type: integer
+    format: int64
+    collectionFormat: multi
+
 definitions:
   ScoreSet:
     type: array
@@ -342,6 +567,56 @@ definitions:
       value:
         type: number
         format: float
+  FlatScore:
+    type: object
+    required:
+      - studyId
+      - metricId
+      - challengerId
+      - patientId
+    properties:
+      value:
+        type: number
+        format: float
+      studyId:
+        type: number
+        format: int64
+      metricId:
+        type: number
+        format: int64
+      challengerId:
+        type: number
+        format: int64
+      patientId:
+        type: number
+        format: int64
+      inputDatasetId:
+        type: number
+        format: int64
+  ResetObject:
+    required :
+      - scoreList
+    properties:
+      scoreList:
+        type: array
+        items:
+          $ref: '#/definitions/FlatScore'
+      studyList:
+        type: array
+        items:
+          $ref: '#/definitions/Study'
+      metricList:
+        type: array
+        items:
+          $ref: '#/definitions/Metric'
+      challengerList:
+        type: array
+        items:
+          $ref: '#/definitions/Challenger'
+      patientList:
+        type: array
+        items:
+          $ref: '#/definitions/Patient'
   ChallengeScores:
     type: array
     items:
@@ -356,7 +631,8 @@ definitions:
         type: string
       challengers:
         type: array
-        $ref: '#/definitions/ChallengerSubjects'
+        items:
+          $ref: '#/definitions/ChallengerSubjects'
   ChallengerSubjects:
     type: object
     required:
@@ -367,7 +643,8 @@ definitions:
         type: string
       subjects:
         type: array
-        $ref: '#/definitions/SubjectScore'
+        items:
+          $ref: '#/definitions/SubjectScore'
   SubjectScore:
     type: object
     required:
@@ -384,31 +661,83 @@ definitions:
     required:
       - name
     properties:
+      id:
+        type: number
+        format: int64
+        description: The id of the metric
       name:
         type: string
+        description: The name of the metric
       NaN:
         type: string
+        description: What to do if a value for this metric is NaN
       posInf:
         type: string
+        description: What to do if a value for this metric is a negative infinite
       negInf:
         type: string
-  SaveScoreParams:
+        description: What to do if a value for this metric a positive infinite
+      studyIds:
+        type: array
+        description: Ids of the involved studies
+        items:
+          type: integer
+          format: int64
+  Metrics:
+    type: array
+    items:
+      $ref: '#/definitions/Metric'
+  Challenger:
     type: object
     required:
-      - subjectId
-      - ownerId
-      - scoreSet
+      - id
+      - name
     properties:
-      subjectId:
-        type: long
+      id:
+        type: number
         format: int64
-      ownerId:
-        type: long
+        description: The id
+      name:
+        type: string
+        description: The name
+  Challengers:
+    type: array
+    items:
+      $ref: '#/definitions/Challenger'
+  Study:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: number
         format: int64
-      scoreSet:
-        type: object
-        schema:
-          $ref: '#/definitions/ScoreSet'
+        description: The id
+      name:
+        type: string
+        description: The name
+  Studies:
+    type: array
+    items:
+      $ref: '#/definitions/Study'
+  Patient:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: number
+        format: int64
+        description: The id
+      name:
+        type: string
+        description: The name
+  Patients:
+    type: array
+    items:
+      $ref: '#/definitions/Patient'
   ErrorModel:
     type: object
     required:
