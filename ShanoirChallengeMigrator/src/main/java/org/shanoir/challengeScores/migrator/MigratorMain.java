@@ -1,6 +1,8 @@
 package org.shanoir.challengeScores.migrator;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -11,6 +13,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.shanoir.challengeScores.migrator.model.Challenger;
@@ -36,11 +39,7 @@ public class MigratorMain {
 
 	private static Logger LOGGER = new Logger();
 
-	private static final String DB_DRIVER = "com.mysql.jdbc.Driver";
-	private static final String DB_CONNECTION = "jdbc:mysql:///shanoirdbchal";
-	private static final String DB_USER = "shanoir";
-	private static final String DB_PASSWORD = "shanoir";
-	private static final String SQL_QUERY_FILE = "resources/mysql-import-scores.sql";
+	private static Properties properties;
 
 	private static Set<Metric> metrics;
 	private static Set<Challenger> challengers;
@@ -57,6 +56,7 @@ public class MigratorMain {
     public static void main(String[] args)
     {
     	try {
+    		loadConfiguration();
 			getDataFromShanoirV1();
 			updateScores();
 
@@ -67,7 +67,16 @@ public class MigratorMain {
     }
 
 
-    private static void updateScores() throws RestCallException {
+    private static void loadConfiguration() throws IOException {
+    	File file = new File("resources/config.properties");
+		FileInputStream fileInput = new FileInputStream(file);
+		properties = new Properties();
+		properties.load(fileInput);
+		fileInput.close();
+	}
+
+
+	private static void updateScores() throws RestCallException {
 		ObjectNode json = getJsonBodyArg();
 		//LOGGER.info(json.toString());
     	callRestService(json);
@@ -164,7 +173,7 @@ public class MigratorMain {
     private static void getDataFromShanoirV1() throws SQLException, IOException, ClassNotFoundException {
 		Connection dbConnection = null;
 		Statement statement = null;
-		String queryStr = readFile(SQL_QUERY_FILE);
+		String queryStr = readFile(properties.getProperty("query.file"));
 		dbConnection = getDBConnection();
 		statement = dbConnection.createStatement();
 		// execute select SQL stetement
@@ -227,13 +236,16 @@ public class MigratorMain {
 	private static Connection getDBConnection() throws ClassNotFoundException {
 		Connection dbConnection = null;
 		try {
-			Class.forName(DB_DRIVER);
+			Class.forName(properties.getProperty("db.driver"));
 
 		} catch (ClassNotFoundException e) {
 			System.out.println(e.getMessage());
 		}
 		try {
-			dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
+			dbConnection = DriverManager.getConnection(
+					properties.getProperty("db.connection"),
+					properties.getProperty("db.user"),
+					properties.getProperty("db.password"));
 			return dbConnection;
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
