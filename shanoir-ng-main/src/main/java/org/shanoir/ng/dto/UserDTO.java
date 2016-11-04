@@ -26,6 +26,8 @@ public class UserDTO {
 
     @NotEmpty
     private List<String> authorities;
+    
+    private String token;
 
 	/**
 	 * @return the id
@@ -37,7 +39,7 @@ public class UserDTO {
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(Integer id) {
+	public void setId(final Integer id) {
 		this.id = id;
 	}
 
@@ -51,7 +53,7 @@ public class UserDTO {
 	/**
 	 * @param login the login to set
 	 */
-	public void setLogin(String login) {
+	public void setLogin(final String login) {
 		this.login = login;
 	}
 
@@ -65,7 +67,7 @@ public class UserDTO {
 	/**
 	 * @param password the password to set
 	 */
-	public void setPassword(String password) {
+	public void setPassword(final String password) {
 		this.password = password;
 	}
 
@@ -79,8 +81,22 @@ public class UserDTO {
 	/**
 	 * @param authorities the authorities to set
 	 */
-	public void setAuthorities(List<String> authorities) {
+	public void setAuthorities(final List<String> authorities) {
 		this.authorities = authorities;
+	}
+
+	/**
+	 * @return the token
+	 */
+	public String getToken() {
+		return token;
+	}
+
+	/**
+	 * @param token the token to set
+	 */
+	public void setToken(final String token) {
+		this.token = token;
 	}
 
 }

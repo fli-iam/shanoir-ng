@@ -22,7 +22,7 @@ public class ShanoirUserDetailsServiceImpl implements UserDetailsService {
 	 * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
 	 */
 	@Override
-	public UserDetails loadUserByUsername(String arg0) throws UsernameNotFoundException {
+	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		// MOCK !!!
 		// Replace by DAO access
 		return new User("user", "password", Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));

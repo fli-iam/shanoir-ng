@@ -3,32 +3,18 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.shanoir-ng</groupId>
-	<artifactId>main</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<parent>
+		<groupId>org.shanoir-ng</groupId>
+		<artifactId>shanoir-ng</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../shanoir-ng-parent</relativePath>
+	</parent>
+	
+	<artifactId>shanoir-ng-main</artifactId>
+	<packaging>jar</packaging>
 
 	<name>shanoir-ng-main</name>
-	<description>Main project for shanoir-ng</description>
-
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.3.5.RELEASE</version>
-		<relativePath />
-	</parent>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>Brixton.RELEASE</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+	<description>Main project for Shanoir-ng</description>
 
 	<dependencies>
 		<dependency>
@@ -66,10 +52,8 @@
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
-
+	
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>1.8</java.version>
 		<docker.image.prefix>shanoir-ng</docker.image.prefix>
 	</properties>
 
@@ -82,41 +66,6 @@
 	                <source>1.8</source>
 	                <target>1.8</target>
 	            </configuration>
-	        </plugin>
-	        <plugin>
-	            <groupId>org.codehaus.mojo</groupId>
-	            <artifactId>exec-maven-plugin</artifactId>
-	            <executions>
-	                <execution>
-	                    <id>exec-npm-install</id>
-	                    <phase>generate-sources</phase>
-	                    <configuration>
-	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
-	                        <executable>npm</executable>
-	                        <arguments>
-	                            <argument>install</argument>
-	                        </arguments>
-	                    </configuration>
-	                    <goals>
-	                        <goal>exec</goal>
-	                    </goals>
-	                </execution>
-	                <execution>
-	                    <id>exec-npm-run-tsc</id>
-	                    <phase>generate-sources</phase>
-	                    <configuration>
-	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
-	                        <executable>npm</executable>
-	                        <arguments>
-	                            <argument>run</argument>
-	                            <argument>tsc</argument>
-	                        </arguments>
-	                    </configuration>
-	                    <goals>
-	                        <goal>exec</goal>
-	                    </goals>
-	                </execution>
-	            </executions>
 	        </plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.shanoir.ng.configuration.security.xauth.TokenUtils;
 import org.shanoir.ng.dto.LoginDTO;
 import org.shanoir.ng.dto.UserDTO;
 import org.shanoir.ng.service.AuthenticationService;
@@ -37,6 +38,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Autowired
     private UserDetailsService userDetailsService;
+    
+    private final TokenUtils tokenUtils = new TokenUtils();
 
 	@Override
 	public UserDTO authenticate(final LoginDTO loginDTO, final HttpServletResponse response) throws Exception {
@@ -60,30 +63,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             authorities.add(authority.getAuthority());
         }
 
-        //Get Hmac signed token
-//        Map<String,String> customClaims = new HashMap<>();
-//        customClaims.put(HmacSigner.ENCODING_CLAIM_PROPERTY, HmacUtils.HMAC_SHA_256);
-
-        //Generate a random secret
-//        String secret = HmacSigner.generateSecret();
-
-//        HmacToken hmacToken = HmacSigner.getSignedToken(secret,String.valueOf(securityUser.getId()), HmacSecurityFilter.JWT_TTL,customClaims);
-
-//        for(UserDTO userDTO : MockUsers.getUsers()){
-//            if(userDTO.getId().equals(securityUser.getId())){
-//                userDTO.setSecretKey(secret);
-//            }
-//        }
-
-        //Set all tokens in http response headers
-//        response.setHeader(HmacUtils.X_TOKEN_ACCESS, hmacToken.getJwt());
-//        response.setHeader(HmacUtils.X_SECRET, hmacToken.getSecret());
-//        response.setHeader(HttpHeaders.WWW_AUTHENTICATE, HmacUtils.HMAC_SHA_256);
-
+        // Create user DTO
         final UserDTO userDTO = new UserDTO();
         userDTO.setId(1);
         userDTO.setLogin(securityUser.getUsername());
         userDTO.setAuthorities(authorities);
+        userDTO.setToken(tokenUtils.createToken(securityUser));
         
         return userDTO;
 	}

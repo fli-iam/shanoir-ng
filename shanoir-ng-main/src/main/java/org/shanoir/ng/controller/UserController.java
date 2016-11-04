@@ -17,7 +17,7 @@ public class UserController {
 
 	@RequestMapping("/user")
 	@ResponseBody
-	public Principal user(Principal user) {
+	public Principal user(final Principal user) {
 		return user;
 	}
 

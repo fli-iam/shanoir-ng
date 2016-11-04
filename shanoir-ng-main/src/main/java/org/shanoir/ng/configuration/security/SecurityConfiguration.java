@@ -1,7 +1,6 @@
 package org.shanoir.ng.configuration.security;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -10,24 +9,26 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.shanoir.ng.configuration.security.xauth.XAuthTokenFilter;
 import org.shanoir.ng.service.impl.ShanoirUserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.security.web.csrf.CsrfTokenRepository;
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.session.web.http.HeaderHttpSessionStrategy;
+import org.springframework.session.web.http.HttpSessionStrategy;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
@@ -45,53 +46,65 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private ShanoirUserDetailsServiceImpl userDetailsService;
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring()
-        		.antMatchers("/systemjs.config.js")
-                .antMatchers("/node_modules/**")
-                .antMatchers("/app/**");
-    }
+    @Autowired
+    private ShanoirLogoutSuccess logoutSuccess;
 
 	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-	    // Delegates based on url
-	    http.exceptionHandling().authenticationEntryPoint(delegatingEntryPoint());
-	    
+	protected void configure(final HttpSecurity http) throws Exception {
+		// Authentication token filter
+		final XAuthTokenFilter customFilter = new XAuthTokenFilter(userDetailsService);
+		http.addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class);
+		
 		http
 			.authorizeRequests()
 			.antMatchers("/authenticate").permitAll()
-			.antMatchers("/login").permitAll()
-			.antMatchers("/").permitAll()
 			.anyRequest().authenticated()
             .and()
-            	.formLogin().loginPage("/login")
+            	.formLogin().loginPage("http://localhost:3000/login")
 			.and()
 				.httpBasic()
 			.and()
-				.logout()
+				.logout().logoutSuccessHandler(logoutSuccess)
 			.and()
-				.csrf().csrfTokenRepository(csrfTokenRepository())
+				.csrf()
+					.ignoringAntMatchers("/authenticate")
+					.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 			.and()
 				.addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);
 	}
 	
-	@Bean
-	public AuthenticationEntryPoint delegatingEntryPoint() {
-	    final LinkedHashMap<RequestMatcher, AuthenticationEntryPoint> map = new LinkedHashMap<RequestMatcher, AuthenticationEntryPoint>();
-	    map.put(new AntPathRequestMatcher("/"), new LoginUrlAuthenticationEntryPoint("/login"));
-	    map.put(new AntPathRequestMatcher("/authenticate"), new ShanoirAuthenticationEntryPoint());
-
-	    final DelegatingAuthenticationEntryPoint entryPoint = new DelegatingAuthenticationEntryPoint(map);
-	    entryPoint.setDefaultEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
-
-	    return entryPoint;
-	}
-	
 	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+	protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(userDetailsService);
 	}
+	
+	/**
+	 * http://stackoverflow.com/a/31748398/122441 until https://jira.spring.io/browse/DATAREST-573
+	 * @return
+	 */
+	@Bean
+	public FilterRegistrationBean corsFilter() {
+		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		final CorsConfiguration config = new CorsConfiguration();
+	    config.setAllowCredentials(true);
+	    config.addAllowedOrigin("*");
+	    config.addAllowedHeader("*");
+	    config.addAllowedMethod("OPTIONS");
+	    config.addAllowedMethod("HEAD");
+	    config.addAllowedMethod("GET");
+	    config.addAllowedMethod("PUT");
+	    config.addAllowedMethod("POST");
+	    config.addAllowedMethod("DELETE");
+	    source.registerCorsConfiguration("/**", config);
+	    final FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+	    bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+	    return bean;
+	}
+	
+	@Bean
+    public HttpSessionStrategy httpSessionStrategy() {
+        return new HeaderHttpSessionStrategy();
+    }
 	
 	private Filter csrfHeaderFilter() {
 		return new OncePerRequestFilter() {
@@ -99,7 +112,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 			protected void doFilterInternal(HttpServletRequest request,
 					HttpServletResponse response, FilterChain filterChain)
 					throws ServletException, IOException {
-				CsrfToken csrf = (CsrfToken) request.getAttribute(CsrfToken.class
+				final CsrfToken csrf = (CsrfToken) request.getAttribute(CsrfToken.class
 						.getName());
 				if (csrf != null) {
 					Cookie cookie = WebUtils.getCookie(request, "XSRF-TOKEN");
@@ -116,10 +129,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		};
 	}
 
-	private CsrfTokenRepository csrfTokenRepository() {
-		final HttpSessionCsrfTokenRepository repository = new HttpSessionCsrfTokenRepository();
-		repository.setHeaderName("X-XSRF-TOKEN");
-		return repository;
-	}
+//	private CsrfTokenRepository csrfTokenRepository() {
+//		final HttpSessionCsrfTokenRepository repository = new HttpSessionCsrfTokenRepository();
+//		repository.setHeaderName("X-XSRF-TOKEN");
+//		return repository;
+//	}
 
 }

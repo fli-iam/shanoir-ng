@@ -1,9 +1,0 @@
-{
-	"id" : 1, 
-	"name" : "test", 
-	"disabled" : false, 
-	"studyId" : 1, 
-	"acquisitionEquipmentId" : 1, 
-	"centerId" : 1,
-	"niftiConverter" : 1
-}
