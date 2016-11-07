@@ -67,26 +67,30 @@
 	                </execution>
 	            </executions>
 	        </plugin>
-<!-- 			<plugin> -->
-<!-- 				<groupId>org.springframework.boot</groupId> -->
-<!-- 				<artifactId>spring-boot-maven-plugin</artifactId> -->
-<!-- 			</plugin> -->
-			<plugin>
-				<groupId>com.spotify</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.4.11</version>
-				<configuration>
-					<imageName>${project.artifactId}-${docker.image.prefix}</imageName>
-					<dockerDirectory>src/main/docker</dockerDirectory>
-					<resources>
-						<resource>
-							<targetPath>/</targetPath>
-							<directory>${project.build.directory}</directory>
-							<include>${project.build.finalName}.jar</include>
-						</resource>
-					</resources>
-				</configuration>
-			</plugin>
+            <plugin>
+	        	<artifactId>maven-resources-plugin</artifactId>
+	        	<executions>
+	          		<execution>
+	            		<id>copy-resources</id>
+	            		<phase>validate</phase>
+	            		<goals>
+	              			<goal>copy-resources</goal>
+	            		</goals>
+	            		<configuration>
+	              			<outputDirectory>${basedir}/../shanoir-ng-nginx/webapp</outputDirectory>
+	              			<resources>          
+	                			<resource>
+	                  				<directory>src/main/webapp</directory>
+	                  				<filtering>true</filtering>
+	                  				<excludes>
+          								<exclude>app</exclude>
+          							</excludes>
+	                			</resource>
+	              			</resources>              
+	            		</configuration>            
+	          		</execution>
+	        	</executions>
+	      	</plugin>
 		</plugins>
 	</build>
 	<repositories>

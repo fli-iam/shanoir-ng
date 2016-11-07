@@ -9,3 +9,5 @@ angular2-quickstart/typings/
 *.map
 npm-debug.log
 *.settings/
+.metadata/
+shanoir-ng-nginx/webapp
