@@ -61,7 +61,7 @@ export class LoginService {
         headersTest.append('Content-Type', 'application/json');
         headersTest.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
         
-        this.http.get(AppUtils.BACKEND_API_ROOT_URL + "/user", new RequestOptions({ headers : headersTest, withCredentials: true })).subscribe(
+        this.http.get(AppUtils.BACKEND_API_ROOT_URL + "/main/user", new RequestOptions({ headers : headersTest, withCredentials: true })).subscribe(
             data => {
                 console.log("data: " + data.text());
             },

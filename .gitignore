@@ -5,7 +5,7 @@ shanoir-ng-resource-server.log
 target
 *~
 **/node_modules/
-angular2-quickstart/typings/
+**/typings/
 *.map
 npm-debug.log
 *.settings/
