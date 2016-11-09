@@ -19,7 +19,7 @@
 	</parent>
 	
 	<modules>
-		<module>../shanoir-ng-main</module>
+		<module>../shanoir-ng-users</module>
 		<module>../shanoir-ng-front</module>
 	</modules>
 

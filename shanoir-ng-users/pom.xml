@@ -10,11 +10,11 @@
 		<relativePath>../shanoir-ng-parent</relativePath>
 	</parent>
 	
-	<artifactId>shanoir-ng-main</artifactId>
+	<artifactId>shanoir-ng-users</artifactId>
 	<packaging>jar</packaging>
 
-	<name>shanoir-ng-main</name>
-	<description>Main project for Shanoir-ng</description>
+	<name>shanoir-ng-users</name>
+	<description>Users management project for Shanoir-ng</description>
 
 	<dependencies>
 		<dependency>
