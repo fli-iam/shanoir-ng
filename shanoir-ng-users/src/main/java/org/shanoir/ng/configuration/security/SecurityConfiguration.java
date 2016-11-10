@@ -60,7 +60,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 			.antMatchers("/authenticate").permitAll()
 			.anyRequest().authenticated()
             .and()
-            	.formLogin().loginPage("http://localhost:3000/login")
+            	.formLogin().loginPage("http://localhost/login")
 			.and()
 				.httpBasic()
 			.and()
