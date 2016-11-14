@@ -20,6 +20,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
 		<docker.image.prefix>shanoir-ng</docker.image.prefix>
+		<npm.executable>npm</npm.executable>
 	</properties>
 
 	<build>
@@ -41,7 +42,7 @@
 	                    <phase>generate-sources</phase>
 	                    <configuration>
 	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
-	                        <executable>npm.cmd</executable>
+	                        <executable>${npm.executable}</executable>
 	                        <arguments>
 	                            <argument>install</argument>
 	                        </arguments>
@@ -55,7 +56,7 @@
 	                    <phase>generate-sources</phase>
 	                    <configuration>
 	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
-	                        <executable>npm.cmd</executable>
+	                        <executable>${npm.executable}</executable>
 	                        <arguments>
 	                            <argument>run</argument>
 	                            <argument>tsc</argument>
@@ -93,6 +94,22 @@
 	      	</plugin>
 		</plugins>
 	</build>
+	<profiles>
+	    <profile>
+	        <id>platform-windows</id>
+	        <activation>
+	            <os>
+	                <family>windows</family>
+	            </os>
+	        </activation>
+	        <properties>
+	            <!-- Override the executable names for Windows -->
+	            <npm.executable>npm.cmd</npm.executable>
+	            <grunt.executable>grunt.cmd</grunt.executable>
+	            <bower.executable>bower.cmd</bower.executable>
+	        </properties>
+	    </profile>
+	</profiles>
 	<repositories>
 		<repository>
 			<id>spring-snapshots</id>
