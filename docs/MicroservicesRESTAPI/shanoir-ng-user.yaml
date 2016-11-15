@@ -224,12 +224,16 @@ definitions:
     required:
       - id
       - name
+      - accessLevel
     properties:
       id:
         type: integer
         format: int64
       name:
         type: string
+      accessLevel:
+        type: integer
+        format: int32
   ErrorModel:
     type: object
     required:
