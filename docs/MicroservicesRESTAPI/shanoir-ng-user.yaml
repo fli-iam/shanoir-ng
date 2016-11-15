@@ -1,0 +1,219 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Shanoir NG Users Microservice
+  description: Microservice API for Shanoir NG user managment
+basePath: /
+produces:
+  - application/json
+  
+paths:
+  /user:
+    get:
+      operationId: findUserById
+      description: If exists, returns the user corresponding to the given id
+      parameters:
+        - $ref: "#/parameters/userId"
+      responses:
+        '200':
+          description: founded user
+          schema:
+            $ref: "#/definitions/User"
+        '404':
+          description: no user founded
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    post:
+      operationId: saveNewUser
+      description: Saves a new user
+      consumes: 
+        - application/json
+      parameters:
+        - name: user
+          in: body
+          description: the user to create
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        '200':
+          description: created user
+          schema:
+            $ref: "#/definitions/User"
+        '422':
+          description: bad parameters
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    put:
+      operationId: updateUser
+      description: Updates a user
+      consumes: 
+        - application/json
+      parameters:
+        - $ref: "#/parameters/userId"
+        - name: user
+          in: body
+          description: the user to update
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        '204':
+          description: user updated
+        '422':
+          description: bad parameters
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    delete:
+      operationId: deleteUser
+      description: Deletes a user
+      parameters:
+        - $ref: "#/parameters/userId"
+      responses:
+        '204':
+          description: user deleted
+        '404':
+          description: no user founded
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /user/all:
+    get:
+      operationId: findUsers
+      description: Returns all the users
+      responses:
+        '200':
+          description: founded users
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+        '404':
+          description: no user founded
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+parameters:
+  userId:
+    name: userId
+    in: query
+    description: id of the user
+    required: true
+    type: integer
+    format: int64
+
+definitions:
+  User:
+    type: object
+    required:
+      - email
+      - username
+    properties:
+      id:
+        type: integer
+        format: int64
+      username:
+        type: string
+      password:
+        type: string
+        format: password
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
+        type: string
+      teamName:
+        type: string
+      isMedical:
+        type: boolean
+      canImportFromPACS:
+        type: boolean
+      creationDate:
+        type: string
+        format: date
+      expirationDate:
+        type: string
+        format: date
+      lastLogin:
+        type: string
+        format: date
+      canAccessToDicomAssociation:
+        type: boolean
+      motivation:
+        type: string
+      roles:
+        $ref: "#/definitions/Role"
+      preferences:
+        $ref: "#/definitions/UserPreferences"
+  UserPreferences:
+    type: object
+    properties:
+      dateFormat:
+        type: string
+      language:
+        type: string
+      theme:
+        type: string
+      centerListMaxSize:
+        type: number
+      datasetExpressionListMaxSize:
+        type: number
+      datasetListMaxSize:
+        type: number
+      experimentalGroupOfSubjectsListMaxSize:
+        type: number
+      instrumentListMaxSize:
+        type: number
+      instrumentVariableListMaxSize:
+        type: number
+      investigatorListMaxSize:
+        type: number
+      mrAcquisitionEquipmentListMaxSize:
+        type: number
+      mrDatasetAcquisitionListMaxSize:
+        type: number
+      mrExaminationListMaxSize:
+        type: number
+      studyCardListMaxSize:
+        type: number
+      studyListMaxSize:
+        type: number
+      subjectListMaxSize:
+        type: number
+      userListMaxSize:
+        type: number
+  Role:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+  ErrorModel:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
