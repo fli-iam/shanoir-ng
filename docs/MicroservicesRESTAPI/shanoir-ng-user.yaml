@@ -9,22 +9,6 @@ produces:
   
 paths:
   /user:
-    get:
-      operationId: findUserById
-      description: If exists, returns the user corresponding to the given id
-      parameters:
-        - $ref: "#/parameters/userId"
-      responses:
-        '200':
-          description: founded user
-          schema:
-            $ref: "#/definitions/User"
-        '404':
-          description: no user founded
-        default:
-          description: unexpected error
-          schema:
-            $ref: "#/definitions/ErrorModel"
     post:
       operationId: saveNewUser
       description: Saves a new user
@@ -46,6 +30,23 @@ paths:
           description: bad parameters
           schema:
             $ref: "#/definitions/ErrorModel"
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  /user/{userId}:
+    get:
+      operationId: findUserById
+      description: If exists, returns the user corresponding to the given id
+      parameters:
+        - $ref: "#/parameters/userId"
+      responses:
+        '200':
+          description: founded user
+          schema:
+            $ref: "#/definitions/User"
+        '404':
+          description: no user founded
         default:
           description: unexpected error
           schema:
@@ -88,6 +89,29 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  /user/{userId}/changePassword:
+    put:
+      operationId: changeUserPassword
+      description: Changes a password
+      parameters:
+        - $ref: "#/parameters/userId"
+        - name: newPassword
+          in: query
+          description: the new password
+          required: true
+          type: string
+          format: password
+      responses:
+        '204':
+          description: password updated
+        '422':
+          description: wrong format
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
   /user/all:
     get:
       operationId: findUsers
@@ -108,7 +132,7 @@ paths:
 parameters:
   userId:
     name: userId
-    in: query
+    in: path
     description: id of the user
     required: true
     type: integer
