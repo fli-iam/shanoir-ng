@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 
-import { LoginService } from '../login/login.service';
+import { LoginService } from 'app/shared/login/login.service';
 
 @Component({
     selector: 'shanoir-home',
-    templateUrl: './app/home/home.html'
+    moduleId: module.id,
+    templateUrl: 'home.component.html'
 })
 
 export class HomeComponent {

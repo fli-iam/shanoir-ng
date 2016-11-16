@@ -1,0 +1,42 @@
+/************/
+/* Login page
+/************/
+.LoginPage {
+    margin-bottom: 30px;
+    margin-top: 50px;
+    text-align: center;
+}
+
+.LoginPage-loginContent {
+    padding: 20px;
+    margin: 50px auto auto auto;
+    width: 20%;
+}
+
+.LoginContent {
+    border: 1px solid black;
+    border-radius: 20px;
+    min-width: 400px;
+}
+
+.LoginContent-loginForm {
+    margin: auto;
+    width: 300px;
+}
+
+.LoginForm {
+    overflow: hidden;
+}
+
+.LoginForm-input {
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+.LoginForm-submit {
+    background-color: black;
+    color: white;
+    float: right;
+    width: 100px;
+}
+

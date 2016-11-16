@@ -4,9 +4,9 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 import 'rxjs/add/operator/map';
 
-import { Account } from '../account/account';
-import { AccountEventsService } from '../account/account.events.service';
-import * as AppUtils from '../utils/app.utils';
+import { Account } from 'app/users/account/account';
+import { AccountEventsService } from 'app/users/account/account.events.service';
+import * as AppUtils from 'app/utils/app.utils';
 
 @Injectable()
 export class LoginService {

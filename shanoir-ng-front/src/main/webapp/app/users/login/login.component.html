@@ -1,0 +1,20 @@
+<div class="LoginPage">
+    <img [src]="shanoirNGImageUrl">
+    <div class="LoginPage-loginContent LoginContent">
+        <h2 i18n="Login form|Title">Welcome to Shanoir</h2>
+        <span *ngIf="error">{{error}}</span>
+        <form [formGroup]="loginForm" (ngSubmit)="login()" class="LoginContent-loginForm LoginForm">
+            <input type="text"  
+                   id="email"  
+                   class="LoginForm-input"
+                   formControlName="email"
+                   placeholder="Username" i18n-placeholder="Login form|Username label"/>  
+            <input type="text"  
+                   id="password"
+                class="LoginForm-input"
+                   formControlName="password"
+                   placeholder="Password" i18n-placeholder="Login form|Password label"/>  
+            <button type="submit" i18n="Login form|Button label" class="LoginForm-submit">Login</button>
+        </form>
+    </div>
+</div>

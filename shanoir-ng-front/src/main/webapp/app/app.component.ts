@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { LoginService } from './login/login.service';
+import { LoginService } from './shared/login/login.service';
 
 @Component({
     selector: 'shanoir-ng-app',
-    templateUrl: './app/app.html'
+    moduleId: module.id,
+    templateUrl: 'app.component.html'
 })
 
 export class AppComponent {

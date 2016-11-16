@@ -1,13 +1,14 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "removeComments": false,
-    "noImplicitAny": false,
-    "outDir": "../../../../shanoir-ng-nginx/webapp/app"
-  }
+    "compilerOptions": {
+        "baseUrl": ".",    
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "noImplicitAny": false,
+        //"outDir": "../../../../shanoir-ng-nginx/webapp/app",
+        "removeComments": false,
+        "sourceMap": true,
+        "target": "es5"
+    }
 }

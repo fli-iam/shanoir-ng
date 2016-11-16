@@ -6,10 +6,10 @@ import { HttpModule } from '@angular/http';
 import { routing } from './app.routing';
 
 import { AppComponent }   from './app.component';
-import { LoginComponent }   from './login/login.component';
+import { LoginComponent }   from './users/login/login.component';
 import { HomeComponent }   from './home/home.component';
-import { LoginService } from './login/login.service';
-import { AccountEventsService } from './account/account.events.service';
+import { LoginService } from './shared/login/login.service';
+import { AccountEventsService } from './users/account/account.events.service';
 
 @NgModule({
     imports:      [ 
