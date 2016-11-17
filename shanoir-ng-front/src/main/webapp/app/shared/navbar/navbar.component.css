@@ -1,0 +1,36 @@
+/******************/
+/* Navbar component
+/******************/
+.NavbarComponent {
+    background: black;
+    margin-bottom: 20px;
+}
+
+.Menu-list {
+    display: inline-block;
+    position: relative;
+    vertical-align: bottom;
+}
+.Menu-list:hover > div {
+    display: block;
+}
+
+.Menu-link {
+    background: black;
+    color: white;
+    cursor: pointer;
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+}
+.Menu-link:hover {
+    background: dimgrey;
+    display: block;
+    text-decoration: none;
+}
+
+.AdministrationMenu-content {
+    display: none;
+    min-width: 100%;
+    position: absolute;
+}

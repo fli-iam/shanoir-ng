@@ -6,27 +6,31 @@ import { HttpModule } from '@angular/http';
 import { routing } from './app.routing';
 
 import { AppComponent }   from './app.component';
-import { LoginComponent }   from './users/login/login.component';
+import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
-import { LoginService } from './shared/login/login.service';
+import { LoginComponent }   from './users/login/login.component';
+import { NavbarComponent }   from './shared/navbar/navbar.component';
 import { AccountEventsService } from './users/account/account.events.service';
+import { LoginService } from './shared/login/login.service';
 
 @NgModule({
     imports:      [ 
         BrowserModule,
         FormsModule,
-        ReactiveFormsModule,
         HttpModule,
+        ReactiveFormsModule,
         routing
     ],
     declarations: [ 
         AppComponent,
+        HeaderComponent,
+        HomeComponent,
         LoginComponent,
-        HomeComponent
+        NavbarComponent
     ],
     providers: [
-        LoginService,
-        AccountEventsService
+        AccountEventsService,
+        LoginService
     ],
     bootstrap:    [ AppComponent ]
 })

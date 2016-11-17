@@ -1,0 +1,10 @@
+/******************/
+/* Header component
+/******************/
+.HeaderComponent {
+    margin: 20px;
+}
+
+.HeaderComponent-logout {
+    float: right;
+}

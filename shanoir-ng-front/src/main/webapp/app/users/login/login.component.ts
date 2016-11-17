@@ -7,10 +7,10 @@ import { Account } from '../account/account';
 import { AccountEventsService } from '../account/account.events.service';
 
 @Component({
-    selector: 'shanoir-login',
+    selector: 'login',
     moduleId: module.id,
     templateUrl: 'login.component.html',
-    styleUrls: ['login.component.css']
+    styleUrls: ['../../shared/css/common.css', 'login.component.css']
 })
 
 export class LoginComponent {
