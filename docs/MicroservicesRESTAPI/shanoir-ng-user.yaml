@@ -180,45 +180,6 @@ definitions:
         type: string
       roles:
         $ref: "#/definitions/Role"
-      preferences:
-        $ref: "#/definitions/UserPreferences"
-  UserPreferences:
-    type: object
-    properties:
-      dateFormat:
-        type: string
-      language:
-        type: string
-      theme:
-        type: string
-      centerListMaxSize:
-        type: number
-      datasetExpressionListMaxSize:
-        type: number
-      datasetListMaxSize:
-        type: number
-      experimentalGroupOfSubjectsListMaxSize:
-        type: number
-      instrumentListMaxSize:
-        type: number
-      instrumentVariableListMaxSize:
-        type: number
-      investigatorListMaxSize:
-        type: number
-      mrAcquisitionEquipmentListMaxSize:
-        type: number
-      mrDatasetAcquisitionListMaxSize:
-        type: number
-      mrExaminationListMaxSize:
-        type: number
-      studyCardListMaxSize:
-        type: number
-      studyListMaxSize:
-        type: number
-      subjectListMaxSize:
-        type: number
-      userListMaxSize:
-        type: number
   Role:
     type: object
     required:
