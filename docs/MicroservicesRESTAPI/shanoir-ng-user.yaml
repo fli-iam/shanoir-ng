@@ -3,7 +3,6 @@ info:
   version: "0.0.1"
   title: Shanoir NG Users Microservice
   description: Microservice API for Shanoir NG user managment
-basePath: /
 produces:
   - application/json
   
@@ -89,29 +88,6 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /user/{userId}/changePassword:
-    put:
-      operationId: changeUserPassword
-      description: Changes a password
-      parameters:
-        - $ref: "#/parameters/userId"
-        - name: newPassword
-          in: query
-          description: the new password
-          required: true
-          type: string
-          format: password
-      responses:
-        '204':
-          description: password updated
-        '422':
-          description: wrong format
-          schema:
-            $ref: "#/definitions/ErrorModel"
-        default:
-          description: unexpected error
-          schema:
-            $ref: "#/definitions/ErrorModel"
   /user/all:
     get:
       operationId: findUsers
@@ -123,7 +99,7 @@ paths:
             type: array
             items:
               $ref: "#/definitions/User"
-        '404':
+        '204':
           description: no user founded
         default:
           description: unexpected error
