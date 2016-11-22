@@ -16,7 +16,7 @@ paths:
       parameters:
         - name: user
           in: body
-          description: the user to create
+          description: user to create
           required: true
           schema:
             $ref: "#/definitions/User"
@@ -41,11 +41,11 @@ paths:
         - $ref: "#/parameters/userId"
       responses:
         '200':
-          description: founded user
+          description: found user 
           schema:
             $ref: "#/definitions/User"
         '404':
-          description: no user founded
+          description: no user found
         default:
           description: unexpected error
           schema:
@@ -59,7 +59,7 @@ paths:
         - $ref: "#/parameters/userId"
         - name: user
           in: body
-          description: the user to update
+          description: user to update
           required: true
           schema:
             $ref: "#/definitions/User"
@@ -83,7 +83,7 @@ paths:
         '204':
           description: user deleted
         '404':
-          description: no user founded
+          description: no user found
         default:
           description: unexpected error
           schema:
@@ -94,13 +94,13 @@ paths:
       description: Returns all the users
       responses:
         '200':
-          description: founded users
+          description: found users 
           schema:
             type: array
             items:
               $ref: "#/definitions/User"
         '204':
-          description: no user founded
+          description: no user found
         default:
           description: unexpected error
           schema:
@@ -111,13 +111,13 @@ paths:
       description: Returns all the roles
       responses:
         '200':
-          description: founded roles
+          description: found roles
           schema:
             type: array
             items:
               $ref: "#/definitions/Role"
         '204':
-          description: no role founded
+          description: no role found
         default:
           description: unexpected error
           schema:
