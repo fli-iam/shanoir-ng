@@ -154,8 +154,6 @@ definitions:
         type: string
       teamName:
         type: string
-      isMedical:
-        type: boolean
       canImportFromPACS:
         type: boolean
       creationDate:
@@ -170,6 +168,16 @@ definitions:
       canAccessToDicomAssociation:
         type: boolean
       motivation:
+        type: string
+      institution:
+        type: string
+      service:
+        type: string
+      function:
+        type: string
+      study:
+        type: string
+      contact:
         type: string
       roles:
         $ref: "#/definitions/Role"
