@@ -105,6 +105,23 @@ paths:
           description: unexpected error
           schema:
             $ref: "#/definitions/ErrorModel"
+  /role/all:
+    get:
+      operationId: findRoles
+      description: Returns all the roles
+      responses:
+        '200':
+          description: founded roles
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Role"
+        '204':
+          description: no role founded
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
 parameters:
   userId:
     name: userId
