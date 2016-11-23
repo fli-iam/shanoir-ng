@@ -11,7 +11,7 @@ server:
 #    resource:
 #      path: /resource/**
 #      url: http://resource:9901
-#      sensitive-headers: 
+#      sensitive-headers:
 # spring security configuration
 security:
   sessions: never
@@ -21,6 +21,26 @@ security:
 spring:
   redis:
     host: localhost
-# logging configuration
-logging:
-  file: shanoir-ng-main.log
+  datasource:
+    url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&useSSL=false
+    username: shanoir
+    password: shanoir
+    # The SQL dialect makes Hibernate generate better SQL for the chosen database
+    driver-class-name: com.mysql.jdbc.Driver
+  # Show or not log for each sql query
+  jpa:
+    show-sql: true
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update)
+      ddl-auto: create
+      # Naming strategy
+      naming:
+        strategy: org.hibernate.cfg.ImprovedNamingStrategy
+  jooq:
+    sql-dialect: Mysql
+  # logging configuration
+  logging:
+    file: shanoir-ng-user.log
+    level:
+      org.springframework.web: DEBUG
+      org.hibernate: ERROR
