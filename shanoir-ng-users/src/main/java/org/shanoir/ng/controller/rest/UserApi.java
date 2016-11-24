@@ -1,8 +1,9 @@
-package org.shanoir.ng.controller;
+package org.shanoir.ng.controller.rest;
 
 
 import java.util.List;
 
+import org.shanoir.ng.model.ErrorModel;
 import org.shanoir.ng.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,40 +23,45 @@ import io.swagger.annotations.ApiResponses;
 public interface UserApi {
 
 	@ApiOperation(value = "", notes = "Deletes a user", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "user deleted", response = Void.class),
+	@ApiResponses(value = {
+			@ApiResponse(code = 204, message = "user deleted", response = Void.class),
 			@ApiResponse(code = 404, message = "no user founded", response = Void.class),
-			@ApiResponse(code = 200, message = "unexpected error", response = Void.class) })
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	ResponseEntity<Void> deleteUser(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId);
 
 	@ApiOperation(value = "", notes = "If exists, returns the user corresponding to the given id", response = User.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "founded user", response = User.class),
-			@ApiResponse(code = 404, message = "no user founded", response = User.class),
-			@ApiResponse(code = 200, message = "unexpected error", response = User.class) })
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "founded user", response = User.class),
+			@ApiResponse(code = 404, message = "no user founded", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<User> findUserById(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId);
 
-	@ApiOperation(value = "", notes = "Returns all the users", response = User.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "founded users", response = User.class),
-			@ApiResponse(code = 204, message = "no user founded", response = User.class),
-			@ApiResponse(code = 200, message = "unexpected error", response = User.class) })
+	@ApiOperation(value = "", notes = "Returns all the users", response = User.class, tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "founded users", response = User.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no user founded", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/user/all", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<User>> findUsers();
 
 	@ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created user", response = User.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = User.class),
-			@ApiResponse(code = 200, message = "unexpected error", response = User.class) })
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "created user", response = User.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/user", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	ResponseEntity<User> saveNewUser(@ApiParam(value = "the user to create", required = true) @RequestBody User user);
 
 	@ApiOperation(value = "", notes = "Updates a user", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "user updated", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 200, message = "unexpected error", response = Void.class) })
+	@ApiResponses(value = {
+			@ApiResponse(code = 204, message = "user updated", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
 	ResponseEntity<Void> updateUser(
