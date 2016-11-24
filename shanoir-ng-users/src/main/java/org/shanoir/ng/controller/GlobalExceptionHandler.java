@@ -2,6 +2,8 @@ package org.shanoir.ng.controller;
 
 import org.shanoir.ng.model.ErrorModel;
 import org.shanoir.ng.model.exception.RestServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GlobalExceptionHandler {
 
+	private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(value = RestServiceException.class)
     public ResponseEntity<ErrorModel> handleRestServiceException(RestServiceException e){
-    	e.printStackTrace();
+    	LOG.error("Error in the rest service. ", e);
     	return new ResponseEntity<ErrorModel>(e.toErrorModel(), HttpStatus.valueOf(e.getCode()));
     }
 
@@ -25,6 +29,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorModel> handleException(Exception e){
     	e.printStackTrace();
     	ErrorModel error = new ErrorModel().code(500).message(e.toString());
+    	LOG.error("Unexpected error in the rest service. ", e);
     	return new ResponseEntity<ErrorModel>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

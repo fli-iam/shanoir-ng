@@ -1,0 +1,10 @@
+/**************************/
+/* ag-Grid
+/* https://www.ag-grid.com/
+/**************************/
+@import "partials/base";
+
+.AgGrid-header {
+    background-color: $mainThemeBackgroundColor;
+    color: $mainThemeLabelColor;
+}

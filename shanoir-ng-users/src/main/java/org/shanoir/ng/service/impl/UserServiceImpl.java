@@ -2,10 +2,6 @@ package org.shanoir.ng.service.impl;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.shanoir.ng.dto.LoginDTO;
-import org.shanoir.ng.dto.UserDTO;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.service.UserService;
 import org.shanoir.ng.service.repository.UserRepository;
@@ -20,20 +16,23 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Override
-	public UserDTO authenticate(LoginDTO loginDTO, HttpServletResponse response) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void logout() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public List<User> finAll() {
+	public List<User> findAll() {
 		return Utils.toList(userRepository.findAll());
+	}
+
+	@Override
+	public User findById(Long id) {
+		return userRepository.findOne(id);
+	}
+
+	@Override
+	public void save(User user) {
+		userRepository.save(user);
+	}
+
+	@Override
+	public void deleteById(Long id) {
+		userRepository.delete(id);
 	}
 
 }

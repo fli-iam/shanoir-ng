@@ -3,6 +3,7 @@
 *~
 *.js
 *.map
+*.metadata.json
 *.settings/
 .DS_Store
 .metadata/

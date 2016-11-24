@@ -7,9 +7,12 @@
         "url": "https://github.com/fli-iam/shanoir-ng.git"
     },
     "scripts": {
+        "build": "npm run build:ts && npm run build:sass",
+        "build:sass": "node-sass -o app/ app/",
+        "build:ts": "tsc",
         "i18n": "ng-xi18n",
-        "start": "tsc && concurrently \"tsc -w\" \"lite-server\" ",
         "lite": "lite-server",
+        "start": "npm run build && concurrently \"tsc -w\" \"lite-server\" ",
         "tsc": "tsc",
         "tsc:w": "tsc -w"
     },
@@ -37,13 +40,18 @@
         "reflect-metadata": "^0.1.8",
         "rxjs": "5.0.0-beta.12",
         "systemjs": "0.19.39",
-        "zone.js": "^0.6.25"
+        "zone.js": "^0.6.25",
+        
+        "ag-grid": "6.4.x",
+        "ag-grid-ng2": "6.4.x"
     },
     "devDependencies": {
         "@types/core-js": "^0.9.34",
         "@types/node": "^6.0.45",
         "concurrently": "^3.0.0",
         "lite-server": "^2.2.2",
+        "node-sass": "^3.4.2",
+        "postcss": "^5.0.14",
         "typescript": "^2.0.3"
     }
 }

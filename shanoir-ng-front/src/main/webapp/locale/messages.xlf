@@ -2,6 +2,18 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="en" datatype="plaintext" original="ng2.template">
     <body>
+      <trans-unit id="a4fb970c89bd2f48137f0b91b404ae82aada6e6c" datatype="html">
+        <source>Logout</source>
+        <target/>
+        <note priority="1" from="description">Logout</note>
+        <note priority="1" from="meaning">Shanoir NG</note>
+      </trans-unit>
+      <trans-unit id="0a11596cc6e1c47d7a10ac4000df553480434892" datatype="html">
+        <source>Shanoir NG home</source>
+        <target/>
+        <note priority="1" from="description">Title</note>
+        <note priority="1" from="meaning">Shanoir NG home</note>
+      </trans-unit>
       <trans-unit id="29a32ce8170ba6c0ea5b20ad1e061047acd623d8" datatype="html">
         <source>Welcome to Shanoir</source>
         <target/>
@@ -32,17 +44,23 @@
         <note priority="1" from="description">Home label</note>
         <note priority="1" from="meaning">Menu</note>
       </trans-unit>
-      <trans-unit id="0a11596cc6e1c47d7a10ac4000df553480434892" datatype="html">
-        <source>Shanoir NG home</source>
+      <trans-unit id="6d5f95f383d0eeebda86186bfe6c43e6c2eadd23" datatype="html">
+        <source>Administration</source>
+        <target/>
+        <note priority="1" from="description">Administration label</note>
+        <note priority="1" from="meaning">Menu</note>
+      </trans-unit>
+      <trans-unit id="206004087015b5c443687daad22a3384ac9388a0" datatype="html">
+        <source>Manage users</source>
+        <target/>
+        <note priority="1" from="description">Manage users label</note>
+        <note priority="1" from="meaning">Menu</note>
+      </trans-unit>
+      <trans-unit id="75195320aabc9f54cc018db1d0c5bd49cad17b92" datatype="html">
+        <source>Manage users</source>
         <target/>
         <note priority="1" from="description">Title</note>
-        <note priority="1" from="meaning">Shanoir NG home</note>
-      </trans-unit>
-      <trans-unit id="a4fb970c89bd2f48137f0b91b404ae82aada6e6c" datatype="html">
-        <source>Logout</source>
-        <target/>
-        <note priority="1" from="description">Logout</note>
-        <note priority="1" from="meaning">Shanoir NG</note>
+        <note priority="1" from="meaning">Manage users</note>
       </trans-unit>
     </body>
   </file>

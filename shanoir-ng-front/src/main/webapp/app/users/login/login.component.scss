@@ -1,6 +1,8 @@
 /*****************/
 /* Login component
 /*****************/
+@import "app/shared/css/partials/base";
+
 .LoginComponent {
     margin-bottom: 30px;
     margin-top: 50px;
@@ -14,7 +16,7 @@
 }
 
 .LoginContent {
-    border: 1px solid black;
+    border: 1px solid $mainThemeBackgroundColor;
     border-radius: 20px;
     min-width: 400px;
 }
