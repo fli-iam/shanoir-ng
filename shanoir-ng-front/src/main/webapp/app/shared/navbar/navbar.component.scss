@@ -1,8 +1,10 @@
 /******************/
 /* Navbar component
 /******************/
+@import "app/shared/css/partials/base";
+
 .NavbarComponent {
-    background: black;
+    background: $mainThemeBackgroundColor;
     margin-bottom: 20px;
 }
 
@@ -16,15 +18,15 @@
 }
 
 .Menu-link {
-    background: black;
-    color: white;
+    background: $mainThemeBackgroundColor;
+    color: $mainThemeLabelColor;
     cursor: pointer;
     display: block;
     padding: 10px;
     text-decoration: none;
 }
 .Menu-link:hover {
-    background: dimgrey;
+    background: $mainThemeBackgroundHoverColor;
     display: block;
     text-decoration: none;
 }

@@ -1,0 +1,9 @@
+/********/
+/* Common
+/********/
+@import "partials/base";
+    
+.Button {
+    background-color: $mainThemeBackgroundColor;
+    color: $mainThemeLabelColor;
+}

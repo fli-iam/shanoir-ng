@@ -1,0 +1,14 @@
+import { User } from './user.model';
+
+export const USERS: User[] = [
+  { id: 1, username: 'mrnice', firstName: 'Jean', lastName: 'Nice', email: 'jean.nice@mr.fr', team: 'MR', role: 'Administrator', canAccessToDicomAssociation: true, createdOn: new Date(2014, 1, 1), expirationDate: new Date(2017, 1, 1), valid: true, lastLoginOn: new Date(2016, 11, 1) },
+  { id: 2, username: 'narco', firstName: 'Nicolas', lastName: 'Arco', email: 'nico@arco.fr', team: null, role: 'Administrator', canAccessToDicomAssociation: true, createdOn: new Date(2014, 1, 1), expirationDate: new Date(2018, 1, 1), valid: true, lastLoginOn: new Date(2016, 11, 11)},
+  { id: 3, username: 'bombasto', firstName: 'Brigitte', lastName: 'Ombasto', email: 'brigitte@yooha.fr', team: 'Tete', role: 'User', canAccessToDicomAssociation: true, createdOn: new Date(2015, 3, 1), expirationDate: new Date(2016, 1, 1), valid: false, lastLoginOn: new Date(2015, 11, 1) },
+  { id: 4, username: 'celeritas', firstName: 'Célestène', lastName: 'Ritas', email: 'celeritas@cele.ritas', team: null, role: 'Guest', canAccessToDicomAssociation: true, createdOn: new Date(2016, 8, 1), expirationDate: new Date(2017, 8, 1), valid: true, lastLoginOn: new Date(2016, 9, 1) },
+  { id: 5, username: 'magneta', firstName: 'Marin', lastName: 'Gneta', email: 'marin@gne.ta', team: 'Toto', role: 'User', canAccessToDicomAssociation: true, createdOn: new Date(2014, 5, 13), expirationDate: new Date(2017, 5, 13), valid: true, lastLoginOn: new Date(2016, 10, 1) },
+  { id: 6, username: 'rubberman', firstName: 'Rubben', lastName: 'Herman', email: 'rubberman@coco.te', team: 'Coco', role: 'Guest', canAccessToDicomAssociation: false, createdOn: new Date(2013, 12 ,12), expirationDate: new Date(2015, 1, 12), valid: false, lastLoginOn: new Date(2014, 1, 11) },
+  { id: 7, username: 'dynama', firstName: 'Dylan', lastName: 'Nama', email: 'dylan.nama@freeeee.fr', team: 'Freeeee', role: 'User', canAccessToDicomAssociation: true, createdOn: new Date(2015, 8, 1), expirationDate: new Date(2018, 8, 1), valid: true, lastLoginOn: new Date(2016, 8, 1) },
+  { id: 8, username: 'driq', firstName: 'Didier', lastName: 'Riq', email: 'driq@hophop.hop', team: 'Hop', role: 'User', canAccessToDicomAssociation: true, createdOn: new Date(2014, 3, 17), expirationDate: new Date(2017, 3, 17), valid: true, lastLoginOn: new Date(2016, 10, 14) },
+  { id: 9, username: 'magma', firstName: 'Mathidle', lastName: 'Gma', email: 'magma@mag.ma', team: null, role: 'User', canAccessToDicomAssociation: true, createdOn: new Date(2016, 1, 1), expirationDate: new Date(2017, 1, 1), valid: false, lastLoginOn: null },
+  { id: 10, username: 'tornado', firstName: 'Tor', lastName: 'Nado', email: 'tornado@jiji.ji', team: 'Jiji', role: 'Guest', canAccessToDicomAssociation: true, createdOn: new Date(2016, 1, 1), expirationDate: new Date(2017, 1, 1), valid: true, lastLoginOn: new Date(2016, 11, 1) }
+];

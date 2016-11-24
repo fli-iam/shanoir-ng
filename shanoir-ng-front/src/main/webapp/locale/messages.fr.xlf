@@ -44,6 +44,24 @@
         <note priority="1" from="description">Logout</note>
         <note priority="1" from="meaning">Shanoir NG</note>
       </trans-unit>
+      <trans-unit id="6d5f95f383d0eeebda86186bfe6c43e6c2eadd23" datatype="html">
+        <source>Administration</source>
+        <target>Administration</target>
+        <note priority="1" from="description">Administration label</note>
+        <note priority="1" from="meaning">Menu</note>
+      </trans-unit>
+      <trans-unit id="206004087015b5c443687daad22a3384ac9388a0" datatype="html">
+        <source>Manage users</source>
+        <target>Gestion des utilisateurs</target>
+        <note priority="1" from="description">Manage users label</note>
+        <note priority="1" from="meaning">Menu</note>
+      </trans-unit>
+      <trans-unit id="75195320aabc9f54cc018db1d0c5bd49cad17b92" datatype="html">
+        <source>Manage users</source>
+        <target>Gestion des utilisateurs</target>
+        <note priority="1" from="description">Title</note>
+        <note priority="1" from="meaning">Manage users</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
