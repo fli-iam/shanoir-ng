@@ -25,10 +25,6 @@ public class Role {
 	@JsonProperty("accessLevel")
 	private Integer accessLevel = null;
 
-	public Role id(Long id) {
-		this.id = id;
-		return this;
-	}
 
 	/**
 	 * Get id
@@ -44,10 +40,6 @@ public class Role {
 		this.id = id;
 	}
 
-	public Role name(String name) {
-		this.name = name;
-		return this;
-	}
 
 	/**
 	 * Get name
@@ -63,10 +55,6 @@ public class Role {
 		this.name = name;
 	}
 
-	public Role accessLevel(Integer accessLevel) {
-		this.accessLevel = accessLevel;
-		return this;
-	}
 
 	/**
 	 * Get accessLevel

@@ -1,16 +1,22 @@
 package org.shanoir.ng.model;
 
+import java.util.Date;
 import java.util.Objects;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
-import org.joda.time.LocalDate;
+import org.shanoir.ng.model.hateoas.HRef;
+import org.shanoir.ng.model.hateoas.HalEntity;
+import org.shanoir.ng.model.hateoas.Link;
+import org.shanoir.ng.model.hateoas.Links;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -19,7 +25,8 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @Entity
 @Table(name = "users")
-public class User {
+@JsonPropertyOrder({ "_links", "id", "firstName", "lasName", "username", "email" })
+public class User extends HalEntity {
 
 	@JsonProperty("id")
 	@Id
@@ -47,16 +54,16 @@ public class User {
 	private Boolean isMedical = null;
 
 	@JsonProperty("canImportFromPACS")
-	private Boolean canImportFromPACS = null;
+	private Boolean canImportFromPacs = null;
 
 	@JsonProperty("creationDate")
-	private LocalDate creationDate = null;
+	private Date creationDate = null;
 
 	@JsonProperty("expirationDate")
-	private LocalDate expirationDate = null;
+	private Date expirationDate = null;
 
 	@JsonProperty("lastLogin")
-	private LocalDate lastLogin = null;
+	private Date lastLogin = null;
 
 	@JsonProperty("canAccessToDicomAssociation")
 	private Boolean canAccessToDicomAssociation = null;
@@ -68,9 +75,14 @@ public class User {
 	@ManyToOne @JoinColumn(name="ROLE_ID")
 	private Role role = null;
 
-	public User id(Long id) {
-		this.id = id;
-		return this;
+
+	/**
+	 *
+	 */
+	@PostLoad
+	public void initLinks() {
+		this.addLink(new Link(Links.REL_SELF, new HRef("user/" + getId())));
+		//this.addLink(new Link(Links.REL_NEXT, new HRef("user/" + (getId() + 1))));
 	}
 
 	/**
@@ -87,10 +99,6 @@ public class User {
 		this.id = id;
 	}
 
-	public User username(String username) {
-		this.username = username;
-		return this;
-	}
 
 	/**
 	 * Get username
@@ -104,11 +112,6 @@ public class User {
 
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	public User password(String password) {
-		this.password = password;
-		return this;
 	}
 
 	/**
@@ -125,10 +128,6 @@ public class User {
 		this.password = password;
 	}
 
-	public User firstName(String firstName) {
-		this.firstName = firstName;
-		return this;
-	}
 
 	/**
 	 * Get firstName
@@ -144,10 +143,6 @@ public class User {
 		this.firstName = firstName;
 	}
 
-	public User lastName(String lastName) {
-		this.lastName = lastName;
-		return this;
-	}
 
 	/**
 	 * Get lastName
@@ -163,10 +158,6 @@ public class User {
 		this.lastName = lastName;
 	}
 
-	public User email(String email) {
-		this.email = email;
-		return this;
-	}
 
 	/**
 	 * Get email
@@ -182,10 +173,6 @@ public class User {
 		this.email = email;
 	}
 
-	public User teamName(String teamName) {
-		this.teamName = teamName;
-		return this;
-	}
 
 	/**
 	 * Get teamName
@@ -201,10 +188,6 @@ public class User {
 		this.teamName = teamName;
 	}
 
-	public User isMedical(Boolean isMedical) {
-		this.isMedical = isMedical;
-		return this;
-	}
 
 	/**
 	 * Get isMedical
@@ -220,10 +203,6 @@ public class User {
 		this.isMedical = isMedical;
 	}
 
-	public User canImportFromPACS(Boolean canImportFromPACS) {
-		this.canImportFromPACS = canImportFromPACS;
-		return this;
-	}
 
 	/**
 	 * Get canImportFromPACS
@@ -232,17 +211,13 @@ public class User {
 	 **/
 	@ApiModelProperty(value = "")
 	public Boolean getCanImportFromPACS() {
-		return canImportFromPACS;
+		return canImportFromPacs;
 	}
 
 	public void setCanImportFromPACS(Boolean canImportFromPACS) {
-		this.canImportFromPACS = canImportFromPACS;
+		this.canImportFromPacs = canImportFromPACS;
 	}
 
-	public User creationDate(LocalDate creationDate) {
-		this.creationDate = creationDate;
-		return this;
-	}
 
 	/**
 	 * Get creationDate
@@ -250,18 +225,14 @@ public class User {
 	 * @return creationDate
 	 **/
 	@ApiModelProperty(value = "")
-	public LocalDate getCreationDate() {
+	public Date getCreationDate() {
 		return creationDate;
 	}
 
-	public void setCreationDate(LocalDate creationDate) {
+	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
 	}
 
-	public User expirationDate(LocalDate expirationDate) {
-		this.expirationDate = expirationDate;
-		return this;
-	}
 
 	/**
 	 * Get expirationDate
@@ -269,18 +240,14 @@ public class User {
 	 * @return expirationDate
 	 **/
 	@ApiModelProperty(value = "")
-	public LocalDate getExpirationDate() {
+	public Date getExpirationDate() {
 		return expirationDate;
 	}
 
-	public void setExpirationDate(LocalDate expirationDate) {
+	public void setExpirationDate(Date expirationDate) {
 		this.expirationDate = expirationDate;
 	}
 
-	public User lastLogin(LocalDate lastLogin) {
-		this.lastLogin = lastLogin;
-		return this;
-	}
 
 	/**
 	 * Get lastLogin
@@ -288,18 +255,14 @@ public class User {
 	 * @return lastLogin
 	 **/
 	@ApiModelProperty(value = "")
-	public LocalDate getLastLogin() {
+	public Date getLastLogin() {
 		return lastLogin;
 	}
 
-	public void setLastLogin(LocalDate lastLogin) {
+	public void setLastLogin(Date lastLogin) {
 		this.lastLogin = lastLogin;
 	}
 
-	public User canAccessToDicomAssociation(Boolean canAccessToDicomAssociation) {
-		this.canAccessToDicomAssociation = canAccessToDicomAssociation;
-		return this;
-	}
 
 	/**
 	 * Get canAccessToDicomAssociation
@@ -315,10 +278,6 @@ public class User {
 		this.canAccessToDicomAssociation = canAccessToDicomAssociation;
 	}
 
-	public User motivation(String motivation) {
-		this.motivation = motivation;
-		return this;
-	}
 
 	/**
 	 * Get motivation
@@ -332,11 +291,6 @@ public class User {
 
 	public void setMotivation(String motivation) {
 		this.motivation = motivation;
-	}
-
-	public User role(Role role) {
-		this.role = role;
-		return this;
 	}
 
 	/**
@@ -369,7 +323,7 @@ public class User {
 				&& Objects.equals(this.firstName, user.firstName) && Objects.equals(this.lastName, user.lastName)
 				&& Objects.equals(this.email, user.email) && Objects.equals(this.teamName, user.teamName)
 				&& Objects.equals(this.isMedical, user.isMedical)
-				&& Objects.equals(this.canImportFromPACS, user.canImportFromPACS)
+				&& Objects.equals(this.canImportFromPacs, user.canImportFromPacs)
 				&& Objects.equals(this.creationDate, user.creationDate)
 				&& Objects.equals(this.expirationDate, user.expirationDate)
 				&& Objects.equals(this.lastLogin, user.lastLogin)
@@ -379,7 +333,7 @@ public class User {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, username, password, firstName, lastName, email, teamName, isMedical, canImportFromPACS,
+		return Objects.hash(id, username, password, firstName, lastName, email, teamName, isMedical, canImportFromPacs,
 				creationDate, expirationDate, lastLogin, canAccessToDicomAssociation, motivation, role);
 	}
 
@@ -396,7 +350,7 @@ public class User {
 		sb.append("    email: ").append(toIndentedString(email)).append("\n");
 		sb.append("    teamName: ").append(toIndentedString(teamName)).append("\n");
 		sb.append("    isMedical: ").append(toIndentedString(isMedical)).append("\n");
-		sb.append("    canImportFromPACS: ").append(toIndentedString(canImportFromPACS)).append("\n");
+		sb.append("    canImportFromPACS: ").append(toIndentedString(canImportFromPacs)).append("\n");
 		sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
 		sb.append("    expirationDate: ").append(toIndentedString(expirationDate)).append("\n");
 		sb.append("    lastLogin: ").append(toIndentedString(lastLogin)).append("\n");
