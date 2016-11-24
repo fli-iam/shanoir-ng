@@ -21,6 +21,6 @@ public class LinkSerializer extends JsonSerializer<Link> {
                           throws IOException, JsonProcessingException {
 
 
-        jsonGenerator.writeObjectField(link.getRel(), link.getHref());
+        jsonGenerator.writeObject(link.getHref());
     }
 }
