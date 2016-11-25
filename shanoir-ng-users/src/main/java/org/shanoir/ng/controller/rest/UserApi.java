@@ -3,11 +3,14 @@ package org.shanoir.ng.controller.rest;
 
 import java.util.List;
 
+import org.shanoir.ng.configuration.swagger.SwaggerDocumentationConfig;
 import org.shanoir.ng.model.ErrorModel;
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.model.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -29,6 +32,7 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	ResponseEntity<Void> deleteUser(
+			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId);
 
 	@ApiOperation(value = "", notes = "If exists, returns the user corresponding to the given id", response = User.class, tags = {})
@@ -55,7 +59,9 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/user", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<User> saveNewUser(@ApiParam(value = "the user to create", required = true) @RequestBody User user);
+	ResponseEntity<User> saveNewUser(
+			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
+			@ApiParam(value = "the user to create", required = true) @RequestBody User user) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates a user", response = Void.class, tags = {})
 	@ApiResponses(value = {
@@ -65,7 +71,8 @@ public interface UserApi {
 	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
 	ResponseEntity<Void> updateUser(
+			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
-			@ApiParam(value = "the user to update", required = true) @RequestBody User user);
+			@ApiParam(value = "the user to update", required = true) @RequestBody User user) throws RestServiceException;
 
 }

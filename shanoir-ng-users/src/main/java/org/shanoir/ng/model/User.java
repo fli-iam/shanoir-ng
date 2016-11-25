@@ -9,8 +9,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
-import org.shanoir.ng.model.hateoas.HRef;
+import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.model.hateoas.HalEntity;
 import org.shanoir.ng.model.hateoas.Link;
 import org.shanoir.ng.model.hateoas.Links;
@@ -33,30 +34,32 @@ public class User extends HalEntity {
 	private Long id = null;
 
 	@JsonProperty("username")
+	@NotBlank
 	private String username = null;
 
 	@JsonProperty("password")
 	private String password = null;
 
 	@JsonProperty("firstName")
+	@NotBlank
 	private String firstName = null;
 
 	@JsonProperty("lastName")
+	@NotBlank
 	private String lastName = null;
 
 	@JsonProperty("email")
+	@NotBlank
 	private String email = null;
 
 	@JsonProperty("teamName")
 	private String teamName = null;
 
-	@JsonProperty("isMedical")
-	private Boolean isMedical = null;
-
 	@JsonProperty("canImportFromPACS")
 	private Boolean canImportFromPacs = null;
 
 	@JsonProperty("creationDate")
+	@NotNull
 	private Date creationDate = null;
 
 	@JsonProperty("expirationDate")
@@ -73,6 +76,7 @@ public class User extends HalEntity {
 
 	@JsonProperty("role")
 	@ManyToOne @JoinColumn(name="ROLE_ID")
+	@NotNull
 	private Role role = null;
 
 
@@ -81,7 +85,7 @@ public class User extends HalEntity {
 	 */
 	@PostLoad
 	public void initLinks() {
-		this.addLink(new Link(Links.REL_SELF, new HRef("user/" + getId())));
+		this.addLink(new Link(Links.REL_SELF, "user/" + getId()));
 		//this.addLink(new Link(Links.REL_NEXT, new HRef("user/" + (getId() + 1))));
 	}
 
@@ -187,22 +191,6 @@ public class User extends HalEntity {
 	public void setTeamName(String teamName) {
 		this.teamName = teamName;
 	}
-
-
-	/**
-	 * Get isMedical
-	 *
-	 * @return isMedical
-	 **/
-	@ApiModelProperty(value = "")
-	public Boolean getIsMedical() {
-		return isMedical;
-	}
-
-	public void setIsMedical(Boolean isMedical) {
-		this.isMedical = isMedical;
-	}
-
 
 	/**
 	 * Get canImportFromPACS
@@ -322,7 +310,6 @@ public class User extends HalEntity {
 		return Objects.equals(this.username, user.username) && Objects.equals(this.password, user.password)
 				&& Objects.equals(this.firstName, user.firstName) && Objects.equals(this.lastName, user.lastName)
 				&& Objects.equals(this.email, user.email) && Objects.equals(this.teamName, user.teamName)
-				&& Objects.equals(this.isMedical, user.isMedical)
 				&& Objects.equals(this.canImportFromPacs, user.canImportFromPacs)
 				&& Objects.equals(this.creationDate, user.creationDate)
 				&& Objects.equals(this.expirationDate, user.expirationDate)
@@ -333,7 +320,7 @@ public class User extends HalEntity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, username, password, firstName, lastName, email, teamName, isMedical, canImportFromPacs,
+		return Objects.hash(id, username, password, firstName, lastName, email, teamName, canImportFromPacs,
 				creationDate, expirationDate, lastLogin, canAccessToDicomAssociation, motivation, role);
 	}
 
@@ -349,7 +336,6 @@ public class User extends HalEntity {
 		sb.append("    lastName: ").append(toIndentedString(lastName)).append("\n");
 		sb.append("    email: ").append(toIndentedString(email)).append("\n");
 		sb.append("    teamName: ").append(toIndentedString(teamName)).append("\n");
-		sb.append("    isMedical: ").append(toIndentedString(isMedical)).append("\n");
 		sb.append("    canImportFromPACS: ").append(toIndentedString(canImportFromPacs)).append("\n");
 		sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
 		sb.append("    expirationDate: ").append(toIndentedString(expirationDate)).append("\n");

@@ -2,14 +2,18 @@ package org.shanoir.ng.controller.rest;
 
 import java.util.List;
 
+import org.shanoir.ng.configuration.swagger.SwaggerDocumentationConfig;
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.model.exception.RestServiceException;
 import org.shanoir.ng.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.datasource.init.ScriptException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import io.swagger.annotations.ApiParam;
 
@@ -19,7 +23,9 @@ public class UserApiController implements UserApi {
 	@Autowired
 	private UserService userService;
 
-	public ResponseEntity<Void> deleteUser(@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) {
+	public ResponseEntity<Void> deleteUser(
+			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) {
 		if (userService.findById(userId) == null) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
@@ -45,15 +51,26 @@ public class UserApiController implements UserApi {
 		}
 	}
 
-	public ResponseEntity<User> saveNewUser(@ApiParam(value = "the user to create", required = true) @RequestBody User user) {
-		userService.save(user);
+	public ResponseEntity<User> saveNewUser(
+			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
+			@ApiParam(value = "the user to create", required = true) @RequestBody User user) throws RestServiceException {
+		try {
+			userService.save(user);
+		} catch (ScriptException e) {
+			throw new RestServiceException(422, e.getLocalizedMessage());
+		}
 		return new ResponseEntity<User>(user, HttpStatus.OK);
 	}
 
 	public ResponseEntity<Void> updateUser(
+			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
-			@ApiParam(value = "the user to update", required = true) @RequestBody User user) {
-		userService.save(user);
+			@ApiParam(value = "the user to update", required = true) @RequestBody User user) throws RestServiceException {
+		try {
+			userService.save(user);
+		} catch (ScriptException e) {
+			throw new RestServiceException(422, e.getLocalizedMessage());
+		}
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 

@@ -22,6 +22,17 @@ public class Link {
 		this.href = href;
 	}
 
+
+	/**
+	 * @param rel
+	 * @param relativePath
+	 */
+	public Link(String rel, String href) {
+		super();
+		this.rel = rel;
+		this.href = new HRef(href);
+	}
+
 	/**
 	 * @return the rel
 	 */

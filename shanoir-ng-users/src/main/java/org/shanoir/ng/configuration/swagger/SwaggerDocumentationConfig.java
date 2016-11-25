@@ -15,6 +15,9 @@ import springfox.documentation.spring.web.plugins.Docket;
 @Configuration
 public class SwaggerDocumentationConfig {
 
+	/** The name of the authentication token parameter. */
+	public static final String AUTH_TOKEN_NAME = "x-auth-token";
+
 	ApiInfo apiInfo() {
 		return new ApiInfoBuilder().title("Shanoir NG Users Microservice")
 				.description("Microservice API for Shanoir NG user managment").license("").licenseUrl("")
@@ -23,10 +26,12 @@ public class SwaggerDocumentationConfig {
 
 	@Bean
 	public Docket customImplementation() {
+
 		return new Docket(DocumentationType.SWAGGER_2).select()
 				.apis(RequestHandlerSelectors.basePackage("org.shanoir.ng.controller.rest")).build()
 				.directModelSubstitute(org.joda.time.LocalDate.class, java.sql.Date.class)
-				.directModelSubstitute(org.joda.time.DateTime.class, java.util.Date.class).apiInfo(apiInfo());
+				.directModelSubstitute(org.joda.time.DateTime.class, java.util.Date.class).apiInfo(apiInfo())
+				.useDefaultResponseMessages(false);
 	}
 
 }

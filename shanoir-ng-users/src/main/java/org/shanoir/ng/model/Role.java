@@ -4,6 +4,9 @@ import java.util.Objects;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -20,9 +23,11 @@ public class Role {
 	private Long id = null;
 
 	@JsonProperty("name")
+	@NotBlank
 	private String name = null;
 
 	@JsonProperty("accessLevel")
+	@NotNull
 	private Integer accessLevel = null;
 
 

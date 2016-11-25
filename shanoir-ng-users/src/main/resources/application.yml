@@ -36,6 +36,7 @@ spring:
       # Naming strategy
       naming:
         strategy: org.hibernate.cfg.ImprovedNamingStrategy
+    database-platform: org.hibernate.dialect.MySQLDialect
   jooq:
     sql-dialect: Mysql
   # logging configuration

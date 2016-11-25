@@ -1,4 +1,4 @@
-package org.shanoir.ng.controller;
+package org.shanoir.ng.controller.rest;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller for user authentication.
- * 
+ *
  * @author msimon
  *
  */
