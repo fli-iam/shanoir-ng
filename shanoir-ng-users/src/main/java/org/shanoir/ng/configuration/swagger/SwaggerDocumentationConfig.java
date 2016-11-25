@@ -16,7 +16,7 @@ import springfox.documentation.spring.web.plugins.Docket;
 public class SwaggerDocumentationConfig {
 
 	/** The name of the authentication token parameter. */
-	public static final String AUTH_TOKEN_NAME = "x-auth-token";
+	public static final String AUTH_TOKEN_NAME = "X-XSRF-TOKEN";
 
 	ApiInfo apiInfo() {
 		return new ApiInfoBuilder().title("Shanoir NG Users Microservice")

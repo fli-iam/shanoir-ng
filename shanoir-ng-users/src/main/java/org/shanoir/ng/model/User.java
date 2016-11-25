@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Objects;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -31,6 +32,7 @@ public class User extends HalEntity {
 
 	@JsonProperty("id")
 	@Id
+	@GeneratedValue
 	private Long id = null;
 
 	@JsonProperty("username")

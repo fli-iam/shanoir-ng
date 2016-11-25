@@ -8,6 +8,7 @@ import org.shanoir.ng.model.ErrorModel;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -61,7 +62,8 @@ public interface UserApi {
 			"application/json" }, method = RequestMethod.POST)
 	ResponseEntity<User> saveNewUser(
 			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
-			@ApiParam(value = "the user to create", required = true) @RequestBody User user) throws RestServiceException;
+			@ApiParam(value = "the user to create", required = true) @RequestBody User user,
+			BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates a user", response = Void.class, tags = {})
 	@ApiResponses(value = {
@@ -73,6 +75,7 @@ public interface UserApi {
 	ResponseEntity<Void> updateUser(
 			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
-			@ApiParam(value = "the user to update", required = true) @RequestBody User user) throws RestServiceException;
+			@ApiParam(value = "the user to update", required = true) @RequestBody User user,
+			BindingResult result) throws RestServiceException;
 
 }
