@@ -1,15 +1,15 @@
 package org.shanoir.ng.model;
 
 import java.util.Date;
-import java.util.Objects;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -17,7 +17,6 @@ import org.shanoir.ng.model.hateoas.HalEntity;
 import org.shanoir.ng.model.hateoas.Link;
 import org.shanoir.ng.model.hateoas.Links;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -30,57 +29,44 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonPropertyOrder({ "_links", "id", "firstName", "lasName", "username", "email" })
 public class User extends HalEntity {
 
-	@JsonProperty("id")
 	@Id
 	@GeneratedValue
-	private Long id = null;
+	private Long id;
 
-	@JsonProperty("username")
 	@NotBlank
-	private String username = null;
+	@Column(unique = true)
+	private String username;
 
-	@JsonProperty("password")
-	private String password = null;
+	private String password;
 
-	@JsonProperty("firstName")
 	@NotBlank
-	private String firstName = null;
+	private String firstName;
 
-	@JsonProperty("lastName")
 	@NotBlank
-	private String lastName = null;
+	private String lastName;
 
-	@JsonProperty("email")
 	@NotBlank
-	private String email = null;
+	@Column(unique = true)
+	private String email;
 
-	@JsonProperty("teamName")
-	private String teamName = null;
+	private String teamName;
 
-	@JsonProperty("canImportFromPACS")
-	private Boolean canImportFromPacs = null;
+	private Boolean canImportFromPacs;
 
-	@JsonProperty("creationDate")
 	@NotNull
-	private Date creationDate = null;
+	private Date creationDate;
 
-	@JsonProperty("expirationDate")
-	private Date expirationDate = null;
+	private Date expirationDate;
 
-	@JsonProperty("lastLogin")
-	private Date lastLogin = null;
+	private Date lastLogin;
 
-	@JsonProperty("canAccessToDicomAssociation")
-	private Boolean canAccessToDicomAssociation = null;
+	private Boolean canAccessToDicomAssociation;
 
-	@JsonProperty("motivation")
-	private String motivation = null;
+	private String motivation;
 
-	@JsonProperty("role")
-	@ManyToOne @JoinColumn(name="ROLE_ID")
+	@ManyToOne
 	@NotNull
-	private Role role = null;
-
+	private Role role;
 
 	/**
 	 *
@@ -297,67 +283,4 @@ public class User extends HalEntity {
 		this.role = role;
 	}
 
-	@Override
-	public boolean equals(java.lang.Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		User user = (User) o;
-		if (this.id != null && user.id != null) {
-			return Objects.equals(this.id, user.id);
-		}
-		return Objects.equals(this.username, user.username) && Objects.equals(this.password, user.password)
-				&& Objects.equals(this.firstName, user.firstName) && Objects.equals(this.lastName, user.lastName)
-				&& Objects.equals(this.email, user.email) && Objects.equals(this.teamName, user.teamName)
-				&& Objects.equals(this.canImportFromPacs, user.canImportFromPacs)
-				&& Objects.equals(this.creationDate, user.creationDate)
-				&& Objects.equals(this.expirationDate, user.expirationDate)
-				&& Objects.equals(this.lastLogin, user.lastLogin)
-				&& Objects.equals(this.canAccessToDicomAssociation, user.canAccessToDicomAssociation)
-				&& Objects.equals(this.motivation, user.motivation) && Objects.equals(this.role, user.role);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, username, password, firstName, lastName, email, teamName, canImportFromPacs,
-				creationDate, expirationDate, lastLogin, canAccessToDicomAssociation, motivation, role);
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("class User {\n");
-
-		sb.append("    id: ").append(toIndentedString(id)).append("\n");
-		sb.append("    username: ").append(toIndentedString(username)).append("\n");
-		sb.append("    password: ").append(toIndentedString(password)).append("\n");
-		sb.append("    firstName: ").append(toIndentedString(firstName)).append("\n");
-		sb.append("    lastName: ").append(toIndentedString(lastName)).append("\n");
-		sb.append("    email: ").append(toIndentedString(email)).append("\n");
-		sb.append("    teamName: ").append(toIndentedString(teamName)).append("\n");
-		sb.append("    canImportFromPACS: ").append(toIndentedString(canImportFromPacs)).append("\n");
-		sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
-		sb.append("    expirationDate: ").append(toIndentedString(expirationDate)).append("\n");
-		sb.append("    lastLogin: ").append(toIndentedString(lastLogin)).append("\n");
-		sb.append("    canAccessToDicomAssociation: ").append(toIndentedString(canAccessToDicomAssociation))
-				.append("\n");
-		sb.append("    motivation: ").append(toIndentedString(motivation)).append("\n");
-		sb.append("    role: ").append(toIndentedString(role)).append("\n");
-		sb.append("}");
-		return sb.toString();
-	}
-
-	/**
-	 * Convert the given object to string with each line indented by 4 spaces
-	 * (except the first line).
-	 */
-	private String toIndentedString(java.lang.Object o) {
-		if (o == null) {
-			return "null";
-		}
-		return o.toString().replace("\n", "\n    ");
-	}
 }
