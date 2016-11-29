@@ -1,5 +1,6 @@
 package org.shanoir.ng.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
@@ -18,6 +19,11 @@ public class Role {
 	private Long id = null;
 
 	@NotBlank
+	@Column(unique = true)
+	private String displayName = null;
+	
+	@NotBlank
+	@Column(unique = true)
 	private String name = null;
 
 	@NotNull
@@ -38,6 +44,19 @@ public class Role {
 		this.id = id;
 	}
 
+	/**
+	 * Get display name
+	 *
+	 * @return display name
+	 **/
+	@ApiModelProperty(required = true, value = "")
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
 
 	/**
 	 * Get name

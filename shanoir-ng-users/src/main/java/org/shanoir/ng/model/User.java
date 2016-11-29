@@ -51,7 +51,8 @@ public class User extends HalEntity {
 
 	private String teamName;
 
-	private Boolean canImportFromPacs;
+	@NotNull
+	private Boolean isMedical;
 
 	@NotNull
 	private Date creationDate;
@@ -60,9 +61,16 @@ public class User extends HalEntity {
 
 	private Date lastLogin;
 
+	@NotBlank
 	private Boolean canAccessToDicomAssociation;
 
 	private String motivation;
+	
+	private Boolean isFirstExpirationNotificationSent;
+	
+	private Boolean isSecondExpirationNotificationSent;
+	
+	private Boolean isOnDemand;
 
 	@ManyToOne
 	@NotNull
@@ -181,19 +189,18 @@ public class User extends HalEntity {
 	}
 
 	/**
-	 * Get canImportFromPACS
+	 * Get isMedical
 	 *
-	 * @return canImportFromPACS
+	 * @return isMedical
 	 **/
 	@ApiModelProperty(value = "")
-	public Boolean getCanImportFromPACS() {
-		return canImportFromPacs;
+	public Boolean getIsMedical() {
+		return isMedical;
 	}
 
-	public void setCanImportFromPACS(Boolean canImportFromPACS) {
-		this.canImportFromPacs = canImportFromPACS;
+	public void setIsMedical(Boolean isMedical) {
+		this.isMedical = isMedical;
 	}
-
 
 	/**
 	 * Get creationDate
@@ -267,6 +274,48 @@ public class User extends HalEntity {
 
 	public void setMotivation(String motivation) {
 		this.motivation = motivation;
+	}
+
+	/**
+	 * Get isFirstExpirationNotificationSent
+	 *
+	 * @return isFirstExpirationNotificationSent
+	 **/
+	@ApiModelProperty(value = "")
+	public Boolean getIsFirstExpirationNotificationSent() {
+		return isFirstExpirationNotificationSent;
+	}
+
+	public void setIsFirstExpirationNotificationSent(Boolean isFirstExpirationNotificationSent) {
+		this.isFirstExpirationNotificationSent = isFirstExpirationNotificationSent;
+	}
+
+	/**
+	 * Get isSecondExpirationNotificationSent
+	 *
+	 * @return isSecondExpirationNotificationSent
+	 **/
+	@ApiModelProperty(value = "")
+	public Boolean getIsSecondExpirationNotificationSent() {
+		return isSecondExpirationNotificationSent;
+	}
+
+	public void setIsSecondExpirationNotificationSent(Boolean isSecondExpirationNotificationSent) {
+		this.isSecondExpirationNotificationSent = isSecondExpirationNotificationSent;
+	}
+
+	/**
+	 * Get isOnDemand
+	 *
+	 * @return isOnDemand
+	 **/
+	@ApiModelProperty(value = "")
+	public Boolean getIsOnDemand() {
+		return isOnDemand;
+	}
+
+	public void setIsOnDemand(Boolean isOnDemand) {
+		this.isOnDemand = isOnDemand;
 	}
 
 	/**

@@ -33,6 +33,12 @@ public interface UserService {
      * @param user
      */
     void save(User user);
+    
+    /**
+     * Update a user from the old Shanoir
+     * @param user
+     */
+    void updateFromShanoirOld(User user);
 
     /**
      * Delete a user
