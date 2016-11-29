@@ -20,7 +20,7 @@ public class Receiver {
 	private CountDownLatch latch = new CountDownLatch(1);
 	
 	public void receiveMessage(String message) throws IOException {
-		LOG.info(" [x] Received '" + message + "'");
+		LOG.debug(" [x] Received '" + message + "'");
         
         Gson oGson = new Gson();
         org.shanoir.ng.model.User user = oGson.fromJson(message, org.shanoir.ng.model.User.class);

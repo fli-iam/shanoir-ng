@@ -41,21 +41,21 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		final User userDb = userRepository.findOne(user.getId());
+		userDb.setCanAccessToDicomAssociation(user.getCanAccessToDicomAssociation());
+		userDb.setEmail(user.getEmail());
+		userDb.setExpirationDate(user.getExpirationDate());
+		userDb.setFirstName(user.getFirstName());
+		userDb.setLastName(user.getLastName());
+		userDb.setMotivation(user.getMotivation());
+		userDb.setPassword(user.getPassword());
+		userDb.setRole(user.getRole());
+		userDb.setIsMedical(user.getIsMedical());
 		try {
-			userDb.setCanAccessToDicomAssociation(user.getCanAccessToDicomAssociation());
-			userDb.setEmail(user.getEmail());
-			userDb.setExpirationDate(user.getExpirationDate());
-			userDb.setFirstName(user.getFirstName());
-			userDb.setLastName(user.getLastName());
-			userDb.setMotivation(user.getMotivation());
-			userDb.setPassword(user.getPassword());
-			userDb.setRole(user.getRole());
-			userDb.setIsMedical(user.getIsMedical());
+			userRepository.save(userDb);
 		} catch (Exception e) {
-			LOG.error("Error updating user from Shanoir Old: " + e.getMessage());
+			LOG.error("Error updating user from Shanoir Old: " + e.getCause().getCause());
+			return;
 		}
-		
-		userRepository.save(userDb);
 	}
 	
 	@Override
