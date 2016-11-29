@@ -9,7 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -46,7 +45,6 @@ public class User extends HalEntity {
 	private String lastName;
 
 	@NotBlank
-	@Column(unique = true)
 	private String email;
 
 	private String teamName;
@@ -66,10 +64,12 @@ public class User extends HalEntity {
 
 	private String motivation;
 	
+	@Column(columnDefinition = "boolean default false")
 	private Boolean isFirstExpirationNotificationSent;
 	
 	private Boolean isSecondExpirationNotificationSent;
 	
+	@Column(columnDefinition = "boolean default false")
 	private Boolean isOnDemand;
 
 	@ManyToOne
