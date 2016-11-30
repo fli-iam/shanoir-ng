@@ -2,12 +2,11 @@ package org.shanoir.ng.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
-
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Role
@@ -16,75 +15,74 @@ import io.swagger.annotations.ApiModelProperty;
 public class Role {
 
 	@Id
-	private Long id = null;
+	@GeneratedValue
+	private Long id;
 
-	@NotBlank
-	@Column(unique = true)
-	private String displayName = null;
+	@NotNull
+	private int accessLevel;
 	
 	@NotBlank
 	@Column(unique = true)
-	private String name = null;
-
-	@NotNull
-	private Integer accessLevel = null;
-
+	private String displayName;
+	
+	@NotBlank
+	@Column(unique = true)
+	private String name;
 
 	/**
-	 * Get id
-	 *
-	 * @return id
-	 **/
-	@ApiModelProperty(required = true, value = "")
+	 * @return the id
+	 */
 	public Long getId() {
 		return id;
 	}
 
+	/**
+	 * @param id the id to set
+	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
 
 	/**
-	 * Get display name
-	 *
-	 * @return display name
-	 **/
-	@ApiModelProperty(required = true, value = "")
+	 * @return the accessLevel
+	 */
+	public int getAccessLevel() {
+		return accessLevel;
+	}
+
+	/**
+	 * @param accessLevel the accessLevel to set
+	 */
+	public void setAccessLevel(int accessLevel) {
+		this.accessLevel = accessLevel;
+	}
+
+	/**
+	 * @return the displayName
+	 */
 	public String getDisplayName() {
 		return displayName;
 	}
 
+	/**
+	 * @param displayName the displayName to set
+	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
 	/**
-	 * Get name
-	 *
-	 * @return name
-	 **/
-	@ApiModelProperty(required = true, value = "")
+	 * @return the name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * @param name the name to set
+	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-
-	/**
-	 * Get accessLevel
-	 *
-	 * @return accessLevel
-	 **/
-	@ApiModelProperty(required = true, value = "")
-	public Integer getAccessLevel() {
-		return accessLevel;
-	}
-
-	public void setAccessLevel(Integer accessLevel) {
-		this.accessLevel = accessLevel;
 	}
 
 }

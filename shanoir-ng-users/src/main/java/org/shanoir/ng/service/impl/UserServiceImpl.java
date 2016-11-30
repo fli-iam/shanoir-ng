@@ -3,8 +3,9 @@ package org.shanoir.ng.service.impl;
 import java.util.List;
 
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.model.exception.ShanoirUsersException;
+import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.UserService;
-import org.shanoir.ng.service.repository.UserRepository;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,27 +35,25 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	public void updateFromShanoirOld(User user) {
+	public void updateFromShanoirOld(User user) throws ShanoirUsersException {
 		if (user.getId() == null) {
 			LOG.error("Cannot update an user without id.");
 			return;
 		}
 		
 		final User userDb = userRepository.findOne(user.getId());
-		userDb.setCanAccessToDicomAssociation(user.getCanAccessToDicomAssociation());
+		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
 		userDb.setEmail(user.getEmail());
 		userDb.setExpirationDate(user.getExpirationDate());
 		userDb.setFirstName(user.getFirstName());
 		userDb.setLastName(user.getLastName());
-		userDb.setMotivation(user.getMotivation());
 		userDb.setPassword(user.getPassword());
 		userDb.setRole(user.getRole());
-		userDb.setIsMedical(user.getIsMedical());
+		userDb.setMedical(user.isMedical());
 		try {
 			userRepository.save(userDb);
 		} catch (Exception e) {
-			LOG.error("Error updating user from Shanoir Old: " + e.getCause().getCause());
-			return;
+			ShanoirUsersException.logAndThrow(LOG, "Error updating user from Shanoir Old: " + e.getMessage());
 		}
 	}
 	

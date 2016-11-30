@@ -1,8 +1,9 @@
 package org.shanoir.ng.configuration.amqp;
 
-import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
+import org.shanoir.ng.model.User;
+import org.shanoir.ng.model.exception.ShanoirUsersException;
 import org.shanoir.ng.service.UserService;
 import org.shanoir.ng.service.impl.AuthenticationServiceImpl;
 import org.slf4j.Logger;
@@ -19,14 +20,19 @@ public class Receiver {
 	
 	private CountDownLatch latch = new CountDownLatch(1);
 	
-	public void receiveMessage(String message) throws IOException {
+	public void receiveMessage(String message) {
 		LOG.debug(" [x] Received '" + message + "'");
         
         Gson oGson = new Gson();
-        org.shanoir.ng.model.User user = oGson.fromJson(message, org.shanoir.ng.model.User.class);
+        User user = oGson.fromJson(message, User.class);
         
-        userService.updateFromShanoirOld(user);
-        latch.countDown();
+        try {
+			userService.updateFromShanoirOld(user);
+			latch.countDown();
+		} catch (ShanoirUsersException e) {
+			// Exception.
+			// TODO: how to manage these exceptions to avoid messages loop
+		}
     }
 	
 }

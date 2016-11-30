@@ -4,8 +4,11 @@ import org.shanoir.ng.model.ErrorModel;
 
 public class RestServiceException extends Exception {
 
-	private static final long serialVersionUID = 1L;
-
+	/**
+	 * Serial version uid
+	 */
+	private static final long serialVersionUID = 2796153429277618391L;
+	
 	private int code;
 	private String message;
 
@@ -41,4 +44,5 @@ public class RestServiceException extends Exception {
 	public int getCode() {
 		return code;
 	}
+	
 }

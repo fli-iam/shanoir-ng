@@ -3,6 +3,7 @@ package org.shanoir.ng.service;
 import java.util.List;
 
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.model.exception.ShanoirUsersException;
 
 /**
  * User service.
@@ -37,8 +38,9 @@ public interface UserService {
     /**
      * Update a user from the old Shanoir
      * @param user
+     * @throws ShanoirUsersException
      */
-    void updateFromShanoirOld(User user);
+    void updateFromShanoirOld(User user) throws ShanoirUsersException;
 
     /**
      * Delete a user
