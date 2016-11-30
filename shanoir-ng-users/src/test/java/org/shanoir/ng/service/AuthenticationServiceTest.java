@@ -22,10 +22,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-
 /**
- * Authentication service test
- * Created by Michael DESIGAUD on 15/02/2016.
+ * Authentication service test.
+ * 
+ * @author msimon
+ *
  */
 @RunWith(MockitoJUnitRunner.class)
 public class AuthenticationServiceTest {
@@ -49,7 +50,7 @@ public class AuthenticationServiceTest {
     }
 
     @Test
-    public void authenticate() throws Exception {
+    public void authenticateTest() throws Exception {
 
     	final LoginDTO loginDTO = new LoginDTO();
         loginDTO.setLogin("user");

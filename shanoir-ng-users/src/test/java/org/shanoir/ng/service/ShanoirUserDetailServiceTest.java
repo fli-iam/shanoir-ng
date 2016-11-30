@@ -10,8 +10,10 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
- * HmacUserDetailService test
- * Created by Michael DESIGAUD on 15/02/2016.
+ * User detail service test.
+ * 
+ * @author msimon
+ * 
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ShanoirUserDetailServiceTest {
@@ -20,7 +22,7 @@ public class ShanoirUserDetailServiceTest {
     private ShanoirUserDetailsServiceImpl userDetailsService;
 
     @Test
-    public void loadByUserName(){
+    public void loadByUserNameTest(){
         final String username = "user";
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         Assert.assertNotNull(userDetails);
