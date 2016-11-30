@@ -59,7 +59,7 @@ public class User extends HalEntity {
 
 	private Date lastLogin;
 
-	@NotBlank
+	@NotNull
 	private Boolean canAccessToDicomAssociation;
 
 	private String motivation;
