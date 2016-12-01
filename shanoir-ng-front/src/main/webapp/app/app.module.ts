@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
-import {AgGridModule} from 'ag-grid-ng2/main';
+import { AgGridModule } from 'ag-grid-ng2/main';
 
 import { routing } from './app.routing';
 

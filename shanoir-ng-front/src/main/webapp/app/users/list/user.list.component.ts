@@ -41,6 +41,10 @@ export class UserListComponent {
             if (users) {
                 this.rowCount = users.length;
             }
+        })
+        .catch((error) => {
+            // TODO: display error
+            this.users = [];
         });
     }
 

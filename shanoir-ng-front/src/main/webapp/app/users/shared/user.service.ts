@@ -7,7 +7,7 @@ import * as AppUtils from 'app/utils/app.utils';
 @Injectable()
 export class UserService {
     
-    constructor(private http:Http) { }
+    constructor(private http: Http) { }
 
     getUsers(): Promise<User[]> {
         let headers = new Headers();
