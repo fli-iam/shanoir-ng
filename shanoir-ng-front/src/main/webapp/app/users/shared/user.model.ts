@@ -1,14 +1,14 @@
 export class User {
     id: number;
-    username: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    team: string;
-    role: string;
     canAccessToDicomAssociation: boolean;
-    createdOn: Date;
+    creationDate: Date;
+    email: string;
     expirationDate: Date;
+    firstName: string;
+    lastLogin: Date;
+    lastName: string;
+    role: string;
+    teamName: string;
+    username: string;
     valid: boolean;
-    lastLoginOn: Date;
 }

@@ -48,7 +48,7 @@ export class UserListComponent {
     private createColumnDefs() {
         function dateRenderer(date) {
             if (date) {
-                return date.toLocaleDateString();
+                return new Date(date).toLocaleDateString();
             }
             return null;
         };
@@ -66,22 +66,22 @@ export class UserListComponent {
             {headerName: "First Name", field: "firstName", width: 130, suppressMenu: true},
             {headerName: "Last Name", field: "lastName", width: 130, suppressMenu: true},
             {headerName: "Email", field: "email", width: 200, suppressMenu: true},
-            {headerName: "Team", field: "team", width: 100, suppressMenu: true},
-            {headerName: "Role", field: "role", width: 100, suppressMenu: true},
+            {headerName: "Team", field: "teamName", width: 100, suppressMenu: true},
+            {headerName: "Role", field: "role.displayName", width: 100, suppressMenu: true},
             {headerName: "Can import from PACS", field: "canAccessToDicomAssociation", width: 160, suppressMenu: true, cellRenderer: function (params) {
                 return booleanTrueRenderer(params.data.canAccessToDicomAssociation);
             }, cellStyle: {"text-align": "center"}},
-            {headerName: "Created on", field: "createdOn", width: 110, suppressMenu: true, cellRenderer: function (params) {
-                return dateRenderer(params.data.createdOn);
+            {headerName: "Created on", field: "creationDate", width: 110, suppressMenu: true, cellRenderer: function (params) {
+                return dateRenderer(params.data.creationDate);
             }},
             {headerName: "Expiration Date", field: "expirationDate", width: 110, suppressMenu: true, cellRenderer: function (params) {
                 return dateRenderer(params.data.expirationDate);
             }},
             {headerName: "Active", field: "valid", width: 60, suppressMenu: true, cellRenderer: function (params) {
-                return booleanTrueRenderer(params.data.valid);
+                    return booleanTrueRenderer(params.data.expirationDate >= new Date());
             }, cellStyle: {"text-align": "center"}},
-            {headerName: "Last Login", field: "lastLoginOn", width: 100, suppressMenu: true, cellRenderer: function (params) {
-                return dateRenderer(params.data.lastLoginOn);
+            {headerName: "Last Login", field: "lastLogin", width: 100, suppressMenu: true, cellRenderer: function (params) {
+                return dateRenderer(params.data.lastLogin);
             }}
         ];
     }
