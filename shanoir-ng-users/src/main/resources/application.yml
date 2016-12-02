@@ -22,14 +22,13 @@ spring:
   redis:
     host: localhost
   datasource:
-    url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&useSSL=false
+    url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: shanoir
     password: shanoir
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
   # Show or not log for each sql query
   jpa:
-    show-sql: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
@@ -41,7 +40,47 @@ spring:
     sql-dialect: Mysql
 # logging configuration
 logging:
-  file: shanoir-ng-user.log
+  file: /vol/log/ms/shanoir-ng-users.log
+  level:
+    org.springframework.web: ERROR
+    org.hibernate: ERROR
+
+---
+
+######################################
+# DO NOT COMMIT VALUES MODIFICATIONS #
+######################################
+spring:
+  profiles: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: nimda
+    # The SQL dialect makes Hibernate generate better SQL for the chosen database
+    driver-class-name: com.mysql.jdbc.Driver
+    data: import.sql
+  # Show or not log for each sql query
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create
+    properties:
+      hibernate:
+        connection:
+          charset: UTF-8
+        hbm2ddl:
+          import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
+    show-sql: true
+  jooq:
+    sql-dialect: Mysql
+server:
+    port: 9001
+# logging configuration
+logging:
+  file: c:\\Temp\\shanoir-ng\\shanoir-ng-users.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
+
+    
