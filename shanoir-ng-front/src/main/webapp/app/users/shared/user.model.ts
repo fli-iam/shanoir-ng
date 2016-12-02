@@ -11,4 +11,6 @@ export class User {
     teamName: string;
     username: string;
     valid: boolean;
+    lastLoginOn: Date;
+    isMedical: boolean;
 }

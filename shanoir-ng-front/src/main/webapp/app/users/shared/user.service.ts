@@ -22,5 +22,8 @@ export class UserService {
                 return Promise.reject(error.message || error);
             });
     }
+
+    create(user: User): void {
+    
     
 }
