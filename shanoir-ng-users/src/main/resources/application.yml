@@ -17,8 +17,8 @@ security:
   sessions: never
   user:
     password: password
-# redis configuration
 spring:
+  # redis configuration
   redis:
     host: localhost
   datasource:
@@ -31,7 +31,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      # Hibernate ddl auto (create, create-drop, update)
+      # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
       # Naming strategy
       naming:
@@ -39,9 +39,9 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
   jooq:
     sql-dialect: Mysql
-  # logging configuration
-  logging:
-    file: shanoir-ng-user.log
-    level:
-      org.springframework.web: DEBUG
-      org.hibernate: ERROR
+# logging configuration
+logging:
+  file: shanoir-ng-user.log
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate: ERROR

@@ -108,7 +108,10 @@ export class UserListComponent {
     
     // Grid height with a max value
     private gridHeight() {
-        if (this.rowCount <= GridUtils.maxDisplayedRows) {
+        if (this.rowCount == 0) {
+            // No row => 120px
+            return 120;
+        } else if (this.rowCount <= GridUtils.maxDisplayedRows) {
             // Rows height + header + 2px for borders
             return (this.rowCount + 1) * this.rowHeight + 2;
         } else {

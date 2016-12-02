@@ -66,6 +66,21 @@
 	                        <goal>exec</goal>
 	                    </goals>
 	                </execution>
+	                <execution>
+	                    <id>exec-npm-run-build-sass</id>
+	                    <phase>generate-sources</phase>
+	                    <configuration>
+	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
+	                        <executable>${npm.executable}</executable>
+	                        <arguments>
+	                            <argument>run</argument>
+	                            <argument>build:sass</argument>
+	                        </arguments>
+	                    </configuration>
+	                    <goals>
+	                        <goal>exec</goal>
+	                    </goals>
+	                </execution>
 	            </executions>
 	        </plugin>
             <plugin>
