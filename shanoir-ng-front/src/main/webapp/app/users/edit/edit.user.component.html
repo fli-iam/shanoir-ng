@@ -1,0 +1,51 @@
+<div class="EditUserComponent">
+    <div class="EditUserComponent-title">
+        <h2 i18n="Edit user|Title">Edit user</h2>
+    </div>
+
+    <form #editUserForm="ngForm" (ngSubmit)="onSubmit()" class="EditUserContent">
+        <div class="EditUserComponent-div">
+            <label i18n="Edit user|FirstName label">First Name: </label> 
+            <input type="text" id="firstName" required/>
+        </div>
+        <div class="EditUserComponent-div">
+            <label i18n="Edit user|LastName label">Last Name: </label> 
+            <input type="text" id="lastName" required/>
+        </div>
+        <div class="EditUserComponent-div">
+            <label i18n="Edit user|Username label">Username: </label> 
+            <input type="text" id="username" required/>
+        </div>
+        <div class="EditUserComponent-div">
+            <label i18n="Edit user|Email label">Email: </label> 
+            <input type="text" id="email" required/>
+        </div>
+        <div class="EditUserComponent-div">
+            <label i18n="Edit user|ExpirationDate label">Expiration Date: </label> 
+            <input type="date" #expirationDate />
+        </div>
+        <div class="EditUserComponent-div">
+            <label i18n="Edit user|Role label">Role of the user: </label> 
+            <select id="role">
+                <option *ngFor="let role of roles" [value]="role">{{role}}</option>
+            </select>
+        </div>
+        <div class="EditUserComponent-div">   
+            <label i18n="Edit user|CanAccessToDicomAssociation label">Can import from Neurinfo-PACS: </label> 
+            <input type="radio" #canAccessToDicomAssociation [value]="true"/>Yes
+            <input type="radio" #canAccessToDicomAssociation [value]="false" checked="checked"/>No
+        </div>
+        <div class="EditUserComponent-div">
+            <label i18n="Edit user|IsMedical label">Is a medical doctor/resident: </label> 
+            <input type="radio" #isMedical [value]="true"/>Yes
+            <input type="radio" #isMedical [value]="false" checked="checked"/>No
+        </div>
+        <div class="EditUserComponent-div">
+            <label i18n="Edit user|Motivation label">Comment: </label> 
+            <textarea #motivation></textarea>
+        </div>
+
+        <button type="submit" i18n="Edit user|CancelButton label" class="Button" (click)="cancel();">Cancel</button>
+        <button type="submit" i18n="Edit user|CreateButton label" class="Button">Create</button>
+    </form>
+</div>

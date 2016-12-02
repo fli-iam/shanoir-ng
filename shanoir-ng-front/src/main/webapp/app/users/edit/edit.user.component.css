@@ -1,0 +1,26 @@
+/*********************/
+/* Edit user component
+/*********************/
+.EditUserComponent {
+    padding-left: 5%;
+    width: 90%;
+}
+
+.EditUserComponent-title {
+    text-align: center;
+}
+
+.EditUserComponent-buttonBar {
+    padding-left: 10px;
+}
+
+.EditUserComponent-div {
+  margin-bottom: 1em;
+  width: 100%; 
+}
+
+.EditUserContent {
+  border: 1px solid gray;
+  padding: 10px;
+}
+
