@@ -18,6 +18,7 @@
 
 	<properties>
 		<springfox-version>2.5.0</springfox-version>
+		<spring-active-profile></spring-active-profile>
 	</properties>
 
 	<dependencies>
@@ -103,7 +104,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 		          	<profiles>
-		            	<profile>dev</profile>
+		            	<profile>${spring-active-profile}</profile>
 		          	</profiles>
 		        </configuration>
 			</plugin>
@@ -152,4 +153,13 @@
 			</snapshots>
 		</repository>
 	</repositories>
+	
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<spring-active-profile>dev</spring-active-profile>
+			</properties>
+		</profile>
+	</profiles>
 </project>
