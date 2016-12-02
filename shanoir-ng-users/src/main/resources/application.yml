@@ -54,8 +54,8 @@ spring:
   profiles: dev
   datasource:
     url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
-    username: root
-    password: nimda
+    username: shanoir
+    password: shanoir
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
     data: import.sql
