@@ -79,8 +79,7 @@ export class LoginService {
     }
 
     isAuthenticated():boolean {
-        //return !!localStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN);
-        return true;
+        return !!localStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN);
     }
 
 }
