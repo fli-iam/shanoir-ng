@@ -44,12 +44,13 @@ public final class ModelsUtil {
 	 */
 	public static User createUser(final Role role) {
 		final User user = new User();
-		user.setUsername("toto");
-		user.setEmail("toto@to.to");
 		user.setCreationDate(new Date());
-		user.setRole(role);
+		user.setEmail("toto@to.to");
 		user.setFirstName("toto");
 		user.setLastName("toto");
+		user.setPassword(LoginUtil.USER_PASSWORD);
+		user.setRole(role);
+		user.setUsername(LoginUtil.USER_LOGIN);
 		return user;
 	}
 	

@@ -4,10 +4,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.shanoir.ng.model.User;
+import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.impl.ShanoirUserDetailsServiceImpl;
 import org.shanoir.ng.utils.LoginUtil;
-import org.springframework.security.core.userdetails.User;
+import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
@@ -22,8 +26,13 @@ public class ShanoirUserDetailServiceTest {
     @InjectMocks
     private ShanoirUserDetailsServiceImpl userDetailsService;
 
+    @Mock
+    private UserRepository userRepository;
+
     @Test
     public void loadByUserNameTest(){
+    	Mockito.when(userRepository.findByUsername(LoginUtil.USER_LOGIN)).thenReturn(ModelsUtil.createUser());
+
         final String username = LoginUtil.USER_LOGIN;
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         Assert.assertNotNull(userDetails);
