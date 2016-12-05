@@ -15,6 +15,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.dto.LoginDTO;
 import org.shanoir.ng.dto.UserDTO;
 import org.shanoir.ng.service.impl.AuthenticationServiceImpl;
+import org.shanoir.ng.utils.LoginUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -53,8 +54,8 @@ public class AuthenticationServiceTest {
     public void authenticateTest() throws Exception {
 
     	final LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setLogin("user");
-        loginDTO.setPassword("password");
+        loginDTO.setLogin(LoginUtil.USER_LOGIN);
+        loginDTO.setPassword(LoginUtil.USER_PASSWORD);
 
         final User securityUser = getSecurityUser(loginDTO.getLogin(),loginDTO.getPassword());
 

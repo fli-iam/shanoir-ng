@@ -12,7 +12,7 @@ import org.shanoir.ng.model.User;
  * @author msimon
  *
  */
-public class ModelsUtil {
+public final class ModelsUtil {
 
 	/**
 	 * Create a role.

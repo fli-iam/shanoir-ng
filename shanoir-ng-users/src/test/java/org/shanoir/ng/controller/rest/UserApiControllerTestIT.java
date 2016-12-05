@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.service.UserService;
+import org.shanoir.ng.utils.LoginUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,7 +59,7 @@ public class UserApiControllerTestIT {
 	@Test
 	public void findUserByIdWithLogin() {
 		final BasicAuthorizationInterceptor basicAuthInterceptor = new BasicAuthorizationInterceptor(
-				"user", "password");
+				LoginUtil.USER_LOGIN, LoginUtil.USER_PASSWORD);
 		this.restTemplate.getRestTemplate().getInterceptors().add(basicAuthInterceptor);
 		try {
 			final ResponseEntity<String> response = restTemplate.getForEntity("/user/1", String.class);
@@ -77,7 +78,7 @@ public class UserApiControllerTestIT {
 	@Test
 	public void findUsersWithLogin() {
 		final BasicAuthorizationInterceptor basicAuthInterceptor = new BasicAuthorizationInterceptor(
-				"user", "password");
+				LoginUtil.USER_LOGIN, LoginUtil.USER_PASSWORD);
 		this.restTemplate.getRestTemplate().getInterceptors().add(basicAuthInterceptor);
 		try {
 			final ResponseEntity<String> response = restTemplate.getForEntity("/user/all", String.class);
@@ -96,7 +97,7 @@ public class UserApiControllerTestIT {
 	@Test
 	public void saveNewUserWithLogin() {
 		final BasicAuthorizationInterceptor basicAuthInterceptor = new BasicAuthorizationInterceptor(
-				"user", "password");
+				LoginUtil.USER_LOGIN, LoginUtil.USER_PASSWORD);
 		this.restTemplate.getRestTemplate().getInterceptors().add(basicAuthInterceptor);
 		try {
 			final HttpEntity<User> request = new HttpEntity<User>(createUser(), generateHeaders());
