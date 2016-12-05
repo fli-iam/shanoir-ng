@@ -20,6 +20,13 @@ public interface UserService {
      */
     List<User> findAll();
 
+    /**
+     * Find user by its email address
+     *
+     * @param email
+     * @return a user or null
+     */
+    User findByEmail(String email);
 
     /**
      * Find user by its id
@@ -28,6 +35,14 @@ public interface UserService {
      * @return a user or null
      */
     User findById(Long id);
+
+    /**
+     * Find user by its username
+     *
+     * @param id
+     * @return a user or null
+     */
+    User findByUsername(String username);
 
     /**
      * Save a user

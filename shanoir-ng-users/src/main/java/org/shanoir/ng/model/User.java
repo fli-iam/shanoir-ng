@@ -1,5 +1,7 @@
 package org.shanoir.ng.model;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -12,7 +14,10 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.model.hateoas.HalEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -21,7 +26,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @Table(name = "users")
 @JsonPropertyOrder({ "_links", "id", "firstName", "lasName", "username", "email" })
-public class User extends HalEntity {
+public class User extends HalEntity implements UserDetails {
+
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -5277815428510293236L;
 
 	@Id
 	@GeneratedValue
@@ -60,6 +70,12 @@ public class User extends HalEntity {
 	@NotNull
 	private Role role;
 
+	private String teamName;
+
+	@NotBlank
+	@Column(unique = true)
+	private String username;
+	
 	/**
 	 * @return the id
 	 */
@@ -231,6 +247,7 @@ public class User extends HalEntity {
 	/**
 	 * @return the password
 	 */
+	@JsonIgnore
 	public String getPassword() {
 		return password;
 	}
@@ -284,10 +301,34 @@ public class User extends HalEntity {
 		this.username = username;
 	}
 
-	private String teamName;
+	@Override
+	@JsonIgnore
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return Arrays.asList(role);
+	}
 
-	@NotBlank
-	@Column(unique = true)
-	private String username;
-	
+	@Override
+	@JsonIgnore
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	@JsonIgnore
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	@JsonIgnore
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	@JsonIgnore
+	public boolean isEnabled() {
+		return true;
+	}
+
 }

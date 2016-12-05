@@ -56,12 +56,6 @@ public class UserRepositoryTest {
 	}
 	
 	@Test
-	public void findOneTest() throws Exception {
-		User userDb = repository.findOne(user.getId());
-		assertThat(userDb.getUsername()).isEqualTo(user.getUsername());
-	}
-	
-	@Test
 	public void findAllTest() throws Exception {
 		Iterable<User> usersDb = repository.findAll();
 		assertThat(usersDb).isNotNull();
@@ -72,6 +66,24 @@ public class UserRepositoryTest {
 			nbUsers++;
 		}
 		assertThat(nbUsers).isEqualTo(1);
+	}
+	
+	@Test
+	public void findByEmailTest() throws Exception {
+		User userDb = repository.findByEmail(user.getEmail());
+		assertThat(userDb.getUsername()).isEqualTo(user.getUsername());
+	}
+	
+	@Test
+	public void findByUsernameTest() throws Exception {
+		User userDb = repository.findByUsername(user.getUsername());
+		assertThat(userDb.getId()).isEqualTo(user.getId());
+	}
+	
+	@Test
+	public void findOneTest() throws Exception {
+		User userDb = repository.findOne(user.getId());
+		assertThat(userDb.getUsername()).isEqualTo(user.getUsername());
 	}
 	
 }

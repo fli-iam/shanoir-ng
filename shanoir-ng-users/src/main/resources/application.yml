@@ -15,8 +15,6 @@ server:
 # spring security configuration
 security:
   sessions: never
-  user:
-    password: password
 spring:
   # redis configuration
   redis:
@@ -74,6 +72,10 @@ spring:
     show-sql: true
   jooq:
     sql-dialect: Mysql
+security:
+  sessions: never
+  user:
+    password: password
 server:
     port: 9001
 # logging configuration
