@@ -45,10 +45,12 @@ public interface UserService {
     User findByUsername(String username);
 
     /**
-     * Save a user
-     * @param user
+     * Save a user.
+     * 
+     * @param user user to create.
+     * @return created user.
      */
-    void save(User user);
+    User save(User user);
     
     /**
      * Update a user from the old Shanoir
