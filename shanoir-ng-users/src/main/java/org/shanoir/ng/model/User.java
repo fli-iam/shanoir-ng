@@ -18,6 +18,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -43,6 +44,7 @@ public class User extends HalEntity implements UserDetails {
 	private Date creationDate;
 
 	@NotBlank
+	@Column(unique = true)
 	private String email;
 	
 	private Date expirationDate;
@@ -255,6 +257,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @param password the password to set
 	 */
+	@JsonProperty
 	public void setPassword(String password) {
 		this.password = password;
 	}
