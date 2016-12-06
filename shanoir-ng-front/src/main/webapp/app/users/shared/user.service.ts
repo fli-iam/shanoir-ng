@@ -35,4 +35,5 @@ export class UserService {
                 console.error('Error while creating users', error);
                 return Promise.reject(error.message || error);
             });
+    }
 }
