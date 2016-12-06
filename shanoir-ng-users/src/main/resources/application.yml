@@ -72,12 +72,8 @@ spring:
     show-sql: true
   jooq:
     sql-dialect: Mysql
-security:
-  sessions: never
-  user:
-    password: password
 server:
-    port: 9001
+    port: 9901
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-users.log
