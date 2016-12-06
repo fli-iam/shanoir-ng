@@ -51,7 +51,7 @@ public class UserApiControllerTest {
 		doNothing().when(userServiceMock).deleteById(1L);
 		given(userServiceMock.findAll()).willReturn(Arrays.asList(new User()));
 		given(userServiceMock.findById(1L)).willReturn(new User());
-		doNothing().when(userServiceMock).save(Mockito.mock(User.class));
+		given(userServiceMock.save(Mockito.mock(User.class))).willReturn(new User());
 	}
 
 	@Test

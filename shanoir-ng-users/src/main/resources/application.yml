@@ -52,8 +52,8 @@ spring:
   profiles: dev
   datasource:
     url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
-    username: shanoir
-    password: shanoir
+    username: root
+    password: 
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
     data: import.sql
@@ -62,7 +62,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         connection:
@@ -72,12 +72,8 @@ spring:
     show-sql: true
   jooq:
     sql-dialect: Mysql
-security:
-  sessions: never
-  user:
-    password: password
 server:
-    port: 9001
+    port: 9901
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-users.log

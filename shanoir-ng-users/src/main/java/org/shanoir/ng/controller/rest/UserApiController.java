@@ -60,8 +60,8 @@ public class UserApiController implements UserApi {
 		if (result.hasErrors()) {
 			throw Utils.buildFieldErrorException(result);
 		}
-		userService.save(user);
-		return new ResponseEntity<User>(user, HttpStatus.OK);
+		final User createdUser = userService.save(user);
+		return new ResponseEntity<User>(createdUser, HttpStatus.OK);
 	}
 
 	public ResponseEntity<Void> updateUser(

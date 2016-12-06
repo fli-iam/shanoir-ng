@@ -3,49 +3,50 @@
         <h2 i18n="Edit user|Title">Edit user</h2>
     </div>
 
-    <form #editUserForm="ngForm" (ngSubmit)="onSubmit()" class="EditUserContent">
-        <div class="EditUserComponent-div">
-            <label i18n="Edit user|FirstName label">First Name: </label> 
-            <input type="text" id="firstName" required/>
+    <form [formGroup]="editUserForm" (ngSubmit)="create()" class="EditUserContent">
+        <div class="EditUserComponent-div required">
+            <label i18n="Edit user|FirstName label" class="required-label">First Name: </label> 
+            <input type="text" id="firstName" required minlength="2" maxlength="50" formControlName="firstName"/>
         </div>
-        <div class="EditUserComponent-div">
-            <label i18n="Edit user|LastName label">Last Name: </label> 
-            <input type="text" id="lastName" required/>
+        <div class="EditUserComponent-div required">
+            <label i18n="Edit user|LastName label" class="required-label">Last Name: </label> 
+            <input type="text" id="lastName" required minlength="2" maxlength="50" formControlName="lastName"/>
         </div>
-        <div class="EditUserComponent-div">
-            <label i18n="Edit user|Username label">Username: </label> 
-            <input type="text" id="username" required/>
+        <div class="EditUserComponent-div required">
+            <label i18n="Edit user|Username label" class="required-label">Username: </label> 
+            <input type="text" id="username" required minlength="4" maxlength="20" formControlName="username"/>
         </div>
-        <div class="EditUserComponent-div">
-            <label i18n="Edit user|Email label">Email: </label> 
-            <input type="text" id="email" required/>
+        <div class="EditUserComponent-div required">
+            <label i18n="Edit user|Email label" class="required-label">Email: </label> 
+            <input type="email" id="email" required formControlName="email"/>
         </div>
         <div class="EditUserComponent-div">
             <label i18n="Edit user|ExpirationDate label">Expiration Date: </label> 
-            <input type="date" #expirationDate />
+            <input type="date" id="expirationDate" formControlName="expirationDate"/>
         </div>
-        <div class="EditUserComponent-div">
+        <div class="EditUserComponent-div required">
             <label i18n="Edit user|Role label">Role of the user: </label> 
-            <select id="role">
-                <option *ngFor="let role of roles" [value]="role">{{role}}</option>
+            <select id="role" required formControlName="role">
+                <option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>
             </select>
         </div>
         <div class="EditUserComponent-div">   
             <label i18n="Edit user|CanAccessToDicomAssociation label">Can import from Neurinfo-PACS: </label> 
-            <input type="radio" #canAccessToDicomAssociation [value]="true"/>Yes
-            <input type="radio" #canAccessToDicomAssociation [value]="false" checked="checked"/>No
+            <input type="radio" formControlName="canAccessToDicomAssociation" value="true"/>Yes
+            <input type="radio" formControlName="canAccessToDicomAssociation" value="false" checked="checked"/>No
         </div>
         <div class="EditUserComponent-div">
             <label i18n="Edit user|IsMedical label">Is a medical doctor/resident: </label> 
-            <input type="radio" #isMedical [value]="true"/>Yes
-            <input type="radio" #isMedical [value]="false" checked="checked"/>No
+            <input type="radio" formControlName="isMedical" value="true"/>Yes
+            <input type="radio" formControlName="isMedical" value="false" checked="checked"/>No
         </div>
         <div class="EditUserComponent-div">
             <label i18n="Edit user|Motivation label">Comment: </label> 
-            <textarea #motivation></textarea>
+            <textarea type="text" formControlName="motivation">
+            </textarea>
         </div>
 
-        <button type="submit" i18n="Edit user|CancelButton label" class="Button" (click)="cancel();">Cancel</button>
-        <button type="submit" i18n="Edit user|CreateButton label" class="Button">Create</button>
+        <button i18n="Edit user|CancelButton label" class="Button" (click)="cancel()">Cancel</button>
+        <button type="submit" i18n="Edit user|CreateButton label" class="Button"> Create</button>
     </form>
 </div>
