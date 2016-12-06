@@ -17,6 +17,7 @@ import { AccountEventsService } from './users/account/account.events.service';
 import { LoginService } from './shared/login/login.service';
 import { UserService } from './users/shared/user.service';
 import { EditUserComponent }   from './users/edit/edit.user.component';
+import { RoleService } from './roles/role.service';
 
 @NgModule({
     imports:      [ 
@@ -39,7 +40,8 @@ import { EditUserComponent }   from './users/edit/edit.user.component';
     providers: [
         AccountEventsService,
         LoginService,
-        UserService
+        UserService,
+        RoleService
     ],
     bootstrap:    [ AppComponent ]
 })

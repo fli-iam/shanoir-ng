@@ -19,6 +19,11 @@
   width: 100%; 
 }
 
+.EditUserComponent-div.required .required-label:after{
+  content:"*";
+  color:red;
+}
+
 .EditUserContent {
   border: 1px solid gray;
   padding: 10px;
