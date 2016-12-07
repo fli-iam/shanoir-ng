@@ -4,38 +4,39 @@ server:
   error:
     whitelabel:
       enabled: false
-# zuul configuration
-# as url is used: no service discovery with service-id
-#zuul:
-#  routes:
-#    resource:
-#      path: /resource/**
-#      url: http://resource:9901
-#      sensitive-headers:
 # spring security configuration
 security:
   sessions: never
 spring:
   # redis configuration
   redis:
-    host: localhost
+    host: shanoir-ng-redis
   datasource:
     url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: shanoir
     password: shanoir
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
+    data: classpath:/scripts/populate.sql
   # Show or not log for each sql query
   jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
       # Naming strategy
       naming:
         strategy: org.hibernate.cfg.ImprovedNamingStrategy
-    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate:
+        connection:
+          charset: UTF-8
+        hbm2ddl:
+          import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
   jooq:
     sql-dialect: Mysql
+  rabbitmq:
+    host: rabbitmq
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-users.log
@@ -56,22 +57,21 @@ spring:
     password: 
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
-    data: import.sql
+    data: classpath:/scripts/import.sql
   # Show or not log for each sql query
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: update
-    properties:
-      hibernate:
-        connection:
-          charset: UTF-8
-        hbm2ddl:
-          import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
     show-sql: true
   jooq:
     sql-dialect: Mysql
+  rabbitmq:
+    host: localhost
+  # redis configuration
+  redis:
+    host: localhost
 server:
     port: 9901
 # logging configuration
