@@ -2,12 +2,12 @@
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/challengescoresmicroservice?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&useSSL=false
-    username: shanoir
-    password: shanoir
+    username: root
+    password: root
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
-  # Show or not log for each sql query
   jpa:
+    # Show or not log for each sql query
     show-sql: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update)

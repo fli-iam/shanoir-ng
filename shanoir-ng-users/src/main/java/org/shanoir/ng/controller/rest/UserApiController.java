@@ -82,9 +82,7 @@ public class UserApiController implements UserApi {
 		try {
 			userService.save(user);
 		} catch (DataIntegrityViolationException e) {
-			ErrorDetails details = new ErrorDetails();
-			details.setFormErrors(SecondLevelValidation(user));
-			throw new RestServiceException(new ErrorModel(422, "Bad arguments", details));
+			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(SecondLevelValidation(user))));
 		}
 		final User createdUser = userService.save(user);
 		return new ResponseEntity<User>(createdUser, HttpStatus.OK);
@@ -99,12 +97,11 @@ public class UserApiController implements UserApi {
 		if (result.hasErrors()) {
 			throw Utils.buildValidationException(result);
 		}
+		user.setId(userId);
 		try {
 			userService.save(user);
 		} catch (DataIntegrityViolationException e) {
-			ErrorDetails details = new ErrorDetails();
-			details.setFormErrors(SecondLevelValidation(user));
-			throw new RestServiceException(new ErrorModel(422, "Bad arguments", details));
+			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(SecondLevelValidation(user))));
 		}
 
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
@@ -128,7 +125,9 @@ public class UserApiController implements UserApi {
 					try {
 						Method getter = user.getClass().getMethod(getterName);
 						Object value = getter.invoke(user);
-						if (!userService.findBy(field.getName(), value).isEmpty()) {
+						List<User> foundedList = userService.findBy(field.getName(), value);
+						// If found users and it is not the same current user
+						if (!foundedList.isEmpty() && !(foundedList.size() == 1 && foundedList.get(0).getId().equals(user.getId()))) {
 							FormError formError = new FormError(field.getName(), Arrays.asList("unique"));
 							errorList.add(formError);
 						}

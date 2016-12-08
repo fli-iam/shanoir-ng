@@ -46,7 +46,7 @@ public class User extends HalEntity implements UserDetails {
 
 	private Date creationDate;
 
-	@NotBlank @Unique
+	@NotBlank @Unique @Column(unique=true)
 	private String email;
 
 	private Date expirationDate;
@@ -70,8 +70,7 @@ public class User extends HalEntity implements UserDetails {
 
 	private String password;
 
-	@NotBlank
-	@Unique
+	@NotBlank @Unique @Column(unique=true)
 	private String username;
 
 	private String teamName;

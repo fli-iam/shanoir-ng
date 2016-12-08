@@ -11,6 +11,20 @@ public class ErrorDetails {
 
 	List<FormError> formErrors = null;
 
+
+	/**
+	 *
+	 */
+	public ErrorDetails() {
+	}
+
+	/**
+	 * @param formErrors
+	 */
+	public ErrorDetails(List<FormError> formErrors) {
+		this.formErrors = formErrors;
+	}
+
 	/**
 	 * @return the formErrors
 	 */

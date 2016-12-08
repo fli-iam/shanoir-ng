@@ -35,7 +35,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Spring security configuration.
- * 
+ *
  * @author msimon
  *
  */
@@ -54,11 +54,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		// Authentication token filter
 		final XAuthTokenFilter customFilter = new XAuthTokenFilter(userDetailsService);
 		http.addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class);
-		
+
 		http
 			.authorizeRequests()
 			.antMatchers("/authenticate").permitAll()
-			.anyRequest().authenticated()
+			.anyRequest().permitAll()
             .and()
             	.formLogin().loginPage("http://localhost/login")
 			.and()
@@ -72,12 +72,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 			.and()
 				.addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);
 	}
-	
+
 	@Override
 	protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(userDetailsService);
 	}
-	
+
 	/**
 	 * http://stackoverflow.com/a/31748398/122441 until https://jira.spring.io/browse/DATAREST-573
 	 * @return
@@ -100,12 +100,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	    bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
 	    return bean;
 	}
-	
+
 	@Bean
     public HttpSessionStrategy httpSessionStrategy() {
         return new HeaderHttpSessionStrategy();
     }
-	
+
 	private Filter csrfHeaderFilter() {
 		return new OncePerRequestFilter() {
 			@Override
