@@ -31,9 +31,9 @@ public class ShanoirUserDetailServiceTest {
 
     @Test
     public void loadByUserNameTest(){
-    	Mockito.when(userRepository.findByUsername(LoginUtil.USER_LOGIN)).thenReturn(ModelsUtil.createUser());
+    	Mockito.when(userRepository.findByUsername(LoginUtil.NEW_USER_LOGIN)).thenReturn(ModelsUtil.createUser());
 
-        final String username = LoginUtil.USER_LOGIN;
+        final String username = LoginUtil.NEW_USER_LOGIN;
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         Assert.assertNotNull(userDetails);
         Assert.assertTrue(userDetails.getClass().isAssignableFrom(User.class));

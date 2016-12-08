@@ -8,6 +8,10 @@ package org.shanoir.ng.utils;
  */
 public final class LoginUtil {
 
+	public static final String NEW_USER_LOGIN = "user";
+	
+	public static final String NEW_USER_PASSWORD = "password";
+	
 	public static final String USER_LOGIN = "admin";
 	
 	public static final String USER_PASSWORD = "admin";

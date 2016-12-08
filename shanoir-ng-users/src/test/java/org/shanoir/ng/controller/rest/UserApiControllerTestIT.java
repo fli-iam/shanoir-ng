@@ -2,7 +2,6 @@ package org.shanoir.ng.controller.rest;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
 
 import java.util.Arrays;
 
@@ -25,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
@@ -35,6 +35,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("dev")
 public class UserApiControllerTestIT {
 
     @Autowired
@@ -47,7 +48,7 @@ public class UserApiControllerTestIT {
     public void setup() {
         given(userService.findAll()).willReturn(Arrays.asList(new User()));
         given(userService.findById(1L)).willReturn(new User());
-        doNothing().when(userService).save(Mockito.mock(User.class));
+		given(userService.save(Mockito.mock(User.class))).willReturn(new User());
    }
 
 	@Test

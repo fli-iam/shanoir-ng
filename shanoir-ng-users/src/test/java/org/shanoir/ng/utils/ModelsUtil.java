@@ -48,9 +48,9 @@ public final class ModelsUtil {
 		user.setEmail("toto@to.to");
 		user.setFirstName("toto");
 		user.setLastName("toto");
-		user.setPassword(LoginUtil.USER_PASSWORD);
+		user.setPassword(LoginUtil.NEW_USER_PASSWORD);
 		user.setRole(role);
-		user.setUsername(LoginUtil.USER_LOGIN);
+		user.setUsername(LoginUtil.NEW_USER_LOGIN);
 		return user;
 	}
 	

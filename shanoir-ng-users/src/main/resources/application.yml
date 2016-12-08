@@ -18,7 +18,6 @@ spring:
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
     data: classpath:/scripts/populate.sql
-  # Show or not log for each sql query
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
@@ -58,12 +57,12 @@ spring:
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
     data: classpath:/scripts/import.sql
-  # Show or not log for each sql query
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: update
+      ddl-auto: create
+    # Show or not log for each sql query
     show-sql: true
   jooq:
     sql-dialect: Mysql
@@ -81,4 +80,21 @@ logging:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
 
-    
+---
+
+#################
+# DO NOT CHANGE #
+#################
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:h2:mem:SHANOIR_NG_USERS;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    data: classpath:/scripts/test-data-h2.sql
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create
