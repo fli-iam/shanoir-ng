@@ -21,6 +21,7 @@
 		<java.version>1.8</java.version>
 		<docker.image.prefix>shanoir-ng</docker.image.prefix>
 		<npm.executable>npm</npm.executable>
+		<nginx.webapp.directory>${basedir}/../shanoir-ng-nginx/webapp</nginx.webapp.directory>
 	</properties>
 
 	<build>
@@ -34,12 +35,32 @@
 	            </configuration>
 	        </plugin>
 	        <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+				    <execution>
+				        <phase>clean</phase>
+				        <goals>
+                    		<goal>run</goal>
+                		</goals>
+				        <configuration>
+				            <target>
+				                <delete dir="${nginx.webapp.directory}" />
+				            </target>
+				        </configuration>
+				    </execution>
+				</executions>
+			</plugin>
+	        <plugin>
 	            <groupId>org.codehaus.mojo</groupId>
 	            <artifactId>exec-maven-plugin</artifactId>
 	            <executions>
 	                <execution>
 	                    <id>exec-npm-install</id>
 	                    <phase>generate-sources</phase>
+				        <goals>
+                    		<goal>exec</goal>
+                		</goals>
 	                    <configuration>
 	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
 	                        <executable>${npm.executable}</executable>
@@ -47,13 +68,13 @@
 	                            <argument>install</argument>
 	                        </arguments>
 	                    </configuration>
-	                    <goals>
-	                        <goal>exec</goal>
-	                    </goals>
 	                </execution>
 	                <execution>
 	                    <id>exec-npm-run-tsc</id>
 	                    <phase>generate-sources</phase>
+				        <goals>
+                    		<goal>exec</goal>
+                		</goals>
 	                    <configuration>
 	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
 	                        <executable>${npm.executable}</executable>
@@ -62,13 +83,13 @@
 	                            <argument>tsc</argument>
 	                        </arguments>
 	                    </configuration>
-	                    <goals>
-	                        <goal>exec</goal>
-	                    </goals>
 	                </execution>
 	                <execution>
 	                    <id>exec-npm-run-build-sass</id>
 	                    <phase>generate-sources</phase>
+				        <goals>
+                    		<goal>exec</goal>
+                		</goals>
 	                    <configuration>
 	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
 	                        <executable>${npm.executable}</executable>
@@ -77,9 +98,6 @@
 	                            <argument>build:sass</argument>
 	                        </arguments>
 	                    </configuration>
-	                    <goals>
-	                        <goal>exec</goal>
-	                    </goals>
 	                </execution>
 	            </executions>
 	        </plugin>
@@ -88,12 +106,12 @@
 	        	<executions>
 	          		<execution>
 	            		<id>copy-resources</id>
-	            		<phase>validate</phase>
+	            		<phase>process-resources</phase>
 	            		<goals>
 	              			<goal>copy-resources</goal>
 	            		</goals>
 	            		<configuration>
-	              			<outputDirectory>${basedir}/../shanoir-ng-nginx/webapp</outputDirectory>
+	              			<outputDirectory>${nginx.webapp.directory}</outputDirectory>
 	              			<resources>          
 	                			<resource>
 	                  				<directory>src/main/webapp</directory>
@@ -109,6 +127,7 @@
 	      	</plugin>
 		</plugins>
 	</build>
+	
 	<profiles>
 	    <profile>
 	        <id>platform-windows</id>
