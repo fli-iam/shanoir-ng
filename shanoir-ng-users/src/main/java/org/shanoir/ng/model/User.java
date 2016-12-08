@@ -88,6 +88,15 @@ public class User extends HalEntity implements UserDetails {
 		this.addLink(new Link(Links.REL_SELF, "user/" + getId()));
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (!(obj instanceof User)) return false;
+		User user = (User) obj;
+		if (this.getId() == null) return user.getId() == null;
+		return this.getId().equals(user.getId());
+	}
+
 	/**
 	 * @return the id
 	 */

@@ -1,10 +1,5 @@
 package org.shanoir.ng.controller.rest;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -14,19 +9,15 @@ import org.shanoir.ng.configuration.swagger.SwaggerDocumentationConfig;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.error.ErrorDetails;
 import org.shanoir.ng.model.error.ErrorModel;
-import org.shanoir.ng.model.error.FormError;
 import org.shanoir.ng.model.exception.RestServiceException;
-import org.shanoir.ng.model.validation.Unique;
+import org.shanoir.ng.model.validation.UniqueValidator;
 import org.shanoir.ng.service.UserService;
 import org.shanoir.ng.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,8 +27,6 @@ import io.swagger.annotations.ApiParam;
 
 @Controller
 public class UserApiController implements UserApi {
-
-	private static final Logger LOG = LoggerFactory.getLogger(UserApiController.class);
 
 	@Autowired
 	private UserService userService;
@@ -82,7 +71,8 @@ public class UserApiController implements UserApi {
 		try {
 			userService.save(user);
 		} catch (DataIntegrityViolationException e) {
-			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(SecondLevelValidation(user))));
+			UniqueValidator<User> uniqueValidator = new UniqueValidator<User>(userService);
+			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(uniqueValidator.Validate(user))));
 		}
 		final User createdUser = userService.save(user);
 		return new ResponseEntity<User>(createdUser, HttpStatus.OK);
@@ -101,48 +91,11 @@ public class UserApiController implements UserApi {
 		try {
 			userService.save(user);
 		} catch (DataIntegrityViolationException e) {
-			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(SecondLevelValidation(user))));
+			UniqueValidator<User> uniqueValidator = new UniqueValidator<User>(userService);
+			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(uniqueValidator.Validate(user))));
 		}
 
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-	}
-
-
-	/**
-	 * Validates what can't be done by Spring/Hibernate validation, in particular unique constraints
-	 * !!! Calls database !!!
-	 *
-	 * @param user
-	 * @return
-	 */
-	private List<FormError> SecondLevelValidation(User user) {
-		List<FormError> errorList = new ArrayList<FormError>();
-		try {
-			for (Field field : User.class.getDeclaredFields()) {
-				// check @unique
-				if (field.isAnnotationPresent(Unique.class)) {
-					String getterName = "get"+StringUtils.capitalize(field.getName());
-					try {
-						Method getter = user.getClass().getMethod(getterName);
-						Object value = getter.invoke(user);
-						List<User> foundedList = userService.findBy(field.getName(), value);
-						// If found users and it is not the same current user
-						if (!foundedList.isEmpty() && !(foundedList.size() == 1 && foundedList.get(0).getId().equals(user.getId()))) {
-							FormError formError = new FormError(field.getName(), Arrays.asList("unique"));
-							errorList.add(formError);
-						}
-					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-						LOG.error("Error while checking @Unique custom annotation", e);
-					} catch (NoSuchMethodException e) {
-						LOG.error("Error while checking @Unique custom annotation, you must implement a method named "
-								+ getterName + "() for accessing User." + field.getName());
-					}
-				}
-			}
-		} catch (SecurityException e) {
-			LOG.error("Error while checking @Unique custom annotation", e);
-		}
-		return errorList;
 	}
 
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.exception.ShanoirUsersException;
+import org.shanoir.ng.model.validation.UniqueCheckableService;
 
 /**
  * User service.
@@ -12,7 +13,7 @@ import org.shanoir.ng.model.exception.ShanoirUsersException;
  * @author jlouis
  *
  */
-public interface UserService {
+public interface UserService extends UniqueCheckableService<User>{
 
     /**
      * Get all the users
@@ -65,13 +66,5 @@ public interface UserService {
      * @param id
      */
     void deleteById(Long id);
-
-    /**
-     * Find by ? = ?
-     * @param fieldName
-     * @param value
-     * @return
-     */
-    List<User> findBy(String fieldName, Object value);
 
 }
