@@ -13,4 +13,5 @@ export class User {
     valid: boolean;
     lastLoginOn: Date;
     isMedical: boolean;
+    motivation: string;
 }

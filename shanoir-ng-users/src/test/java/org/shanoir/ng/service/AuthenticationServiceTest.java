@@ -1,8 +1,5 @@
 package org.shanoir.ng.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Assert;
@@ -14,13 +11,11 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.dto.LoginDTO;
 import org.shanoir.ng.dto.UserDTO;
+import org.shanoir.ng.model.User;
 import org.shanoir.ng.service.impl.AuthenticationServiceImpl;
+import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
  * Authentication service test.
@@ -38,29 +33,22 @@ public class AuthenticationServiceTest {
     private AuthenticationManager authenticationManager;
 
     @Mock
-    private UserDetailsService userDetailsService;
+    private UserService userService;
 
     @Mock
     private HttpServletResponse httpResponse;
 
-    private User getSecurityUser(String login, String password){
-    	final List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        return new User(login, password, authorities);
-    }
-
     @Test
     public void authenticateTest() throws Exception {
-
+    	final User securityUser = ModelsUtil.createUser();
+    	
     	final LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setLogin("user");
-        loginDTO.setPassword("password");
-
-        final User securityUser = getSecurityUser(loginDTO.getLogin(),loginDTO.getPassword());
+        loginDTO.setLogin(securityUser.getUsername());
+        loginDTO.setPassword(securityUser.getPassword());
 
         final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginDTO.getLogin(),loginDTO.getPassword());
 
-        Mockito.when(userDetailsService.loadUserByUsername(loginDTO.getLogin())).thenReturn(securityUser);
+        Mockito.when(userService.findByUsername(loginDTO.getLogin())).thenReturn(securityUser);
         Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class))).thenReturn(token);
 
         final UserDTO userDTO = authenticationService.authenticate(loginDTO, httpResponse);
@@ -70,7 +58,7 @@ public class AuthenticationServiceTest {
         Assert.assertTrue(!userDTO.getAuthorities().isEmpty());
 
         Mockito.verify(authenticationManager,Mockito.times(1)).authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class));
-        Mockito.verify(userDetailsService,Mockito.times(1)).loadUserByUsername(loginDTO.getLogin());
+        Mockito.verify(userService,Mockito.times(1)).findByUsername(loginDTO.getLogin());
     }
 
 }

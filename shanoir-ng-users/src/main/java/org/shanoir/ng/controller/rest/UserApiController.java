@@ -86,7 +86,8 @@ public class UserApiController implements UserApi {
 			details.setFormErrors(SecondLevelValidation(user));
 			throw new RestServiceException(new ErrorModel(422, "Bad arguments", details));
 		}
-		return new ResponseEntity<User>(user, HttpStatus.OK);
+		final User createdUser = userService.save(user);
+		return new ResponseEntity<User>(createdUser, HttpStatus.OK);
 	}
 
 	public ResponseEntity<Void> updateUser(

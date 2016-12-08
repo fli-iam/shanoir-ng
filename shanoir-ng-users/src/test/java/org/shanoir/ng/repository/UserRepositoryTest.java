@@ -4,18 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Iterator;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
-import org.shanoir.ng.repository.UserRepository;
-import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper;
@@ -29,10 +25,12 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest
+@ActiveProfiles("test")
 public class UserRepositoryTest {
 
-	@Autowired
-	private TestEntityManager entityManager;
+	private static final String USER_TEST_1_EMAIL = "admin@shanoir.fr";
+	private static final Long USER_TEST_1_ID = 1L;
+	private static final String USER_TEST_1_USERNAME = "admin";
 	
 	@Autowired
 	private UserRepository repository;
@@ -47,20 +45,6 @@ public class UserRepositoryTest {
 	@MockBean
 	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
 	
-	private User user;
-	
-	@Before
-	public void setUp() {
-		final Role role = entityManager.persist(ModelsUtil.createRole());
-		user = entityManager.persist(ModelsUtil.createUser(role));
-	}
-	
-	@Test
-	public void findOneTest() throws Exception {
-		User userDb = repository.findOne(user.getId());
-		assertThat(userDb.getUsername()).isEqualTo(user.getUsername());
-	}
-	
 	@Test
 	public void findAllTest() throws Exception {
 		Iterable<User> usersDb = repository.findAll();
@@ -71,7 +55,25 @@ public class UserRepositoryTest {
 			usersIt.next();
 			nbUsers++;
 		}
-		assertThat(nbUsers).isEqualTo(1);
+		assertThat(nbUsers).isEqualTo(7);
+	}
+	
+	@Test
+	public void findByEmailTest() throws Exception {
+		User userDb = repository.findByEmail(USER_TEST_1_EMAIL);
+		assertThat(userDb.getUsername()).isEqualTo(USER_TEST_1_USERNAME);
+	}
+	
+	@Test
+	public void findByUsernameTest() throws Exception {
+		User userDb = repository.findByUsername(USER_TEST_1_USERNAME);
+		assertThat(userDb.getId()).isEqualTo(USER_TEST_1_ID);
+	}
+	
+	@Test
+	public void findOneTest() throws Exception {
+		User userDb = repository.findOne(USER_TEST_1_ID);
+		assertThat(userDb.getUsername()).isEqualTo(USER_TEST_1_USERNAME);
 	}
 	
 }

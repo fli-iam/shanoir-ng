@@ -7,12 +7,20 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
+import org.springframework.security.core.GrantedAuthority;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Role
  */
 @Entity
-public class Role {
+public class Role implements GrantedAuthority {
+
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -8021102195810091679L;
 
 	@Id
 	@GeneratedValue
@@ -46,6 +54,7 @@ public class Role {
 	/**
 	 * @return the accessLevel
 	 */
+	@JsonIgnore
 	public int getAccessLevel() {
 		return accessLevel;
 	}
@@ -74,6 +83,7 @@ public class Role {
 	/**
 	 * @return the name
 	 */
+	@JsonIgnore
 	public String getName() {
 		return name;
 	}
@@ -83,6 +93,12 @@ public class Role {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	@JsonIgnore
+	public String getAuthority() {
+		return name;
 	}
 
 }

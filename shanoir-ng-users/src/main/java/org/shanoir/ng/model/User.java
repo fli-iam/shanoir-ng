@@ -1,5 +1,7 @@
 package org.shanoir.ng.model;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -16,7 +18,11 @@ import org.shanoir.ng.model.hateoas.HalEntity;
 import org.shanoir.ng.model.hateoas.Link;
 import org.shanoir.ng.model.hateoas.Links;
 import org.shanoir.ng.model.validation.Unique;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -25,7 +31,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @Table(name = "users")
 @JsonPropertyOrder({ "_links", "id", "firstName", "lasName", "username", "email" })
-public class User extends HalEntity {
+public class User extends HalEntity implements UserDetails {
+
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -5277815428510293236L;
 
 	@Id
 	@GeneratedValue
@@ -60,7 +71,6 @@ public class User extends HalEntity {
 	private String password;
 
 	@NotBlank
-	@Column(unique = true)
 	@Unique
 	private String username;
 
@@ -250,6 +260,7 @@ public class User extends HalEntity {
 	/**
 	 * @return the password
 	 */
+	@JsonIgnore
 	public String getPassword() {
 		return password;
 	}
@@ -257,6 +268,7 @@ public class User extends HalEntity {
 	/**
 	 * @param password the password to set
 	 */
+	@JsonProperty
 	public void setPassword(String password) {
 		this.password = password;
 	}
@@ -301,6 +313,36 @@ public class User extends HalEntity {
 	 */
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	@Override
+	@JsonIgnore
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return Arrays.asList(role);
+	}
+
+	@Override
+	@JsonIgnore
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	@JsonIgnore
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	@JsonIgnore
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	@JsonIgnore
+	public boolean isEnabled() {
+		return true;
 	}
 
 }

@@ -8,7 +8,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.shanoir.ng.configuration.security.xauth.TokenUtils;
 import org.shanoir.ng.dto.LoginDTO;
 import org.shanoir.ng.dto.UserDTO;
+import org.shanoir.ng.model.User;
+import org.shanoir.ng.model.exception.ShanoirUsersException;
 import org.shanoir.ng.service.AuthenticationService;
+import org.shanoir.ng.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +21,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,7 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private UserService userService;
     
     private final TokenUtils tokenUtils = new TokenUtils();
 
@@ -54,10 +55,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        //Retrieve security user after authentication
-        final User securityUser = (User) userDetailsService.loadUserByUsername(loginDTO.getLogin());
+        // Retrieve security user after authentication
+        User securityUser = null;
+        if (loginDTO.getLogin().contains("@")) {
+        	securityUser = (User) userService.findByEmail(loginDTO.getLogin());
+        } else {
+        	securityUser = (User) userService.findByUsername(loginDTO.getLogin());
+        }
+        
+        if (securityUser == null) {
+        	throw new ShanoirUsersException("No user found with username/email " + loginDTO.getLogin());
+        }
 
-        //Parse Granted authorities to a list of string authorities
+        // Parse Granted authorities to a list of string authorities
         final List<String> authorities = new ArrayList<>();
         for(GrantedAuthority authority : securityUser.getAuthorities()){
             authorities.add(authority.getAuthority());

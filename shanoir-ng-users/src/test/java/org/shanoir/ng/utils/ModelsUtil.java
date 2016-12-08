@@ -12,7 +12,7 @@ import org.shanoir.ng.model.User;
  * @author msimon
  *
  */
-public class ModelsUtil {
+public final class ModelsUtil {
 
 	/**
 	 * Create a role.
@@ -44,12 +44,13 @@ public class ModelsUtil {
 	 */
 	public static User createUser(final Role role) {
 		final User user = new User();
-		user.setUsername("toto");
-		user.setEmail("toto@to.to");
 		user.setCreationDate(new Date());
-		user.setRole(role);
+		user.setEmail("toto@to.to");
 		user.setFirstName("toto");
 		user.setLastName("toto");
+		user.setPassword(LoginUtil.NEW_USER_PASSWORD);
+		user.setRole(role);
+		user.setUsername(LoginUtil.NEW_USER_LOGIN);
 		return user;
 	}
 	

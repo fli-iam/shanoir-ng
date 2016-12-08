@@ -20,6 +20,13 @@ public interface UserService {
      */
     List<User> findAll();
 
+    /**
+     * Find user by its email address
+     *
+     * @param email
+     * @return a user or null
+     */
+    User findByEmail(String email);
 
     /**
      * Find user by its id
@@ -30,10 +37,21 @@ public interface UserService {
     User findById(Long id);
 
     /**
-     * Save a user
-     * @param user
+     * Find user by its username
+     *
+     * @param id
+     * @return a user or null
      */
-    void save(User user);
+    User findByUsername(String username);
+
+    /**
+     * Save a user.
+     *
+     * @param user user to create.
+     * @return created user.
+     */
+
+    User save(User user);
 
     /**
      * Update a user from the old Shanoir
