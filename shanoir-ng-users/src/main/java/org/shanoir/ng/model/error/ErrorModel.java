@@ -1,4 +1,4 @@
-package org.shanoir.ng.model;
+package org.shanoir.ng.model.error;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,16 +8,42 @@ import io.swagger.annotations.ApiModelProperty;
  * ErrorModel
  */
 public class ErrorModel {
-	
+
 	@JsonProperty("code")
 	private Integer code = null;
 
 	@JsonProperty("message")
 	private String message = null;
 
+	@JsonProperty("details")
+	private Object details = null;
+
 	public ErrorModel code(Integer code) {
 		this.code = code;
 		return this;
+	}
+
+	/**
+	 * @param code
+	 * @param message
+	 * @param details
+	 */
+	public ErrorModel(Integer code, String message, Object details) {
+		super();
+		this.code = code;
+		this.message = message;
+		this.details = details;
+	}
+
+	/**
+	 * @param code
+	 * @param message
+	 */
+	public ErrorModel(int code, String message) {
+		super();
+		this.code = code;
+		this.message = message;
+		this.details = null;
 	}
 
 	/**
@@ -51,6 +77,21 @@ public class ErrorModel {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+
+	/**
+	 * Get details
+	 *
+	 * @return details
+	 **/
+	@ApiModelProperty(value = "")
+	public Object getDetails() {
+		return details;
+	}
+
+	public void setDetails(Object details) {
+		this.details = details;
 	}
 
 }

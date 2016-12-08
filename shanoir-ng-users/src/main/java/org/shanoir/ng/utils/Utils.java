@@ -1,8 +1,13 @@
 package org.shanoir.ng.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.shanoir.ng.model.error.ErrorDetails;
+import org.shanoir.ng.model.error.ErrorModel;
+import org.shanoir.ng.model.error.FormError;
 import org.shanoir.ng.model.exception.RestServiceException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -36,22 +41,38 @@ public class Utils {
 
 
 	/**
-	 * Build a ready to use exception for field errors
+	 * Build a ready to use exception for field validation errors
 	 * @param result
 	 * @return
 	 */
-	public static RestServiceException buildFieldErrorException(BindingResult result) {
-		StringBuilder msgStrBuilder = new StringBuilder();
+	public static RestServiceException buildValidationException(BindingResult result) {
+		Map<String, List<String>> errorMap = new HashMap<String, List<String>>();
 		for (ObjectError objectError : result.getAllErrors()) {
 			FieldError fieldError = (FieldError) objectError;
-			if (msgStrBuilder.length() > 0) {
-				msgStrBuilder.append("; ");
+			if (!errorMap.containsKey(fieldError.getField())) {
+				errorMap.put(fieldError.getField(), new ArrayList<String>());
 			}
-			msgStrBuilder.append(fieldError.getField());
-			msgStrBuilder.append(" : ");
-			msgStrBuilder.append(fieldError.getDefaultMessage());
+			errorMap.get(fieldError.getField()).add(fieldError.getDefaultMessage());
 		}
-		return new RestServiceException(422, msgStrBuilder.toString());
+		return buildValidationException(errorMap);
+	}
+
+
+	/**
+	 * Build a ready to use exception for field validation errors
+	 * @param result
+	 * @return
+	 */
+	public static RestServiceException buildValidationException(Map<String, List<String>> errors) {
+		List<FormError> errorList = new ArrayList<FormError>();
+		for (String fieldName : errors.keySet()) {
+			List<String> codes = errors.get(fieldName);
+			FormError formError = new FormError(fieldName, codes);
+			errorList.add(formError);
+		}
+		ErrorDetails details = new ErrorDetails();
+		details.setFormErrors(errorList);
+		return new RestServiceException(new ErrorModel(422, "Bad arguments", details));
 	}
 
 }

@@ -1,6 +1,6 @@
 package org.shanoir.ng.model.exception;
 
-import org.shanoir.ng.model.ErrorModel;
+import org.shanoir.ng.model.error.ErrorModel;
 
 public class RestServiceException extends Exception {
 
@@ -8,41 +8,29 @@ public class RestServiceException extends Exception {
 	 * Serial version uid
 	 */
 	private static final long serialVersionUID = 2796153429277618391L;
-	
-	private int code;
-	private String message;
+
+	private ErrorModel errorModel;
 
 	/**
 	 * @param code
 	 */
-	public RestServiceException(int code, String message) {
+	public RestServiceException(ErrorModel errorModel) {
 		super();
-		this.code = code;
-		this.message = message;
-	}
-
-	public ErrorModel toErrorModel() {
-		return new ErrorModel().code(code).message(message);
+		this.errorModel = errorModel;
 	}
 
 	/**
-	 * @param message
-	 *            the message to set
+	 * @return the errorModel
 	 */
-	protected void setMessage(String message) {
-		this.message = message;
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + ". " + message;
+	public ErrorModel getErrorModel() {
+		return errorModel;
 	}
 
 	/**
-	 * @return the code
+	 * @param errorModel the errorModel to set
 	 */
-	public int getCode() {
-		return code;
+	public void setErrorModel(ErrorModel errorModel) {
+		this.errorModel = errorModel;
 	}
-	
+
 }

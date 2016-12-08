@@ -34,7 +34,7 @@ public interface UserService {
      * @param user
      */
     void save(User user);
-    
+
     /**
      * Update a user from the old Shanoir
      * @param user
@@ -47,5 +47,13 @@ public interface UserService {
      * @param id
      */
     void deleteById(Long id);
+
+    /**
+     * Find by ? = ?
+     * @param fieldName
+     * @param value
+     * @return
+     */
+    List<User> findBy(String fieldName, Object value);
 
 }

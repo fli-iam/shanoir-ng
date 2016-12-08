@@ -4,8 +4,8 @@ package org.shanoir.ng.controller.rest;
 import java.util.List;
 
 import org.shanoir.ng.configuration.swagger.SwaggerDocumentationConfig;
-import org.shanoir.ng.model.ErrorModel;
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.model.error.ErrorModel;
 import org.shanoir.ng.model.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;

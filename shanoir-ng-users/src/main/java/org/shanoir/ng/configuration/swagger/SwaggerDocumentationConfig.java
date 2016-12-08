@@ -32,6 +32,7 @@ public class SwaggerDocumentationConfig {
 				.directModelSubstitute(org.joda.time.LocalDate.class, java.sql.Date.class)
 				.directModelSubstitute(org.joda.time.DateTime.class, java.util.Date.class).apiInfo(apiInfo())
 				.useDefaultResponseMessages(false);
+				//.pathMapping("/shanoir-ng/users");
 	}
 
 }

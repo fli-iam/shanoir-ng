@@ -7,11 +7,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.model.hateoas.HalEntity;
+import org.shanoir.ng.model.hateoas.Link;
+import org.shanoir.ng.model.hateoas.Links;
+import org.shanoir.ng.model.validation.Unique;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -29,36 +33,51 @@ public class User extends HalEntity {
 
 	private boolean canAccessToDicomAssociation;
 
-	@NotNull
 	private Date creationDate;
 
-	@NotBlank
+	@NotBlank @Unique
 	private String email;
-	
+
 	private Date expirationDate;
 
 	@NotBlank
 	private String firstName;
-	
+
 	private boolean isFirstExpirationNotificationSent;
-	
+
 	@NotNull
 	private boolean isMedical;
 
 	private boolean isOnDemand;
 
 	private boolean isSecondExpirationNotificationSent;
-	
+
 	private Date lastLogin;
 
 	@NotNull
 	private String lastName;
-	
+
 	private String password;
+
+	@NotBlank
+	@Column(unique = true)
+	@Unique
+	private String username;
+
+	private String teamName;
 
 	@ManyToOne
 	@NotNull
 	private Role role;
+
+
+	/**
+	 *
+	 */
+	@PostLoad
+	public void initLinks() {
+		this.addLink(new Link(Links.REL_SELF, "user/" + getId()));
+	}
 
 	/**
 	 * @return the id
@@ -284,10 +303,4 @@ public class User extends HalEntity {
 		this.username = username;
 	}
 
-	private String teamName;
-
-	@NotBlank
-	@Column(unique = true)
-	private String username;
-	
 }
