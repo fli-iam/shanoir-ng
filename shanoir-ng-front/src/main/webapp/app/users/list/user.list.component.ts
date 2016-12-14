@@ -82,7 +82,7 @@ export class UserListComponent {
                 return dateRenderer(params.data.expirationDate);
             }},
             {headerName: "Active", field: "valid", width: 60, suppressMenu: true, cellRenderer: function (params) {
-                    return booleanTrueRenderer(params.data.expirationDate >= new Date());
+                return booleanTrueRenderer(!params.data.expirationDate || params.data.expirationDate >= new Date());
             }, cellStyle: {"text-align": "center"}},
             {headerName: "Last Login", field: "lastLogin", width: 100, suppressMenu: true, cellRenderer: function (params) {
                 return dateRenderer(params.data.lastLogin);
