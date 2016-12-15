@@ -18,6 +18,7 @@ import org.shanoir.ng.model.hateoas.HalEntity;
 import org.shanoir.ng.model.hateoas.Link;
 import org.shanoir.ng.model.hateoas.Links;
 import org.shanoir.ng.model.validation.Unique;
+import org.shanoir.ng.service.impl.UserServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
@@ -82,13 +83,6 @@ public class User extends HalEntity implements UserDetails {
 	@ManyToOne
 	@NotNull
 	private Role role;
-
-	private String institution;
-	private String service;
-	private String function;
-	private String study;
-	private String contact;
-	private String motivation;
 
 
 	/**
@@ -362,90 +356,6 @@ public class User extends HalEntity implements UserDetails {
 	@JsonIgnore
 	public boolean isEnabled() {
 		return true;
-	}
-
-	/**
-	 * @return the institution
-	 */
-	public String getInstitution() {
-		return institution;
-	}
-
-	/**
-	 * @param institution the institution to set
-	 */
-	public void setInstitution(String institution) {
-		this.institution = institution;
-	}
-
-	/**
-	 * @return the service
-	 */
-	public String getService() {
-		return service;
-	}
-
-	/**
-	 * @param service the service to set
-	 */
-	public void setService(String service) {
-		this.service = service;
-	}
-
-	/**
-	 * @return the function
-	 */
-	public String getFunction() {
-		return function;
-	}
-
-	/**
-	 * @param function the function to set
-	 */
-	public void setFunction(String function) {
-		this.function = function;
-	}
-
-	/**
-	 * @return the study
-	 */
-	public String getStudy() {
-		return study;
-	}
-
-	/**
-	 * @param study the study to set
-	 */
-	public void setStudy(String study) {
-		this.study = study;
-	}
-
-	/**
-	 * @return the contact
-	 */
-	public String getContact() {
-		return contact;
-	}
-
-	/**
-	 * @param contact the contact to set
-	 */
-	public void setContact(String contact) {
-		this.contact = contact;
-	}
-
-	/**
-	 * @return the motivation
-	 */
-	public String getMotivation() {
-		return motivation;
-	}
-
-	/**
-	 * @param motivation the motivation to set
-	 */
-	public void setMotivation(String motivation) {
-		this.motivation = motivation;
 	}
 
 }
