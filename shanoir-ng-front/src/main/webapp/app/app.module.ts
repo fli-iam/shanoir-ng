@@ -20,8 +20,8 @@ import { EditUserComponent }   from './users/edit/edit.user.component';
 import { RoleService } from './roles/role.service';
 
 @NgModule({
-    imports:      [ 
-        AgGridModule.withNg2ComponentSupport(),
+    imports: [ 
+        AgGridModule.withComponents([]),
         BrowserModule,
         FormsModule,
         HttpModule,

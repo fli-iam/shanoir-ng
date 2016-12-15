@@ -2,7 +2,11 @@
 /* Common
 /********/
 @import "partials/base";
-    
+
+h2 {
+    margin: 10px 0px;
+}
+
 .Button {
     background-color: $mainThemeBackgroundColor;
     color: $mainThemeLabelColor;

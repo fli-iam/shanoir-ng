@@ -8,6 +8,7 @@
 
 .UserListComponent-title {
     text-align: center;
+    margin: 0px;
 }
 
 .UserListComponent-buttonBar {
