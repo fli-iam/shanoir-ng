@@ -18,6 +18,9 @@ import org.shanoir.ng.model.hateoas.HalEntity;
 import org.shanoir.ng.model.hateoas.Link;
 import org.shanoir.ng.model.hateoas.Links;
 import org.shanoir.ng.model.validation.Unique;
+import org.shanoir.ng.service.impl.UserServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -32,6 +35,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Table(name = "users")
 @JsonPropertyOrder({ "_links", "id", "firstName", "lasName", "username", "email" })
 public class User extends HalEntity implements UserDetails {
+
+	private static final Logger LOG = LoggerFactory.getLogger(User.class);
 
 	/**
 	 * UID
@@ -326,6 +331,7 @@ public class User extends HalEntity implements UserDetails {
 	@Override
 	@JsonIgnore
 	public Collection<? extends GrantedAuthority> getAuthorities() {
+		LOG.error("#################################################### " + role.getName());
 		return Arrays.asList(role);
 	}
 

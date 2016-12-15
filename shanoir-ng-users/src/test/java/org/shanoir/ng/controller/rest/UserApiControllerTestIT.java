@@ -29,7 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Integration tests for user controller.
- * 
+ *
  * @author msimon
  *
  */
@@ -43,7 +43,7 @@ public class UserApiControllerTestIT {
 
     @MockBean
     private UserService userService;
-    
+
     @Before
     public void setup() {
         given(userService.findAll()).willReturn(Arrays.asList(new User()));
@@ -109,7 +109,7 @@ public class UserApiControllerTestIT {
 			restTemplate.getRestTemplate().getInterceptors().remove(basicAuthInterceptor);
 		}
 	}
-	
+
 	/*
 	 * Create a user for tests.
 	 * @return a user.
@@ -118,7 +118,7 @@ public class UserApiControllerTestIT {
 		final Role role = ModelsUtil.createRole();
 		return ModelsUtil.createUser(role);
 	}
-	
+
 	/*
 	 * Generate headers for CSRF.
 	 * @return http headers.

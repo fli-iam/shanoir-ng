@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = RestServiceException.class)
     public ResponseEntity<ErrorModel> handleRestServiceException(RestServiceException e){
-    	LOG.error("Error in the rest service. ", e);
+    	LOG.warn("Error in the rest service. ", e);
     	return new ResponseEntity<ErrorModel>(e.getErrorModel(), HttpStatus.valueOf(e.getErrorModel().getCode()));
     }
 

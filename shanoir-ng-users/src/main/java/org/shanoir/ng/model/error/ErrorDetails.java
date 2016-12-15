@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class ErrorDetails {
 
-	List<FormError> formErrors = null;
+	List<FieldError> fieldErrors = null;
 
 
 	/**
@@ -19,24 +19,24 @@ public class ErrorDetails {
 	}
 
 	/**
-	 * @param formErrors
+	 * @param fieldErrors
 	 */
-	public ErrorDetails(List<FormError> formErrors) {
-		this.formErrors = formErrors;
+	public ErrorDetails(List<FieldError> fieldErrors) {
+		this.fieldErrors = fieldErrors;
 	}
 
 	/**
-	 * @return the formErrors
+	 * @return the fieldErrors
 	 */
-	public List<FormError> getFormErrors() {
-		return formErrors;
+	public List<FieldError> getFieldErrors() {
+		return fieldErrors;
 	}
 
 	/**
-	 * @param formErrors the formErrors to set
+	 * @param formErrors the fieldErrors to set
 	 */
-	public void setFormErrors(List<FormError> formErrors) {
-		this.formErrors = formErrors;
+	public void setFieldErrors(List<FieldError> fieldErrors) {
+		this.fieldErrors = fieldErrors;
 	}
 
 }

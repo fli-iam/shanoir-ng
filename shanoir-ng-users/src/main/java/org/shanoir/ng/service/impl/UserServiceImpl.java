@@ -2,6 +2,7 @@ package org.shanoir.ng.service.impl;
 
 import java.util.List;
 
+import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.exception.ShanoirUsersException;
 import org.shanoir.ng.repository.UserRepository;
@@ -10,12 +11,20 @@ import org.shanoir.ng.service.UserService;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class UserServiceImpl implements UserService {
-	private static final Logger LOG = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -45,14 +54,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User save(User user) {
-		return userRepository.save(user);
+		User savedUser = userRepository.save(user);
+		updateShanoirClassic(savedUser);
+		return savedUser;
 	}
 
 	@Override
 	public void updateFromShanoirOld(User user) throws ShanoirUsersException {
 		if (user.getId() == null) {
-			LOG.error("Cannot update an user without id.");
-			return;
+			throw new IllegalArgumentException("user id cannot be null");
 		}
 
 		final User userDb = userRepository.findOne(user.getId());
@@ -79,6 +89,24 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<User> findBy(String fieldName, Object value) {
 		return userRepositorySpecific.findBy(fieldName, value);
+	}
+
+	/**
+	 * Update Shanoir Classic
+	 * @param user
+	 * @return false if it fails, true if it succeed
+	 */
+	private boolean updateShanoirClassic(User user) {
+		try {
+			LOG.info("Send update to shanoir classic");
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(), new ObjectMapper().writeValueAsString(user));
+			return true;
+		} catch (AmqpException e) {
+			LOG.error("Cannot send user " + user.getId() + " save/update to Shanoir Classic on queue : " + RabbitMqConfiguration.queueOut().getName(), e);
+		} catch (JsonProcessingException e) {
+			LOG.error("Cannot send user " + user.getId() + " save/update because of an error while serialize user. ", e);
+		}
+		return false;
 	}
 
 }

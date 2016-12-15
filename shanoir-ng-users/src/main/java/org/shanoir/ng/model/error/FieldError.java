@@ -3,7 +3,7 @@ package org.shanoir.ng.model.error;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FormError {
+public class FieldError {
 
 	private String fieldName;
 
@@ -20,7 +20,7 @@ public class FormError {
 	 * @param fieldName
 	 * @param errorCodes
 	 */
-	public FormError(String fieldName, List<String> errorCodes) {
+	public FieldError(String fieldName, List<String> errorCodes) {
 		super();
 		this.fieldName = fieldName;
 		this.errorCodes = errorCodes;

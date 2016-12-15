@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.shanoir.ng.model.error.ErrorDetails;
 import org.shanoir.ng.model.error.ErrorModel;
-import org.shanoir.ng.model.error.FormError;
 import org.shanoir.ng.model.exception.RestServiceException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -52,7 +51,7 @@ public class Utils {
 			if (!errorMap.containsKey(fieldError.getField())) {
 				errorMap.put(fieldError.getField(), new ArrayList<String>());
 			}
-			errorMap.get(fieldError.getField()).add(fieldError.getDefaultMessage());
+			errorMap.get(fieldError.getField()).add(fieldError.getCode());
 		}
 		return buildValidationException(errorMap);
 	}
@@ -64,14 +63,14 @@ public class Utils {
 	 * @return
 	 */
 	public static RestServiceException buildValidationException(Map<String, List<String>> errors) {
-		List<FormError> errorList = new ArrayList<FormError>();
+		List<org.shanoir.ng.model.error.FieldError> errorList = new ArrayList<org.shanoir.ng.model.error.FieldError>();
 		for (String fieldName : errors.keySet()) {
 			List<String> codes = errors.get(fieldName);
-			FormError formError = new FormError(fieldName, codes);
-			errorList.add(formError);
+			org.shanoir.ng.model.error.FieldError fieldError = new org.shanoir.ng.model.error.FieldError(fieldName, codes);
+			errorList.add(fieldError);
 		}
 		ErrorDetails details = new ErrorDetails();
-		details.setFormErrors(errorList);
+		details.setFieldErrors(errorList);
 		return new RestServiceException(new ErrorModel(422, "Bad arguments", details));
 	}
 
