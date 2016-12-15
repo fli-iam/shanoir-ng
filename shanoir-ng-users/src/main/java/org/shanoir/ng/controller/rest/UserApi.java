@@ -8,6 +8,7 @@ import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.error.ErrorModel;
 import org.shanoir.ng.model.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,8 +33,9 @@ public interface UserApi {
 			@ApiResponse(code = 404, message = "no user founded", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, method = RequestMethod.DELETE)
+	@PreAuthorize("hasAuthority('adminRole')")
 	ResponseEntity<Void> deleteUser(
-			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
+			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String xsrfToken,
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId);
 
 	@ApiOperation(value = "", notes = "If exists, returns the user corresponding to the given id", response = User.class, tags = {})
@@ -42,6 +44,7 @@ public interface UserApi {
 			@ApiResponse(code = 404, message = "no user founded", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("@currentUserServiceImpl.canAccessUser(#userId)")
 	ResponseEntity<User> findUserById(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId);
 
@@ -51,6 +54,7 @@ public interface UserApi {
 			@ApiResponse(code = 204, message = "no user founded", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/user/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAuthority('adminRole')")
 	ResponseEntity<List<User>> findUsers();
 
 	@ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
@@ -58,10 +62,10 @@ public interface UserApi {
 			@ApiResponse(code = 200, message = "created user", response = User.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/user", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
+	@RequestMapping(value = "/user", produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.POST)
+	@PreAuthorize("hasAuthority('adminRole')")
 	ResponseEntity<User> saveNewUser(
-			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
+			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
 			@ApiParam(value = "the user to create", required = true) @RequestBody User user,
 			BindingResult result) throws RestServiceException;
 
@@ -70,10 +74,10 @@ public interface UserApi {
 			@ApiResponse(code = 204, message = "user updated", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.PUT)
+	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.PUT)
+	@PreAuthorize("hasAuthority('adminRole')")
 	ResponseEntity<Void> updateUser(
-			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
+			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
 			@ApiParam(value = "the user to update", required = true) @RequestBody User user,
 			BindingResult result) throws RestServiceException;

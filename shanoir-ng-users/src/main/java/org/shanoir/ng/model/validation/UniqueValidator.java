@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.shanoir.ng.model.User;
-import org.shanoir.ng.model.error.FormError;
+import org.shanoir.ng.model.error.FieldError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -37,8 +37,8 @@ public class UniqueValidator <T> {
 	 * @param user
 	 * @return
 	 */
-	public List<FormError> Validate(T entity) {
-		List<FormError> errorList = new ArrayList<FormError>();
+	public List<FieldError> Validate(T entity) {
+		List<FieldError> errorList = new ArrayList<FieldError>();
 		try {
 			for (Field field : User.class.getDeclaredFields()) {
 				// check @unique
@@ -50,7 +50,7 @@ public class UniqueValidator <T> {
 						List<T> foundedList = service.findBy(field.getName(), value);
 						// If found users and it is not the same current user
 						if (!foundedList.isEmpty() && !(foundedList.size() == 1 && foundedList.get(0).equals(entity))) {
-							FormError formError = new FormError(field.getName(), Arrays.asList("unique"));
+							FieldError formError = new FieldError(field.getName(), Arrays.asList("unique"));
 							errorList.add(formError);
 						}
 					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {

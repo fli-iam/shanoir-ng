@@ -5,6 +5,7 @@ import java.util.List;
 import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.error.ErrorModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -22,6 +23,7 @@ public interface RoleApi {
 			@ApiResponse(code = 204, message = "no role founded", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/role/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAuthority('adminRole')")
 	ResponseEntity<List<Role>> findRoles();
 
 }

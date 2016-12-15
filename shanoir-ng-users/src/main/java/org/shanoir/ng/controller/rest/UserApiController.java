@@ -32,7 +32,7 @@ public class UserApiController implements UserApi {
 	private UserService userService;
 
 	public ResponseEntity<Void> deleteUser(
-			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
+			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) {
 		if (userService.findById(userId) == null) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
@@ -58,7 +58,7 @@ public class UserApiController implements UserApi {
 	}
 
 	public ResponseEntity<User> saveNewUser(
-			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
+			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
 			@ApiParam(value = "the user to create", required = true) @RequestBody @Valid User user,
 			BindingResult result) throws RestServiceException {
 
@@ -79,7 +79,7 @@ public class UserApiController implements UserApi {
 	}
 
 	public ResponseEntity<Void> updateUser(
-			@RequestHeader(value=SwaggerDocumentationConfig.AUTH_TOKEN_NAME) String authToken,
+			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
 			@ApiParam(value = "the user to update", required = true) @RequestBody @Valid User user,
 			BindingResult result) throws RestServiceException {
