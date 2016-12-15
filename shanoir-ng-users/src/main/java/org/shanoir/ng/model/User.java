@@ -331,7 +331,6 @@ public class User extends HalEntity implements UserDetails {
 	@Override
 	@JsonIgnore
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		LOG.error("#################################################### " + role.getName());
 		return Arrays.asList(role);
 	}
 
