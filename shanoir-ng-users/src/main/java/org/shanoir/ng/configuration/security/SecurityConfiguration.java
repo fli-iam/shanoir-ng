@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.shanoir.ng.configuration.security.xauth.XAuthTokenFilter;
-import org.shanoir.ng.service.impl.ShanoirUserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -61,7 +60,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http
 			.authorizeRequests()
 			.antMatchers("/authenticate").permitAll()
-			.anyRequest().permitAll()
+			.anyRequest().authenticated()
             .and()
             	.formLogin().loginPage("http://localhost/login")
 			.and()
