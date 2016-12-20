@@ -49,6 +49,11 @@ public class FieldErrorMap extends HashMap<String, List<FieldError>> {
     }
 
 
+    /**
+     * Merge errors properly
+     *
+     * @param maps
+     */
     public void merge(FieldErrorMap... maps) {
     	for (FieldErrorMap map : maps) {
 			for (String fieldName : map.keySet()) {

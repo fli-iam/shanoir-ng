@@ -1,6 +1,7 @@
 package org.shanoir.ng.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -62,10 +63,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } else {
         	securityUser = (User) userService.findByUsername(loginDTO.getLogin());
         }
-
         if (securityUser == null) {
         	throw new ShanoirUsersException("No user found with username/email " + loginDTO.getLogin());
         }
+
+        // Update last login
+        securityUser.setLastLogin(new Date());
+        userService.save(securityUser);
 
         // Parse Granted authorities to a list of string authorities
         final List<String> authorities = new ArrayList<>();
