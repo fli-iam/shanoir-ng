@@ -9,20 +9,17 @@ import org.shanoir.ng.configuration.swagger.SwaggerDocumentationConfig;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.error.ErrorDetails;
 import org.shanoir.ng.model.error.ErrorModel;
-import org.shanoir.ng.model.error.FieldError;
+import org.shanoir.ng.model.error.FieldErrorMap;
 import org.shanoir.ng.model.exception.RestServiceException;
 import org.shanoir.ng.model.validation.EditableOnlyByValidator;
 import org.shanoir.ng.model.validation.UniqueValidator;
 import org.shanoir.ng.service.UserService;
-import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -74,20 +71,27 @@ public class UserApiController implements UserApi {
             @ApiParam(value = "the user to create", required = true) @RequestBody @Valid User user,
             BindingResult result) throws RestServiceException {
 
-        if (result.hasErrors()) {
-            throw Utils.buildValidationException(result);
+    	/* Validation */
+        FieldErrorMap accessErrors = this.getCreationRightsErrors(user); //A basic user can only update certain fields, check that
+        FieldErrorMap hibernateErrors = new FieldErrorMap(result); // Check hibernate validation
+        FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user); // Check unique constrainte
+        /* Merge errors. */
+        FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+        if (!errors.isEmpty()) {
+            throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
         }
 
         user.setId(null); // Guarantees it is a creation, not an update
-        user.setCreationDate(new Date()); // Set creation date on creation, seems logical
+        user.setCreationDate(new Date()); // Set creation date on creation.
+
+        /* Save user in db. */
         try {
-            userService.save(user);
+            final User createdUser = userService.save(user);
+            return new ResponseEntity<User>(createdUser, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
-            UniqueValidator<User> uniqueValidator = new UniqueValidator<User>(userService);
-            throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(uniqueValidator.validate(user))));
+        	LOG.error("Error while trying to save new user " + user.getUsername() + " : ", e);
+            throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
         }
-        final User createdUser = userService.save(user);
-        return new ResponseEntity<User>(createdUser, HttpStatus.OK);
     }
 
     @Override
@@ -97,34 +101,64 @@ public class UserApiController implements UserApi {
             @ApiParam(value = "the user to update", required = true) @RequestBody @Valid User user,
             BindingResult result) throws RestServiceException {
 
-        /* A basic user can only update certain fields, check that. */
-        if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken ) {
-            throw new IllegalStateException("updateUser() must be restricted to connected user but it seems an anonymous user is accessing it");
-        }
-        User connectedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User previousStateUser = userService.findById(userId);
-        List<FieldError> errors = new EditableOnlyByValidator<User>().validate(connectedUser, previousStateUser, user);
+    	user.setId(userId); // IMPORTANT : avoid any confusion that could lead to security breach
+
+    	/* Validation */
+        FieldErrorMap accessErrors = this.getUpdateRightsErrors(user); //A basic user can only update certain fields, check that
+        FieldErrorMap hibernateErrors = new FieldErrorMap(result); // Check hibernate validation
+        FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user); // Check unique constrainte
+        /* Merge errors. */
+        FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
         if (!errors.isEmpty()) {
             throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
         }
 
-        /* Check hibernate validation. */
-        if (result.hasErrors()) {
-            throw Utils.buildValidationException(result);
-        }
-        user.setId(userId);
-
-        /* Try to save user in db.
-         * If it fails, it may be because of unique constraints. So if it fails we check that, but not before
-         * (in order to save one transaction with the database). */
+        /* Save user in db. */
         try {
             userService.save(user);
         } catch (DataIntegrityViolationException e) {
-            UniqueValidator<User> uniqueValidator = new UniqueValidator<User>(userService);
-            throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(uniqueValidator.validate(user))));
+        	LOG.error("Error while trying to save user " + userId + " : ", e);
+            throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
         }
 
         return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
+
+
+    /**
+     * Get access rights errors
+     *
+     * @param user
+     * @return an error map
+     */
+    private FieldErrorMap getUpdateRightsErrors(User user) {
+        User previousStateUser = userService.findById(user.getId());
+        FieldErrorMap accessErrors = new EditableOnlyByValidator<User>().validate(previousStateUser, user);
+        return accessErrors;
+    }
+
+
+    /**
+     * Get access rights errors
+     *
+     * @param user
+     * @return an error map
+     */
+    private FieldErrorMap getCreationRightsErrors(User user) {
+    	return new EditableOnlyByValidator<User>().validate(user);
+    }
+
+
+	/**
+	 * Get unique constraint errors
+	 *
+	 * @param user
+	 * @return an error map
+	 */
+	private FieldErrorMap getUniqueConstraintErrors(User user) {
+		UniqueValidator<User> uniqueValidator = new UniqueValidator<User>(userService);
+		FieldErrorMap uniqueErrors = uniqueValidator.validate(user);
+		return uniqueErrors;
+	}
 
 }

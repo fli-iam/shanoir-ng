@@ -67,6 +67,7 @@ public class User extends HalEntity implements UserDetails {
 	@NotNull
 	private boolean isMedical;
 
+	@EditableOnlyBy(roles={"adminRole"})
 	private boolean isOnDemand;
 
 	@EditableOnlyBy(roles={"adminRole"})
