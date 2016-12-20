@@ -3,32 +3,43 @@
         <h2 i18n="Edit user|Title">Edit user</h2>
     </div>
 
-    <form [formGroup]="editUserForm" (ngSubmit)="create()" class="EditUserContent">
+    <form [formGroup]="editUserForm" (ngSubmit)="create()" class="EditUserContent" novalidate>
         <div class="EditUserComponent-div required">
             <label i18n="Edit user|FirstName label" class="required-label">First Name: </label> 
             <input type="text" id="firstName" required minlength="2" maxlength="50" formControlName="firstName"/>
+            <label *ngIf="formErrors.firstName.includes('required')" class="form-validation-alert" i18n="Edit user|FirstNameRequiredError label">First Name is required!</label>
+            <label *ngIf="formErrors.firstName.includes('length')" class="form-validation-alert" i18n="Edit user|FirstNameLengthError label">First Name length must be between 2 and 50!</label>
         </div>
         <div class="EditUserComponent-div required">
             <label i18n="Edit user|LastName label" class="required-label">Last Name: </label> 
             <input type="text" id="lastName" required minlength="2" maxlength="50" formControlName="lastName"/>
+            <label *ngIf="formErrors.lastName.includes('required')" class="form-validation-alert" i18n="Edit user|LastNameRequiredError label">Last Name is required!</label>
+            <label *ngIf="formErrors.lastName.includes('length')" class="form-validation-alert" i18n="Edit user|LastNameLengthError label">Last Name length must be between 2 and 50!</label>
         </div>
         <div class="EditUserComponent-div required">
             <label i18n="Edit user|Username label" class="required-label">Username: </label> 
             <input type="text" id="username" required minlength="4" maxlength="20" formControlName="username"/>
+            <label *ngIf="formErrors.username.includes('required')" class="form-validation-alert" i18n="Edit user|UsernameRequiredError label">Username is required!</label>
+            <label *ngIf="formErrors.username.includes('length')" class="form-validation-alert" i18n="Edit user|UsernameLengthError label">Username length must be between 4 and 20!</label>
+            <label *ngIf="isUserNameUnique==false" class="form-validation-alert" i18n="Edit user|UsernameUniqueError label">Username should be unique!</label>
         </div>
         <div class="EditUserComponent-div required">
             <label i18n="Edit user|Email label" class="required-label">Email: </label> 
             <input type="email" id="email" required formControlName="email"/>
+            <label *ngIf="formErrors.email.includes('required')" class="form-validation-alert" i18n="Edit user|EmailRequiredError label">Email is required!</label>
+            <label *ngIf="formErrors.email.includes('pattern')" class="form-validation-alert" i18n="Edit user|EmailPatternError label">Email should be valid!</label>
+            <label *ngIf="isEmailUnique==false" class="form-validation-alert" i18n="Edit user|EmailUniqueError label">Email should be unique!</label>
         </div>
         <div class="EditUserComponent-div">
             <label i18n="Edit user|ExpirationDate label">Expiration Date: </label> 
             <input type="date" id="expirationDate" formControlName="expirationDate"/>
         </div>
         <div class="EditUserComponent-div required">
-            <label i18n="Edit user|Role label">Role of the user: </label> 
+            <label i18n="Edit user|Role label" class="required-label">Role of the user: </label> 
             <select id="role" required formControlName="role">
                 <option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>
             </select>
+            <label *ngIf="formErrors.role.includes('required')" class="form-validation-alert" i18n="Edit user|RoleRequiredError label">Role is required!</label>
         </div>
         <div class="EditUserComponent-div">   
             <label i18n="Edit user|CanAccessToDicomAssociation label">Can import from Neurinfo-PACS: </label> 
@@ -47,6 +58,6 @@
         </div>
 
         <button i18n="Edit user|CancelButton label" class="Button" (click)="cancel()">Cancel</button>
-        <button type="submit" i18n="Edit user|CreateButton label" class="Button"> Create</button>
+        <button type="submit" i18n="Edit user|CreateButton label" class="Button" [disabled]="!editUserForm.valid">Create</button>
     </form>
 </div>

@@ -29,3 +29,15 @@
   padding: 10px;
 }
 
+.form-validation-alert {
+  color: #c7254e;
+  background: #f9f2f4;
+  border: 1px solid transparent;
+  padding: 3px;
+}
+
+button:disabled {
+  background-color: #eee;
+  color: #aaa;
+  cursor: auto;
+}
