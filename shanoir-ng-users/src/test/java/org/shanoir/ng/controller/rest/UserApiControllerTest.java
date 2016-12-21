@@ -18,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -27,7 +28,7 @@ import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for user controller.
- * 
+ *
  * @author msimon
  *
  */
@@ -73,6 +74,7 @@ public class UserApiControllerTest {
 	}
 
 	@Test
+	@WithMockUser(authorities={"adminRole"})
 	public void saveNewUserTest() throws Exception {
 		mvc.perform(
 				MockMvcRequestBuilders.post("/user").header("X-XSRF-TOKEN", "test").accept(MediaType.APPLICATION_JSON)
@@ -81,6 +83,7 @@ public class UserApiControllerTest {
 	}
 
 	@Test
+	@WithMockUser(authorities={"adminRole"})
 	public void updateNewUserTest() throws Exception {
 		mvc.perform(
 				MockMvcRequestBuilders.put("/user/1").header("X-XSRF-TOKEN", "test").accept(MediaType.APPLICATION_JSON)

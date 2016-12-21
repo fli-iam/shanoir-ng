@@ -5,10 +5,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.shanoir.ng.model.Role;
-import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.error.FieldError;
 import org.shanoir.ng.model.error.FieldErrorMap;
 import org.shanoir.ng.utils.Utils;
@@ -122,7 +122,8 @@ public class EditableOnlyByValidator <T> {
 		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken ) {
 			connectedUserRoles = new ArrayList<Role>();
 		} else {
-			User connectedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			org.springframework.security.core.userdetails.User connectedUser =
+					(org.springframework.security.core.userdetails.User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			if (connectedUser == null) {
 				throw new IllegalArgumentException("connectedUser cannot be null");
 			}

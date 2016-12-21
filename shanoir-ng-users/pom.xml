@@ -43,13 +43,17 @@
 			<groupId>org.springframework.session</groupId>
 			<artifactId>spring-session</artifactId>
 		</dependency>
-        
+		<dependency>
+		    <groupId>org.springframework.security</groupId>
+		    <artifactId>spring-security-test</artifactId>
+		</dependency>
+
 		<!-- Database connector -->
 		<dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
-		
+
  		<!-- SpringFox Swagger UI -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -66,7 +70,7 @@
             <version>${springfox-version}</version>
         </dependency>
 
-		<!-- AMQP -->        
+		<!-- AMQP -->
         <dependency>
 		    <groupId>com.google.code.gson</groupId>
 		    <artifactId>gson</artifactId>
@@ -75,7 +79,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
-		
+
         <!-- Test -->
 		<dependency>
   			<groupId>com.h2database</groupId>
@@ -153,7 +157,7 @@
 			</snapshots>
 		</repository>
 	</repositories>
-	
+
 	<profiles>
 		<profile>
 			<id>dev</id>

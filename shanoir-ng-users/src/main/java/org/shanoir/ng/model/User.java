@@ -49,7 +49,7 @@ public class User extends HalEntity implements UserDetails {
 
 	private boolean canAccessToDicomAssociation;
 
-	@EditableOnlyBy(roles={""})
+	@EditableOnlyBy(roles={"adminRole"})
 	private Date creationDate;
 
 	@NotBlank @Unique @Column(unique=true)
@@ -73,7 +73,7 @@ public class User extends HalEntity implements UserDetails {
 	@EditableOnlyBy(roles={"adminRole"})
 	private boolean isSecondExpirationNotificationSent;
 
-	@EditableOnlyBy(roles={""})
+	@EditableOnlyBy(roles={"adminRole"})
 	private Date lastLogin;
 
 	@NotNull
