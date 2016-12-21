@@ -2,7 +2,7 @@
 
 if [ ! -f "/var/run/mysqld/mysqld.sock" ]; then
   echo "Initialize MariaDB command"
-  /docker-entrypoint.sh mysqld
+  /opt/mysql/init/mariadb_init.sh mysqld
 fi
 
 if [ ! -d "/vol/log/supervisor" ]; then

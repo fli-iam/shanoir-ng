@@ -161,5 +161,33 @@
 				<spring-active-profile>dev</spring-active-profile>
 			</properties>
 		</profile>
+		<profile>
+			<id>qualif</id>
+			<properties>
+				<spring-active-profile>qualif</spring-active-profile>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+					<groupId>com.spotify</groupId>
+					<artifactId>docker-maven-plugin</artifactId>
+					<version>0.4.11</version>
+					<configuration>
+						<dockerHost>${docker-host}</dockerHost>
+						<dockerCertPath>${docker-cert-path}</dockerCertPath>
+						<imageName>${project.artifactId}</imageName>
+						<dockerDirectory>src/main/docker-qualif</dockerDirectory>
+						<resources>
+							<resource>
+								<targetPath>/</targetPath>
+								<directory>${project.build.directory}</directory>
+								<include>${project.build.finalName}.jar</include>
+							</resource>
+						</resources>
+					</configuration>
+				</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 </project>

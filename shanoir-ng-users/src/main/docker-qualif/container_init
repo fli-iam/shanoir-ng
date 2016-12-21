@@ -1,0 +1,7 @@
+﻿#!/bin/bash
+
+echo "Initialize MariaDB command"
+/opt/mysql/init/mariadb_init.sh mysqld
+
+echo "Create supervisor log directory"
+mkdir -p /vol/log/supervisor
