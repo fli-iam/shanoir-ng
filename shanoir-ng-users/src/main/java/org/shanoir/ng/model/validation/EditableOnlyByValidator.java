@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.shanoir.ng.model.Role;
@@ -17,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
 
 public class EditableOnlyByValidator <T> {
@@ -122,8 +122,7 @@ public class EditableOnlyByValidator <T> {
 		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken ) {
 			connectedUserRoles = new ArrayList<Role>();
 		} else {
-			org.springframework.security.core.userdetails.User connectedUser =
-					(org.springframework.security.core.userdetails.User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			UserDetails connectedUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			if (connectedUser == null) {
 				throw new IllegalArgumentException("connectedUser cannot be null");
 			}

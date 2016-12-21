@@ -15,7 +15,6 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.model.hateoas.HalEntity;
-import org.shanoir.ng.model.hateoas.Link;
 import org.shanoir.ng.model.hateoas.Links;
 import org.shanoir.ng.model.validation.EditableOnlyBy;
 import org.shanoir.ng.model.validation.Unique;
@@ -93,12 +92,13 @@ public class User extends HalEntity implements UserDetails {
 
 
 	/**
-	 *
+	 * Init HATEOAS links
 	 */
 	@PostLoad
 	public void initLinks() {
-		this.addLink(new Link(Links.REL_SELF, "user/" + getId()));
+		this.addLink(Links.REL_SELF, "user/" + getId());
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {
