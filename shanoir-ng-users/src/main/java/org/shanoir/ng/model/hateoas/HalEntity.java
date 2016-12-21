@@ -30,8 +30,8 @@ public abstract class HalEntity {
 	}
 
 
-	public void addLink(Link link) {
-		links.getLinks().add(link);
+	public void addLink(String key, String href) {
+		links.put(key, new Link(key, Links.BASE_URL + href));
 	}
 
 }

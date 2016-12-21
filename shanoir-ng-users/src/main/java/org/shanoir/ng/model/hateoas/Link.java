@@ -1,63 +1,52 @@
 package org.shanoir.ng.model.hateoas;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@JsonSerialize(using = LinkSerializer.class)
+/**
+ *
+ * @author jlouis
+ */
 public class Link {
 
-	/** The relationship. */
+	@JsonIgnore
 	private String rel;
 
-	/** The link url. */
-	private HRef href;
-
+	private String href;
 
 	/**
 	 * @param rel
-	 * @param relativePath
-	 */
-	public Link(String rel, HRef href) {
-		super();
-		this.rel = rel;
-		this.href = href;
-	}
-
-
-	/**
-	 * @param rel
-	 * @param relativePath
+	 * @param href
 	 */
 	public Link(String rel, String href) {
-		super();
 		this.rel = rel;
-		this.href = new HRef(href);
+		this.href = href;
 	}
 
 	/**
 	 * @return the rel
 	 */
-	protected String getRel() {
+	public String getRel() {
 		return rel;
 	}
 
 	/**
 	 * @param rel the rel to set
 	 */
-	protected void setRel(String rel) {
+	public void setRel(String rel) {
 		this.rel = rel;
 	}
 
 	/**
 	 * @return the href
 	 */
-	protected HRef getHref() {
+	public String getHref() {
 		return href;
 	}
 
 	/**
 	 * @param href the href to set
 	 */
-	protected void setHref(HRef href) {
+	public void setHref(String href) {
 		this.href = href;
 	}
 

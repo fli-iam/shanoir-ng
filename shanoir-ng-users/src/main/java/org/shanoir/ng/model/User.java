@@ -15,10 +15,9 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.model.hateoas.HalEntity;
-import org.shanoir.ng.model.hateoas.Link;
 import org.shanoir.ng.model.hateoas.Links;
+import org.shanoir.ng.model.validation.EditableOnlyBy;
 import org.shanoir.ng.model.validation.Unique;
-import org.shanoir.ng.service.impl.UserServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
@@ -49,25 +48,31 @@ public class User extends HalEntity implements UserDetails {
 
 	private boolean canAccessToDicomAssociation;
 
+	@EditableOnlyBy(roles={"adminRole"})
 	private Date creationDate;
 
 	@NotBlank @Unique @Column(unique=true)
 	private String email;
 
+	@EditableOnlyBy(roles={"adminRole"})
 	private Date expirationDate;
 
 	@NotBlank
 	private String firstName;
 
+	@EditableOnlyBy(roles={"adminRole"})
 	private boolean isFirstExpirationNotificationSent;
 
 	@NotNull
 	private boolean isMedical;
 
+	@EditableOnlyBy(roles={"adminRole"})
 	private boolean isOnDemand;
 
+	@EditableOnlyBy(roles={"adminRole"})
 	private boolean isSecondExpirationNotificationSent;
 
+	@EditableOnlyBy(roles={"adminRole"})
 	private Date lastLogin;
 
 	@NotNull
@@ -82,16 +87,18 @@ public class User extends HalEntity implements UserDetails {
 
 	@ManyToOne
 	@NotNull
+	@EditableOnlyBy(roles={"adminRole"})
 	private Role role;
 
 
 	/**
-	 *
+	 * Init HATEOAS links
 	 */
 	@PostLoad
 	public void initLinks() {
-		this.addLink(new Link(Links.REL_SELF, "user/" + getId()));
+		this.addLink(Links.REL_SELF, "user/" + getId());
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {

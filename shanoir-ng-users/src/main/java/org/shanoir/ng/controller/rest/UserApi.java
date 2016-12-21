@@ -63,7 +63,6 @@ public interface UserApi {
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/user", produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasAuthority('adminRole')")
 	ResponseEntity<User> saveNewUser(
 			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
 			@ApiParam(value = "the user to create", required = true) @RequestBody User user,
@@ -75,7 +74,7 @@ public interface UserApi {
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasAuthority('adminRole')")
+	@PreAuthorize("hasAnyAuthority('adminRole', 'medicalRole', 'expertRole', 'userRole', 'guestRole')")
 	ResponseEntity<Void> updateUser(
 			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,

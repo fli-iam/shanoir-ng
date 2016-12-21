@@ -1,6 +1,7 @@
 package org.shanoir.ng.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Authentication service implementation.
- * 
+ *
  * @author msimon
  *
  */
@@ -33,18 +34,18 @@ import org.springframework.stereotype.Service;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
-	
+
 	@Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
     private UserService userService;
-    
+
     private final TokenUtils tokenUtils = new TokenUtils();
 
 	@Override
 	public UserDTO authenticate(final LoginDTO loginDTO, final HttpServletResponse response) throws Exception {
-		final UsernamePasswordAuthenticationToken authenticationToken = 
+		final UsernamePasswordAuthenticationToken authenticationToken =
 				new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), loginDTO.getPassword());
         Authentication authentication = null;
         try {
@@ -62,10 +63,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } else {
         	securityUser = (User) userService.findByUsername(loginDTO.getLogin());
         }
-        
         if (securityUser == null) {
         	throw new ShanoirUsersException("No user found with username/email " + loginDTO.getLogin());
         }
+
+        // Update last login
+        securityUser.setLastLogin(new Date());
+        userService.save(securityUser);
 
         // Parse Granted authorities to a list of string authorities
         final List<String> authorities = new ArrayList<>();
@@ -79,7 +83,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         userDTO.setLogin(securityUser.getUsername());
         userDTO.setAuthorities(authorities);
         userDTO.setToken(tokenUtils.createToken(securityUser));
-        
+
         return userDTO;
 	}
 

@@ -28,11 +28,11 @@ public class Role implements GrantedAuthority {
 
 	@NotNull
 	private int accessLevel;
-	
+
 	@NotBlank
 	@Column(unique = true)
 	private String displayName;
-	
+
 	@NotBlank
 	@Column(unique = true)
 	private String name;

@@ -1,52 +1,61 @@
 package org.shanoir.ng.model.error;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class FieldError {
 
-	private String fieldName;
-
-	private List<String> errorCodes = new ArrayList<String>();
-
-	/**
-	 * @return the fieldName
-	 */
-	public String getFieldName() {
-		return fieldName;
-	}
+	private String code;
+	private String message;
+	private Object givenValue;
 
 	/**
-	 * @param fieldName
-	 * @param errorCodes
+	 * @param code
+	 * @param message
 	 */
-	public FieldError(String fieldName, List<String> errorCodes) {
+	public FieldError(String code, String message, Object givenValue) {
 		super();
-		this.fieldName = fieldName;
-		this.errorCodes = errorCodes;
+		this.code = code;
+		this.message = message;
+		this.givenValue = givenValue;
 	}
 
 	/**
-	 * @param fieldName the fieldName to set
+	 * @return the code
 	 */
-	public void setFieldName(String fieldName) {
-		this.fieldName = fieldName;
+	public String getCode() {
+		return code;
 	}
 
 	/**
-	 * @return the errorCodes
+	 * @param code the code to set
 	 */
-	public List<String> getErrorCodes() {
-		return errorCodes;
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	/**
-	 * @param errorCodes the errorCodes to set
+	 * @return the message
 	 */
-	public void setErrorCodes(List<String> errorCodes) {
-		this.errorCodes = errorCodes;
+	public String getMessage() {
+		return message;
 	}
 
+	/**
+	 * @param message the message to set
+	 */
+	public void setMessage(String message) {
+		this.message = message;
+	}
 
+	/**
+	 * @return the givenValue
+	 */
+	public Object getGivenValue() {
+		return givenValue;
+	}
 
+	/**
+	 * @param givenValue the givenValue to set
+	 */
+	public void setGivenValue(Object givenValue) {
+		this.givenValue = givenValue;
+	}
 }

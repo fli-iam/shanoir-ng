@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * User DTO.
- * 
+ *
  * @author msimon
  *
  */
@@ -26,7 +26,7 @@ public class UserDTO {
 
     @NotEmpty
     private List<String> authorities;
-    
+
     private String token;
 
 	/**

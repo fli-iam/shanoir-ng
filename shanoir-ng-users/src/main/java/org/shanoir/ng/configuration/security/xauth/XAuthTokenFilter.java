@@ -28,15 +28,15 @@ public class XAuthTokenFilter extends GenericFilterBean {
 	 * Logger
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(XAuthTokenFilter.class);
-	
+
 	private final static String XAUTH_TOKEN_HEADER_NAME = "x-auth-token";
-	
+
     private final UserDetailsService detailsService;
     private final TokenUtils tokenUtils = new TokenUtils();
 
     /**
      * Constructor.
-     * 
+     *
      * @param userDetailsService user details service.
      */
     public XAuthTokenFilter(final UserDetailsService userDetailsService) {
