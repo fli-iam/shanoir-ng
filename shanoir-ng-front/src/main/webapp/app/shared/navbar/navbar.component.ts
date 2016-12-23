@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 
+import { LoginService } from 'app/shared/login/login.service';
+
 @Component({
     selector: 'navbar',
     moduleId: module.id,
@@ -9,7 +11,11 @@ import { Component } from '@angular/core';
 
 export class NavbarComponent {
 
-    constructor() {
+    constructor(private loginService: LoginService) {
+    }
+
+    isUserAdmin(): boolean {
+        return this.loginService.isUserAdmin();
     }
     
 }

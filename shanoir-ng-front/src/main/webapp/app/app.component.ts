@@ -23,10 +23,5 @@ export class AppComponent {
     isAuthenticated(): boolean {
         return this.loginService.isAuthenticated();
     }
-
-    test(event): void {  
-        event.preventDefault();
-        this.loginService.test();
-    }
     
 }

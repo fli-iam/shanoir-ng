@@ -6,7 +6,7 @@
             <li class="Menu-list">
                 <a routerLink="home" routerLinkActive="active" i18n="Menu|Home label" class="Menu-link">Home</a>
             </li>
-            <li class="Menu-list">
+            <li class="Menu-list" *ngIf="isUserAdmin()">
                 <span class="Menu-link" i18n="Menu|Administration label">Administration</span>
                 <div class="AdministrationMenu-content">
                     <a routerLink="userlist" routerLinkActive="active" i18n="Menu|Manage users label" class="Menu-link">Manage users</a>

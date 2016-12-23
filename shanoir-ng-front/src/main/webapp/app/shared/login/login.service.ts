@@ -56,23 +56,6 @@ export class LoginService {
         );
     }
 
-    test(): void {
-        let headersTest = new Headers();
-        headersTest.append('Content-Type', 'application/json');
-        headersTest.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
-        
-        this.http.get(AppUtils.BACKEND_API_ROOT_URL + "/users/user", new RequestOptions({ headers : headersTest, withCredentials: true })).subscribe(
-            data => {
-                console.log("data: " + data.text());
-            },
-            error => {
-                if(error.status === 401) {
-                    this.accountEventsService.logout({error: error.text()});
-                }
-            }
-        );
-    }
-
     removeAccount():void {
         localStorage.removeItem(AppUtils.STORAGE_ACCOUNT_TOKEN);
         localStorage.removeItem(AppUtils.STORAGE_TOKEN);
@@ -80,6 +63,21 @@ export class LoginService {
 
     isAuthenticated():boolean {
         return !!localStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN);
+    }
+
+    getLoggedUser(): Account {
+        if (!!localStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN)) {
+            return JSON.parse(localStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN));
+        }
+        this.router.navigate(['/login']);
+    }
+
+    isUserAdmin(): boolean {
+        let account = this.getLoggedUser();
+        if (account && account.authorities.indexOf("adminRole") != -1) {
+            return true;
+        }
+        return false;
     }
 
 }
