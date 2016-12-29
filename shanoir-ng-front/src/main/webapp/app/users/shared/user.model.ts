@@ -1,3 +1,5 @@
+import { Role } from '../../roles/role.model';
+
 export class User {
     id: number;
     canAccessToDicomAssociation: boolean;
@@ -7,7 +9,7 @@ export class User {
     firstName: string;
     lastLogin: Date;
     lastName: string;
-    role: string;
+    role: Role;
     teamName: string;
     username: string;
     valid: boolean;

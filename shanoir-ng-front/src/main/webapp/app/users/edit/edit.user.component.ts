@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute, Params } from '@angular/router';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
 
@@ -18,15 +18,20 @@ import { RoleService } from '../../roles/role.service';
 export class EditUserComponent implements OnInit {
     user: User = new User();
     router: Router;
+    route: ActivatedRoute;
     userService: UserService;
     editUserForm: FormGroup;
     roles: Role[];
     roleService: RoleService;
     isUserNameUnique: Boolean = true;
     isEmailUnique: Boolean = true;
+    creationMode: Boolean;
+    selectedRole: Role = new Role();
+    userId: number;
 
-    constructor(router: Router, userService: UserService, roleService: RoleService, private fb: FormBuilder) {
+    constructor(router: Router, route: ActivatedRoute, userService: UserService, roleService: RoleService, private fb: FormBuilder) {
         this.router = router;
+        this.route = route;
         this.userService = userService;
         this.roleService = roleService;
     }
@@ -34,30 +39,66 @@ export class EditUserComponent implements OnInit {
     getRoles(): void {
         this.roleService
             .getRoles()
-            .then(roles => this.roles = roles);
+            .then(roles => this.roles = roles)
+            .catch((error) => {
+            // TODO: display error
+            log.error("error getting roles list!");
+        });
+    }
+
+    getUser(): void {
+        this.route.queryParams
+            .switchMap((queryParams: Params) => {
+                let userId = queryParams['id'];
+                if (userId) {
+                    this.creationMode = false;
+                    this.userId = userId;
+                    return this.userService.getUser(userId);
+                } else { 
+                    this.creationMode = true;
+                    return Observable.of<User>();
+                }
+            })
+            .subscribe(user => {
+               this.user = user;
+               this.user.expirationDate = new Date(user.expirationDate);
+               this.selectedRole = user.role;
+            });
     }
 
     cancel(): void {
         this.router.navigate(['../userlist']);
     }
 
-    create(): void {
+    submit(): void {
         this.user = this.editUserForm.value;
-
-        this.userService.create(this.user)
-            .subscribe((user) => {
-                this.cancel();
-            }, (err: String) => {
-                if (err.indexOf("username unique") != -1) {
-                    this.isUserNameUnique = false;
-                }
-                if (err.indexOf("email unique") != -1) {
-                    this.isEmailUnique = false;
-                }
-            });
+        if (this.creationMode == true) {
+            this.userService.create(this.user)
+                .subscribe((user) => {
+                    this.cancel();
+                }, (err: String) => {
+                    if (err.indexOf("username unique") != -1) {
+                        this.isUserNameUnique = false;
+                    }
+                    if (err.indexOf("email unique") != -1) {
+                        this.isEmailUnique = false;
+                    }
+                });
+        } else {
+            this.userService.update(this.userId, this.user)
+                .then((user) => {
+                    this.user = user;
+                    this.cancel();
+                })
+                .catch((error) => {
+                    // TODO: display error
+                    console.error("error updating user!");
+                });
+        }
     }
 
     ngOnInit(): void {
+        this.getUser();
         this.getRoles();
         this.buildForm();
     }

@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
-
 import {GridOptions} from 'ag-grid/main';
 
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import GridUtils from 'app/shared/utils/grid.utils';
+import {ClickableComponent} from "app/shared/utils/clickable.component";
+import {ClickableParentComponent} from "app/shared/utils/clickable.parent.component";
+
 
 @Component({
     selector: 'user-list',
@@ -86,7 +88,10 @@ export class UserListComponent {
             }, cellStyle: {"text-align": "center"}},
             {headerName: "Last Login", field: "lastLogin", width: 100, suppressMenu: true, cellRenderer: function (params) {
                 return dateRenderer(params.data.lastLogin);
-            }}
+            }},
+            {headerName: "Edit", field: "id", width: 50, suppressMenu: true, 
+              cellRendererFramework: ClickableParentComponent
+            , cellStyle: {"text-align": "center"}}
         ];
     }
     
@@ -119,5 +124,4 @@ export class UserListComponent {
             return (GridUtils.maxDisplayedRows + 1) * this.rowHeight + 2 + 17;
         }
     }
-    
 }

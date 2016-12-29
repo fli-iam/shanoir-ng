@@ -24,14 +24,42 @@ export class UserService {
         });
     }
 
+    getUser(id: number): Promise<User> {
+        let headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
+        
+        return this.http.get(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, { headers: headers })
+            .toPromise()
+            .then(response => response.json() as User)
+            .catch((error) => {
+                console.error('Error while getting user', error);
+                return Promise.reject(error.message || error);
+        });
+    }
+
     create(user: User): Observable<User> {
         let headers = new Headers();
         headers.append('Content-Type', 'application/json');
         headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
         
-        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_CREATE_USER_URL, JSON.stringify(user), new RequestOptions({ headers: headers, withCredentials: true }))
+        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL, JSON.stringify(user), new RequestOptions({ headers: headers, withCredentials: true }))
             .map(this.extractData)
             .catch(this.handleError);
+    }
+
+    update(id: number, user: User): Promise<User> {
+        let headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
+        
+        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, JSON.stringify(user), new RequestOptions({ headers: headers, withCredentials: true }))
+            .toPromise()
+            .then(response => response.json() as User)
+            .catch((error) => {
+                console.error('Error while updating user', error);
+                return Promise.reject(error.message || error);
+        });
     }
 
     private extractData(res: Response) {
@@ -44,9 +72,11 @@ export class UserService {
         if (error instanceof Response) {
             const body = error.json() || '';
             errMsg= "[" + body.code + "]: " + body.message;
-            let errDetails = body.details.formErrors || '';
-            for (let errDetail of errDetails) {
-                errMsg += "; " + errDetail.fieldName + " " + errDetail.errorCodes[0];
+            if (body.details) {
+                let errDetails = body.details.formErrors || '';
+                for (let errDetail of errDetails) {
+                    errMsg += "; " + errDetail.fieldName + " " + errDetail.errorCodes[0];
+                }
             }
         } else {
             errMsg = error.message ? error.message : error.toString();
