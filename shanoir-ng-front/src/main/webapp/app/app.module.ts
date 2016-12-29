@@ -19,10 +19,12 @@ import { UserService } from './users/shared/user.service';
 import { EditUserComponent }   from './users/edit/edit.user.component';
 import { RoleService } from './roles/role.service';
 import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
+import {ClickableComponent} from "./shared/utils/clickable.component";
+import {ClickableParentComponent} from "./shared/utils/clickable.parent.component";
 
 @NgModule({
     imports: [ 
-        AgGridModule.withComponents([]),
+        AgGridModule.withComponents([ClickableComponent, ClickableParentComponent]),
         BrowserModule,
         FormsModule,
         HttpModule,
@@ -36,7 +38,9 @@ import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
         LoginComponent,
         NavbarComponent,
         UserListComponent,
-        EditUserComponent
+        EditUserComponent,
+        ClickableComponent,
+        ClickableParentComponent
     ],
     providers: [
         AccountEventsService,
