@@ -26,7 +26,6 @@ export class EditUserComponent implements OnInit {
     isUserNameUnique: Boolean = true;
     isEmailUnique: Boolean = true;
     creationMode: Boolean;
-    selectedRole: Role = new Role();
     userId: number;
 
     constructor(router: Router, route: ActivatedRoute, userService: UserService, roleService: RoleService, private fb: FormBuilder) {
@@ -39,7 +38,10 @@ export class EditUserComponent implements OnInit {
     getRoles(): void {
         this.roleService
             .getRoles()
-            .then(roles => this.roles = roles)
+            .then(roles => {
+                this.roles = roles;
+                this.getUser();
+            })
             .catch((error) => {
             // TODO: display error
             log.error("error getting roles list!");
@@ -60,8 +62,8 @@ export class EditUserComponent implements OnInit {
                 }
             })
             .subscribe(user => {
-               this.user = user;
-               this.selectedRole = user.role;
+                user.role = this.getRoleById(user.role.id);
+                this.user = user;
             });
     }
 
@@ -97,7 +99,6 @@ export class EditUserComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.getUser();
         this.getRoles();
         this.buildForm();
     }
@@ -153,6 +154,15 @@ export class EditUserComponent implements OnInit {
 
     set expirationDate(dateStr: String) {
         this.user.expirationDate = new Date(dateStr);
+    }
+
+    getRoleById(id:number): Role {
+        for (let role of this.roles) {
+            if (id == role.id) {
+                return role;
+            }
+        }
+        return null;
     }
     
 }

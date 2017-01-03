@@ -37,7 +37,7 @@
         </div>
         <div class="EditUserComponent-div required">
             <label i18n="Edit user|Role label" class="required-label">Role of the user: </label> 
-            <select id="role" required formControlName="role" [(ngModel)]="selectedRole">
+            <select id="role" required formControlName="role" [(ngModel)]="user.role">
                 <option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>
             </select>
             <label *ngIf="formErrors.role.includes('required')" class="form-validation-alert" i18n="Edit user|RoleRequiredError label">Role is required!</label>
