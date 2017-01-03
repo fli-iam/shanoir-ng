@@ -33,12 +33,12 @@
         </div>
         <div class="EditUserComponent-div">
             <label i18n="Edit user|ExpirationDate label">Expiration Date: </label> 
-            <input type="date" id="expirationDate" formControlName="expirationDate" [(ngModel)]="user.expirationDate"/>
+            <input type="date" id="expirationDate" formControlName="expirationDate" [(ngModel)]="expirationDate"/>
         </div>
         <div class="EditUserComponent-div required">
             <label i18n="Edit user|Role label" class="required-label">Role of the user: </label> 
-            <select id="role" required formControlName="role" [(ngModel)]="selectedRole.id">
-                <option *ngFor="let role of roles" [ngValue]="role.id">{{role.displayName}}</option>
+            <select id="role" required formControlName="role" [(ngModel)]="selectedRole">
+                <option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>
             </select>
             <label *ngIf="formErrors.role.includes('required')" class="form-validation-alert" i18n="Edit user|RoleRequiredError label">Role is required!</label>
         </div>

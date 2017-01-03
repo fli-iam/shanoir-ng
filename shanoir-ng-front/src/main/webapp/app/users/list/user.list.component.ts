@@ -19,6 +19,7 @@ export class UserListComponent {
     private gridOptions:GridOptions;
     private headerCellTemplate: string;
     private users: User[];
+    private userRequest: User[];
     private rowCount: number = 0;
     private columnDefs: any[];
     private rowHeight: number;
@@ -38,10 +39,20 @@ export class UserListComponent {
     
     // Grid data
     getUsers(): void {
-        this.userService.getUsers().then(users => { 
-            this.users = users;
-            if (users) {
-                this.rowCount = users.length;
+        var usersTmp: User[] = [];
+        var userRequestTmp: User[] = [];
+        this.userService.getUsers().then(users2 => { 
+            if (users2) {
+                for (let user of users2) {
+                    if (!user.onDemand) {
+                        usersTmp.push(user);
+                    } else {
+                        userRequestTmp.push(user);
+                    }
+                }
+                this.users = usersTmp;
+                this.userRequest = userRequestTmp;
+                this.rowCount = this.users.length;
             }
         })
         .catch((error) => {

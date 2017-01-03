@@ -61,7 +61,6 @@ export class EditUserComponent implements OnInit {
             })
             .subscribe(user => {
                this.user = user;
-               this.user.expirationDate = new Date(user.expirationDate);
                this.selectedRole = user.role;
             });
     }
@@ -144,4 +143,16 @@ export class EditUserComponent implements OnInit {
         'email': '',
         'role': ''
     };
+
+    get expirationDate(): String {
+        if (this.user && this.user.expirationDate && !isNaN(new Date(this.user.expirationDate).getTime())) {
+            return new Date(this.user.expirationDate).toISOString().split('T')[0];
+        }
+        return "";
+    }
+
+    set expirationDate(dateStr: String) {
+        this.user.expirationDate = new Date(dateStr);
+    }
+    
 }

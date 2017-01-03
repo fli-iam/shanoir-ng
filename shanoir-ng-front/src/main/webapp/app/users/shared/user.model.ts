@@ -8,12 +8,13 @@ export class User {
     expirationDate: Date;
     firstName: string;
     lastLogin: Date;
+    lastLoginOn: Date;
     lastName: string;
+    medical: boolean;
+    motivation: string;
+    onDemand: boolean;
     role: Role;
     teamName: string;
     username: string;
     valid: boolean;
-    lastLoginOn: Date;
-    isMedical: boolean;
-    motivation: string;
 }

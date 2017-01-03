@@ -53,7 +53,7 @@ export class UserService {
         headers.append('Content-Type', 'application/json');
         headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
         
-        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, JSON.stringify(user), new RequestOptions({ headers: headers, withCredentials: true }))
+        return this.http.put(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, JSON.stringify(user), new RequestOptions({ headers: headers, withCredentials: true }))
             .toPromise()
             .then(response => response.json() as User)
             .catch((error) => {
