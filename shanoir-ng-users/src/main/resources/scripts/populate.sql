@@ -9,15 +9,14 @@ VALUES
 	(1,1000,'Administrator','adminRole'),
 	(2,0,'Guest','guestRole'),
 	(3,100,'User','userRole'),
-	(4,200,'Expert','expertRole'),
-	(5,300,'Medical','medicalRole');
+	(4,200,'Expert','expertRole');
 
 	
 INSERT INTO users (id, can_access_to_dicom_association, creation_date, email, first_name, last_login, last_name, password, username, role_id, is_medical, expiration_date, is_first_expiration_notification_sent, is_second_expiration_notification_sent, is_on_demand)
 VALUES 
 (1,1,'1970-01-01 01:00:00','noemail@noemail.fr','defaultUser','1970-01-01 01:00:00','defaultUser','nopass','defaultUser',3,0,NULL,0,0,0),
 (2,0,'1970-01-01 01:00:00','guest@irisa.fr','GUEST','2016-08-04 10:43:20','GUEST','2638F4-1292-11','guest',2,0,NULL,0,0,0),
-(3,1,'1970-01-01 01:00:00','contact@neurinfo.org','ADMINISTRATOR','2016-11-23 10:15:11','ADMINISTRATOR','admin','admin',1,0,'2100-03-29 00:00:00',0,0,0),
+(3,1,'1970-01-01 01:00:00','contact@neurinfo.org','ADMINISTRATOR','2016-11-23 10:15:11','ADMINISTRATOR','D0-483351E2-30','admin',1,0,'2100-03-29 00:00:00',0,0,0),
 (4,1,'2010-08-25 15:24:43','elise.bannier@irisa.fr','Elise','2016-09-30 11:19:40','Bannier','CC-529B-101E3-','ebannier',4,0,'2020-12-31 00:00:00',0,0,0),
 (9,1,'2010-09-03 11:33:53','icorouge@irisa.fr','Isabelle','2016-11-08 09:23:37','Corouge','88-120AD-83223','icorouge',4,0,'2020-12-31 00:00:00',0,0,0),
 (10,0,'2010-09-03 11:34:20','david.travers@chu-rennes.fr','David','2014-04-25 15:58:26','Travers','13193654528293','dtravers',3,0,'2014-12-31 00:00:00',1,0,0),

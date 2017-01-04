@@ -14,6 +14,6 @@ public final class LoginUtil {
 	
 	public static final String USER_LOGIN = "admin";
 	
-	public static final String USER_PASSWORD = "admin";
+	public static final String USER_PASSWORD = "D0-483351E2-30";
 	
 }

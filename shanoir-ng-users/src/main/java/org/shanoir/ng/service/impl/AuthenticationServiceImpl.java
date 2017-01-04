@@ -13,6 +13,7 @@ import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.exception.ShanoirUsersException;
 import org.shanoir.ng.service.AuthenticationService;
 import org.shanoir.ng.service.UserService;
+import org.shanoir.ng.utils.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +46,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Override
 	public UserDTO authenticate(final LoginDTO loginDTO, final HttpServletResponse response) throws Exception {
+		// SHA-1 digest used by Shanoir (same code than Shanoir)
+		// TODO: replace it with SHA-256 digest : DigestUtils.sha256(loginDTO.getPassword())
+		final String hashedPassword = HashUtil.getHash(loginDTO.getPassword());
+		
 		final UsernamePasswordAuthenticationToken authenticationToken =
-				new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), loginDTO.getPassword());
+				new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), hashedPassword);
         Authentication authentication = null;
         try {
         	authentication = authenticationManager.authenticate(authenticationToken);
