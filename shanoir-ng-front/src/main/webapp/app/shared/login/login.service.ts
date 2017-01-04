@@ -18,7 +18,7 @@ export class LoginService {
         let headers = new Headers();
         headers.append('Content-Type', 'application/json');
         
-        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_AUTHENTICATE_PATH,  JSON.stringify({login:login, password:password}), { headers: headers })
+        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_AUTHENTICATE_PATH,  JSON.stringify({login:login, password:password}), { headers: headers, withCredentials: true })
             .map((res) => {
                 localStorage.setItem(AppUtils.STORAGE_ACCOUNT_TOKEN, res.text());
                 localStorage.setItem(AppUtils.STORAGE_TOKEN, res.json().token);
