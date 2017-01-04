@@ -15,6 +15,12 @@ import org.shanoir.ng.model.validation.UniqueCheckableService;
  */
 public interface UserService extends UniqueCheckableService<User>{
 
+	/**
+	 * Delete a user
+	 * @param id
+	 */
+	void deleteById(Long id);
+	
     /**
      * Get all the users
      * @return a list of users
@@ -51,7 +57,6 @@ public interface UserService extends UniqueCheckableService<User>{
      * @param user user to create.
      * @return created user.
      */
-
     User save(User user);
 
     /**
@@ -62,9 +67,12 @@ public interface UserService extends UniqueCheckableService<User>{
     void updateFromShanoirOld(User user) throws ShanoirUsersException;
 
     /**
-     * Delete a user
-     * @param id
+     * Update a user.
+     *
+     * @param user user to update.
+     * @return updated user.
+     * @throws ShanoirUsersException
      */
-    void deleteById(Long id);
+    User update(User user) throws ShanoirUsersException;
 
 }

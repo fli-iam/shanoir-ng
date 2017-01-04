@@ -11,6 +11,7 @@ import org.shanoir.ng.model.error.ErrorDetails;
 import org.shanoir.ng.model.error.ErrorModel;
 import org.shanoir.ng.model.error.FieldErrorMap;
 import org.shanoir.ng.model.exception.RestServiceException;
+import org.shanoir.ng.model.exception.ShanoirUsersException;
 import org.shanoir.ng.model.validation.EditableOnlyByValidator;
 import org.shanoir.ng.model.validation.UniqueValidator;
 import org.shanoir.ng.service.UserService;
@@ -113,11 +114,12 @@ public class UserApiController implements UserApi {
             throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
         }
 
-        /* Save user in db. */
+        /* Update user in db. */
         try {
-            userService.save(user);
-        } catch (DataIntegrityViolationException e) {
-        	LOG.error("Error while trying to save user " + userId + " : ", e);
+            userService.update(user);
+        } catch (ShanoirUsersException e) {
+        	LOG.error("Error while trying to update user " + userId + " : ", e);
+        	// TODO: 422 ???
             throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
         }
 

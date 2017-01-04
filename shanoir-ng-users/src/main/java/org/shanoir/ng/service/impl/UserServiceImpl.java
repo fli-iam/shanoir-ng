@@ -33,10 +33,20 @@ public class UserServiceImpl implements UserService {
 	private UserRepositorySpecific userRepositorySpecific;
 
 	@Override
+	public void deleteById(Long id) {
+		userRepository.delete(id);
+	}
+	
+	@Override
 	public List<User> findAll() {
 		return Utils.toList(userRepository.findAll());
 	}
 
+	@Override
+	public List<User> findBy(String fieldName, Object value) {
+		return userRepositorySpecific.findBy(fieldName, value);
+	}
+	
 	@Override
 	public User findByEmail(String email) {
 		return userRepository.findByEmail(email);
@@ -77,18 +87,29 @@ public class UserServiceImpl implements UserService {
 		try {
 			userRepository.save(userDb);
 		} catch (Exception e) {
-			ShanoirUsersException.logAndThrow(LOG, "Error updating user from Shanoir Old: " + e.getMessage());
+			ShanoirUsersException.logAndThrow(LOG, "Error while updating user from Shanoir Old: " + e.getMessage());
 		}
 	}
 
 	@Override
-	public void deleteById(Long id) {
-		userRepository.delete(id);
-	}
-
-	@Override
-	public List<User> findBy(String fieldName, Object value) {
-		return userRepositorySpecific.findBy(fieldName, value);
+	public User update(User user) throws ShanoirUsersException {
+		final User userDb = userRepository.findOne(user.getId());
+		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
+		userDb.setEmail(user.getEmail());
+		userDb.setExpirationDate(user.getExpirationDate());
+		userDb.setFirstName(user.getFirstName());
+		userDb.setLastName(user.getLastName());
+		// TODO: add motivation (user account request)
+		userDb.setPassword(user.getPassword());
+		userDb.setRole(user.getRole());
+		userDb.setMedical(user.isMedical());
+		userDb.setUsername(user.getUsername());
+		try {
+			userRepository.save(userDb);
+		} catch (Exception e) {
+			ShanoirUsersException.logAndThrow(LOG, "Error while updating user: " + e.getMessage());
+		}
+		return userDb;
 	}
 
 	/**
