@@ -15,9 +15,9 @@ import { AccountEventsService } from '../account/account.events.service';
 
 export class LoginComponent {
     loginForm: FormGroup;
-    account:Account;
+    account: Account;
     shanoirNGImageUrl: string;
-    error:string;
+    errorCode: string;
 
     constructor(private router: Router, private loginService: LoginService, accountEventsService: AccountEventsService, fb:FormBuilder) {
         this.shanoirNGImageUrl = '/images/shanoirNG.png';
@@ -30,11 +30,7 @@ export class LoginComponent {
         accountEventsService.subscribe((account) => {
             if(!account.authenticated) {
                 if(account.error) {
-                    if(account.error.indexOf('BadCredentialsException') !== -1) {
-                        this.error = 'Username and/or password are invalid !';
-                    } else {
-                        this.error = account.error;
-                    }
+                    this.errorCode = account.error.message;
                 }
             }
         });

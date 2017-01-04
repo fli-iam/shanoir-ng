@@ -6,12 +6,12 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.shanoir.ng.configuration.swagger.SwaggerDocumentationConfig;
+import org.shanoir.ng.exception.RestServiceException;
+import org.shanoir.ng.exception.ShanoirUsersException;
+import org.shanoir.ng.exception.error.ErrorDetails;
+import org.shanoir.ng.exception.error.ErrorModel;
 import org.shanoir.ng.model.User;
-import org.shanoir.ng.model.error.ErrorDetails;
-import org.shanoir.ng.model.error.ErrorModel;
 import org.shanoir.ng.model.error.FieldErrorMap;
-import org.shanoir.ng.model.exception.RestServiceException;
-import org.shanoir.ng.model.exception.ShanoirUsersException;
 import org.shanoir.ng.model.validation.EditableOnlyByValidator;
 import org.shanoir.ng.model.validation.UniqueValidator;
 import org.shanoir.ng.service.UserService;

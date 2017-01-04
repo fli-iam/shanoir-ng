@@ -2,7 +2,6 @@
     <img [src]="shanoirNGImageUrl">
     <div class="LoginComponent-loginContent LoginContent">
         <h2 i18n="Login form|Title">Welcome to Shanoir</h2>
-        <span *ngIf="error">{{error}}</span>
         <form [formGroup]="loginForm" (ngSubmit)="login()" class="LoginContent-loginForm LoginForm">
             <input type="text"  
                    id="email"  
@@ -16,6 +15,8 @@
                    placeholder="Password" i18n-placeholder="Login form|Password label"/>  
             <button type="submit" i18n="Login form|Button label" class="Button LoginForm-submit">Login</button>
         </form>
+        <label *ngIf="errorCode=='101'" class="LoginForm-error" i18n="Login form|BadCredentials label">Bad credentials.</label>
+        <label *ngIf="errorCode=='102'" class="LoginForm-error" i18n="Login form|ExpiredAccount label">Your account has expired. Please contact your administrator.</label>
     </div>
     <a routerLink="" routerLinkActive="active">Create an account</a>
 </div>

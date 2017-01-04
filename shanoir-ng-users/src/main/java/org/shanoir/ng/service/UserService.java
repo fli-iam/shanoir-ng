@@ -2,8 +2,8 @@ package org.shanoir.ng.service;
 
 import java.util.List;
 
+import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.User;
-import org.shanoir.ng.model.exception.ShanoirUsersException;
 import org.shanoir.ng.model.validation.UniqueCheckableService;
 
 /**

@@ -29,7 +29,7 @@ export class LoginService {
             })
             .catch((error) => {
                 if(error.status === 401) {
-                    this.accountEventsService.logout({error: error.text()});
+                    this.accountEventsService.logout({error: error.json()});
                 }
                 return Observable.throw(error.message || error || 'Authentication fails');
             });

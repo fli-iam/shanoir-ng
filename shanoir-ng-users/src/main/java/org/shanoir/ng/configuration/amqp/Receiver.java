@@ -2,8 +2,8 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.util.concurrent.CountDownLatch;
 
+import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.User;
-import org.shanoir.ng.model.exception.ShanoirUsersException;
 import org.shanoir.ng.service.UserService;
 import org.shanoir.ng.service.impl.AuthenticationServiceImpl;
 import org.slf4j.Logger;

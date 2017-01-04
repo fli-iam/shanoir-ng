@@ -3,8 +3,8 @@ package org.shanoir.ng.service.impl;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.User;
-import org.shanoir.ng.model.exception.ShanoirUsersException;
 import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.repository.UserRepositorySpecific;
 import org.shanoir.ng.service.UserService;
@@ -100,7 +100,6 @@ public class UserServiceImpl implements UserService {
 		userDb.setFirstName(user.getFirstName());
 		userDb.setLastName(user.getLastName());
 		// TODO: add motivation (user account request)
-		userDb.setPassword(user.getPassword());
 		userDb.setRole(user.getRole());
 		userDb.setMedical(user.isMedical());
 		userDb.setUsername(user.getUsername());

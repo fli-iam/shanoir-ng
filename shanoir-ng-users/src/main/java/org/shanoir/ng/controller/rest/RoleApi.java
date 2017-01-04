@@ -2,8 +2,8 @@ package org.shanoir.ng.controller.rest;
 
 import java.util.List;
 
+import org.shanoir.ng.exception.error.ErrorModel;
 import org.shanoir.ng.model.Role;
-import org.shanoir.ng.model.error.ErrorModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;

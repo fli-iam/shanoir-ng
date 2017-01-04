@@ -5,6 +5,9 @@ import javax.servlet.http.HttpSession;
 
 import org.shanoir.ng.dto.LoginDTO;
 import org.shanoir.ng.dto.UserDTO;
+import org.shanoir.ng.exception.RestServiceException;
+import org.shanoir.ng.exception.ShanoirUsersException;
+import org.shanoir.ng.exception.error.ErrorModel;
 import org.shanoir.ng.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,14 +32,14 @@ public class AuthenticationController {
 
 	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
 	@ResponseBody
-	public UserDTO authenticate(@RequestBody final LoginDTO loginDTO, final HttpServletResponse response) throws Exception {
-		return authenticationService.authenticate(loginDTO, response);
+	public UserDTO authenticate(@RequestBody final LoginDTO loginDTO, final HttpServletResponse response)
+			throws RestServiceException {
+		try {
+			return authenticationService.authenticate(loginDTO, response);
+		} catch (ShanoirUsersException sue) {
+			throw new RestServiceException(new ErrorModel(401, "" + sue.getErrorCode(), null));
+		}
 	}
-
-	// @RequestMapping(value = "/logout", method = RequestMethod.GET)
-	// public void logout(){
-	// authenticationService.logout();
-	// }
 
 	@RequestMapping(value = "/logout", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.NO_CONTENT)

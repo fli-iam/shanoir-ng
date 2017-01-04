@@ -1,7 +1,7 @@
 package org.shanoir.ng.controller;
 
-import org.shanoir.ng.model.error.ErrorModel;
-import org.shanoir.ng.model.exception.RestServiceException;
+import org.shanoir.ng.exception.RestServiceException;
+import org.shanoir.ng.exception.error.ErrorModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
-package org.shanoir.ng.model.exception;
+package org.shanoir.ng.exception;
 
-import org.shanoir.ng.model.error.ErrorModel;
+import org.shanoir.ng.exception.error.ErrorModel;
 
 public class RestServiceException extends Exception {
 
@@ -24,13 +24,6 @@ public class RestServiceException extends Exception {
 	 */
 	public ErrorModel getErrorModel() {
 		return errorModel;
-	}
-
-	/**
-	 * @param errorModel the errorModel to set
-	 */
-	public void setErrorModel(ErrorModel errorModel) {
-		this.errorModel = errorModel;
 	}
 
 }

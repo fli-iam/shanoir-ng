@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.shanoir.ng.dto.LoginDTO;
 import org.shanoir.ng.dto.UserDTO;
+import org.shanoir.ng.exception.ShanoirUsersException;
 
 /**
  * Authentication service.
@@ -20,9 +21,9 @@ public interface AuthenticationService {
 	 * @param response HTTP response.
 	 * 
 	 * @return connected user - null if connection fails.
-	 * @throws Exception authentication exception
+	 * @throws ShanoirUsersException authentication exception.
 	 */
-	UserDTO authenticate(LoginDTO loginDTO, HttpServletResponse response) throws Exception;
+	UserDTO authenticate(LoginDTO loginDTO, HttpServletResponse response) throws ShanoirUsersException;
 	
     /**
      * Logout a user:

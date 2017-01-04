@@ -3,17 +3,12 @@ package org.shanoir.ng.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Utility class
  *
  * @author jlouis
  */
 public class Utils {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
     /**
      * Convert Iterable to List
