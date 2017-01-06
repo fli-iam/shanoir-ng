@@ -52,7 +52,7 @@ public class UserServiceTest {
     //@Test
     public void cancelRequestTest() throws ShanoirUsersException {
     	final User user = ModelsUtil.createUser();
-        user.setAccountRequest(true);
+        user.setAccountRequestDemand(true);
 		given(userRepository.findOne(USER_ID)).willReturn(user);
 		
         userService.handleAccountRequest(USER_ID, false);
@@ -62,13 +62,13 @@ public class UserServiceTest {
     @Test
     public void confirmRequestTest() throws ShanoirUsersException {
     	final User user = ModelsUtil.createUser();
-        user.setAccountRequest(true);
+        user.setAccountRequestDemand(true);
 		given(userRepository.findOne(USER_ID)).willReturn(user);
 		
         userService.handleAccountRequest(USER_ID, true);
         
         Mockito.verify(userRepository,Mockito.times(1)).findOne(Mockito.anyLong());
-        user.setAccountRequest(false);
+        user.setAccountRequestDemand(false);
         Mockito.verify(userRepository,Mockito.times(1)).save(user);
     }
 

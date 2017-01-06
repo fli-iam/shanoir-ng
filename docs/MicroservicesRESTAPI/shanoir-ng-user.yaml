@@ -157,7 +157,7 @@ definitions:
     type: object
     required:
       - id
-      - accountRequest
+      - accountRequestDemand
       - canAccessToDicomAssociation
       - creationDate
       - email
@@ -170,7 +170,7 @@ definitions:
       id:
         type: integer
         format: int64
-      accountRequest:
+      accountRequestDemand:
         type: boolean
       accountRequestInfo:
         $ref: "#/definitions/AccountRequestInfo"

@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
 			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
 		}
 		if (acceptRequest) {
-			user.setAccountRequest(false);
+			user.setAccountRequestDemand(false);
 			try {
 				userRepository.save(user);
 			} catch (Exception e) {

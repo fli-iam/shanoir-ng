@@ -43,7 +43,7 @@ public class User extends HalEntity implements UserDetails {
 	@GeneratedValue
 	private Long id;
 
-	private boolean accountRequest;
+	private boolean accountRequestDemand;
 
 	@OneToOne(orphanRemoval = true)
 	private AccountRequestInfo accountRequestInfo;
@@ -69,9 +69,6 @@ public class User extends HalEntity implements UserDetails {
 
 	@NotNull
 	private boolean isMedical;
-
-	@EditableOnlyBy(roles = { "adminRole" })
-	private boolean isOnDemand;
 
 	@EditableOnlyBy(roles = { "adminRole" })
 	private boolean isSecondExpirationNotificationSent;
@@ -120,18 +117,18 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @return the accountRequest
+	 * @return the accountRequestDemand
 	 */
-	public boolean isAccountRequest() {
-		return accountRequest;
+	public boolean isAccountRequestDemand() {
+		return accountRequestDemand;
 	}
 
 	/**
-	 * @param accountRequest
-	 *            the accountRequest to set
+	 * @param accountRequestDemand
+	 *            the accountRequestDemand to set
 	 */
-	public void setAccountRequest(boolean accountRequest) {
-		this.accountRequest = accountRequest;
+	public void setAccountRequestDemand(boolean accountRequestDemand) {
+		this.accountRequestDemand = accountRequestDemand;
 	}
 
 	/**
@@ -252,21 +249,6 @@ public class User extends HalEntity implements UserDetails {
 	 */
 	public void setMedical(boolean isMedical) {
 		this.isMedical = isMedical;
-	}
-
-	/**
-	 * @return the isOnDemand
-	 */
-	public boolean isOnDemand() {
-		return isOnDemand;
-	}
-
-	/**
-	 * @param isOnDemand
-	 *            the isOnDemand to set
-	 */
-	public void setOnDemand(boolean isOnDemand) {
-		this.isOnDemand = isOnDemand;
 	}
 
 	/**
