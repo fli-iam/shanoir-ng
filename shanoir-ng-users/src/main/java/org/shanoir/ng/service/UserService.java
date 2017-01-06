@@ -51,6 +51,15 @@ public interface UserService extends UniqueCheckableService<User>{
      */
     User findByUsername(String username);
 
+	/**
+	 * Handles an account request.
+	 * 
+	 * @param userId user id.
+	 * @param acceptRequest answer acceptance (accept or deny).
+	 * @throws ShanoirUsersException
+	 */
+	void handleAccountRequest(Long userId, boolean acceptRequest) throws ShanoirUsersException;
+	
     /**
      * Save a user.
      *

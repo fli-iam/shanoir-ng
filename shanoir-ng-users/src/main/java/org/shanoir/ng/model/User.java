@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -42,35 +43,40 @@ public class User extends HalEntity implements UserDetails {
 	@GeneratedValue
 	private Long id;
 
+	private boolean accountRequest;
+
+	@OneToOne(orphanRemoval = true)
+	private AccountRequestInfo accountRequestInfo;
+
 	private boolean canAccessToDicomAssociation;
 
-	@EditableOnlyBy(roles={"adminRole"})
+	@EditableOnlyBy(roles = { "adminRole" })
 	private Date creationDate;
 
 	@NotBlank
-	@Column(unique=true)
-	@Unique 
+	@Column(unique = true)
+	@Unique
 	private String email;
 
-	@EditableOnlyBy(roles={"adminRole"})
+	@EditableOnlyBy(roles = { "adminRole" })
 	private Date expirationDate;
 
 	@NotBlank
 	private String firstName;
 
-	@EditableOnlyBy(roles={"adminRole"})
+	@EditableOnlyBy(roles = { "adminRole" })
 	private boolean isFirstExpirationNotificationSent;
 
 	@NotNull
 	private boolean isMedical;
 
-	@EditableOnlyBy(roles={"adminRole"})
+	@EditableOnlyBy(roles = { "adminRole" })
 	private boolean isOnDemand;
 
-	@EditableOnlyBy(roles={"adminRole"})
+	@EditableOnlyBy(roles = { "adminRole" })
 	private boolean isSecondExpirationNotificationSent;
 
-	@EditableOnlyBy(roles={"adminRole"})
+	@EditableOnlyBy(roles = { "adminRole" })
 	private Date lastLogin;
 
 	@NotNull
@@ -79,7 +85,7 @@ public class User extends HalEntity implements UserDetails {
 	private String password;
 
 	@NotBlank
-	@Column(unique=true)
+	@Column(unique = true)
 	@Unique
 	private String username;
 
@@ -87,9 +93,8 @@ public class User extends HalEntity implements UserDetails {
 
 	@ManyToOne
 	@NotNull
-	@EditableOnlyBy(roles={"adminRole"})
+	@EditableOnlyBy(roles = { "adminRole" })
 	private Role role;
-
 
 	/**
 	 * Init HATEOAS links
@@ -97,16 +102,6 @@ public class User extends HalEntity implements UserDetails {
 	@PostLoad
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "user/" + getId());
-	}
-
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (!(obj instanceof User)) return false;
-		User user = (User) obj;
-		if (this.getId() == null) return user.getId() == null;
-		return this.getId().equals(user.getId());
 	}
 
 	/**
@@ -117,10 +112,41 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param id the id to set
+	 * @param id
+	 *            the id to set
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return the accountRequest
+	 */
+	public boolean isAccountRequest() {
+		return accountRequest;
+	}
+
+	/**
+	 * @param accountRequest
+	 *            the accountRequest to set
+	 */
+	public void setAccountRequest(boolean accountRequest) {
+		this.accountRequest = accountRequest;
+	}
+
+	/**
+	 * @return the accountRequestInfo
+	 */
+	public AccountRequestInfo getAccountRequestInfo() {
+		return accountRequestInfo;
+	}
+
+	/**
+	 * @param accountRequestInfo
+	 *            the accountRequestInfo to set
+	 */
+	public void setAccountRequestInfo(AccountRequestInfo accountRequestInfo) {
+		this.accountRequestInfo = accountRequestInfo;
 	}
 
 	/**
@@ -131,7 +157,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param canAccessToDicomAssociation the canAccessToDicomAssociation to set
+	 * @param canAccessToDicomAssociation
+	 *            the canAccessToDicomAssociation to set
 	 */
 	public void setCanAccessToDicomAssociation(boolean canAccessToDicomAssociation) {
 		this.canAccessToDicomAssociation = canAccessToDicomAssociation;
@@ -145,7 +172,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param creationDate the creationDate to set
+	 * @param creationDate
+	 *            the creationDate to set
 	 */
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
@@ -159,7 +187,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param email the email to set
+	 * @param email
+	 *            the email to set
 	 */
 	public void setEmail(String email) {
 		this.email = email;
@@ -173,7 +202,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param expirationDate the expirationDate to set
+	 * @param expirationDate
+	 *            the expirationDate to set
 	 */
 	public void setExpirationDate(Date expirationDate) {
 		this.expirationDate = expirationDate;
@@ -187,7 +217,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param firstName the firstName to set
+	 * @param firstName
+	 *            the firstName to set
 	 */
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
@@ -201,7 +232,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param isFirstExpirationNotificationSent the isFirstExpirationNotificationSent to set
+	 * @param isFirstExpirationNotificationSent
+	 *            the isFirstExpirationNotificationSent to set
 	 */
 	public void setFirstExpirationNotificationSent(boolean isFirstExpirationNotificationSent) {
 		this.isFirstExpirationNotificationSent = isFirstExpirationNotificationSent;
@@ -215,7 +247,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param isMedical the isMedical to set
+	 * @param isMedical
+	 *            the isMedical to set
 	 */
 	public void setMedical(boolean isMedical) {
 		this.isMedical = isMedical;
@@ -229,7 +262,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param isOnDemand the isOnDemand to set
+	 * @param isOnDemand
+	 *            the isOnDemand to set
 	 */
 	public void setOnDemand(boolean isOnDemand) {
 		this.isOnDemand = isOnDemand;
@@ -243,7 +277,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param isSecondExpirationNotificationSent the isSecondExpirationNotificationSent to set
+	 * @param isSecondExpirationNotificationSent
+	 *            the isSecondExpirationNotificationSent to set
 	 */
 	public void setSecondExpirationNotificationSent(boolean isSecondExpirationNotificationSent) {
 		this.isSecondExpirationNotificationSent = isSecondExpirationNotificationSent;
@@ -257,7 +292,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param lastLogin the lastLogin to set
+	 * @param lastLogin
+	 *            the lastLogin to set
 	 */
 	public void setLastLogin(Date lastLogin) {
 		this.lastLogin = lastLogin;
@@ -271,7 +307,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param lastName the lastName to set
+	 * @param lastName
+	 *            the lastName to set
 	 */
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
@@ -286,7 +323,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param password the password to set
+	 * @param password
+	 *            the password to set
 	 */
 	@JsonProperty
 	public void setPassword(String password) {
@@ -301,7 +339,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param role the role to set
+	 * @param role
+	 *            the role to set
 	 */
 	public void setRole(Role role) {
 		this.role = role;
@@ -315,7 +354,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param teamName the teamName to set
+	 * @param teamName
+	 *            the teamName to set
 	 */
 	public void setTeamName(String teamName) {
 		this.teamName = teamName;
@@ -329,7 +369,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param username the username to set
+	 * @param username
+	 *            the username to set
 	 */
 	public void setUsername(String username) {
 		this.username = username;

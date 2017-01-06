@@ -10,6 +10,7 @@ import org.shanoir.ng.exception.RestServiceException;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorDetails;
 import org.shanoir.ng.exception.error.ErrorModel;
+import org.shanoir.ng.exception.error.ErrorModelCode;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.error.FieldErrorMap;
 import org.shanoir.ng.model.validation.EditableOnlyByValidator;
@@ -65,6 +66,19 @@ public class UserApiController implements UserApi {
         }
         return new ResponseEntity<List<User>>(users, HttpStatus.OK);
     }
+
+    public ResponseEntity<Void> handleAccountRequest(@ApiParam(value = "id of the user",required=true ) @PathVariable("userId") Long userId,
+            @ApiParam(value = "user account answer" ,required=true ) @RequestBody Boolean acceptRequest) {
+        try {
+            userService.handleAccountRequest(userId, acceptRequest);
+        } catch (ShanoirUsersException e) {
+        	if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
+        		return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        	}
+        	return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+	}
 
     @Override
     public ResponseEntity<User> saveNewUser(
@@ -126,8 +140,7 @@ public class UserApiController implements UserApi {
         return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
 
-
-    /**
+    /*
      * Get access rights errors
      *
      * @param user
@@ -139,8 +152,7 @@ public class UserApiController implements UserApi {
         return accessErrors;
     }
 
-
-    /**
+    /*
      * Get access rights errors
      *
      * @param user
@@ -150,8 +162,7 @@ public class UserApiController implements UserApi {
     	return new EditableOnlyByValidator<User>().validate(user);
     }
 
-
-	/**
+	/*
 	 * Get unique constraint errors
 	 *
 	 * @param user

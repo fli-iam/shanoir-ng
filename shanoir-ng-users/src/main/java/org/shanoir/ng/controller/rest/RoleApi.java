@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @Api(value = "role", description = "the role API")
+@RequestMapping("/role")
 public interface RoleApi {
 
 	@ApiOperation(value = "", notes = "Returns all the roles", response = Role.class, tags = {})
@@ -22,7 +23,7 @@ public interface RoleApi {
 			@ApiResponse(code = 200, message = "founded roles", response = Role.class, responseContainer = "List"),
 			@ApiResponse(code = 204, message = "no role founded", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/role/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAuthority('adminRole')")
 	ResponseEntity<List<Role>> findRoles();
 

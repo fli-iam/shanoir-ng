@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.exception.ShanoirUsersException;
+import org.shanoir.ng.exception.error.ErrorModelCode;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.UserService;
@@ -18,8 +19,18 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * User service implementation.
+ * 
+ * @author msimon
+ *
+ */
 @Service
 public class UserServiceImpl implements UserService {
+
+	/**
+	 * Logger
+	 */
 	private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	@Autowired
@@ -29,44 +40,64 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Override
-	public void deleteById(Long id) {
+	public void deleteById(final Long id) {
 		userRepository.delete(id);
 	}
-	
+
 	@Override
 	public List<User> findAll() {
 		return Utils.toList(userRepository.findAll());
 	}
 
 	@Override
-	public List<User> findBy(String fieldName, Object value) {
+	public List<User> findBy(final String fieldName, final Object value) {
 		return userRepository.findBy(fieldName, value);
 	}
-	
+
 	@Override
-	public User findByEmail(String email) {
+	public User findByEmail(final String email) {
 		return userRepository.findByEmail(email);
 	}
 
 	@Override
-	public User findById(Long id) {
+	public User findById(final Long id) {
 		return userRepository.findOne(id);
 	}
 
 	@Override
-	public User findByUsername(String username) {
+	public User findByUsername(final String username) {
 		return userRepository.findByUsername(username);
 	}
 
 	@Override
-	public User save(User user) {
-		User savedUser = userRepository.save(user);
+	public void handleAccountRequest(final Long userId, final boolean acceptRequest) throws ShanoirUsersException {
+		final User user = userRepository.findOne(userId);
+		if (user == null) {
+			LOG.error("User with id " + userId + " not found");
+			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
+		}
+		if (acceptRequest) {
+			user.setAccountRequest(false);
+			try {
+				userRepository.save(user);
+			} catch (Exception e) {
+				ShanoirUsersException.logAndThrow(LOG,
+						"Error while confirming user account request with id '" + userId + "': " + e.getMessage());
+			}
+		} else {
+			// TODO: what to do? remove user?
+		}
+	}
+
+	@Override
+	public User save(final User user) {
+		final User savedUser = userRepository.save(user);
 		updateShanoirClassic(savedUser);
 		return savedUser;
 	}
 
 	@Override
-	public User update(User user) throws ShanoirUsersException {
+	public User update(final User user) throws ShanoirUsersException {
 		final User userDb = userRepository.findOne(user.getId());
 		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
 		userDb.setEmail(user.getEmail());
@@ -86,7 +117,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void updateFromShanoirOld(User user) throws ShanoirUsersException {
+	public void updateFromShanoirOld(final User user) throws ShanoirUsersException {
 		if (user.getId() == null) {
 			throw new IllegalArgumentException("user id cannot be null");
 		}
@@ -107,20 +138,25 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-	/**
-	 * Update Shanoir Classic
+	/*
+	 * Update Shanoir Classic.
+	 * 
 	 * @param user
+	 * 
 	 * @return false if it fails, true if it succeed
 	 */
-	private boolean updateShanoirClassic(User user) {
+	private boolean updateShanoirClassic(final User user) {
 		try {
 			LOG.info("Send update to shanoir classic");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(), new ObjectMapper().writeValueAsString(user));
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(),
+					new ObjectMapper().writeValueAsString(user));
 			return true;
 		} catch (AmqpException e) {
-			LOG.error("Cannot send user " + user.getId() + " save/update to Shanoir Classic on queue : " + RabbitMqConfiguration.queueOut().getName(), e);
+			LOG.error("Cannot send user " + user.getId() + " save/update to Shanoir Classic on queue : "
+					+ RabbitMqConfiguration.queueOut().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send user " + user.getId() + " save/update because of an error while serialize user. ", e);
+			LOG.error("Cannot send user " + user.getId() + " save/update because of an error while serialize user. ",
+					e);
 		}
 		return false;
 	}

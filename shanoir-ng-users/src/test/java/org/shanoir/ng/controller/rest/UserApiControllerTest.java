@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.service.UserService;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -46,13 +47,26 @@ public class UserApiControllerTest {
 	private UserService userServiceMock;
 
 	@Before
-	public void setup() {
+	public void setup() throws ShanoirUsersException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
+		doNothing().when(userServiceMock).handleAccountRequest(Mockito.anyLong(), Mockito.anyBoolean());
 		doNothing().when(userServiceMock).deleteById(1L);
 		given(userServiceMock.findAll()).willReturn(Arrays.asList(new User()));
 		given(userServiceMock.findById(1L)).willReturn(new User());
 		given(userServiceMock.save(Mockito.mock(User.class))).willReturn(new User());
+	}
+
+	@Test
+	@WithMockUser(authorities = { "adminRole" })
+	public void confirmRequestTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.patch("/user/1/accountrequest").header("X-XSRF-TOKEN", "test")
+				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content("true"))
+				.andExpect(status().isNoContent());
+		
+		mvc.perform(MockMvcRequestBuilders.patch("/user/1/accountrequest").header("X-XSRF-TOKEN", "test")
+				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content("false"))
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -74,7 +88,7 @@ public class UserApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser(authorities={"adminRole"})
+	@WithMockUser(authorities = { "adminRole" })
 	public void saveNewUserTest() throws Exception {
 		mvc.perform(
 				MockMvcRequestBuilders.post("/user").header("X-XSRF-TOKEN", "test").accept(MediaType.APPLICATION_JSON)
@@ -83,7 +97,7 @@ public class UserApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser(authorities={"adminRole"})
+	@WithMockUser(authorities = { "adminRole" })
 	public void updateUserTest() throws Exception {
 		mvc.perform(
 				MockMvcRequestBuilders.put("/user/1").header("X-XSRF-TOKEN", "test").accept(MediaType.APPLICATION_JSON)

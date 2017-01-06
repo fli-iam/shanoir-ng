@@ -49,6 +49,29 @@ public class UserServiceTest {
 		given(userRepository.findByUsername(ModelsUtil.USER_LOGIN)).willReturn(ModelsUtil.createUser());
 	}
 
+    //@Test
+    public void cancelRequestTest() throws ShanoirUsersException {
+    	final User user = ModelsUtil.createUser();
+        user.setAccountRequest(true);
+		given(userRepository.findOne(USER_ID)).willReturn(user);
+		
+        userService.handleAccountRequest(USER_ID, false);
+        // TODO
+    }
+
+    @Test
+    public void confirmRequestTest() throws ShanoirUsersException {
+    	final User user = ModelsUtil.createUser();
+        user.setAccountRequest(true);
+		given(userRepository.findOne(USER_ID)).willReturn(user);
+		
+        userService.handleAccountRequest(USER_ID, true);
+        
+        Mockito.verify(userRepository,Mockito.times(1)).findOne(Mockito.anyLong());
+        user.setAccountRequest(false);
+        Mockito.verify(userRepository,Mockito.times(1)).save(user);
+    }
+
     @Test
     public void deleteByIdTest() throws ShanoirUsersException {
         userService.deleteById(USER_ID);
@@ -90,6 +113,16 @@ public class UserServiceTest {
         Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(user.getFirstName()));
         
         Mockito.verify(userRepository,Mockito.times(1)).findByUsername(Mockito.anyString());
+    }
+
+    @Test(expected = ShanoirUsersException.class)
+    public void handleAccountRequestBadUserIdTest() throws ShanoirUsersException {
+		given(userRepository.findOne(USER_ID)).willReturn(null);
+		
+        userService.handleAccountRequest(USER_ID, true);
+        
+        Mockito.verify(userRepository,Mockito.times(1)).findOne(Mockito.anyLong());
+        Mockito.verify(userRepository,Mockito.times(0)).save(Mockito.any(User.class));
     }
 
     @Test

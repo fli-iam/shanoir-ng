@@ -9,6 +9,12 @@ import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Role service implementation.
+ *
+ * @author jlouis
+ *
+ */
 @Service
 public class RoleServiceImpl implements RoleService {
 

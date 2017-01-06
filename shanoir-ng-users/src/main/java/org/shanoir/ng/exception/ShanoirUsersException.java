@@ -55,7 +55,7 @@ public class ShanoirUsersException extends Exception {
 	 * @throws ShanoirUsersException
 	 */
 	public static void logAndThrow(final Logger logger, final String message) throws ShanoirUsersException {
-		ShanoirUsersException e = new ShanoirUsersException(message);
+		final ShanoirUsersException e = new ShanoirUsersException(message);
 		logger.error(message, e);
 		throw e;
 	}

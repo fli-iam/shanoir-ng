@@ -25,6 +25,7 @@ import io.swagger.annotations.ApiResponses;
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-11-18T15:36:13.002Z")
 
 @Api(value = "user", description = "the user API")
+@RequestMapping("/user")
 public interface UserApi {
 
 	@ApiOperation(value = "", notes = "Deletes a user", response = Void.class, tags = {})
@@ -32,7 +33,7 @@ public interface UserApi {
 			@ApiResponse(code = 204, message = "user deleted", response = Void.class),
 			@ApiResponse(code = 404, message = "no user founded", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, method = RequestMethod.DELETE)
+	@RequestMapping(value = "/{userId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasAuthority('adminRole')")
 	ResponseEntity<Void> deleteUser(
 			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String xsrfToken,
@@ -43,7 +44,7 @@ public interface UserApi {
 			@ApiResponse(code = 200, message = "founded user", response = User.class),
 			@ApiResponse(code = 404, message = "no user founded", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "/{userId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("@currentUserServiceImpl.canAccessUser(#userId)")
 	ResponseEntity<User> findUserById(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId);
@@ -53,16 +54,29 @@ public interface UserApi {
 			@ApiResponse(code = 200, message = "founded users", response = User.class, responseContainer = "List"),
 			@ApiResponse(code = 204, message = "no user founded", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/user/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAuthority('adminRole')")
 	ResponseEntity<List<User>> findUsers();
 
-	@ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
+    @ApiOperation(value = "", notes = "Handles an account request", response = Void.class, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 204, message = "user confirmed", response = Void.class),
+        @ApiResponse(code = 404, message = "no user found", response = Void.class),
+        @ApiResponse(code = 500, message = "internal error", response = Void.class) })
+    @RequestMapping(value = "/{userId}/accountrequest",
+        produces = { "application/json" }, 
+        consumes = { "application/json" },
+        method = RequestMethod.PATCH)
+	@PreAuthorize("hasAuthority('adminRole')")
+    ResponseEntity<Void> handleAccountRequest(@ApiParam(value = "id of the user",required=true ) @PathVariable("userId") Long userId,
+        @ApiParam(value = "user account answer" ,required=true ) @RequestBody Boolean acceptRequest);
+
+    @ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "created user", response = User.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/user", produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.POST)
+	@RequestMapping(produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.POST)
 	ResponseEntity<User> saveNewUser(
 			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
 			@ApiParam(value = "the user to create", required = true) @RequestBody User user,
@@ -73,7 +87,7 @@ public interface UserApi {
 			@ApiResponse(code = 204, message = "user updated", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/user/{userId}", produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.PUT)
+	@RequestMapping(value = "/{userId}", produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasAnyAuthority('adminRole', 'medicalRole', 'expertRole', 'userRole', 'guestRole')")
 	ResponseEntity<Void> updateUser(
 			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
