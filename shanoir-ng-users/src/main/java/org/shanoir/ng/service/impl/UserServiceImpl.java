@@ -6,7 +6,6 @@ import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.repository.UserRepository;
-import org.shanoir.ng.repository.UserRepositorySpecific;
 import org.shanoir.ng.service.UserService;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -29,9 +28,6 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private UserRepository userRepository;
 
-	@Autowired
-	private UserRepositorySpecific userRepositorySpecific;
-
 	@Override
 	public void deleteById(Long id) {
 		userRepository.delete(id);
@@ -44,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<User> findBy(String fieldName, Object value) {
-		return userRepositorySpecific.findBy(fieldName, value);
+		return userRepository.findBy(fieldName, value);
 	}
 	
 	@Override
@@ -70,6 +66,26 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public User update(User user) throws ShanoirUsersException {
+		final User userDb = userRepository.findOne(user.getId());
+		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
+		userDb.setEmail(user.getEmail());
+		userDb.setExpirationDate(user.getExpirationDate());
+		userDb.setFirstName(user.getFirstName());
+		userDb.setLastName(user.getLastName());
+		// TODO: add motivation (user account request)
+		userDb.setRole(user.getRole());
+		userDb.setMedical(user.isMedical());
+		userDb.setUsername(user.getUsername());
+		try {
+			userRepository.save(userDb);
+		} catch (Exception e) {
+			ShanoirUsersException.logAndThrow(LOG, "Error while updating user: " + e.getMessage());
+		}
+		return userDb;
+	}
+
+	@Override
 	public void updateFromShanoirOld(User user) throws ShanoirUsersException {
 		if (user.getId() == null) {
 			throw new IllegalArgumentException("user id cannot be null");
@@ -89,26 +105,6 @@ public class UserServiceImpl implements UserService {
 		} catch (Exception e) {
 			ShanoirUsersException.logAndThrow(LOG, "Error while updating user from Shanoir Old: " + e.getMessage());
 		}
-	}
-
-	@Override
-	public User update(User user) throws ShanoirUsersException {
-		final User userDb = userRepository.findOne(user.getId());
-		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
-		userDb.setEmail(user.getEmail());
-		userDb.setExpirationDate(user.getExpirationDate());
-		userDb.setFirstName(user.getFirstName());
-		userDb.setLastName(user.getLastName());
-		// TODO: add motivation (user account request)
-		userDb.setRole(user.getRole());
-		userDb.setMedical(user.isMedical());
-		userDb.setUsername(user.getUsername());
-		try {
-			userRepository.save(userDb);
-		} catch (Exception e) {
-			ShanoirUsersException.logAndThrow(LOG, "Error while updating user: " + e.getMessage());
-		}
-		return userDb;
 	}
 
 	/**

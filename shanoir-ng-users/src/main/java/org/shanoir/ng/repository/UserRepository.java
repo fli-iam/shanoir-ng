@@ -8,8 +8,7 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author jlouis
  */
-public interface UserRepository extends CrudRepository<User, Long> {
-
+public interface UserRepository extends CrudRepository<User, Long>, UserRepositoryCustom {
 
     /**
      * Find user by its email address

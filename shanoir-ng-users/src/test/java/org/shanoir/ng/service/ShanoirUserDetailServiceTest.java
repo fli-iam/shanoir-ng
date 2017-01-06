@@ -10,7 +10,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.impl.ShanoirUserDetailsServiceImpl;
-import org.shanoir.ng.utils.LoginUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -31,9 +30,9 @@ public class ShanoirUserDetailServiceTest {
 
     @Test
     public void loadByUserNameTest(){
-    	Mockito.when(userRepository.findByUsername(LoginUtil.NEW_USER_LOGIN)).thenReturn(ModelsUtil.createUser());
+    	Mockito.when(userRepository.findByUsername(ModelsUtil.NEW_USER_LOGIN)).thenReturn(ModelsUtil.createUser());
 
-        final String username = LoginUtil.NEW_USER_LOGIN;
+        final String username = ModelsUtil.NEW_USER_LOGIN;
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         Assert.assertNotNull(userDetails);
         Assert.assertTrue(userDetails.getClass().isAssignableFrom(User.class));

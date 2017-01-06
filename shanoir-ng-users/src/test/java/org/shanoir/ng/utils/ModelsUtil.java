@@ -14,6 +14,24 @@ import org.shanoir.ng.model.User;
  */
 public final class ModelsUtil {
 
+	// Role data
+	public static final int ROLE_ACCESS_LEVEL = 3;
+	public static final String ROLE_DISPLAY_NAME = "guest";
+	public static final String ROLE_NAME = "guest";
+	
+	// User data
+	public static final String USER_EMAIL = "toto@to.to";
+	public static final String USER_FIRSTNAME = "toto";
+	public static final String USER_LASTNAME = "toto";
+	
+	// Login/password
+	public static final String NEW_USER_LOGIN = "user";
+	public static final String NEW_USER_PASSWORD = "password";
+	public static final String USER_LOGIN = "admin";
+	public static final String USER_PASSWORD = "D0-483351E2-30";
+	public static final String USER_LOGIN_GUEST = "wopa";
+	public static final String USER_PASSWORD_GUEST = "1117DC-36DE-34";
+	
 	/**
 	 * Create a role.
 	 * 
@@ -21,9 +39,9 @@ public final class ModelsUtil {
 	 */
 	public static Role createRole() {
 		final Role role = new Role();
-		role.setName("guest");
-		role.setAccessLevel(3);
-		role.setDisplayName("guest");
+		role.setAccessLevel(ROLE_ACCESS_LEVEL);
+		role.setDisplayName(ROLE_DISPLAY_NAME);
+		role.setName(ROLE_NAME);
 		return role;
 	}
 	
@@ -45,12 +63,12 @@ public final class ModelsUtil {
 	public static User createUser(final Role role) {
 		final User user = new User();
 		user.setCreationDate(new Date());
-		user.setEmail("toto@to.to");
-		user.setFirstName("toto");
-		user.setLastName("toto");
-		user.setPassword(LoginUtil.NEW_USER_PASSWORD);
+		user.setEmail(USER_EMAIL);
+		user.setFirstName(USER_FIRSTNAME);
+		user.setLastName(USER_LASTNAME);
+		user.setPassword(NEW_USER_PASSWORD);
 		user.setRole(role);
-		user.setUsername(LoginUtil.NEW_USER_LOGIN);
+		user.setUsername(NEW_USER_LOGIN);
 		return user;
 	}
 	

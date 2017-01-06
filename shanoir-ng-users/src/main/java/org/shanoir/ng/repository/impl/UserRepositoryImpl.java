@@ -1,4 +1,4 @@
-package org.shanoir.ng.repository;
+package org.shanoir.ng.repository.impl;
 
 import java.util.List;
 
@@ -6,10 +6,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.repository.UserRepositoryCustom;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserRepositorySpecificImpl implements UserRepositorySpecific {
+public class UserRepositoryImpl implements UserRepositoryCustom {
 
 	@PersistenceContext
     private EntityManager em;

@@ -12,5 +12,10 @@ import org.shanoir.ng.model.Role;
  */
 public interface RoleService {
 
-		List<Role> findAll();
+    /**
+     * Get all the roles
+     * @return a list of roles
+     */
+	List<Role> findAll();
+	
 }

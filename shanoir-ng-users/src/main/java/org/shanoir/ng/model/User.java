@@ -47,7 +47,9 @@ public class User extends HalEntity implements UserDetails {
 	@EditableOnlyBy(roles={"adminRole"})
 	private Date creationDate;
 
-	@NotBlank @Unique @Column(unique=true)
+	@NotBlank
+	@Column(unique=true)
+	@Unique 
 	private String email;
 
 	@EditableOnlyBy(roles={"adminRole"})
@@ -76,7 +78,9 @@ public class User extends HalEntity implements UserDetails {
 
 	private String password;
 
-	@NotBlank @Unique @Column(unique=true)
+	@NotBlank
+	@Column(unique=true)
+	@Unique
 	private String username;
 
 	private String teamName;

@@ -84,7 +84,7 @@ public class UserApiControllerTest {
 
 	@Test
 	@WithMockUser(authorities={"adminRole"})
-	public void updateNewUserTest() throws Exception {
+	public void updateUserTest() throws Exception {
 		mvc.perform(
 				MockMvcRequestBuilders.put("/user/1").header("X-XSRF-TOKEN", "test").accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createUser())))

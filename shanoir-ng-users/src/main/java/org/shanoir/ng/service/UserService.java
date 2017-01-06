@@ -60,13 +60,6 @@ public interface UserService extends UniqueCheckableService<User>{
     User save(User user);
 
     /**
-     * Update a user from the old Shanoir
-     * @param user
-     * @throws ShanoirUsersException
-     */
-    void updateFromShanoirOld(User user) throws ShanoirUsersException;
-
-    /**
      * Update a user.
      *
      * @param user user to update.
@@ -74,5 +67,12 @@ public interface UserService extends UniqueCheckableService<User>{
      * @throws ShanoirUsersException
      */
     User update(User user) throws ShanoirUsersException;
+    
+    /**
+     * Update a user from the old Shanoir
+     * @param user
+     * @throws ShanoirUsersException
+     */
+    void updateFromShanoirOld(User user) throws ShanoirUsersException;
 
 }

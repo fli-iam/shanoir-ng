@@ -12,7 +12,6 @@ import org.mockito.Mockito;
 import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.service.UserService;
-import org.shanoir.ng.utils.LoginUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,7 +59,7 @@ public class UserApiControllerTestIT {
 	@Test
 	public void findUserByIdWithLogin() {
 		final BasicAuthorizationInterceptor basicAuthInterceptor = new BasicAuthorizationInterceptor(
-				LoginUtil.USER_LOGIN, LoginUtil.USER_PASSWORD);
+				ModelsUtil.USER_LOGIN, ModelsUtil.USER_PASSWORD);
 		this.restTemplate.getRestTemplate().getInterceptors().add(basicAuthInterceptor);
 		try {
 			final ResponseEntity<String> response = restTemplate.getForEntity("/user/1", String.class);
@@ -79,11 +78,24 @@ public class UserApiControllerTestIT {
 	@Test
 	public void findUsersWithLogin() {
 		final BasicAuthorizationInterceptor basicAuthInterceptor = new BasicAuthorizationInterceptor(
-				LoginUtil.USER_LOGIN, LoginUtil.USER_PASSWORD);
+				ModelsUtil.USER_LOGIN, ModelsUtil.USER_PASSWORD);
 		this.restTemplate.getRestTemplate().getInterceptors().add(basicAuthInterceptor);
 		try {
 			final ResponseEntity<String> response = restTemplate.getForEntity("/user/all", String.class);
 			assertEquals(HttpStatus.OK, response.getStatusCode());
+		} finally {
+			restTemplate.getRestTemplate().getInterceptors().remove(basicAuthInterceptor);
+		}
+	}
+
+	@Test
+	public void findUsersWithBadRole() {
+		final BasicAuthorizationInterceptor basicAuthInterceptor = new BasicAuthorizationInterceptor(
+				ModelsUtil.USER_LOGIN_GUEST, ModelsUtil.USER_PASSWORD_GUEST);
+		this.restTemplate.getRestTemplate().getInterceptors().add(basicAuthInterceptor);
+		try {
+			final ResponseEntity<String> response = restTemplate.getForEntity("/user/all", String.class);
+			assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 		} finally {
 			restTemplate.getRestTemplate().getInterceptors().remove(basicAuthInterceptor);
 		}
@@ -98,7 +110,7 @@ public class UserApiControllerTestIT {
 	@Test
 	public void saveNewUserWithLogin() {
 		final BasicAuthorizationInterceptor basicAuthInterceptor = new BasicAuthorizationInterceptor(
-				LoginUtil.USER_LOGIN, LoginUtil.USER_PASSWORD);
+				ModelsUtil.USER_LOGIN, ModelsUtil.USER_PASSWORD);
 		this.restTemplate.getRestTemplate().getInterceptors().add(basicAuthInterceptor);
 		try {
 			final HttpEntity<User> request = new HttpEntity<User>(createUser(), generateHeaders());
