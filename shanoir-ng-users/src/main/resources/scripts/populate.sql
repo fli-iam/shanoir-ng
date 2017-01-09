@@ -12,7 +12,7 @@ VALUES
 	(4,200,'Expert','expertRole');
 
 	
-INSERT INTO users (id, can_access_to_dicom_association, creation_date, email, first_name, last_login, last_name, password, username, role_id, is_medical, expiration_date, is_first_expiration_notification_sent, is_second_expiration_notification_sent, is_on_demand)
+INSERT INTO users (id, can_access_to_dicom_association, creation_date, email, first_name, last_login, last_name, password, username, role_id, is_medical, expiration_date, is_first_expiration_notification_sent, is_second_expiration_notification_sent, account_request_demand)
 VALUES 
 (1,1,'1970-01-01 01:00:00','noemail@noemail.fr','defaultUser','1970-01-01 01:00:00','defaultUser','nopass','defaultUser',3,0,NULL,0,0,0),
 (2,0,'1970-01-01 01:00:00','guest@irisa.fr','GUEST','2016-08-04 10:43:20','GUEST','2638F4-1292-11','guest',2,0,NULL,0,0,0),
