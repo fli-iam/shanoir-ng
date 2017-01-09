@@ -6,8 +6,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
@@ -38,10 +36,6 @@ public class User extends HalEntity implements UserDetails {
 	 * UID
 	 */
 	private static final long serialVersionUID = -5277815428510293236L;
-
-	@Id
-	@GeneratedValue
-	private Long id;
 
 	private boolean accountRequestDemand;
 
@@ -99,21 +93,6 @@ public class User extends HalEntity implements UserDetails {
 	@PostLoad
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "user/" + getId());
-	}
-
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
-
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	/**

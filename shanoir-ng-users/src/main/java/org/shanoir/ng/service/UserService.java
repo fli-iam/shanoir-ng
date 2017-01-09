@@ -13,7 +13,7 @@ import org.shanoir.ng.model.validation.UniqueCheckableService;
  * @author jlouis
  *
  */
-public interface UserService extends UniqueCheckableService<User>{
+public interface UserService extends UniqueCheckableService<User> {
 
 	/**
 	 * Delete a user

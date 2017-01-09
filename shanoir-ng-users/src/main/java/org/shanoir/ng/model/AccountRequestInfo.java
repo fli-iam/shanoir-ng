@@ -1,8 +1,6 @@
 package org.shanoir.ng.model;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -12,11 +10,7 @@ import javax.validation.constraints.NotNull;
  *
  */
 @Entity
-public class AccountRequestInfo {
-
-	@Id
-	@GeneratedValue
-	private Long id;
+public class AccountRequestInfo extends AbstractGenericItem {
 
 	@NotNull
 	private String contact;
@@ -35,20 +29,6 @@ public class AccountRequestInfo {
 
 	@NotNull
 	private String work;
-
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	/**
 	 * @return the contact

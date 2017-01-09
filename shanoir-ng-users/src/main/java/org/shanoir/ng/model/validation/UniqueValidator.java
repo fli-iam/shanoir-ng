@@ -6,18 +6,18 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.shanoir.ng.model.AbstractGenericItem;
 import org.shanoir.ng.model.error.FieldError;
 import org.shanoir.ng.model.error.FieldErrorMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-public class UniqueValidator <T> {
+public class UniqueValidator <T extends AbstractGenericItem> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UniqueValidator.class);
 
 	private UniqueCheckableService<T> service;
-
 
 	/**
 	 * @param service
@@ -26,7 +26,6 @@ public class UniqueValidator <T> {
 		super();
 		this.service = service;
 	}
-
 
 	/**
 	 * Validates what can't be done by Spring/Hibernate validation, in particular unique constraints
@@ -48,7 +47,7 @@ public class UniqueValidator <T> {
 						Object value = getter.invoke(entity);
 						List<T> foundedList = service.findBy(field.getName(), value);
 						// If found users and it is not the same current user
-						if (!foundedList.isEmpty() && !(foundedList.size() == 1 && foundedList.get(0).equals(entity))) {
+						if (!foundedList.isEmpty() && !(foundedList.size() == 1 && foundedList.get(0).getId().equals(entity.getId()))) {
 							List<FieldError> errors = new ArrayList<FieldError>();
 							errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", value));
 							errorMap.put(field.getName(), errors);

@@ -2,8 +2,6 @@ package org.shanoir.ng.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -15,16 +13,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Role
  */
 @Entity
-public class Role implements GrantedAuthority {
+public class Role extends AbstractGenericItem implements GrantedAuthority {
 
 	/**
 	 * UID
 	 */
 	private static final long serialVersionUID = -8021102195810091679L;
-
-	@Id
-	@GeneratedValue
-	private Long id;
 
 	@NotNull
 	private int accessLevel;
@@ -36,20 +30,6 @@ public class Role implements GrantedAuthority {
 	@NotBlank
 	@Column(unique = true)
 	private String name;
-
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	/**
 	 * @return the accessLevel
