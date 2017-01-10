@@ -4,8 +4,8 @@ import {GridOptions} from 'ag-grid/main';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import GridUtils from 'app/shared/utils/grid.utils';
-import {ClickableComponent} from "app/shared/utils/clickable.component";
-import {ClickableParentComponent} from "app/shared/utils/clickable.parent.component";
+import {ClickableComponent} from "../shared/clickable.component";
+import {ClickableParentComponent} from "../shared/clickable.parent.component";
 
 @Component({
     selector: 'user-list',

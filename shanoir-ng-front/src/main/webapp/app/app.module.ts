@@ -19,8 +19,8 @@ import { UserService } from './users/shared/user.service';
 import { EditUserComponent }   from './users/edit/edit.user.component';
 import { RoleService } from './roles/role.service';
 import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
-import {ClickableComponent} from "./shared/utils/clickable.component";
-import {ClickableParentComponent} from "./shared/utils/clickable.parent.component";
+import {ClickableComponent} from "./users/shared/clickable.component";
+import {ClickableParentComponent} from "./users/shared/clickable.parent.component";
 
 @NgModule({
     imports: [ 

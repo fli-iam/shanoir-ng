@@ -61,10 +61,9 @@ export class EditUserComponent implements OnInit {
                     return Observable.of<User>();
                 }
             })
-            .subscribe(user => {
+            .subscribe((user: User) => {
                 user.role = this.getRoleById(user.role.id);
                 this.user = user;
-                if (user.accountRequestDemand) {}
             });
     }
 
@@ -72,12 +71,26 @@ export class EditUserComponent implements OnInit {
         this.router.navigate(['../userlist']);
     }
 
-    deny(): void {
-        this.userService.handleAccountRequest(this.user.id, false);
+    accept(): void {
+        this.userService.confirmAccountRequest(this.userId, this.user)
+            .subscribe(user => this.cancel)
+            , (err: String) => {
+                if (err.indexOf("username should be unique") != -1) {
+                    this.isUserNameUnique = false;
+                }
+                if (err.indexOf("email should be unique") != -1) {
+                    this.isEmailUnique = false;
+                }
+            };
     }
 
-    accept(): void {
-        this.userService.handleAccountRequest(this.user.id, true);
+    deny(): void {
+        this.userService.denyAccountRequest(this.userId)
+            .then()
+                .catch((error) => {
+                // TODO: display error
+                log.error("error deny account request!");
+        });
     }
 
     submit(): void {
@@ -88,23 +101,25 @@ export class EditUserComponent implements OnInit {
                 .subscribe((user) => {
                     this.cancel();
                 }, (err: String) => {
-                    if (err.indexOf("username unique") != -1) {
+                    if (err.indexOf("username should be unique") != -1) {
                         this.isUserNameUnique = false;
                     }
-                    if (err.indexOf("email unique") != -1) {
+                    if (err.indexOf("email should be unique") != -1) {
                         this.isEmailUnique = false;
                     }
                 });
         } else {
         // user update
         this.userService.update(this.userId, this.user)
-            .then((user) => {
-                this.user = user;
+           .subscribe((user) => {
                 this.cancel();
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.error("error updating user!");
+            }, (err: String) => {
+                if (err.indexOf("username should be unique") != -1) {
+                    this.isUserNameUnique = false;
+                }
+                if (err.indexOf("email should be unique") != -1) {
+                    this.isEmailUnique = false;
+                }
             });
         }
     }

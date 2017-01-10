@@ -48,32 +48,38 @@ export class UserService {
             .catch(this.handleError);
     }
 
-    update(id: number, user: User): Promise<User> {
+    update(id: number, user: User): Observable<User> {
         let headers = new Headers();
         headers.append('Content-Type', 'application/json');
         headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
         
         return this.http.put(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, JSON.stringify(user), new RequestOptions({ headers: headers, withCredentials: true }))
-            .toPromise()
-            .then(response => response.json() as User)
-            .catch((error) => {
-                console.error('Error while updating user', error);
-                return Promise.reject(error.message || error);
-        });
+            .map(response => response.json() as User)
+            .catch(this.handleError);
     }
 
-    handleAccountRequest(id: number, acceptRequest: boolean): Promise<User> {
+    confirmAccountRequest(id: number, user: User): Observable<User> {
         let headers = new Headers();
         headers.append('Content-Type', 'application/json');
         headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
 
-        return this.http.patch(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL, acceptRequest, new RequestOptions({ headers: headers, withCredentials: true }))
+        return this.http.put(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL, JSON.stringify(user), new RequestOptions({ headers: headers, withCredentials: true }))
+            .map(response => response.json() as User)
+            .catch(this.handleError);
+    }
+
+    denyAccountRequest(id: number): Promise<User> {
+        let headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
+        
+        return this.http.delete(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, { headers: headers })
             .toPromise()
             .then(response => response.json() as User)
             .catch((error) => {
-                console.error('Error while getting user', error);
+                console.error('Error deny user account request', error);
                 return Promise.reject(error.message || error);
-        }); 
+        });
     }
 
     private extractData(res: Response) {
@@ -87,9 +93,14 @@ export class UserService {
             const body = error.json() || '';
             errMsg= "[" + body.code + "]: " + body.message;
             if (body.details) {
-                let errDetails = body.details.formErrors || '';
-                for (let errDetail of errDetails) {
-                    errMsg += "; " + errDetail.fieldName + " " + errDetail.errorCodes[0];
+                let errDetails = body.details.fieldErrors || '';
+                for (var errKey in errDetails) {
+                    errMsg += "; " + errKey + " should be ";
+                    var errDetailsByKey = errDetails[errKey][0];
+                    for (var errDetail in errDetailsByKey) {
+                        if (errDetail === "code")
+                        errMsg += errDetailsByKey[errDetail];
+                    }
                 }
             }
         } else {
