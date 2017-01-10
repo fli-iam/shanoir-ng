@@ -28,28 +28,12 @@ public interface UserService extends UniqueCheckableService<User> {
     List<User> findAll();
 
     /**
-     * Find user by its email address
-     *
-     * @param email
-     * @return a user or null
-     */
-    User findByEmail(String email);
-
-    /**
      * Find user by its id
      *
      * @param id
      * @return a user or null
      */
     User findById(Long id);
-
-    /**
-     * Find user by its username
-     *
-     * @param id
-     * @return a user or null
-     */
-    User findByUsername(String username);
 
 	/**
 	 * Handles an account request.
@@ -65,8 +49,9 @@ public interface UserService extends UniqueCheckableService<User> {
      *
      * @param user user to create.
      * @return created user.
+	 * @throws ShanoirUsersException
      */
-    User save(User user);
+    User save(User user) throws ShanoirUsersException;
 
     /**
      * Update a user.

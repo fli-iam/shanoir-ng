@@ -45,8 +45,6 @@ public class UserServiceTest {
 	public void setup() {
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository.findOne(USER_ID)).willReturn(ModelsUtil.createUser());
-		given(userRepository.findByEmail(ModelsUtil.USER_EMAIL)).willReturn(ModelsUtil.createUser());
-		given(userRepository.findByUsername(ModelsUtil.USER_LOGIN)).willReturn(ModelsUtil.createUser());
 	}
 
     //@Test
@@ -89,30 +87,12 @@ public class UserServiceTest {
     }
 
     @Test
-    public void findByEmailTest(){
-        final User user = userService.findByEmail(ModelsUtil.USER_EMAIL);
-        Assert.assertNotNull(user);
-        Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(user.getFirstName()));
-        
-        Mockito.verify(userRepository,Mockito.times(1)).findByEmail(Mockito.anyString());
-    }
-
-    @Test
     public void findByIdTest(){
         final User user = userService.findById(USER_ID);
         Assert.assertNotNull(user);
         Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(user.getFirstName()));
         
         Mockito.verify(userRepository,Mockito.times(1)).findOne(Mockito.anyLong());
-    }
-
-    @Test
-    public void findByUsernameTest(){
-        final User user = userService.findByUsername(ModelsUtil.USER_LOGIN);
-        Assert.assertNotNull(user);
-        Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(user.getFirstName()));
-        
-        Mockito.verify(userRepository,Mockito.times(1)).findByUsername(Mockito.anyString());
     }
 
     @Test(expected = ShanoirUsersException.class)

@@ -12,6 +12,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.dto.LoginDTO;
 import org.shanoir.ng.dto.UserDTO;
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.impl.AuthenticationServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,7 +34,7 @@ public class AuthenticationServiceTest {
     private AuthenticationManager authenticationManager;
 
     @Mock
-    private UserService userService;
+    private UserRepository userRepository;
 
     @Mock
     private HttpServletResponse httpResponse;
@@ -48,7 +49,7 @@ public class AuthenticationServiceTest {
 
         final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginDTO.getLogin(),loginDTO.getPassword());
 
-        Mockito.when(userService.findByUsername(loginDTO.getLogin())).thenReturn(securityUser);
+        Mockito.when(userRepository.findByUsername(loginDTO.getLogin())).thenReturn(securityUser);
         Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class))).thenReturn(token);
 
         final UserDTO userDTO = authenticationService.authenticate(loginDTO, httpResponse);
@@ -58,7 +59,7 @@ public class AuthenticationServiceTest {
         Assert.assertTrue(!userDTO.getAuthorities().isEmpty());
 
         Mockito.verify(authenticationManager,Mockito.times(1)).authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class));
-        Mockito.verify(userService,Mockito.times(1)).findByUsername(loginDTO.getLogin());
+        Mockito.verify(userRepository,Mockito.times(1)).findByUsername(loginDTO.getLogin());
     }
 
 }

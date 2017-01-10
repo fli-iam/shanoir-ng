@@ -10,7 +10,7 @@ import org.mockito.runners.MockitoJUnitRunner;
  *
  */
 @RunWith(MockitoJUnitRunner.class)
-public class HashUtilTest {
+public class PasswordUtilsTest {
 
 	private static final String PASSWORD = "testtest";
 	
@@ -18,9 +18,16 @@ public class HashUtilTest {
 	
     @Test
 	public void getHashTest() {
-		final String hash = HashUtil.getHash(PASSWORD);
+		final String hash = PasswordUtils.getHash(PASSWORD);
         Assert.assertNotNull(hash);
         Assert.assertTrue(HASHED_PASSWORD.equals(hash));
+	}
+	
+    @Test
+	public void generatePasswordTest() {
+		final String password = PasswordUtils.generatePassword();
+        Assert.assertNotNull(password);
+        Assert.assertTrue(password.length() == 8);
 	}
 	
 }

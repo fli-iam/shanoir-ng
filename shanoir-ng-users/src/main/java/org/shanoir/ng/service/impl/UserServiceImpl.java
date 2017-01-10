@@ -8,13 +8,16 @@ import org.shanoir.ng.exception.error.ErrorModelCode;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.UserService;
+import org.shanoir.ng.utils.PasswordUtils;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,18 +58,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User findByEmail(final String email) {
-		return userRepository.findByEmail(email);
-	}
-
-	@Override
 	public User findById(final Long id) {
 		return userRepository.findOne(id);
-	}
-
-	@Override
-	public User findByUsername(final String username) {
-		return userRepository.findByUsername(username);
 	}
 
 	@Override
@@ -90,9 +83,25 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User save(final User user) {
-		final User savedUser = userRepository.save(user);
-		updateShanoirClassic(savedUser);
+	public User save(final User user) throws ShanoirUsersException {
+		String newPassword = null;
+		if (!StringUtils.hasText(user.getPassword())) {
+			newPassword = PasswordUtils.generatePassword();
+			// TODO: send email
+		} else {
+			newPassword = user.getPassword();
+			// Check password
+			PasswordUtils.checkPasswordPolicy(newPassword, user.getUsername());
+		}
+		// Save hashed password
+		user.setPassword(PasswordUtils.getHash(newPassword));
+		User savedUser = null;
+		try {
+			savedUser = userRepository.save(user);
+		} catch (DataIntegrityViolationException dive) {
+			ShanoirUsersException.logAndThrow(LOG, "Error while creating user: " + dive.getMessage());
+		}
+		updateShanoirOld(savedUser);
 		return savedUser;
 	}
 
@@ -104,6 +113,7 @@ public class UserServiceImpl implements UserService {
 		userDb.setExpirationDate(user.getExpirationDate());
 		userDb.setFirstName(user.getFirstName());
 		userDb.setLastName(user.getLastName());
+		// TODO: password modification
 		// TODO: add motivation (user account request)
 		userDb.setRole(user.getRole());
 		userDb.setMedical(user.isMedical());
@@ -139,23 +149,23 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/*
-	 * Update Shanoir Classic.
+	 * Update Shanoir Old.
 	 * 
 	 * @param user
 	 * 
 	 * @return false if it fails, true if it succeed
 	 */
-	private boolean updateShanoirClassic(final User user) {
+	private boolean updateShanoirOld(final User user) {
 		try {
-			LOG.info("Send update to shanoir classic");
+			LOG.info("Send update to Shanoir Old");
 			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(),
 					new ObjectMapper().writeValueAsString(user));
 			return true;
 		} catch (AmqpException e) {
-			LOG.error("Cannot send user " + user.getId() + " save/update to Shanoir Classic on queue : "
+			LOG.error("Cannot send user " + user.getId() + " save/update to Shanoir Old on queue : "
 					+ RabbitMqConfiguration.queueOut().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send user " + user.getId() + " save/update because of an error while serialize user. ",
+			LOG.error("Cannot send user " + user.getId() + " save/update because of an error while serializing user.",
 					e);
 		}
 		return false;

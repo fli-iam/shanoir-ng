@@ -103,8 +103,10 @@ public class UserApiController implements UserApi {
         try {
             final User createdUser = userService.save(user);
             return new ResponseEntity<User>(createdUser, HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
-        	LOG.error("Error while trying to save new user " + user.getUsername() + " : ", e);
+        } catch (ShanoirUsersException e) {
+        	if (ErrorModelCode.PASSWORD_NOT_CORRECT == e.getErrorCode()) {
+                throw new RestServiceException(new ErrorModel(422, "Password does not match policy", null));
+        	}
             throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
         }
     }

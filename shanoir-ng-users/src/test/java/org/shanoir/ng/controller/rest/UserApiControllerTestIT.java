@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.service.UserService;
@@ -44,7 +45,7 @@ public class UserApiControllerTestIT {
     private UserService userService;
 
     @Before
-    public void setup() {
+    public void setup() throws ShanoirUsersException {
         given(userService.findAll()).willReturn(Arrays.asList(new User()));
         given(userService.findById(1L)).willReturn(new User());
 		given(userService.save(Mockito.mock(User.class))).willReturn(new User());

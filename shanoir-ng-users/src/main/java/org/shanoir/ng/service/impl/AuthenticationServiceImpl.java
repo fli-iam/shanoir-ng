@@ -12,9 +12,9 @@ import org.shanoir.ng.dto.UserDTO;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorModelCode;
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.AuthenticationService;
-import org.shanoir.ng.service.UserService;
-import org.shanoir.ng.utils.HashUtil;
+import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private UserService userService;
+    private UserRepository userRepository;
 
     private final TokenUtils tokenUtils = new TokenUtils();
 
@@ -49,7 +49,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	public UserDTO authenticate(final LoginDTO loginDTO, final HttpServletResponse response) throws ShanoirUsersException {
 		// SHA-1 digest used by Shanoir (same code than Shanoir)
 		// TODO: replace it with SHA-256 digest : DigestUtils.sha256(loginDTO.getPassword())
-		final String hashedPassword = HashUtil.getHash(loginDTO.getPassword());
+		final String hashedPassword = PasswordUtils.getHash(loginDTO.getPassword());
 		
 		final UsernamePasswordAuthenticationToken authenticationToken =
 				new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), hashedPassword);
@@ -65,9 +65,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         // Retrieve security user after authentication
         User securityUser = null;
         if (loginDTO.getLogin().contains("@")) {
-        	securityUser = (User) userService.findByEmail(loginDTO.getLogin());
+        	securityUser = (User) userRepository.findByEmail(loginDTO.getLogin());
         } else {
-        	securityUser = (User) userService.findByUsername(loginDTO.getLogin());
+        	securityUser = (User) userRepository.findByUsername(loginDTO.getLogin());
         }
         if (securityUser == null) {
         	LOG.error("No user found with username/email " + loginDTO.getLogin());
@@ -80,7 +80,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         // Update last login
         securityUser.setLastLogin(new Date());
-        userService.save(securityUser);
+        userRepository.save(securityUser);
 
         // Parse Granted authorities to a list of string authorities
         final List<String> authorities = new ArrayList<>();
