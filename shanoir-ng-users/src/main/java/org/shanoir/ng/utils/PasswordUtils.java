@@ -66,9 +66,9 @@ public class PasswordUtils {
 					return;
 				}
 			}
-        	LOG.error("Password does not match policy for user " + username + " : ");
-			throw new ShanoirUsersException(ErrorModelCode.PASSWORD_NOT_CORRECT);
 		}
+		LOG.error("Password does not match policy for user " + username + " : ");
+		throw new ShanoirUsersException(ErrorModelCode.PASSWORD_NOT_CORRECT);
 	}
 
 	/**

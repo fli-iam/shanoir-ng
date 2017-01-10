@@ -99,7 +99,6 @@ public interface UserApi {
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/{userId}", produces = { "application/json" }, consumes = {"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasAnyAuthority('adminRole', 'medicalRole', 'expertRole', 'userRole', 'guestRole')")
 	ResponseEntity<Void> updateUser(
 			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,

@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.shanoir.ng.exception.ShanoirUsersException;
 
 /**
  * @author msimon
@@ -28,6 +29,31 @@ public class PasswordUtilsTest {
 		final String password = PasswordUtils.generatePassword();
         Assert.assertNotNull(password);
         Assert.assertTrue(password.length() == 8);
+	}
+	
+    @Test
+	public void checkPasswordPolicyTest() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy("aa11@@22", null);
+	}
+	
+    @Test(expected = ShanoirUsersException.class)
+	public void checkPasswordPolicyBadPwdTest1() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy("aa11@@", null);
+	}
+	
+    @Test(expected = ShanoirUsersException.class)
+	public void checkPasswordPolicyBadPwdTest2() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy("@@11@@22", null);
+	}
+	
+    @Test(expected = ShanoirUsersException.class)
+	public void checkPasswordPolicyBadPwdTest3() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy("aabb@@cc", null);
+	}
+	
+    @Test(expected = ShanoirUsersException.class)
+	public void checkPasswordPolicyBadPwdTest4() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy("aa11aa22", null);
 	}
 	
 }

@@ -23,7 +23,6 @@ public class EditableOnlyByValidator <T> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EditableOnlyByValidator.class);
 
-
 	/**
 	 * Validates an update
 	 *
