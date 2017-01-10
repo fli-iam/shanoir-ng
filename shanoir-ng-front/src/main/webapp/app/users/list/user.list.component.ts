@@ -7,7 +7,6 @@ import GridUtils from 'app/shared/utils/grid.utils';
 import {ClickableComponent} from "app/shared/utils/clickable.component";
 import {ClickableParentComponent} from "app/shared/utils/clickable.parent.component";
 
-
 @Component({
     selector: 'user-list',
     moduleId: module.id,
@@ -20,6 +19,7 @@ export class UserListComponent {
     private headerCellTemplate: string;
     private users: User[];
     private userRequest: User[];
+    private validatedUser: User[];
     private rowCount: number = 0;
     private columnDefs: any[];
     private rowHeight: number;
@@ -44,14 +44,15 @@ export class UserListComponent {
         this.userService.getUsers().then(users2 => { 
             if (users2) {
                 for (let user of users2) {
-                    if (!user.onDemand) {
+                    if (!user.accountRequestDemand) {
                         usersTmp.push(user);
                     } else {
                         userRequestTmp.push(user);
                     }
                 }
-                this.users = usersTmp;
+                this.validatedUser = usersTmp;
                 this.userRequest = userRequestTmp;
+                this.users = userRequestTmp.concat(usersTmp); 
                 this.rowCount = this.users.length;
             }
         })
@@ -83,6 +84,9 @@ export class UserListComponent {
             {headerName: "First Name", field: "firstName", width: 130, suppressMenu: true},
             {headerName: "Last Name", field: "lastName", width: 130, suppressMenu: true},
             {headerName: "Email", field: "email", width: 200, suppressMenu: true},
+            {headerName: "On Demande", field: "accountRequestDemand", width: 100, suppressMenu: true, suppressSorting: true, cellRenderer: function (params) {
+                return booleanTrueRenderer(params.data.accountRequestDemand);
+            }, cellStyle: {"text-align": "center"}},
             {headerName: "Team", field: "teamName", width: 100, suppressMenu: true},
             {headerName: "Role", field: "role.displayName", width: 100, suppressMenu: true},
             {headerName: "Can import from PACS", field: "canAccessToDicomAssociation", width: 160, suppressMenu: true, cellRenderer: function (params) {
@@ -100,7 +104,7 @@ export class UserListComponent {
             {headerName: "Last Login", field: "lastLogin", width: 100, suppressMenu: true, cellRenderer: function (params) {
                 return dateRenderer(params.data.lastLogin);
             }},
-            {headerName: "Edit", field: "id", width: 50, suppressMenu: true, 
+            {headerName: "Edit", field: "id", width: 50, suppressMenu: true, suppressSorting: true,
               cellRendererFramework: ClickableParentComponent
             , cellStyle: {"text-align": "center"}}
         ];
@@ -134,5 +138,18 @@ export class UserListComponent {
             // Rows height + header + 2px for borders + scrollbar height
             return (GridUtils.maxDisplayedRows + 1) * this.rowHeight + 2 + 17;
         }
+    }
+
+     showUsersOnDemande(event): void {
+        this.users = this.userRequest;
+        this.rowCount = this.users.length;
+    }
+    showValidtedUsers(event): void {
+        this.users = this.validatedUser;
+        this.rowCount = this.users.length;
+    }
+    clearUsersFilter(event): void {
+        this.users = this.userRequest.concat(this.validatedUser);
+        this.rowCount = this.users.length;
     }
 }
