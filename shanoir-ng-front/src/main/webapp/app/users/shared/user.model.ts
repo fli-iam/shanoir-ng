@@ -2,6 +2,7 @@ import { Role } from '../../roles/role.model';
 
 export class User {
     id: number;
+    accountRequestDemand: boolean;
     canAccessToDicomAssociation: boolean;
     creationDate: Date;
     email: string;
@@ -12,7 +13,6 @@ export class User {
     lastName: string;
     medical: boolean;
     motivation: string;
-    onDemand: boolean;
     role: Role;
     teamName: string;
     username: string;

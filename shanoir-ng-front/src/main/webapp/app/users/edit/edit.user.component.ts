@@ -64,6 +64,7 @@ export class EditUserComponent implements OnInit {
             .subscribe(user => {
                 user.role = this.getRoleById(user.role.id);
                 this.user = user;
+                if (user.accountRequestDemand) {}
             });
     }
 
@@ -71,9 +72,18 @@ export class EditUserComponent implements OnInit {
         this.router.navigate(['../userlist']);
     }
 
+    deny(): void {
+        this.userService.handleAccountRequest(this.user.id, false);
+    }
+
+    accept(): void {
+        this.userService.handleAccountRequest(this.user.id, true);
+    }
+
     submit(): void {
         this.user = this.editUserForm.value;
         if (this.creationMode == true) {
+            // new user creation
             this.userService.create(this.user)
                 .subscribe((user) => {
                     this.cancel();
@@ -86,15 +96,16 @@ export class EditUserComponent implements OnInit {
                     }
                 });
         } else {
-            this.userService.update(this.userId, this.user)
-                .then((user) => {
-                    this.user = user;
-                    this.cancel();
-                })
-                .catch((error) => {
-                    // TODO: display error
-                    console.error("error updating user!");
-                });
+        // user update
+        this.userService.update(this.userId, this.user)
+            .then((user) => {
+                this.user = user;
+                this.cancel();
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.error("error updating user!");
+            });
         }
     }
 

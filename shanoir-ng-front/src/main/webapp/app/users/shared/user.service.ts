@@ -62,6 +62,20 @@ export class UserService {
         });
     }
 
+    handleAccountRequest(id: number, acceptRequest: boolean): Promise<User> {
+        let headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
+
+        return this.http.patch(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL, acceptRequest, new RequestOptions({ headers: headers, withCredentials: true }))
+            .toPromise()
+            .then(response => response.json() as User)
+            .catch((error) => {
+                console.error('Error while getting user', error);
+                return Promise.reject(error.message || error);
+        }); 
+    }
+
     private extractData(res: Response) {
         let body = res.json();
         return body.data || { };

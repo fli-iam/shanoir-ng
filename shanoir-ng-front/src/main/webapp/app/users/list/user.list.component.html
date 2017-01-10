@@ -2,6 +2,13 @@
     <div class="UserListComponent-title">
         <h2 i18n="Manage users|Title">Manage users</h2>
     </div>
+
+    <div>
+        <button style="margin-bottom: 10px" (click)="showUsersOnDemande($event)" i18n="Manage users|UsersOnDemandeButton label" class="Button">Users On Demande</button>
+        <button style="margin-bottom: 10px" (click)="showValidtedUsers($event)" i18n="Manage users|ValidatedUsersButton label" class="Button">Validated Users</button>
+        <button style="margin-bottom: 10px" (click)="clearUsersFilter($event)" i18n="Manage users|ClearUsersFilterButton label" class="Button">Clear Users Filter</button>
+    </div> 
+    
     
     <div class="UserListComponent-buttonBar">
         <a routerLink="../editUser" routerLinkActive="active"><img src="/images/plus.24x24.png" /></a>
