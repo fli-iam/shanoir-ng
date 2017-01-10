@@ -43,8 +43,44 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Override
+	public User confirmAccountRequest(Long userId, User user) throws ShanoirUsersException {
+		final User userDb = userRepository.findOne(userId);
+		if (userDb == null) {
+			LOG.error("User with id " + userId + " not found");
+			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
+		}
+		if (!userDb.isAccountRequestDemand()) {
+			LOG.error("User with id " + userId + " has no account request");
+			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
+		}
+		userDb.setAccountRequestDemand(false);
+		updateUserValues(userDb, user);
+		try {
+			userRepository.save(userDb);
+		} catch (Exception e) {
+			ShanoirUsersException.logAndThrow(LOG,
+					"Error while confirming user account request with id '" + userId + "': " + e.getMessage());
+		}
+		return userDb;
+	}
+
+	@Override
 	public void deleteById(final Long id) {
 		userRepository.delete(id);
+	}
+
+	@Override
+	public void denyAccountRequest(Long userId) throws ShanoirUsersException {
+		final User user = userRepository.findOne(userId);
+		if (user == null) {
+			LOG.error("User with id " + userId + " not found");
+			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
+		}
+		if (!user.isAccountRequestDemand()) {
+			LOG.error("User with id " + userId + " has no account request");
+			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
+		}
+		// TODO: what to do? remove user?
 	}
 
 	@Override
@@ -60,26 +96,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User findById(final Long id) {
 		return userRepository.findOne(id);
-	}
-
-	@Override
-	public void handleAccountRequest(final Long userId, final boolean acceptRequest) throws ShanoirUsersException {
-		final User user = userRepository.findOne(userId);
-		if (user == null) {
-			LOG.error("User with id " + userId + " not found");
-			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
-		}
-		if (acceptRequest) {
-			user.setAccountRequestDemand(false);
-			try {
-				userRepository.save(user);
-			} catch (Exception e) {
-				ShanoirUsersException.logAndThrow(LOG,
-						"Error while confirming user account request with id '" + userId + "': " + e.getMessage());
-			}
-		} else {
-			// TODO: what to do? remove user?
-		}
 	}
 
 	@Override
@@ -108,16 +124,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User update(final User user) throws ShanoirUsersException {
 		final User userDb = userRepository.findOne(user.getId());
-		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
-		userDb.setEmail(user.getEmail());
-		userDb.setExpirationDate(user.getExpirationDate());
-		userDb.setFirstName(user.getFirstName());
-		userDb.setLastName(user.getLastName());
-		// TODO: password modification
-		// TODO: add motivation (user account request)
-		userDb.setRole(user.getRole());
-		userDb.setMedical(user.isMedical());
-		userDb.setUsername(user.getUsername());
+		updateUserValues(userDb, user);
 		try {
 			userRepository.save(userDb);
 		} catch (Exception e) {
@@ -133,21 +140,14 @@ public class UserServiceImpl implements UserService {
 		}
 
 		final User userDb = userRepository.findOne(user.getId());
-		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
-		userDb.setEmail(user.getEmail());
-		userDb.setExpirationDate(user.getExpirationDate());
-		userDb.setFirstName(user.getFirstName());
-		userDb.setLastName(user.getLastName());
-		userDb.setPassword(user.getPassword());
-		userDb.setRole(user.getRole());
-		userDb.setMedical(user.isMedical());
+		updateUserValues(userDb, user);
 		try {
 			userRepository.save(userDb);
 		} catch (Exception e) {
 			ShanoirUsersException.logAndThrow(LOG, "Error while updating user from Shanoir Old: " + e.getMessage());
 		}
 	}
-
+	
 	/*
 	 * Update Shanoir Old.
 	 * 
@@ -169,6 +169,27 @@ public class UserServiceImpl implements UserService {
 					e);
 		}
 		return false;
+	}
+
+	/*
+	 * Update some values of user to save them in database.
+	 * 
+	 * @param userDb user found in database.
+	 * @param user user with new values.
+	 * @return database user with new values.
+	 */
+	private User updateUserValues(final User userDb, final User user) {
+		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
+		userDb.setEmail(user.getEmail());
+		userDb.setExpirationDate(user.getExpirationDate());
+		userDb.setFirstName(user.getFirstName());
+		userDb.setLastName(user.getLastName());
+		// TODO: password modification
+		// TODO: add motivation (user account request)
+		userDb.setRole(user.getRole());
+		userDb.setMedical(user.isMedical());
+		userDb.setUsername(user.getUsername());
+		return userDb;
 	}
 
 }

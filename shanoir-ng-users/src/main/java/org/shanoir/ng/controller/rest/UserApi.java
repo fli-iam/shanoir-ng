@@ -28,6 +28,19 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/user")
 public interface UserApi {
 
+    @ApiOperation(value = "", notes = "Confirms an account request", response = Void.class, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 204, message = "user confirmed", response = Void.class),
+        @ApiResponse(code = 404, message = "no user found", response = Void.class),
+        @ApiResponse(code = 500, message = "internal error", response = Void.class) })
+    @RequestMapping(value = "/{userId}/confirmaccountrequest",
+        produces = { "application/json" }, 
+        consumes = { "application/json" },
+        method = RequestMethod.PUT)
+	@PreAuthorize("hasAuthority('adminRole')")
+    ResponseEntity<Void> confirmAccountRequest(@ApiParam(value = "id of the user",required=true ) @PathVariable("userId") Long userId,
+        @ApiParam(value = "user to update" ,required=true ) @RequestBody User user);
+
 	@ApiOperation(value = "", notes = "Deletes a user", response = Void.class, tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 204, message = "user deleted", response = Void.class),
@@ -38,6 +51,17 @@ public interface UserApi {
 	ResponseEntity<Void> deleteUser(
 			@RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String xsrfToken,
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId);
+
+    @ApiOperation(value = "", notes = "Denies an account request", response = Void.class, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 204, message = "user deleted", response = Void.class),
+        @ApiResponse(code = 404, message = "no user found", response = Void.class),
+        @ApiResponse(code = 500, message = "internal error", response = Void.class) })
+    @RequestMapping(value = "/{userId}/denyaccountrequest",
+        produces = { "application/json" }, 
+        method = RequestMethod.POST)
+	@PreAuthorize("hasAuthority('adminRole')")
+    ResponseEntity<Void> denyAccountRequest(@ApiParam(value = "id of the user",required=true ) @PathVariable("userId") Long userId);
 
 	@ApiOperation(value = "", notes = "If exists, returns the user corresponding to the given id", response = User.class, tags = {})
 	@ApiResponses(value = {
@@ -57,19 +81,6 @@ public interface UserApi {
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAuthority('adminRole')")
 	ResponseEntity<List<User>> findUsers();
-
-    @ApiOperation(value = "", notes = "Handles an account request", response = Void.class, tags={  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 204, message = "user confirmed", response = Void.class),
-        @ApiResponse(code = 404, message = "no user found", response = Void.class),
-        @ApiResponse(code = 500, message = "internal error", response = Void.class) })
-    @RequestMapping(value = "/{userId}/accountrequest",
-        produces = { "application/json" }, 
-        consumes = { "application/json" },
-        method = RequestMethod.PATCH)
-	@PreAuthorize("hasAuthority('adminRole')")
-    ResponseEntity<Void> handleAccountRequest(@ApiParam(value = "id of the user",required=true ) @PathVariable("userId") Long userId,
-        @ApiParam(value = "user account answer" ,required=true ) @RequestBody Boolean acceptRequest);
 
     @ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
 	@ApiResponses(value = {

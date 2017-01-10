@@ -16,57 +16,74 @@ import org.shanoir.ng.model.validation.UniqueCheckableService;
 public interface UserService extends UniqueCheckableService<User> {
 
 	/**
+	 * Confirms an account request and updates user.
+	 * 
+	 * @param userId
+	 *            user id.
+	 * @param user
+	 *            updated user.
+	 * @return updated user.
+	 * @throws ShanoirUsersException
+	 */
+	User confirmAccountRequest(Long userId, User user) throws ShanoirUsersException;
+
+	/**
 	 * Delete a user
+	 * 
 	 * @param id
 	 */
 	void deleteById(Long id);
-	
-    /**
-     * Get all the users
-     * @return a list of users
-     */
-    List<User> findAll();
-
-    /**
-     * Find user by its id
-     *
-     * @param id
-     * @return a user or null
-     */
-    User findById(Long id);
 
 	/**
-	 * Handles an account request.
+	 * Denies an account request.
 	 * 
-	 * @param userId user id.
-	 * @param acceptRequest answer acceptance (accept or deny).
+	 * @param userId
+	 *            user id.
 	 * @throws ShanoirUsersException
 	 */
-	void handleAccountRequest(Long userId, boolean acceptRequest) throws ShanoirUsersException;
-	
-    /**
-     * Save a user.
-     *
-     * @param user user to create.
-     * @return created user.
-	 * @throws ShanoirUsersException
-     */
-    User save(User user) throws ShanoirUsersException;
+	void denyAccountRequest(Long userId) throws ShanoirUsersException;
 
-    /**
-     * Update a user.
-     *
-     * @param user user to update.
-     * @return updated user.
-     * @throws ShanoirUsersException
-     */
-    User update(User user) throws ShanoirUsersException;
-    
-    /**
-     * Update a user from the old Shanoir
-     * @param user
-     * @throws ShanoirUsersException
-     */
-    void updateFromShanoirOld(User user) throws ShanoirUsersException;
+	/**
+	 * Get all the users
+	 * 
+	 * @return a list of users
+	 */
+	List<User> findAll();
+
+	/**
+	 * Find user by its id
+	 *
+	 * @param id
+	 * @return a user or null
+	 */
+	User findById(Long id);
+
+	/**
+	 * Save a user.
+	 *
+	 * @param user
+	 *            user to create.
+	 * @return created user.
+	 * @throws ShanoirUsersException
+	 */
+	User save(User user) throws ShanoirUsersException;
+
+	/**
+	 * Update a user.
+	 *
+	 * @param user
+	 *            user to update.
+	 * @return updated user.
+	 * @throws ShanoirUsersException
+	 */
+	User update(User user) throws ShanoirUsersException;
+
+	/**
+	 * Update a user from the old Shanoir
+	 * 
+	 * @param user
+	 * @throws ShanoirUsersException
+	 */
+	void updateFromShanoirOld(User user) throws ShanoirUsersException;
 
 }

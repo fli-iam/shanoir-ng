@@ -19,7 +19,6 @@ import org.shanoir.ng.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -38,6 +37,19 @@ public class UserApiController implements UserApi {
     @Autowired
     private UserService userService;
 
+	@Override
+	public ResponseEntity<Void> confirmAccountRequest(Long userId, User user) {
+        try {
+            userService.confirmAccountRequest(userId, user);
+        } catch (ShanoirUsersException e) {
+        	if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
+        		return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        	}
+        	return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+	}
+
     @Override
     public ResponseEntity<Void> deleteUser(
             @RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
@@ -48,6 +60,19 @@ public class UserApiController implements UserApi {
         userService.deleteById(userId);
         return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
+
+	@Override
+	public ResponseEntity<Void> denyAccountRequest(Long userId) {
+        try {
+            userService.denyAccountRequest(userId);
+        } catch (ShanoirUsersException e) {
+        	if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
+        		return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        	}
+        	return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+	}
 
     @Override
     public ResponseEntity<User> findUserById(@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) {
@@ -66,19 +91,6 @@ public class UserApiController implements UserApi {
         }
         return new ResponseEntity<List<User>>(users, HttpStatus.OK);
     }
-
-    public ResponseEntity<Void> handleAccountRequest(@ApiParam(value = "id of the user",required=true ) @PathVariable("userId") Long userId,
-            @ApiParam(value = "user account answer" ,required=true ) @RequestBody Boolean acceptRequest) {
-        try {
-            userService.handleAccountRequest(userId, acceptRequest);
-        } catch (ShanoirUsersException e) {
-        	if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
-        		return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-        	}
-        	return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-	}
 
     @Override
     public ResponseEntity<User> saveNewUser(

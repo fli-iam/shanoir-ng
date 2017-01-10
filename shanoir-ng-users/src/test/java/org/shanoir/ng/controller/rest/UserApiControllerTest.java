@@ -50,8 +50,9 @@ public class UserApiControllerTest {
 	public void setup() throws ShanoirUsersException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		doNothing().when(userServiceMock).handleAccountRequest(Mockito.anyLong(), Mockito.anyBoolean());
+		given(userServiceMock.confirmAccountRequest(Mockito.anyLong(), Mockito.any(User.class))).willReturn(new User());
 		doNothing().when(userServiceMock).deleteById(1L);
+		doNothing().when(userServiceMock).denyAccountRequest(Mockito.anyLong());
 		given(userServiceMock.findAll()).willReturn(Arrays.asList(new User()));
 		given(userServiceMock.findById(1L)).willReturn(new User());
 		given(userServiceMock.save(Mockito.mock(User.class))).willReturn(new User());
@@ -59,20 +60,23 @@ public class UserApiControllerTest {
 
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
-	public void confirmRequestTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.patch("/user/1/accountrequest").header("X-XSRF-TOKEN", "test")
-				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content("true"))
-				.andExpect(status().isNoContent());
-		
-		mvc.perform(MockMvcRequestBuilders.patch("/user/1/accountrequest").header("X-XSRF-TOKEN", "test")
-				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content("false"))
-				.andExpect(status().isNoContent());
+	public void confirmAccountRequestTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.put("/user/1/confirmaccountrequest").header("X-XSRF-TOKEN", "test")
+				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
+				.content(gson.toJson(ModelsUtil.createUser()))).andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void deleteUserTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete("/user/1").header("X-XSRF-TOKEN", "test")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
+	}
+
+	@Test
+	@WithMockUser(authorities = { "adminRole" })
+	public void denyAccountRequestTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.post("/user/1/denyaccountrequest").header("X-XSRF-TOKEN", "test"))
+				.andExpect(status().isNoContent());
 	}
 
 	@Test

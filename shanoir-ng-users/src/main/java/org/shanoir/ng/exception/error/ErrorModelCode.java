@@ -18,4 +18,7 @@ public final class ErrorModelCode {
 	/** No user found */
 	public static final Integer USER_NOT_FOUND = 151;
 	
+	/** No account request for user */
+	public static final Integer NO_ACCOUNT_REQUEST = 152;
+	
 }

@@ -88,23 +88,36 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /user/{userId}/accountrequest:
-    patch:
-      operationId: handleAccountRequest
-      description: Handles an account request
+  /user/{userId}/confirmaccountrequest:
+    put:
+      operationId: confirmAccountRequest
+      description: Confirms an account request
       consumes: 
         - application/json
       parameters:
         - $ref: "#/parameters/userId"
-        - name: acceptRequest
+        - name: user
           in: body
-          description: user account answer
+          description: user to update
           required: true
           schema:
-            type: boolean
+            $ref: "#/definitions/User"
       responses:
         '204':
           description: user confirmed
+        '404':
+          description: no user found
+        '500':
+          description: internal error
+  /user/{userId}/denyaccountrequest:
+    post:
+      operationId: denyAccountRequest
+      description: Denies an account request
+      parameters:
+        - $ref: "#/parameters/userId"
+      responses:
+        '204':
+          description: user deleted
         '404':
           description: no user found
         '500':
