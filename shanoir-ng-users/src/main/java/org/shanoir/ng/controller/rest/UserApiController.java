@@ -32,154 +32,186 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class UserApiController implements UserApi {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UserApiController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(UserApiController.class);
 
-    @Autowired
-    private UserService userService;
-
-	@Override
-	public ResponseEntity<Void> confirmAccountRequest(Long userId, User user) {
-        try {
-            userService.confirmAccountRequest(userId, user);
-        } catch (ShanoirUsersException e) {
-        	if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
-        		return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-        	}
-        	return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-	}
-
-    @Override
-    public ResponseEntity<Void> deleteUser(
-            @RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
-            @ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) {
-        if (userService.findById(userId) == null) {
-            return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-        }
-        userService.deleteById(userId);
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-    }
+	@Autowired
+	private UserService userService;
 
 	@Override
-	public ResponseEntity<Void> denyAccountRequest(Long userId) {
-        try {
-            userService.denyAccountRequest(userId);
-        } catch (ShanoirUsersException e) {
-        	if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
-        		return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-        	}
-        	return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+	public ResponseEntity<Void> confirmAccountRequest(
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
+			@ApiParam(value = "user to update", required = true) @RequestBody User user, BindingResult result)
+			throws RestServiceException {
+		// IMPORTANT : avoid any confusion that could lead to security breach
+		user.setId(userId);
+
+		/* Validation */
+		// A basic user can only update certain fields, check that
+		FieldErrorMap accessErrors = this.getUpdateRightsErrors(user);
+		// Check hibernate validation
+		FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+		// Check unique constrainte
+		FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
+		/* Merge errors. */
+		FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		if (!errors.isEmpty()) {
+			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
+		}
+
+		try {
+			userService.confirmAccountRequest(userId, user);
+		} catch (ShanoirUsersException e) {
+			if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
+				return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 
-    @Override
-    public ResponseEntity<User> findUserById(@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) {
-        User user = userService.findById(userId);
-        if (user == null) {
-            return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<User>(user, HttpStatus.OK);
-    }
+	@Override
+	public ResponseEntity<Void> deleteUser(
+			@RequestHeader(value = SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) {
+		if (userService.findById(userId) == null) {
+			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+		}
+		userService.deleteById(userId);
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+	}
 
-    @Override
-    public ResponseEntity<List<User>> findUsers() {
-        List<User> users = userService.findAll();
-        if (users.isEmpty()) {
-            return new ResponseEntity<List<User>>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<List<User>>(users, HttpStatus.OK);
-    }
+	@Override
+	public ResponseEntity<Void> denyAccountRequest(
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId)
+			throws RestServiceException {
+		try {
+			userService.denyAccountRequest(userId);
+		} catch (ShanoirUsersException e) {
+			if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
+				return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+	}
 
-    @Override
-    public ResponseEntity<User> saveNewUser(
-            @RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
-            @ApiParam(value = "the user to create", required = true) @RequestBody @Valid User user,
-            BindingResult result) throws RestServiceException {
+	@Override
+	public ResponseEntity<User> findUserById(
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) {
+		User user = userService.findById(userId);
+		if (user == null) {
+			return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<User>(user, HttpStatus.OK);
+	}
 
-    	/* Validation */
-        FieldErrorMap accessErrors = this.getCreationRightsErrors(user); //A basic user can only update certain fields, check that
-        FieldErrorMap hibernateErrors = new FieldErrorMap(result); // Check hibernate validation
-        FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user); // Check unique constrainte
-        /* Merge errors. */
-        FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
-        if (!errors.isEmpty()) {
-            throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
-        }
+	@Override
+	public ResponseEntity<List<User>> findUsers() {
+		List<User> users = userService.findAll();
+		if (users.isEmpty()) {
+			return new ResponseEntity<List<User>>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<List<User>>(users, HttpStatus.OK);
+	}
 
-        user.setId(null); // Guarantees it is a creation, not an update
-        user.setCreationDate(new Date()); // Set creation date on creation.
+	@Override
+	public ResponseEntity<User> saveNewUser(
+			@RequestHeader(value = SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
+			@ApiParam(value = "the user to create", required = true) @RequestBody @Valid User user,
+			BindingResult result) throws RestServiceException {
 
-        /* Save user in db. */
-        try {
-            final User createdUser = userService.save(user);
-            return new ResponseEntity<User>(createdUser, HttpStatus.OK);
-        } catch (ShanoirUsersException e) {
-        	if (ErrorModelCode.PASSWORD_NOT_CORRECT == e.getErrorCode()) {
-                throw new RestServiceException(new ErrorModel(422, "Password does not match policy", null));
-        	}
-            throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
-        }
-    }
+		/* Validation */
+		// A basic user can only update certain fields, check that
+		FieldErrorMap accessErrors = this.getCreationRightsErrors(user);
+		// Check hibernate validation
+		FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+		// Check unique constrainte
+		FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
+		/* Merge errors. */
+		FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		if (!errors.isEmpty()) {
+			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
+		}
 
-    @Override
-    public ResponseEntity<Void> updateUser(
-            @RequestHeader(value=SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
-            @ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
-            @ApiParam(value = "the user to update", required = true) @RequestBody @Valid User user,
-            BindingResult result) throws RestServiceException {
+		// Guarantees it is a creation, not an update
+		user.setId(null);
+		// Set creation date on creation.
+		user.setCreationDate(new Date());
 
-    	user.setId(userId); // IMPORTANT : avoid any confusion that could lead to security breach
+		/* Save user in db. */
+		try {
+			final User createdUser = userService.save(user);
+			return new ResponseEntity<User>(createdUser, HttpStatus.OK);
+		} catch (ShanoirUsersException e) {
+			if (ErrorModelCode.PASSWORD_NOT_CORRECT == e.getErrorCode()) {
+				throw new RestServiceException(new ErrorModel(422, "Password does not match policy", null));
+			}
+			throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
+		}
+	}
 
-    	/* Validation */
-        FieldErrorMap accessErrors = this.getUpdateRightsErrors(user); //A basic user can only update certain fields, check that
-        FieldErrorMap hibernateErrors = new FieldErrorMap(result); // Check hibernate validation
-        FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user); // Check unique constrainte
-        /* Merge errors. */
-        FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
-        if (!errors.isEmpty()) {
-            throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
-        }
+	@Override
+	public ResponseEntity<Void> updateUser(
+			@RequestHeader(value = SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
+			@ApiParam(value = "the user to update", required = true) @RequestBody @Valid User user,
+			BindingResult result) throws RestServiceException {
 
-        /* Update user in db. */
-        try {
-            userService.update(user);
-        } catch (ShanoirUsersException e) {
-        	LOG.error("Error while trying to update user " + userId + " : ", e);
-        	// TODO: 422 ???
-            throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
-        }
+		// IMPORTANT : avoid any confusion that could lead to security breach
+		user.setId(userId);
 
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-    }
+		// A basic user can only update certain fields, check that
+		FieldErrorMap accessErrors = this.getUpdateRightsErrors(user);
+		// Check hibernate validation
+		FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+		// Check unique constrainte
+		FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
+		/* Merge errors. */
+		FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		if (!errors.isEmpty()) {
+			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
+		}
 
-    /*
-     * Get access rights errors
-     *
-     * @param user
-     * @return an error map
-     */
-    private FieldErrorMap getUpdateRightsErrors(User user) {
-        User previousStateUser = userService.findById(user.getId());
-        FieldErrorMap accessErrors = new EditableOnlyByValidator<User>().validate(previousStateUser, user);
-        return accessErrors;
-    }
+		/* Update user in db. */
+		try {
+			userService.update(user);
+		} catch (ShanoirUsersException e) {
+			LOG.error("Error while trying to update user " + userId + " : ", e);
+			throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
+		}
 
-    /*
-     * Get access rights errors
-     *
-     * @param user
-     * @return an error map
-     */
-    private FieldErrorMap getCreationRightsErrors(User user) {
-    	return new EditableOnlyByValidator<User>().validate(user);
-    }
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+	}
+
+	/*
+	 * Get access rights errors
+	 *
+	 * @param user
+	 * 
+	 * @return an error map
+	 */
+	private FieldErrorMap getUpdateRightsErrors(User user) {
+		User previousStateUser = userService.findById(user.getId());
+		FieldErrorMap accessErrors = new EditableOnlyByValidator<User>().validate(previousStateUser, user);
+		return accessErrors;
+	}
+
+	/*
+	 * Get access rights errors
+	 *
+	 * @param user
+	 * 
+	 * @return an error map
+	 */
+	private FieldErrorMap getCreationRightsErrors(User user) {
+		return new EditableOnlyByValidator<User>().validate(user);
+	}
 
 	/*
 	 * Get unique constraint errors
 	 *
 	 * @param user
+	 * 
 	 * @return an error map
 	 */
 	private FieldErrorMap getUniqueConstraintErrors(User user) {

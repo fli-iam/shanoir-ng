@@ -39,7 +39,8 @@ public interface UserApi {
         method = RequestMethod.PUT)
 	@PreAuthorize("hasAuthority('adminRole')")
     ResponseEntity<Void> confirmAccountRequest(@ApiParam(value = "id of the user",required=true ) @PathVariable("userId") Long userId,
-        @ApiParam(value = "user to update" ,required=true ) @RequestBody User user);
+        @ApiParam(value = "user to update" ,required=true ) @RequestBody User user,
+        BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Deletes a user", response = Void.class, tags = {})
 	@ApiResponses(value = {
@@ -61,7 +62,8 @@ public interface UserApi {
         produces = { "application/json" }, 
         method = RequestMethod.POST)
 	@PreAuthorize("hasAuthority('adminRole')")
-    ResponseEntity<Void> denyAccountRequest(@ApiParam(value = "id of the user",required=true ) @PathVariable("userId") Long userId);
+    ResponseEntity<Void> denyAccountRequest(@ApiParam(value = "id of the user",required=true ) @PathVariable("userId") Long userId)
+    		 throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the user corresponding to the given id", response = User.class, tags = {})
 	@ApiResponses(value = {
