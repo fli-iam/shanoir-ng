@@ -2,6 +2,7 @@ package org.shanoir.ng.model.hateoas;
 
 import org.shanoir.ng.model.AbstractGenericItem;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -11,20 +12,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public abstract class HalEntity extends AbstractGenericItem {
 
-	@JsonProperty("_links")
+	@JsonIgnore
 	private Links links = new Links();
 
 	/**
 	 * @return the links
 	 */
+	@JsonProperty("_links")
 	public Links getLinks() {
 		return links;
 	}
 
-
 	/**
 	 * @param links the links to set
 	 */
+	@JsonIgnore
 	public void setLinks(Links links) {
 		this.links = links;
 	}
