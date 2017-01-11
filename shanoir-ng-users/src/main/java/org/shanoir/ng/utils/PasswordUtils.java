@@ -3,6 +3,8 @@ package org.shanoir.ng.utils;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorModelCode;
@@ -41,6 +43,9 @@ public class PasswordUtils {
 	/** Password Hash length. */
 	private static final int PASSWORD_HASH_LENGTH = 14;
 
+	/** Password Regular Expression for Shanoir old. */
+	private static final String SHANOIR_OLD_PASSWORD_REGEX = "((?=.*\\d)(?=.*[a-zA-Z])(?=.*[@#$%]).{6,20})";
+	
 	/**
 	 * Check policy of a password.
 	 * 
@@ -49,7 +54,8 @@ public class PasswordUtils {
 	 * @throws ShanoirUsersException exception thrown if password doesn't match policy
 	 */
 	public static void checkPasswordPolicy(final String password, final String username) throws ShanoirUsersException {
-		if (password != null && password.length() >= PASSWORD_MIN_LENGTH) {
+		// Shanoir NG password check
+		/*if (password != null && password.length() >= PASSWORD_MIN_LENGTH) {
 			boolean hasAlpha = false;
 			boolean hasNumeric = false;
 			boolean hasSpecialChar = false;
@@ -66,7 +72,14 @@ public class PasswordUtils {
 					return;
 				}
 			}
+		}*/
+		
+		// Shanoir old password check
+		final Matcher matcher = Pattern.compile(SHANOIR_OLD_PASSWORD_REGEX).matcher(password);
+		if (matcher.find()) {
+			return;
 		}
+
 		LOG.error("Password does not match policy for user " + username + " : ");
 		throw new ShanoirUsersException(ErrorModelCode.PASSWORD_NOT_CORRECT);
 	}
