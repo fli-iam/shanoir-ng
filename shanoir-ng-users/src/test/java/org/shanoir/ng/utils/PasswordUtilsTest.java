@@ -36,9 +36,14 @@ public class PasswordUtilsTest {
 		PasswordUtils.checkPasswordPolicy("aa11@@22", null);
 	}
 	
+    @Test
+	public void checkGeneratedPasswordPolicyTest() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy(PasswordUtils.generatePassword(), null);
+	}
+	
     @Test(expected = ShanoirUsersException.class)
 	public void checkPasswordPolicyBadPwdTest1() throws ShanoirUsersException {
-		PasswordUtils.checkPasswordPolicy("aa11@@", null);
+		PasswordUtils.checkPasswordPolicy("aa11@", null);
 	}
 	
     @Test(expected = ShanoirUsersException.class)
