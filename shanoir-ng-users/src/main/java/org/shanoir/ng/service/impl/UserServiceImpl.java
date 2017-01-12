@@ -80,7 +80,8 @@ public class UserServiceImpl implements UserService {
 			LOG.error("User with id " + userId + " has no account request");
 			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
 		}
-		// TODO: what to do? remove user?
+		// Remove user
+		userRepository.delete(userId);
 	}
 
 	@Override
