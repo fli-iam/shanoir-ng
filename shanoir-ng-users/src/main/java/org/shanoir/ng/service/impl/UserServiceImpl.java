@@ -131,6 +131,7 @@ public class UserServiceImpl implements UserService {
 		} catch (Exception e) {
 			ShanoirUsersException.logAndThrow(LOG, "Error while updating user: " + e.getMessage());
 		}
+		updateShanoirOld(userDb);
 		return userDb;
 	}
 
