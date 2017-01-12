@@ -60,7 +60,7 @@ public interface UserApi {
         @ApiResponse(code = 500, message = "internal error", response = Void.class) })
     @RequestMapping(value = "/{userId}/denyaccountrequest",
         produces = { "application/json" }, 
-        method = RequestMethod.POST)
+        method = RequestMethod.DELETE)
 	@PreAuthorize("hasAuthority('adminRole')")
     ResponseEntity<Void> denyAccountRequest(@ApiParam(value = "id of the user",required=true ) @PathVariable("userId") Long userId)
     		 throws RestServiceException;

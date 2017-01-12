@@ -110,7 +110,7 @@ paths:
         '500':
           description: internal error
   /user/{userId}/denyaccountrequest:
-    post:
+    delete:
       operationId: denyAccountRequest
       description: Denies an account request
       parameters:

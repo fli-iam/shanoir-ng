@@ -68,14 +68,13 @@ export class UserService {
             .catch(this.handleError);
     }
 
-    denyAccountRequest(id: number): Promise<User> {
+    denyAccountRequest(id: number): Promise<Response> {
         let headers = new Headers();
         headers.append('Content-Type', 'application/json');
         headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
         
-        return this.http.delete(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, { headers: headers })
+        return this.http.delete(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL, { headers: headers })
             .toPromise()
-            .then(response => response.json() as User)
             .catch((error) => {
                 console.error('Error deny user account request', error);
                 return Promise.reject(error.message || error);

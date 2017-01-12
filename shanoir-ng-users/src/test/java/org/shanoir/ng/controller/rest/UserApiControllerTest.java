@@ -75,7 +75,7 @@ public class UserApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
 	public void denyAccountRequestTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post("/user/1/denyaccountrequest").header("X-XSRF-TOKEN", "test"))
+		mvc.perform(MockMvcRequestBuilders.delete("/user/1/denyaccountrequest").header("X-XSRF-TOKEN", "test"))
 				.andExpect(status().isNoContent());
 	}
 

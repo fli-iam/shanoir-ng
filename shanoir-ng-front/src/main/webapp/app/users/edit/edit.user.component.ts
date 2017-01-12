@@ -87,8 +87,10 @@ export class EditUserComponent implements OnInit {
 
     deny(): void {
         this.userService.denyAccountRequest(this.userId)
-            .then()
-                .catch((error) => {
+            .then(res => {
+                this.cancel();
+             })
+            .catch((error) => {
                 // TODO: display error
                 log.error("error deny account request!");
         });
