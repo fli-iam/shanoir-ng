@@ -73,15 +73,16 @@ export class EditUserComponent implements OnInit {
 
     accept(): void {
         this.userService.confirmAccountRequest(this.userId, this.user)
-            .subscribe(user => this.cancel)
-            , (err: String) => {
+           .subscribe((user) => {
+                this.cancel();
+             }, (err: String) => {
                 if (err.indexOf("username should be unique") != -1) {
                     this.isUserNameUnique = false;
                 }
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
                 }
-            };
+           });
     }
 
     deny(): void {
@@ -93,23 +94,21 @@ export class EditUserComponent implements OnInit {
         });
     }
 
-    submit(): void {
-        this.user = this.editUserForm.value;
-        if (this.creationMode == true) {
-            // new user creation
-            this.userService.create(this.user)
-                .subscribe((user) => {
-                    this.cancel();
-                }, (err: String) => {
-                    if (err.indexOf("username should be unique") != -1) {
-                        this.isUserNameUnique = false;
-                    }
-                    if (err.indexOf("email should be unique") != -1) {
-                        this.isEmailUnique = false;
-                    }
-                });
-        } else {
-        // user update
+    create(): void {
+        this.userService.create(this.user)
+            .subscribe((user) => {
+                this.cancel();
+            }, (err: String) => {
+                if (err.indexOf("username should be unique") != -1) {
+                    this.isUserNameUnique = false;
+                }
+                if (err.indexOf("email should be unique") != -1) {
+                    this.isEmailUnique = false;
+                }
+            });
+    }
+
+    update(): void {
         this.userService.update(this.userId, this.user)
            .subscribe((user) => {
                 this.cancel();
@@ -121,7 +120,10 @@ export class EditUserComponent implements OnInit {
                     this.isEmailUnique = false;
                 }
             });
-        }
+    }
+
+    submit(): void {
+        this.user = this.editUserForm.value;
     }
 
     ngOnInit(): void {

@@ -59,8 +59,8 @@
         </div>
 
         <button i18n="Edit user|CancelButton label" class="Button" (click)="cancel()">Cancel</button>
-        <button type="submit" *ngIf="creationMode==true" i18n="Edit user|CreateButton label" class="Button" [disabled]="!editUserForm.valid">Create</button>
-        <button type="submit" *ngIf="creationMode==false && user.accountRequestDemand==false" i18n="Edit user|SaveButton label" class="Button" [disabled]="!editUserForm.valid">Save Settings</button>
+        <button type="submit" *ngIf="creationMode==true" i18n="Edit user|CreateButton label" (click)="create()" class="Button" [disabled]="!editUserForm.valid">Create</button>
+        <button type="submit" *ngIf="creationMode==false && user.accountRequestDemand==false" (click)="update()" i18n="Edit user|SaveButton label" class="Button" [disabled]="!editUserForm.valid">Save Settings</button>
         <button type="submit" *ngIf="creationMode==false && user.accountRequestDemand==true" (click)="deny()" i18n="Edit user|DenyAccountRequestButton label" class="Button" [disabled]="!editUserForm.valid">Deny creation</button>
         <button type="submit" *ngIf="creationMode==false && user.accountRequestDemand==true" (click)="accept()" i18n="Edit user|AcceptAccountRequestButton label" class="Button" [disabled]="!editUserForm.valid">Accept</button>
     </form>
