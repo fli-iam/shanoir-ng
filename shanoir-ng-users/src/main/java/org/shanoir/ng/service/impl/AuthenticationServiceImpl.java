@@ -73,6 +73,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         	LOG.error("No user found with username/email " + loginDTO.getLogin());
         	throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
         }
+        
+        if (securityUser.isAccountRequestDemand()) {
+        	LOG.error("Connection forbidden for user " + securityUser.getUsername() + " (account request not validated)");
+        	throw new ShanoirUsersException(ErrorModelCode.ACCOUNT_REQUEST_NOT_VALIDATED);
+        }
+
         if (securityUser.getExpirationDate() != null && securityUser.getExpirationDate().before(new Date())) {
         	LOG.error("Connection forbidden for user " + securityUser.getUsername() + " (date expired)");
         	throw new ShanoirUsersException(ErrorModelCode.DATE_EXPIRED);

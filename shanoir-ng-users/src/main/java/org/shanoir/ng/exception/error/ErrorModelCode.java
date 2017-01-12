@@ -15,6 +15,9 @@ public final class ErrorModelCode {
 	/** Login - date expired */
 	public static final Integer DATE_EXPIRED = 102;
 	
+	/** Login - account request not validated */
+	public static final Integer ACCOUNT_REQUEST_NOT_VALIDATED = 103;
+	
 	/** No user found */
 	public static final Integer USER_NOT_FOUND = 151;
 	

@@ -229,4 +229,6 @@ VALUES
 (235,0,'2016-07-28 14:04:04','refimpax@chu-reunion.fr','Marina ','2016-08-01 11:14:42','MAGNIN','BD-6758880E146','mmagnin',3,0,'2017-07-28 00:00:00',0,0,0),
 (236,0,'2016-08-04 10:55:27','elise.bannier2@irisa.fr','fake','2016-08-04 10:56:03','testderivedstudy','02221336298213','testderivedstudy',3,0,'2017-08-04 00:00:00',0,0,0),
 (237,0,'2016-09-07 15:22:19','cedric.gervaux@chu-limoges.fr','Cédric','2016-09-15 16:29:40','Gervaux','0C1234529F-978','cgervaux',3,0,'2019-09-06 00:00:00',0,0,0),
-(238,0,'2016-09-09 16:06:39','remi.donat@chu-nimes.fr','Remi',NULL,'DONAT','4F79A4-9237551','rdonat',3,0,'2017-09-09 00:00:00',0,0,0);
+(238,0,'2016-09-09 16:06:39','remi.donat@chu-nimes.fr','Remi',NULL,'DONAT','4F79A4-9237551','rdonat',3,0,'2017-09-09 00:00:00',0,0,0),
+(239, 0, NOW(), 'ricky.martin@gmail.com', 'Ricky', null, 'Martin', '4165C7-57B4-76', 'wopa', 2, 0, null, 0, 0, 1),
+(240, 0, NOW(), 'michel.sardou@gmail.com', 'Michel', null, 'sardou', '1117DC-36DE-34', 'connemara', 2, 0, null, 0, 0, 1);

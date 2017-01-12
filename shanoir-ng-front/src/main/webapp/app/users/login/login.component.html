@@ -17,6 +17,7 @@
         </form>
         <label *ngIf="errorCode=='101'" class="LoginForm-error" i18n="Login form|BadCredentials label">Bad credentials.</label>
         <label *ngIf="errorCode=='102'" class="LoginForm-error" i18n="Login form|ExpiredAccount label">Your account has expired. Please contact your administrator.</label>
+        <label *ngIf="errorCode=='103'" class="LoginForm-error" i18n="Login form|AccountRequestNotValidated label">Your account request is not validated. Please contact your administrator.</label>
     </div>
     <a routerLink="" routerLinkActive="active">Create an account</a>
 </div>
