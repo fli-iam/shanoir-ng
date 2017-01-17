@@ -49,8 +49,8 @@
         </div>
         <div class="EditUserComponent-div">
             <label i18n="Edit user|IsMedical label">Is a medical doctor/resident: </label> 
-            <input type="radio" formControlName="isMedical" [(ngModel)]="user.isMedical" [value]="true" i18n="Edit user|isMedical label" [checked]="user.isMedical == true"/>Yes
-            <input type="radio" formControlName="isMedical" [(ngModel)]="user.isMedical" [value]="false" i18n="Edit user|isNotMedical label" [checked]="'user.isMedical'?'user.isMedical == false':'true'"/>No
+            <input type="radio" formControlName="medical" [(ngModel)]="user.medical" [value]="true" i18n="Edit user|medical label" [checked]="user.medical == true"/>Yes
+            <input type="radio" formControlName="medical" [(ngModel)]="user.medical" [value]="false" i18n="Edit user|notMedical label" [checked]="'user.medical'?'user.medical == false':'true'"/>No
         </div>
         <div class="EditUserComponent-div">
             <label i18n="Edit user|Motivation label">Comment: </label> 

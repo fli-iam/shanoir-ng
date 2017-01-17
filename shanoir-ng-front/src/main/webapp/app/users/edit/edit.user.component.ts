@@ -143,7 +143,7 @@ export class EditUserComponent implements OnInit {
             'expirationDate': [this.user.expirationDate],
             'role': [this.user.role, Validators.required],
             'canAccessToDicomAssociation': new FormControl('false'),
-            'isMedical': new FormControl('false'),
+            'medical': new FormControl('false'),
             'motivation': [this.user.motivation]
         });
 
