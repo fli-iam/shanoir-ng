@@ -79,33 +79,35 @@ export class UserListComponent {
             return null;
         };
         this.columnDefs = [
-            {headerName: "Id", field: "id", width: 40, suppressMenu: true},
-            {headerName: "Username", field: "username", width: 120, suppressMenu: true},
-            {headerName: "First Name", field: "firstName", width: 130, suppressMenu: true},
-            {headerName: "Last Name", field: "lastName", width: 130, suppressMenu: true},
-            {headerName: "Email", field: "email", width: 200, suppressMenu: true},
-            {headerName: "On Demande", field: "accountRequestDemand", width: 100, suppressMenu: true, suppressSorting: true, cellRenderer: function (params) {
+            {headerName: "Username", field: "username", suppressMenu: true},
+            {headerName: "First Name", field: "firstName", suppressMenu: true},
+            {headerName: "Last Name", field: "lastName", suppressMenu: true},
+            {headerName: "Email", field: "email", suppressMenu: true},
+            {headerName: "On Demand", field: "accountRequestDemand", suppressMenu: true, suppressSorting: true, cellRenderer: function (params) {
                 return booleanTrueRenderer(params.data.accountRequestDemand);
             }, cellStyle: {"text-align": "center"}},
-            {headerName: "Team", field: "teamName", width: 100, suppressMenu: true},
-            {headerName: "Role", field: "role.displayName", width: 100, suppressMenu: true},
-            {headerName: "Can import from PACS", field: "canAccessToDicomAssociation", width: 160, suppressMenu: true, cellRenderer: function (params) {
-                return booleanTrueRenderer(params.data.canAccessToDicomAssociation);
-            }, cellStyle: {"text-align": "center"}},
-            {headerName: "Created on", field: "creationDate", width: 110, suppressMenu: true, cellRenderer: function (params) {
+            {headerName: "Role", field: "role.displayName", suppressMenu: true},
+            {headerName: "Created on", field: "creationDate", suppressMenu: true, cellRenderer: function (params) {
                 return dateRenderer(params.data.creationDate);
             }},
-            {headerName: "Expiration Date", field: "expirationDate", width: 110, suppressMenu: true, cellRenderer: function (params) {
+            {headerName: "Expiration Date", field: "expirationDate", suppressMenu: true, cellRenderer: function (params) {
                 return dateRenderer(params.data.expirationDate);
             }},
-            {headerName: "Active", field: "valid", width: 60, suppressMenu: true, cellRenderer: function (params) {
+            {headerName: "Active", field: "valid", suppressMenu: true, cellRenderer: function (params) {
                 return booleanTrueRenderer(!params.data.expirationDate || params.data.expirationDate >= new Date());
             }, cellStyle: {"text-align": "center"}},
-            {headerName: "Last Login", field: "lastLogin", width: 100, suppressMenu: true, cellRenderer: function (params) {
+            {headerName: "Last Login", field: "lastLogin", suppressMenu: true, cellRenderer: function (params) {
                 return dateRenderer(params.data.lastLogin);
             }},
-            {headerName: "Edit", field: "id", width: 50, suppressMenu: true, suppressSorting: true,
+            {headerName: "Edit", field: "id", suppressMenu: true, suppressSorting: true,
               cellRendererFramework: ClickableParentComponent
+            , cellStyle: {"text-align": "center"}},
+            {headerName: "Delete", field: "id", suppressMenu: true, suppressSorting: true,
+              cellRenderer: function (params) {
+                  var image = document.createElement("img");
+                  image.src = "/images/delete.16x16.png";
+                  return image;
+              }
             , cellStyle: {"text-align": "center"}}
         ];
     }
@@ -140,7 +142,7 @@ export class UserListComponent {
         }
     }
 
-     showUsersOnDemande(event): void {
+    showUsersOnDemande(event): void {
         this.users = this.userRequest;
         this.rowCount = this.users.length;
     }
