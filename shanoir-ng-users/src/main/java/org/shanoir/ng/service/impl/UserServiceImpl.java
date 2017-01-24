@@ -1,6 +1,8 @@
 package org.shanoir.ng.service.impl;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.exception.ShanoirUsersException;
@@ -43,7 +45,7 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Override
-	public User confirmAccountRequest(Long userId, User user) throws ShanoirUsersException {
+	public User confirmAccountRequest(final Long userId, final User user) throws ShanoirUsersException {
 		final User userDb = userRepository.findOne(userId);
 		if (userDb == null) {
 			LOG.error("User with id " + userId + " not found");
@@ -70,7 +72,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void denyAccountRequest(Long userId) throws ShanoirUsersException {
+	public void denyAccountRequest(final Long userId) throws ShanoirUsersException {
 		final User user = userRepository.findOne(userId);
 		if (user == null) {
 			LOG.error("User with id " + userId + " not found");
@@ -95,10 +97,20 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public Optional<User> findByEmail(final String email) {
+		return userRepository.findByEmail(email);
+	}
+
+	@Override
 	public User findById(final Long id) {
 		return userRepository.findOne(id);
 	}
 
+	@Override
+	public Optional<User> findByUsername(final String username) {
+		return userRepository.findByUsername(username);
+	}
+	
 	@Override
 	public User save(final User user) throws ShanoirUsersException {
 		String newPassword = null;
@@ -192,6 +204,16 @@ public class UserServiceImpl implements UserService {
 		userDb.setMedical(user.isMedical());
 		userDb.setUsername(user.getUsername());
 		return userDb;
+	}
+
+	@Override
+	public void updateLastLogin(final User user) {
+		user.setLastLogin(new Date());
+		try {
+			userRepository.save(user);
+		} catch (Exception e) {
+			LOG.error("Error while updating last login date for user " + user.getId(), e);
+		}
 	}
 
 }

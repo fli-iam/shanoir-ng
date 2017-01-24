@@ -61,22 +61,21 @@ public class UserApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
 	public void confirmAccountRequestTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put("/user/1/confirmaccountrequest").header("X-XSRF-TOKEN", "test")
-				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(ModelsUtil.createUser()))).andExpect(status().isNoContent());
+		mvc.perform(MockMvcRequestBuilders.put("/user/1/confirmaccountrequest").accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createUser())))
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void deleteUserTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete("/user/1").header("X-XSRF-TOKEN", "test")
-				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isNoContent());
+		mvc.perform(MockMvcRequestBuilders.delete("/user/1").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
 	public void denyAccountRequestTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete("/user/1/denyaccountrequest").header("X-XSRF-TOKEN", "test"))
-				.andExpect(status().isNoContent());
+		mvc.perform(MockMvcRequestBuilders.delete("/user/1/denyaccountrequest")).andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -94,18 +93,16 @@ public class UserApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
 	public void saveNewUserTest() throws Exception {
-		mvc.perform(
-				MockMvcRequestBuilders.post("/user").header("X-XSRF-TOKEN", "test").accept(MediaType.APPLICATION_JSON)
-						.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createUser())))
+		mvc.perform(MockMvcRequestBuilders.post("/user").accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createUser())))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
 	public void updateUserTest() throws Exception {
-		mvc.perform(
-				MockMvcRequestBuilders.put("/user/1").header("X-XSRF-TOKEN", "test").accept(MediaType.APPLICATION_JSON)
-						.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createUser())))
+		mvc.perform(MockMvcRequestBuilders.put("/user/1").accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createUser())))
 				.andExpect(status().isNoContent());
 	}
 

@@ -15,6 +15,9 @@ import org.shanoir.ng.model.User;
 public final class ModelsUtil {
 
 	// Role data
+	public static final int ADMIN_ROLE_ACCESS_LEVEL = 1;
+	public static final String ADMIN_ROLE_DISPLAY_NAME = "admin";
+	public static final String ADMIN_ROLE_NAME = "adminRole";
 	public static final int ROLE_ACCESS_LEVEL = 3;
 	public static final String ROLE_DISPLAY_NAME = "guest";
 	public static final String ROLE_NAME = "guest";
@@ -27,17 +30,31 @@ public final class ModelsUtil {
 	// Login/password
 	public static final String NEW_USER_LOGIN = "user";
 	public static final String NEW_USER_PASSWORD = "password";
+	public static final Long USER_ID = 1L;
 	public static final String USER_LOGIN = "admin";
 	public static final String USER_PASSWORD = "D0-483351E2-30";
 	public static final String USER_LOGIN_GUEST = "wopa";
 	public static final String USER_PASSWORD_GUEST = "1117DC-36DE-34";
 	
 	/**
-	 * Create a role.
+	 * Create a role 'admin'.
 	 * 
 	 * @return role
 	 */
-	public static Role createRole() {
+	public static Role createAdminRole() {
+		final Role role = new Role();
+		role.setAccessLevel(ADMIN_ROLE_ACCESS_LEVEL);
+		role.setDisplayName(ADMIN_ROLE_DISPLAY_NAME);
+		role.setName(ADMIN_ROLE_NAME);
+		return role;
+	}
+	
+	/**
+	 * Create a role 'guest'.
+	 * 
+	 * @return role
+	 */
+	public static Role createGuestRole() {
 		final Role role = new Role();
 		role.setAccessLevel(ROLE_ACCESS_LEVEL);
 		role.setDisplayName(ROLE_DISPLAY_NAME);
@@ -51,7 +68,7 @@ public final class ModelsUtil {
 	 * @return user.
 	 */
 	public static User createUser() {
-		return createUser(createRole());
+		return createUser(createGuestRole());
 	}
 	
 	/**

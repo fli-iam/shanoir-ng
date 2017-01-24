@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.shanoir.ng.configuration.swagger.SwaggerDocumentationConfig;
 import org.shanoir.ng.exception.RestServiceException;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorDetails;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import io.swagger.annotations.ApiParam;
 
@@ -39,21 +37,21 @@ public class UserApiController implements UserApi {
 
 	@Override
 	public ResponseEntity<Void> confirmAccountRequest(
-			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
-			@ApiParam(value = "user to update", required = true) @RequestBody User user, BindingResult result)
-			throws RestServiceException {
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") final Long userId,
+			@ApiParam(value = "user to update", required = true) @RequestBody final User user,
+			final BindingResult result) throws RestServiceException {
 		// IMPORTANT : avoid any confusion that could lead to security breach
 		user.setId(userId);
 
 		/* Validation */
 		// A basic user can only update certain fields, check that
-		FieldErrorMap accessErrors = this.getUpdateRightsErrors(user);
+		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(user);
 		// Check hibernate validation
-		FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
 		// Check unique constrainte
-		FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
+		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
 		/* Merge errors. */
-		FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
 		}
@@ -71,8 +69,7 @@ public class UserApiController implements UserApi {
 
 	@Override
 	public ResponseEntity<Void> deleteUser(
-			@RequestHeader(value = SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
-			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) {
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") final Long userId) {
 		if (userService.findById(userId) == null) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
@@ -82,7 +79,7 @@ public class UserApiController implements UserApi {
 
 	@Override
 	public ResponseEntity<Void> denyAccountRequest(
-			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId)
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") final Long userId)
 			throws RestServiceException {
 		try {
 			userService.denyAccountRequest(userId);
@@ -97,8 +94,8 @@ public class UserApiController implements UserApi {
 
 	@Override
 	public ResponseEntity<User> findUserById(
-			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) {
-		User user = userService.findById(userId);
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") final Long userId) {
+		final User user = userService.findById(userId);
 		if (user == null) {
 			return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
 		}
@@ -107,7 +104,7 @@ public class UserApiController implements UserApi {
 
 	@Override
 	public ResponseEntity<List<User>> findUsers() {
-		List<User> users = userService.findAll();
+		final List<User> users = userService.findAll();
 		if (users.isEmpty()) {
 			return new ResponseEntity<List<User>>(HttpStatus.NO_CONTENT);
 		}
@@ -116,19 +113,18 @@ public class UserApiController implements UserApi {
 
 	@Override
 	public ResponseEntity<User> saveNewUser(
-			@RequestHeader(value = SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
-			@ApiParam(value = "the user to create", required = true) @RequestBody @Valid User user,
-			BindingResult result) throws RestServiceException {
+			@ApiParam(value = "the user to create", required = true) @RequestBody @Valid final User user,
+			final BindingResult result) throws RestServiceException {
 
 		/* Validation */
 		// A basic user can only update certain fields, check that
-		FieldErrorMap accessErrors = this.getCreationRightsErrors(user);
+		final FieldErrorMap accessErrors = this.getCreationRightsErrors(user);
 		// Check hibernate validation
-		FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
 		// Check unique constrainte
-		FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
+		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
 		/* Merge errors. */
-		FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
 		}
@@ -152,22 +148,21 @@ public class UserApiController implements UserApi {
 
 	@Override
 	public ResponseEntity<Void> updateUser(
-			@RequestHeader(value = SwaggerDocumentationConfig.XSRF_TOKEN_NAME) String authToken,
-			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
-			@ApiParam(value = "the user to update", required = true) @RequestBody @Valid User user,
-			BindingResult result) throws RestServiceException {
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") final Long userId,
+			@ApiParam(value = "the user to update", required = true) @RequestBody @Valid final User user,
+			final BindingResult result) throws RestServiceException {
 
 		// IMPORTANT : avoid any confusion that could lead to security breach
 		user.setId(userId);
 
 		// A basic user can only update certain fields, check that
-		FieldErrorMap accessErrors = this.getUpdateRightsErrors(user);
+		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(user);
 		// Check hibernate validation
-		FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
 		// Check unique constrainte
-		FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
+		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
 		/* Merge errors. */
-		FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
 		}
@@ -190,9 +185,9 @@ public class UserApiController implements UserApi {
 	 * 
 	 * @return an error map
 	 */
-	private FieldErrorMap getUpdateRightsErrors(User user) {
-		User previousStateUser = userService.findById(user.getId());
-		FieldErrorMap accessErrors = new EditableOnlyByValidator<User>().validate(previousStateUser, user);
+	private FieldErrorMap getUpdateRightsErrors(final User user) {
+		final User previousStateUser = userService.findById(user.getId());
+		final FieldErrorMap accessErrors = new EditableOnlyByValidator<User>().validate(previousStateUser, user);
 		return accessErrors;
 	}
 
@@ -203,7 +198,7 @@ public class UserApiController implements UserApi {
 	 * 
 	 * @return an error map
 	 */
-	private FieldErrorMap getCreationRightsErrors(User user) {
+	private FieldErrorMap getCreationRightsErrors(final User user) {
 		return new EditableOnlyByValidator<User>().validate(user);
 	}
 
@@ -214,9 +209,9 @@ public class UserApiController implements UserApi {
 	 * 
 	 * @return an error map
 	 */
-	private FieldErrorMap getUniqueConstraintErrors(User user) {
-		UniqueValidator<User> uniqueValidator = new UniqueValidator<User>(userService);
-		FieldErrorMap uniqueErrors = uniqueValidator.validate(user);
+	private FieldErrorMap getUniqueConstraintErrors(final User user) {
+		final UniqueValidator<User> uniqueValidator = new UniqueValidator<User>(userService);
+		final FieldErrorMap uniqueErrors = uniqueValidator.validate(user);
 		return uniqueErrors;
 	}
 

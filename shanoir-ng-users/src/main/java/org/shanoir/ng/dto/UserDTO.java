@@ -1,11 +1,7 @@
 package org.shanoir.ng.dto;
 
+import java.util.Date;
 import java.util.List;
-
-import org.hibernate.validator.constraints.NotEmpty;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * User DTO.
@@ -13,62 +9,31 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @author msimon
  *
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDTO {
 
-    private Integer id;
+	private String username;
 
-    @NotEmpty
-    private String login;
+	private List<String> authorities;
 
-    @JsonIgnore
-    private String password;
+	private String token;
 
-    @NotEmpty
-    private List<String> authorities;
+	private Date tokenTimeout;
 
-    private String token;
+	private String refreshToken;
 
 	/**
-	 * @return the id
+	 * @return the username
 	 */
-	public Integer getId() {
-		return id;
+	public String getUsername() {
+		return username;
 	}
 
 	/**
-	 * @param id the id to set
+	 * @param username
+	 *            the username to set
 	 */
-	public void setId(final Integer id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return the login
-	 */
-	public String getLogin() {
-		return login;
-	}
-
-	/**
-	 * @param login the login to set
-	 */
-	public void setLogin(final String login) {
-		this.login = login;
-	}
-
-	/**
-	 * @return the password
-	 */
-	public String getPassword() {
-		return password;
-	}
-
-	/**
-	 * @param password the password to set
-	 */
-	public void setPassword(final String password) {
-		this.password = password;
+	public void setUsername(final String username) {
+		this.username = username;
 	}
 
 	/**
@@ -79,7 +44,8 @@ public class UserDTO {
 	}
 
 	/**
-	 * @param authorities the authorities to set
+	 * @param authorities
+	 *            the authorities to set
 	 */
 	public void setAuthorities(final List<String> authorities) {
 		this.authorities = authorities;
@@ -93,10 +59,41 @@ public class UserDTO {
 	}
 
 	/**
-	 * @param token the token to set
+	 * @param token
+	 *            the token to set
 	 */
 	public void setToken(final String token) {
 		this.token = token;
+	}
+
+	/**
+	 * @return the tokenTimeout
+	 */
+	public Date getTokenTimeout() {
+		return tokenTimeout;
+	}
+
+	/**
+	 * @param tokenTimeout
+	 *            the tokenTimeout to set
+	 */
+	public void setTokenTimeout(final Date tokenTimeout) {
+		this.tokenTimeout = tokenTimeout;
+	}
+
+	/**
+	 * @return the refreshToken
+	 */
+	public String getRefreshToken() {
+		return refreshToken;
+	}
+
+	/**
+	 * @param refreshToken
+	 *            the refreshToken to set
+	 */
+	public void setRefreshToken(final String refreshToken) {
+		this.refreshToken = refreshToken;
 	}
 
 }

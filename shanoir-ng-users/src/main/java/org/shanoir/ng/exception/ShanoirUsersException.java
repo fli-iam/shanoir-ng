@@ -39,6 +39,19 @@ public class ShanoirUsersException extends Exception {
 	}
 
 	/**
+	 * Constructor.
+	 * 
+	 * @param message
+	 *            message.
+	 * @param errorCode
+	 *            error code.
+	 */
+	public ShanoirUsersException(final String message, final int errorCode) {
+		super(message);
+		this.errorCode = errorCode;
+	}
+
+	/**
 	 * @return the errorCode
 	 */
 	public int getErrorCode() {
