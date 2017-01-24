@@ -19,8 +19,9 @@ import { UserService } from './users/shared/user.service';
 import { EditUserComponent }   from './users/edit/edit.user.component';
 import { RoleService } from './roles/role.service';
 import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
-import {ClickableComponent} from "./users/shared/clickable.component";
-import {ClickableParentComponent} from "./users/shared/clickable.parent.component";
+import { ClickableComponent } from "./users/shared/clickable.component";
+import { ClickableParentComponent } from "./users/shared/clickable.parent.component";
+import { MyDatePickerModule } from 'mydatepicker/dist/my-date-picker.module';
 
 @NgModule({
     imports: [ 
@@ -29,7 +30,8 @@ import {ClickableParentComponent} from "./users/shared/clickable.parent.componen
         FormsModule,
         HttpModule,
         ReactiveFormsModule,
-        routing
+        routing,
+        MyDatePickerModule
     ],
     declarations: [ 
         AppComponent,

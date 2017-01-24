@@ -33,7 +33,10 @@
         </div>
         <div class="EditUserComponent-div">
             <label i18n="Edit user|ExpirationDate label">Expiration Date: </label> 
-            <input type="date" id="expirationDate" formControlName="expirationDate" [(ngModel)]="expirationDate"/>
+            <my-date-picker id="expirationDate" [options]="myDatePickerOptions" formControlName="expirationDate" [(ngModel)]="expirationDate" 
+                (dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
+            </my-date-picker>
+            <label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: yyyy-mm-dd</label>
         </div>
         <div class="EditUserComponent-div required">
             <label i18n="Edit user|Role label" class="required-label">Role of the user: </label> 
@@ -59,9 +62,9 @@
         </div>
 
         <button i18n="Edit user|CancelButton label" class="Button" (click)="cancel()">Cancel</button>
-        <button type="submit" *ngIf="creationMode==true" i18n="Edit user|CreateButton label" (click)="create()" class="Button" [disabled]="!editUserForm.valid">Create</button>
-        <button type="submit" *ngIf="creationMode==false && user.accountRequestDemand==false" (click)="update()" i18n="Edit user|SaveButton label" class="Button" [disabled]="!editUserForm.valid">Save Settings</button>
-        <button type="submit" *ngIf="creationMode==false && user.accountRequestDemand==true" (click)="deny()" i18n="Edit user|DenyAccountRequestButton label" class="Button" [disabled]="!editUserForm.valid">Deny creation</button>
-        <button type="submit" *ngIf="creationMode==false && user.accountRequestDemand==true" (click)="accept()" i18n="Edit user|AcceptAccountRequestButton label" class="Button" [disabled]="!editUserForm.valid">Accept</button>
+        <button type="submit" *ngIf="creationMode==true" i18n="Edit user|CreateButton label" (click)="create()" class="Button" [disabled]="!editUserForm.valid || isDateValid==false">Create</button>
+        <button type="submit" *ngIf="creationMode==false && user.accountRequestDemand==false" (click)="update()" i18n="Edit user|SaveButton label" class="Button" [disabled]="!editUserForm.valid || isDateValid==false">Save Settings</button>
+        <button type="submit" *ngIf="creationMode==false && user.accountRequestDemand==true" (click)="deny()" i18n="Edit user|DenyAccountRequestButton label" class="Button" [disabled]="!editUserForm.valid || isDateValid==false">Deny creation</button>
+        <button type="submit" *ngIf="creationMode==false && user.accountRequestDemand==true" (click)="accept()" i18n="Edit user|AcceptAccountRequestButton label" class="Button" [disabled]="!editUserForm.valid || isDateValid==false">Accept</button>
     </form>
 </div>
