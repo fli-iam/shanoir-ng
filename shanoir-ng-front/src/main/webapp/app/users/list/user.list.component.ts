@@ -142,7 +142,7 @@ export class UserListComponent {
         }
     }
 
-    showUsersOnDemande(event): void {
+    showUsersOnDemand(event): void {
         this.users = this.userRequest;
         this.rowCount = this.users.length;
     }

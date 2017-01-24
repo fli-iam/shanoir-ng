@@ -22,6 +22,7 @@ import { RoleService } from './roles/role.service';
 import { SecureHttp } from 'app/shared/http/secure.http';
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
+import { MyDatePickerModule } from 'mydatepicker/dist/my-date-picker.module';
 
 @NgModule({
     imports: [ 
@@ -30,7 +31,8 @@ import { UserService } from './users/shared/user.service';
         FormsModule,
         HttpModule,
         ReactiveFormsModule,
-        routing
+        routing,
+        MyDatePickerModule
     ],
     declarations: [ 
         AppComponent,
