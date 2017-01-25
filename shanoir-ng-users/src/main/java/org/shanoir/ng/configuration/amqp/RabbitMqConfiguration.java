@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMqConfiguration {
 
 	private final static String USER_QUEUE_NAME_IN = "user_queue";
-	private final static String USER_QUEUE_NAME_OUT = "user_queue_out";
+	private final static String USER_QUEUE_NAME_OUT = "user_queue_from_ng";
 
     @Bean
     public static Queue queueIn() {

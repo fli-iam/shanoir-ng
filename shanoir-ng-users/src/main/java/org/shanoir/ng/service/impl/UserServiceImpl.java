@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.dto.ShanoirOldUserDTO;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorModelCode;
 import org.shanoir.ng.model.User;
@@ -110,7 +111,7 @@ public class UserServiceImpl implements UserService {
 	public Optional<User> findByUsername(final String username) {
 		return userRepository.findByUsername(username);
 	}
-	
+
 	@Override
 	public User save(final User user) throws ShanoirUsersException {
 		String newPassword = null;
@@ -161,19 +162,36 @@ public class UserServiceImpl implements UserService {
 			ShanoirUsersException.logAndThrow(LOG, "Error while updating user from Shanoir Old: " + e.getMessage());
 		}
 	}
-	
+
 	/*
 	 * Update Shanoir Old.
 	 * 
-	 * @param user
+	 * @param user user.
 	 * 
-	 * @return false if it fails, true if it succeed
+	 * @return false if it fails, true if it succeed.
 	 */
 	private boolean updateShanoirOld(final User user) {
+		// Parse user to old Shanoir user entity.
+		final ShanoirOldUserDTO shanoirOldUser = new ShanoirOldUserDTO();
+		shanoirOldUser.setId(user.getId());
+		shanoirOldUser.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
+		shanoirOldUser.setCreatedOn(user.getCreationDate());
+		shanoirOldUser.setEmail(user.getEmail());
+		shanoirOldUser.setExpirationDate(user.getExpirationDate());
+		shanoirOldUser.setFirstExpirationNotificationSent(user.isFirstExpirationNotificationSent());
+		shanoirOldUser.setFirstName(user.getFirstName());
+		shanoirOldUser.setIsMedical(user.isMedical());
+		shanoirOldUser.setLastLoginOn(user.getLastLogin());
+		shanoirOldUser.setLastName(user.getLastName());
+		shanoirOldUser.setPasswordHash(user.getPassword());
+		shanoirOldUser.setRole(user.getRole());
+		shanoirOldUser.setSecondExpirationNotificationSent(user.isSecondExpirationNotificationSent());
+		shanoirOldUser.setUsername(user.getUsername());
+
 		try {
 			LOG.info("Send update to Shanoir Old");
 			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(),
-					new ObjectMapper().writeValueAsString(user));
+					new ObjectMapper().writeValueAsString(shanoirOldUser));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send user " + user.getId() + " save/update to Shanoir Old on queue : "
@@ -189,7 +207,9 @@ public class UserServiceImpl implements UserService {
 	 * Update some values of user to save them in database.
 	 * 
 	 * @param userDb user found in database.
+	 * 
 	 * @param user user with new values.
+	 * 
 	 * @return database user with new values.
 	 */
 	private User updateUserValues(final User userDb, final User user) {
