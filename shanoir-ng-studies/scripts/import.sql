@@ -11,8 +11,8 @@ VALUES
 	(2,'in_progress');
 
 INSERT INTO study
-	(study_id, name, START_DATE, END_DATE, IS_CLINICAL, IS_WITH_EXAMINATION, IS_VISIBLE_BY_DEFAULT, IS_DOWNLOADABLE_BY_DEFAULT, REF_STUDY_STATUS_ID)
+	(study_id, name, START_DATE, END_DATE, IS_CLINICAL, IS_WITH_EXAMINATION, IS_VISIBLE_BY_DEFAULT, IS_DOWNLOADABLE_BY_DEFAULT)
 VALUES 
-	(1,'shanoirStudy1', now(), '2017/12/31', 1, 0, 0, 0, null),
-	(2,'shanoirStudy2', now(), '2017/11/30', 0, 0, 0, 0, , null),
-	(3,'shanoirStudy3', now(),'2017/09/30', 1, 0, 0, 0, null);
+	(1,'shanoirStudy1', now(), '2017/12/31', 1, 0, 0, 0),
+	(2,'shanoirStudy2', now(), '2017/11/30', 0, 0, 0, 0),
+	(3,'shanoirStudy3', now(),'2017/09/30', 1, 0, 0, 0);
