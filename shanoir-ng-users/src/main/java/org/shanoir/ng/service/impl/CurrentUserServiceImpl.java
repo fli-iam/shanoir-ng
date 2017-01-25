@@ -22,7 +22,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 		}
 		final UserContext currentUser = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if (currentUser != null) {
-			if (currentUser.getId().equals(userId)) {
+			if (userId.equals(currentUser.getId())) {
 				return true;
 			}
 			if (currentUser.getAuthorities() != null) {
