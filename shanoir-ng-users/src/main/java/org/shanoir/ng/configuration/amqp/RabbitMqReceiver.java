@@ -12,27 +12,39 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
 
-public class Receiver {
+/**
+ * RabbitMQ message receiver.
+ * 
+ * @author msimon
+ *
+ */
+public class RabbitMqReceiver {
 	private static final Logger LOG = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	private CountDownLatch latch = new CountDownLatch(1);
-	
-	public void receiveMessage(String message) {
+
+	/**
+	 * Receive message.
+	 * 
+	 * @param message
+	 *            message.
+	 */
+	public void receiveMessage(final String message) {
 		LOG.debug(" [x] Received '" + message + "'");
-        
-        Gson oGson = new Gson();
-        User user = oGson.fromJson(message, User.class);
-        
-        try {
+
+		final Gson oGson = new Gson();
+		final User user = oGson.fromJson(message, User.class);
+
+		try {
 			userService.updateFromShanoirOld(user);
 			latch.countDown();
 		} catch (ShanoirUsersException e) {
 			// Exception.
 			// TODO: how to manage these exceptions to avoid messages loop
 		}
-    }
-	
+	}
+
 }

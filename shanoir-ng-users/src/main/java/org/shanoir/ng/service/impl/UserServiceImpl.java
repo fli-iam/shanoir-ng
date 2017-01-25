@@ -9,6 +9,8 @@ import org.shanoir.ng.dto.ShanoirOldUserDTO;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorModelCode;
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.repository.AccountRequestInfoRepository;
+import org.shanoir.ng.repository.RoleRepository;
 import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.UserService;
 import org.shanoir.ng.utils.PasswordUtils;
@@ -40,7 +42,13 @@ public class UserServiceImpl implements UserService {
 	private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	@Autowired
+	private AccountRequestInfoRepository accountRequestInfoRepository;
+	
+	@Autowired
 	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private RoleRepository roleRepository;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -151,15 +159,36 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void updateFromShanoirOld(final User user) throws ShanoirUsersException {
 		if (user.getId() == null) {
-			throw new IllegalArgumentException("user id cannot be null");
-		}
-
-		final User userDb = userRepository.findOne(user.getId());
-		updateUserValues(userDb, user);
-		try {
-			userRepository.save(userDb);
-		} catch (Exception e) {
-			ShanoirUsersException.logAndThrow(LOG, "Error while updating user from Shanoir Old: " + e.getMessage());
+			if (user.isAccountRequestDemand()) {
+				// User account request
+				// Set role 'guest'
+				user.setRole(roleRepository.findByName("guestRole")
+						.orElseThrow(() -> new ShanoirUsersException("Error while getting role 'guestRole'")));
+				try {
+					if (user.getAccountRequestInfo() != null) {
+						// Save account request info
+						accountRequestInfoRepository.save(user.getAccountRequestInfo());
+					}
+					// Save user
+					userRepository.save(user);
+				} catch (Exception e) {
+					ShanoirUsersException.logAndThrow(LOG,
+							"Error while creating user from Shanoir Old: " + e.getMessage());
+				}
+			} else {
+				throw new IllegalArgumentException("User id cannot be null if not an account request");
+			}
+		} else {
+			final User userDb = userRepository.findOne(user.getId());
+			if (userDb != null) {
+				updateUserValues(userDb, user);
+				try {
+					userRepository.save(userDb);
+				} catch (Exception e) {
+					ShanoirUsersException.logAndThrow(LOG,
+							"Error while updating user from Shanoir Old: " + e.getMessage());
+				}
+			}
 		}
 	}
 
