@@ -22,6 +22,7 @@
 		<docker.image.prefix>shanoir-ng</docker.image.prefix>
 		<npm.executable>npm</npm.executable>
 		<nginx.webapp.directory>${basedir}/../shanoir-ng-nginx/webapp</nginx.webapp.directory>
+		<sonar.skip>true</sonar.skip>
 	</properties>
 
 	<build>
