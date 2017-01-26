@@ -17,16 +17,13 @@ import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
 import { LoginComponent }   from './users/login/login.component';
 import { LoginService } from './shared/login/login.service';
+import { MyDatePickerModule } from 'mydatepicker/dist/my-date-picker.module';
 import { NavbarComponent }   from './shared/navbar/navbar.component';
 import { RoleService } from './roles/role.service';
 import { SecureHttp } from 'app/shared/http/secure.http';
+import { TableComponent} from "./shared/table/table.component";
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
-import { EditUserComponent }   from './users/edit/edit.user.component';
-import { RoleService } from './roles/role.service';
-import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
-import { TableComponent} from "./shared/table/table.component";
-import { MyDatePickerModule } from 'mydatepicker/dist/my-date-picker.module';
 
 @NgModule({
     imports: [

@@ -33,6 +33,7 @@
         "@angular/platform-server": "^2.4.3",
         "@angular/router": "~3.4.3",
         "@angular/upgrade": "~2.4.3",
+        
         "angular-in-memory-web-api": "~0.2.4",
         "core-js": "^2.4.1",
     	"mydatepicker": "^1.2.9",
@@ -48,4 +49,5 @@
         "lite-server": "^2.2.2",
         "postcss": "^5.2.10",
         "typescript": "^2.1.5"
+    }
 }
