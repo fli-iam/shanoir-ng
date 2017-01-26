@@ -48,4 +48,5 @@
         "lite-server": "^2.2.2",
         "postcss": "^5.2.10",
         "typescript": "^2.1.5"
+    }
 }

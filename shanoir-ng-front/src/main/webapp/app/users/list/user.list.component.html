@@ -3,14 +3,7 @@
         <h2 i18n="Manage users|Title">Manage users</h2>
         <hr/>
     </div>
-
-    <div class="commands">
-        <button (click)="showUsersOnDemande($event)" i18n="Manage users|UsersOnDemandeButton label">Users On Demande</button>
-        <button (click)="showValidtedUsers($event)" i18n="Manage users|ValidatedUsersButton label">Validated Users</button>
-        <button (click)="clearUsersFilter($event)" i18n="Manage users|ClearUsersFilterButton label">Clear Users Filter</button>
-        <button routerLink="../editUser" routerLinkActive="active"><strong>+&nbsp;&nbsp;</strong>Create a user</button>
-   
-    </div>     
-    <shanoir-table [items]="users" [columnDefs]="columnDefs"></shanoir-table>
+  
+    <shanoir-table [items]="users" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs"></shanoir-table>
     
 </div>

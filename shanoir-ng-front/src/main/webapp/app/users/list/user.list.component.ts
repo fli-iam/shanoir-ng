@@ -16,6 +16,7 @@ export class UserListComponent {
     private userRequest: User[];
     private validatedUser: User[];
     private columnDefs: any[];
+    private customActionDefs: any[];
 
     constructor(private userService: UserService) {
         this.getUsers();
@@ -83,15 +84,8 @@ export class UserListComponent {
                 console.log("TODO : delete item n°" + item.id + " in this function");
             }}
         ];
-    }
-
-    showUsersOnDemand(event): void {
-        this.users = this.userRequest;
-    }
-    showValidtedUsers(event): void {
-        this.users = this.validatedUser;
-    }
-    clearUsersFilter(event): void {
-        this.users = this.userRequest.concat(this.validatedUser);
+        this.customActionDefs = [
+            {title: "new user", img: "/images/add.user.24x24.black.png", target: "../editUser"},
+        ];
     }
 }

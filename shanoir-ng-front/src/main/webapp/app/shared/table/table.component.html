@@ -2,15 +2,23 @@
     <thead>
         <tr>
             <th class="controls" [attr.colspan]="columnDefs?.length">
-                <button (click)="resetSearch()">&#x2716;</button>
-                <input class="search-txt" [(ngModel)]="searchStr" (change)="search()" type="text" placeholder="search..."/> 
-                in
-                <select class="search-field" [(ngModel)]="searchField" (change)="search()"> 
-                    <option value="">*</option>
-                    <option *ngFor="let col of getSearchableColumns()" value="{{col.field}}">
-                        {{col.headerName}}
-                    </option>
-                </select>
+                <span class="text-search">
+                    <button (click)="resetSearch()">&#x2716;</button>
+                    <input class="search-txt" [(ngModel)]="searchStr" (change)="search()" type="text" placeholder="search..."/> 
+                    in
+                    <select class="search-field" [(ngModel)]="searchField" (change)="search()"> 
+                        <option value="">*</option>
+                        <option *ngFor="let col of getSearchableColumns()" value="{{col.field}}">
+                            {{col.headerName}}
+                        </option>
+                    </select>
+                </span>
+                <span *ngFor="let command of customActionDefs">
+                    <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams(item) : null" routerLinkActive="active">
+                        <img *ngIf="command.img != undefined" src="{{command.img}}" />
+                        <span>{{command.title}}</span>
+                    </button>
+                </span>
             </th>
         </tr>
         <tr>
@@ -21,9 +29,9 @@
                 [class.sortable]="!col.suppressSorting && col.type!='button'"
                 [class.active]="lastSortedCol==col.field"
                 >{{col.headerName}}
-                    <span *ngIf="!col.suppressSorting && col.type!='button'">
+                    <span class="sort-arrow" *ngIf="!col.suppressSorting && col.type!='button'">
                         <span *ngIf="lastSortedCol==col.field && !lastSortedAsc" class="arrow arrowUp">&#9652;</span>   
-                        <span *ngIf="!(lastSortedCol==col.field && !lastSortedAsc)" class="arrow arrowDown">&#9662;</span>
+                        <span *ngIf="lastSortedCol==col.field && lastSortedAsc" class="arrow arrowDown">&#9662;</span>
                     </span>
             </th>
         </tr>

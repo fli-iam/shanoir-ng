@@ -10,6 +10,7 @@ import { Component, Input } from '@angular/core';
 export class TableComponent {
     @Input() columnDefs: any[];
     @Input() items: Object[];
+    @Input() customActionDefs: any[];
     private itemsSave: Object[];
     private itemsLoaded: boolean = false;
 

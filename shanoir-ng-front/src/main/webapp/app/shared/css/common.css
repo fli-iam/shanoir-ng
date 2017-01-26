@@ -42,7 +42,7 @@ form { color: #777; background-color: #fafafa; border: 1px solid #f1f1f1; }
 .max-content { width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
 .command-zone { background-color: #f1f1f1; }
 
-.shanoir-table table{ border-collapse: collapse; }
+.shanoir-table table { border-collapse: collapse; }
 .shanoir-table table td, .shanoir-table table th { border: 1px solid gray; }
 
 
