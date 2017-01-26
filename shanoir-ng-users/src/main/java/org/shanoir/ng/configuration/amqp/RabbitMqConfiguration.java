@@ -12,6 +12,7 @@ public class RabbitMqConfiguration {
 
 	private final static String USER_QUEUE_NAME_IN = "user_queue";
 	private final static String USER_QUEUE_NAME_OUT = "user_queue_from_ng";
+	private final static String DELETE_USER_QUEUE_NAME_OUT = "delete_user_queue_from_ng";
 
     @Bean
     public static Queue queueIn() {
@@ -21,6 +22,11 @@ public class RabbitMqConfiguration {
     @Bean
     public static Queue queueOut() {
     	return new Queue(USER_QUEUE_NAME_OUT, true);
+    }
+
+    @Bean
+    public static Queue deleteQueueOut() {
+    	return new Queue(DELETE_USER_QUEUE_NAME_OUT, true);
     }
 
     @Bean
