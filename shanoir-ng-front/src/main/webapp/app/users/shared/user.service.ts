@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Response, Headers, Http, RequestOptions } from '@angular/http';
+import { Response, Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
 import { User } from './user.model';
@@ -11,11 +11,7 @@ export class UserService {
     constructor(private http: Http) { }
 
     getUsers(): Promise<User[]> {
-        let headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
-        
-        return this.http.get(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_ALL_URL, { headers: headers })
+        return this.http.get(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_ALL_URL)
             .toPromise()
             .then(response => response.json() as User[])
             .catch((error) => {
@@ -25,11 +21,7 @@ export class UserService {
     }
 
     getUser(id: number): Promise<User> {
-        let headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
-        
-        return this.http.get(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, { headers: headers })
+        return this.http.get(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id)
             .toPromise()
             .then(response => response.json() as User)
             .catch((error) => {
@@ -39,41 +31,26 @@ export class UserService {
     }
 
     create(user: User): Observable<User> {
-        let headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
-        
-        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL, JSON.stringify(user), new RequestOptions({ headers: headers, withCredentials: true }))
+        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL, JSON.stringify(user))
             .map(this.extractData)
             .catch(this.handleError);
     }
 
     update(id: number, user: User): Observable<User> {
-        let headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
-        
-        return this.http.put(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, JSON.stringify(user), new RequestOptions({ headers: headers, withCredentials: true }))
+        return this.http.put(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, JSON.stringify(user))
             .map(response => response.json() as User)
             .catch(this.handleError);
     }
 
     confirmAccountRequest(id: number, user: User): Observable<User> {
-        let headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
-
-        return this.http.put(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL, JSON.stringify(user), new RequestOptions({ headers: headers, withCredentials: true }))
+        return this.http.put(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL, 
+                JSON.stringify(user))
             .map(response => response.json() as User)
             .catch(this.handleError);
     }
 
     denyAccountRequest(id: number): Promise<Response> {
-        let headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        headers.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
-        
-        return this.http.delete(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL, { headers: headers })
+        return this.http.delete(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL)
             .toPromise()
             .catch((error) => {
                 console.error('Error deny user account request', error);

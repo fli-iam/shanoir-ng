@@ -2,9 +2,11 @@ package org.shanoir.ng.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,14 +72,16 @@ public class UserRepositoryTest {
 	
 	@Test
 	public void findByEmailTest() throws Exception {
-		User userDb = repository.findByEmail(USER_TEST_1_EMAIL);
-		assertThat(userDb.getUsername()).isEqualTo(USER_TEST_1_USERNAME);
+		Optional<User> userDb = repository.findByEmail(USER_TEST_1_EMAIL);
+		assertTrue(userDb.isPresent());
+		assertThat(userDb.get().getUsername()).isEqualTo(USER_TEST_1_USERNAME);
 	}
 	
 	@Test
 	public void findByUsernameTest() throws Exception {
-		User userDb = repository.findByUsername(USER_TEST_1_USERNAME);
-		assertThat(userDb.getId()).isEqualTo(USER_TEST_1_ID);
+		Optional<User> userDb = repository.findByUsername(USER_TEST_1_USERNAME);
+		assertTrue(userDb.isPresent());
+		assertThat(userDb.get().getId()).isEqualTo(USER_TEST_1_ID);
 	}
 	
 	@Test

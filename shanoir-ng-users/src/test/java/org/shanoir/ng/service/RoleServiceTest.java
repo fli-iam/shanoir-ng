@@ -35,7 +35,7 @@ public class RoleServiceTest {
 
 	@Before
 	public void setup() {
-		given(roleRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createRole()));
+		given(roleRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createGuestRole()));
 	}
 
     @Test

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMqConfiguration {
 
 	private final static String USER_QUEUE_NAME_IN = "user_queue";
-	private final static String USER_QUEUE_NAME_OUT = "user_queue_out";
+	private final static String USER_QUEUE_NAME_OUT = "user_queue_from_ng";
 
     @Bean
     public static Queue queueIn() {
@@ -24,9 +24,9 @@ public class RabbitMqConfiguration {
     }
 
     @Bean
-    SimpleMessageListenerContainer container(ConnectionFactory connectionFactory,
+    SimpleMessageListenerContainer container(final ConnectionFactory connectionFactory,
             MessageListenerAdapter listenerAdapter) {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+    	final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         container.setQueueNames(USER_QUEUE_NAME_IN);
         container.setMessageListener(listenerAdapter);
@@ -34,12 +34,12 @@ public class RabbitMqConfiguration {
     }
 
     @Bean
-    Receiver receiver() {
-        return new Receiver();
+    RabbitMqReceiver receiver() {
+        return new RabbitMqReceiver();
     }
 
     @Bean
-    MessageListenerAdapter listenerAdapter(Receiver receiver) {
+    MessageListenerAdapter listenerAdapter(final RabbitMqReceiver receiver) {
         return new MessageListenerAdapter(receiver, "receiveMessage");
     }
 

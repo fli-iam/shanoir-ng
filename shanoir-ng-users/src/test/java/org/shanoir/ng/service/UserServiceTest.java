@@ -45,6 +45,7 @@ public class UserServiceTest {
 	public void setup() {
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository.findOne(USER_ID)).willReturn(ModelsUtil.createUser());
+		given(userRepository.save(Mockito.any(User.class))).willReturn(ModelsUtil.createUser());
 	}
 
 	@Test

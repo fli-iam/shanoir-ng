@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Location } from '@angular/common';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
+import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
 
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
@@ -25,10 +27,12 @@ export class EditUserComponent implements OnInit {
     roleService: RoleService;
     isUserNameUnique: Boolean = true;
     isEmailUnique: Boolean = true;
+    isDateValid: Boolean = true;
     creationMode: Boolean;
     userId: number;
+    selectedDateNormal: string = '';
 
-    constructor(router: Router, route: ActivatedRoute, userService: UserService, roleService: RoleService, private fb: FormBuilder) {
+    constructor(router: Router, private location: Location, route: ActivatedRoute, userService: UserService, roleService: RoleService, private fb: FormBuilder) {
         this.router = router;
         this.route = route;
         this.userService = userService;
@@ -64,14 +68,16 @@ export class EditUserComponent implements OnInit {
             .subscribe((user: User) => {
                 user.role = this.getRoleById(user.role.id);
                 this.user = user;
+                this.getDateToDatePicker(this.user);
             });
     }
 
     cancel(): void {
-        this.router.navigate(['../userlist']);
+        this.location.back();
     }
 
     accept(): void {
+        this.setDateFromDatePicker();
         this.userService.confirmAccountRequest(this.userId, this.user)
            .subscribe((user) => {
                 this.cancel();
@@ -97,6 +103,7 @@ export class EditUserComponent implements OnInit {
     }
 
     create(): void {
+        this.setDateFromDatePicker();
         this.userService.create(this.user)
             .subscribe((user) => {
                 this.cancel();
@@ -111,6 +118,7 @@ export class EditUserComponent implements OnInit {
     }
 
     update(): void {
+        this.setDateFromDatePicker();
         this.userService.update(this.userId, this.user)
            .subscribe((user) => {
                 this.cancel();
@@ -126,6 +134,7 @@ export class EditUserComponent implements OnInit {
 
     submit(): void {
         this.user = this.editUserForm.value;
+        this.setDateFromDatePicker();
     }
 
     ngOnInit(): void {
@@ -175,15 +184,39 @@ export class EditUserComponent implements OnInit {
         'role': ''
     };
 
-    get expirationDate(): String {
-        if (this.user && this.user.expirationDate && !isNaN(new Date(this.user.expirationDate).getTime())) {
-            return new Date(this.user.expirationDate).toISOString().split('T')[0];
+    private myDatePickerOptions: IMyOptions = {
+        dateFormat: 'yyyy-mm-dd',
+        height: '20px',
+        width: '160px'
+    };
+
+    onDateChanged(event: IMyDateModel) {
+        if(event.formatted !== '') {
+            this.selectedDateNormal = event.formatted;
         }
-        return "";
     }
 
-    set expirationDate(dateStr: String) {
-        this.user.expirationDate = new Date(dateStr);
+    onInputFieldChanged(event: IMyInputFieldChanged) {
+        if (event.value !== '') {
+            if (!event.valid) {
+                this.isDateValid = false;
+            } else {
+                this.isDateValid = true;
+            }
+        } else {
+            this.isDateValid = true;
+        }
+    }
+
+    setDateFromDatePicker(): void {
+        this.user.expirationDate = new Date(this.selectedDateNormal);
+    }
+    
+    getDateToDatePicker(user : User): void {
+        if (user && user.expirationDate && !isNaN(new Date(user.expirationDate).getTime())) {
+            let date: string = new Date(user.expirationDate).toISOString().split('T')[0];
+            this.selectedDateNormal = date;
+        }
     }
 
     getRoleById(id:number): Role {

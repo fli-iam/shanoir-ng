@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Entity
 @Table(name = "users")
-@JsonPropertyOrder({ "_links", "id", "firstName", "lasName", "username", "email" })
+@JsonPropertyOrder({ "_links", "id", "firstName", "lastName", "username", "email" })
 public class User extends HalEntity implements UserDetails {
 
 	/**
@@ -102,7 +102,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param accountRequestDemand
 	 *            the accountRequestDemand to set
 	 */
-	public void setAccountRequestDemand(boolean accountRequestDemand) {
+	public void setAccountRequestDemand(final boolean accountRequestDemand) {
 		this.accountRequestDemand = accountRequestDemand;
 	}
 
@@ -117,7 +117,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param accountRequestInfo
 	 *            the accountRequestInfo to set
 	 */
-	public void setAccountRequestInfo(AccountRequestInfo accountRequestInfo) {
+	public void setAccountRequestInfo(final AccountRequestInfo accountRequestInfo) {
 		this.accountRequestInfo = accountRequestInfo;
 	}
 
@@ -132,7 +132,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param canAccessToDicomAssociation
 	 *            the canAccessToDicomAssociation to set
 	 */
-	public void setCanAccessToDicomAssociation(boolean canAccessToDicomAssociation) {
+	public void setCanAccessToDicomAssociation(final boolean canAccessToDicomAssociation) {
 		this.canAccessToDicomAssociation = canAccessToDicomAssociation;
 	}
 
@@ -147,7 +147,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param creationDate
 	 *            the creationDate to set
 	 */
-	public void setCreationDate(Date creationDate) {
+	public void setCreationDate(final Date creationDate) {
 		this.creationDate = creationDate;
 	}
 
@@ -162,7 +162,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param email
 	 *            the email to set
 	 */
-	public void setEmail(String email) {
+	public void setEmail(final String email) {
 		this.email = email;
 	}
 
@@ -177,7 +177,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param expirationDate
 	 *            the expirationDate to set
 	 */
-	public void setExpirationDate(Date expirationDate) {
+	public void setExpirationDate(final Date expirationDate) {
 		this.expirationDate = expirationDate;
 	}
 
@@ -192,7 +192,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param firstName
 	 *            the firstName to set
 	 */
-	public void setFirstName(String firstName) {
+	public void setFirstName(final String firstName) {
 		this.firstName = firstName;
 	}
 
@@ -207,7 +207,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param isFirstExpirationNotificationSent
 	 *            the isFirstExpirationNotificationSent to set
 	 */
-	public void setFirstExpirationNotificationSent(boolean isFirstExpirationNotificationSent) {
+	public void setFirstExpirationNotificationSent(final boolean isFirstExpirationNotificationSent) {
 		this.isFirstExpirationNotificationSent = isFirstExpirationNotificationSent;
 	}
 
@@ -222,7 +222,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param isMedical
 	 *            the isMedical to set
 	 */
-	public void setMedical(boolean isMedical) {
+	public void setMedical(final boolean isMedical) {
 		this.isMedical = isMedical;
 	}
 
@@ -237,7 +237,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param isSecondExpirationNotificationSent
 	 *            the isSecondExpirationNotificationSent to set
 	 */
-	public void setSecondExpirationNotificationSent(boolean isSecondExpirationNotificationSent) {
+	public void setSecondExpirationNotificationSent(final boolean isSecondExpirationNotificationSent) {
 		this.isSecondExpirationNotificationSent = isSecondExpirationNotificationSent;
 	}
 
@@ -252,7 +252,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param lastLogin
 	 *            the lastLogin to set
 	 */
-	public void setLastLogin(Date lastLogin) {
+	public void setLastLogin(final Date lastLogin) {
 		this.lastLogin = lastLogin;
 	}
 
@@ -267,7 +267,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param lastName
 	 *            the lastName to set
 	 */
-	public void setLastName(String lastName) {
+	public void setLastName(final String lastName) {
 		this.lastName = lastName;
 	}
 
@@ -284,7 +284,7 @@ public class User extends HalEntity implements UserDetails {
 	 *            the password to set
 	 */
 	@JsonProperty
-	public void setPassword(String password) {
+	public void setPassword(final String password) {
 		this.password = password;
 	}
 
@@ -299,7 +299,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param role
 	 *            the role to set
 	 */
-	public void setRole(Role role) {
+	public void setRole(final Role role) {
 		this.role = role;
 	}
 
@@ -314,7 +314,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param teamName
 	 *            the teamName to set
 	 */
-	public void setTeamName(String teamName) {
+	public void setTeamName(final String teamName) {
 		this.teamName = teamName;
 	}
 
@@ -329,13 +329,13 @@ public class User extends HalEntity implements UserDetails {
 	 * @param username
 	 *            the username to set
 	 */
-	public void setUsername(String username) {
+	public void setUsername(final String username) {
 		this.username = username;
 	}
 
 	@Override
 	@JsonIgnore
-	public Collection<? extends GrantedAuthority> getAuthorities() {
+	public Collection<GrantedAuthority> getAuthorities() {
 		return Arrays.asList(role);
 	}
 

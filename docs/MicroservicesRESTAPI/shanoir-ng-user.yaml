@@ -25,11 +25,15 @@ paths:
           description: created user
           schema:
             $ref: "#/definitions/User"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
         '422':
           description: bad parameters
           schema:
             $ref: "#/definitions/ErrorModel"
-        default:
+        '500':
           description: unexpected error
           schema:
             $ref: "#/definitions/ErrorModel"
@@ -44,9 +48,13 @@ paths:
           description: found user 
           schema:
             $ref: "#/definitions/User"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
         '404':
           description: no user found
-        default:
+        '500':
           description: unexpected error
           schema:
             $ref: "#/definitions/ErrorModel"
@@ -66,11 +74,15 @@ paths:
       responses:
         '204':
           description: user updated
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
         '422':
           description: bad parameters
           schema:
             $ref: "#/definitions/ErrorModel"
-        default:
+        '500':
           description: unexpected error
           schema:
             $ref: "#/definitions/ErrorModel"
@@ -82,9 +94,13 @@ paths:
       responses:
         '204':
           description: user deleted
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
         '404':
           description: no user found
-        default:
+        '500':
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
@@ -105,10 +121,16 @@ paths:
       responses:
         '204':
           description: user confirmed
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
         '404':
           description: no user found
         '500':
-          description: internal error
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
   /user/{userId}/denyaccountrequest:
     delete:
       operationId: denyAccountRequest
@@ -118,10 +140,16 @@ paths:
       responses:
         '204':
           description: user deleted
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
         '404':
           description: no user found
         '500':
-          description: internal error
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
   /user/all:
     get:
       operationId: findUsers
@@ -135,7 +163,11 @@ paths:
               $ref: "#/definitions/User"
         '204':
           description: no user found
-        default:
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
           description: unexpected error
           schema:
             $ref: "#/definitions/ErrorModel"
@@ -152,7 +184,11 @@ paths:
               $ref: "#/definitions/Role"
         '204':
           description: no role found
-        default:
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
           description: unexpected error
           schema:
             $ref: "#/definitions/ErrorModel"

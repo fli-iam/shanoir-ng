@@ -1,0 +1,81 @@
+# server configuration
+server:
+  port: 9900
+  error:
+    whitelabel:
+      enabled: false
+# spring security configuration
+security:
+  sessions: never
+spring:
+  # redis configuration
+  redis:
+    host: shanoir-ng-redis
+  datasource:
+    url: jdbc:mysql://localhost:3306/shanoir_ng_studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    username: shanoir
+    password: shanoir
+    # The SQL dialect makes Hibernate generate better SQL for the chosen database
+    driver-class-name: com.mysql.jdbc.Driver
+    data: classpath:/scripts/populate.sql
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create
+      # Naming strategy
+      naming:
+        strategy: org.hibernate.cfg.ImprovedNamingStrategy
+    properties:
+      hibernate:
+        connection:
+          charset: UTF-8
+        hbm2ddl:
+          import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
+  jooq:
+    sql-dialect: Mysql
+  rabbitmq:
+    host: rabbitmq
+# logging configuration
+logging:
+  file: /vol/log/ms/shanoir-ng-studies.log
+  level:
+    org.springframework.web: ERROR
+    org.hibernate: ERROR
+
+---
+
+######################################
+# DO NOT COMMIT VALUES MODIFICATIONS #
+######################################
+spring:
+  profiles: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/shanoir_ng_studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: WelcomeShanoir1
+    # The SQL dialect makes Hibernate generate better SQL for the chosen database
+    driver-class-name: com.mysql.jdbc.Driver
+    data: classpath:/scripts/import.sql
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create
+    # Show or not log for each sql query
+    show-sql: true
+  jooq:
+    sql-dialect: Mysql
+  rabbitmq:
+    host: localhost
+  # redis configuration
+  redis:
+    host: localhost
+server:
+    port: 9904
+# logging configuration
+logging:
+  file: c:\\Temp\\shanoir-ng\\shanoir-ng-studies.log
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate: ERROR

@@ -1,10 +1,8 @@
 package org.shanoir.ng.service;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.shanoir.ng.dto.LoginDTO;
-import org.shanoir.ng.dto.UserDTO;
 import org.shanoir.ng.exception.ShanoirUsersException;
+import org.shanoir.ng.model.auth.UserContext;
 
 /**
  * Authentication service.
@@ -23,13 +21,6 @@ public interface AuthenticationService {
 	 * @return connected user - null if connection fails.
 	 * @throws ShanoirUsersException authentication exception.
 	 */
-	UserDTO authenticate(LoginDTO loginDTO, HttpServletResponse response) throws ShanoirUsersException;
+	UserContext authenticate(LoginDTO loginDTO) throws ShanoirUsersException;
 	
-    /**
-     * Logout a user:
-     * - Clear the Spring Security context
-     * - Remove the stored UserDTO secret
-     */
-    void logout();
-    
 }

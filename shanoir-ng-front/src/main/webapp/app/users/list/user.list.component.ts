@@ -85,8 +85,7 @@ export class UserListComponent {
         ];
     }
 
-
-    showUsersOnDemande(event): void {
+    showUsersOnDemand(event): void {
         this.users = this.userRequest;
     }
     showValidtedUsers(event): void {

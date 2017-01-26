@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Response, Headers, Http, RequestOptions } from '@angular/http';
+import { Response, Http } from '@angular/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 import 'rxjs/add/operator/map';
@@ -15,13 +15,13 @@ export class LoginService {
     }
 
     login(login:string, password:string): Observable<Account> {
-        let headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        
-        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_AUTHENTICATE_PATH,  JSON.stringify({login:login, password:password}), { headers: headers, withCredentials: true })
+         return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_AUTHENTICATE_PATH, 
+                JSON.stringify({login:login, password:password}))
             .map((res) => {
-                localStorage.setItem(AppUtils.STORAGE_ACCOUNT_TOKEN, res.text());
-                localStorage.setItem(AppUtils.STORAGE_TOKEN, res.json().token);
+                sessionStorage.setItem(AppUtils.STORAGE_ACCOUNT_TOKEN, res.text());
+                sessionStorage.setItem(AppUtils.STORAGE_TOKEN, res.json().token);
+                sessionStorage.setItem(AppUtils.STORAGE_TOKEN_TIMEOUT, res.json().tokenTimeout);
+                sessionStorage.setItem(AppUtils.STORAGE_REFRESH_TOKEN, res.json().refreshToken);
  
                 let account:Account = new Account(res.json());
                 this.sendLoginSuccess(account);
@@ -35,39 +35,53 @@ export class LoginService {
             });
     }
     
+    refreshAuthToken(): Observable<Response> {
+        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_REFRESH_AUTH_TOKEN_PATH, "")
+            .map((res) => {
+                sessionStorage.setItem(AppUtils.STORAGE_TOKEN, res.json().token);
+                sessionStorage.setItem(AppUtils.STORAGE_TOKEN_TIMEOUT, res.json().tokenTimeout);
+                sessionStorage.setItem(AppUtils.STORAGE_REFRESH_TOKEN, res.json().refreshToken);
+                return res;
+            });
+    }
+    
     sendLoginSuccess(account?:Account): void {
         if(!account) {
-            account = new Account(JSON.parse(localStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN)));
+            account = new Account(JSON.parse(sessionStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN)));
         }
         this.accountEventsService.loginSuccess(account);
     }
     
     logout(): void {
-        let headersLogout = new Headers();
-        headersLogout.append('Content-Type', 'application/json');
-        headersLogout.append('x-auth-token', localStorage.getItem(AppUtils.STORAGE_TOKEN));
-        
-        this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_LOGOUT_PATH, "", new RequestOptions({ headers : headersLogout, withCredentials: true })).subscribe(
+        this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_LOGOUT_PATH, "").subscribe(
             () => {
-                this.accountEventsService.logout(new Account(JSON.parse(localStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN))));
+                this.accountEventsService.logout(new Account(JSON.parse(sessionStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN))));
                 this.removeAccount();
-                this.router.navigate(['/login']);
             }
         );
     }
 
     removeAccount():void {
-        localStorage.removeItem(AppUtils.STORAGE_ACCOUNT_TOKEN);
-        localStorage.removeItem(AppUtils.STORAGE_TOKEN);
+        sessionStorage.removeItem(AppUtils.STORAGE_ACCOUNT_TOKEN);
+        sessionStorage.removeItem(AppUtils.STORAGE_TOKEN);
+        this.router.navigate(['/login']);
     }
 
     isAuthenticated():boolean {
-        return !!localStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN);
+        return !!sessionStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN);
+    }
+
+    hasTokenExpired():boolean {
+        let tokenTimeout: string = sessionStorage.getItem(AppUtils.STORAGE_TOKEN_TIMEOUT);
+        if (tokenTimeout) {
+            return (new Date(+tokenTimeout) < new Date());
+        }
+        return true;
     }
 
     getLoggedUser(): Account {
-        if (!!localStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN)) {
-            return JSON.parse(localStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN));
+        if (!!sessionStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN)) {
+            return JSON.parse(sessionStorage.getItem(AppUtils.STORAGE_ACCOUNT_TOKEN));
         }
         this.router.navigate(['/login']);
     }

@@ -25,7 +25,8 @@
             'rxjs':                       'npm:rxjs',
             'angular2-in-memory-web-api': 'npm:angular2-in-memory-web-api',
             'ag-grid-ng2': 'node_modules/ag-grid-ng2',
-            'ag-grid': 'node_modules/ag-grid'
+            'ag-grid': 'node_modules/ag-grid',
+            'mydatepicker': 'npm:mydatepicker'
         },
         // packages tells the System loader how to load when no filename and/or no extension
         packages: {
@@ -49,6 +50,9 @@
             },
             'ag-grid': {
                 defaultExtension: "js"
+            },
+            mydatepicker: {
+                defaultExtension: 'js'
             }
         }
     });

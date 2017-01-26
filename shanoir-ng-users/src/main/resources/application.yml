@@ -7,6 +7,11 @@ server:
 # spring security configuration
 security:
   sessions: never
+shanoir.security.jwt:
+  tokenExpirationTime: 15 # Minutes
+  refreshTokenExpTime: 60 # Minutes
+  tokenIssuer: http://shanoir
+  tokenSigningKey: dfg464dfhSDFH4664FDSHs456
 spring:
   # redis configuration
   redis:

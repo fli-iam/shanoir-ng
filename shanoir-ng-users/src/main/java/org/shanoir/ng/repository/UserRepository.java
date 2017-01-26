@@ -1,5 +1,7 @@
 package org.shanoir.ng.repository;
 
+import java.util.Optional;
+
 import org.shanoir.ng.model.User;
 import org.springframework.data.repository.CrudRepository;
 
@@ -16,7 +18,7 @@ public interface UserRepository extends CrudRepository<User, Long>, UserReposito
      * @param email
      * @return a user or null
      */
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
     /**
      * Find user by its username
@@ -24,6 +26,6 @@ public interface UserRepository extends CrudRepository<User, Long>, UserReposito
      * @param id
      * @return a user or null
      */
-    User findByUsername(String username);
+    Optional<User> findByUsername(String username);
 
 }

@@ -1,6 +1,7 @@
 package org.shanoir.ng.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.User;
@@ -51,12 +52,31 @@ public interface UserService extends UniqueCheckableService<User> {
 	List<User> findAll();
 
 	/**
-	 * Find user by its id
+	 * Find user by its email.
+	 *
+	 * @param email
+	 *            email.
+	 * @return a user or null.
+	 */
+	Optional<User> findByEmail(String email);
+
+	/**
+	 * Find user by its id.
 	 *
 	 * @param id
-	 * @return a user or null
+	 *            user id.
+	 * @return a user or null.
 	 */
 	User findById(Long id);
+
+	/**
+	 * Find user by its username.
+	 *
+	 * @param username
+	 *            user name.
+	 * @return a user or null.
+	 */
+	Optional<User> findByUsername(String username);
 
 	/**
 	 * Save a user.
@@ -85,5 +105,13 @@ public interface UserService extends UniqueCheckableService<User> {
 	 * @throws ShanoirUsersException
 	 */
 	void updateFromShanoirOld(User user) throws ShanoirUsersException;
+
+	/**
+	 * Update last login date.
+	 * 
+	 * @param user
+	 *            user.
+	 */
+	void updateLastLogin(User user);
 
 }
