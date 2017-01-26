@@ -3,15 +3,11 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Http, HttpModule } from '@angular/http';
 
-import { AgGridModule } from 'ag-grid-ng2/main';
-
 import { routing } from './app.routing';
 
 import { AccountEventsService } from './users/account/account.events.service';
 import { AppComponent }   from './app.component';
 import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
-import { ClickableComponent } from "./users/shared/clickable.component";
-import { ClickableParentComponent } from "./users/shared/clickable.parent.component";
 import { EditUserComponent }   from './users/edit/edit.user.component';
 import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
@@ -27,7 +23,6 @@ import { MyDatePickerModule } from 'mydatepicker/dist/my-date-picker.module';
 
 @NgModule({
     imports: [
-        AgGridModule.withComponents([ClickableComponent, ClickableParentComponent]),
         BrowserModule,
         FormsModule,
         HttpModule,
@@ -38,8 +33,6 @@ import { MyDatePickerModule } from 'mydatepicker/dist/my-date-picker.module';
     declarations: [
         AppComponent,
         EditUserComponent,
-        ClickableComponent,
-        ClickableParentComponent,
         HeaderComponent,
         HomeComponent,
         LoginComponent,

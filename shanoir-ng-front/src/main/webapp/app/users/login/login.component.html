@@ -22,14 +22,16 @@
 		     	</ol>
 	            </fieldset>
             <div class="footer command-zone">
-            	<button type="submit" i18n="Login form|Button label" class="Button LoginForm-submit">Login</button>
+				<div>
+					<label *ngIf="errorCode=='52'" class="LoginForm-error" i18n="Login form|BadCredentials label">Bad credentials.</label>
+					<label *ngIf="errorCode=='61'" class="LoginForm-error" i18n="Login form|ExpiredAccount label">Your account has expired. Please contact your administrator.</label>
+					<label *ngIf="errorCode=='62'" class="LoginForm-error" i18n="Login form|AccountRequestNotValidated label">Your account request is not validated. Please contact your administrator.</label>
+				</div>
+				<button type="submit" i18n="Login form|Button label" class="Button LoginForm-submit">Login</button>
             	<div>
             		<a routerLink="" routerLinkActive="active">Create an account</a>
             	</div>
             </div>
         </form>
-        <label *ngIf="errorCode=='52'" class="LoginForm-error" i18n="Login form|BadCredentials label">Bad credentials.</label>
-        <label *ngIf="errorCode=='61'" class="LoginForm-error" i18n="Login form|ExpiredAccount label">Your account has expired. Please contact your administrator.</label>
-        <label *ngIf="errorCode=='62'" class="LoginForm-error" i18n="Login form|AccountRequestNotValidated label">Your account request is not validated. Please contact your administrator.</label>
     </div>
 </div>
