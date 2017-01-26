@@ -1,4 +1,6 @@
-<div class="HeaderComponent">
-    <a href="/home"><img [src]="shanoirLogoUrl"/></a>
-    <button (click)="logout($event)" i18n="Shanoir NG|Logout" class="Button HeaderComponent-logout">Logout</button>
+<div class="header-component">
+    <div class="logo"><a href="/home"><img [src]="shanoirLogoUrl"/></a></div>
+    <div class="logout">
+    	<button (click)="logout($event)" i18n="Shanoir NG|Logout">Logout</button>
+    </div>
 </div>

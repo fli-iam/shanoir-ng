@@ -1,23 +1,35 @@
 <div class="LoginComponent">
-    <img [src]="shanoirNGImageUrl">
+    <img class="logo" [src]="shanoirNGImageUrl">
     <div class="LoginComponent-loginContent LoginContent">
-        <h2 i18n="Login form|Title">Welcome to Shanoir</h2>
         <form [formGroup]="loginForm" (ngSubmit)="login()" class="LoginContent-loginForm LoginForm">
-            <input type="text"  
-                   id="email"  
-                   class="LoginForm-input"
-                   formControlName="email"
-                   placeholder="Username" i18n-placeholder="Login form|Username label"/>  
-            <input type="password"  
-                   id="password"
-                   class="LoginForm-input"
-                   formControlName="password"
-                   placeholder="Password" i18n-placeholder="Login form|Password label"/>  
-            <button type="submit" i18n="Login form|Button label" class="Button LoginForm-submit">Login</button>
+        	<div class="header command-zone">Connect to Shanoir</div>
+		     	<fieldset>
+		     	<ol>
+		     		<li>
+			            <input type="text"  
+			                   id="email"  
+			                   class="LoginForm-input"
+			                   formControlName="email"
+			                   placeholder="Username" i18n-placeholder="Login form|Username label"/>  	     		
+		     		</li>
+					<li>
+			            <input type="password"  
+			                   id="password"
+			                   class="LoginForm-input"
+			                   formControlName="password"
+			                   placeholder="Password" i18n-placeholder="Login form|Password label"/>  
+			       </li>
+		     	</ol>
+	            </fieldset>
+            <div class="footer command-zone">
+            	<button type="submit" i18n="Login form|Button label" class="Button LoginForm-submit">Login</button>
+            	<div>
+            		<a routerLink="" routerLinkActive="active">Create an account</a>
+            	</div>
+            </div>
         </form>
         <label *ngIf="errorCode=='101'" class="LoginForm-error" i18n="Login form|BadCredentials label">Bad credentials.</label>
         <label *ngIf="errorCode=='102'" class="LoginForm-error" i18n="Login form|ExpiredAccount label">Your account has expired. Please contact your administrator.</label>
         <label *ngIf="errorCode=='103'" class="LoginForm-error" i18n="Login form|AccountRequestNotValidated label">Your account request is not validated. Please contact your administrator.</label>
     </div>
-    <a routerLink="" routerLinkActive="active">Create an account</a>
 </div>

@@ -1,0 +1,49 @@
+/**********/
+/* Common */
+/**********/
+body { margin: 0; background-color: #fdfdfd; }
+body, option, table {font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: #222; }
+h2 { color: #333; margin: 0; font-size: 28px; }
+hr { margin: 7px 0 !important; border-bottom: 1px solid #ccc !important; border: 0; }
+
+table.layout { border: none; border-collapse: collapse; }
+  table.layout td { padding: 0;	vertical-align: top; }
+  table.layout td + td { border-left: 3px dashed #f1f1f1; }
+
+button { background-color: #3697dc; border: 1px solid #3697dc; border-radius: 2px; color: white; padding: 5px 10px; }
+  button:hover { cursor: pointer; }
+  button:disabled { background-color: #BEC3C7; border-color: #BEC3C7; color: #333; cursor: auto; }
+
+input[type='date'] { width: 140px; }
+
+form { color: #777; background-color: #fafafa; border: 1px solid #f1f1f1; }
+  form input, form textarea, form select { border: 2px solid #bbbbbb; border-radius: 2px; }
+  form input { padding: 0 5px; }
+  form textarea { resize: vertical; }
+  form button { margin: 10px 0; }
+  form input:not([type]), input[type='text'], input[type='password'], input[type='email'], textarea, select { width: 200px; }
+  form fieldset { border: 0; padding: 0; margin: 11px; }
+  form fieldset + fieldset { border-top: 1px solid #ddd; padding-top: 11px; }
+    form fieldset fieldset { border: none; margin: 3px 0 0; }
+    form fieldset fieldset legend { padding: 0 0 5px; font-weight: normal; }
+    form fieldset fieldset label { display: block; width: auto; }
+    form fieldset fieldset label { margin-left: 183px; }
+  form legend { padding: 0 2px; font-weight: bold; }
+  form label { display: inline-block; line-height: 1.8; vertical-align: top; }
+  form fieldset ol { margin: 0; padding: 0; }
+  form fieldset li { list-style: none; padding: 5px; margin: 0; }
+  form em { font-weight: bold; font-style: normal; color: #f00; }
+  form label { width: 180px; }
+  form .header, form .footer { padding: 6px 15px; }
+  form .footer { text-align: right; }
+  form .header { font-size: 20px; color: #7A7F9D; font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
+
+.content-component { margin: 0 20px; }
+.max-content { width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
+.command-zone { background-color: #f1f1f1; }
+
+.shanoir-table table{ border-collapse: collapse; }
+.shanoir-table table td, .shanoir-table table th { border: 1px solid gray; }
+
+
+

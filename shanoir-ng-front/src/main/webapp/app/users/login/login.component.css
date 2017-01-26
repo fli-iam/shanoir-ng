@@ -1,0 +1,11 @@
+/*******************/
+/* Login component */
+/*******************/
+.LoginComponent { text-align: center; }
+	.LoginComponent .logo {	margin: 50px; }
+
+.LoginContent-loginForm { margin: auto;	width: 300px; text-align: center; }
+	.LoginContent-loginForm .footer { text-align: center; }
+	.LoginContent-loginForm a { text-decoration: none; color: #3697dc; }
+
+.LoginForm-error { color: red; }

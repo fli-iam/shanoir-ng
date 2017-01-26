@@ -1,0 +1,16 @@
+/********************/
+/* Navbar component */
+/********************/
+.navbar-component { border-bottom: 1px solid #e1e1e1; border-top: 1px solid #e1e1e1; margin-bottom: 20px; font-size: 12px; }
+  .navbar-component a { text-decoration: none; color: #6A6A6A; }
+  .navbar-component ul { margin: 5px; padding: 0; }
+  .navbar-component li { display: inline-block; position: relative; vertical-align: bottom; margin: 3px 0; }
+    .navbar-component li + li { border-left: 2px groove #fff; }
+.menu-item { color: #6A6A6A; cursor: pointer; display: block; margin: 0 7px; text-decoration: none; }
+  .menu-item:hover { cursor: pointer; }
+  .menu-item.opened { color: #3697dc; }
+.menu-arrow { margin: 0 -6px 0 3px; vertical-align: text-bottom; }
+.menu-dropdown { background: #f1f1f1; min-width: 110%; position: absolute; top: 25px; z-index: 100; border: none; color: #6A6A6A; border-radius: 2px; }
+.dropdown-item { padding: 6px 12px; }
+  .dropdown-item:hover { background-color: #B7D7EE; color: #222; cursor: pointer; }
+    .dropdown-item:hover > a { color: #f2f2f2; }

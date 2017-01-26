@@ -1,0 +1,23 @@
+.shanoir-table { width: 100%; border-collapse: collapse; border-spacing: 0; border: 1px solid #f1f1f1; }
+	.shanoir-table th { padding: 4px 5px; background-color: #7A7F9D; color: #fdfdfd; font-weight: normal; white-space: nowrap; overflow: hidden; }
+		.shanoir-table th.controls { text-align: left; background-color: #f1f1f1; color: #222; }
+			.shanoir-table th.controls button { height: 19px; padding: 0 5px; vertical-align: top; background-color: #7A7F9D; border-radius: 0; border: 1px solid #aaa; }
+			.shanoir-table th.controls input { padding: 0 5px; width: 150px; }
+			.shanoir-table th.controls select { width: 150px; }
+		.shanoir-table th.sortable { cursor: pointer; }
+			/*.shanoir-table th.sortable .arrow {  }*/
+		.shanoir-table th.active { background-color: #fafafa; color: #222; }
+		.shanoir-table th.col-date { width: 65px; }
+		.shanoir-table th.col-boolean { width: 20px; }
+	.shanoir-table tr { height: 20px; }
+		.shanoir-table tr.odd { background-color: #f1f1f1; }
+		.shanoir-table tr.even { background-color: #fafafa; }
+	.shanoir-table td { padding: 0 5px; border: none; }
+		.shanoir-table td + td { border-left: 1px dotted #d0d0d0; }
+		.shanoir-table td.bool { text-align: center; font-weight: bold; }
+			.shanoir-table td.bool .bool-true { color: green; }
+			.shanoir-table td.bool .bool-false { color: darkred; }
+		.shanoir-table td.cell-date { text-align: right; }
+		.shanoir-table td.cell-number { text-align: right; }
+		.shanoir-table td.cell-nofield { text-align: center; }
+		.shanoir-table td span.button { max-height: 20px; max-width: 20px; cursor: pointer; }

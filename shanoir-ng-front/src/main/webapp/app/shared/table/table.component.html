@@ -1,0 +1,50 @@
+<table class="shanoir-table">
+    <thead>
+        <tr>
+            <th class="controls" [attr.colspan]="columnDefs?.length">
+                <button (click)="resetSearch()">&#x2716;</button>
+                <input class="search-txt" [(ngModel)]="searchStr" (change)="search()" type="text" placeholder="search..."/> 
+                in
+                <select class="search-field" [(ngModel)]="searchField" (change)="search()"> 
+                    <option value="">*</option>
+                    <option *ngFor="let col of getSearchableColumns()" value="{{col.field}}">
+                        {{col.headerName}}
+                    </option>
+                </select>
+            </th>
+        </tr>
+        <tr>
+            <th 
+                *ngFor="let col of columnDefs" 
+                (click)="sortBy(col)"
+                class="{{getColTypeStr(col)}}"
+                [class.sortable]="!col.suppressSorting && col.type!='button'"
+                [class.active]="lastSortedCol==col.field"
+                >{{col.headerName}}
+                    <span *ngIf="!col.suppressSorting && col.type!='button'">
+                        <span *ngIf="lastSortedCol==col.field && !lastSortedAsc" class="arrow arrowUp">&#9652;</span>   
+                        <span *ngIf="!(lastSortedCol==col.field && !lastSortedAsc)" class="arrow arrowDown">&#9662;</span>
+                    </span>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let item of items; let i = index" [class.odd]="i%2!=0" [class.even]="i%2==0" >
+            <td *ngFor="let col of columnDefs" class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" [class.bool]="isFieldBoolean(item, col)">
+                {{renderCell(item, col)}}
+                <span *ngIf="isFieldBoolean(item, col)">
+                    <span *ngIf="getCellValue(item, col)" class="bool-true">&#x2713;</span>
+                    <span *ngIf="!getCellValue(item, col)" class="bool-false">&#x2717;</span>
+                </span>
+                <span class="button" *ngIf="col.type == 'button'">
+                    <a *ngIf="col.target != undefined" [routerLink]="col.target" [queryParams]="col.getParams != undefined ? col.getParams(item) : null" routerLinkActive="active">
+                        <img src="{{col.img}}" />
+                    </a>
+                    <span *ngIf="col.action != undefined" (click)="col.action(item)">
+                        <img src="{{col.img}}" />
+                    </span>
+                </span>
+            </td>
+        </tr>
+    </tbody>
+</table>

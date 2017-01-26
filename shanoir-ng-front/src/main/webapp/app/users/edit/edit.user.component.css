@@ -1,43 +1,5 @@
 /***********************/
 /* Edit user component */
 /***********************/
-.EditUserComponent {
-    padding-left: 5%;
-    width: 90%;
-}
-
-.EditUserComponent-title {
-    text-align: center;
-}
-
-.EditUserComponent-buttonBar {
-    padding-left: 10px;
-}
-
-.EditUserComponent-div {
-  margin-bottom: 1em;
-  width: 100%; 
-}
-
-.EditUserComponent-div.required .required-label:after{
-  content:"*";
-  color:red;
-}
-
-.EditUserContent {
-  border: 1px solid gray;
-  padding: 10px;
-}
-
-.form-validation-alert {
-  color: #c7254e;
-  background: #f9f2f4;
-  border: 1px solid transparent;
-  padding: 3px;
-}
-
-button:disabled {
-  background-color: #eee;
-  color: #aaa;
-  cursor: auto;
-}
+.EditUserComponent-div.required .required-label:after{ content:"*"; color:red; }
+.form-validation-alert { color: #c7254e; background: #f9f2f4; border: 1px solid transparent; padding: 3px; }

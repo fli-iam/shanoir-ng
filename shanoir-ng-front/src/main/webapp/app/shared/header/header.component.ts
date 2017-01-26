@@ -13,12 +13,12 @@ export class HeaderComponent {
     shanoirLogoUrl: string;
 
     constructor(private loginService: LoginService) {
-        this.shanoirLogoUrl = '/images/logo.shanoir.32x32.png';
+        this.shanoirLogoUrl = '/images/logo.shanoir.white.png';
     }
-    
-    logout(event): void {  
+
+    logout(event): void {
         event.preventDefault();
         this.loginService.logout();
     }
-    
+
 }

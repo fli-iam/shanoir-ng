@@ -1,11 +1,8 @@
 import { Component } from '@angular/core';
-import {GridOptions} from 'ag-grid/main';
 
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
-import GridUtils from 'app/shared/utils/grid.utils';
-import {ClickableComponent} from "../shared/clickable.component";
-import {ClickableParentComponent} from "../shared/clickable.parent.component";
+import {TableComponent} from "../../shared/table/table.component";
 
 @Component({
     selector: 'user-list',
@@ -15,33 +12,21 @@ import {ClickableParentComponent} from "../shared/clickable.parent.component";
 })
 
 export class UserListComponent {
-    private gridOptions:GridOptions;
-    private headerCellTemplate: string;
     private users: User[];
     private userRequest: User[];
     private validatedUser: User[];
-    private rowCount: number = 0;
     private columnDefs: any[];
-    private rowHeight: number;
 
     constructor(private userService: UserService) {
-        // we pass an empty gridOptions in, so we can grab the api out
-        this.gridOptions = <GridOptions>{
-            onGridReady: () => {
-                 this.gridOptions.api.sizeColumnsToFit();
-             }
-         };
         this.getUsers();
         this.createColumnDefs();
-        this.setHeaderCellTemplate();
-        this.rowHeight = 24;
-    }
-    
+}
+
     // Grid data
     getUsers(): void {
         var usersTmp: User[] = [];
         var userRequestTmp: User[] = [];
-        this.userService.getUsers().then(users2 => { 
+        this.userService.getUsers().then(users2 => {
             if (users2) {
                 for (let user of users2) {
                     if (!user.accountRequestDemand) {
@@ -52,8 +37,7 @@ export class UserListComponent {
                 }
                 this.validatedUser = usersTmp;
                 this.userRequest = userRequestTmp;
-                this.users = userRequestTmp.concat(usersTmp); 
-                this.rowCount = this.users.length;
+                this.users = userRequestTmp.concat(usersTmp);
             }
         })
         .catch((error) => {
@@ -70,86 +54,45 @@ export class UserListComponent {
             }
             return null;
         };
-        function booleanTrueRenderer(bool) {
-            if (bool) {
-                var imageElement = document.createElement("img");
-                imageElement.src = "/images/passed.16x16.png";
-                return imageElement;
-            }
-            return null;
-        };
         this.columnDefs = [
-            {headerName: "Id", field: "id", width: 40, suppressMenu: true},
-            {headerName: "Username", field: "username", width: 120, suppressMenu: true},
-            {headerName: "First Name", field: "firstName", width: 130, suppressMenu: true},
-            {headerName: "Last Name", field: "lastName", width: 130, suppressMenu: true},
-            {headerName: "Email", field: "email", width: 200, suppressMenu: true},
-            {headerName: "On Demande", field: "accountRequestDemand", width: 100, suppressMenu: true, suppressSorting: true, cellRenderer: function (params) {
-                return booleanTrueRenderer(params.data.accountRequestDemand);
-            }, cellStyle: {"text-align": "center"}},
-            {headerName: "Team", field: "teamName", width: 100, suppressMenu: true},
-            {headerName: "Role", field: "role.displayName", width: 100, suppressMenu: true},
-            {headerName: "Can import from PACS", field: "canAccessToDicomAssociation", width: 160, suppressMenu: true, cellRenderer: function (params) {
-                return booleanTrueRenderer(params.data.canAccessToDicomAssociation);
-            }, cellStyle: {"text-align": "center"}},
-            {headerName: "Created on", field: "creationDate", width: 110, suppressMenu: true, cellRenderer: function (params) {
+            {headerName: "Id", field: "id", type: "number"},
+            {headerName: "Username", field: "username"},
+            {headerName: "First Name", field: "firstName"},
+            {headerName: "Last Name", field: "lastName"},
+            {headerName: "Email", field: "email"},
+            {headerName: "On Demande", field: "accountRequestDemand", type: "boolean"},
+            {headerName: "Team", field: "teamName"},
+            {headerName: "Role", field: "role.displayName"},
+            {headerName: "Can import from PACS", field: "canAccessToDicomAssociation", type: "boolean"},
+            {headerName: "Created on", field: "creationDate", type: "date", cellRenderer: function (params) {
                 return dateRenderer(params.data.creationDate);
             }},
-            {headerName: "Expiration Date", field: "expirationDate", width: 110, suppressMenu: true, cellRenderer: function (params) {
+            {headerName: "Expiration Date", field: "expirationDate", type: "date", cellRenderer: function (params) {
                 return dateRenderer(params.data.expirationDate);
             }},
-            {headerName: "Active", field: "valid", width: 60, suppressMenu: true, cellRenderer: function (params) {
-                return booleanTrueRenderer(!params.data.expirationDate || params.data.expirationDate >= new Date());
-            }, cellStyle: {"text-align": "center"}},
-            {headerName: "Last Login", field: "lastLogin", width: 100, suppressMenu: true, cellRenderer: function (params) {
+            {headerName: "Active", field: "valid", type: "boolean", cellRenderer: function (params) {
+                return !params.data.expirationDate || params.data.expirationDate >= new Date();
+            }},
+            {headerName: "Last Login", field: "lastLogin", type: "date", cellRenderer: function (params) {
                 return dateRenderer(params.data.lastLogin);
             }},
-            {headerName: "Edit", field: "id", width: 50, suppressMenu: true, suppressSorting: true,
-              cellRendererFramework: ClickableParentComponent
-            , cellStyle: {"text-align": "center"}}
+            {headerName: "", type: "button", img: "/images/edit.16x16.png", target : "/editUser", getParams: function(item): Object {
+                return {id: item.id};
+            }},
+            {headerName: "", type: "button", img: "/images/edit.16x16.png", action: function(item): void {
+                console.log("TODO : delete item n°" + item.id + " in this function");
+            }}
         ];
     }
-    
-    // Header cell template
-    private setHeaderCellTemplate() {
-        this.headerCellTemplate = 
-        '<div class="ag-header-cell AgGrid-header">' +
-            '<div id="agResizeBar" class="ag-header-cell-resize"></div>' +
-            '<span id="agMenu" class="ag-header-icon ag-header-cell-menu-button"></span>' +
-            '<div id="agHeaderCellLabel" class="ag-header-cell-label">' +
-                '<span id="agSortAsc" class="ag-header-icon ag-sort-ascending-icon"></span>' +
-                '<span id="agSortDesc" class="ag-header-icon ag-sort-descending-icon"></span>' +
-                '<span id="agNoSort" class="ag-header-icon ag-sort-none-icon"></span>' +
-                '<span id="agFilter" class="ag-header-icon ag-filter-icon"></span>' +
-                '<span id="agText" class="ag-header-cell-text"></span>' +
-            '</div>' +
-        '</div>';
-    }
-    
-    // Grid height with a max value
-    private gridHeight() {
-        if (this.rowCount == 0) {
-            // No row => 120px
-            return 120;
-        } else if (this.rowCount <= GridUtils.maxDisplayedRows) {
-            // Rows height + header + 2px for borders
-            return (this.rowCount + 1) * this.rowHeight + 2;
-        } else {
-            // Rows height + header + 2px for borders + scrollbar height
-            return (GridUtils.maxDisplayedRows + 1) * this.rowHeight + 2 + 17;
-        }
-    }
 
-     showUsersOnDemande(event): void {
+
+    showUsersOnDemande(event): void {
         this.users = this.userRequest;
-        this.rowCount = this.users.length;
     }
     showValidtedUsers(event): void {
         this.users = this.validatedUser;
-        this.rowCount = this.users.length;
     }
     clearUsersFilter(event): void {
         this.users = this.userRequest.concat(this.validatedUser);
-        this.rowCount = this.users.length;
     }
 }

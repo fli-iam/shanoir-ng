@@ -20,13 +20,13 @@ export class LoginComponent {
     errorCode: string;
 
     constructor(private router: Router, private loginService: LoginService, accountEventsService: AccountEventsService, fb:FormBuilder) {
-        this.shanoirNGImageUrl = '/images/shanoirNG.png';
-        
+        this.shanoirNGImageUrl = '/images/logo.shanoir.black.png';
+
         this.loginForm = fb.group({
            'email': ['', Validators.required],
            'password': ['', Validators.required]
         });
-        
+
         accountEventsService.subscribe((account) => {
             if(!account.authenticated) {
                 if(account.error) {
@@ -35,7 +35,7 @@ export class LoginComponent {
             }
         });
     }
-    
+
     login(): void {
         this.loginService.login(this.loginForm.value.email,
                                 this.loginForm.value.password)
@@ -45,5 +45,5 @@ export class LoginComponent {
                 this.router.navigate(['/home']);
             });
     }
-    
+
 }

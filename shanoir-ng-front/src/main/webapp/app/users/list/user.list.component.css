@@ -1,20 +1,5 @@
 /***********************/
 /* User list component */
 /***********************/
-.UserListComponent {
-    padding-left: 5%;
-    width: 90%;
-}
-
-.UserListComponent-title {
-    text-align: center;
-    margin: 0px;
-}
-
-.UserListComponent-buttonBar {
-    padding-left: 10px;
-}
-
-.UserListComponent-grid {
-    padding-top: 10px;
-}
+.UserListComponent .commands { margin: 3px 0 8px 0; }
+.UserListComponent .commands button strong {font-weight: bolder; color: palegoldenrod; }

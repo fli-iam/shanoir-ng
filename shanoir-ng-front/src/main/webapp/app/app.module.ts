@@ -21,9 +21,10 @@ import { RoleService } from './roles/role.service';
 import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
 import {ClickableComponent} from "./users/shared/clickable.component";
 import {ClickableParentComponent} from "./users/shared/clickable.parent.component";
+import {TableComponent} from "./shared/table/table.component";
 
 @NgModule({
-    imports: [ 
+    imports: [
         AgGridModule.withComponents([ClickableComponent, ClickableParentComponent]),
         BrowserModule,
         FormsModule,
@@ -31,7 +32,7 @@ import {ClickableParentComponent} from "./users/shared/clickable.parent.componen
         ReactiveFormsModule,
         routing
     ],
-    declarations: [ 
+    declarations: [
         AppComponent,
         HeaderComponent,
         HomeComponent,
@@ -40,7 +41,8 @@ import {ClickableParentComponent} from "./users/shared/clickable.parent.componen
         UserListComponent,
         EditUserComponent,
         ClickableComponent,
-        ClickableParentComponent
+        ClickableParentComponent,
+        TableComponent
     ],
     providers: [
         AccountEventsService,
