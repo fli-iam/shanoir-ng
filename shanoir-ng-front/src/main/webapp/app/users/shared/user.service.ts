@@ -42,6 +42,15 @@ export class UserService {
             .catch(this.handleError);
     }
 
+    delete(id: number): Promise<Response> {
+        return this.http.delete(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id)
+            .toPromise()
+            .catch((error) => {
+                console.error('Error delete user', error);
+                return Promise.reject(error.message || error);
+        });
+    }
+
     confirmAccountRequest(id: number, user: User): Observable<User> {
         return this.http.put(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL, 
                 JSON.stringify(user))

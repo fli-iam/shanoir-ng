@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private AccountRequestInfoRepository accountRequestInfoRepository;
-	
+
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
@@ -78,6 +78,25 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void deleteById(final Long id) {
 		userRepository.delete(id);
+		deleteUserOnShanoirOld(id);
+	}
+
+	/*
+	 * Send a message to Shanoir old to delete an user.
+	 * 
+	 * @param userId user id.
+	 */
+	private void deleteUserOnShanoirOld(final Long userId) {
+		try {
+			LOG.info("Send update to Shanoir Old");
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteQueueOut().getName(),
+					new ObjectMapper().writeValueAsString(userId));
+		} catch (AmqpException e) {
+			LOG.error("Cannot send user " + userId + " delete to Shanoir Old on queue : "
+					+ RabbitMqConfiguration.queueOut().getName(), e);
+		} catch (JsonProcessingException e) {
+			LOG.error("Cannot send user " + userId + " userId because of an error while serializing user.", e);
+		}
 	}
 
 	@Override
@@ -192,6 +211,16 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	@Override
+	public void updateLastLogin(final User user) {
+		user.setLastLogin(new Date());
+		try {
+			userRepository.save(user);
+		} catch (Exception e) {
+			LOG.error("Error while updating last login date for user " + user.getId(), e);
+		}
+	}
+
 	/*
 	 * Update Shanoir Old.
 	 * 
@@ -253,16 +282,6 @@ public class UserServiceImpl implements UserService {
 		userDb.setMedical(user.isMedical());
 		userDb.setUsername(user.getUsername());
 		return userDb;
-	}
-
-	@Override
-	public void updateLastLogin(final User user) {
-		user.setLastLogin(new Date());
-		try {
-			userRepository.save(user);
-		} catch (Exception e) {
-			LOG.error("Error while updating last login date for user " + user.getId(), e);
-		}
 	}
 
 }
