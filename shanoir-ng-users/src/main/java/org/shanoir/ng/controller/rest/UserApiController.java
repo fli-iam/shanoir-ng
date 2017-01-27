@@ -14,6 +14,7 @@ import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.error.FieldErrorMap;
 import org.shanoir.ng.model.validation.EditableOnlyByValidator;
 import org.shanoir.ng.model.validation.UniqueValidator;
+import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,9 @@ public class UserApiController implements UserApi {
 
 	@Autowired
 	private UserService userService;
+	
+    @Autowired
+    private UserRepository userRepository;
 
 	@Override
 	public ResponseEntity<Void> confirmAccountRequest(
@@ -115,12 +119,20 @@ public class UserApiController implements UserApi {
 	public ResponseEntity<User> saveNewUser(
 			@ApiParam(value = "the user to create", required = true) @RequestBody @Valid final User user,
 			final BindingResult result) throws RestServiceException {
-
+		
+		/* Now we generate a username for the new user creation */
+		if (user.getUsername() == null) {
+			if (user.getFirstName() != null && user.getLastName() != null) {
+				generateUsername(user);
+			}
+		}
+		
 		/* Validation */
 		// A basic user can only update certain fields, check that
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(user);
 		// Check hibernate validation
-		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+		/* Tell Spring to remove the hibernante validation error on username blank now */
+		final FieldErrorMap hibernateErrors = FieldErrorMap.fieldErrorMapIgnoreUsernameBlank(result);
 		// Check unique constrainte
 		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
 		/* Merge errors. */
@@ -144,6 +156,41 @@ public class UserApiController implements UserApi {
 			}
 			throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
 		}
+	}
+
+	private void generateUsername(User user) {
+		String username = "";
+		String usernameAsked = "";
+		final String firstnames = user.getFirstName().trim();
+
+		for (final String firstname : firstnames.split("\\s+")) {
+			for (String f : firstname.split("-")) {
+				username = username + f.substring(0, 1);
+			}
+		}
+
+		final String lastnames = user.getLastName().trim();
+
+		for (final String lastname : lastnames.split("\\s+")) {
+			for (String l : lastname.split("-")) {
+				username = username + l;
+			}
+		}
+		
+		username = username.toLowerCase();
+		usernameAsked = username;
+		
+		int i = 1;
+		while (userRepository.findByUsername(username).isPresent()) {
+			username += i;
+			i++;
+		}
+		if (username != usernameAsked) {
+			user.setUsername(usernameAsked + (i - 1));
+		} else {
+			user.setUsername(usernameAsked);
+		}
+		
 	}
 
 	@Override

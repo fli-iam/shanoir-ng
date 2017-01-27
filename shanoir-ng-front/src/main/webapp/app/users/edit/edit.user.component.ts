@@ -9,6 +9,7 @@ import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
+import { AccountRequestInfo } from '../../accountRequestInfo/account.request.info.model';
 
 @Component({
     selector: 'editUser',
@@ -31,6 +32,7 @@ export class EditUserComponent implements OnInit {
     creationMode: Boolean;
     userId: number;
     selectedDateNormal: string = '';
+    accountRequestInfo: AccountRequestInfo = new AccountRequestInfo();
 
     constructor(router: Router, private location: Location, route: ActivatedRoute, userService: UserService, roleService: RoleService, private fb: FormBuilder) {
         this.router = router;
@@ -69,6 +71,7 @@ export class EditUserComponent implements OnInit {
                 user.role = this.getRoleById(user.role.id);
                 this.user = user;
                 this.getDateToDatePicker(this.user);
+                this.accountRequestInfo = this.user.accountRequestInfo;
             });
     }
 
@@ -147,13 +150,12 @@ export class EditUserComponent implements OnInit {
         this.editUserForm = this.fb.group({
             'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'username': [this.user.username, [Validators.required, Validators.minLength(4), Validators.maxLength(20)]],
+            'username': new FormControl({value: this.user.username, disabled: true}, [Validators.required, Validators.minLength(4), Validators.maxLength(20)]),
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
             'expirationDate': [this.user.expirationDate],
             'role': [this.user.role, Validators.required],
             'canAccessToDicomAssociation': new FormControl('false'),
-            'medical': new FormControl('false'),
-            'motivation': [this.user.motivation]
+            'medical': new FormControl('false')
         });
 
         this.editUserForm.valueChanges

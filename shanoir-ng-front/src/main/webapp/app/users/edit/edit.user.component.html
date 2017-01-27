@@ -1,142 +1,105 @@
 <div class="EditUserComponent content-component">
-
     <form [formGroup]="editUserForm" (ngSubmit)="submit()" class="EditUserContent max-content" novalidate>
-    <table class="layout">
-    	<tr><td colspan="2">
-	    	<div class="header command-zone" *ngIf="creationMode" i18n="Create user|Title">Create a user</div>
-	        <div class="header command-zone" *ngIf="!creationMode" i18n="Edit user|Title">Edit user</div>
-	    </td></tr>
-    	<tr>
-    		<td>
-		    	<fieldset>
-		    	<ol>
-			        <li class="required">
-			            <label i18n="Edit user|FirstName label" class="required-label">First Name</label> 
-			            <input type="text" id="firstName" required minlength="2" maxlength="50" formControlName="firstName" [(ngModel)]="user.firstName"/>
-			            <label *ngIf="formErrors.firstName.includes('required')" class="form-validation-alert" i18n="Edit user|FirstNameRequiredError label">First Name is required!</label>
-			            <label *ngIf="formErrors.firstName.includes('length')" class="form-validation-alert" i18n="Edit user|FirstNameLengthError label">First Name length must be between 2 and 50!</label>
-			        </li>
-			        <li class="required">
-			            <label i18n="Edit user|LastName label" class="required-label">Last Name</label> 
-			            <input type="text" id="lastName" required minlength="2" maxlength="50" formControlName="lastName" [(ngModel)]="user.lastName"/>
-			            <label *ngIf="formErrors.lastName.includes('required')" class="form-validation-alert" i18n="Edit user|LastNameRequiredError label">Last Name is required!</label>
-			            <label *ngIf="formErrors.lastName.includes('length')" class="form-validation-alert" i18n="Edit user|LastNameLengthError label">Last Name length must be between 2 and 50!</label>
-			        </li>
-			        <li class="required">
-			            <label i18n="Edit user|Username label" class="required-label">Username</label> 
-			            <input type="text" id="username" required minlength="4" maxlength="20" formControlName="username" [(ngModel)]="user.username"/>
-			            <label *ngIf="formErrors.username.includes('required')" class="form-validation-alert" i18n="Edit user|UsernameRequiredError label">Username is required!</label>
-			            <label *ngIf="formErrors.username.includes('length')" class="form-validation-alert" i18n="Edit user|UsernameLengthError label">Username length must be between 4 and 20!</label>
-			            <label *ngIf="isUserNameUnique==false" class="form-validation-alert" i18n="Edit user|UsernameUniqueError label">Username should be unique!</label>
-			        </li>
-			        <li class="">
-			            <label i18n="Edit user|Email label" class="required-label">Email</label> 
-			            <input type="email" id="email" required formControlName="email" [(ngModel)]="user.email"/>
-			            <label *ngIf="formErrors.email.includes('required')" class="form-validation-alert" i18n="Edit user|EmailRequiredError label">Email is required!</label>
-			            <label *ngIf="formErrors.email.includes('pattern')" class="form-validation-alert" i18n="Edit user|EmailPatternError label">Email should be valid!</label>
-			            <label *ngIf="isEmailUnique==false" class="form-validation-alert" i18n="Edit user|EmailUniqueError label">Email should be unique!</label>
-			        </li>
-			     </ol>
-			     </fieldset>
-			     <fieldset>
-			     <ol>
-			        <li>
-			            <label i18n="Edit user|ExpirationDate label">Expiration Date</label> 
-			            <input type="date" id="expirationDate" formControlName="expirationDate" [(ngModel)]="expirationDate" placeholder="jj/mm/aaaa"/>
-			        </li>
-			        <li class="required">
-			            <label i18n="Edit user|Role label" class="required-label">Role of the user</label> 
-			            <select id="role" required formControlName="role" [(ngModel)]="user.role">
-			                <option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>
-			            </select>
-			            <label *ngIf="formErrors.role.includes('required')" class="form-validation-alert" i18n="Edit user|RoleRequiredError label">Role is required!</label>
-			        </li>
-			        <li>   
-			            <label i18n="Edit user|CanAccessToDicomAssociation label">Can import from Neurinfo-PACS</label> 
-			            <input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="true" i18n="Edit user|canAccessToDicomAssociation label" [checked]="user.canAccessToDicomAssociation == true"/>Yes
-			            <input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="false" i18n="Edit user|cannotAccessToDicomAssociation label" [checked]="'user.canAccessToDicomAssociation'?'user.canAccessToDicomAssociation == false':'true'"/>No
-			        </li>
-			        <li>
-			            <label i18n="Edit user|IsMedical label">Is a medical doctor/resident</label> 
-			            <input type="radio" formControlName="medical" [(ngModel)]="user.medical" [value]="true" i18n="Edit user|medical label" [checked]="user.medical == true"/>Yes
-			            <input type="radio" formControlName="medical" [(ngModel)]="user.medical" [value]="false" i18n="Edit user|notMedical label" [checked]="'user.medical'?'user.medical == false':'true'"/>No
-			        </li>
-		         </ol>
-			     </fieldset>
-		 
-			     <fieldset>
-			     <ol>
-			        <li>
-			            <label i18n="Edit user|Motivation label">Comment</label> 
-			            <textarea type="text" formControlName="motivation" [(ngModel)]="user.motivation">
-			            </textarea>
-			        </li>
-			     </ol> 
-			     </fieldset>
-		     </td>
-    		<td>
-		    	<fieldset>
-		    	<ol>
-			        <li class="required">
-			            <label i18n="Edit user|FirstName label" class="required-label">First Name</label> 
-			            <input type="text" id="firstName" required minlength="2" maxlength="50" formControlName="firstName" [(ngModel)]="user.firstName"/>
-			            <label *ngIf="formErrors.firstName.includes('required')" class="form-validation-alert" i18n="Edit user|FirstNameRequiredError label">First Name is required!</label>
-			            <label *ngIf="formErrors.firstName.includes('length')" class="form-validation-alert" i18n="Edit user|FirstNameLengthError label">First Name length must be between 2 and 50!</label>
-			        </li>
-			        <li class="required">
-			            <label i18n="Edit user|LastName label" class="required-label">Last Name</label> 
-			            <input type="text" id="lastName" required minlength="2" maxlength="50" formControlName="lastName" [(ngModel)]="user.lastName"/>
-			            <label *ngIf="formErrors.lastName.includes('required')" class="form-validation-alert" i18n="Edit user|LastNameRequiredError label">Last Name is required!</label>
-			            <label *ngIf="formErrors.lastName.includes('length')" class="form-validation-alert" i18n="Edit user|LastNameLengthError label">Last Name length must be between 2 and 50!</label>
-			        </li>
-			        <li class="required">
-			            <label i18n="Edit user|Username label" class="required-label">Username</label> 
-			            <input type="text" id="username" required minlength="4" maxlength="20" formControlName="username" [(ngModel)]="user.username"/>
-			            <label *ngIf="formErrors.username.includes('required')" class="form-validation-alert" i18n="Edit user|UsernameRequiredError label">Username is required!</label>
-			            <label *ngIf="formErrors.username.includes('length')" class="form-validation-alert" i18n="Edit user|UsernameLengthError label">Username length must be between 4 and 20!</label>
-			            <label *ngIf="isUserNameUnique==false" class="form-validation-alert" i18n="Edit user|UsernameUniqueError label">Username should be unique!</label>
-			        </li>
-			        <li class="">
-			            <label i18n="Edit user|Email label" class="required-label">Email</label> 
-			            <input type="email" id="email" required formControlName="email" [(ngModel)]="user.email"/>
-			            <label *ngIf="formErrors.email.includes('required')" class="form-validation-alert" i18n="Edit user|EmailRequiredError label">Email is required!</label>
-			            <label *ngIf="formErrors.email.includes('pattern')" class="form-validation-alert" i18n="Edit user|EmailPatternError label">Email should be valid!</label>
-			            <label *ngIf="isEmailUnique==false" class="form-validation-alert" i18n="Edit user|EmailUniqueError label">Email should be unique!</label>
-			        </li>
-			        <li class="">
-			            <label i18n="Edit user|Email label" class="required-label">Email</label> 
-			            <input type="email" id="email" required formControlName="email" [(ngModel)]="user.email"/>
-			            <label *ngIf="formErrors.email.includes('required')" class="form-validation-alert" i18n="Edit user|EmailRequiredError label">Email is required!</label>
-			            <label *ngIf="formErrors.email.includes('pattern')" class="form-validation-alert" i18n="Edit user|EmailPatternError label">Email should be valid!</label>
-			            <label *ngIf="isEmailUnique==false" class="form-validation-alert" i18n="Edit user|EmailUniqueError label">Email should be unique!</label>
-			        </li>
-			        <li class="">
-			            <label i18n="Edit user|Email label" class="required-label">Email</label> 
-			            <input type="email" id="email" required formControlName="email" [(ngModel)]="user.email"/>
-			            <label *ngIf="formErrors.email.includes('required')" class="form-validation-alert" i18n="Edit user|EmailRequiredError label">Email is required!</label>
-			            <label *ngIf="formErrors.email.includes('pattern')" class="form-validation-alert" i18n="Edit user|EmailPatternError label">Email should be valid!</label>
-			            <label *ngIf="isEmailUnique==false" class="form-validation-alert" i18n="Edit user|EmailUniqueError label">Email should be unique!</label>
-			        </li>
-			        <li class="">
-			            <label i18n="Edit user|Email label" class="required-label">Email</label> 
-			            <input type="email" id="email" required formControlName="email" [(ngModel)]="user.email"/>
-			            <label *ngIf="formErrors.email.includes('required')" class="form-validation-alert" i18n="Edit user|EmailRequiredError label">Email is required!</label>
-			            <label *ngIf="formErrors.email.includes('pattern')" class="form-validation-alert" i18n="Edit user|EmailPatternError label">Email should be valid!</label>
-			            <label *ngIf="isEmailUnique==false" class="form-validation-alert" i18n="Edit user|EmailUniqueError label">Email should be unique!</label>
-			        </li>
-			     </ol>
-			     </fieldset>	 
-			     
-		     </td>
-		 </tr>
-	     
-	     <tr><td colspan="2"><div class="footer command-zone">
-	        <button i18n="Edit user|CancelButton label" class="Button" (click)="cancel()">Cancel</button>
-	        <button type="submit" *ngIf="creationMode" i18n="Edit user|CreateButton label" (click)="create()" class="Button" [disabled]="!editUserForm.valid">Create</button>
-	        <button type="submit" *ngIf="!creationMode && !user.accountRequestDemand" (click)="update()" i18n="Edit user|SaveButton label" class="Button" [disabled]="!editUserForm.valid">Save Settings</button>
-	        <button type="submit" *ngIf="!creationMode && user.accountRequestDemand" (click)="deny()" i18n="Edit user|DenyAccountRequestButton label" class="Button" [disabled]="!editUserForm.valid">Deny creation</button>
-	        <button type="submit" *ngIf="!creationMode && user.accountRequestDemand" (click)="accept()" i18n="Edit user|AcceptAccountRequestButton label" class="Button" [disabled]="!editUserForm.valid">Accept</button>
-    	</div></td></tr>
-    </table>
+		<table class="layout">
+			<tr><td colspan="2">
+				<div class="header command-zone" *ngIf="creationMode" i18n="Create user|Title">Create a user</div>
+				<div class="header command-zone" *ngIf="!creationMode" i18n="Edit user|Title">Edit user</div>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<li class="required">
+							<label i18n="Edit user|FirstName label" class="required-label">First Name</label> 
+							<input type="text" id="firstName" required minlength="2" maxlength="50" formControlName="firstName" [(ngModel)]="user.firstName"/>
+							<label *ngIf="formErrors.firstName.includes('required')" class="form-validation-alert" i18n="Edit user|FirstNameRequiredError label">First Name is required!</label>
+							<label *ngIf="formErrors.firstName.includes('length')" class="form-validation-alert" i18n="Edit user|FirstNameLengthError label">First Name length must be between 2 and 50!</label>
+						</li>
+						<li class="required">
+							<label i18n="Edit user|LastName label" class="required-label">Last Name</label> 
+							<input type="text" id="lastName" required minlength="2" maxlength="50" formControlName="lastName" [(ngModel)]="user.lastName"/>
+							<label *ngIf="formErrors.lastName.includes('required')" class="form-validation-alert" i18n="Edit user|LastNameRequiredError label">Last Name is required!</label>
+							<label *ngIf="formErrors.lastName.includes('length')" class="form-validation-alert" i18n="Edit user|LastNameLengthError label">Last Name length must be between 2 and 50!</label>
+						</li>
+						<li *ngIf="creationMode==false" class="required">
+							<label i18n="Edit user|Username label" class="required-label">Username</label> 
+							<input type="text" id="username" required minlength="4" maxlength="20" formControlName="username" [(ngModel)]="user.username"/>
+							<label *ngIf="formErrors.username.includes('required')" class="form-validation-alert" i18n="Edit user|UsernameRequiredError label">Username is required!</label>
+							<label *ngIf="formErrors.username.includes('length')" class="form-validation-alert" i18n="Edit user|UsernameLengthError label">Username length must be between 4 and 20!</label>
+							<label *ngIf="isUserNameUnique==false" class="form-validation-alert" i18n="Edit user|UsernameUniqueError label">Username should be unique!</label>
+						</li>
+						<li class="required">
+							<label i18n="Edit user|Email label" class="required-label">Email</label> 
+							<input type="email" id="email" required formControlName="email" [(ngModel)]="user.email"/>
+							<label *ngIf="formErrors.email.includes('required')" class="form-validation-alert" i18n="Edit user|EmailRequiredError label">Email is required!</label>
+							<label *ngIf="formErrors.email.includes('pattern')" class="form-validation-alert" i18n="Edit user|EmailPatternError label">Email should be valid!</label>
+							<label *ngIf="isEmailUnique==false" class="form-validation-alert" i18n="Edit user|EmailUniqueError label">Email should be unique!</label>
+						</li>
+					</ol>
+					</fieldset>
+					<fieldset>
+					<ol>
+						<li>
+							<label i18n="Edit user|ExpirationDate label">Expiration Date</label> 
+							<my-date-picker id="expirationDate" [options]="myDatePickerOptions" formControlName="expirationDate" [(ngModel)]="expirationDate" 
+								(dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
+							</my-date-picker>
+							<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: yyyy-mm-dd</label>
+						</li>
+						<li class="required">
+							<label i18n="Edit user|Role label" class="required-label">Role of the user</label> 
+							<select id="role" required formControlName="role" [(ngModel)]="user.role">
+								<option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>
+							</select>
+							<label *ngIf="formErrors.role.includes('required')" class="form-validation-alert" i18n="Edit user|RoleRequiredError label">Role is required!</label>
+						</li>
+						<li>   
+							<label i18n="Edit user|CanAccessToDicomAssociation label">Can import from Neurinfo-PACS</label> 
+							<input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="true" i18n="Edit user|canAccessToDicomAssociation label" [checked]="user.canAccessToDicomAssociation == true"/>Yes
+							<input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="false" i18n="Edit user|cannotAccessToDicomAssociation label" [checked]="'user.canAccessToDicomAssociation'?'user.canAccessToDicomAssociation == false':'true'"/>No
+						</li>
+						<li>
+							<label i18n="Edit user|IsMedical label">Is a medical doctor/resident</label> 
+							<input type="radio" formControlName="medical" [(ngModel)]="user.medical" [value]="true" i18n="Edit user|medical label" [checked]="user.medical == true"/>Yes
+							<input type="radio" formControlName="medical" [(ngModel)]="user.medical" [value]="false" i18n="Edit user|notMedical label" [checked]="'user.medical'?'user.medical == false':'true'"/>No
+						</li>
+					</ol>
+					</fieldset>
+				</td>
+				<td *ngIf="user.accountRequestDemand==true">
+					<fieldset>
+					<ol>
+						<li>
+							<label i18n="Edit user|Contact label">Contact: </label>{{accountRequestInfo.contact}}
+						</li>
+						<li>
+							<label i18n="Edit user|Function label">Function: </label>{{accountRequestInfo.function}}
+						</li>
+						<li>
+							<label i18n="Edit user|Institution label">Institution: </label>{{accountRequestInfo.institution}}
+						</li>
+						<li>
+							<label i18n="Edit user|Service label">Service: </label>{{accountRequestInfo.service}}
+						</li>
+						<li>
+							<label i18n="Edit user|Study label">Study: </label>{{accountRequestInfo.study}}
+						</li>
+						<li>
+							<label i18n="Edit user|Work label">Work: </label>{{accountRequestInfo.work}}
+						</li>
+					</ol>
+					</fieldset>	 
+					
+				</td>
+			</tr>
+			
+			<tr><td colspan="2"><div class="footer command-zone">
+				<button i18n="Edit user|CancelButton label" class="Button" (click)="cancel()">Cancel</button>
+				<button type="submit" *ngIf="creationMode" i18n="Edit user|CreateButton label" (click)="create()" class="Button" [disabled]="!editUserForm.valid || isDateValid==false">Create</button>
+				<button type="submit" *ngIf="!creationMode && !user.accountRequestDemand" (click)="update()" i18n="Edit user|SaveButton label" class="Button" [disabled]="!editUserForm.valid || isDateValid==false">Save Settings</button>
+				<button type="submit" *ngIf="!creationMode && user.accountRequestDemand" (click)="deny()" i18n="Edit user|DenyAccountRequestButton label" class="Button" [disabled]="!editUserForm.valid || isDateValid==false">Deny creation</button>
+				<button type="submit" *ngIf="!creationMode && user.accountRequestDemand" (click)="accept()" i18n="Edit user|AcceptAccountRequestButton label" class="Button" [disabled]="!editUserForm.valid || isDateValid==false">Accept</button>
+			</div></td></tr>
+		</table>
     </form>
 </div>
