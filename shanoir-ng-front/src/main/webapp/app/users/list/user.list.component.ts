@@ -61,14 +61,14 @@ export class UserListComponent {
             {headerName: "First Name", field: "firstName"},
             {headerName: "Last Name", field: "lastName"},
             {headerName: "Email", field: "email"},
-            {headerName: "On Demande", field: "accountRequestDemand", type: "boolean"},
+            {headerName: "O.D.", tip: "On Demand", field: "accountRequestDemand", type: "boolean"},
             {headerName: "Team", field: "teamName"},
             {headerName: "Role", field: "role.displayName"},
-            {headerName: "Can import from PACS", field: "canAccessToDicomAssociation", type: "boolean"},
-            {headerName: "Created on", field: "creationDate", type: "date", cellRenderer: function (params) {
+            {headerName: "PACS", tip: "can import from PACS", field: "canAccessToDicomAssociation", type: "boolean"},
+            {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params) {
                 return dateRenderer(params.data.creationDate);
             }},
-            {headerName: "Expiration Date", field: "expirationDate", type: "date", cellRenderer: function (params) {
+            {headerName: "Expiration", field: "expirationDate", type: "date", cellRenderer: function (params) {
                 return dateRenderer(params.data.expirationDate);
             }},
             {headerName: "Active", field: "valid", type: "boolean", cellRenderer: function (params) {

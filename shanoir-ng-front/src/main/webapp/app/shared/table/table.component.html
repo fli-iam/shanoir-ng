@@ -28,6 +28,7 @@
                 class="{{getColTypeStr(col)}}"
                 [class.sortable]="!col.suppressSorting && col.type!='button'"
                 [class.active]="lastSortedCol==col.field"
+                [attr.title]="col.tip != undefined ? col.tip : null"
                 >{{col.headerName}}
                     <span class="sort-arrow" *ngIf="!col.suppressSorting && col.type!='button'">
                         <span *ngIf="lastSortedCol==col.field && !lastSortedAsc" class="arrow arrowUp">&#9652;</span>   

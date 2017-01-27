@@ -1,21 +1,21 @@
 .shanoir-table { width: 100%; border-collapse: collapse; border-spacing: 0; border: 1px solid #f1f1f1; }
 	.shanoir-table th { padding: 4px 5px; background-color: #7A7F9D; color: #fdfdfd; font-weight: normal; white-space: nowrap; overflow: hidden; }
-		.shanoir-table th.controls { text-align: left; background-color: #f1f1f1; color: #222; }
-			.shanoir-table th.controls button { height: 22px; padding: 0 5px; vertical-align: top; background-color: transparent; border-radius: 0; border: 1px solid transparent; color: #333; }
-				.shanoir-table th.controls button span { vertical-align: top; }
+		.shanoir-table th.controls { padding: 0; min-height: 26px; text-align: left; background-color: #f1f1f1; color: #222; }
+			.shanoir-table th.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 0; border: 1px solid transparent; color: #333; }
+				.shanoir-table th.controls button:hover { background-color: #CFD1D9; }
+				.shanoir-table th.controls button span { vertical-align: middle; }
 				.shanoir-table th.controls button img { height: 16px; vertical-align: middle; }
-			.shanoir-table th.controls input { padding: 0 5px; width: 150px; height: 22px;}
-			.shanoir-table th.controls select { width: 150px; height: 22px;}
+			.shanoir-table th.controls input { padding: 0 5px; width: 150px; height: 22px; vertical-align: middle; }
+			.shanoir-table th.controls select { width: 150px; height: 22px; vertical-align: middle; }
 			.shanoir-table th.controls .text-search { margin: 0 10px 0 0; padding: 0 7px 0 0; border-right: 1px solid #d0d0d0; }
-		.shanoir-table th.sortable { cursor: pointer; }
-			.shanoir-table th.sortable .sort-arrow { width: 15px; display: inline-block; }
-				.shanoir-table th.sortable .sort-arrow span { vertical-align: bottom; }
+		.shanoir-table th.sortable { cursor: pointer; position: relative; }
+			.shanoir-table th.sortable .sort-arrow { position: absolute; top: 11px; right: -1px; }
 		.shanoir-table th.active { background-color: #fafafa; color: #222; }
 		.shanoir-table th.col-date { width: 65px; }
 		.shanoir-table th.col-boolean { width: 20px; }
 	.shanoir-table tr { height: 20px; }
-		.shanoir-table tr.odd { background-color: #f1f1f1; }
-		.shanoir-table tr.even { background-color: #fafafa; }
+		.shanoir-table tr.even { background-color: #f1f1f1; }
+		.shanoir-table tr.odd { background-color: #fafafa; }
 	.shanoir-table td { padding: 0 5px; border: none; }
 		.shanoir-table td + td { border-left: 1px dotted #d0d0d0; }
 		.shanoir-table td.bool { text-align: center; font-weight: bold; }
