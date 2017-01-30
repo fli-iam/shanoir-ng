@@ -1,5 +1,5 @@
 <div class="EditUserComponent content-component">
-    <form [formGroup]="editUserForm" (ngSubmit)="submit()" class="EditUserContent max-content" novalidate>
+    <form [formGroup]="editUserForm" class="EditUserContent max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
 				<div class="header command-zone" *ngIf="creationMode" i18n="Create user|Title">Create a user</div>
@@ -21,12 +21,9 @@
 							<label *ngIf="formErrors.lastName.includes('required')" class="form-validation-alert" i18n="Edit user|LastNameRequiredError label">Last Name is required!</label>
 							<label *ngIf="formErrors.lastName.includes('length')" class="form-validation-alert" i18n="Edit user|LastNameLengthError label">Last Name length must be between 2 and 50!</label>
 						</li>
-						<li *ngIf="creationMode==false" class="required">
+						<li *ngIf="creationMode==false">
 							<label i18n="Edit user|Username label" class="required-label">Username</label> 
-							<input type="text" id="username" required minlength="4" maxlength="20" formControlName="username" [(ngModel)]="user.username"/>
-							<label *ngIf="formErrors.username.includes('required')" class="form-validation-alert" i18n="Edit user|UsernameRequiredError label">Username is required!</label>
-							<label *ngIf="formErrors.username.includes('length')" class="form-validation-alert" i18n="Edit user|UsernameLengthError label">Username length must be between 4 and 20!</label>
-							<label *ngIf="isUserNameUnique==false" class="form-validation-alert" i18n="Edit user|UsernameUniqueError label">Username should be unique!</label>
+							<input type="text" id="username" required minlength="4" maxlength="20" formControlName="username" [(ngModel)]="user.username" readonly/>
 						</li>
 						<li class="required">
 							<label i18n="Edit user|Email label" class="required-label">Email</label> 
