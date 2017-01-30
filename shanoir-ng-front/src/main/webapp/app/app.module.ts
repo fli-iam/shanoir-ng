@@ -14,12 +14,12 @@ import { HomeComponent }   from './home/home.component';
 import { LoginComponent }   from './users/login/login.component';
 import { LoginService } from './shared/login/login.service';
 import { NavbarComponent }   from './shared/navbar/navbar.component';
-import { SecureHttp } from 'app/shared/http/secure.http';
+import { SecureHttp } from './shared/http/secure.http';
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
 import { RoleService } from './roles/role.service';
 import { TableComponent} from "./shared/table/table.component";
-import { MyDatePickerModule } from 'mydatepicker/dist/my-date-picker.module';
+import { MyDatePickerModule } from 'mydatepicker';
 
 @NgModule({
     imports: [
