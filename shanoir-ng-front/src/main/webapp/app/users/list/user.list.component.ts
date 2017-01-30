@@ -102,6 +102,7 @@ export class UserListComponent {
     }
 
     deleteUser(userId: number) {
+        // Delete user and refresh page
         this.userService.delete(userId).then((res) => this.getUsers());
     }
 
