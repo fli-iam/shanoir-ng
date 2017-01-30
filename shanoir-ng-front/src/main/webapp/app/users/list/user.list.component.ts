@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { MdDialog, MdDialogConfig, MdDialogRef } from '@angular/material';
 
+import { ConfirmDialogComponent } from "../../shared/utils/confirm.dialog.component";
+import { ConfirmDialogService } from "../../shared/utils/confirm.dialog.service";
+import { TableComponent } from "../../shared/table/table.component";
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
-import {TableComponent} from "../../shared/table/table.component";
 
 @Component({
     selector: 'user-list',
@@ -18,7 +21,7 @@ export class UserListComponent {
     private columnDefs: any[];
     private customActionDefs: any[];
 
-    constructor(private userService: UserService) {
+    constructor(private userService: UserService, private confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
         this.getUsers();
         this.createColumnDefs();
 }
@@ -80,12 +83,26 @@ export class UserListComponent {
             {headerName: "", type: "button", img: "/images/edit.16x16.png", target : "/editUser", getParams: function(item): Object {
                 return {id: item.id};
             }},
-            {headerName: "", type: "button", img: "/images/edit.16x16.png", action: function(item): void {
-                console.log("TODO : delete item n°" + item.id + " in this function");
-            }}
+            {headerName: "", type: "button", img: "/images/delete.16x16.png", action: this.openDeleteUserConfirmDialog, component:this}
         ];
         this.customActionDefs = [
             {title: "new user", img: "/images/add.user.24x24.black.png", target: "../editUser"},
         ];
     }
+
+    openDeleteUserConfirmDialog(item: User, component: UserListComponent):void {
+         component.confirmDialogService
+                .confirm('Delete user', 'Are you sure you want to delete user ' + item.firstName + ' ' + item.lastName + '?', 
+                    component.viewContainerRef)
+                .subscribe(res => {
+                    if (res) {
+                        component.deleteUser(item.id);
+                    }
+                });
+    }
+
+    deleteUser(userId: number) {
+        this.userService.delete(userId).then((res) => this.getUsers());
+    }
+
 }

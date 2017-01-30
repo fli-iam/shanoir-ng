@@ -9,6 +9,7 @@ import org.shanoir.ng.dto.ShanoirOldUserDTO;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorModelCode;
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.model.auth.UserContext;
 import org.shanoir.ng.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.repository.RoleRepository;
 import org.shanoir.ng.repository.UserRepository;
@@ -21,6 +22,7 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -76,7 +78,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void deleteById(final Long id) {
+	public void deleteById(final Long id) throws ShanoirUsersException {
+		final UserContext currentUser = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (currentUser != null && id.equals(currentUser.getId())) {
+			ShanoirUsersException.logAndThrow(LOG, "Forbidden to delete connected user.");
+		}
 		userRepository.delete(id);
 		deleteUserOnShanoirOld(id);
 	}

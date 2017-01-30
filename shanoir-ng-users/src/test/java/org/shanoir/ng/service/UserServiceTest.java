@@ -15,10 +15,13 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.model.auth.UserContext;
 import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.impl.UserServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * User detail service test.
@@ -116,6 +119,21 @@ public class UserServiceTest {
 
 	@Test
 	public void deleteByIdTest() throws ShanoirUsersException {
+		UserContext userContext = new UserContext();
+		userContext.setId(2L);
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(userContext, null));
+		
+		userService.deleteById(USER_ID);
+
+		Mockito.verify(userRepository, Mockito.times(1)).delete(Mockito.anyLong());
+	}
+
+	@Test(expected = ShanoirUsersException.class)
+	public void deleteByIdByUserWithSameIdTest() throws ShanoirUsersException {
+		UserContext userContext = new UserContext();
+		userContext.setId(1L);
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(userContext, null));
+		
 		userService.deleteById(USER_ID);
 
 		Mockito.verify(userRepository, Mockito.times(1)).delete(Mockito.anyLong());

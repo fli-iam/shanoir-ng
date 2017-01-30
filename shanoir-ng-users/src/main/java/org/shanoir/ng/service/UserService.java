@@ -32,8 +32,9 @@ public interface UserService extends UniqueCheckableService<User> {
 	 * Delete a user
 	 * 
 	 * @param id
+	 * @throws ShanoirUsersException
 	 */
-	void deleteById(Long id);
+	void deleteById(Long id) throws ShanoirUsersException;
 
 	/**
 	 * Denies an account request.
