@@ -80,14 +80,11 @@ export class EditUserComponent implements OnInit {
     }
 
     accept(): void {
-        this.setDateFromDatePicker();
+        this.submit();
         this.userService.confirmAccountRequest(this.userId, this.user)
            .subscribe((user) => {
                 this.cancel();
              }, (err: String) => {
-                if (err.indexOf("username should be unique") != -1) {
-                    this.isUserNameUnique = false;
-                }
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
                 }
@@ -106,14 +103,11 @@ export class EditUserComponent implements OnInit {
     }
 
     create(): void {
-        this.setDateFromDatePicker();
+        this.submit();
         this.userService.create(this.user)
             .subscribe((user) => {
                 this.cancel();
             }, (err: String) => {
-                if (err.indexOf("username should be unique") != -1) {
-                    this.isUserNameUnique = false;
-                }
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
                 }
@@ -121,14 +115,11 @@ export class EditUserComponent implements OnInit {
     }
 
     update(): void {
-        this.setDateFromDatePicker();
+        this.submit();
         this.userService.update(this.userId, this.user)
            .subscribe((user) => {
                 this.cancel();
             }, (err: String) => {
-                if (err.indexOf("username should be unique") != -1) {
-                    this.isUserNameUnique = false;
-                }
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
                 }
@@ -150,7 +141,7 @@ export class EditUserComponent implements OnInit {
         this.editUserForm = this.fb.group({
             'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'username': new FormControl({value: this.user.username, disabled: true}, [Validators.required, Validators.minLength(4), Validators.maxLength(20)]),
+            'username': new FormControl(this.user.username),
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
             'expirationDate': [this.user.expirationDate],
             'role': [this.user.role, Validators.required],
@@ -181,7 +172,6 @@ export class EditUserComponent implements OnInit {
     formErrors = {
         'firstName': '',
         'lastName': '',
-        'username': '',
         'email': '',
         'role': ''
     };
@@ -207,11 +197,16 @@ export class EditUserComponent implements OnInit {
             }
         } else {
             this.isDateValid = true;
+            this.selectedDateNormal = null;
         }
     }
 
     setDateFromDatePicker(): void {
-        this.user.expirationDate = new Date(this.selectedDateNormal);
+        if (this.selectedDateNormal && !isNaN(new Date(this.selectedDateNormal).getTime())) {
+            this.user.expirationDate = new Date(this.selectedDateNormal);
+        } else {
+            this.user.expirationDate = null;
+        }
     }
     
     getDateToDatePicker(user : User): void {
