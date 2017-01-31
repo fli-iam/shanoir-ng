@@ -160,6 +160,10 @@ public class UserServiceImpl implements UserService {
 		user.setPassword(PasswordUtils.getHash(newPassword));
 		User savedUser = null;
 		try {
+			if (user.getAccountRequestInfo() != null) {
+				// Save account request info
+				accountRequestInfoRepository.save(user.getAccountRequestInfo());
+			}
 			savedUser = userRepository.save(user);
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirUsersException.logAndThrow(LOG, "Error while creating user: " + dive.getMessage());
