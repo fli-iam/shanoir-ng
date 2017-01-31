@@ -1,8 +1,5 @@
 package org.shanoir.ng.configuration.security.jwt.token;
 
-import java.util.Date;
-
-import org.joda.time.DateTime;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -100,16 +97,6 @@ public class JwtSettings {
 	 */
 	public void setTokenSigningKey(String tokenSigningKey) {
 		this.tokenSigningKey = tokenSigningKey;
-	}
-
-	/**
-	 * Get token expiration date. Current date + token expiration time.
-	 * 
-	 * @return token expiration date
-	 */
-	public Date getTokenExpirationDate() {
-		DateTime currentTime = new DateTime();
-		return currentTime.plusMinutes(tokenExpirationTime).toDate();
 	}
 
 }

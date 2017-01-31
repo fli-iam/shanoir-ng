@@ -1,6 +1,5 @@
 package org.shanoir.ng.dto;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,7 +16,7 @@ public class UserDTO {
 
 	private String token;
 
-	private Date tokenTimeout;
+	private Integer tokenExpirationTime;
 
 	private String refreshToken;
 
@@ -67,18 +66,17 @@ public class UserDTO {
 	}
 
 	/**
-	 * @return the tokenTimeout
+	 * @return the tokenExpirationTime
 	 */
-	public Date getTokenTimeout() {
-		return tokenTimeout;
+	public Integer getTokenExpirationTime() {
+		return tokenExpirationTime;
 	}
 
 	/**
-	 * @param tokenTimeout
-	 *            the tokenTimeout to set
+	 * @param tokenExpirationTime the tokenExpirationTime to set
 	 */
-	public void setTokenTimeout(final Date tokenTimeout) {
-		this.tokenTimeout = tokenTimeout;
+	public void setTokenExpirationTime(Integer tokenExpirationTime) {
+		this.tokenExpirationTime = tokenExpirationTime;
 	}
 
 	/**
