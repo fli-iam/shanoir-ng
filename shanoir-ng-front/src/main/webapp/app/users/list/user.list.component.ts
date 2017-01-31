@@ -59,15 +59,12 @@ export class UserListComponent {
             return null;
         };
         this.columnDefs = [
-            {headerName: "Id", field: "id", type: "number"},
             {headerName: "Username", field: "username"},
             {headerName: "First Name", field: "firstName"},
             {headerName: "Last Name", field: "lastName"},
             {headerName: "Email", field: "email"},
             {headerName: "O.D.", tip: "On Demand", field: "accountRequestDemand", type: "boolean"},
-            {headerName: "Team", field: "teamName"},
             {headerName: "Role", field: "role.displayName"},
-            {headerName: "PACS", tip: "can import from PACS", field: "canAccessToDicomAssociation", type: "boolean"},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params) {
                 return dateRenderer(params.data.creationDate);
             }},
