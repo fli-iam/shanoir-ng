@@ -99,7 +99,6 @@ export class LoginService {
         if (tokenExpirationTime) {
             tokenTimeoutDate.setTime(tokenTimeoutDate.getTime() + tokenExpirationTime*60000);
         }
-        console.log("tokenTimeoutDate.getTime().toString(): " + tokenTimeoutDate.getTime().toString());
         return tokenTimeoutDate.getTime().toString();
     }
 
