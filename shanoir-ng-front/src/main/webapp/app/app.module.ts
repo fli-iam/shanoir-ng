@@ -14,6 +14,7 @@ import { ConfirmDialogService } from "./shared/utils/confirm.dialog.service";
 import { EditUserComponent }   from './users/edit/edit.user.component';
 import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
+import { KeycloakService } from "./keycloak/keycloak.service";
 import { LoginComponent }   from './users/login/login.component';
 import { LoginService } from './shared/login/login.service';
 import { MyDatePickerModule } from 'mydatepicker';
@@ -52,6 +53,7 @@ import { TableComponent} from "./shared/table/table.component";
         AccountEventsService,
         AuthAdminGuard,
         ConfirmDialogService,
+        KeycloakService,
         LoginService,
         RoleService,
         UserService,

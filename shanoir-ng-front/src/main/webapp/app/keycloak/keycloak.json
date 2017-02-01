@@ -1,0 +1,7 @@
+{
+  "realm": "demo",
+  "auth-server-url": "http://127.0.0.1:8080/auth",
+  "ssl-required": "external",
+  "resource": "angular2-product",
+  "public-client": true
+}
