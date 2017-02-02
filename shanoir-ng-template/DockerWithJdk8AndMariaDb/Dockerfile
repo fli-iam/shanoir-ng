@@ -18,7 +18,7 @@ RUN \
     apt-get update && \
     \
     echo "===> install Java" && \
-    DEBIAN_FRONTEND=noninteractive  apt-get install -y --no-install-recommends openjdk-8-jdk && \
+    DEBIAN_FRONTEND=noninteractive  apt-get install -y --no-install-recommends openjdk-8-jdk-headless openjdk-8-jre-headless ca-certificates-java/jessie-backports && \
     \
     echo "===> clean up..." && \
     apt-get clean && \
