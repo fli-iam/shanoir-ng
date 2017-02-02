@@ -14,7 +14,7 @@ RUN \
 # install java8
 RUN \
     echo "===> add java8 repository..." && \
-    echo "deb http://ftp.de.debian.org/debian jessie-backports main" >> /etc/apt/sources.list && \
+    echo "deb http://ftp.de.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
     apt-get update && \
     \
     echo "===> install Java" && \
