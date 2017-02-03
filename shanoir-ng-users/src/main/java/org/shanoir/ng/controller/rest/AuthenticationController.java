@@ -110,7 +110,7 @@ public class AuthenticationController {
 	@ResponseBody
 	public UserDTO refreshToken(final HttpServletRequest request, final HttpServletResponse response)
 			throws RestServiceException {
-		final String tokenPayload = tokenExtractor.extract(request.getHeader(SecurityConfiguration.JWT_TOKEN_HEADER_PARAM));
+		final String tokenPayload = null;//tokenExtractor.extract(request.getHeader(SecurityConfiguration.JWT_TOKEN_HEADER_PARAM));
         
 		final AccessJwtToken rawToken = new AccessJwtToken(tokenPayload);
 		final RefreshToken refreshToken = RefreshToken.create(rawToken, jwtSettings.getTokenSigningKey()).orElseThrow(() -> new InvalidJwtTokenException());

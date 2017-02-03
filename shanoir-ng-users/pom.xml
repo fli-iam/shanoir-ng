@@ -19,6 +19,7 @@
 	<properties>
 		<springfox-version>2.5.0</springfox-version>
 		<spring-active-profile></spring-active-profile>
+		<keycloak.version>2.5.1.Final</keycloak.version>
 	</properties>
 
 	<dependencies>
@@ -57,6 +58,18 @@
 		<dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        
+        <!-- Keycloak -->
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-tomcat8-adapter</artifactId>
+            <version>${keycloak.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-spring-boot-adapter</artifactId>
+            <version>${keycloak.version}</version>
         </dependency>
         
         <!-- JWT -->

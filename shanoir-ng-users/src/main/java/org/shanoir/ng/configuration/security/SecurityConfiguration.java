@@ -1,32 +1,13 @@
 package org.shanoir.ng.configuration.security;
 
-import java.util.Arrays;
 import java.util.List;
 
-import org.shanoir.ng.configuration.security.jwt.JwtAuthenticationProvider;
-import org.shanoir.ng.configuration.security.jwt.JwtAuthenticationProcessingFilter;
-import org.shanoir.ng.configuration.security.jwt.ShanoirAuthenticationProvider;
-import org.shanoir.ng.configuration.security.jwt.SkipPathRequestMatcher;
-import org.shanoir.ng.configuration.security.jwt.extractor.TokenExtractor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.session.web.http.HeaderHttpSessionStrategy;
-import org.springframework.session.web.http.HttpSessionStrategy;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
  * Spring security configuration.
@@ -37,10 +18,20 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration extends WebMvcConfigurerAdapter {
 
+	/*@Override
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		argumentResolvers.add(createUserDetailsResolver());
+	}
+
+	@Bean
+	public UserDetailsArgumentResolver createUserDetailsResolver() {
+		return new UserDetailsArgumentResolver();
+	}*/
+	
 	public static final String JWT_TOKEN_HEADER_PARAM = "X-Authorization";
-	public static final String FORM_BASED_LOGIN_ENTRY_POINT = "/authenticate";
+	/*public static final String FORM_BASED_LOGIN_ENTRY_POINT = "/authenticate";
 	public static final String TOKEN_BASED_AUTH_ENTRY_POINT = "/**";
 	public static final String TOKEN_REFRESH_ENTRY_POINT = "/authenticate/token";
 
@@ -107,7 +98,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
 		auth.authenticationProvider(shanoirAuthenticationProvider);
 		auth.authenticationProvider(jwtAuthenticationProvider);
-	}
+	}*/
 
 	/**
 	 * http://stackoverflow.com/a/31748398/122441 until
@@ -115,7 +106,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 * 
 	 * @return
 	 */
-	@Bean
+	/*@Bean
 	public FilterRegistrationBean corsFilter() {
 		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		final CorsConfiguration config = new CorsConfiguration();
@@ -137,6 +128,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Bean
 	public HttpSessionStrategy httpSessionStrategy() {
 		return new HeaderHttpSessionStrategy();
-	}
+	}*/
 
 }

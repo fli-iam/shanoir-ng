@@ -44,6 +44,23 @@ spring:
     sql-dialect: Mysql
   rabbitmq:
     host: rabbitmq
+#keycloak
+keycloak:
+  realm: Demo
+  #realmKey: MI...
+  auth-server-url: http://localhost:8080/auth
+  ssl-required: external
+  resource: springboot
+  bearer-only: true
+  credentials.secret: 6a85f996-a162-4366-b1a8-6e1ff4b36210
+  securityConstraints[0]:
+    securityCollections[0]:
+      name: spring secured api
+      authRoles: 
+        - admin
+        - manager
+      patterns:
+        - /api/*
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-users.log
