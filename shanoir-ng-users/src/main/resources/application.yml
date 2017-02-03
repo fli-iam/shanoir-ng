@@ -4,18 +4,12 @@ server:
   error:
     whitelabel:
       enabled: false
-# spring security configuration
-security:
-  sessions: never
 shanoir.security.jwt:
   tokenExpirationTime: 15 # Minutes
   refreshTokenExpTime: 60 # Minutes
   tokenIssuer: http://shanoir
   tokenSigningKey: dfg464dfhSDFH4664FDSHs456
 spring:
-  # redis configuration
-  redis:
-    host: shanoir-ng-redis
   datasource:
     url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: shanoir
@@ -44,6 +38,8 @@ spring:
     sql-dialect: Mysql
   rabbitmq:
     host: rabbitmq
+  session:
+    store-type: none
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-users.log
@@ -75,9 +71,6 @@ spring:
   jooq:
     sql-dialect: Mysql
   rabbitmq:
-    host: localhost
-  # redis configuration
-  redis:
     host: localhost
 server:
     port: 9901
