@@ -61,10 +61,10 @@ public class AuthenticationController {
 	@Autowired
 	private JwtSettings jwtSettings;
 
-    @Autowired
+//    @Autowired
     private TokenExtractor tokenExtractor;
     
-	@Autowired
+//	@Autowired
     private JwtTokenFactory tokenFactory;
     
 	@Autowired

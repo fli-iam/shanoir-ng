@@ -1,7 +1,7 @@
 import { NgModule }      from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Http, HttpModule } from '@angular/http';
+import { Http, HttpModule, RequestOptions, XHRBackend } from '@angular/http';
 import { MaterialModule } from '@angular/material';
 
 import { routing } from './app.routing';
@@ -14,6 +14,7 @@ import { ConfirmDialogService } from "./shared/utils/confirm.dialog.service";
 import { EditUserComponent }   from './users/edit/edit.user.component';
 import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
+import { KeycloakHttp } from "./keycloak/keycloak.http";
 import { KeycloakService } from "./keycloak/keycloak.service";
 import { LoginComponent }   from './users/login/login.component';
 import { LoginService } from './shared/login/login.service';
@@ -57,7 +58,16 @@ import { TableComponent} from "./shared/table/table.component";
         LoginService,
         RoleService,
         UserService,
-        {provide: Http, useClass: SecureHttp}
+        {
+            provide: Http,
+            useFactory:
+            (
+                backend: XHRBackend,
+                defaultOptions: RequestOptions,
+                keycloakService: KeycloakService
+            ) => new KeycloakHttp(backend, defaultOptions, keycloakService),
+            deps: [XHRBackend, RequestOptions, KeycloakService]
+        }
     ],
     bootstrap:    [ AppComponent ]
 })

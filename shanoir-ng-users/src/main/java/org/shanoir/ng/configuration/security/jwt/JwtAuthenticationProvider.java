@@ -24,7 +24,7 @@ import io.jsonwebtoken.Jws;
  * @author msimon
  *
  */
-@Component
+//@Component
 public class JwtAuthenticationProvider implements AuthenticationProvider {
 
 	@Autowired

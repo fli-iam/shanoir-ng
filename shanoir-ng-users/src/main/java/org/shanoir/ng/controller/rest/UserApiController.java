@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
 import org.shanoir.ng.exception.RestServiceException;
 import org.shanoir.ng.exception.ShanoirUsersException;
@@ -110,8 +111,9 @@ public class UserApiController implements UserApi {
 	}
 
 	@Override
-	public ResponseEntity<List<User>> findUsers(KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal) {
-		AccessToken token = principal.getKeycloakSecurityContext().getToken();
+	public ResponseEntity<List<User>> findUsers(KeycloakAuthenticationToken principal) {
+		RefreshableKeycloakSecurityContext context = (RefreshableKeycloakSecurityContext) principal.getCredentials();
+		AccessToken token = context.getToken();
 	       
         LOG.info(token.getId() + " - " + token.getPreferredUsername());
 		final List<User> users = userService.findAll();

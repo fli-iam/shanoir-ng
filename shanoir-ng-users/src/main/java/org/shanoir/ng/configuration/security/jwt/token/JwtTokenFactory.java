@@ -20,7 +20,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
  * @author msimon
  *
  */
-@Component
+//@Component
 public class JwtTokenFactory {
 
 	@Autowired

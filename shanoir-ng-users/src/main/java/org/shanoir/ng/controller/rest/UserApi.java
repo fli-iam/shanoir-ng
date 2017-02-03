@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
+import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.shanoir.ng.exception.RestServiceException;
 import org.shanoir.ng.model.User;
 import org.springframework.http.ResponseEntity;
@@ -83,7 +84,7 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
 //	@PreAuthorize("hasAuthority('adminRole')")
-	ResponseEntity<List<User>> findUsers(KeycloakPrincipal<RefreshableKeycloakSecurityContext> principal);
+	ResponseEntity<List<User>> findUsers(KeycloakAuthenticationToken principal);
 
 	@ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created user", response = User.class),

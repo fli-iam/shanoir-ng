@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author msimon
  *
  */
-@Component
+//@Component
 public class JwtAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
 	@Autowired

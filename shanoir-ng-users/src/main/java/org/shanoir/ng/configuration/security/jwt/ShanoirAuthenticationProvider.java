@@ -30,7 +30,7 @@ import io.jsonwebtoken.lang.Assert;
  * @author msimon
  *
  */
-@Component
+//@Component
 public class ShanoirAuthenticationProvider implements AuthenticationProvider {
 
 	/**

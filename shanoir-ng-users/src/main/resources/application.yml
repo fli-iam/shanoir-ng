@@ -46,8 +46,9 @@ spring:
     host: rabbitmq
 #keycloak
 keycloak:
-  realm: Demo
-  #realmKey: MI...
+  cors: true
+  realm: demo
+  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmgMaWeSsqzD6zkYxRl+X2kXnv6jvT9/juPzxBD8T5Fp2+4erfxnZ69UGqVtGNaKR0CF0wvr3a9S3jf4hhBkWBeLcZp+VEyZHRy1v+lNoFCtc0owIqvlEy85I0X5bScSn9kcex8aIELnuPtSB+D+78JYgdhLsriIJQcYYqr8YMUJThakKCzHidf8p33aiI+pJE889/hh2xB47u/KIe+9lTKnwqs11ooX5QiOTOwJtX+/AFn7m8xnhiQygDT+e3dT2RR1CjkS6b+bdu9xS7BsUpypJlSGckjhUoGC3lXePGIRMbl3DM+Z5Yc0fWlP2aZvTYhT+G1jzwpf+wIAChUnPjwIDAQAB
   auth-server-url: http://localhost:8080/auth
   ssl-required: external
   resource: springboot
@@ -57,10 +58,10 @@ keycloak:
     securityCollections[0]:
       name: spring secured api
       authRoles: 
-        - admin
-        - manager
+        - adminRole
+        - ROLE_ADMIN
       patterns:
-        - /api/*
+        - /*
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-users.log

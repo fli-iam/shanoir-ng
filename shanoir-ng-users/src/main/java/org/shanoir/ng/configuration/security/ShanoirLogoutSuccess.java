@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * @author msimon
  *
  */
-@Component
+//@Component
 public class ShanoirLogoutSuccess implements LogoutSuccessHandler {
 
 	/**
