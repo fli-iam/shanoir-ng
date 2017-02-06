@@ -13,8 +13,6 @@ import {TableComponent} from "../../shared/table/table.component";
 
 export class UserListComponent {
     private users: User[];
-    private userRequest: User[];
-    private validatedUser: User[];
     private columnDefs: any[];
     private customActionDefs: any[];
 
@@ -26,19 +24,14 @@ export class UserListComponent {
     // Grid data
     getUsers(): void {
         var usersTmp: User[] = [];
-        var userRequestTmp: User[] = [];
         this.userService.getUsers().then(users2 => {
             if (users2) {
                 for (let user of users2) {
                     if (!user.accountRequestDemand) {
                         usersTmp.push(user);
-                    } else {
-                        userRequestTmp.push(user);
                     }
                 }
-                this.validatedUser = usersTmp;
-                this.userRequest = userRequestTmp;
-                this.users = userRequestTmp.concat(usersTmp);
+                this.users = usersTmp;
             }
         })
         .catch((error) => {
@@ -64,7 +57,7 @@ export class UserListComponent {
             {headerName: "O.D.", tip: "On Demand", field: "accountRequestDemand", type: "boolean"},
             {headerName: "Team", field: "teamName"},
             {headerName: "Role", field: "role.displayName"},
-            {headerName: "PACS", tip: "can import from PACS", field: "canAccessToDicomAssociation", type: "boolean"},
+            {headerName: "PACS", tip: "Can import from PACS", field: "canAccessToDicomAssociation", type: "boolean"},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params) {
                 return dateRenderer(params.data.creationDate);
             }},

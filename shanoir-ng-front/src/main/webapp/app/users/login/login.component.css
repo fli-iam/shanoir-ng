@@ -6,6 +6,6 @@
 
 .LoginContent-loginForm { margin: auto;	width: 300px; text-align: center; }
 	.LoginContent-loginForm .footer { text-align: center; }
-	.LoginContent-loginForm a { text-decoration: none; color: #3697dc; }
+	.LoginContent-loginForm a { text-decoration: none; color: var(--color-a); }
 
-.LoginForm-error { color: red; }
+.LoginForm-error { color: var(--color-red); }

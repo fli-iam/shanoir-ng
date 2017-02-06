@@ -1,9 +1,9 @@
 /******************/
-/* Header component*/
+/* Header component */
 /******************/
 
-.header-component { background-color: #3697dc; height: 50px; }
+.header-component { background-color: var(--color-a); height: 54px; }
 	.header-component .logo { margin: 10px; float: left; }
 		.header-component .logo img { height: 32px; }
 	.header-component .logout { margin: 10px; float: right; }
-		.header-component .logout button { color: #3697dc; background-color: white; border-color: white; }
+		.header-component .logout button { color: var(--color-a); background-color: var(--very-light-grey); border-color: var(--very-light-grey); }

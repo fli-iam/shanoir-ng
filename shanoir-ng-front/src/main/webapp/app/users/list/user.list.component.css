@@ -2,4 +2,3 @@
 /* User list component */
 /***********************/
 .UserListComponent .commands { margin: 3px 0 8px 0; }
-.UserListComponent .commands button strong {font-weight: bolder; color: palegoldenrod; }

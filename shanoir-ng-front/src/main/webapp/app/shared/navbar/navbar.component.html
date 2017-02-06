@@ -1,31 +1,24 @@
-<div class="navbar-component command-zone">
-    <nav class="Menu">
-        <ul class="Menu-bar">
-            <!-- ngFor could be used but for the moment i18n does not work with ngfor -->
-            <!-- If this is ok, see https://webcake.co/automating-your-main-nav-in-a-modular-angular-2-app/ -->
-            <li>
-               	<a routerLink="home" routerLinkActive="active" i18n="Menu|Home label" class="menu-item">Home</a>
-            </li>
-            <li>
-                 <a routerLink="userlist" routerLinkActive="active" i18n="Menu|Manage users label" class="menu-item">Manage users</a>
-            </li>
-            <li>
-                <span class="menu-item" [class.opened]="adminMenuOpen" i18n="Menu|Administration label" (click)="toggleAdminMenu()">Administration<span class="menu-arrow">&#x25BE;</span></span>
-                <div id="admin-menu" class="menu-dropdown" *ngIf="adminMenuOpen">
-                	<div class="dropdown-item"  routerLink="userlist" routerLinkActive="active" >
-	                   	<span i18n="Menu|Manage users label">Manage users</span>
-                	</div>
-                	<div class="dropdown-item"  routerLink="userlist" routerLinkActive="active" >
-	                   	<span i18n="Menu|Manage users label">Manage users</span>
-                	</div>
-                	<div class="dropdown-item"  routerLink="userlist" routerLinkActive="active" >
-	                   	<span i18n="Menu|Manage users label">Manage users</span>
-                	</div>
-                </div>
-            </li>
+<div #container class="navbar-component command-zone">
+    <nav>
+        <ul class="menu-list">
+
+            <dropdown-menu label="Home" i18n-label="Home menu|Home label" link="home">
+            </dropdown-menu>
+
+            <dropdown-menu label="Administration">
+                <menu-item label="Manage users" i18n-label="User menu|Manage users label" link="userlist" ></menu-item>
+                <menu-item label="Preferences" i18n-label="User menu|Manage users label">
+                    <menu-item label="Pink mode" i18n-label="User menu|Manage users label" (click)="togglePink()" [boolVar]="pinkMode"></menu-item>
+                </menu-item>
+            </dropdown-menu>
+
+            
         </ul>
     </nav>
+
+
 </div>
+
 
 
 

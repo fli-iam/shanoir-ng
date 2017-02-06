@@ -20,5 +20,4 @@ export class HeaderComponent {
         event.preventDefault();
         this.loginService.logout();
     }
-
 }

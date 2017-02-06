@@ -1,4 +1,15 @@
-<dropdown-menu>
-    <div>Menu</div>
-
-</dropdown-menu>
+<li 
+    [class.opened]="opened" 
+    [class.closed]="!opened" 
+    [routerLink]="link != undefined ? link : null" 
+    [routerLinkActive]="link != undefined ? 'active' : 'unactive'">
+    <span 
+        class="label" 
+        (click)="contentWrapper.children.length > 0 ? toggle() : void"
+        >{{label}}
+        <span *ngIf="contentWrapper.children.length > 0" class="menu-arrow">&#x25BE;</span>
+    </span>
+    <ul #contentWrapper class="sub-content" [class.hidden]="!opened">
+        <ng-content></ng-content>
+    </ul>
+</li>

@@ -1,0 +1,18 @@
+<li class="menu-item" 
+    [class.opened]="opened" 
+    [class.closed]="!opened" 
+    [routerLink]="link != undefined ? link : null" 
+    [routerLinkActive]="link != undefined ? 'active' : 'unactive'"
+    >
+    <span 
+        class="label" 
+        (click)="contentWrapper.children.length > 0 ? toggle() : click()"
+        >{{label}}
+        <span class="arrow" *ngIf="contentWrapper.children.length > 0">&nbsp;&#9656;</span>
+        <span class="arrow" *ngIf="boolVar != undefined && boolVar">&nbsp;&#x2713;</span>
+        <span class="arrow" *ngIf="boolVar != undefined && !boolVar">&nbsp;&#x2717;</span>
+    </span>
+    <ul #contentWrapper class="sub-content" [class.hidden]="!opened">
+        <ng-content></ng-content>
+    </ul>
+</li>

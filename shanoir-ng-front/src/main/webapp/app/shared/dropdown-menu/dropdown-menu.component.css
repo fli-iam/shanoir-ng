@@ -1,0 +1,10 @@
+li { display: inline-block; position: static; vertical-align: middle; margin: 0; padding: 0; color: var(--greyer); }
+li.active, li.opened { color: var(--very-light-grey); background-color: var(--color-a); }
+    li .label { cursor: pointer; display: flex; margin: 0; text-decoration: none; padding: 5px 8px; }
+    li .label:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-a); }
+
+.sub-content { position: absolute; padding: 0; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
+    .sub-content:before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; box-shadow: 0 0 5px 0px gray; }
+
+.menu-arrow { margin: 0 -6px -2px 3px; float: right; }
+.hidden { display: none !important; }

@@ -15,6 +15,8 @@ import { LoginComponent }   from './users/login/login.component';
 import { LoginService } from './shared/login/login.service';
 import { NavbarComponent }   from './shared/navbar/navbar.component';
 import { SecureHttp } from './shared/http/secure.http';
+import { DropdownMenuComponent }   from './shared/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent }   from './shared/dropdown-menu/menu-item/menu-item.component';
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
 import { RoleService } from './roles/role.service';
@@ -39,7 +41,9 @@ import { MyDatePickerModule } from 'mydatepicker';
         NavbarComponent,
         UserListComponent,
         EditUserComponent,
-        TableComponent
+        TableComponent,
+        DropdownMenuComponent,
+        MenuItemComponent
     ],
     providers: [
         AccountEventsService,
