@@ -76,7 +76,7 @@ export class EditUserComponent implements OnInit {
     }
 
     cancel(): void {
-        this.location.back();
+        this.router.navigate(['/userlist']);
     }
 
     accept(): void {
