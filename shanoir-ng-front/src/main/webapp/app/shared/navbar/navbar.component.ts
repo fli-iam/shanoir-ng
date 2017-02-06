@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+
+import { KeycloakService } from "app/keycloak/keycloak.service";
 import { LoginService } from 'app/shared/login/login.service';
 
 @Component({
@@ -11,7 +13,7 @@ import { LoginService } from 'app/shared/login/login.service';
 export class NavbarComponent {
 
 
-    constructor(private loginService: LoginService) {
+    constructor(private loginService: LoginService, private keycloakService: KeycloakService) {
     }
 
     isUserAdmin(): boolean {
@@ -41,7 +43,7 @@ export class NavbarComponent {
 
     logout(event): void {
         event.preventDefault();
-        this.loginService.logout();
+        this.keycloakService.logout();
     }
 
 }

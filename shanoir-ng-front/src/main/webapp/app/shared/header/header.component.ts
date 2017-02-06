@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { LoginService } from '../login/login.service';
+import { KeycloakService } from "app/keycloak/keycloak.service";
 
 @Component({
     selector: 'header',
@@ -12,13 +12,13 @@ import { LoginService } from '../login/login.service';
 export class HeaderComponent {
     shanoirLogoUrl: string;
 
-    constructor(private loginService: LoginService) {
+    constructor(private keycloakService: KeycloakService) {
         this.shanoirLogoUrl = '/images/logo.shanoir.white.png';
     }
 
     logout(event): void {
         event.preventDefault();
-        this.loginService.logout();
+        this.keycloakService.logout();
     }
 
 }
