@@ -29,9 +29,6 @@
 							<label i18n="Edit user|Username label" class="required-label">Username</label> 
 							<span class="right-col">
 								<input type="text" id="username" required minlength="4" maxlength="20" formControlName="username" [(ngModel)]="user.username"/>
-								<label *ngIf="formErrors.username.includes('required')" class="form-validation-alert" i18n="Edit user|UsernameRequiredError label">Username is required!</label>
-								<label *ngIf="formErrors.username.includes('length')" class="form-validation-alert" i18n="Edit user|UsernameLengthError label">Username length must be between 4 and 20!</label>
-								<label *ngIf="isUserNameUnique==false" class="form-validation-alert" i18n="Edit user|UsernameUniqueError label">Username should be unique!</label>
 							</span>
 						</li>
 						<li class="required">
