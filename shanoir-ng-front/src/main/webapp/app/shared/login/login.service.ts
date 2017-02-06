@@ -20,7 +20,7 @@ export class LoginService {
             .map((res) => {
                 sessionStorage.setItem(AppUtils.STORAGE_ACCOUNT_TOKEN, res.text());
                 sessionStorage.setItem(AppUtils.STORAGE_TOKEN, res.json().token);
-                sessionStorage.setItem(AppUtils.STORAGE_TOKEN_TIMEOUT, res.json().tokenTimeout);
+                sessionStorage.setItem(AppUtils.STORAGE_TOKEN_TIMEOUT, this.getTokenTimeoutDateStr(res.json().tokenExpirationTime));
                 sessionStorage.setItem(AppUtils.STORAGE_REFRESH_TOKEN, res.json().refreshToken);
  
                 let account:Account = new Account(res.json());
@@ -39,7 +39,7 @@ export class LoginService {
         return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_REFRESH_AUTH_TOKEN_PATH, "")
             .map((res) => {
                 sessionStorage.setItem(AppUtils.STORAGE_TOKEN, res.json().token);
-                sessionStorage.setItem(AppUtils.STORAGE_TOKEN_TIMEOUT, res.json().tokenTimeout);
+                sessionStorage.setItem(AppUtils.STORAGE_TOKEN_TIMEOUT, this.getTokenTimeoutDateStr(res.json().tokenExpirationTime));
                 sessionStorage.setItem(AppUtils.STORAGE_REFRESH_TOKEN, res.json().refreshToken);
                 return res;
             });
@@ -92,6 +92,14 @@ export class LoginService {
             return true;
         }
         return false;
+    }
+
+    getTokenTimeoutDateStr(tokenExpirationTime: number): string {
+        let tokenTimeoutDate: Date = new Date();
+        if (tokenExpirationTime) {
+            tokenTimeoutDate.setTime(tokenTimeoutDate.getTime() + tokenExpirationTime*60000);
+        }
+        return tokenTimeoutDate.getTime().toString();
     }
 
 }

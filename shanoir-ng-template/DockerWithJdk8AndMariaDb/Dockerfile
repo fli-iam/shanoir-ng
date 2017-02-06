@@ -14,11 +14,11 @@ RUN \
 # install java8
 RUN \
     echo "===> add java8 repository..." && \
-    echo "deb http://ftp.de.debian.org/debian jessie-backports main" >> /etc/apt/sources.list && \
+    echo "deb http://ftp.de.debian.org/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list && \
     apt-get update && \
     \
     echo "===> install Java" && \
-    DEBIAN_FRONTEND=noninteractive  apt-get install -y --no-install-recommends openjdk-8-jdk && \
+    DEBIAN_FRONTEND=noninteractive  apt-get install -y --no-install-recommends openjdk-8-jdk-headless openjdk-8-jre-headless ca-certificates-java/jessie-backports && \
     \
     echo "===> clean up..." && \
     apt-get clean && \

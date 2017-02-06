@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * @author msimon
  *
  */
-public class PasswordUtils {
+public final class PasswordUtils {
 
 	/** Logger */
 	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
@@ -93,9 +93,9 @@ public class PasswordUtils {
 	public static String generatePassword() {
 		final Random rnd = new Random();
 		final char[] pwd = new char[PASSWORD_MIN_LENGTH];
-		int index = 0;
+		
 		// 1 letter
-		index = getNextIndex(rnd, pwd);
+		int index = getNextIndex(rnd, pwd);
 		pwd[index] = ALPHA.charAt(rnd.nextInt(ALPHA.length()));
 
 		// 1 number
@@ -126,7 +126,7 @@ public class PasswordUtils {
 	 */
 	public static String getHash(final String password) {
 		try {
-			int hashInt = -1;
+			int hashInt;
 			final MessageDigest msgDigest = MessageDigest.getInstance(ALGORITHM);
 			msgDigest.update(password.getBytes());
 			final byte[] hash = msgDigest.digest();
@@ -162,7 +162,6 @@ public class PasswordUtils {
 	private static int getNextIndex(final Random rnd, final char[] pwd) {
 		int index = rnd.nextInt(PASSWORD_MIN_LENGTH);
 		while (pwd[index = rnd.nextInt(PASSWORD_MIN_LENGTH)] != 0) {
-			;
 		}
 		return index;
 	}

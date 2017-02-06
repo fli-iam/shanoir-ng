@@ -1,5 +1,5 @@
 <div class="EditUserComponent content-component">
-    <form [formGroup]="editUserForm" (ngSubmit)="submit()" class="EditUserContent max-content" novalidate>
+    <form [formGroup]="editUserForm" class="EditUserContent max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
 				<div class="header command-zone" *ngIf="creationMode" i18n="Create user|Title">Create a user</div>
@@ -25,7 +25,7 @@
 								<label *ngIf="formErrors.lastName.includes('length')" class="form-validation-alert" i18n="Edit user|LastNameLengthError label">Last Name length must be between 2 and 50!</label>
 							</span>
 						</li>
-						<li *ngIf="creationMode==false" class="required">
+						<li *ngIf="creationMode==false">
 							<label i18n="Edit user|Username label" class="required-label">Username</label> 
 							<span class="right-col">
 								<input type="text" id="username" required minlength="4" maxlength="20" formControlName="username" [(ngModel)]="user.username"/>

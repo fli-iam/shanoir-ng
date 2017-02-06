@@ -14,11 +14,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.exception.ShanoirUsersException;
+import org.shanoir.ng.model.AccountRequestInfo;
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.model.auth.UserContext;
+import org.shanoir.ng.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.impl.UserServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * User detail service test.
@@ -34,6 +39,9 @@ public class UserServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private AccountRequestInfoRepository accountRequestInfoRepository;
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;
@@ -116,6 +124,21 @@ public class UserServiceTest {
 
 	@Test
 	public void deleteByIdTest() throws ShanoirUsersException {
+		UserContext userContext = new UserContext();
+		userContext.setId(2L);
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(userContext, null));
+		
+		userService.deleteById(USER_ID);
+
+		Mockito.verify(userRepository, Mockito.times(1)).delete(Mockito.anyLong());
+	}
+
+	@Test(expected = ShanoirUsersException.class)
+	public void deleteByIdByUserWithSameIdTest() throws ShanoirUsersException {
+		UserContext userContext = new UserContext();
+		userContext.setId(1L);
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(userContext, null));
+		
 		userService.deleteById(USER_ID);
 
 		Mockito.verify(userRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -143,6 +166,25 @@ public class UserServiceTest {
 	public void saveTest() throws ShanoirUsersException {
 		userService.save(createUser());
 
+		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+		Mockito.verify(accountRequestInfoRepository, Mockito.times(0)).save(Mockito.any(AccountRequestInfo.class));
+	}
+
+	@Test
+	public void saveWithAccountRequestTest() throws ShanoirUsersException {
+		final User user = createUser();
+		final AccountRequestInfo accountRequestInfo = new AccountRequestInfo();
+		accountRequestInfo.setContact("contact");
+		accountRequestInfo.setFunction("function");
+		accountRequestInfo.setInstitution("institution");
+		accountRequestInfo.setService("service");
+		accountRequestInfo.setStudy("study");
+		accountRequestInfo.setWork("work");
+		user.setAccountRequestDemand(true);
+		user.setAccountRequestInfo(accountRequestInfo);
+		userService.save(user);
+
+		Mockito.verify(accountRequestInfoRepository, Mockito.times(1)).save(accountRequestInfo);
 		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
 	}
 

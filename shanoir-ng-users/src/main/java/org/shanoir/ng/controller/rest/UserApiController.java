@@ -14,7 +14,6 @@ import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.error.FieldErrorMap;
 import org.shanoir.ng.model.validation.EditableOnlyByValidator;
 import org.shanoir.ng.model.validation.UniqueValidator;
-import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +35,6 @@ public class UserApiController implements UserApi {
 	@Autowired
 	private UserService userService;
 	
-    @Autowired
-    private UserRepository userRepository;
-
 	@Override
 	public ResponseEntity<Void> confirmAccountRequest(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") final Long userId,
@@ -77,7 +73,11 @@ public class UserApiController implements UserApi {
 		if (userService.findById(userId) == null) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
-		userService.deleteById(userId);
+		try {
+			userService.deleteById(userId);
+		} catch (ShanoirUsersException e) {
+			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+		}
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 
@@ -181,7 +181,7 @@ public class UserApiController implements UserApi {
 		usernameAsked = username;
 		
 		int i = 1;
-		while (userRepository.findByUsername(username).isPresent()) {
+		while (userService.findByUsername(username).isPresent()) {
 			username += i;
 			i++;
 		}

@@ -76,7 +76,7 @@ export class SecureHttp extends Http {
     private catchAuthError (self: SecureHttp) {
         // We have to pass HttpService's own instance here as `self`
         return (res: Response) => {
-            if (res.status === 401 || res.status === 403) {
+            if (res.status === 401) {
                 // If not authenticated
                 this.loginService.removeAccount();
             }

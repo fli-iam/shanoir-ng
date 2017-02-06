@@ -100,7 +100,7 @@ public class AuthenticationController {
         userDTO.setAuthorities(authorities);
         userDTO.setRefreshToken(tokenFactory.createRefreshToken(userContext).getToken());
         userDTO.setToken(tokenFactory.createAccessJwtToken(userContext).getToken());
-        userDTO.setTokenTimeout(jwtSettings.getTokenExpirationDate());
+        userDTO.setTokenExpirationTime(jwtSettings.getTokenExpirationTime());
         userDTO.setUsername(userContext.getUsername());
         
         return userDTO;
@@ -125,7 +125,7 @@ public class AuthenticationController {
         final UserDTO userDTO = new UserDTO();
         userDTO.setRefreshToken(tokenFactory.createRefreshToken(userContext).getToken());
         userDTO.setToken(tokenFactory.createAccessJwtToken(userContext).getToken());
-        userDTO.setTokenTimeout(jwtSettings.getTokenExpirationDate());
+        userDTO.setTokenExpirationTime(jwtSettings.getTokenExpirationTime());
         
         return userDTO;
 	}
