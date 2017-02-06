@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.configuration.security.jwt.token.JwtTokenFactory;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
@@ -43,9 +42,6 @@ public class UserApiControllerTestIT {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @Autowired
-    private JwtTokenFactory tokenFactory;
-
     @MockBean
     private UserService userService;
 
@@ -64,7 +60,7 @@ public class UserApiControllerTestIT {
 
 	@Test
 	public void findUserByIdWithLogin() {
-		HttpHeaders headers = ApiControllerTestUtil.generateHeadersWithTokenForAdmin(tokenFactory);
+		HttpHeaders headers = null;//ApiControllerTestUtil.generateHeadersWithTokenForAdmin(tokenFactory);
 
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 		final ResponseEntity<String> response = restTemplate.exchange("/user/1", HttpMethod.GET, entity, String.class);
@@ -79,7 +75,7 @@ public class UserApiControllerTestIT {
 
 	@Test
 	public void findUsersWithLogin() {
-		HttpHeaders headers = ApiControllerTestUtil.generateHeadersWithTokenForAdmin(tokenFactory);
+		HttpHeaders headers = null;//ApiControllerTestUtil.generateHeadersWithTokenForAdmin(tokenFactory);
 
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 		final ResponseEntity<String> response = restTemplate.exchange("/user/all", HttpMethod.GET, entity, String.class);
@@ -107,7 +103,7 @@ public class UserApiControllerTestIT {
 
 	@Test
 	public void saveNewUserWithLogin() {
-		HttpHeaders headers = ApiControllerTestUtil.generateHeadersWithTokenForAdmin(tokenFactory);
+		HttpHeaders headers = null;//ApiControllerTestUtil.generateHeadersWithTokenForAdmin(tokenFactory);
 
 		HttpEntity<User> entity = new HttpEntity<User>(createUser(), headers);
 		final ResponseEntity<String> response = restTemplate.exchange("/user", HttpMethod.POST, entity, String.class);
