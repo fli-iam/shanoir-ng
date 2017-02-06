@@ -11,6 +11,7 @@ export class TableComponent {
     @Input() columnDefs: any[];
     @Input() items: Object[];
     @Input() customActionDefs: any[];
+    @Input() loading: boolean;
     private itemsSave: Object[];
     private itemsLoaded: boolean = false;
 

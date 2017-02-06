@@ -37,7 +37,7 @@
             </th>
         </tr>
     </thead>
-    <tbody>
+    <tbody *ngIf="!loading && items.length > 0">
         <tr *ngFor="let item of items; let i = index" [class.odd]="i%2!=0" [class.even]="i%2==0" >
             <td *ngFor="let col of columnDefs" class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" [class.bool]="isFieldBoolean(item, col)">
                 {{renderCell(item, col)}}
@@ -53,6 +53,21 @@
                         <img src="{{col.img}}" />
                     </span>
                 </span>
+            </td>
+        </tr>
+    </tbody>
+
+    <tbody *ngIf="loading">
+        <tr>
+            <td [attr.colspan]="columnDefs?.length" class="loading">
+                <img src="/images/loader.32x32.gif"/><br/>Loading...
+            </td>
+        </tr>
+    </tbody>
+    <tbody *ngIf="!loading && items.length == 0">
+        <tr>
+            <td [attr.colspan]="columnDefs?.length" class="empty">
+                The table is empty
             </td>
         </tr>
     </tbody>

@@ -18,6 +18,7 @@ export class UserListComponent {
     private users: User[];
     private columnDefs: any[];
     private customActionDefs: any[];
+    private loading: boolean = false;
 
     constructor(private userService: UserService, private confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
         this.getUsers();
@@ -26,6 +27,7 @@ export class UserListComponent {
 
     // Grid data
     getUsers(): void {
+        this.loading = true;
         var usersTmp: User[] = [];
         this.userService.getUsers().then(users2 => {
             if (users2) {
@@ -36,6 +38,7 @@ export class UserListComponent {
                 }
                 this.users = usersTmp;
             }
+            this.loading = false;
         })
         .catch((error) => {
             // TODO: display error
