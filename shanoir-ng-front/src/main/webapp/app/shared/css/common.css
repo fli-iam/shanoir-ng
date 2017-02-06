@@ -68,7 +68,7 @@ form { color: var(--greyer); background-color: var(--lighter-grey); border: 1px 
     form my-date-picker .icon-calendar { line-height: 17px !important; }
     form my-date-picker .mydp { border: 0 !important; }
 
-.content-component { margin: 0 20px; position: relative; z-index: -2; }
+.content-component { margin: 0 20px; position: relative; z-index: 1; }
 .max-content { width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
 .command-zone { background-color: var(--light-grey); }
 
