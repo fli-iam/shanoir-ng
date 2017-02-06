@@ -76,22 +76,22 @@ export class UserListComponent {
             {headerName: "", type: "button", img: "/images/edit.16x16.png", target : "/editUser", getParams: function(item): Object {
                 return {id: item.id};
             }},
-            {headerName: "", type: "button", img: "/images/delete.16x16.png", action: this.openDeleteUserConfirmDialog, component:this}
+            {headerName: "", type: "button", img: "/images/delete.16x16.png", action: this.openDeleteUserConfirmDialog}
         ];
         this.customActionDefs = [
             {title: "new user", img: "/images/add.user.24x24.black.png", target: "../editUser"},
         ];
     }
 
-    openDeleteUserConfirmDialog(item: User, component: UserListComponent):void {
-         component.confirmDialogService
+    openDeleteUserConfirmDialog = (item: User) => {
+         this.confirmDialogService
                 .confirm('Delete user', 'Are you sure you want to delete user ' + item.firstName + ' ' + item.lastName + '?',
-                    component.viewContainerRef)
+                    this.viewContainerRef)
                 .subscribe(res => {
                     if (res) {
-                        component.deleteUser(item.id);
+                        this.deleteUser(item.id);
                     }
-                });
+                })
     }
 
     deleteUser(userId: number) {

@@ -49,7 +49,7 @@
                     <a *ngIf="col.target != undefined" [routerLink]="col.target" [queryParams]="col.getParams != undefined ? col.getParams(item) : null" routerLinkActive="active">
                         <img src="{{col.img}}" />
                     </a>
-                    <span *ngIf="col.action != undefined" (click)="col.component != undefined ? col.action(item, col.component) : col.action(item)">
+                    <span *ngIf="col.action != undefined" (click)="col.action(item)">
                         <img src="{{col.img}}" />
                     </span>
                 </span>
