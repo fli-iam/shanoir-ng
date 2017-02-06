@@ -71,6 +71,11 @@
             <artifactId>keycloak-spring-boot-adapter</artifactId>
             <version>${keycloak.version}</version>
         </dependency>
+        <dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-security-adapter</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
         
         <!-- JWT -->
         <dependency>
