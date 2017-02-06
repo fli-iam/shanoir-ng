@@ -1,11 +1,13 @@
 package org.shanoir.ng.service.impl;
 
-import org.shanoir.ng.model.auth.UserContext;
+import java.util.Map;
+
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.representations.AccessToken;
 import org.shanoir.ng.service.CurrentUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Service;
 public class CurrentUserServiceImpl implements CurrentUserService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CurrentUserServiceImpl.class);
+	
+	private static final String USER_ID_TOKEN_ATT = "userId";
 
 	@Override
 	public boolean canAccessUser(final Long userId) {
@@ -20,18 +24,19 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 			LOG.warn("anonymous user is connected, access refused to user " + userId);
 			return false;
 		}
-		final UserContext currentUser = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (currentUser != null) {
-			if (userId.equals(currentUser.getId())) {
-				return true;
-			}
-			if (currentUser.getAuthorities() != null) {
-				for (final GrantedAuthority authority : currentUser.getAuthorities()) {
-					if ("adminRole".equals(authority.getAuthority())) {
-						return true;
-					}
-				}
-			}
+		final KeycloakPrincipal principal = (KeycloakPrincipal) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal();
+		final AccessToken accessToken = principal.getKeycloakSecurityContext().getToken();
+		
+		Long tokenUserId = null;
+		final Map<String, Object> otherClaims = accessToken.getOtherClaims();
+	    if (otherClaims.containsKey(USER_ID_TOKEN_ATT)) {
+	    	tokenUserId = Long.valueOf(otherClaims.get(USER_ID_TOKEN_ATT).toString());
+	    }
+
+		if (accessToken != null
+				&& ((userId.equals(tokenUserId) || accessToken.getRealmAccess().isUserInRole("adminRole")))) {
+			return true;
 		}
 		return false;
 	}

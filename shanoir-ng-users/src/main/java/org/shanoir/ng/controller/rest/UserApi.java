@@ -2,8 +2,6 @@ package org.shanoir.ng.controller.rest;
 
 import java.util.List;
 
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.shanoir.ng.exception.RestServiceException;
 import org.shanoir.ng.model.User;
@@ -83,8 +81,8 @@ public interface UserApi {
 			@ApiResponse(code = 403, message = "forbidden", response = User.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
-//	@PreAuthorize("hasAuthority('adminRole')")
-	ResponseEntity<List<User>> findUsers(KeycloakAuthenticationToken principal);
+	@PreAuthorize("hasAuthority('adminRole')")
+	ResponseEntity<List<User>> findUsers(KeycloakAuthenticationToken authToken);
 
 	@ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created user", response = User.class),

@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.representations.AccessToken;
@@ -38,7 +37,7 @@ public class UserApiController implements UserApi {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Override
 	public ResponseEntity<Void> confirmAccountRequest(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") final Long userId,
@@ -111,11 +110,11 @@ public class UserApiController implements UserApi {
 	}
 
 	@Override
-	public ResponseEntity<List<User>> findUsers(KeycloakAuthenticationToken principal) {
-		RefreshableKeycloakSecurityContext context = (RefreshableKeycloakSecurityContext) principal.getCredentials();
+	public ResponseEntity<List<User>> findUsers(KeycloakAuthenticationToken authToken) {
+		RefreshableKeycloakSecurityContext context = (RefreshableKeycloakSecurityContext) authToken.getCredentials();
 		AccessToken token = context.getToken();
-	       
-        LOG.info(token.getId() + " - " + token.getPreferredUsername());
+
+		LOG.info(token.getId() + " - " + token.getPreferredUsername());
 		final List<User> users = userService.findAll();
 		if (users.isEmpty()) {
 			return new ResponseEntity<List<User>>(HttpStatus.NO_CONTENT);
@@ -127,19 +126,22 @@ public class UserApiController implements UserApi {
 	public ResponseEntity<User> saveNewUser(
 			@ApiParam(value = "the user to create", required = true) @RequestBody @Valid final User user,
 			final BindingResult result) throws RestServiceException {
-		
+
 		/* Now we generate a username for the new user creation */
 		if (user.getUsername() == null) {
 			if (user.getFirstName() != null && user.getLastName() != null) {
 				generateUsername(user);
 			}
 		}
-		
+
 		/* Validation */
 		// A basic user can only update certain fields, check that
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(user);
 		// Check hibernate validation
-		/* Tell Spring to remove the hibernante validation error on username blank now */
+		/*
+		 * Tell Spring to remove the hibernate validation error on username
+		 * blank now
+		 */
 		final FieldErrorMap hibernateErrors = FieldErrorMap.fieldErrorMapIgnoreUsernameBlank(result);
 		// Check unique constrainte
 		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
@@ -184,10 +186,10 @@ public class UserApiController implements UserApi {
 				username = username + l;
 			}
 		}
-		
+
 		username = username.toLowerCase();
 		usernameAsked = username;
-		
+
 		int i = 1;
 		while (userService.findByUsername(username).isPresent()) {
 			username += i;
@@ -198,7 +200,7 @@ public class UserApiController implements UserApi {
 		} else {
 			user.setUsername(usernameAsked);
 		}
-		
+
 	}
 
 	@Override
