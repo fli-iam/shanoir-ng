@@ -5,10 +5,24 @@
             <dropdown-menu label="Home" i18n-label="Home menu|Home label" link="home">
             </dropdown-menu>
 
+            <dropdown-menu label="Manage data">
+                <menu-item label="Research study" link="" ></menu-item>
+                <menu-item label="Subject" link="" ></menu-item>
+                <menu-item label="Examination" link="" ></menu-item>
+                <menu-item label="Dataset acquisition" link="" ></menu-item>
+                <menu-item label="Dataset" link="" ></menu-item>
+                <menu-item label="Center" link="" ></menu-item>
+                <menu-item label="Investigator" link="" ></menu-item>
+                <menu-item label="Acquisition equipment" link="" ></menu-item>
+                <menu-item label="Coil" link="" ></menu-item>
+                <menu-item label="Experimental group of subjects" link="" ></menu-item>
+                <menu-item label="Score" link="" ></menu-item>
+            </dropdown-menu>
+
             <dropdown-menu label="Administration">
                 <menu-item label="Manage users" i18n-label="User menu|Manage users label" link="userlist" ></menu-item>
-                <menu-item label="Preferences" i18n-label="User menu|Manage users label">
-                    <menu-item label="Pink mode" i18n-label="User menu|Manage users label" (click)="togglePink()" [boolVar]="pinkMode"></menu-item>
+                <menu-item label="Preferences" i18n-label="Preferences menu|Manage users preferences">
+                    <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="pinkMode"></menu-item>
                 </menu-item>
             </dropdown-menu>
 

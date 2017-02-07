@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 echo "Initialize MariaDB command"
 /opt/mysql/init/mariadb_init.sh mysqld

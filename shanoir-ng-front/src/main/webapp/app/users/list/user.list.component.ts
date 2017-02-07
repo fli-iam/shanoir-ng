@@ -31,12 +31,7 @@ export class UserListComponent {
         var usersTmp: User[] = [];
         this.userService.getUsers().then(users2 => {
             if (users2) {
-                for (let user of users2) {
-                    if (!user.accountRequestDemand) {
-                        usersTmp.push(user);
-                    }
-                }
-                this.users = usersTmp;
+                this.users = users2;
             }
             this.loading = false;
         })
