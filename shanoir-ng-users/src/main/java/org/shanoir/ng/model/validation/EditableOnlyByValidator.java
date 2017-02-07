@@ -14,7 +14,9 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.util.StringUtils;
 
 public class EditableOnlyByValidator<T> {
@@ -122,12 +124,18 @@ public class EditableOnlyByValidator<T> {
 		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
 			return new ArrayList<String>();
 		} else {
-			final KeycloakPrincipal principal = (KeycloakPrincipal) SecurityContextHolder.getContext()
-					.getAuthentication().getPrincipal();
-			if (principal == null || principal.getKeycloakSecurityContext().getToken() == null) {
+			final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			if (principal == null) {
 				throw new IllegalArgumentException("connectedUser cannot be null");
 			}
-			return principal.getKeycloakSecurityContext().getToken().getRealmAccess().getRoles();
+			if (principal instanceof User) {
+				final List<String> userRoles = new ArrayList<String>();
+				for (GrantedAuthority authority : ((User) principal).getAuthorities()) {
+					userRoles.add(authority.getAuthority());
+				}
+				return userRoles;
+			}
+			return ((KeycloakPrincipal) principal).getKeycloakSecurityContext().getToken().getRealmAccess().getRoles();
 		}
 	}
 
