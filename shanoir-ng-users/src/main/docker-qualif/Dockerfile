@@ -12,4 +12,4 @@ COPY container_init /dk/container_init
 RUN chmod +x /dk/container_init
 
 EXPOSE 9900
-CMD supervisord -c /etc/supervisor/supervisord.conf
+CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
