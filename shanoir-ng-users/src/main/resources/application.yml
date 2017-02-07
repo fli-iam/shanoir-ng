@@ -16,7 +16,6 @@ spring:
     password: shanoir
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
-    data: classpath:/scripts/populate.sql
   jackson:
     mapper:
       use-getters-as-setters: false

@@ -184,6 +184,7 @@
 			<id>qualif</id>
 			<properties>
 				<spring-active-profile>qualif</spring-active-profile>
+				<maven.test.skip>true</maven.test.skip>
 			</properties>
 			<build>
 				<plugins>
@@ -192,8 +193,6 @@
 					<artifactId>docker-maven-plugin</artifactId>
 					<version>0.4.11</version>
 					<configuration>
-						<dockerHost>${docker-host}</dockerHost>
-						<dockerCertPath>${docker-cert-path}</dockerCertPath>
 						<imageName>${project.artifactId}</imageName>
 						<dockerDirectory>src/main/docker-qualif</dockerDirectory>
 						<resources>
