@@ -11,4 +11,5 @@ RUN chmod +x /opt/mysql/init/mariadb_init.sh
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
+EXPOSE 9900
 CMD ./run.sh
