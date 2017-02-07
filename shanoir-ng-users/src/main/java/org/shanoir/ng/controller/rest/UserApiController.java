@@ -182,7 +182,7 @@ public class UserApiController implements UserApi {
 		
 		int i = 1;
 		while (userService.findByUsername(username).isPresent()) {
-			username += i;
+			username = usernameAsked + i;
 			i++;
 		}
 		if (username != usernameAsked) {
