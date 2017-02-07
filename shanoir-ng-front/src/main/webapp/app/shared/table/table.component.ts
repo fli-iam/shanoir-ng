@@ -14,24 +14,28 @@ export class TableComponent {
     @Input() loading: boolean;
     private itemsSave: Object[];
     private itemsLoaded: boolean = false;
+    private maxResultsField: number;
 
+    public maxResults: number = 20;
     public lastSortedCol: String = "";
     public lastSortedAsc: boolean = true;
     public searchField: String = "";
     public searchStr: String;
+    public currentPage: number = 1;
 
     constructor() {
+        this.maxResultsField = this.maxResults;
     }
 
     /**
      * Sort items by col, then by id
      */
     public sortBy(col: Object): void {
+        if (!this.checkItemsLoaded()) { return; }
         // Some columns are incompatible with sorting
         if (col["suppressSorting"] || col["type"] == "button") {
             return;
         }
-
         let field: string = col["field"];
         let defaultAsc: boolean = true;
         let asc: boolean =  field == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
@@ -77,28 +81,19 @@ export class TableComponent {
                 return asc ? -1 : 1;
             }
         });
+        this.goToPage(1);
     }
 
     /**
      * Filter items by a search string
      */
     public search(): void {
-        if (this.searchStr == undefined) {
-            return;
-        }
+        if (!this.checkItemsLoaded()) { return; }
+        if (this.searchStr == undefined) { return; }
         let searchStr: string = this.searchStr.toLowerCase().trim();
         if (this.items == undefined /*|| (searchStr.length > 0 && searchStr.length < 3)*/) {
             return;
         }
-        // Here we need to save the items so we will be able to reset the filter.
-        // Do it only once. 
-        // Not possible to do it on initialisation because item list can be asynchronous.
-        if (!this.itemsLoaded) {
-            this.itemsLoaded = true;
-            this.itemsSave = [];
-            for (let item of this.items) { this.itemsSave.push(item) }
-        }
-
         this.items = [];
         // If seacrh string empty, reset the filter
         if (searchStr.length == 0) {
@@ -123,6 +118,26 @@ export class TableComponent {
                 }
             }
         }
+        this.goToPage(1);
+    }
+
+    /**
+     * Here we need to save the items so we will be able to reset the filter.
+     * Do it only once. 
+     * Not possible to do it on initialisation because item list can be asynchronous.
+     */
+    private checkItemsLoaded(): boolean {
+        if (this.items != undefined) {
+            if (!this.itemsLoaded) {
+                this.itemsLoaded = true;
+                this.itemsSave = [];
+                for (let item of this.items) { this.itemsSave.push(item); }
+            }
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
     /**
@@ -138,6 +153,7 @@ export class TableComponent {
             }
         }
         this.searchStr = "";
+        this.goToPage(1);
     }
 
     /**
@@ -232,5 +248,60 @@ export class TableComponent {
             }
         }
         return cols;
+    }
+
+    public getMaxPage(): number {
+        if (this.items == undefined || this.items == null) {
+            return 0;
+        } else {
+            return Math.floor(this.items.length/this.maxResults) + 1;
+        }
+    }
+
+
+    public getPagerList(): number[] {
+        let nbLinks = 7; // Must be odd
+        let half = (Math.floor(nbLinks/2));
+        let list: number[] = [];
+        if (this.currentPage <= half+2) {
+            if (this.getMaxPage() <= nbLinks) {
+                for (let i=1; i<=nbLinks+1 && i<=this.getMaxPage(); i++) {
+                    list.push(i);
+                }
+            } else {
+                for (let i=1; i<=nbLinks; i++) {
+                    list.push(i);
+                }
+                list.push(null);
+                list.push(this.getMaxPage());
+            }
+        } else {
+            list.push(1);
+            list.push(null);
+            if (this.getMaxPage() <= this.currentPage+half) {
+                for (let i=this.getMaxPage()-nbLinks+1; i<=this.getMaxPage(); i++) {
+                    list.push(i);
+                }
+            } else {
+                for (let i=this.currentPage-half+1; i<=this.currentPage+half-1; i++) {
+                    list.push(i);
+                }
+                list.push(null);
+                list.push(this.getMaxPage());
+            }
+        }
+        return list;
+    }
+
+
+    public goToPage(p: number): void {
+        this.currentPage = p;
+        // TODO : paging from the database? -> modify users[] here.
+    }
+
+
+    public updateMaxResults(): void {
+        this.maxResults = this.maxResultsField;
+        this.goToPage(1);
     }
 }
