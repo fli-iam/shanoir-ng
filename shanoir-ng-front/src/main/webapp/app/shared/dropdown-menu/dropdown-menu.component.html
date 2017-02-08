@@ -5,7 +5,7 @@
     [routerLinkActive]="link != undefined ? 'active' : 'unactive'">
     <span 
         class="label" 
-        (click)="contentWrapper.children.length > 0 ? toggle() : void"
+        (click)="contentWrapper.children.length > 0 ? toggle() : click()"
         >{{label}}
         <span *ngIf="contentWrapper.children.length > 0" class="menu-arrow">&#x25BE;</span>
     </span>
