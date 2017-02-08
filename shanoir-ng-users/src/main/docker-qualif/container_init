@@ -6,7 +6,7 @@ echo "Initialize MariaDB command"
 echo "Create supervisor log directory"
 mkdir -p /vol/log/supervisor
 
-echo "Populate database"
 service mysql start
+echo "Populate database"
 mysql -u shanoir -pshanoir shanoir_ng_users < /dk/shanoirng_users.sql
 service mysql stop	
