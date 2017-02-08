@@ -50,12 +50,12 @@ export class UserListComponent {
             return null;
         };
         this.columnDefs = [
-            {headerName: "Username", field: "username"},
-            {headerName: "First Name", field: "firstName"},
-            {headerName: "Last Name", field: "lastName"},
-            {headerName: "Email", field: "email"},
+            {headerName: "Username", field: "username", widthPercent: "10"},
+            {headerName: "First Name", field: "firstName", widthPercent: "10"},
+            {headerName: "Last Name", field: "lastName", widthPercent: "10"},
+            {headerName: "Email", field: "email", widthPercent: "20"},
             {headerName: "O.D.", tip: "On Demand", field: "accountRequestDemand", type: "boolean"},
-            {headerName: "Role", field: "role.displayName"},
+            {headerName: "Role", field: "role.displayName", widthPercent: "5"},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params) {
                 return dateRenderer(params.data.creationDate);
             }},

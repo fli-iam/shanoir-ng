@@ -21,6 +21,7 @@ body { margin: 0; background-color: var(--very-light-grey); }
 body, option, table, button, select, input {font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
 h2 { color: var(--dark-black); margin: 0; font-size: 28px; }
 hr { margin: 7px 0 !important; border-bottom: 1px solid var(--grey) !important; border: 0; }
+input { padding: 0 5px; }
 
 table.layout { border: none; border-collapse: collapse; }
   table.layout td { padding: 0;	vertical-align: top; }
@@ -42,7 +43,6 @@ form { color: var(--greyer); background-color: var(--lighter-grey); border: 1px 
     form input.invaliddate, 
     form textarea.ng-invalid.ng-dirty, 
     form select.ng-invalid.ng-dirty { border: 2px solid var(--color-error) !important; background-color: var(--color-light-error) !important; }--color-light-error
-  form input { padding: 0 5px; }
   form textarea { resize: vertical; }
   form button { margin: 10px 0; }
   form input:not([type]), input[type='text'], input[type='password'], input[type='email'], textarea, select { width: 200px; }
@@ -63,10 +63,33 @@ form { color: var(--greyer); background-color: var(--lighter-grey); border: 1px 
   form .required-label:after{ content:" *"; }
   form .form-validation-alert { color: var(--color-error); }
   form .right-col label { text-align: right; display: block; }
-  form my-date-picker input { font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; }
-    form my-date-picker button { font-weight: normal; color: var(--greyer); /*border: 2px solid var(--grey) !important*/; border-radius: 2px !important; }
-    form my-date-picker .icon-calendar { line-height: 17px !important; }
-    form my-date-picker .mydp { border: 0 !important; }
+  
+  /* Date picker style overriding */
+  form my-date-picker input { font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; }
+  form my-date-picker .selector { border: 1px solid var(--light-grey) !important; box-shadow: 5px 5px 5px -5px gray !important; }
+  form my-date-picker input.selection { text-align: left !important; padding: 0 5px !important; }
+  form my-date-picker button.btnpicker,
+  form my-date-picker button.btnclear { font-weight: normal !important; color: var(--greyer) !important; border: 0 !important; height: 10px; background-color: transparent !important; }
+  /* form my-date-picker button.btnpicker:hover,
+  form my-date-picker button.btnclear:hover { color: var(--color-a) !important; background-color: transparent !important; } */
+    form my-date-picker button.btnpicker span,
+    form my-date-picker button.btnclear span { font-size: 12px !important; }
+  form my-date-picker .icon-calendar { line-height: 17px !important; }
+  form my-date-picker .mydp { border: 0 !important; font-family: "Open Sans",Arial,sans-serif !important;}
+  form my-date-picker .mydp .caltable,
+  form my-date-picker .mydp .header { font-size: 12px !important; padding: 0 !important; }
+  form my-date-picker .mydp .daycell { height: 23px !important; }
+  form my-date-picker .mydp .selector { width: auto !important; }
+  form my-date-picker .mydp td + td { border-left: none; }
+  form my-date-picker .mydp .daycell, 
+  form my-date-picker .mydp .weekdaytitle { padding: 5px 3px !important; }
+  form my-date-picker .mydp .headerlabelbtn { font-size: 12px !important; color: var(--dark-grey) !important; min-width: 40px !important;}
+  form my-date-picker .mydp .icon-left,
+  form my-date-picker .mydp .icon-right { font-size: 12px !important; }
+  form my-date-picker .mydp .headertodaybtn { font-size: 12px !important; min-width: 0 !important; }
+  form my-date-picker .mydp .selbtngroup { top: 2px !important; right: 2px !important; height: 14px !important; }
+  form my-date-picker .mydp .selectorarrow::after { }
+  form my-date-picker .mydp .selectorarrow::before { border-color: rgba(204, 204, 204, 0) rgba(204, 204, 204, 0) #f1f1f1 !important; border-width: 12px !important; margin-left: -12px !important; }
 
 .content-component { margin: 0 20px 10px 20px; position: relative; z-index: 1; }
 .max-content { width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }

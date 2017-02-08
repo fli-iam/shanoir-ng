@@ -1,7 +1,9 @@
 <table class="shanoir-table">
     <thead>
+        <!-- Control bar -->
         <tr>
             <th class="controls" [attr.colspan]="columnDefs?.length">
+                <!-- Text search -->
                 <span class="text-search">
                     <button (click)="resetSearch()">&#x2716;</button>
                     <input class="search-txt" [(ngModel)]="searchStr" (change)="search()" type="text" placeholder="search..."/> 
@@ -13,9 +15,11 @@
                         </option>
                     </select>
                 </span>
+                <!-- Nb results per page input -->
                 <span class="options">
                     <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/> 
                 </span>
+                <!-- User defined buttons -->
                 <span *ngFor="let command of customActionDefs">
                     <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams(item) : null" routerLinkActive="active">
                         <img *ngIf="command.img != undefined" src="{{command.img}}" />
@@ -24,6 +28,7 @@
                 </span>
             </th>
         </tr>
+        <!-- Headers -->
         <tr>
             <th 
                 *ngFor="let col of columnDefs" 
@@ -32,6 +37,7 @@
                 [class.sortable]="!col.suppressSorting && col.type!='button'"
                 [class.active]="lastSortedCol==col.field"
                 [attr.title]="col.tip != undefined ? col.tip : null"
+                [style.width]="col.widthPercent+'%'"
                 >{{col.headerName}}
                     <span class="sort-arrow" *ngIf="!col.suppressSorting && col.type!='button'">
                         <span *ngIf="lastSortedCol==col.field && !lastSortedAsc" class="arrow arrowUp">&#9652;</span>   
@@ -40,6 +46,7 @@
             </th>
         </tr>
     </thead>
+    <!-- Table ontent -->
     <tbody *ngIf="!loading && items.length > 0">
         <tr *ngFor="let item of items.slice((currentPage-1)*maxResults, currentPage*maxResults); let i = index" [class.odd]="i%2!=0" [class.even]="i%2==0" >
             <td *ngFor="let col of columnDefs" class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" [class.bool]="isFieldBoolean(item, col)">
@@ -72,9 +79,8 @@
                 (click)="currentPage < getMaxPage() ? goToPage(currentPage + 1) : void" 
                 >&#9654;</span>
         </th>
-
     </tbody>
-
+    <!-- Loader -->
     <tbody *ngIf="loading">
         <tr>
             <td [attr.colspan]="columnDefs?.length" class="loading">
@@ -82,6 +88,7 @@
             </td>
         </tr>
     </tbody>
+    <!-- Empty table msg -->
     <tbody *ngIf="!loading && items.length == 0">
         <tr>
             <td [attr.colspan]="columnDefs?.length" class="empty">
