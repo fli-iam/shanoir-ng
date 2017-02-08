@@ -11,4 +11,7 @@ RUN chmod +x /opt/mysql/init/mariadb_init.sh
 COPY container_init /dk/container_init
 RUN chmod +x /dk/container_init
 
-CMD supervisord -c /etc/supervisor/supervisord.conf
+COPY run.sh /run.sh
+RUN chmod +x /run.sh
+
+CMD ./run.sh

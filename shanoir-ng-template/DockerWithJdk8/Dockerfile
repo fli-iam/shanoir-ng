@@ -23,3 +23,6 @@ RUN \
 
 # supervisor base configuration
 COPY supervisord.conf /etc/supervisor/supervisord.conf
+
+# add user shanoir
+RUN groupadd -r shanoir && useradd -r -g shanoir shanoir
