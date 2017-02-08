@@ -7,7 +7,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 import random
 
 
@@ -48,6 +47,10 @@ def start_selenium():
     # driver.set_window_size(1360, 1020)
     driver.maximize_window()
 
+path_to_downloads = os.getcwd()+"\\downloads\\"
+if not os.path.exists(path_to_downloads):
+    os.makedirs(path_to_downloads)
+
 
 def login(user, password):
     # Enter login and password and submit
@@ -63,16 +66,45 @@ def login(user, password):
     time.sleep(1)
     driver.find_element_by_xpath(button_login_xpath).click()
 
+
+def manage_users():
     # Click on Administration
     button_admin_xpath = "//span[contains(.,'Administration')]"
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, button_admin_xpath)))
-    ActionChains(driver).move_to_element(driver.find_element_by_xpath(button_admin_xpath)).perform()
-    time.sleep(1)
+    driver.find_element_by_xpath(button_admin_xpath).click()
 
-    # Click on userlist
-    button_userlist_xpath = "//a[@href='/userlist']"
+    # Click on Manage Users
+    button_userlist_xpath = "//span[contains(.,'Manage users')]"
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, button_userlist_xpath)))
     driver.find_element_by_xpath(button_userlist_xpath).click()
+
+
+def pink_mode():
+    # Get the best color
+    button_admin_xpath = "//span[contains(.,'Administration')]"
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, button_admin_xpath)))
+    driver.find_element_by_xpath(button_admin_xpath).click()
+
+    button_preferences_xpath = "//span[contains(.,'Preferences')]"
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, button_preferences_xpath)))
+    driver.find_element_by_xpath(button_preferences_xpath).click()
+
+    button_pink_mode_xpath = "//span[contains(.,'Pink mode')]"
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, button_pink_mode_xpath)))
+    driver.find_element_by_xpath(button_pink_mode_xpath).click()
+    driver.find_element_by_xpath(button_admin_xpath).click()
+
+
+def search(search_string, select_option):
+    input_search_xpath = "//span[@class='text-search']/input[contains(@class,'search-txt')]"
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, input_search_xpath)))
+    driver.find_element_by_xpath(input_search_xpath).send_keys(search_string)
+
+    option_role_xpath = "//span[@class='text-search']//option[contains(.,'"+select_option+"')]"
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, option_role_xpath)))
+    driver.find_element_by_xpath(option_role_xpath).click()
+    time.sleep(1)
+    driver.save_screenshot(path_to_downloads+email+"_search.jpg")
 
 
 def add_user():
@@ -80,53 +112,69 @@ def add_user():
     role = "User"
     first_name = "test1"
     last_name = "test2"
-    username = "testusername"+str(random_int)
+    global email
     email = "testusername"+str(random_int)+"@shanoir.fr"
     expiration_date = "2017-05-05"
 
-    button_add_user_xpath = "//a[@href='/editUser']"
+    # Click on Add new user
+    button_add_user_xpath = "//span[contains(.,'new user')]"
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, button_add_user_xpath)))
     driver.find_element_by_xpath(button_add_user_xpath).click()
 
     first_name_xpath = "//input[@id='firstName']"
     last_name_xpath = "//input[@id='lastName']"
-    username_xpath = "//input[@id='username']"
     email_xpath = "//input[@id='email']"
-    expiration_date_xpath = "//input[@id='expirationDate']"
-    option_role_xpath = "//select[@id='role']/option[contains(.,'"+role+"')]"
+    expiration_date_xpath = "//input[@aria-label='Calendar input field']"
+    option_role_xpath = "//select[@id='role']/option[contains(.,'" + role + "')]"
 
     # Fill in the fields
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, option_role_xpath)))
     driver.find_element_by_xpath(first_name_xpath).send_keys(first_name)
     driver.find_element_by_xpath(last_name_xpath).send_keys(last_name)
-    driver.find_element_by_xpath(username_xpath).send_keys(username)
     driver.find_element_by_xpath(email_xpath).send_keys(email)
     driver.find_element_by_xpath(expiration_date_xpath).send_keys(expiration_date)
     driver.find_element_by_xpath(option_role_xpath).click()
+    driver.save_screenshot(path_to_downloads+email+"_add.jpg")
+
+    # Submit
+    submit_xpath = "//button[@type='submit']"
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, submit_xpath)))
+    time.sleep(1)
+    driver.find_element_by_xpath(submit_xpath).click()
+
+
+def edit_user():
+    # Click on Edit button
+    button_edit_xpath = "//tr[td[contains(.,'"+email+"')]]//a[contains(@href,'editUser')]"
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, button_edit_xpath)))
+    driver.find_element_by_xpath(button_edit_xpath).click()
+
+    # Enter new email
+    email_edited = "edit"
+    email_xpath = "//input[@id='email']"
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, email_xpath)))
+    input_email = driver.find_element_by_xpath(email_xpath)
+    # driver.execute_script("document.getElementById('email').value = '';")
+    input_email.send_keys(email_edited)
+    driver.save_screenshot(path_to_downloads + email + "_edit.jpg")
 
     # Submit
     submit_xpath = "//button[@type='submit']"
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, submit_xpath)))
     driver.find_element_by_xpath(submit_xpath).click()
 
-    # Wait for the users table and find new user
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//div[@class='UserListComponent']")))
 
-    # Scroll
-    # time.sleep(2)
-    # driver.execute_script("var h = document.getElementsByClassName('ag-body-container')[0].clientHeight;\
-    #                       document.getElementsByClassName('ag-body-viewport')[0].scrollBy(0,h)")
+def delete_user():
+    # Click on Delete button
+    button_delete_xpath = "//tr[td[contains(.,'"+email+"')]]//img[contains(@src,'delete')]"
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, button_delete_xpath)))
+    driver.find_element_by_xpath(button_delete_xpath).click()
 
-    # Sort
-    span_sort_by_id_xpath = '//span[@class="ag-header-cell-text"]'
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, span_sort_by_id_xpath)))
-    driver.find_element_by_xpath(span_sort_by_id_xpath).click()
-    driver.find_element_by_xpath(span_sort_by_id_xpath).click()
-
-    # Click on row with user's email
-    div_email_xpath = "//div[contains(.,'"+email+"') and @colid='email']"
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, div_email_xpath)))
-    driver.find_element_by_xpath(div_email_xpath).click()
+    # Confirm
+    button_confirm_xpath = "//button[contains(.,'OK')]"
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, button_confirm_xpath)))
+    driver.save_screenshot(path_to_downloads + email + "_delete.jpg")
+    driver.find_element_by_xpath(button_confirm_xpath).click()
 
 
 def logout():
@@ -139,9 +187,13 @@ def logout():
 if __name__ == "__main__":
     start_selenium()
     login(args.user, args.password)
+    pink_mode()
+    manage_users()
     add_user()
-    time.sleep(60)
+    search(email, 'Email')
+    edit_user()
+    search(email, 'Email')
+    delete_user()
     logout()
-    time.sleep(300)
     driver.quit()
 
