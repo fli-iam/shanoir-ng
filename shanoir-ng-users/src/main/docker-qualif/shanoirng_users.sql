@@ -1,5 +1,15 @@
 ﻿use shanoir_ng_users;
 
+CREATE TABLE `role` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `access_level` int(11) NOT NULL,
+  `display_name` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_ac56dul55smn5it0ce76jswg3` (`display_name`),
+  UNIQUE KEY `UK_8sewwnpamngi6b1dwaa88askk` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+
 INSERT INTO role 
 VALUES 
 (1,1000,'Administrator','adminRole'),
@@ -7,11 +17,49 @@ VALUES
 (3,100,'User','userRole'),
 (4,200,'Expert','expertRole');
 
+CREATE TABLE `account_request_info` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `contact` varchar(255) NOT NULL,
+  `function` varchar(255) NOT NULL,
+  `institution` varchar(255) NOT NULL,
+  `service` varchar(255) NOT NULL,
+  `study` varchar(255) NOT NULL,
+  `work` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `users` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `account_request_demand` bit(1) NOT NULL,
+  `can_access_to_dicom_association` bit(1) NOT NULL,
+  `creation_date` datetime DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
+  `expiration_date` datetime DEFAULT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `is_first_expiration_notification_sent` bit(1) NOT NULL,
+  `is_medical` bit(1) NOT NULL,
+  `is_second_expiration_notification_sent` bit(1) NOT NULL,
+  `last_login` datetime DEFAULT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `team_name` varchar(255) DEFAULT NULL,
+  `username` varchar(255) NOT NULL,
+  `account_request_info_id` bigint(20) DEFAULT NULL,
+  `role_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_6dotkott2kjsp8vw4d0m25fb7` (`email`),
+  UNIQUE KEY `UK_r43af9ap4edm43mmtq01oddj6` (`username`),
+  KEY `FKnujey376reejcmp77iuc48ja7` (`account_request_info_id`),
+  KEY `FK4qu1gr772nnf6ve5af002rwya` (`role_id`),
+  CONSTRAINT `FK4qu1gr772nnf6ve5af002rwya` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`),
+  CONSTRAINT `FKnujey376reejcmp77iuc48ja7` FOREIGN KEY (`account_request_info_id`) REFERENCES `account_request_info` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=259 DEFAULT CHARSET=utf8;
+
 INSERT INTO users (id, can_access_to_dicom_association, creation_date, email, first_name, last_login, last_name, password, username, role_id, is_medical, expiration_date, is_first_expiration_notification_sent, is_second_expiration_notification_sent, account_request_demand)
 VALUES 
 (1,'','1970-01-01 01:00:00','noemail@noemail.fr','defaultUser','1970-01-01 01:00:00','defaultUser','nopass','defaultUser',3,'\0',NULL,'\0','\0',0),
 (2,'\0','1970-01-01 01:00:00','guest@irisa.fr','GUEST','2016-10-26 19:34:28','GUEST','2638F4-1292-11','guest',2,'\0',NULL,'\0','\0',0),
-(3,'','1970-01-01 01:00:00','contact@neurinfo.org','ADMINISTRATOR','2017-02-02 16:59:33','ADMINISTRATOR','02221336298213','admin',1,'\0','2100-03-29 00:00:00','\0','\0',0),
+(3,'','1970-01-01 01:00:00','contact@neurinfo.org','ADMINISTRATOR','2017-02-02 16:59:33','ADMINISTRATOR','D0-483351E2-30','admin',1,'\0','2100-03-29 00:00:00','\0','\0',0),
 (4,'','2010-08-25 15:24:43','elise.bannier@irisa.fr','Elise','2017-02-07 15:56:14','Bannier','CC-529B-101E3-','ebannier',4,'\0','2020-12-31 00:00:00','\0','\0',0),
 (9,'','2010-09-03 11:33:53','icorouge@irisa.fr','Isabelle','2017-02-07 15:40:11','Corouge','88-120AD-83223','icorouge',4,'\0','2020-12-31 00:00:00','\0','\0',0),
 (10,'\0','2010-09-03 11:34:20','david.travers@chu-rennes.fr','David','2014-04-25 15:58:26','Travers','13193654528293','dtravers',3,'\0','2014-12-31 00:00:00','','\0',0),

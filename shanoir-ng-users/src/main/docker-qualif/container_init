@@ -7,4 +7,6 @@ echo "Create supervisor log directory"
 mkdir -p /vol/log/supervisor
 
 echo "Populate database"
-mysql -u shanoir -pshanoir /opt/mysql/init/shanoirng_users.sql
+service mysql start
+mysql -u shanoir -pshanoir shanoir_ng_users < /dk/shanoirng_users.sql
+service mysql stop	
