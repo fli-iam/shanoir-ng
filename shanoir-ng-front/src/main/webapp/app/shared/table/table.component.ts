@@ -41,11 +41,29 @@ export class TableComponent {
         let asc: boolean =  field == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
         this.lastSortedCol = field;
         this.lastSortedAsc = asc;
+
+        // Regarding the data type, we set a neg infinity because unless this, 
+        // null values can't be compared
         let negInf;
+        switch (col["type"]) {
+            case "number": 
+                negInf = -1*Infinity;
+                break;
+            case "date":
+                negInf = new Date();
+                break;
+            default:
+                negInf = "";
+        }
         /* Sort function */
         this.items.sort((n1,n2) => {
             let cell1 = this.getCellValue(n1, col);
             let cell2 = this.getCellValue(n2, col);
+            if (col["type"] == "date") {
+                // Real value for date
+                cell1 = this.getFieldRawValue(n1, col["field"])
+                cell2 = this.getFieldRawValue(n2, col["field"])
+            }
             // If equality, test the id so the order is always the same
             if (cell1 == cell2) {
                 if (n1["id"] != undefined) {
@@ -57,27 +75,28 @@ export class TableComponent {
                 }
                 return 0;
             }
-            // Regarding the data type, we set a neg infinity because unless this, 
-            // null values can't be compared
-            if (negInf == undefined) {
-                switch (typeof cell1 != null ? cell1 : cell2) {
-                    case "number": 
-                        negInf = -1*Infinity;
-                        break;
-                    case "date":
-                        negInf = new Date();
-                        break;
-                    default:
-                        negInf = "";
+            
+            if (cell1 == null) {
+                cell1 = negInf;
+            } else {
+                if (col["type"] == null || col["type"] == "sting") {
+                    // Sort insensitive
+                    cell1 = cell1.toLowerCase();
                 }
             }
-            if (cell1 == null) cell1 = negInf;
-            if (cell2 == null) cell2 = negInf;
+            if (cell2 == null) {
+                cell2 = negInf;
+            } else {
+                if (col["type"] == null || col["type"] == "string") {
+                    // Sort insensitive
+                    cell2 = cell2.toLowerCase();
+                }
+            }
+            
             // Comparison
             if (cell1 > cell2) {
                 return asc ? 1 : -1;
-            }
-            else if (cell1 < cell2) {
+            } else {
                 return asc ? -1 : 1;
             }
         });
