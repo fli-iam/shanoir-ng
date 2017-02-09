@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.exception.RestServiceException;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorDetails;
@@ -158,39 +159,34 @@ public class UserApiController implements UserApi {
 		}
 	}
 
-	private void generateUsername(User user) {
-		String username = "";
-		String usernameAsked = "";
-		final String firstnames = user.getFirstName().trim();
+	private void generateUsername(final User user) {
+		final StringBuilder usernameSb = new StringBuilder();
 
+		final String firstnames = user.getFirstName().trim();
 		for (final String firstname : firstnames.split("\\s+")) {
 			for (String f : firstname.split("-")) {
-				username = username + f.substring(0, 1);
+				usernameSb.append(f.substring(0, 1));
 			}
 		}
 
 		final String lastnames = user.getLastName().trim();
-
 		for (final String lastname : lastnames.split("\\s+")) {
 			for (String l : lastname.split("-")) {
-				username = username + l;
+				usernameSb.append(l);
 			}
 		}
 		
-		username = username.toLowerCase();
-		usernameAsked = username;
+		// Username in lower case without accent
+		String usernameAsked = StringUtils.stripAccents(usernameSb.toString().toLowerCase());
+		String username = usernameAsked;
 		
 		int i = 1;
 		while (userService.findByUsername(username).isPresent()) {
 			username = usernameAsked + i;
 			i++;
 		}
-		if (username != usernameAsked) {
-			user.setUsername(usernameAsked + (i - 1));
-		} else {
-			user.setUsername(usernameAsked);
-		}
 		
+		user.setUsername(username);
 	}
 
 	@Override
