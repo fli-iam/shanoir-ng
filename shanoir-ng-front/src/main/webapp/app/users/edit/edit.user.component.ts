@@ -11,11 +11,13 @@ import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
 import { AccountRequestInfo } from '../../accountRequestInfo/account.request.info.model';
 
+const GUEST_ROLE_NAME:string = "guestRole";
+
 @Component({
     selector: 'editUser',
     moduleId: module.id,
     templateUrl: 'edit.user.component.html',
-    styleUrls: ['../../shared/css/common.css', 'edit.user.component.css']
+    styleUrls: ['../../shared/css/common.css', 'edit.user.component.css'],
 })
 
 export class EditUserComponent implements OnInit {
@@ -30,9 +32,11 @@ export class EditUserComponent implements OnInit {
     isEmailUnique: Boolean = true;
     isDateValid: Boolean = true;
     creationMode: Boolean;
+    requestAccountMode: Boolean = false;
     userId: number;
     selectedDateNormal: string = '';
     accountRequestInfo: AccountRequestInfo = new AccountRequestInfo();
+    private accountRequestInfoValid: Boolean = false;
 
     constructor(router: Router, private location: Location, route: ActivatedRoute, userService: UserService, roleService: RoleService, private fb: FormBuilder) {
         this.router = router;
@@ -131,8 +135,33 @@ export class EditUserComponent implements OnInit {
         this.setDateFromDatePicker();
     }
 
+    isEditUserFormValid(): Boolean {
+        if (this.editUserForm.valid && this.isDateValid) {
+            if (this.requestAccountMode) {
+                if (this.accountRequestInfoValid) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
     ngOnInit(): void {
-        this.getRoles();
+        this.requestAccountMode = this.route.snapshot.data['requestAccount'];
+        if (this.requestAccountMode) {
+            this.creationMode = true;
+            // guest role by default
+            let guestRole: Role = new Role();
+            guestRole.name = GUEST_ROLE_NAME;
+            this.user.role = guestRole;
+        } else {
+            this.getRoles();
+        }
         this.buildForm();
     }
 
@@ -146,7 +175,8 @@ export class EditUserComponent implements OnInit {
             'expirationDate': [this.user.expirationDate],
             'role': [this.user.role, Validators.required],
             'canAccessToDicomAssociation': new FormControl('false'),
-            'medical': new FormControl('false')
+            'medical': new FormControl('false'),
+            'accountRequestInfo': new FormControl({contact: '', function: '', institution: '', service: '', study: '', work: ''}, Validators.required)
         });
 
         this.editUserForm.valueChanges
