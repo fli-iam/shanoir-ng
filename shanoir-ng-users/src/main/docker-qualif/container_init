@@ -8,5 +8,5 @@ mkdir -p /vol/log/supervisor
 
 service mysql start
 echo "Populate database"
-mysql -u shanoir -pshanoir shanoir_ng_users < /dk/shanoirng_users.sql
-service mysql stop	
+echo "Stop mysql process"
+ps | grep -i mysql | awk {'print $1'} | xargs kill -9
