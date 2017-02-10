@@ -11,7 +11,7 @@ import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
 import { AccountRequestInfo } from '../../accountRequestInfo/account.request.info.model';
 
-const GUEST_ROLE_NAME:string = "guestRole";
+const GUEST_ROLE_ID: number = 2;
 
 @Component({
     selector: 'editUser',
@@ -133,6 +133,7 @@ export class EditUserComponent implements OnInit {
     submit(): void {
         this.user = this.editUserForm.value;
         this.setDateFromDatePicker();
+        this.user.accountRequestInfo = this.accountRequestInfo;
     }
 
     isEditUserFormValid(): Boolean {
@@ -157,7 +158,10 @@ export class EditUserComponent implements OnInit {
             this.creationMode = true;
             // guest role by default
             let guestRole: Role = new Role();
-            guestRole.name = GUEST_ROLE_NAME;
+            guestRole.id = GUEST_ROLE_ID;
+            guestRole.accessLevel = 0;
+            guestRole.displayName = "Guest";
+            guestRole.name = "guestRole";
             this.user.role = guestRole;
         } else {
             this.getRoles();
@@ -253,6 +257,14 @@ export class EditUserComponent implements OnInit {
             }
         }
         return null;
+    }
+
+    saveARI(ari: AccountRequestInfo): void {
+        this.accountRequestInfo = ari;
+    }
+
+    updateARIValid(ariValid: Boolean): void {
+        this.accountRequestInfoValid = ariValid;
     }
     
 }

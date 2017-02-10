@@ -13,42 +13,42 @@ import { AccountRequestInfo } from './account.request.info.model';
                 <li class="required">
                     <label i18n="Edit user|Contact label" class="required-label">Contact: </label> 
                     <span class="right-col">
-                        <input type="text" id="contact" required formControlName="contact" [(ngModel)]="accountRequestInfo.contact"/>
+                        <input type="text" id="contact" required formControlName="contact"/>
                         <label *ngIf="formErrors.contact.includes('required')" class="form-validation-alert" i18n="Edit user|ContactRequiredError label">Contact is required!</label>
                     </span>
                 </li>
                 <li class="required">
                     <label i18n="Edit user|Function label" class="required-label">Function: </label> 
                     <span class="right-col">
-                        <input type="text" id="function" required formControlName="function" [(ngModel)]="accountRequestInfo.function"/>
+                        <input type="text" id="function" required formControlName="function"/>
                         <label *ngIf="formErrors.function.includes('required')" class="form-validation-alert" i18n="Edit user|FunctionRequiredError label">Function is required!</label>
                     </span>
                 </li>
                 <li class="required">
                     <label i18n="Edit user|Institution label" class="required-label">Institution: </label> 
                     <span class="right-col">
-                        <input type="text" id="institution" required formControlName="institution" [(ngModel)]="accountRequestInfo.institution"/>
+                        <input type="text" id="institution" required formControlName="institution"/>
                         <label *ngIf="formErrors.institution.includes('required')" class="form-validation-alert" i18n="Edit user|InstitutionRequiredError label">Institution is required!</label>
                     </span>
                 </li>
                 <li class="required">
                     <label i18n="Edit user|Service label" class="required-label">Service: </label> 
                     <span class="right-col">
-                        <input type="text" id="service" required formControlName="service" [(ngModel)]="accountRequestInfo.service"/>
+                        <input type="text" id="service" required formControlName="service"/>
                         <label *ngIf="formErrors.service.includes('required')" class="form-validation-alert" i18n="Edit user|ServiceRequiredError label">Service is required!</label>
                     </span>
                 </li>
                 <li class="required">
                     <label i18n="Edit user|Study label" class="required-label">Study: </label> 
                     <span class="right-col">
-                        <input type="text" id="study" required formControlName="study" [(ngModel)]="accountRequestInfo.study"/>
+                        <input type="text" id="study" required formControlName="study"/>
                         <label *ngIf="formErrors.study.includes('required')" class="form-validation-alert" i18n="Edit user|StudyRequiredError label">Study is required!</label>
                     </span>
                 </li>
                 <li class="required">
                     <label i18n="Edit user|Work label" class="required-label">Work: </label> 
                     <span class="right-col">
-                        <input type="text" id="work" required formControlName="work" [(ngModel)]="accountRequestInfo.work"/>
+                        <input type="text" id="work" required formControlName="work"/>
                         <label *ngIf="formErrors.work.includes('required')" class="form-validation-alert" i18n="Edit user|WorkRequiredError label">Work is required!</label>
                     </span>
                 </li>
@@ -58,9 +58,10 @@ import { AccountRequestInfo } from './account.request.info.model';
     `
 })
 export class AccountRequestInfoComponent implements OnInit {
-    @Input() accountRequestInfo: AccountRequestInfo;
-    @Output() isValid = new EventEmitter();
+    @Output() accountRequestInfo: EventEmitter<AccountRequestInfo> = new EventEmitter<AccountRequestInfo>();
+    @Output() isValid: EventEmitter<Boolean> = new EventEmitter<Boolean>();
     private accountRequestInfoForm: FormGroup;
+    ari: AccountRequestInfo = new AccountRequestInfo();
 
     constructor(private formBuilder: FormBuilder) { 
     }
@@ -92,6 +93,10 @@ export class AccountRequestInfoComponent implements OnInit {
                 }
             }
         }
+
+        this.ari = this.accountRequestInfoForm.value;
+        this.accountRequestInfo.emit(this.ari);
+       
         if (this.accountRequestInfoForm.valid) {
             this.isValid.emit(true);
         } else {
