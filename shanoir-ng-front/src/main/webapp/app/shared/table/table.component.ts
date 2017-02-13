@@ -11,13 +11,13 @@ export class TableComponent {
     @Input() columnDefs: any[];
     @Input() items: Object[];
     @Input() customActionDefs: any[];
-    @Input() loading: boolean;
+    private isLoading: boolean = false;
     private itemsSave: Object[];
     private itemsLoaded: boolean = false;
     private maxResultsField: number;
 
     public maxResults: number = 20;
-    public lastSortedCol: String = "";
+    public lastSortedCol: Object = null;
     public lastSortedAsc: boolean = true;
     public searchField: String = "";
     public searchStr: String;
@@ -28,18 +28,95 @@ export class TableComponent {
     }
 
     /**
+     * The parent must bind a loading boolean to tell the table that the item list is loading, then loaded.
+     * Setting it to true then false must be repeated every time the item list is updated by the parent.
+     * 
+     * DONT'T MODIFY this.loading IN THE TABLE COMPONENT! Instead use this.isLoading to display and hide the loader.
+     */
+    @Input()
+    set loading(loading: boolean) {
+        if (this.isLoading && !loading) { 
+            if (this.items != undefined) {
+                this.itemsSave = [];
+                for (let item of this.items) { this.itemsSave.push(item); }
+                // Choose default sorting
+                this.lastSortedCol = this.columnDefs[0];
+                for (let col of this.columnDefs) {
+                    if (col.defaultSortCol != undefined) {
+                        this.lastSortedCol = col;
+                        this.lastSortedAsc = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
+                        console.log("caca");
+                        break;
+                    }
+                }
+                this.itemsLoaded = true;
+                this.refreshSorting();
+            } else {
+                this.itemsLoaded = false;
+            }
+        } else if (!this.isLoading && loading) {
+            this.itemsLoaded = false;
+        }
+        this.isLoading = loading;
+    }
+
+    /**
+     * Do a search and display results
+     */
+    public search(): void {
+        if (!this.itemsLoaded) { return; }
+        if (this.searchStr == undefined) { return; }
+        this.isLoading = true;
+        this.goToPage(1);
+        this.filter();
+        this.refreshSorting();
+        this.isLoading = false;
+    }
+
+    /**
      * Sort items by col, then by id
      */
     public sortBy(col: Object): void {
-        if (!this.checkItemsLoaded()) { return; }
+        console.log(col["defaultAsc"]);
+        let defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
+        let asc: boolean =  col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
+        this.sortByOrderBy(col, asc);
+        this.goToPage(1);
+    }
+
+    /**
+     * Re-sort with last terms
+     */
+    private refreshSorting(): void {
+        this.sortByOrderBy(this.lastSortedCol, this.lastSortedAsc);
+    }
+
+    /**
+     * Reset the search
+     */
+    public resetSearch(): void {
+        // If seacrh string empty, reset the filter
+        if (this.itemsLoaded) {
+            this.items = [];
+            let itemsTmp = [];
+            for (let item of this.itemsSave) { 
+                this.items.push(item); 
+            }
+        }
+        this.searchStr = "";
+        this.goToPage(1);
+    }
+
+    /**
+     * Sort items by col, then by id
+     */
+    public sortByOrderBy(col: Object, asc: boolean) {
+        if (!this.itemsLoaded) { return; }
         // Some columns are incompatible with sorting
         if (col["suppressSorting"] || col["type"] == "button") {
             return;
         }
-        let field: string = col["field"];
-        let defaultAsc: boolean = true;
-        let asc: boolean =  field == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
-        this.lastSortedCol = field;
+        this.lastSortedCol = col;
         this.lastSortedAsc = asc;
         let negInf;
         /* Sort function */
@@ -81,19 +158,13 @@ export class TableComponent {
                 return asc ? -1 : 1;
             }
         });
-        this.goToPage(1);
     }
 
     /**
      * Filter items by a search string
      */
-    public search(): void {
-        if (!this.checkItemsLoaded()) { return; }
-        if (this.searchStr == undefined) { return; }
+    private filter(): void {
         let searchStr: string = this.searchStr.toLowerCase().trim();
-        if (this.items == undefined /*|| (searchStr.length > 0 && searchStr.length < 3)*/) {
-            return;
-        }
         this.items = [];
         // If seacrh string empty, reset the filter
         if (searchStr.length == 0) {
@@ -118,42 +189,6 @@ export class TableComponent {
                 }
             }
         }
-        this.goToPage(1);
-    }
-
-    /**
-     * Here we need to save the items so we will be able to reset the filter.
-     * Do it only once. 
-     * Not possible to do it on initialisation because item list can be asynchronous.
-     */
-    private checkItemsLoaded(): boolean {
-        if (this.items != undefined) {
-            if (!this.itemsLoaded) {
-                this.itemsLoaded = true;
-                this.itemsSave = [];
-                for (let item of this.items) { this.itemsSave.push(item); }
-            }
-            return true;
-        } else {
-            return false;
-        }
-
-    }
-
-    /**
-     * Reset the search
-     */
-    public resetSearch(): void {
-        // If seacrh string empty, reset the filter
-        if (this.itemsLoaded) {
-            this.items = [];
-            let itemsTmp = [];
-            for (let item of this.itemsSave) { 
-                this.items.push(item); 
-            }
-        }
-        this.searchStr = "";
-        this.goToPage(1);
     }
 
     /**

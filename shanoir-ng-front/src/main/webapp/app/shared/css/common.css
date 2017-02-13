@@ -5,19 +5,23 @@
     --very-light-grey: #fdfdfd;
     --lighter-grey: #fafafa;
     --light-grey: #f1f1f1;
-    --grey: #BEC3C7; 
+    --grey: #BEC3C7;
     --greyer: #777;
     --dark-grey: #333;
     --very-dark-grey: #222;
 
-    --color-a: #1976d2;
-    --color-b: #7A7F9D;
-    --color-b-light: #C2C4D2 ;
+    --color-a: #49274a;
+    --color-b: #94618e;
+    --color-b-light: #f4decb ;
+    --color-c: #f4decb;
     --color-error: red;
     --color-light-error: #f4dede;
+
+    --shadow-height: 20px;
 }
 
 body { margin: 0; background-color: var(--very-light-grey); }
+  body.outsilde { background-color: var(--color-a); }
 body, option, table, button, select, input {font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
 h2 { color: var(--dark-black); margin: 0; font-size: 28px; }
 hr { margin: 7px 0 !important; border-bottom: 1px solid var(--grey) !important; border: 0; }
@@ -36,18 +40,19 @@ input[type='date'] { width: 140px; }
 .hidden { display: none !important; }
 
 form { color: var(--greyer); background-color: var(--lighter-grey); border: 1px solid var(--light-grey); }
-  form input, 
-  form textarea, 
-  form select { border: 2px solid var(--grey) !important; border-radius: 2px !important; }
+  form input,
+  form textarea,
+  form select { border: 1px solid var(--grey) !important; border-radius: 2px !important; }
     form input.ng-invalid.ng-dirty,
-    form input.invaliddate, 
-    form textarea.ng-invalid.ng-dirty, 
-    form select.ng-invalid.ng-dirty { border: 2px solid var(--color-error) !important; background-color: var(--color-light-error) !important; }--color-light-error
+    form input.invaliddate,
+    form textarea.ng-invalid.ng-dirty,
+    form select.ng-invalid.ng-dirty { border: 1px solid var(--color-error) !important; background-color: var(--color-light-error) !important; }--color-light-error
+  form input, form select { height: 20px; }
   form textarea { resize: vertical; }
   form button { margin: 10px 0; }
   form input:not([type]), input[type='text'], input[type='password'], input[type='email'], textarea, select { width: 200px; }
   form fieldset { border: 0; padding: 0; margin: 11px; }
-  form fieldset + fieldset { border-top: 1px solid var(--grey); padding-top: 11px; } 
+  form fieldset + fieldset { border-top: 1px solid var(--grey); padding-top: 11px; }
     form fieldset fieldset { border: none; margin: 3px 0 0; }
     form fieldset fieldset legend { padding: 0 0 5px; font-weight: normal; }
     form fieldset fieldset label { display: block; width: auto; }
@@ -59,14 +64,14 @@ form { color: var(--greyer); background-color: var(--lighter-grey); border: 1px 
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { padding: 6px 15px; }
   form .footer { text-align: right; }
-  form .header { font-size: 20px; color: var(--color-b); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
+  form .header { font-size: 20px; color: var(--color-a); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
   form .required-label:after{ content:" *"; }
   form .form-validation-alert { color: var(--color-error); }
   form .right-col label { text-align: right; display: block; }
-  
+
   /* Date picker style overriding */
   form my-date-picker input { font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; }
-  form my-date-picker .selector { border: 1px solid var(--light-grey) !important; box-shadow: 5px 5px 5px -5px gray !important; }
+  form my-date-picker .selector { border: 1px solid var(--light-grey) !important; box-shadow: 0 0 var(--shadow-height) 0px gray !important; }
   form my-date-picker input.selection { text-align: left !important; padding: 0 5px !important; }
   form my-date-picker button.btnpicker,
   form my-date-picker button.btnclear { font-weight: normal !important; color: var(--greyer) !important; border: 0 !important; height: 10px; background-color: transparent !important; }
@@ -81,7 +86,7 @@ form { color: var(--greyer); background-color: var(--lighter-grey); border: 1px 
   form my-date-picker .mydp .daycell { height: 23px !important; }
   form my-date-picker .mydp .selector { width: auto !important; }
   form my-date-picker .mydp td + td { border-left: none; }
-  form my-date-picker .mydp .daycell, 
+  form my-date-picker .mydp .daycell,
   form my-date-picker .mydp .weekdaytitle { padding: 5px 3px !important; }
   form my-date-picker .mydp .headerlabelbtn { font-size: 12px !important; color: var(--dark-grey) !important; min-width: 40px !important;}
   form my-date-picker .mydp .icon-left,

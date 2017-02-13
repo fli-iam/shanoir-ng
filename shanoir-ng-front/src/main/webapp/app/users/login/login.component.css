@@ -1,7 +1,8 @@
 /*******************/
 /* Login component */
 /*******************/
-.LoginComponent { text-align: center; }
+
+.LoginComponent { text-align: center; background-color: var(--color-a); width: 100%; height: 100%; }
 	.LoginComponent .logo {	margin: 50px; }
 
 .LoginContent-loginForm { margin: auto;	width: 300px; text-align: center; }

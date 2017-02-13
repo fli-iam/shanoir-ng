@@ -6,15 +6,17 @@
 				.shanoir-table th.controls button span { vertical-align: middle; }
 				.shanoir-table th.controls button img { height: 16px; vertical-align: middle; }
 			.shanoir-table th.controls input,
-				.shanoir-table th.controls select { border: 2px solid var(--grey); border-radius: 2px;  height: 22px; vertical-align: middle; }
+			.shanoir-table th.controls select { border: 1px solid var(--grey); border-radius: 2px;  height: 20px; vertical-align: middle; }
+				.shanoir-table th.controls input:hover,
+				.shanoir-table th.controls select:hover { background-color: var(--color-c); }
 			.shanoir-table th.controls input { padding: 0 5px; width: 150px; }
 			.shanoir-table th.controls select { width: 150px; }
 			.shanoir-table th.controls .text-search,
 			.shanoir-table th.controls .options { margin: 0 10px 0 0; padding: 0 7px 0 0; border-right: 1px solid var(--grey); }
-				.shanoir-table th.controls .options input { width: 40px; }
+				.shanoir-table th.controls .options .max-results { width: 40px; text-align: right; }
 		.shanoir-table th.sortable { cursor: pointer; position: relative; }
 			.shanoir-table th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; }
-		.shanoir-table th.active { background-color: var(--lighter-grey); color: var(--very-dark-grey); }
+		.shanoir-table th.active { background-color: var(--color-b-light); color: var(--dark-grey); }
 		.shanoir-table th.col-date { width: 65px; }
 		.shanoir-table th.col-boolean { width: 20px; }
 		.shanoir-table th.col-button { width: 20px; }
@@ -23,11 +25,16 @@
 				.shanoir-table th.pager span.clickable:not(.disabled):not(.active) { cursor: pointer; }
 				.shanoir-table th.pager span.clickable:not(.disabled):not(.active):hover { background-color: var(--color-b-light); color: var(--color-b); }
 				.shanoir-table th.pager span.disabled { color: var(--color-b-light); }
-				.shanoir-table th.pager span.active { color: var(--color-b); background-color: var(--lighter-grey); font-weight: bold; }
+				.shanoir-table th.pager span.active { color: var(--dark-grey); background-color: var(--color-b-light); }
+			.shanoir-table th.status-bar { text-align: left; padding: 3px 0; color: var(--greyer)}
+				.shanoir-table th.status-bar input { width: 150px; }
+				.shanoir-table th.status-bar .options { border-right: 0; }
+					.shanoir-table th.status-bar .options span { padding: 0 10px; }
+						.shanoir-table th.status-bar .options span + span { border: 0; border-left: 1px solid var(--grey); }
 	.shanoir-table tr { height: 20px; }
 		.shanoir-table tr.even { background-color: var(--light-grey); }
 		.shanoir-table tr.odd { background-color: var(--lighter-grey); }
-		/* HIGLIGHT ROW ON CURSOR HOVER .shanoir-table tr:hover td { height: 20px; background-color: var(--color-b-light); cursor: pointer; } */
+		.shanoir-table tr:hover td { height: 20px; background-color: var(--color-b-light); cursor: pointer; }
 	.shanoir-table td { padding: 0 5px; border: none; white-space: nowrap; }
 		.shanoir-table td + td { border-left: 1px dotted var(--grey); }
 		.shanoir-table td.bool { text-align: center; font-weight: bold; }

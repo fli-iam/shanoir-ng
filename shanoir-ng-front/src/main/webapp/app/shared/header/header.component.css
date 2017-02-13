@@ -2,7 +2,7 @@
 /* Header component */
 /******************/
 
-.header-component { background-color: var(--color-a); height: 54px; }
+.header-component { background-color: var(--color-a); height: 54px; z-index: 1000; position: relative; }
 	.header-component .logo { margin: 10px; float: left; }
 		.header-component .logo img { height: 32px; }
 	.header-component .logout { margin: 10px; float: right; }

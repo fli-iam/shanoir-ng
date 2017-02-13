@@ -15,10 +15,6 @@
                         </option>
                     </select>
                 </span>
-                <!-- Nb results per page input -->
-                <span class="options">
-                    <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/> 
-                </span>
                 <!-- User defined buttons -->
                 <span *ngFor="let command of customActionDefs">
                     <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams(item) : null" routerLinkActive="active">
@@ -35,19 +31,19 @@
                 (click)="sortBy(col)"
                 class="{{getColTypeStr(col)}}"
                 [class.sortable]="!col.suppressSorting && col.type!='button'"
-                [class.active]="lastSortedCol==col.field"
+                [class.active]="lastSortedCol==col"
                 [attr.title]="col.tip != undefined ? col.tip : null"
                 [style.width]="col.widthPercent+'%'"
                 >{{col.headerName}}
                     <span class="sort-arrow" *ngIf="!col.suppressSorting && col.type!='button'">
-                        <span *ngIf="lastSortedCol==col.field && !lastSortedAsc" class="arrow arrowUp">&#9652;</span>   
-                        <span *ngIf="lastSortedCol==col.field && lastSortedAsc" class="arrow arrowDown">&#9662;</span>
+                        <span *ngIf="lastSortedCol==col && !lastSortedAsc" class="arrow arrowUp">&#9652;</span>   
+                        <span *ngIf="lastSortedCol==col && lastSortedAsc" class="arrow arrowDown">&#9662;</span>
                     </span>
             </th>
         </tr>
     </thead>
     <!-- Table ontent -->
-    <tbody *ngIf="!loading && items.length > 0">
+    <tbody *ngIf="!isLoading && items.length > 0">
         <tr *ngFor="let item of items.slice((currentPage-1)*maxResults, currentPage*maxResults); let i = index" [class.odd]="i%2!=0" [class.even]="i%2==0" >
             <td *ngFor="let col of columnDefs" class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" [class.bool]="isFieldBoolean(item, col)">
                 {{renderCell(item, col)}}
@@ -67,21 +63,33 @@
         </tr>
 
         <!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
-        <th class="pager" [attr.colspan]="columnDefs?.length">
-            <span class="clickable"
-                [class.disabled]="currentPage == 1"
-                (click)="currentPage > 1 ? goToPage(currentPage - 1) : void" 
-                >&#9664;</span><span class="wrapper"
-                *ngFor="let p of getPagerList(); let i = index" 
-            ><span *ngIf="p==null">...</span><span *ngIf="p!=null" class="clickable" (click)="goToPage(p)" [class.active]="p == currentPage">{{p}}</span></span><span 
-                class="clickable"
-                [class.disabled]="currentPage == getMaxPage()"
-                (click)="currentPage < getMaxPage() ? goToPage(currentPage + 1) : void" 
-                >&#9654;</span>
-        </th>
+        <tr>
+            <th class="pager" [attr.colspan]="columnDefs?.length">
+                <span class="clickable"
+                    [class.disabled]="currentPage == 1"
+                    (click)="currentPage > 1 ? goToPage(currentPage - 1) : void" 
+                    >&#9664;</span><span class="wrapper"
+                    *ngFor="let p of getPagerList(); let i = index" 
+                ><span *ngIf="p==null">...</span><span *ngIf="p!=null" class="clickable" (click)="goToPage(p)" [class.active]="p == currentPage">{{p}}</span></span><span 
+                    class="clickable"
+                    [class.disabled]="currentPage == getMaxPage()"
+                    (click)="currentPage < getMaxPage() ? goToPage(currentPage + 1) : void" 
+                    >&#9654;</span>
+            </th>
+        </tr>
+        <tr>
+            <th class="status-bar controls" [attr.colspan]="columnDefs?.length">
+                <!-- Nb results per page input -->
+                <span class="options">
+                    <span *ngIf="items != undefined && items != null">Founded : {{items.length}}</span>
+                    <span *ngIf="itemsSave != undefined && itemsSave != null">Total : {{itemsSave.length}}</span>
+                    <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
+                </span>
+            </th>
+        </tr>
     </tbody>
     <!-- Loader -->
-    <tbody *ngIf="loading">
+    <tbody *ngIf="isLoading">
         <tr>
             <td [attr.colspan]="columnDefs?.length" class="loading">
                 <img src="/images/loader.32x32.gif"/><br/>Loading...
@@ -89,10 +97,10 @@
         </tr>
     </tbody>
     <!-- Empty table msg -->
-    <tbody *ngIf="!loading && items.length == 0">
+    <tbody *ngIf="!isLoading && items.length == 0">
         <tr>
             <td [attr.colspan]="columnDefs?.length" class="empty">
-                The table is empty
+                No results
             </td>
         </tr>
     </tbody>

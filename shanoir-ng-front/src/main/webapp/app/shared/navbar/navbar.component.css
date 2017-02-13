@@ -1,12 +1,8 @@
 /********************/
 /* Navbar component */
 /********************/
-.navbar-component { box-shadow: 0 5px 5px -5px gray; margin-bottom: 15px; } 
+.navbar-component { box-shadow: 0 0 var(--shadow-height) 0 gray; margin-bottom: 15px; z-index: 100; position: relative; } 
 
-dropdown-menu { margin: 0 -4px 20px 0; padding: 0;  border: 0; color: var(--greyer); }
+dropdown-menu { margin-left: -4px; padding: 0;  border: 0; }
 
-.menu-item { cursor: pointer; display: block; margin: 0; padding: 5px 8px; }
-  .menu-item:hover,
-  .menu-item.opened { color: var(--very-light-grey); background-color: var(--color-a); }
-
-.menu-list { padding: 0 0; margin: 0; }
+.menu-list { padding: 0; margin: 0; }

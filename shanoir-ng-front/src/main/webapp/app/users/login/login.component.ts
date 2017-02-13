@@ -20,7 +20,7 @@ export class LoginComponent {
     errorCode: string;
 
     constructor(private router: Router, private loginService: LoginService, accountEventsService: AccountEventsService, fb:FormBuilder) {
-        this.shanoirNGImageUrl = '/images/logo.shanoir.black.png';
+        this.shanoirNGImageUrl = '/images/logo.shanoir.white.png';
 
         this.loginForm = fb.group({
            'email': ['', Validators.required],
