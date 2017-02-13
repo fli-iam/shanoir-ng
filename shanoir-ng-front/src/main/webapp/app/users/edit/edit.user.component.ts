@@ -118,6 +118,18 @@ export class EditUserComponent implements OnInit {
             });
     }
 
+    requestAccount(): void {
+        this.submit();
+        this.userService.requestAccount(this.user)
+            .subscribe((user) => {
+                this.cancel();
+            }, (err: String) => {
+                if (err.indexOf("email should be unique") != -1) {
+                    this.isEmailUnique = false;
+                }
+            });
+    }
+
     update(): void {
         this.submit();
         this.userService.update(this.userId, this.user)
@@ -156,13 +168,6 @@ export class EditUserComponent implements OnInit {
         this.requestAccountMode = this.route.snapshot.data['requestAccount'];
         if (this.requestAccountMode) {
             this.creationMode = true;
-            // guest role by default
-            let guestRole: Role = new Role();
-            guestRole.id = GUEST_ROLE_ID;
-            guestRole.accessLevel = 0;
-            guestRole.displayName = "Guest";
-            guestRole.name = "guestRole";
-            this.user.role = guestRole;
         } else {
             this.getRoles();
         }
@@ -171,13 +176,19 @@ export class EditUserComponent implements OnInit {
 
     buildForm(): void {
         const emailRegex = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$';
+        let roleFormControl: FormControl;
+        if (this.requestAccountMode) {
+            roleFormControl = new FormControl(this.user.role);
+        } else {
+            roleFormControl = new FormControl(this.user.role, Validators.required);
+        }
         this.editUserForm = this.fb.group({
             'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'username': new FormControl(this.user.username),
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
             'expirationDate': [this.user.expirationDate],
-            'role': [this.user.role, Validators.required],
+            'role': roleFormControl,
             'canAccessToDicomAssociation': new FormControl('false'),
             'medical': new FormControl('false'),
             'accountRequestInfo': new FormControl({contact: '', function: '', institution: '', service: '', study: '', work: ''}, Validators.required)

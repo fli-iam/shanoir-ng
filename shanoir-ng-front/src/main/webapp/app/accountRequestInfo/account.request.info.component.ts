@@ -67,13 +67,13 @@ export class AccountRequestInfoComponent implements OnInit {
     }
 
     ngOnInit() {
-    this.accountRequestInfoForm = this.formBuilder.group({
-        'contact': ['', Validators.required],
-        'function': ['', Validators.required],
-        'institution': ['', Validators.required],
-        'service': ['', Validators.required],
-        'study': ['', Validators.required],
-        'work': ['', Validators.required]
+        this.accountRequestInfoForm = this.formBuilder.group({
+            'contact': ['', Validators.required],
+            'function': ['', Validators.required],
+            'institution': ['', Validators.required],
+            'service': ['', Validators.required],
+            'study': ['', Validators.required],
+            'work': ['', Validators.required]
     });
     this.accountRequestInfoForm.valueChanges
             .subscribe(data => this.onValueChanged(data));

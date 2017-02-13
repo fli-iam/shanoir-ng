@@ -35,7 +35,7 @@ export class SecureHttp extends Http {
             }
         } else {
             url.headers.append('Content-Type', 'application/json');
-            if (url.url.indexOf('/authenticate') != -1) {
+            if (url.url.indexOf('/authenticate') != -1 || url.url.indexOf(AppUtils.BACKEND_API_USER_URL+ AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL) != -1) {
                 authentRequest = true;
                 url.headers.set('X-Authorization', `Bearer ${refreshToken}`);
             } else {

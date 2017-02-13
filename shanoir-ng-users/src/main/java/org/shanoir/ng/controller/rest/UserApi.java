@@ -91,7 +91,19 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
+	@PreAuthorize("hasAuthority('adminRole')")
 	ResponseEntity<User> saveNewUser(@ApiParam(value = "user to create", required = true) @RequestBody User user,
+			BindingResult result) throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Saves a new user from account request", response = User.class, tags={})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "created user from account request", response = User.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = User.class),
+			@ApiResponse(code = 403, message = "forbidden", response = User.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = User.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
+	@RequestMapping(value = "/accountrequest", produces = { "application/json" }, consumes = {
+			"application/json" }, method = RequestMethod.POST)
+	ResponseEntity<User> saveNewUserFromAccountRequest(@ApiParam(value = "user to create from account request", required = true) @RequestBody User user,
 			BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates a user", response = Void.class, tags = {})

@@ -159,6 +159,49 @@ public class UserApiController implements UserApi {
 		}
 	}
 
+	@Override
+	public ResponseEntity<User> saveNewUserFromAccountRequest(
+			@ApiParam(value = "user to create from account request", required=true) @RequestBody @Valid final User user,
+			final BindingResult result) throws RestServiceException{
+		
+		/* Now we generate a username for the new user creation */
+		if (user.getUsername() == null) {
+			if (user.getFirstName() != null && user.getLastName() != null) {
+				generateUsername(user);
+			}
+		}
+		
+		/* Validation */
+		// A basic user can only update certain fields, check that
+		final FieldErrorMap accessErrors = this.getCreationRightsErrors(user);
+		// Check hibernate validation
+		/* Tell Spring to remove the hibernante validation error on username or role blank for user account request */
+		final FieldErrorMap hibernateErrors = FieldErrorMap.fieldErrorMapIgnoreUsernameAndRoleBlank(result);
+		// Check unique constrainte
+		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
+		/* Merge errors. */
+		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		if (!errors.isEmpty()) {
+			throw new RestServiceException(new ErrorModel(422, "Bad arguments", new ErrorDetails(errors)));
+		}
+
+		// Guarantees it is a creation, not an update
+		user.setId(null);
+		// Set creation date on creation.
+		user.setCreationDate(new Date());
+
+		/* Save user in db. */
+		try {
+			final User createdUser = userService.save(user);
+			return new ResponseEntity<User>(createdUser, HttpStatus.OK);
+		} catch (ShanoirUsersException e) {
+			if (ErrorModelCode.PASSWORD_NOT_CORRECT == e.getErrorCode()) {
+				throw new RestServiceException(new ErrorModel(422, "Password does not match policy", null));
+			}
+			throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
+		}
+	}
+	 
 	private void generateUsername(final User user) {
 		final StringBuilder usernameSb = new StringBuilder();
 
@@ -257,5 +300,6 @@ public class UserApiController implements UserApi {
 		final FieldErrorMap uniqueErrors = uniqueValidator.validate(user);
 		return uniqueErrors;
 	}
+
 
 }

@@ -8,6 +8,7 @@ import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.dto.ShanoirOldUserDTO;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorModelCode;
+import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.auth.UserContext;
 import org.shanoir.ng.repository.AccountRequestInfoRepository;
@@ -163,6 +164,10 @@ public class UserServiceImpl implements UserService {
 			if (user.getAccountRequestInfo() != null) {
 				// Save account request info
 				accountRequestInfoRepository.save(user.getAccountRequestInfo());
+				user.setAccountRequestDemand(true);
+				// Set role 'guest'
+				user.setRole(roleRepository.findByName("guestRole")
+						.orElseThrow(() -> new ShanoirUsersException("Error while getting role 'guestRole'")));
 			}
 			savedUser = userRepository.save(user);
 		} catch (DataIntegrityViolationException dive) {

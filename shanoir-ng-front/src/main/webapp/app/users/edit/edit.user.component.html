@@ -2,7 +2,8 @@
     <form [formGroup]="editUserForm" class="EditUserContent max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
-				<div class="header command-zone" *ngIf="creationMode" i18n="Create user|Title">Create an user</div>
+				<div class="header command-zone" *ngIf="creationMode && !requestAccountMode" i18n="Create user|Title">Create an user</div>
+				<div class="header command-zone" *ngIf="creationMode && requestAccountMode" i18n="Request account|Title">Request an account</div>
 				<div class="header command-zone" *ngIf="!creationMode" i18n="Edit user|Title">Edit user</div>
 			</td></tr>
 			<tr>
@@ -108,7 +109,8 @@
 			
 			<tr><td colspan="2"><div class="footer command-zone">
 				<button i18n="Edit user|CancelButton label" class="Button" (click)="cancel()">Cancel</button>
-				<button type="submit" *ngIf="creationMode" i18n="Edit user|CreateButton label" (click)="create()" class="Button" [disabled]="!isEditUserFormValid()">Create</button>
+				<button type="submit" *ngIf="creationMode && !requestAccountMode" i18n="Edit user|CreateButton label" (click)="create()" class="Button" [disabled]="!isEditUserFormValid()">Create</button>
+				<button type="submit" *ngIf="creationMode && requestAccountMode" i18n="Edit user|RequestAccountButton label" (click)="requestAccount()" class="Button" [disabled]="!isEditUserFormValid()">Request Account</button>
 				<button type="submit" *ngIf="!creationMode && !user.accountRequestDemand" (click)="update()" i18n="Edit user|SaveButton label" class="Button" [disabled]="!isEditUserFormValid()">Save Settings</button>
 				<button type="submit" *ngIf="!creationMode && user.accountRequestDemand" (click)="deny()" i18n="Edit user|DenyAccountRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Deny creation</button>
 				<button type="submit" *ngIf="!creationMode && user.accountRequestDemand" (click)="accept()" i18n="Edit user|AcceptAccountRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Accept</button>

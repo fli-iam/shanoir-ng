@@ -70,6 +70,30 @@ public class FieldErrorMap extends HashMap<String, List<FieldError>> {
         }
         return fieldErrorMap;
     }
+    
+	/**
+     * Tell Spring to remove the hibernante validation error on username or role blank for user account request
+     *
+     * @param {@link BindingResult}
+     * @return {@link FieldErrorMap}
+     */
+    public static FieldErrorMap fieldErrorMapIgnoreUsernameAndRoleBlank(BindingResult result) {
+    	FieldErrorMap fieldErrorMap = new FieldErrorMap();
+        if (result.hasErrors()) {
+        	for (ObjectError objectError : result.getAllErrors()) {
+        		org.springframework.validation.FieldError fieldError = (org.springframework.validation.FieldError) objectError;
+        		if ((!fieldError.getField().equals("role") && !fieldError.getField().equals("username")) || fieldError.getRejectedValue() != null) {
+	        		if (!fieldErrorMap.containsKey(fieldError.getField())) {
+	        			fieldErrorMap.put(fieldError.getField(), new ArrayList<org.shanoir.ng.model.error.FieldError>());
+	        		}
+	        		fieldErrorMap.get(fieldError.getField()).add(new org.shanoir.ng.model.error.FieldError(
+	        				fieldError.getCode(), fieldError.getDefaultMessage(), fieldError.getRejectedValue()));
+        		}
+        	}
+        }
+        return fieldErrorMap;
+    }
+
 
 
     /**

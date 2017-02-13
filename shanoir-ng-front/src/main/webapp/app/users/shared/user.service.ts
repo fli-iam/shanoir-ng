@@ -36,6 +36,12 @@ export class UserService {
             .catch(this.handleError);
     }
 
+    requestAccount(user: User): Observable<User> {
+        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL+ AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL, JSON.stringify(user))
+            .map(this.extractData)
+            .catch(this.handleError);
+    }
+
     update(id: number, user: User): Observable<User> {
         return this.http.put(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, JSON.stringify(user))
             .map(response => response.json() as User)
