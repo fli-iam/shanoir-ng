@@ -38,6 +38,10 @@ import com.google.gson.GsonBuilder;
 @AutoConfigureMockMvc(secure = false)
 public class UserApiControllerTest {
 
+	private static final String REQUEST_PATH = "/user";
+	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+
 	private Gson gson;
 
 	@Autowired
@@ -61,39 +65,40 @@ public class UserApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
 	public void confirmAccountRequestTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put("/user/1/confirmaccountrequest").accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createUser())))
-				.andExpect(status().isNoContent());
+		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID + "/confirmaccountrequest")
+				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
+				.content(gson.toJson(ModelsUtil.createUser()))).andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void deleteUserTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete("/user/1").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
 	}
 
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
 	public void denyAccountRequestTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete("/user/1/denyaccountrequest")).andExpect(status().isNoContent());
+		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID + "/denyaccountrequest"))
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void findUserByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get("/user/1").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void findUsersTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get("/user/all").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_ALL).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
 	public void saveNewUserTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post("/user").accept(MediaType.APPLICATION_JSON)
+		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createUser())))
 				.andExpect(status().isOk());
 	}
@@ -101,7 +106,7 @@ public class UserApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
 	public void updateUserTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put("/user/1").accept(MediaType.APPLICATION_JSON)
+		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createUser())))
 				.andExpect(status().isNoContent());
 	}

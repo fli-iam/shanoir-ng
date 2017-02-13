@@ -3,21 +3,23 @@ package org.shanoir.ng.controller.rest;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 
+import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.http.client.ClientProtocolException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.model.Role;
 import org.shanoir.ng.service.RoleService;
+import org.shanoir.ng.utils.AccessTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("dev")
 public class RoleApiControllerTestIT {
 
+	private static final String REQUEST_PATH = "/role";
+	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -48,27 +53,24 @@ public class RoleApiControllerTestIT {
 
 	@Test
 	public void findRolesProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity("/role/all", String.class);
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
-	@Ignore
-	public void findRolesWithLogin() {
-		HttpHeaders headers = null;
-
-		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		final ResponseEntity<String> response = restTemplate.exchange("/role/all", HttpMethod.GET, entity, String.class);
+	public void findRolesWithLogin() throws ClientProtocolException, IOException {
+		HttpEntity<String> entity = new HttpEntity<String>(null, AccessTokenUtil.getHeadersWithToken());
+		
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
 	@Test
 	@Ignore
-	public void findRolesWithBadRole() {
-		HttpHeaders headers = null;
+	public void findRolesWithBadRole() throws ClientProtocolException, IOException {
+		HttpEntity<String> entity = new HttpEntity<String>(null, AccessTokenUtil.getHeadersWithToken());
 		
-		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		final ResponseEntity<String> response = restTemplate.exchange("/role/all", HttpMethod.GET, entity, String.class);
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
 	

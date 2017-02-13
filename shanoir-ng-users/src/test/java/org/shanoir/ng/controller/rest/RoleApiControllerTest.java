@@ -30,6 +30,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @AutoConfigureMockMvc(secure = false)
 public class RoleApiControllerTest {
 
+	private static final String REQUEST_PATH = "/role";
+	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	
 	@Autowired
 	private MockMvc mvc;
 
@@ -43,7 +46,7 @@ public class RoleApiControllerTest {
 
 	@Test
 	public void findRolesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get("/role/all").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_ALL).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
