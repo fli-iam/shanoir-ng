@@ -1,26 +1,19 @@
 package org.shanoir.ng.controller.rest;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.apache.http.client.ClientProtocolException;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.shanoir.ng.configuration.security.jwt.token.JwtTokenFactory;
-import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
-import org.shanoir.ng.service.UserService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -51,16 +44,6 @@ public class UserApiControllerTestIT {
 
     @Autowired
     private JwtTokenFactory tokenFactory;
-
-    @MockBean
-    private UserService userService;
-
-    @Before
-    public void setup() throws ShanoirUsersException {
-        given(userService.findAll()).willReturn(Arrays.asList(new User()));
-        given(userService.findById(1L)).willReturn(new User());
-		given(userService.save(Mockito.mock(User.class))).willReturn(new User());
-   }
 
 	@Test
 	public void findUserByIdProtected() {
@@ -133,7 +116,10 @@ public class UserApiControllerTestIT {
 	public void updateNewTemplateWithLogin() throws ClientProtocolException, IOException {
 		HttpHeaders headers = ApiControllerTestUtil.generateHeadersWithTokenForAdmin(tokenFactory);
 
-		HttpEntity<User> entity = new HttpEntity<User>(createUser(), headers);
+		final User user = createUser();
+		user.setEmail("titi@ti.ti");
+		user.setUsername("titi");
+		HttpEntity<User> entity = new HttpEntity<User>(user, headers);
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity, String.class);
 		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 	}
