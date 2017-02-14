@@ -4,6 +4,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,9 +16,11 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.AccountRequestInfo;
+import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.auth.UserContext;
 import org.shanoir.ng.repository.AccountRequestInfoRepository;
+import org.shanoir.ng.repository.RoleRepository;
 import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.impl.UserServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -39,6 +42,9 @@ public class UserServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+	
+	@Mock
+	private RoleRepository roleRepository;
 
 	@Mock
 	private AccountRequestInfoRepository accountRequestInfoRepository;
@@ -54,6 +60,7 @@ public class UserServiceTest {
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository.findOne(USER_ID)).willReturn(ModelsUtil.createUser());
 		given(userRepository.save(Mockito.any(User.class))).willReturn(ModelsUtil.createUser());
+		given(roleRepository.findByName(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createGuestRole()));
 	}
 
 	@Test
