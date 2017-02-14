@@ -8,7 +8,6 @@ import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.dto.ShanoirOldUserDTO;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorModelCode;
-import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.auth.UserContext;
 import org.shanoir.ng.repository.AccountRequestInfoRepository;
