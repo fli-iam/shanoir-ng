@@ -60,7 +60,8 @@ def login(user, password):
     input_password_xpath = "//input[@ng-reflect-name='password']"
     button_login_xpath = "//button[contains(., 'Login')]"
 
-    WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, input_login_xpath)))
+    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, input_login_xpath)))
+    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, input_password_xpath)))
     driver.find_element_by_xpath(input_login_xpath).send_keys(user)
     driver.find_element_by_xpath(input_password_xpath).send_keys(password)
 
@@ -206,9 +207,11 @@ def request_account():
 
     request_inputs = "test"
 
-    first_name_xpath = "//input[id='firstName']"
-    last_name_xpath = "//input[id='lastName']"
-    email_xpath = "//input[id='email']"
+    first_name_xpath = "//input[@id='firstName']"
+    last_name_xpath = "//input[@id='lastName']"
+    email_xpath = "//input[@id='email']"
+
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, first_name_xpath)))
 
     # Bug - separate names and emails and send multiple times
     driver.find_element_by_xpath(first_name_xpath).send_keys(first_name[:2])
@@ -220,12 +223,12 @@ def request_account():
     driver.find_element_by_xpath(email_xpath).send_keys(email[email.index("@") + 2:-1])
     driver.find_element_by_xpath(email_xpath).send_keys(email[-1])
 
-    driver.find_element_by_xpath("//input[@id='contact']").send_keys(request_inputs)
-    driver.find_element_by_xpath("//input[@id='function']").send_keys(request_inputs)
-    driver.find_element_by_xpath("//input[@id='institution']").send_keys(request_inputs)
-    driver.find_element_by_xpath("//input[@id='service']").send_keys(request_inputs)
-    driver.find_element_by_xpath("//input[@id='study']").send_keys(request_inputs)
-    driver.find_element_by_xpath("//input[@id='work']").send_keys(request_inputs)
+    driver.find_element_by_xpath("//input[@formcontrolname='contact']").send_keys(request_inputs)
+    driver.find_element_by_xpath("//input[@formcontrolname='function']").send_keys(request_inputs)
+    driver.find_element_by_xpath("//input[@formcontrolname='institution']").send_keys(request_inputs)
+    driver.find_element_by_xpath("//input[@formcontrolname='service']").send_keys(request_inputs)
+    driver.find_element_by_xpath("//input[@formcontrolname='study']").send_keys(request_inputs)
+    driver.find_element_by_xpath("//input[@formcontrolname='work']").send_keys(request_inputs)
 
     time.sleep(1)
 
@@ -233,6 +236,8 @@ def request_account():
     submit_xpath = "//button[@type='submit']"
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, submit_xpath)))
     driver.find_element_by_xpath(submit_xpath).click()
+
+    return email
 
 
 def accept_deny_account_request(u, accept):
@@ -278,11 +283,28 @@ def logout():
 
 if __name__ == "__main__":
     start_selenium()
-    request_account()
 
+    # Request 2 accounts
+    acc1 = request_account()
+    acc2 = request_account()
+
+    # Login and go to Manage users
     login(args.user, args.password)
     pink_mode()
     manage_users()
+
+    # Accept account request
+    search(acc1, 'Email')
+    accept_deny_account_request(acc1, True)
+    search(acc1, 'Email')
+    edit_user(acc1)
+    search(acc1, 'Email')
+    delete_user(acc1)
+    clean_search()
+
+    # Deny account request
+    search(acc2, 'Email')
+    accept_deny_account_request(acc2, False)
 
     # Create, edit and delete user
     email = add_user()
@@ -290,16 +312,6 @@ if __name__ == "__main__":
     edit_user(email)
     search(email, 'Email')
     delete_user(email)
-    clean_search()
-
-    # Accept account request
-    username = 'wopa'
-    search(username, 'Username')
-    accept_deny_account_request(username, True)
-    search(username, 'Username')
-    edit_user(username)
-    search(username, 'Username')
-    delete_user(username)
     clean_search()
 
     logout()
