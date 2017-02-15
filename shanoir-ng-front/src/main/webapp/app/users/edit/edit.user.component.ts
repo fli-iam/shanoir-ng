@@ -17,7 +17,7 @@ const GUEST_ROLE_ID: number = 2;
     selector: 'editUser',
     moduleId: module.id,
     templateUrl: 'edit.user.component.html',
-    styleUrls: ['../../shared/css/common.css', 'edit.user.component.css'],
+    styleUrls: ['../../shared/css/common.css', 'edit.user.component.css']
 })
 
 export class EditUserComponent implements OnInit {
@@ -35,7 +35,7 @@ export class EditUserComponent implements OnInit {
     requestAccountMode: Boolean = false;
     userId: number;
     selectedDateNormal: string = '';
-    accountRequestInfo: AccountRequestInfo = new AccountRequestInfo();
+    accountRequestInfo: AccountRequestInfo;
     private accountRequestInfoValid: Boolean = false;
 
     constructor(router: Router, private location: Location, route: ActivatedRoute, userService: UserService, roleService: RoleService, private fb: FormBuilder) {
@@ -176,11 +176,11 @@ export class EditUserComponent implements OnInit {
 
     buildForm(): void {
         const emailRegex = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$';
-        let roleFormControl: FormControl;
+        let roleFC: FormControl;
         if (this.requestAccountMode) {
-            roleFormControl = new FormControl(this.user.role);
+            roleFC = new FormControl(this.user.role);
         } else {
-            roleFormControl = new FormControl(this.user.role, Validators.required);
+            roleFC = new FormControl(this.user.role, Validators.required);
         }
         this.editUserForm = this.fb.group({
             'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
@@ -188,10 +188,9 @@ export class EditUserComponent implements OnInit {
             'username': new FormControl(this.user.username),
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
             'expirationDate': [this.user.expirationDate],
-            'role': roleFormControl,
+            'role': roleFC,
             'canAccessToDicomAssociation': new FormControl('false'),
-            'medical': new FormControl('false'),
-            'accountRequestInfo': new FormControl({contact: '', function: '', institution: '', service: '', study: '', work: ''}, Validators.required)
+            'medical': new FormControl('false')
         });
 
         this.editUserForm.valueChanges

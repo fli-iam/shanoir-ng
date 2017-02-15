@@ -67,7 +67,8 @@
 								<label i18n="Edit user|CanAccessToDicomAssociation label">Can import from Neurinfo-PACS</label> 
 								<span class="right-col">
 									<input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="true" i18n="Edit user|canAccessToDicomAssociation label" [checked]="user.canAccessToDicomAssociation == true"/>Yes
-									<input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="false" i18n="Edit user|cannotAccessToDicomAssociation label" [checked]="'user.canAccessToDicomAssociation'?'user.canAccessToDicomAssociation == false':'true'"/>No
+									<input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="false" i18n="Edit user|cannotAccessToDicomAssociation label" 
+										[checked]="'user.canAccessToDicomAssociation'?'user.canAccessToDicomAssociation == false':'true'"/>No
 								</span>
 							</li>
 							<li>
@@ -80,31 +81,9 @@
 						</ol>
 					</fieldset>
 				</td>
-				<td *ngIf="user.accountRequestDemand==true && accountRequestInfo">
-					<fieldset>
-						<ol>
-							<li>
-								<label i18n="Edit user|Contact label">Contact: </label>{{accountRequestInfo.contact}}
-							</li>
-							<li>
-								<label i18n="Edit user|Function label">Function: </label>{{accountRequestInfo.function}}
-							</li>
-							<li>
-								<label i18n="Edit user|Institution label">Institution: </label>{{accountRequestInfo.institution}}
-							</li>
-							<li>
-								<label i18n="Edit user|Service label">Service: </label>{{accountRequestInfo.service}}
-							</li>
-							<li>
-								<label i18n="Edit user|Study label">Study: </label>{{accountRequestInfo.study}}
-							</li>
-							<li>
-								<label i18n="Edit user|Work label">Work: </label>{{accountRequestInfo.work}}
-							</li>
-						</ol>
-					</fieldset>	 
-				</td>
-				<account-request-info *ngIf="requestAccountMode" (accountRequestInfo)="saveARI($event)" (isValid)="updateARIValid($event)"></account-request-info>
+				<account-request-info *ngIf="requestAccountMode || user.accountRequestDemand"
+					[userAccountRequestInfo]='accountRequestInfo' [requestAccountMode]='requestAccountMode' [accountRequestDemand]='user.accountRequestDemand'
+					(accountRequestInfo)="saveARI($event)" (isValid)="updateARIValid($event)"></account-request-info>
 			</tr>
 			
 			<tr><td colspan="2"><div class="footer command-zone">
