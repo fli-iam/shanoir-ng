@@ -25,7 +25,8 @@ import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
 import { RoleService } from './roles/role.service';
 import { TableComponent} from "./shared/table/table.component";
-import { AccountRequestInfoComponent} from "./accountRequestInfo/account.request.info.component";
+import { AccountRequestInfoComponent} from "./users/accountRequestInfo/account.request.info.component";
+import { AccountRequestComponent} from "./users/accountRequest/account.request.component";
 
 @NgModule({
     imports: [
@@ -50,7 +51,8 @@ import { AccountRequestInfoComponent} from "./accountRequestInfo/account.request
         TableComponent,
         DropdownMenuComponent,
         MenuItemComponent,
-        AccountRequestInfoComponent
+        AccountRequestInfoComponent,
+        AccountRequestComponent
     ],
     entryComponents: [
         ConfirmDialogComponent

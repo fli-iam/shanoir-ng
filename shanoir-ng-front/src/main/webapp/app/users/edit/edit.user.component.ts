@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
@@ -9,7 +9,7 @@ import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
-import { AccountRequestInfo } from '../../accountRequestInfo/account.request.info.model';
+import { AccountRequestInfo } from '../accountRequestInfo/account.request.info.model';
 
 const GUEST_ROLE_ID: number = 2;
 
@@ -21,6 +21,7 @@ const GUEST_ROLE_ID: number = 2;
 })
 
 export class EditUserComponent implements OnInit {
+    @Input() requestAccountMode: boolean = false;
     user: User = new User();
     router: Router;
     route: ActivatedRoute;
@@ -32,7 +33,6 @@ export class EditUserComponent implements OnInit {
     isEmailUnique: Boolean = true;
     isDateValid: Boolean = true;
     creationMode: Boolean;
-    requestAccountMode: Boolean = false;
     userId: number;
     selectedDateNormal: string = '';
     accountRequestInfo: AccountRequestInfo;
@@ -165,7 +165,6 @@ export class EditUserComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.requestAccountMode = this.route.snapshot.data['requestAccount'];
         if (this.requestAccountMode) {
             this.creationMode = true;
         } else {

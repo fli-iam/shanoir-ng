@@ -81,9 +81,11 @@
 						</ol>
 					</fieldset>
 				</td>
-				<account-request-info *ngIf="requestAccountMode || user.accountRequestDemand"
-					[userAccountRequestInfo]='accountRequestInfo' [requestAccountMode]='requestAccountMode' [accountRequestDemand]='user.accountRequestDemand'
-					(accountRequestInfo)="saveARI($event)" (isValid)="updateARIValid($event)"></account-request-info>
+				<td *ngIf="requestAccountMode || user.accountRequestDemand">
+					<account-request-info
+						[userAccountRequestInfo]='accountRequestInfo' [requestAccountMode]='requestAccountMode' [accountRequestDemand]='user.accountRequestDemand'
+						(accountRequestInfo)="saveARI($event)" (isValid)="updateARIValid($event)"></account-request-info>
+				</td>
 			</tr>
 			
 			<tr><td colspan="2"><div class="footer command-zone">

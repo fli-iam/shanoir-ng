@@ -7,11 +7,10 @@ import { AccountRequestInfo } from './account.request.info.model';
     moduleId: module.id,
     selector: 'account-request-info',
     template: `
-    <td [formGroup]="accountRequestInfoForm" class="required">
-        <fieldset>
+        <fieldset [formGroup]="accountRequestInfoForm">
             <ol>
                 <li class="required">
-                    <label i18n="Edit user|Contact label" class="required-label">Contact: </label> 
+                    <label i18n="Edit user|Contact label" class="required-label">Contact</label> 
                     <span class="right-col">
                         <input *ngIf="userAccountRequestInfo && accountRequestDemand" type="text" id="contact" required formControlName="contact" [(ngModel)]="userAccountRequestInfo.contact" readonly/>
                         <input *ngIf="!userAccountRequestInfo && accountRequestDemand" type="text" id="contact" required readonly/>
@@ -20,7 +19,7 @@ import { AccountRequestInfo } from './account.request.info.model';
                     </span>
                 </li>
                 <li class="required">
-                    <label i18n="Edit user|Function label" class="required-label">Function: </label> 
+                    <label i18n="Edit user|Function label" class="required-label">Function</label> 
                     <span class="right-col">
                         <input *ngIf="userAccountRequestInfo && accountRequestDemand" type="text" id="function" required formControlName="function" [(ngModel)]="userAccountRequestInfo.function" readonly/>
                         <input *ngIf="!userAccountRequestInfo && accountRequestDemand" type="text" id="function" required readonly/>
@@ -29,7 +28,7 @@ import { AccountRequestInfo } from './account.request.info.model';
                     </span>
                 </li>
                 <li class="required">
-                    <label i18n="Edit user|Institution label" class="required-label">Institution: </label> 
+                    <label i18n="Edit user|Institution label" class="required-label">Institution</label> 
                     <span class="right-col">
                         <input *ngIf="userAccountRequestInfo && accountRequestDemand" type="text" id="institution" required formControlName="institution" [(ngModel)]="userAccountRequestInfo.institution" readonly/>
                         <input *ngIf="!userAccountRequestInfo && accountRequestDemand" type="text" id="institution" required readonly/>
@@ -38,7 +37,7 @@ import { AccountRequestInfo } from './account.request.info.model';
                     </span>
                 </li>
                 <li class="required">
-                    <label i18n="Edit user|Service label" class="required-label">Service: </label> 
+                    <label i18n="Edit user|Service label" class="required-label">Service</label> 
                     <span class="right-col">
                         <input *ngIf="userAccountRequestInfo && accountRequestDemand" type="text" id="service" required formControlName="service" [(ngModel)]="userAccountRequestInfo.service" readonly/>
                         <input *ngIf="!userAccountRequestInfo && accountRequestDemand" type="text" id="service" required readonly/>
@@ -47,7 +46,7 @@ import { AccountRequestInfo } from './account.request.info.model';
                     </span>
                 </li>
                 <li class="required">
-                    <label i18n="Edit user|Study label" class="required-label">Study: </label> 
+                    <label i18n="Edit user|Study label" class="required-label">Study</label> 
                     <span class="right-col">
                         <input *ngIf="userAccountRequestInfo && accountRequestDemand" type="text" id="study" required formControlName="study" [(ngModel)]="userAccountRequestInfo.study" readonly/>
                         <input *ngIf="!userAccountRequestInfo && accountRequestDemand" type="text" id="study" required readonly/>
@@ -56,7 +55,7 @@ import { AccountRequestInfo } from './account.request.info.model';
                     </span>
                 </li>
                 <li class="required">
-                    <label i18n="Edit user|Work label" class="required-label">Work: </label> 
+                    <label i18n="Edit user|Work label" class="required-label">Work</label> 
                     <span class="right-col">
                         <input *ngIf="userAccountRequestInfo && accountRequestDemand" type="text" id="work" required formControlName="work" [(ngModel)]="userAccountRequestInfo.work" readonly/>
                         <input *ngIf="!userAccountRequestInfo && accountRequestDemand" type="text" id="work" required readonly/>
@@ -66,7 +65,6 @@ import { AccountRequestInfo } from './account.request.info.model';
                 </li>
             </ol>
         </fieldset>
-    </td>
     `
 })
 export class AccountRequestInfoComponent implements OnInit {
