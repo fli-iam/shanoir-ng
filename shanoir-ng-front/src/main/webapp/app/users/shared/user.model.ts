@@ -1,5 +1,5 @@
 import { Role } from '../../roles/role.model';
-import { AccountRequestInfo } from '../../accountRequestInfo/account.request.info.model';
+import { AccountRequestInfo } from '../accountRequestInfo/account.request.info.model';
 
 export class User {
     id: number;

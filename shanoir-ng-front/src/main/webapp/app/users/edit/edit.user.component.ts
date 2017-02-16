@@ -11,8 +11,6 @@ import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
 import { AccountRequestInfo } from '../accountRequestInfo/account.request.info.model';
 
-const GUEST_ROLE_ID: number = 2;
-
 @Component({
     selector: 'editUser',
     moduleId: module.id,
