@@ -19,11 +19,16 @@
                     <img *ngIf="command.img != undefined" src="{{command.img}}" />
                     <span>{{command.title}}</span>
                 </button>
+                <button *ngIf="command.action != undefined" (click)="command.action()">
+                    <img *ngIf="command.img != undefined" src="{{command.img}}" />
+                    <span>{{command.title}}</span>
+                </button>
             </span>
     </caption>
     <!-- Headers -->
     <thead>
         <tr class="full-row">
+            <th class="checkbox-col"></th>
             <th 
                 *ngFor="let col of columnDefs" 
                 (click)="sortBy(col)"
@@ -46,7 +51,10 @@
             *ngFor="let item of items.slice((currentPage-1)*maxResults, currentPage*maxResults); let i = index" 
             [class.odd]="i%2!=0" 
             [class.even]="i%2==0" 
-            ><td 
+            >
+            <td class="checkbox-cell"><input type="checkbox" [(ngModel)]="item.isSelectedInTable" /></td>
+            <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
+            <td 
                 *ngFor="let col of columnDefs" 
                 class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" 
                 [class.bool]="isFieldBoolean(item, col)"
@@ -86,6 +94,7 @@
             <th class="status-bar controls" [attr.colspan]="columnDefs?.length">
                 <!-- Nb results per page input -->
                 <span class="options">
+                    <span>Selected : {{getNbSelected()}}</span>
                     <span *ngIf="items != undefined && items != null">Found : {{items.length}}</span>
                     <span *ngIf="itemsSave != undefined && itemsSave != null">Total : {{itemsSave.length}}</span>
                     <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>

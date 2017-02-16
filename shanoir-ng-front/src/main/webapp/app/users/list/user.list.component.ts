@@ -76,6 +76,7 @@ export class UserListComponent {
         ];
         this.customActionDefs = [
             {title: "new user", img: "/images/add.user.24x24.black.png", target: "../editUser"},
+            {title: "delete selected", action: this.deleteAll }
         ];
         this.rowClickAction = {target : "/editUser", getParams: function(item): Object {
                 return {id: item.id};
@@ -91,6 +92,16 @@ export class UserListComponent {
                         this.deleteUser(item.id);
                     }
                 })
+    }
+
+    deleteAll = () => {
+        let ids: number[] = [];
+        for (let user of this.users) {
+            if (user["isSelectedInTable"]) ids.push(user.id);
+        }
+        if (ids.length > 0) {
+            console.log("TODO : delete those ids : " + ids);
+        }
     }
 
     deleteUser(userId: number) {

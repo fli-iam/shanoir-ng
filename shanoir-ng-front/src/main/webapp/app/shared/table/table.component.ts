@@ -357,4 +357,13 @@ export class TableComponent {
         this.maxResults = this.maxResultsField;
         this.goToPage(1);
     }
+
+    public getNbSelected(): number {
+        if (!this.itemsLoaded) return 0;
+        let nb: number = 0;
+        for (let item of this.items) {
+            if (item["isSelectedInTable"]) nb++;
+        }
+        return nb;
+    }
 }
