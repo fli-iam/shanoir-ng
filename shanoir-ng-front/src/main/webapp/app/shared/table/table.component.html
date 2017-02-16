@@ -1,31 +1,29 @@
 <table class="shanoir-table">
+    <!-- Control bar -->
+    <caption class="controls">
+            <!-- Text search -->
+            <span class="text-search">
+                <button (click)="resetSearch()">&#x2716;</button>
+                <input class="search-txt" [(ngModel)]="searchStr" (change)="search()" type="text" placeholder="search..."/> 
+                in
+                <select class="search-field" [(ngModel)]="searchField" (change)="search()"> 
+                    <option value="">*</option>
+                    <option *ngFor="let col of getSearchableColumns()" value="{{col.field}}">
+                        {{col.headerName}}
+                    </option>
+                </select>
+            </span>
+            <!-- User defined buttons -->
+            <span *ngFor="let command of customActionDefs">
+                <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams(item) : null" routerLinkActive="active">
+                    <img *ngIf="command.img != undefined" src="{{command.img}}" />
+                    <span>{{command.title}}</span>
+                </button>
+            </span>
+    </caption>
+    <!-- Headers -->
     <thead>
-        <!-- Control bar -->
-        <tr>
-            <th class="controls" [attr.colspan]="columnDefs?.length">
-                <!-- Text search -->
-                <span class="text-search">
-                    <button (click)="resetSearch()">&#x2716;</button>
-                    <input class="search-txt" [(ngModel)]="searchStr" (change)="search()" type="text" placeholder="search..."/> 
-                    in
-                    <select class="search-field" [(ngModel)]="searchField" (change)="search()"> 
-                        <option value="">*</option>
-                        <option *ngFor="let col of getSearchableColumns()" value="{{col.field}}">
-                            {{col.headerName}}
-                        </option>
-                    </select>
-                </span>
-                <!-- User defined buttons -->
-                <span *ngFor="let command of customActionDefs">
-                    <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams(item) : null" routerLinkActive="active">
-                        <img *ngIf="command.img != undefined" src="{{command.img}}" />
-                        <span>{{command.title}}</span>
-                    </button>
-                </span>
-            </th>
-        </tr>
-        <!-- Headers -->
-        <tr>
+        <tr class="full-row">
             <th 
                 *ngFor="let col of columnDefs" 
                 (click)="sortBy(col)"
@@ -33,7 +31,7 @@
                 [class.sortable]="!col.suppressSorting && col.type!='button'"
                 [class.active]="lastSortedCol==col"
                 [attr.title]="col.tip != undefined ? col.tip : null"
-                [style.width]="col.widthPercent+'%'"
+                [style.width]="col.width"
                 >{{col.headerName}}
                     <span class="sort-arrow" *ngIf="!col.suppressSorting && col.type!='button'">
                         <span *ngIf="lastSortedCol==col && !lastSortedAsc" class="arrow arrowUp">&#9652;</span>   
@@ -44,9 +42,16 @@
     </thead>
     <!-- Table ontent -->
     <tbody *ngIf="!isLoading && items.length > 0">
-        <tr *ngFor="let item of items.slice((currentPage-1)*maxResults, currentPage*maxResults); let i = index" [class.odd]="i%2!=0" [class.even]="i%2==0" >
-            <td *ngFor="let col of columnDefs" class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" [class.bool]="isFieldBoolean(item, col)">
-                {{renderCell(item, col)}}
+        <tr 
+            *ngFor="let item of items.slice((currentPage-1)*maxResults, currentPage*maxResults); let i = index" 
+            [class.odd]="i%2!=0" 
+            [class.even]="i%2==0" 
+            ><td 
+                *ngFor="let col of columnDefs" 
+                class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" 
+                [class.bool]="isFieldBoolean(item, col)"
+                [routerLink]="col.type != 'button' ? rowClickAction.target : null" [queryParams]="rowClickAction.getParams != undefined ? rowClickAction.getParams(item) : null" routerLinkActive="active"
+                >{{renderCell(item, col)}}
                 <span *ngIf="isFieldBoolean(item, col)">
                     <span *ngIf="getCellValue(item, col)" class="bool-true">&#x2713;</span>
                     <span *ngIf="!getCellValue(item, col)" class="bool-false">&#x2717;</span>
@@ -63,7 +68,7 @@
         </tr>
 
         <!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
-        <tr>
+        <tr class="full-row">
             <th class="pager" [attr.colspan]="columnDefs?.length">
                 <span class="clickable"
                     [class.disabled]="currentPage == 1"
@@ -81,7 +86,7 @@
             <th class="status-bar controls" [attr.colspan]="columnDefs?.length">
                 <!-- Nb results per page input -->
                 <span class="options">
-                    <span *ngIf="items != undefined && items != null">Founded : {{items.length}}</span>
+                    <span *ngIf="items != undefined && items != null">Found : {{items.length}}</span>
                     <span *ngIf="itemsSave != undefined && itemsSave != null">Total : {{itemsSave.length}}</span>
                     <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
                 </span>

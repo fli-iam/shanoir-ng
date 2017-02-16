@@ -11,6 +11,7 @@ export class TableComponent {
     @Input() columnDefs: any[];
     @Input() items: Object[];
     @Input() customActionDefs: any[];
+    @Input() rowClickAction: Object;
     private isLoading: boolean = false;
     private itemsSave: Object[];
     private itemsLoaded: boolean = false;
@@ -45,7 +46,6 @@ export class TableComponent {
                     if (col.defaultSortCol != undefined) {
                         this.lastSortedCol = col;
                         this.lastSortedAsc = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
-                        console.log("caca");
                         break;
                     }
                 }
@@ -77,7 +77,6 @@ export class TableComponent {
      * Sort items by col, then by id
      */
     public sortBy(col: Object): void {
-        console.log(col["defaultAsc"]);
         let defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
         let asc: boolean =  col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
         this.sortByOrderBy(col, asc);

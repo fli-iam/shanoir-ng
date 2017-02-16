@@ -1,9 +1,9 @@
 <div class="UserListComponent content-component">
-    <div class="UserListComponent-title">
+    <div class="title">
         <h2 i18n="Manage users|Title">Manage users</h2>
-        <hr/>
+        <!-- hr/ -->
     </div>
   
-    <shanoir-table [items]="users" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading"></shanoir-table>
+    <shanoir-table [items]="users" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
     
 </div>

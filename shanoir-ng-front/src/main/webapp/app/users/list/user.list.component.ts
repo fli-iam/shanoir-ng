@@ -18,6 +18,7 @@ export class UserListComponent {
     private users: User[];
     private columnDefs: any[];
     private customActionDefs: any[];
+    private rowClickAction: Object;
     private loading: boolean = false;
 
     constructor(private userService: UserService, private confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
@@ -50,12 +51,12 @@ export class UserListComponent {
             return null;
         };
         this.columnDefs = [
-            {headerName: "Username", field: "username", widthPercent: "10"},
-            {headerName: "First Name", field: "firstName", widthPercent: "10"},
-            {headerName: "Last Name", field: "lastName", widthPercent: "10"},
-            {headerName: "Email", field: "email", widthPercent: "20"},
+            {headerName: "Username", field: "username", width: "100px"},
+            {headerName: "First Name", field: "firstName", width: "100px"},
+            {headerName: "Last Name", field: "lastName", width: "100px"},
+            {headerName: "Email", field: "email", width: "200px"},
             {headerName: "O.D.", tip: "On Demand", field: "accountRequestDemand", type: "boolean", defaultSortCol: true, defaultAsc: false},
-            {headerName: "Role", field: "role.displayName", widthPercent: "5"},
+            {headerName: "Role", field: "role.displayName", width: "63px"},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params) {
                 return dateRenderer(params.data.creationDate);
             }},
@@ -76,6 +77,9 @@ export class UserListComponent {
         this.customActionDefs = [
             {title: "new user", img: "/images/add.user.24x24.black.png", target: "../editUser"},
         ];
+        this.rowClickAction = {target : "/editUser", getParams: function(item): Object {
+                return {id: item.id};
+        }};
     }
 
     openDeleteUserConfirmDialog = (item: User) => {
