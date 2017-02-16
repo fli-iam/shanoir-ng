@@ -93,7 +93,6 @@ form { color: var(--greyer); background-color: var(--lighter-grey); border: 1px 
   form my-date-picker .mydp .icon-right { font-size: 12px !important; }
   form my-date-picker .mydp .headertodaybtn { font-size: 12px !important; min-width: 0 !important; }
   form my-date-picker .mydp .selbtngroup { top: 2px !important; right: 2px !important; height: 14px !important; }
-  form my-date-picker .mydp .selectorarrow::after { }
   form my-date-picker .mydp .selectorarrow::before { border-color: rgba(204, 204, 204, 0) rgba(204, 204, 204, 0) #f1f1f1 !important; border-width: 12px !important; margin-left: -12px !important; }
   form my-date-picker .mydp .caltable, 
   form my-date-picker .mydp .daycell, 
@@ -101,7 +100,7 @@ form { color: var(--greyer); background-color: var(--lighter-grey); border: 1px 
   form my-date-picker .mydp .sunday { color: var(--color-b) !important; }
 
 
-.content-component { padding: 0 20px 10px 20px; position: relative; z-index: 1; }
+.content-component { padding: 0 20px 10px 20px; position: relative; z-index: 1; display: inline-block; }
 .max-content { width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
 .command-zone { background-color: var(--light-grey); }
 

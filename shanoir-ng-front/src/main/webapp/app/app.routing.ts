@@ -5,6 +5,7 @@ import { LoginComponent }       from './users/login/login.component';
 import { HomeComponent }       from './home/home.component';
 import { UserListComponent }   from './users/list/user.list.component';
 import { EditUserComponent }   from './users/edit/edit.user.component';
+import { AccountRequestComponent }   from './users/accountRequest/account.request.component';
 import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
 
 const appRoutes: Routes = [
@@ -32,8 +33,7 @@ const appRoutes: Routes = [
   },
   {
     path: 'requestAccount',
-    component: EditUserComponent,
-    data: { requestAccount: true }
+    component: AccountRequestComponent,
   }
 ];
 
