@@ -45,7 +45,7 @@
 					</fieldset>
 					<fieldset>
 						<ol>
-							<li>
+							<li *ngIf="!requestAccountMode">
 								<label i18n="Edit user|ExpirationDate label">Expiration Date</label> 
 								<span class="right-col">
 									<my-date-picker id="expirationDate" [options]="myDatePickerOptions" formControlName="expirationDate" [(ngModel)]="expirationDate" 
