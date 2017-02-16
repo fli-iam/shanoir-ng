@@ -12,7 +12,7 @@ import { LoginService } from './shared/login/login.service';
 export class AppComponent {
     constructor(private router: Router, private loginService: LoginService) {
         router.events.subscribe(e => {
-            if(e.url !== '/login') {
+            if(e.url !== '/login' && e.url !== '/requestAccount') {
                 if(!this.loginService.isAuthenticated()) {
                     this.router.navigate(['/login']);
                 }

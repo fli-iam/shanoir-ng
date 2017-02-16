@@ -29,6 +29,11 @@ const appRoutes: Routes = [
   {
     path: 'editUser',
     component: EditUserComponent
+  },
+  {
+    path: 'requestAccount',
+    component: EditUserComponent,
+    data: { requestAccount: true }
   }
 ];
 

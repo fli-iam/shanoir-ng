@@ -43,6 +43,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	public static final String FORM_BASED_LOGIN_ENTRY_POINT = "/authenticate";
 	public static final String TOKEN_BASED_AUTH_ENTRY_POINT = "/**";
 	public static final String TOKEN_REFRESH_ENTRY_POINT = "/authenticate/token";
+	public static final String USER_ACCOUNT_REQUEST_ENTRY_POINT = "/user/accountrequest";
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
@@ -63,7 +64,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	private ShanoirLogoutSuccess logoutSuccess;
 
 	protected JwtAuthenticationProcessingFilter buildJwtAuthenticationProcessingFilter() throws Exception {
-		List<String> pathsToSkip = Arrays.asList(TOKEN_REFRESH_ENTRY_POINT, FORM_BASED_LOGIN_ENTRY_POINT);
+		List<String> pathsToSkip = Arrays.asList(TOKEN_REFRESH_ENTRY_POINT, FORM_BASED_LOGIN_ENTRY_POINT, USER_ACCOUNT_REQUEST_ENTRY_POINT);
 		SkipPathRequestMatcher matcher = new SkipPathRequestMatcher(pathsToSkip, TOKEN_BASED_AUTH_ENTRY_POINT);
 		JwtAuthenticationProcessingFilter filter = new JwtAuthenticationProcessingFilter(
 				authenticationFailureHandler, tokenExtractor, matcher);
@@ -84,6 +85,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers(FORM_BASED_LOGIN_ENTRY_POINT).permitAll()
 				// Token refresh end-point
 				.antMatchers(TOKEN_REFRESH_ENTRY_POINT).permitAll()
+				// User account request end-point
+				.antMatchers(USER_ACCOUNT_REQUEST_ENTRY_POINT).permitAll()
 
 				.and().authorizeRequests()
 				// Protected API End-points

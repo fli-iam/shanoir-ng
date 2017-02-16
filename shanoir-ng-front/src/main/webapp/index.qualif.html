@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <base href="/shanoir-ng/">
+        <title>Shanoir NG</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- 1. Load libraries -->
+        <!-- Polyfills -->
+        <script src="https://unpkg.com/core-js/client/shim.min.js"></script>
+        <!-- Update these package versions as needed -->
+        <script src="https://unpkg.com/zone.js@0.7.7"></script>
+        <script src="https://unpkg.com/reflect-metadata@0.1.9"></script>
+        <script src="https://unpkg.com/systemjs@0.20.7"></script>
+        <!-- This SystemJS configuration loads umd packages from the web -->
+        <script src="systemjs.config.server.js"></script>
+        <script>
+          System.import('app').catch(function(err){ console.error(err); });
+        </script>
+        
+        <link href="app/shared/css/common.css" rel="stylesheet" />
+        
+    </head>
+    <!-- 3. Display the application -->
+    <body>
+        <shanoir-ng-app>Loading...</shanoir-ng-app>
+    </body>
+</html>

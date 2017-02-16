@@ -11,6 +11,8 @@ import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
 import { AccountRequestInfo } from '../../accountRequestInfo/account.request.info.model';
 
+const GUEST_ROLE_ID: number = 2;
+
 @Component({
     selector: 'editUser',
     moduleId: module.id,
@@ -30,9 +32,11 @@ export class EditUserComponent implements OnInit {
     isEmailUnique: Boolean = true;
     isDateValid: Boolean = true;
     creationMode: Boolean;
+    requestAccountMode: Boolean = false;
     userId: number;
     selectedDateNormal: string = '';
-    accountRequestInfo: AccountRequestInfo = new AccountRequestInfo();
+    accountRequestInfo: AccountRequestInfo;
+    private accountRequestInfoValid: Boolean = false;
 
     constructor(router: Router, private location: Location, route: ActivatedRoute, userService: UserService, roleService: RoleService, private fb: FormBuilder) {
         this.router = router;
@@ -114,6 +118,18 @@ export class EditUserComponent implements OnInit {
             });
     }
 
+    requestAccount(): void {
+        this.submit();
+        this.userService.requestAccount(this.user)
+            .subscribe((user) => {
+                this.cancel();
+            }, (err: String) => {
+                if (err.indexOf("email should be unique") != -1) {
+                    this.isEmailUnique = false;
+                }
+            });
+    }
+
     update(): void {
         this.submit();
         this.userService.update(this.userId, this.user)
@@ -129,22 +145,50 @@ export class EditUserComponent implements OnInit {
     submit(): void {
         this.user = this.editUserForm.value;
         this.setDateFromDatePicker();
+        this.user.accountRequestInfo = this.accountRequestInfo;
+    }
+
+    isEditUserFormValid(): Boolean {
+        if (this.editUserForm.valid && this.isDateValid) {
+            if (this.requestAccountMode) {
+                if (this.accountRequestInfoValid) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
     ngOnInit(): void {
-        this.getRoles();
+        this.requestAccountMode = this.route.snapshot.data['requestAccount'];
+        if (this.requestAccountMode) {
+            this.creationMode = true;
+        } else {
+            this.getRoles();
+        }
         this.buildForm();
     }
 
     buildForm(): void {
         const emailRegex = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$';
+        let roleFC: FormControl;
+        if (this.requestAccountMode) {
+            roleFC = new FormControl(this.user.role);
+        } else {
+            roleFC = new FormControl(this.user.role, Validators.required);
+        }
         this.editUserForm = this.fb.group({
             'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
             'username': new FormControl(this.user.username),
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
             'expirationDate': [this.user.expirationDate],
-            'role': [this.user.role, Validators.required],
+            'role': roleFC,
             'canAccessToDicomAssociation': new FormControl('false'),
             'medical': new FormControl('false')
         });
@@ -223,6 +267,14 @@ export class EditUserComponent implements OnInit {
             }
         }
         return null;
+    }
+
+    saveARI(ari: AccountRequestInfo): void {
+        this.accountRequestInfo = ari;
+    }
+
+    updateARIValid(ariValid: Boolean): void {
+        this.accountRequestInfoValid = ariValid;
     }
     
 }

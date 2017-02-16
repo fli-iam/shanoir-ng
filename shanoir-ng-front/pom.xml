@@ -23,6 +23,7 @@
 		<npm.executable>npm</npm.executable>
 		<nginx.webapp.directory>${basedir}/../shanoir-ng-nginx/webapp</nginx.webapp.directory>
 		<sonar.skip>true</sonar.skip>
+		<index.file.suffix></index.file.suffix>
 	</properties>
 
 	<build>
@@ -40,6 +41,7 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 				    <execution>
+						<id>clean-webapp-directory</id>
 				        <phase>clean</phase>
 				        <goals>
                     		<goal>run</goal>
@@ -49,6 +51,18 @@
 				                <delete dir="${nginx.webapp.directory}" />
 				            </target>
 				        </configuration>
+				    </execution>
+					<execution>
+						<id>copy-index-qualif</id>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<copy file="src/main/webapp/index${index.file.suffix}.html" tofile="${nginx.webapp.directory}/index.html"/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
 				    </execution>
 				</executions>
 			</plugin>
@@ -85,7 +99,6 @@
 	                        </arguments>
 	                    </configuration>
 	                </execution>
-
 	            </executions>
 	        </plugin>
             <plugin>
@@ -103,9 +116,9 @@
 	                			<resource>
 	                  				<directory>src/main/webapp</directory>
 	                  				<filtering>true</filtering>
-	                  				<excludes>
-          								<exclude>app</exclude>
-          							</excludes>
+										<excludes>
+											<exclude>index*.html</exclude>
+										</excludes>
 	                			</resource>
 	              			</resources>
 	            		</configuration>
@@ -130,6 +143,40 @@
 	            <bower.executable>bower.cmd</bower.executable>
 	        </properties>
 	    </profile>
+		<profile>
+			<id>qualif</id>
+			<properties>
+				<index.file.suffix>.qualif</index.file.suffix>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-resources</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${nginx.webapp.directory}</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/main/webapp</directory>
+											<filtering>true</filtering>
+											<excludes combine.children="append">
+												<exclude>node_modules/**</exclude>
+											</excludes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 	<repositories>
 		<repository>

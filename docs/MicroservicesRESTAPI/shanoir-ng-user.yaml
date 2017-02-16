@@ -37,6 +37,36 @@ paths:
           description: unexpected error
           schema:
             $ref: "#/definitions/ErrorModel"
+  /user/accountrequest:
+    post:
+      operationId: saveNewUserFromAccountRequest
+      description: Saves a new user from account request
+      consumes: 
+        - application/json
+      parameters:
+        - name: user
+          in: body
+          description: user to create from account request
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        '200':
+          description: created user from account request
+          schema:
+            $ref: "#/definitions/User"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '500':
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
   /user/{userId}:
     get:
       operationId: findUserById

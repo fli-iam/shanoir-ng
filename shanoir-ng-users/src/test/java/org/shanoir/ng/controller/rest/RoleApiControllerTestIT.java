@@ -1,20 +1,13 @@
 package org.shanoir.ng.controller.rest;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
 
-import java.util.Arrays;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.configuration.security.jwt.token.JwtTokenFactory;
-import org.shanoir.ng.model.Role;
-import org.shanoir.ng.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -40,14 +33,6 @@ public class RoleApiControllerTestIT {
 
     @Autowired
     private JwtTokenFactory tokenFactory;
-
-    @MockBean
-    private RoleService roleService;
-
-    @Before
-    public void setup() {
-        given(roleService.findAll()).willReturn(Arrays.asList(new Role()));
-   }
 
 	@Test
 	public void findRolesProtected() {

@@ -1,24 +1,19 @@
 package org.shanoir.ng.controller.rest;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
 
-import java.util.Arrays;
+import java.io.IOException;
 
-import org.junit.Before;
+import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.shanoir.ng.configuration.security.jwt.token.JwtTokenFactory;
-import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
-import org.shanoir.ng.service.UserService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -40,25 +35,19 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("dev")
 public class UserApiControllerTestIT {
 
+	private static final String REQUEST_PATH = "/user";
+	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+
     @Autowired
     private TestRestTemplate restTemplate;
 
     @Autowired
     private JwtTokenFactory tokenFactory;
 
-    @MockBean
-    private UserService userService;
-
-    @Before
-    public void setup() throws ShanoirUsersException {
-        given(userService.findAll()).willReturn(Arrays.asList(new User()));
-        given(userService.findById(1L)).willReturn(new User());
-		given(userService.save(Mockito.mock(User.class))).willReturn(new User());
-   }
-
 	@Test
 	public void findUserByIdProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity("/user/1", String.class);
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
@@ -67,13 +56,13 @@ public class UserApiControllerTestIT {
 		HttpHeaders headers = ApiControllerTestUtil.generateHeadersWithTokenForAdmin(tokenFactory);
 
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		final ResponseEntity<String> response = restTemplate.exchange("/user/1", HttpMethod.GET, entity, String.class);
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
 	@Test
 	public void findUsersProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity("/user/all", String.class);
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
@@ -82,7 +71,7 @@ public class UserApiControllerTestIT {
 		HttpHeaders headers = ApiControllerTestUtil.generateHeadersWithTokenForAdmin(tokenFactory);
 
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		final ResponseEntity<String> response = restTemplate.exchange("/user/all", HttpMethod.GET, entity, String.class);
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
@@ -92,7 +81,7 @@ public class UserApiControllerTestIT {
 				ModelsUtil.USER_LOGIN_GUEST, ModelsUtil.USER_PASSWORD_GUEST);
 		this.restTemplate.getRestTemplate().getInterceptors().add(basicAuthInterceptor);
 		try {
-			final ResponseEntity<String> response = restTemplate.getForEntity("/user/all", String.class);
+			final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
 			assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 		} finally {
 			restTemplate.getRestTemplate().getInterceptors().remove(basicAuthInterceptor);
@@ -101,7 +90,7 @@ public class UserApiControllerTestIT {
 
 	@Test
 	public void saveNewUserProtected() {
-		final ResponseEntity<String> response = restTemplate.postForEntity("/user", new User(), String.class);
+		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new User(), String.class);
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
@@ -110,8 +99,29 @@ public class UserApiControllerTestIT {
 		HttpHeaders headers = ApiControllerTestUtil.generateHeadersWithTokenForAdmin(tokenFactory);
 
 		HttpEntity<User> entity = new HttpEntity<User>(createUser(), headers);
-		final ResponseEntity<String> response = restTemplate.exchange("/user", HttpMethod.POST, entity, String.class);
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity, String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
+
+	@Test
+	public void updateNewTemplateProtected() {
+		final HttpEntity<User> entity = new HttpEntity<User>(createUser());
+		
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+				String.class);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+	}
+
+	@Test
+	public void updateNewTemplateWithLogin() throws ClientProtocolException, IOException {
+		HttpHeaders headers = ApiControllerTestUtil.generateHeadersWithTokenForAdmin(tokenFactory);
+
+		final User user = createUser();
+		user.setEmail("titi@ti.ti");
+		user.setUsername("titi");
+		HttpEntity<User> entity = new HttpEntity<User>(user, headers);
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity, String.class);
+		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 	}
 
 	/*

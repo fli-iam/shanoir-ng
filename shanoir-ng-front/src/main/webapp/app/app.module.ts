@@ -25,6 +25,7 @@ import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
 import { RoleService } from './roles/role.service';
 import { TableComponent} from "./shared/table/table.component";
+import { AccountRequestInfoComponent} from "./accountRequestInfo/account.request.info.component";
 
 @NgModule({
     imports: [
@@ -48,7 +49,8 @@ import { TableComponent} from "./shared/table/table.component";
         EditUserComponent,
         TableComponent,
         DropdownMenuComponent,
-        MenuItemComponent
+        MenuItemComponent,
+        AccountRequestInfoComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
