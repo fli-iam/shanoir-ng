@@ -39,15 +39,20 @@ input[type='date'] { width: 140px; }
 
 .hidden { display: none !important; }
 
-form { color: var(--greyer); background-color: var(--lighter-grey); border: 1px solid var(--light-grey); }
+form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1px solid var(--light-grey); }
   form input,
   form textarea,
   form select { border: 1px solid var(--grey) !important; border-radius: 2px !important; }
+  form input[readonly],
+  form textarea[readonly],
+  form select[readonly] { background-color: var(--light-grey); cursor: default; color : transparent; text-shadow : 0 0 0 var(--greyer);}
     form input.ng-invalid.ng-dirty,
     form input.invaliddate,
     form textarea.ng-invalid.ng-dirty,
     form select.ng-invalid.ng-dirty { border: 1px solid var(--color-error) !important; background-color: var(--color-light-error) !important; }
   form input, form select { height: 20px; }
+  form input[type='radio'] { vertical-align: middle; position: relative; top: -3px; left: -3px; }
+  form input[type='radio'] + input[type='radio'] { margin-left: 20px; }
   form textarea { resize: vertical; }
   form button { margin: 10px 0; }
   form input:not([type]), input[type='text'], input[type='password'], input[type='email'], textarea, select { width: 200px; }

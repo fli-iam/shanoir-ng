@@ -1,5 +1,5 @@
 .shanoir-table { border-collapse: collapse; border-spacing: 0; border: 1px solid var(--light-grey); table-layout: fixed; width: 1000px; border-top: 0; }
-	.shanoir-table .full-row { border-left: 1px solid var(--color-b); border-right: 1px solid var(--color-b); }
+	/* .shanoir-table .full-row { border-left: 1px solid var(--color-b); border-right: 1px solid var(--color-b); } */
 	.shanoir-table th,
 	.shanoir-table caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; overflow: hidden; }
 		.shanoir-table .controls { padding: 0; min-height: 26px; text-align: left; background-color: var(--light-grey); color: var(--very-dark-grey); }
