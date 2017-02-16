@@ -46,7 +46,7 @@ form { color: var(--greyer); background-color: var(--lighter-grey); border: 1px 
     form input.ng-invalid.ng-dirty,
     form input.invaliddate,
     form textarea.ng-invalid.ng-dirty,
-    form select.ng-invalid.ng-dirty { border: 1px solid var(--color-error) !important; background-color: var(--color-light-error) !important; }--color-light-error
+    form select.ng-invalid.ng-dirty { border: 1px solid var(--color-error) !important; background-color: var(--color-light-error) !important; }
   form input, form select { height: 20px; }
   form textarea { resize: vertical; }
   form button { margin: 10px 0; }
