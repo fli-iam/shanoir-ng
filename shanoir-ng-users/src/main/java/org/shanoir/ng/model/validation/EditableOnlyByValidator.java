@@ -120,6 +120,7 @@ public class EditableOnlyByValidator<T> {
 	 * 
 	 * @return roles
 	 */
+	@SuppressWarnings("rawtypes")
 	private Collection<String> getConnectedUserRoles() {
 		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
 			return new ArrayList<String>();

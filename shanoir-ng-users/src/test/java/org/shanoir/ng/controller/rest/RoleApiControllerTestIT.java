@@ -3,17 +3,14 @@ package org.shanoir.ng.controller.rest;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 
-import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.http.client.ClientProtocolException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.model.Role;
 import org.shanoir.ng.service.RoleService;
-import org.shanoir.ng.utils.AccessTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -35,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
-public class RoleApiControllerTestIT {
+public class RoleApiControllerTestIT extends KeycloakControllerTestIT {
 
 	private static final String REQUEST_PATH = "/role";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
@@ -58,8 +55,8 @@ public class RoleApiControllerTestIT {
 	}
 
 	@Test
-	public void findRolesWithLogin() throws ClientProtocolException, IOException {
-		HttpEntity<String> entity = new HttpEntity<String>(null, AccessTokenUtil.getHeadersWithToken());
+	public void findRolesWithLogin() {
+		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken());
 		
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -67,8 +64,8 @@ public class RoleApiControllerTestIT {
 
 	@Test
 	@Ignore
-	public void findRolesWithBadRole() throws ClientProtocolException, IOException {
-		HttpEntity<String> entity = new HttpEntity<String>(null, AccessTokenUtil.getHeadersWithToken());
+	public void findRolesWithBadRole() {
+		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken());
 		
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());

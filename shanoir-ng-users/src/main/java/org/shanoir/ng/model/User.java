@@ -64,11 +64,13 @@ public class User extends HalEntity implements UserDetails {
 
 	private boolean isSecondExpirationNotificationSent;
 
+	private String keycloakId;
+	
 	private Date lastLogin;
 
 	@NotNull
 	private String lastName;
-
+	
 	private String password;
 
 	@NotBlank
@@ -239,6 +241,20 @@ public class User extends HalEntity implements UserDetails {
 	 */
 	public void setSecondExpirationNotificationSent(final boolean isSecondExpirationNotificationSent) {
 		this.isSecondExpirationNotificationSent = isSecondExpirationNotificationSent;
+	}
+
+	/**
+	 * @return the keycloakId
+	 */
+	public String getKeycloakId() {
+		return keycloakId;
+	}
+
+	/**
+	 * @param keycloakId the keycloakId to set
+	 */
+	public void setKeycloakId(String keycloakId) {
+		this.keycloakId = keycloakId;
 	}
 
 	/**

@@ -3,10 +3,8 @@ package org.shanoir.ng.controller.rest;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 
-import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.http.client.ClientProtocolException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +13,6 @@ import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.service.UserService;
-import org.shanoir.ng.utils.AccessTokenUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +36,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
-public class UserApiControllerTestIT {
+public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 
 	private static final String REQUEST_PATH = "/user";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
@@ -65,8 +62,8 @@ public class UserApiControllerTestIT {
 	}
 
 	@Test
-	public void findUserByIdWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<User> entity = new HttpEntity<User>(null, AccessTokenUtil.getHeadersWithToken());
+	public void findUserByIdWithLogin() {
+		final HttpEntity<User> entity = new HttpEntity<User>(null, getHeadersWithToken());
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -79,8 +76,8 @@ public class UserApiControllerTestIT {
 	}
 
 	@Test
-	public void findUsersWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<User> entity = new HttpEntity<User>(null, AccessTokenUtil.getHeadersWithToken());
+	public void findUsersWithLogin() {
+		final HttpEntity<User> entity = new HttpEntity<User>(null, getHeadersWithToken());
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -106,8 +103,8 @@ public class UserApiControllerTestIT {
 	}
 
 	@Test
-	public void saveNewTemplateWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<User> entity = new HttpEntity<User>(createUser(), AccessTokenUtil.getHeadersWithToken());
+	public void saveNewTemplateWithLogin() {
+		final HttpEntity<User> entity = new HttpEntity<User>(createUser(), getHeadersWithToken());
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 				String.class);
@@ -124,8 +121,8 @@ public class UserApiControllerTestIT {
 	}
 
 	@Test
-	public void updateNewTemplateWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<User> entity = new HttpEntity<User>(createUser(), AccessTokenUtil.getHeadersWithToken());
+	public void updateNewTemplateWithLogin() {
+		final HttpEntity<User> entity = new HttpEntity<User>(createUser(), getHeadersWithToken());
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);

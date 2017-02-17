@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.exception.ShanoirUsersException;
+import org.shanoir.ng.keycloak.KeycloakClient;
 import org.shanoir.ng.model.AccountRequestInfo;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.auth.UserContext;
@@ -42,6 +43,9 @@ public class UserServiceTest {
 
 	@Mock
 	private AccountRequestInfoRepository accountRequestInfoRepository;
+
+	@Mock
+	private KeycloakClient keycloakClient;
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;

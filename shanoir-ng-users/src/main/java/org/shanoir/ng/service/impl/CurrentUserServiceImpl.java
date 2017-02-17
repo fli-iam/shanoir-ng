@@ -18,6 +18,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 	
 	private static final String USER_ID_TOKEN_ATT = "userId";
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean canAccessUser(final Long userId) {
 		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
