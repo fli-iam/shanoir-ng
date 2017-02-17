@@ -103,6 +103,8 @@ export class TableComponent {
             }
         }
         this.searchStr = "";
+        this.searchField = "";
+        this.refreshSorting();
         this.goToPage(1);
     }
 
@@ -365,5 +367,19 @@ export class TableComponent {
             if (item["isSelectedInTable"]) nb++;
         }
         return nb;
+    }
+
+    public selectAll() {
+        if (!this.itemsLoaded) return;
+        for (let item of this.items) {
+            item["isSelectedInTable"] = true;
+        }
+    }
+
+    public unSelectAll() {
+        if (!this.itemsLoaded) return;
+        for (let item of this.items) {
+            item["isSelectedInTable"] = false;
+        }
     }
 }

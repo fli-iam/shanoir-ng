@@ -1,9 +1,13 @@
 <table class="shanoir-table">
     <!-- Control bar -->
     <caption class="controls">
+            <span class="select-ctrl">
+                <button (click)="selectAll()" title="select all"><input type="checkbox" checked readonly/></button>
+                <button (click)="unSelectAll()" title="unselect all"><input type="checkbox" readonly/></button>
+            </span>
             <!-- Text search -->
             <span class="text-search">
-                <button (click)="resetSearch()">&#x2716;</button>
+                <button (click)="resetSearch()" title="clear search">&#x2716;</button>
                 <input class="search-txt" [(ngModel)]="searchStr" (change)="search()" type="text" placeholder="search..."/> 
                 in
                 <select class="search-field" [(ngModel)]="searchField" (change)="search()"> 

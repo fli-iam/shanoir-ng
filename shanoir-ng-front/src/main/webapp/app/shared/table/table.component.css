@@ -12,10 +12,13 @@
 				.shanoir-table .controls input:hover,
 				.shanoir-table .controls select:hover { background-color: var(--color-b-light); }
 			.shanoir-table .controls input { padding: 0 5px; width: 150px; }
-			.shanoir-table .controls select { width: 150px; }
+			.shanoir-table .controls select { width: 150px; margin-right: 5px; }
 			.shanoir-table .controls .text-search,
-			.shanoir-table .controls .options { margin: 0 10px 0 0; padding: 0 7px 0 0; border-right: 1px solid var(--grey); }
+			.shanoir-table .controls .options,
+			.shanoir-table .select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 0; border-right: 1px solid var(--grey); }
 				.shanoir-table .controls .options .max-results { width: 40px; text-align: right; }
+		.shanoir-table .select-ctrl button { padding: 0 5px; }
+		.shanoir-table .select-ctrl input[type="checkbox"] { margin: 0; width: 15px; }
 		.shanoir-table th.sortable { cursor: pointer; position: relative; }
 			.shanoir-table th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; }
 		.shanoir-table th.checkbox-col { width: 21px; }
