@@ -51,10 +51,10 @@ export class UserListComponent {
             return null;
         };
         this.columnDefs = [
-            {headerName: "Username", field: "username", width: "100px"},
-            {headerName: "First Name", field: "firstName", width: "100px"},
-            {headerName: "Last Name", field: "lastName", width: "100px"},
-            {headerName: "Email", field: "email", width: "200px"},
+            {headerName: "Username", field: "username" },
+            {headerName: "First Name", field: "firstName" },
+            {headerName: "Last Name", field: "lastName" },
+            {headerName: "Email", field: "email", width: "200%"},
             {headerName: "O.D.", tip: "On Demand", field: "accountRequestDemand", type: "boolean", defaultSortCol: true, defaultAsc: false},
             {headerName: "Role", field: "role.displayName", width: "63px"},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params) {
