@@ -27,6 +27,7 @@
 		.shanoir-table th.col-date { width: 65px; }
 		.shanoir-table th.col-boolean { width: 20px; }
 		.shanoir-table th.col-button { width: 20px; }
+		.shanoir-table th.pager { padding: 0 5px; }
 		.shanoir-table th.pager span:not(.wrapper) { display: inline-block; width: 30px; padding: 3px 0; margin-top: -2px; }
 			.shanoir-table th.pager span.clickable:not(.disabled):not(.active) { cursor: pointer; }
 			.shanoir-table th.pager span.clickable:not(.disabled):not(.active):hover { background-color: var(--color-b-light); color: var(--dark-grey); }
