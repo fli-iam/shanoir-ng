@@ -10,6 +10,8 @@
     --dark-grey: #333;
     --very-dark-grey: #222;
 
+    --color-overlay: rgba(70, 70, 70, 0.8); 
+
     --color-a: #5f0f4e;
     --color-b: #675682;
     --color-b-light: #67aeca ;
@@ -23,7 +25,7 @@
 body { margin: 0; background-color: var(--very-light-grey); }
   body.outsilde { background-color: var(--color-a); }
 body, option, table, button, select, input {font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
-h2 { color: var(--dark-black); margin: 0; font-size: 28px; }
+h2 { color: var(--color-a); margin: 0; font-size: 28px; }
 hr { margin: 7px 0 !important; border-bottom: 1px solid var(--grey) !important; border: 0; }
 input { padding: 0 5px; }
 
@@ -105,11 +107,11 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form my-date-picker .mydp .sunday { color: var(--color-b) !important; }
 
 
-.content-component { padding: 0 20px 10px 20px; position: relative; z-index: 1; display: inline-block; }
+.content-component { padding: 0 20px 10px 20px; position: relative; z-index: 1; }
 .max-content { width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
 .command-zone { background-color: var(--light-grey); }
 
 .shanoir-table table { border-collapse: collapse; }
   .shanoir-table table td, .shanoir-table table th { border: 1px solid gray; }
 
-md-dialog-container { position: fixed; background-color: grey; top: 300px; z-index: 1000; height: auto; }
+md-dialog-container { position: fixed; top: 0; background-color: var(--color-overlay); width: 100%; z-index: 10000; max-width: 100% !important; box-shadow: none !important; display: flex !important; justify-content: center !important; }

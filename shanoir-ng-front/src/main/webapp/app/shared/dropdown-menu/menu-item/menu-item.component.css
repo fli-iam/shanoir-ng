@@ -7,3 +7,4 @@
 .label { text-align: left; display: block; padding: 5px 8px;}
 .arrow { text-align: right; float: right; }
 .hidden { display: none !important; }
+img { height: 16px; vertical-align: bottom; margin-right: 7px; }

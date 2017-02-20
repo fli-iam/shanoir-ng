@@ -2,15 +2,10 @@ import { Component } from '@angular/core';
 import { MdDialogRef } from '@angular/material';
 
 @Component({
-  selector: 'confirm-dialog',
-  template: `
-    <h2>{{ title }}</h2>
-    <p>{{ message }}</p>
-    <button type="button" md-raised-button 
-        (click)="dialogRef.close(true)">OK</button>
-    <button type="button" md-button 
-        (click)="dialogRef.close()">Cancel</button>
-  `
+    selector: 'confirm-dialog',
+    moduleId: module.id,
+    templateUrl: 'confirm.dialog.component.html',
+    styleUrls: ['../css/common.css', 'confirm.dialog.component.css']
 })
 export class ConfirmDialogComponent {
     

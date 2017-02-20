@@ -7,7 +7,7 @@
     <span 
         class="label" 
         (click)="contentWrapper.children.length > 0 ? toggle() : click()"
-        >{{label}}
+        ><img src="{{icon}}" onerror="if (this.src != '/images/icons/medical/notepad.png') this.src = '/images/icons/medical/notepad.png';"/>{{label}}
         <span class="arrow" *ngIf="contentWrapper.children.length > 0">&nbsp;&#9656;</span>
         <span class="arrow" *ngIf="boolVar != undefined && boolVar">&nbsp;&#x2713;</span>
         <span class="arrow" *ngIf="boolVar != undefined && !boolVar">&nbsp;&#x2717;</span>

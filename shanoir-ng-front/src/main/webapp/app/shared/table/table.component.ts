@@ -382,4 +382,8 @@ export class TableComponent {
             item["isSelectedInTable"] = false;
         }
     }
+
+    private returnFalse() {
+        return false;
+    }
 }

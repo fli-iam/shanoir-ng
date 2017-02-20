@@ -26,17 +26,17 @@
 		.shanoir-table th.col-date { width: 65px; }
 		.shanoir-table th.col-boolean { width: 20px; }
 		.shanoir-table th.col-button { width: 20px; }
-			.shanoir-table th.pager { text-align: center; padding: 0; }
-			.shanoir-table th.pager span:not(.wrapper) { display: inline-block; width: 30px; padding: 3px 0; margin-top: -2px; }
-				.shanoir-table th.pager span.clickable:not(.disabled):not(.active) { cursor: pointer; }
-				.shanoir-table th.pager span.clickable:not(.disabled):not(.active):hover { background-color: var(--color-b-light); color: var(--dark-grey); }
-				.shanoir-table th.pager span.disabled { color: var(--color-b); }
-				.shanoir-table th.pager span.active { color: var(--dark-grey); background-color: var(--color-b-light); }
-			.shanoir-table th.status-bar { text-align: left; padding: 3px 0; color: var(--greyer)}
-				.shanoir-table th.status-bar input { width: 150px; }
-				.shanoir-table th.status-bar .options { border-right: 0; }
-					.shanoir-table th.status-bar .options span { padding: 0 10px; }
-						.shanoir-table th.status-bar .options span + span { border: 0; border-left: 1px solid var(--grey); }
+		.shanoir-table th.pager { text-align: center; padding: 0; }
+		.shanoir-table th.pager span:not(.wrapper) { display: inline-block; width: 30px; padding: 3px 0; margin-top: -2px; }
+			.shanoir-table th.pager span.clickable:not(.disabled):not(.active) { cursor: pointer; }
+			.shanoir-table th.pager span.clickable:not(.disabled):not(.active):hover { background-color: var(--color-b-light); color: var(--dark-grey); }
+			.shanoir-table th.pager span.disabled { color: var(--color-b); }
+			.shanoir-table th.pager span.active { color: var(--dark-grey); background-color: var(--color-b-light); }
+		.shanoir-table th.status-bar { text-align: left; padding: 3px 0; color: var(--greyer)}
+			.shanoir-table th.status-bar input { width: 150px; }
+			.shanoir-table th.status-bar .options { border-right: 0; }
+				.shanoir-table th.status-bar .options span { padding: 0 10px; }
+					.shanoir-table th.status-bar .options span + span { border: 0; border-left: 1px solid var(--grey); }
 	.shanoir-table tr { height: 20px; }
 		.shanoir-table tr.even { background-color: var(--light-grey); }
 		.shanoir-table tr.odd { background-color: var(--lighter-grey); }
@@ -50,6 +50,7 @@
 		.shanoir-table td.cell-number { text-align: right; }
 		.shanoir-table td.cell-nofield { text-align: center; }
 		.shanoir-table td span.button { max-height: 20px; max-width: 20px; cursor: pointer; }
+			.shanoir-table td span.button img { height: 16px; vertical-align: bottom; }
 		.shanoir-table td.loading,
 		.shanoir-table td.empty { padding: 20px 20px; text-align: center; }
 			.shanoir-table td.loading img { vertical-align: middle; margin: 10px; }

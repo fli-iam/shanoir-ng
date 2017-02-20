@@ -2,8 +2,8 @@
     <!-- Control bar -->
     <caption class="controls">
             <span class="select-ctrl">
-                <button (click)="selectAll()" title="select all"><input type="checkbox" checked readonly/></button>
-                <button (click)="unSelectAll()" title="unselect all"><input type="checkbox" readonly/></button>
+                <button (click)="selectAll()" title="select all"><img src="/images/icons/check-all.png"/></button>
+                <button (click)="unSelectAll()" title="unselect all"><img src="/images/icons/uncheck-all.png"/></button>
             </span>
             <!-- Text search -->
             <span class="text-search">
@@ -81,7 +81,7 @@
 
         <!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
         <tr class="full-row">
-            <th class="pager" [attr.colspan]="columnDefs?.length">
+            <th class="pager" [attr.colspan]="columnDefs?.length + 1">
                 <span class="clickable"
                     [class.disabled]="currentPage == 1"
                     (click)="currentPage > 1 ? goToPage(currentPage - 1) : void" 
@@ -95,7 +95,7 @@
             </th>
         </tr>
         <tr>
-            <th class="status-bar controls" [attr.colspan]="columnDefs?.length">
+            <th class="status-bar controls" [attr.colspan]="columnDefs?.length + 1">
                 <!-- Nb results per page input -->
                 <span class="options">
                     <span>Selected : {{getNbSelected()}}</span>
@@ -109,7 +109,7 @@
     <!-- Loader -->
     <tbody *ngIf="isLoading">
         <tr>
-            <td [attr.colspan]="columnDefs?.length" class="loading">
+            <td [attr.colspan]="columnDefs?.length + 1" class="loading">
                 <img src="/images/loader.32x32.gif"/><br/>Loading...
             </td>
         </tr>
@@ -117,7 +117,7 @@
     <!-- Empty table msg -->
     <tbody *ngIf="!isLoading && items.length == 0">
         <tr>
-            <td [attr.colspan]="columnDefs?.length" class="empty">
+            <td [attr.colspan]="columnDefs?.length + 1" class="empty">
                 No results
             </td>
         </tr>

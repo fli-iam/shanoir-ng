@@ -69,14 +69,14 @@ export class UserListComponent {
             {headerName: "Last Login", field: "lastLogin", type: "date", cellRenderer: function (params) {
                 return dateRenderer(params.data.lastLogin);
             }},
-            {headerName: "", type: "button", img: "/images/edit.16x16.png", target : "/editUser", getParams: function(item): Object {
+            {headerName: "", type: "button", img: "/images/icons/edit.png", target : "/editUser", getParams: function(item): Object {
                 return {id: item.id};
             }},
-            {headerName: "", type: "button", img: "/images/delete.16x16.png", action: this.openDeleteUserConfirmDialog}
+            {headerName: "", type: "button", img: "/images/icons/garbage-1.png", action: this.openDeleteUserConfirmDialog}
         ];
         this.customActionDefs = [
-            {title: "new user", img: "/images/add.user.24x24.black.png", target: "../editUser"},
-            {title: "delete selected", action: this.deleteAll }
+            {title: "new user", img: "/images/icons/add-1.png", target: "../editUser"},
+            {title: "delete selected", img: "/images/icons/garbage-1.png", action: this.deleteAll } 
         ];
         this.rowClickAction = {target : "/editUser", getParams: function(item): Object {
                 return {id: item.id};

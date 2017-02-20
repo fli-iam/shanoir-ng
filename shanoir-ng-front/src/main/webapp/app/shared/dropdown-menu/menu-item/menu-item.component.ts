@@ -12,6 +12,7 @@ export class MenuItemComponent {
     @Input() label: string;
     @Input() link: string;
     @Input() boolVar: boolean;
+    @Input() icon: string;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus;
 
     public opened: boolean;
