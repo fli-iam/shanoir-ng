@@ -309,7 +309,7 @@ export class TableComponent {
         if (this.items == undefined || this.items == null) {
             return 0;
         } else {
-            return Math.floor(this.items.length/this.maxResults) + 1;
+            return Math.floor(this.items.length/this.maxResults);
         }
     }
 
