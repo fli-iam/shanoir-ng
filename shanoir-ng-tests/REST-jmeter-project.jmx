@@ -30,7 +30,7 @@
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">100</stringProp>
+          <stringProp name="LoopController.loops">10000</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">0</stringProp>
@@ -220,9 +220,7 @@ sampler.getHeaderManager().add(new Header(&quot;x-auth-token&quot;,vars.get(&quo
 	&quot;email&quot; : &quot;testsautofli@gmail.com&quot;,&#xd;
 	&quot;creationDate&quot; : &quot;2016-11-28&quot;,&#xd;
 	&quot;role&quot; : {&#xd;
-      &quot;id&quot;: 2,&#xd;
-      &quot;name&quot;: &quot;Expert&quot;,&#xd;
-      &quot;accessLevel&quot;: 200&#xd;
+      &quot;id&quot;: 2&#xd;
 	}&#xd;
 }</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
