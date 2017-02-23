@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.shanoir.ng.model.Role;
+import org.keycloak.KeycloakPrincipal;
 import org.shanoir.ng.model.error.FieldError;
 import org.shanoir.ng.model.error.FieldErrorMap;
 import org.shanoir.ng.utils.Utils;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.util.StringUtils;
 
 public class EditableOnlyByValidator<T> {
@@ -30,7 +30,7 @@ public class EditableOnlyByValidator<T> {
 	 * @return the forgotten fields names
 	 */
 	public FieldErrorMap validate(final T originalEntity, final T editedEntity) {
-		final Collection<? extends GrantedAuthority> connectedUserRoles = getConnectedUserRoles();
+		final Collection<String> connectedUserRoles = getConnectedUserRoles();
 		final FieldErrorMap errorMap = new FieldErrorMap();
 		try {
 			for (final Field field : originalEntity.getClass().getDeclaredFields()) {
@@ -72,7 +72,7 @@ public class EditableOnlyByValidator<T> {
 	 * @return the forgotten fields names
 	 */
 	public FieldErrorMap validate(final T editedEntity) {
-		final Collection<? extends GrantedAuthority> connectedUserRoles = getConnectedUserRoles();
+		final Collection<String> connectedUserRoles = getConnectedUserRoles();
 		final FieldErrorMap errorMap = new FieldErrorMap();
 		try {
 			for (final Field field : editedEntity.getClass().getDeclaredFields()) {
@@ -104,11 +104,10 @@ public class EditableOnlyByValidator<T> {
 		return errorMap;
 	}
 
-	private boolean haveOneRoleInCommon(final String[] roles,
-			final Collection<? extends GrantedAuthority> authorities) {
+	private boolean haveOneRoleInCommon(final String[] roles, final Collection<String> authorities) {
 		for (final String role : roles) {
-			for (final GrantedAuthority authority : authorities) {
-				if (role != null && role.equals(authority.getAuthority())) {
+			for (final String authority : authorities) {
+				if (role != null && role.equals(authority)) {
 					return true;
 				}
 			}
@@ -121,19 +120,24 @@ public class EditableOnlyByValidator<T> {
 	 * 
 	 * @return roles
 	 */
-	private Collection<? extends GrantedAuthority> getConnectedUserRoles() {
-		Collection<? extends GrantedAuthority> connectedUserRoles;
+	@SuppressWarnings("rawtypes")
+	private Collection<String> getConnectedUserRoles() {
 		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
-			connectedUserRoles = new ArrayList<Role>();
+			return new ArrayList<String>();
 		} else {
-			UserDetails connectedUser = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-					.getPrincipal();
-			if (connectedUser == null) {
+			final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			if (principal == null) {
 				throw new IllegalArgumentException("connectedUser cannot be null");
 			}
-			connectedUserRoles = connectedUser.getAuthorities();
+			if (principal instanceof User) {
+				final List<String> userRoles = new ArrayList<String>();
+				for (GrantedAuthority authority : ((User) principal).getAuthorities()) {
+					userRoles.add(authority.getAuthority());
+				}
+				return userRoles;
+			}
+			return ((KeycloakPrincipal) principal).getKeycloakSecurityContext().getToken().getRealmAccess().getRoles();
 		}
-		return connectedUserRoles;
 	}
 
 }

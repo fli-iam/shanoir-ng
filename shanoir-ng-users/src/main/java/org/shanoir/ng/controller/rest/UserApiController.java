@@ -35,7 +35,7 @@ public class UserApiController implements UserApi {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Override
 	public ResponseEntity<Void> confirmAccountRequest(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") final Long userId,
@@ -120,19 +120,22 @@ public class UserApiController implements UserApi {
 	public ResponseEntity<User> saveNewUser(
 			@ApiParam(value = "the user to create", required = true) @RequestBody @Valid final User user,
 			final BindingResult result) throws RestServiceException {
-		
+
 		/* Now we generate a username for the new user creation */
 		if (user.getUsername() == null) {
 			if (user.getFirstName() != null && user.getLastName() != null) {
 				generateUsername(user);
 			}
 		}
-		
+
 		/* Validation */
 		// A basic user can only update certain fields, check that
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(user);
 		// Check hibernate validation
-		/* Tell Spring to remove the hibernante validation error on username blank now */
+		/*
+		 * Tell Spring to remove the hibernate validation error on username
+		 * blank now
+		 */
 		final FieldErrorMap hibernateErrors = FieldErrorMap.fieldErrorMapIgnoreUsernameBlank(result);
 		// Check unique constrainte
 		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
@@ -218,17 +221,17 @@ public class UserApiController implements UserApi {
 				usernameSb.append(l);
 			}
 		}
-		
+
 		// Username in lower case without accent
 		String usernameAsked = StringUtils.stripAccents(usernameSb.toString().toLowerCase());
 		String username = usernameAsked;
-		
+
 		int i = 1;
 		while (userService.findByUsername(username).isPresent()) {
 			username = usernameAsked + i;
 			i++;
 		}
-		
+
 		user.setUsername(username);
 	}
 

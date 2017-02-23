@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.shanoir-ng</groupId>
+		<artifactId>shanoir-ng</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../shanoir-ng-parent</relativePath>
+	</parent>
+
+	<artifactId>shanoir-ng-keycloak-init</artifactId>
+	<packaging>jar</packaging>
+
+	<name>shanoir-ng-keycloak-init</name>
+	<description>Shanoir-ng project used to initialize Keycloak server</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spring.profile.active>dev</spring.profile.active>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-users</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-compiler-plugin</artifactId>
+	            <configuration>
+	                <source>1.8</source>
+	                <target>1.8</target>
+	            </configuration>
+	        </plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+		          	<profiles>
+		            	<profile>${spring.profile.active}</profile>
+		          	</profiles>
+		        </configuration>
+<!-- 				<executions> -->
+<!--         <execution> -->
+<!--             <goals> -->
+<!--                 <goal>repackage</goal> -->
+<!--             </goals> -->
+<!--             <configuration> -->
+<!--                 <classifier>spring-boot</classifier> -->
+<!--                 <mainClass> -->
+<!--                   org.shanoir.ng.KeycloakServerInit -->
+<!--                 </mainClass> -->
+<!--             </configuration> -->
+<!--         </execution> -->
+<!--     </executions> -->
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<spring.profile.active>dev</spring.profile.active>
+			</properties>
+		</profile>
+		<profile>
+			<id>qualif</id>
+			<properties>
+				<spring.profile.active>qualif</spring.profile.active>
+			</properties>
+		</profile>
+	</profiles>
+</project>

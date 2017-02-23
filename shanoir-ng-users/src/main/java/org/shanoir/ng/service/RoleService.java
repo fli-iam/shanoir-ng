@@ -1,6 +1,7 @@
 package org.shanoir.ng.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.model.Role;
 
@@ -18,4 +19,13 @@ public interface RoleService {
      */
 	List<Role> findAll();
 	
+	/**
+	 * Find role by its name.
+	 *
+	 * @param name
+	 *            name.
+	 * @return a role or null/
+	 */
+	Optional<Role> findByName(String name);
+
 }

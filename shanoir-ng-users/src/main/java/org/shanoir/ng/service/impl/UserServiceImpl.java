@@ -2,18 +2,22 @@ package org.shanoir.ng.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.keycloak.KeycloakPrincipal;
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.dto.ShanoirOldUserDTO;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorModelCode;
+import org.shanoir.ng.keycloak.KeycloakClient;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.auth.UserContext;
 import org.shanoir.ng.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.repository.RoleRepository;
 import org.shanoir.ng.repository.UserRepository;
 import org.shanoir.ng.service.UserService;
+import org.shanoir.ng.utils.KeycloakUtils;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -47,6 +51,9 @@ public class UserServiceImpl implements UserService {
 	private AccountRequestInfoRepository accountRequestInfoRepository;
 
 	@Autowired
+	private KeycloakClient keycloakClient;
+
+	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
@@ -66,43 +73,40 @@ public class UserServiceImpl implements UserService {
 			LOG.error("User with id " + userId + " has no account request");
 			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
 		}
+
+		// Confirm and update user
 		userDb.setAccountRequestDemand(false);
-		updateUserValues(userDb, user);
-		try {
-			userRepository.save(userDb);
-		} catch (Exception e) {
-			ShanoirUsersException.logAndThrow(LOG,
-					"Error while confirming user account request with id '" + userId + "': " + e.getMessage());
-		}
-		return userDb;
+		return updateUserOnAllSystems(userDb, user);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void deleteById(final Long id) throws ShanoirUsersException {
-		final UserContext currentUser = (UserContext) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (currentUser != null && id.equals(currentUser.getId())) {
-			ShanoirUsersException.logAndThrow(LOG, "Forbidden to delete connected user.");
+		// Check if connected user tries to delete itself
+		final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		if (principal instanceof UserContext) {
+			// For tests
+			if (id.equals(((UserContext) principal).getId())) {
+				ShanoirUsersException.logAndThrow(LOG, "Forbidden to delete connected user.");
+			}
+		} else {
+			final Map<String, Object> otherClaims = ((KeycloakPrincipal) principal).getKeycloakSecurityContext()
+					.getToken().getOtherClaims();
+			if (otherClaims.containsKey(KeycloakUtils.ATT_USER_ID)
+					&& id.equals(Long.valueOf(otherClaims.get(KeycloakUtils.ATT_USER_ID).toString()))) {
+				ShanoirUsersException.logAndThrow(LOG, "Forbidden to delete connected user.");
+			}
+		}
+
+		final User user = userRepository.findOne(id);
+		if (user == null) {
+			LOG.error("User with id " + id + " not found");
+			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
 		}
 		userRepository.delete(id);
 		deleteUserOnShanoirOld(id);
-	}
-
-	/*
-	 * Send a message to Shanoir old to delete an user.
-	 * 
-	 * @param userId user id.
-	 */
-	private void deleteUserOnShanoirOld(final Long userId) {
-		try {
-			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteQueueOut().getName(),
-					new ObjectMapper().writeValueAsString(userId));
-		} catch (AmqpException e) {
-			LOG.error("Cannot send user " + userId + " delete to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.queueOut().getName(), e);
-		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send user " + userId + " userId because of an error while serializing user.", e);
-		}
+		keycloakClient.deleteUser(user.getKeycloakId());
 	}
 
 	@Override
@@ -118,6 +122,7 @@ public class UserServiceImpl implements UserService {
 		}
 		// Remove user
 		userRepository.delete(userId);
+		keycloakClient.deleteUser(user.getKeycloakId());
 	}
 
 	@Override
@@ -172,6 +177,12 @@ public class UserServiceImpl implements UserService {
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirUsersException.logAndThrow(LOG, "Error while creating user: " + dive.getMessage());
 		}
+		String keycloakUserId = keycloakClient.createUser(user);
+		if (keycloakUserId != null) {
+			// Save keycloak id
+			savedUser.setKeycloakId(keycloakUserId);
+			userRepository.save(savedUser);
+		}
 		updateShanoirOld(savedUser);
 		return savedUser;
 	}
@@ -179,14 +190,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User update(final User user) throws ShanoirUsersException {
 		final User userDb = userRepository.findOne(user.getId());
-		updateUserValues(userDb, user);
-		try {
-			userRepository.save(userDb);
-		} catch (Exception e) {
-			ShanoirUsersException.logAndThrow(LOG, "Error while updating user: " + e.getMessage());
+		if (userDb == null) {
+			LOG.error("User with id " + user.getId() + " not found");
+			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
 		}
-		updateShanoirOld(userDb);
-		return userDb;
+		return updateUserOnAllSystems(userDb, user);
 	}
 
 	@Override
@@ -236,6 +244,24 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/*
+	 * Send a message to Shanoir old to delete an user.
+	 * 
+	 * @param userId user id.
+	 */
+	private void deleteUserOnShanoirOld(final Long userId) {
+		try {
+			LOG.info("Send update to Shanoir Old");
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteQueueOut().getName(),
+					new ObjectMapper().writeValueAsString(userId));
+		} catch (AmqpException e) {
+			LOG.error("Cannot send user " + userId + " delete to Shanoir Old on queue : "
+					+ RabbitMqConfiguration.queueOut().getName(), e);
+		} catch (JsonProcessingException e) {
+			LOG.error("Cannot send user " + userId + " userId because of an error while serializing user.", e);
+		}
+	}
+
+	/*
 	 * Update Shanoir Old.
 	 * 
 	 * @param user user.
@@ -276,6 +302,30 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/*
+	 * Update user on all systems: microservice database, Shanoir old and
+	 * Keycloak server
+	 * 
+	 * @param userDb user found in database.
+	 * 
+	 * @param user user with new values.
+	 * 
+	 * @return database user with new values.
+	 * 
+	 * @throws ShanoirUsersException
+	 */
+	private User updateUserOnAllSystems(final User userDb, final User user) throws ShanoirUsersException {
+		updateUserValues(userDb, user);
+		try {
+			userRepository.save(userDb);
+		} catch (Exception e) {
+			ShanoirUsersException.logAndThrow(LOG, "Error while updating user: " + e.getMessage());
+		}
+		updateShanoirOld(userDb);
+		keycloakClient.updateUser(userDb);
+		return userDb;
+	}
+
+	/*
 	 * Update some values of user to save them in database.
 	 * 
 	 * @param userDb user found in database.
@@ -291,7 +341,6 @@ public class UserServiceImpl implements UserService {
 		userDb.setFirstName(user.getFirstName());
 		userDb.setLastName(user.getLastName());
 		// TODO: password modification
-		// TODO: add motivation (user account request)
 		userDb.setRole(user.getRole());
 		userDb.setMedical(user.isMedical());
 		userDb.setUsername(user.getUsername());

@@ -5,7 +5,6 @@ import java.util.concurrent.CountDownLatch;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.service.UserService;
-import org.shanoir.ng.service.impl.AuthenticationServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,7 @@ import com.google.gson.Gson;
  *
  */
 public class RabbitMqReceiver {
-	private static final Logger LOG = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RabbitMqReceiver.class);
 
 	@Autowired
 	private UserService userService;

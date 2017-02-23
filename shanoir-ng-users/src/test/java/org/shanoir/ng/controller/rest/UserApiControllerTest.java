@@ -65,9 +65,9 @@ public class UserApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
 	public void confirmAccountRequestTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID + "/confirmaccountrequest").accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createUser())))
-				.andExpect(status().isNoContent());
+		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID + "/confirmaccountrequest")
+				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
+				.content(gson.toJson(ModelsUtil.createUser()))).andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -79,7 +79,8 @@ public class UserApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "adminRole" })
 	public void denyAccountRequestTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID + "/denyaccountrequest")).andExpect(status().isNoContent());
+		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID + "/denyaccountrequest"))
+				.andExpect(status().isNoContent());
 	}
 
 	@Test
