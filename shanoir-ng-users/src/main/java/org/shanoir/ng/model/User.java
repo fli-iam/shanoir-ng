@@ -376,7 +376,7 @@ public class User extends HalEntity implements UserDetails {
 	@Override
 	@JsonIgnore
 	public boolean isEnabled() {
-		return true;
+		return expirationDate == null || expirationDate.after(new Date());
 	}
 
 }

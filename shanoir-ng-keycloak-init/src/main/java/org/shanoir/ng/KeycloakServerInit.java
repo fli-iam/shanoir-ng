@@ -239,7 +239,7 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 		userRepresentation.setAttributes(attributes);
 		userRepresentation.setEmail(user.getEmail());
 		userRepresentation.setEmailVerified(Boolean.TRUE);
-		userRepresentation.setEnabled(Boolean.TRUE);
+		userRepresentation.setEnabled(user.isEnabled());
 		userRepresentation.setFirstName(user.getFirstName());
 		userRepresentation.setLastName(user.getLastName());
 		userRepresentation.setUsername(user.getUsername());
