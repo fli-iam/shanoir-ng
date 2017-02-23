@@ -1,6 +1,7 @@
 package org.shanoir.ng.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.model.Role;
 import org.shanoir.ng.repository.RoleRepository;
@@ -24,6 +25,11 @@ public class RoleServiceImpl implements RoleService {
 	@Override
 	public List<Role> findAll() {
 		return Utils.toList(roleRepository.findAll());
+	}
+
+	@Override
+	public Optional<Role> findByName(String name) {
+		return roleRepository.findByName(name);
 	}
 
 }
