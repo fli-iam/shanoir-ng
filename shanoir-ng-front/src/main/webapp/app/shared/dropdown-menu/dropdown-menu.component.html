@@ -1,13 +1,20 @@
 <li 
     [class.opened]="opened" 
-    [class.closed]="!opened" 
-    [routerLink]="link != undefined ? link : null" 
-    [routerLinkActive]="link != undefined ? 'active' : 'unactive'">
+    [class.closed]="!opened">
     <span 
-        class="label" 
-        (click)="contentWrapper.children.length > 0 ? toggle() : click()"
+        *ngIf="contentWrapper.children.length > 0"
+        class="label"
+        (click)="toggle()"
         >{{label}}
-        <span *ngIf="contentWrapper.children.length > 0" class="menu-arrow">&#x25BE;</span>
+        <span class="menu-arrow">&#x25BE;</span>
+    </span>
+    <span
+        *ngIf="contentWrapper.children.length == 0"
+        class="label" 
+        (click)="click()"
+        [routerLink]="link? link : null"
+        [routerLinkActive]="link? 'active' : 'unactive'"
+        >{{label}}
     </span>
     <ul #contentWrapper class="sub-content" [class.hidden]="!opened">
         <ng-content></ng-content>
