@@ -17,7 +17,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.keycloak.KeycloakClient;
 import org.shanoir.ng.model.AccountRequestInfo;
-import org.shanoir.ng.model.Role;
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.model.auth.UserContext;
 import org.shanoir.ng.repository.AccountRequestInfoRepository;

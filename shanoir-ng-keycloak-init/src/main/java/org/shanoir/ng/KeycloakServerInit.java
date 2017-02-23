@@ -46,15 +46,6 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	@Value("${keycloak.auth-server-url}")
 	private String keycloakAuthServerUrl;
 
-	@Value("${kc.requests.front.resource}")
-	private String keycloakFrontResource;
-
-	@Value("${kc.requests.front.url}")
-	private String keycloakFrontUrl;
-
-	@Value("${kc.requests.ms.users.url}")
-	private String keycloakMsUsersUrl;
-
 	@Value("${keycloak.realm}")
 	private String keycloakRealm;
 
@@ -66,9 +57,6 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 
 	@Value("${kc.requests.realm}")
 	private String keycloakRequestsRealm;
-
-	@Value("${keycloak.resource}")
-	private String keycloakResource;
 
 	@Value("${kc.requests.temporary.password}")
 	private boolean keycloakTemporaryPassword;
