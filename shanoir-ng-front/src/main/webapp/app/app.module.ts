@@ -16,8 +16,6 @@ import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
 import { KeycloakHttp } from "./shared/keycloak/keycloak.http";
 import { KeycloakService } from "./shared/keycloak/keycloak.service";
-import { LoginComponent }   from './users/login/login.component';
-import { LoginService } from './shared/login/login.service';
 import { MyDatePickerModule } from 'mydatepicker';
 import { NavbarComponent }   from './shared/navbar/navbar.component';
 import { DropdownMenuComponent }   from './shared/dropdown-menu/dropdown-menu.component';
@@ -45,7 +43,6 @@ import { AccountRequestComponent} from "./users/accountRequest/account.request.c
         EditUserComponent,
         HeaderComponent,
         HomeComponent,
-        LoginComponent,
         NavbarComponent,
         UserListComponent,
         EditUserComponent,
@@ -63,7 +60,6 @@ import { AccountRequestComponent} from "./users/accountRequest/account.request.c
         AuthAdminGuard,
         ConfirmDialogService,
         KeycloakService,
-        LoginService,
         RoleService,
         UserService,
         {

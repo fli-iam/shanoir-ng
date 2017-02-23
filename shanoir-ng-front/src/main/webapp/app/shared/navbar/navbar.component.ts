@@ -1,5 +1,4 @@
 import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
-import { LoginService } from 'app/shared/login/login.service';
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
 
 @Component({
@@ -21,7 +20,7 @@ export class NavbarComponent {
     private colorBSave;    
     public pinkMode: boolean = false;
 
-    constructor(private loginService: LoginService) {
+    constructor() {
         
     }
 
@@ -36,12 +35,8 @@ export class NavbarComponent {
     }
  
     isUserAdmin(): boolean {
-        return this.loginService.isUserAdmin();
-    }
-
-    logout(event): void {
-        event.preventDefault();
-        this.loginService.logout();
+        //return this.loginService.isUserAdmin();
+        return true;
     }
 
     togglePink() {
