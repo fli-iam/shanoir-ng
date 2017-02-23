@@ -15,7 +15,7 @@ export class MenuItemComponent {
     @Input() icon: string;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus;
 
-    public opened: boolean;
+    public opened: boolean = false;
     public siblings: QueryList<MenuItemComponent>;
     public parent: any;
     public closeAll: () => void;

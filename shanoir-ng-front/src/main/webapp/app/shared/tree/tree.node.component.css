@@ -1,0 +1,3 @@
+.node-wrapper { position: relative; left: 2em; padding-left: 10px; cursor: default; margin: 2px 0; }
+.arrow { cursor: pointer; left: -5px; top: -1px; position: absolute; }
+.picto { height: 16px; vertical-align: bottom; }

@@ -1,0 +1,8 @@
+<node *ngFor="let patient of patients" [label]="patient.name" pictoUrl="/images/icons/user.png">
+    <node *ngFor="let exam of patient.examinations" [label]="exam.name + ' [' + exam.date + ']'" pictoUrl="/images/icons/list.png">
+        <node *ngFor="let acq of exam.acquisitions" [label]="acq.name" pictoUrl="/images/icons/medical/x-ray-2.png">
+            <node *ngFor="let dataset of acq.datasets" [label]="dataset.name" pictoUrl="/images/icons/medical/brain.png">
+            </node>
+        </node>
+    </node>
+</node>

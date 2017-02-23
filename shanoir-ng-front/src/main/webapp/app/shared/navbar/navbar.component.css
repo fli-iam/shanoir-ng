@@ -3,6 +3,6 @@
 /********************/
 .navbar-component { box-shadow: 0 0 var(--shadow-height) 0 gray; margin-bottom: 25px; z-index: 100; position: relative; } 
 
-dropdown-menu { margin-left: -4px; padding: 0;  border: 0; }
+dropdown-menu + dropdown-menu { margin-left: -4px; padding: 0;  border: 0; }
 
 .menu-list { padding: 0; margin: 0; }
