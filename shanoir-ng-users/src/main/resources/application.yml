@@ -42,12 +42,12 @@ spring:
 keycloak:
   cors: true
   realm: shanoir-ng
-  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1X1Yxc6iFhiqGHE/0+jbDGlZbSc/K2KRxXwShx6hdIRkgXw7caxKpl8+5D6i3GOtG9FZl8H0VZfbbReJQ9lXq/WygBKJHGrjkb4RoS1P3G47zDpg8sBIW+q4dyu7Nm98OXKhaRBPEfT7wt+0/zRrbbfh+IhJVzlFZ6KU/DS6tRsTBTi0xVL5U1hbpNA+oCy51P63blh0F0bAnMExNTjr9qhAdVv6mwwzh8MB52aln1rHhnfJtZEKLPV3IxlpwWKpDY58LwFGFTjoHLMaPkU7jf4/znD3I34evgA2VtXhTKakT8spX+0aBfTkSeR5Ix69b2LvgNCeY8kCKRANqWZbBQIDAQAB
-  auth-server-url: http://localhost:8080/auth
+  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiUQgjPFATVI3SxFNYVnxan7q39M+0Qohi5Al+tMoFHO1aI8LITp6VUh+DRwnkKVLiCQMqR/rm9lk1laej7mDeGG/sYnt0bCF0DjfiTs6DjW8EKbY2iNUDTSf+4QbOw7YCMSwz3794/tVssODe3bz6eBDpE0iNs+FylshjssSAnaJES2p5NxV71Vcmu4nFC7y4Jv65802XKM7YLT5VLqgtBl5JTBnTAn7cWXKHqUVJgMjLNo/OUAN+D2cpUhUJGF8ivMMpqx33gf2lbV+4/wl1EkpvVaf3//Em8YKeOYtLPCqNMgeR1HMpSbKWUnLnOJerCzYvU84E0yKMhhRiMC4SwIDAQAB
+  auth-server-url: http://localhost/auth
   ssl-required: external
   resource: shanoir-ng-users
   bearer-only: true
-  credentials.secret: af0a63d8-8540-4bdc-b909-ee5866361dca
+  credentials.secret: bd223310-42ac-44b3-8aa6-fc8f57e47945
   securityConstraints[0]:
     securityCollections[0]:
       name: spring secured api
@@ -58,7 +58,7 @@ keycloak:
         - /*
 kc.requests:
     realm: master
-    client.id: security-admin-console
+    client.id: admin-cli
     admin:
       login: admin
       password: admin

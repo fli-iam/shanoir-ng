@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { KeycloakService } from "app/keycloak/keycloak.service";
+import { KeycloakService } from "../keycloak/keycloak.service";
 
 @Component({
     selector: 'header',

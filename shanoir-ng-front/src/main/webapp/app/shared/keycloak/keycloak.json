@@ -1,6 +1,6 @@
 {
   "realm": "shanoir-ng",
-  "auth-server-url": "http://localhost:8080/auth",
+  "auth-server-url": "http://localhost/auth",
   "ssl-required": "external",
   "resource": "shanoir-ng-front",
   "public-client": true

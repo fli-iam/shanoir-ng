@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
-import { KeycloakService } from "app/keycloak/keycloak.service";
-import { LoginService } from 'app/shared/login/login.service';
+import { KeycloakService } from "../keycloak/keycloak.service";
+import { LoginService } from '../login/login.service';
 
 @Component({
     selector: 'navbar',
