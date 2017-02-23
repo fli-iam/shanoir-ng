@@ -7,10 +7,7 @@ import java.util.Map;
 
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.ProtocolMapperRepresentation;
-import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.model.Role;
@@ -42,8 +39,6 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	 * Logger
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(KeycloakServerInit.class);
-
-	private static final String PROTOCOL_OPENID_CONNECT = "openid-connect";
 
 	@Value("${kc.requests.admin.login}")
 	private String keycloakRequestsAdminLogin;
@@ -110,69 +105,8 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	}
 
 	private void start() {
-		createRealm();
-		createClients();
 		createRoles();
 		createUsers();
-	}
-
-	private void createRealm() {
-		LOG.info("Create realm '" + keycloakRealm + "'");
-
-		RealmRepresentation realm = new RealmRepresentation();
-		realm.setRealm(keycloakRealm);
-		realm.setEnabled(Boolean.TRUE);
-		realm.setResetPasswordAllowed(Boolean.TRUE);
-		realm.setVerifyEmail(Boolean.TRUE);
-
-		getKeycloak().realms().create(realm);
-	}
-
-	private void createClients() {
-		LOG.info("Create client '" + keycloakFrontResource + "'");
-
-		ClientRepresentation client = new ClientRepresentation();
-		client.setClientId(keycloakFrontResource);
-		client.setEnabled(Boolean.TRUE);
-		client.setClientAuthenticatorType("client-secret");
-		client.setRedirectUris(Arrays.asList(keycloakFrontUrl + "/*"));
-		client.setWebOrigins(Arrays.asList(keycloakFrontUrl));
-		client.setStandardFlowEnabled(Boolean.TRUE);
-		client.setDirectAccessGrantsEnabled(Boolean.TRUE);
-		client.setPublicClient(Boolean.TRUE);
-		client.setProtocol(PROTOCOL_OPENID_CONNECT);
-		client.setFullScopeAllowed(Boolean.TRUE);
-
-		getKeycloak().realm(keycloakRealm).clients().create(client);
-
-		LOG.info("Create client '" + keycloakResource + "'");
-
-		client = new ClientRepresentation();
-		client.setClientId(keycloakResource);
-		client.setEnabled(Boolean.TRUE);
-		client.setClientAuthenticatorType("client-secret");
-		client.setRedirectUris(Arrays.asList(keycloakMsUsersUrl + "/*"));
-		client.setStandardFlowEnabled(Boolean.TRUE);
-		client.setDirectAccessGrantsEnabled(Boolean.TRUE);
-		client.setServiceAccountsEnabled(Boolean.TRUE);
-		client.setAuthorizationServicesEnabled(Boolean.TRUE);
-		client.setPublicClient(Boolean.TRUE);
-		client.setProtocol(PROTOCOL_OPENID_CONNECT);
-		client.setFullScopeAllowed(Boolean.TRUE);
-
-		final ProtocolMapperRepresentation protocolMapper = new ProtocolMapperRepresentation();
-		protocolMapper.setName("userId");
-		protocolMapper.setProtocol(PROTOCOL_OPENID_CONNECT);
-		protocolMapper.setProtocolMapper("oidc-usermodel-attribute-mapper");
-		final Map<String, String> config = new HashMap<String, String>();
-		config.put("user.attribute", "userId");
-		config.put("access.token.claim", "true");
-		config.put("jsonType.label", "long");
-		config.put("user.attribute", "userId");
-		protocolMapper.setConfig(config);
-		client.setProtocolMappers(Arrays.asList(protocolMapper));
-
-		getKeycloak().realm(keycloakRealm).clients().create(client);
 	}
 
 	private void createRoles() {

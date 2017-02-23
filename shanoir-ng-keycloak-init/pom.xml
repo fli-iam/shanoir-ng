@@ -46,19 +46,6 @@
 		            	<profile>${spring.profile.active}</profile>
 		          	</profiles>
 		        </configuration>
-<!-- 				<executions> -->
-<!--         <execution> -->
-<!--             <goals> -->
-<!--                 <goal>repackage</goal> -->
-<!--             </goals> -->
-<!--             <configuration> -->
-<!--                 <classifier>spring-boot</classifier> -->
-<!--                 <mainClass> -->
-<!--                   org.shanoir.ng.KeycloakServerInit -->
-<!--                 </mainClass> -->
-<!--             </configuration> -->
-<!--         </execution> -->
-<!--     </executions> -->
 			</plugin>
 		</plugins>
 	</build>
