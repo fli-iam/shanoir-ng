@@ -16,8 +16,17 @@
                 <menu-item label="Score" link="" icon="/images/icons/podium.png"></menu-item>
             </dropdown-menu>
 
+            <dropdown-menu label="Import data">
+                <menu-item label="From DICOM CD/DVD" link="" icon="/images/icons/compact-disc.png"></menu-item>
+                <menu-item label="From Neuroinfo PACS" link="" icon="/images/neurinfo-icon.png"></menu-item>
+                <menu-item label="From ShanoirUploader" link="" icon="/images/logo.shanoirUp_transp.128x128.png"></menu-item>
+                <menu-item label="Processed datasets (NifTi)" link="" icon="/images/NifTi.png"></menu-item>
+                <menu-item label="From files ..." link="" icon="/images/icons/folder-7.png"></menu-item>
+            </dropdown-menu>
+
             <dropdown-menu label="Administration" *ngIf="isUserAdmin()">
                 <menu-item label="Manage users" i18n-label="User menu|Manage users label" link="userlist" icon="/images/icons/users-1.png"></menu-item>
+                <menu-item label="Tree test page" link="treeTest" icon="/images/icons/share-1.png"></menu-item>
                 <menu-item label="Preferences" i18n-label="Preferences menu|Manage users preferences" icon="/images/icons/controls-7.png">
                     <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="pinkMode" icon="/images/icons/user-5.png"></menu-item>
                 </menu-item>

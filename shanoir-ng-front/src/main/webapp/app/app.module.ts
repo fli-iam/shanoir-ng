@@ -27,6 +27,8 @@ import { RoleService } from './roles/role.service';
 import { TableComponent} from "./shared/table/table.component";
 import { AccountRequestInfoComponent} from "./users/accountRequestInfo/account.request.info.component";
 import { AccountRequestComponent} from "./users/accountRequest/account.request.component";
+import { StudyTreeComponent }   from './studies/tree/study.tree.component';
+import { TreeNodeComponent }   from './shared/tree/tree.node.component';
 
 @NgModule({
     imports: [
@@ -52,7 +54,9 @@ import { AccountRequestComponent} from "./users/accountRequest/account.request.c
         DropdownMenuComponent,
         MenuItemComponent,
         AccountRequestInfoComponent,
-        AccountRequestComponent
+        AccountRequestComponent,
+        StudyTreeComponent,
+        TreeNodeComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
