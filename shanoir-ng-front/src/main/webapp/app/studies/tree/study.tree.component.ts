@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TreeNodeComponent } from './shared/tree/tree.node.component';
+import { TreeNodeComponent } from '../../shared/tree/tree.node.component';
 
 @Component({
     selector: 'study-tree',
