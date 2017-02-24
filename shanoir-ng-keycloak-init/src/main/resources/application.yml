@@ -35,7 +35,7 @@ kc.requests:
   temporary.password: false
 # logging configuration
 logging:
-  file: /vol/log/ms/shanoir-ng-init-keycloak.log
+  file: /vol/log/ms/shanoir-ng-keycloak-init.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
@@ -77,6 +77,9 @@ logging:
 spring:
   profiles: qualif
   datasource:
+    url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    username: shanoir
+    password: shanoir
     initialize: false
   jpa:
     hibernate:
@@ -85,7 +88,7 @@ spring:
 #keycloak
 keycloak:
   realm: shanoir-ng
-  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/keycloak/auth
+  auth-server-url: http://shanoir-ng-nginx/auth
 kc.requests:
   admin:
     login: admin
