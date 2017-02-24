@@ -156,6 +156,7 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	private UserRepresentation getUserRepresentation(final User user) {
 		final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
 		attributes.put("userId", Arrays.asList(user.getId().toString()));
+		attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate().getTime()));
 
 		final UserRepresentation userRepresentation = new UserRepresentation();
 		userRepresentation.setAttributes(attributes);
