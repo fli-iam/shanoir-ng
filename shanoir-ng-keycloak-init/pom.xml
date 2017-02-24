@@ -17,7 +17,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.profile.active>dev</spring.profile.active>
+		<spring.profile.active></spring.profile.active>
 		<users.docker.directory>${basedir}/../shanoir-ng-users/src/main/docker</users.docker.directory>
 	</properties>
 
