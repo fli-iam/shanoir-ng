@@ -11,3 +11,6 @@ echo "Populate database"
 mysql -u shanoir -pshanoir shanoir_ng_users < /dk/shanoirng_users.sql
 echo "Stop mysql process"
 mysqladmin -u root -p$MYSQL_ROOT_PASSWORD shutdown
+
+echo "Initialize Keycloak database"
+java -jar shanoir-ng-keycloak-init.jar --spring.profiles.active=qualif
