@@ -64,7 +64,7 @@ kc.requests:
   temporary.password: false
 # logging configuration
 logging:
-  file: c:\\Temp\\shanoir-ng\\shanoir-ng-init-keycloak.log
+  file: c:\\Temp\\shanoir-ng\\shanoir-ng-keycloak-init.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
