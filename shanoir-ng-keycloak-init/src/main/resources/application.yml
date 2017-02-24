@@ -25,19 +25,14 @@ spring:
 #keycloak
 keycloak:
   realm: shanoir-ng
-  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/keycloak/auth
-  resource: shanoir-ng-users
+  auth-server-url: http://shanoir-ng-nginx/auth
 kc.requests:
   admin:
     login: admin
     password: admin
   client.id: admin-cli
-  front:
-    resource: shanoir-ng-front
-    url: https://shanoir-qualif.irisa.fr/shanoir-ng
-  ms.users.url: https://shanoir-qualif.irisa.fr/shanoir-ng/users
   realm: master
-  temporary.password: true
+  temporary.password: false
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-init-keycloak.log
@@ -60,16 +55,11 @@ spring:
 keycloak:
   realm: shanoir-ng
   auth-server-url: http://localhost:8080/auth
-  resource: shanoir-ng-users
 kc.requests:
   admin:
     login: admin
     password: admin
   client.id: admin-cli
-  front:
-    resource: shanoir-ng-front
-    url: http://localhost:3000
-  ms.users.url: http://localhost:9901
   realm: master
   temporary.password: false
 # logging configuration
@@ -78,3 +68,28 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
+
+---
+
+######################################
+# DO NOT COMMIT VALUES MODIFICATIONS #
+######################################
+spring:
+  profiles: qualif
+  datasource:
+    initialize: false
+  jpa:
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: validate
+#keycloak
+keycloak:
+  realm: shanoir-ng
+  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/keycloak/auth
+kc.requests:
+  admin:
+    login: admin
+    password: admin
+  client.id: admin-cli
+  realm: master
+  temporary.password: true
