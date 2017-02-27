@@ -28,14 +28,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-	            <groupId>org.apache.maven.plugins</groupId>
-	            <artifactId>maven-compiler-plugin</artifactId>
-	            <configuration>
-	                <source>1.8</source>
-	                <target>1.8</target>
-	            </configuration>
-	        </plugin>
 	        <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -57,7 +49,7 @@
 						<phase>package</phase>
 						<configuration>
 							<target>
-								<copy file="src/main/webapp/index${index.file.suffix}.html" tofile="${nginx.webapp.directory}/index.html"/>
+								<copy file="src/index${index.file.suffix}.html" tofile="${nginx.webapp.directory}/index.html"/>
 							</target>
 						</configuration>
 						<goals>
@@ -66,41 +58,92 @@
 				    </execution>
 				</executions>
 			</plugin>
-	        <plugin>
-	            <groupId>org.codehaus.mojo</groupId>
-	            <artifactId>exec-maven-plugin</artifactId>
+			<plugin>
+	            <groupId>com.github.eirslett</groupId>
+	            <artifactId>frontend-maven-plugin</artifactId>
+	            <version>0.0.26</version>
+	
 	            <executions>
+	
 	                <execution>
-	                    <id>exec-npm-install</id>
-	                    <phase>generate-sources</phase>
-				        <goals>
-                    		<goal>exec</goal>
-                		</goals>
+	                    <!-- optional: you don't really need execution ids,
+	                    but it looks nice in your build log. -->
+	                    <id>install node and npm</id>
+	                    <goals>
+	                        <goal>install-node-and-npm</goal>
+	                    </goals>
 	                    <configuration>
-	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
-	                        <executable>${npm.executable}</executable>
-	                        <arguments>
-	                            <argument>install</argument>
-	                        </arguments>
+	                        <nodeVersion>v6.2.2</nodeVersion>
+	                        <npmVersion>3.9.5</npmVersion>
+	                    </configuration>                        
+	                </execution>
+	
+	                <execution>
+	                    <id>npm install</id>
+	                    <goals>
+	                        <goal>npm</goal>
+	                    </goals>
+	
+	                    <!-- optional: default phase is "generate-resources" -->
+	                    <phase>generate-resources</phase>
+	
+	                    <configuration>
+	                        <!-- optional: The default argument is actually
+	                        "install", so unless you need to run some other npm command,
+	                        you can remove this whole <configuration> section.
+	                        -->
+	                        <arguments>install</arguments>
 	                    </configuration>
 	                </execution>
+	
 	                <execution>
-	                    <id>exec-npm-run-tsc</id>
-	                    <phase>generate-sources</phase>
-				        <goals>
-                    		<goal>exec</goal>
-                		</goals>
+	                    <id>npm run build</id>
+	                    <goals>
+	                        <goal>npm</goal>
+	                    </goals>
+	                    <phase>generate-resources</phase>
 	                    <configuration>
-	                        <workingDirectory>${project.basedir}/src/main/webapp</workingDirectory>
-	                        <executable>${npm.executable}</executable>
-	                        <arguments>
-	                            <argument>run</argument>
-	                            <argument>tsc</argument>
-	                        </arguments>
+	                        <arguments>run build</arguments>
 	                    </configuration>
 	                </execution>
+	
 	            </executions>
 	        </plugin>
+<!-- 	        <plugin> -->
+<!-- 	            <groupId>org.codehaus.mojo</groupId> -->
+<!-- 	            <artifactId>exec-maven-plugin</artifactId> -->
+<!-- 	            <executions> -->
+<!-- 	                <execution> -->
+<!-- 	                    <id>exec-npm-install</id> -->
+<!-- 	                    <phase>generate-sources</phase> -->
+<!-- 				        <goals> -->
+<!--                     		<goal>exec</goal> -->
+<!--                 		</goals> -->
+<!-- 	                    <configuration> -->
+<!-- 	                        <workingDirectory>${project.basedir}</workingDirectory> -->
+<!-- 	                        <executable>${npm.executable}</executable> -->
+<!-- 	                        <arguments> -->
+<!-- 	                            <argument>install</argument> -->
+<!-- 	                        </arguments> -->
+<!-- 	                    </configuration> -->
+<!-- 	                </execution> -->
+<!-- 	                <execution> -->
+<!-- 	                    <id>exec-npm-run-tsc</id> -->
+<!-- 	                    <phase>generate-sources</phase> -->
+<!-- 				        <goals> -->
+<!--                     		<goal>exec</goal> -->
+<!--                 		</goals> -->
+<!-- 	                    <configuration> -->
+<!-- 	                        <workingDirectory>${project.basedir}</workingDirectory> -->
+<!-- 	                        <executable>${npm.executable}</executable> -->
+<!-- 	                        <arguments> -->
+<!-- 	                            <argument>run</argument> -->
+<!-- 	                            <argument>tsc</argument> -->
+<!-- 	                        </arguments> -->
+<!-- 	                    </configuration> -->
+<!-- 	                </execution> -->
+<!-- 	            </executions> -->
+<!-- 	        </plugin> -->
             <plugin>
 	        	<artifactId>maven-resources-plugin</artifactId>
 	        	<executions>
@@ -114,10 +157,11 @@
 	              			<outputDirectory>${nginx.webapp.directory}</outputDirectory>
 	              			<resources>
 	                			<resource>
-	                  				<directory>src/main/webapp</directory>
+	                  				<directory>${project.basedir}</directory>
 	                  				<filtering>true</filtering>
 										<excludes>
 											<exclude>index*.html</exclude>
+											<exclude>node/**</exclude>
 										</excludes>
 	                			</resource>
 	              			</resources>
@@ -163,7 +207,7 @@
 									<outputDirectory>${nginx.webapp.directory}</outputDirectory>
 									<resources>
 										<resource>
-											<directory>src/main/webapp</directory>
+											<directory>${project.basedir}</directory>
 											<filtering>true</filtering>
 											<excludes combine.children="append">
 												<exclude>node_modules/**</exclude>
@@ -178,30 +222,5 @@
 			</build>
 		</profile>
 	</profiles>
-	<repositories>
-		<repository>
-			<id>spring-snapshots</id>
-			<name>Spring Snapshots</name>
-			<url>http://repo.spring.io/libs-snapshot-local</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>http://repo.spring.io/libs-milestone-local</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>spring-releases</id>
-			<name>Spring Releases</name>
-			<url>http://repo.spring.io/libs-release-local</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
+	
 </project>

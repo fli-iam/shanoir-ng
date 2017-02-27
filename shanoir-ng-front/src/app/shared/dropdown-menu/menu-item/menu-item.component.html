@@ -1,0 +1,30 @@
+<li class="menu-item" 
+    [class.opened]="opened" 
+    [class.closed]="!opened" 
+    >
+    <span 
+        *ngIf="contentWrapper.children.length > 0"
+        class="label" 
+        (click)="toggle()"
+        ><img src="{{icon}}" onerror="if (this.src != '/assets/icons/medical/notepad.png') this.src = '/assets/icons/medical/notepad.png';"/>{{label}}
+        <span class="arrow">&nbsp;&#9656;</span>
+    </span>
+    <span 
+        *ngIf="contentWrapper.children.length == 0 && boolVar != undefined"
+        class="label"
+        ><img src="{{icon}}" onerror="if (this.src != '/assets/icons/medical/notepad.png') this.src = '/assets/icons/medical/notepad.png';"/>{{label}}
+        <span class="arrow" *ngIf="boolVar != undefined && boolVar">&nbsp;&#x2713;</span>
+        <span class="arrow" *ngIf="boolVar != undefined && !boolVar">&nbsp;&#x2717;</span>
+    </span>
+    <span 
+        *ngIf="contentWrapper.children.length == 0 && boolVar == undefined"
+        [routerLink]="link? link : null" 
+        [routerLinkActive]="link? 'active' : 'unactive'"
+        class="label" 
+        (click)="click()"
+        ><img src="{{icon}}" onerror="if (this.src != '/assets/icons/medical/notepad.png') this.src = '/assets/icons/medical/notepad.png';"/>{{label}}
+    </span>
+    <ul #contentWrapper class="sub-content" [class.hidden]="!opened">
+        <ng-content></ng-content>
+    </ul>
+</li>
