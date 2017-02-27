@@ -67,8 +67,22 @@ public class KeycloakClient {
 	 */
 	public String createUser(final User user) {
 		try {
-			return KeycloakUtils
+			final String keycloakId = KeycloakUtils
 					.getCreatedUserId(getKeycloak().realm(keycloakRealm).users().create(getUserRepresentation(user)));
+			
+			final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+			// Reset user password
+			// TODO: manage it
+			final CredentialRepresentation credential = new CredentialRepresentation();
+			credential.setType(CredentialRepresentation.PASSWORD);
+			credential.setValue(user.getPassword());
+//			credential.setTemporary(???);
+//			userResource.resetPassword(credential);
+
+			// Add realm role
+			userResource.roles().realmLevel().add(Arrays.asList(
+					getKeycloak().realm(keycloakRealm).roles().get(user.getRole().getName()).toRepresentation()));
+			return keycloakId;
 		} catch (Exception e) {
 			LOG.error("Error while creating user with id " + user.getId() + " on Keycloak server", e);
 			return null;
@@ -99,6 +113,18 @@ public class KeycloakClient {
 		try {
 			final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(user.getKeycloakId());
 			userResource.update(getUserRepresentation(user));
+
+			// New user password
+			// TODO: manage it
+			final CredentialRepresentation credential = new CredentialRepresentation();
+			credential.setType(CredentialRepresentation.PASSWORD);
+			credential.setValue(user.getPassword());
+//			credential.setTemporary(???);
+//			userResource.resetPassword(credential);
+
+			// Add realm role
+			userResource.roles().realmLevel().add(Arrays.asList(
+					getKeycloak().realm(keycloakRealm).roles().get(user.getRole().getName()).toRepresentation()));
 		} catch (Exception e) {
 			LOG.error("Error while updating user with keycloak id " + user.getKeycloakId() + " on Keycloak server", e);
 		}
@@ -112,10 +138,6 @@ public class KeycloakClient {
 	 * @return keycloak user representation.
 	 */
 	private UserRepresentation getUserRepresentation(final User user) {
-		final CredentialRepresentation credential = new CredentialRepresentation();
-		credential.setType(CredentialRepresentation.PASSWORD);
-		credential.setValue(user.getPassword());
-
 		final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
 		attributes.put("userId", Arrays.asList(user.getId().toString()));
 		if (user.getExpirationDate() != null) {
@@ -124,12 +146,10 @@ public class KeycloakClient {
 
 		final UserRepresentation userRepresentation = new UserRepresentation();
 		userRepresentation.setAttributes(attributes);
-		userRepresentation.setCredentials(Arrays.asList(credential));
 		userRepresentation.setEmail(user.getEmail());
-		userRepresentation.setEnabled(user.isAccountRequestDemand());
+		userRepresentation.setEnabled(user.isEnabled() && !user.isAccountRequestDemand());
 		userRepresentation.setFirstName(user.getFirstName());
 		userRepresentation.setLastName(user.getLastName());
-		userRepresentation.setRealmRoles(Arrays.asList(user.getRole().getName()));
 		userRepresentation.setUsername(user.getUsername());
 
 		return userRepresentation;
