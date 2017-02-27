@@ -23,11 +23,13 @@ import { MenuItemComponent }   from './shared/dropdown-menu/menu-item/menu-item.
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
 import { RoleService } from './roles/role.service';
+import { CenterService } from './centers/shared/center.service';
 import { TableComponent} from "./shared/table/table.component";
 import { AccountRequestInfoComponent} from "./users/accountRequestInfo/account.request.info.component";
 import { AccountRequestComponent} from "./users/accountRequest/account.request.component";
 import { StudyTreeComponent }   from './studies/tree/study.tree.component';
 import { TreeNodeComponent }   from './shared/tree/tree.node.component';
+import { CenterListComponent }   from './centers/list/center.list.component';
 
 @NgModule({
     imports: [
@@ -42,7 +44,6 @@ import { TreeNodeComponent }   from './shared/tree/tree.node.component';
     declarations: [
         AppComponent,
         ConfirmDialogComponent,
-        EditUserComponent,
         HeaderComponent,
         HomeComponent,
         NavbarComponent,
@@ -54,7 +55,8 @@ import { TreeNodeComponent }   from './shared/tree/tree.node.component';
         AccountRequestInfoComponent,
         AccountRequestComponent,
         StudyTreeComponent,
-        TreeNodeComponent
+        TreeNodeComponent,
+        CenterListComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -66,6 +68,7 @@ import { TreeNodeComponent }   from './shared/tree/tree.node.component';
         KeycloakService,
         RoleService,
         UserService,
+        CenterService,
         {
             provide: Http,
             useFactory:

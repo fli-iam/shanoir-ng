@@ -24,15 +24,14 @@ export class UserListComponent {
     constructor(private userService: UserService, private confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
         this.getUsers();
         this.createColumnDefs();
-}
+    }
 
     // Grid data
     getUsers(): void {
         this.loading = true;
-        var usersTmp: User[] = [];
-        this.userService.getUsers().then(users2 => {
-            if (users2) {
-                this.users = users2;
+        this.userService.getUsers().then(users => {
+            if (users) {
+                this.users = users;
             }
             this.loading = false;
         })
