@@ -261,8 +261,7 @@ export class TableComponent {
     private isValueBoolean(val: any): boolean {
         return val != undefined
             && val != null
-            && (typeof val == "boolean" 
-            || typeof val == "Boolean");
+            && typeof val == "boolean";
     }
 
     /**
