@@ -38,7 +38,7 @@
 
 	<div class="logo">
 		<#if realm.displayName == "shanoir-ng">
-			<img src="http://localhost:3000/assets/logo.shanoir.white.png"/>
+			<img src="${properties.shanoirUrl!}/assets/logo.shanoir.white.png"/>
 		</#if>
 	</div>
 
