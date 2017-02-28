@@ -1,0 +1,40 @@
+<div #container class="navbar-component command-zone">
+    <nav>
+        <ul class="menu-list">
+
+            <dropdown-menu label="Manage data">
+                <menu-item label="Research study" link="" icon="/assets/icons/folder-12.png"></menu-item>
+                <menu-item label="Subject" link="" icon="/assets/icons/user.png"></menu-item>
+                <menu-item label="Examination" link="" icon="/assets/icons/medical/stethoscope.png"></menu-item>
+                <menu-item label="Dataset acquisition" link="" icon="/assets/icons/medical/x-ray-1.png"></menu-item>
+                <menu-item label="Dataset" link="" icon="/assets/icons/medical/brain.png"></menu-item>
+                <menu-item label="Center" link="centerlist" icon="/assets/icons/medical/hospital.png"></menu-item>
+                <menu-item label="Investigator" link="" icon="/assets/icons/medical/nurse.png"></menu-item>
+                <menu-item label="Acquisition equipment" link="" icon="/assets/icons/medical/cardiogram-1.png"></menu-item>
+                <menu-item label="Coil" link="" icon="/assets/icons/wifi.png"></menu-item>
+                <menu-item label="Experimental group of subjects" icon="/assets/icons/users.png"></menu-item>
+                <menu-item label="Score" link="" icon="/assets/icons/podium.png"></menu-item>
+            </dropdown-menu>
+
+            <dropdown-menu label="Import data">
+                <menu-item label="From DICOM CD/DVD" link="" icon="/assets/icons/compact-disc.png"></menu-item>
+                <menu-item label="From Neuroinfo PACS" link="" icon="/assets/neurinfo-icon.png"></menu-item>
+                <menu-item label="From ShanoirUploader" link="" icon="/assets/logo.shanoirUp_transp.128x128.png"></menu-item>
+                <menu-item label="Processed datasets (NifTi)" link="" icon="/assets/NifTi.png"></menu-item>
+                <menu-item label="From files ..." link="" icon="/assets/icons/folder-7.png"></menu-item>
+            </dropdown-menu>
+
+            <dropdown-menu label="Administration" *ngIf="isUserAdmin()">
+                <menu-item label="Manage users" i18n-label="User menu|Manage users label" link="userlist" icon="/assets/icons/users-1.png"></menu-item>
+                <menu-item label="Tree test page" link="treeTest" icon="/assets/icons/share-1.png"></menu-item>
+                <menu-item label="Preferences" i18n-label="Preferences menu|Manage users preferences" icon="/assets/icons/controls-7.png">
+                    <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="pinkMode" icon="/assets/icons/user-5.png"></menu-item>
+                </menu-item>
+            </dropdown-menu>
+
+            
+        </ul>
+    </nav>
+
+
+</div>

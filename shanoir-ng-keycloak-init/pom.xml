@@ -17,7 +17,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.profile.active>dev</spring.profile.active>
+		<spring.profile.active></spring.profile.active>
+		<users.docker.directory>${basedir}/../shanoir-ng-users/src/main/docker</users.docker.directory>
 	</properties>
 
 	<dependencies>
@@ -47,6 +48,23 @@
 		          	</profiles>
 		        </configuration>
 			</plugin>
+	        <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<copy file="target/${project.build.finalName}.jar" tofile="${users.docker.directory}/${project.artifactId}.jar"/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+				    </execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>
@@ -54,12 +72,14 @@
 			<id>dev</id>
 			<properties>
 				<spring.profile.active>dev</spring.profile.active>
+				<users.docker.directory>${basedir}/../shanoir-ng-users/src/main/docker</users.docker.directory>
 			</properties>
 		</profile>
 		<profile>
 			<id>qualif</id>
 			<properties>
 				<spring.profile.active>qualif</spring.profile.active>
+				<users.docker.directory>${basedir}/../shanoir-ng-users/src/main/docker-qualif</users.docker.directory>
 			</properties>
 		</profile>
 	</profiles>

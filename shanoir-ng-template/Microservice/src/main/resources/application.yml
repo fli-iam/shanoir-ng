@@ -42,19 +42,18 @@ spring:
 #keycloak
 keycloak:
   cors: true
-  realm: demo
-  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmgMaWeSsqzD6zkYxRl+X2kXnv6jvT9/juPzxBD8T5Fp2+4erfxnZ69UGqVtGNaKR0CF0wvr3a9S3jf4hhBkWBeLcZp+VEyZHRy1v+lNoFCtc0owIqvlEy85I0X5bScSn9kcex8aIELnuPtSB+D+78JYgdhLsriIJQcYYqr8YMUJThakKCzHidf8p33aiI+pJE889/hh2xB47u/KIe+9lTKnwqs11ooX5QiOTOwJtX+/AFn7m8xnhiQygDT+e3dT2RR1CjkS6b+bdu9xS7BsUpypJlSGckjhUoGC3lXePGIRMbl3DM+Z5Yc0fWlP2aZvTYhT+G1jzwpf+wIAChUnPjwIDAQAB
-  auth-server-url: http://localhost:8080/auth
+  realm: shanoir-ng
+  auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
-  resource: springboot
-  bearer-only: true
-  credentials.secret: 6a85f996-a162-4366-b1a8-6e1ff4b36210
+  resource: shanoir-ng-template
   securityConstraints[0]:
     securityCollections[0]:
       name: spring secured api
       authRoles: 
         - adminRole
-        - ROLE_ADMIN
+        - expertRole
+        - guestRole
+        - userRole
       patterns:
         - /*
 # logging configuration
@@ -94,6 +93,9 @@ spring:
     host: localhost
 server:
     port: 9902
+#keycloak
+keycloak:
+  auth-server-url: http://localhost/auth
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-users.log
@@ -119,3 +121,20 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
+
+---
+
+#################
+# DO NOT CHANGE #
+#################
+spring:
+  profiles: qualif
+  datasource:
+    initialize: false
+  jpa:
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: validate
+#keycloak
+keycloak:
+  auth-server-url: http://shanoir-ng-nginx/auth

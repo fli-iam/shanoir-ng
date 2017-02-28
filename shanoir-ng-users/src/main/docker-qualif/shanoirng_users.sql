@@ -39,6 +39,7 @@ CREATE TABLE `users` (
   `is_first_expiration_notification_sent` bit(1) NOT NULL,
   `is_medical` bit(1) NOT NULL,
   `is_second_expiration_notification_sent` bit(1) NOT NULL,
+  `keycloak_id` varchar(255) DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
   `last_name` varchar(255) NOT NULL,
   `password` varchar(255) DEFAULT NULL,

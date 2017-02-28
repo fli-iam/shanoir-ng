@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",    
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "noImplicitAny": false,
+        //"outDir": "../../../../shanoir-ng-nginx/webapp/app",
+        "removeComments": false,
+        "sourceMap": true,
+        "target": "es5"
+    }
+}

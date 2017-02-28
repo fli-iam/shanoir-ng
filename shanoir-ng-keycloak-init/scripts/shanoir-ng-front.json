@@ -9,6 +9,7 @@
         "http://localhost/*"
     ],
     "webOrigins": [
+        "http://localhost:3000",
         "http://localhost"
     ],
     "notBefore": 0,

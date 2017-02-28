@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.shanoir-ng</groupId>
+		<artifactId>shanoir-ng</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../shanoir-ng-parent</relativePath>
+	</parent>
+
+	<artifactId>shanoir-ng-centers</artifactId>
+	<packaging>jar</packaging>
+
+	<name>shanoir-ng-centers</name>
+	<description>Centers management project for Shanoir-ng</description>
+
+	<properties>
+		<springfox-version>2.5.0</springfox-version>
+		<spring-active-profile></spring-active-profile>
+		<keycloak.version>2.5.1.Final</keycloak.version>
+	</properties>
+
+	<dependencies>
+		<!-- Spring boot -->
+        <dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-data-jpa</artifactId>
+  		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- Database connector -->
+		<dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        
+        <!-- Keycloak -->
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-tomcat8-adapter</artifactId>
+            <version>${keycloak.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-spring-boot-adapter</artifactId>
+            <version>${keycloak.version}</version>
+        </dependency>
+        <dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-security-adapter</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
+        
+ 		<!-- SpringFox Swagger UI -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+        </dependency>
+		<dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${springfox-version}</version>
+        </dependency>
+
+		<!-- AMQP -->
+        <dependency>
+		    <groupId>com.google.code.gson</groupId>
+		    <artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+		<!-- Commons -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.4</version>
+		</dependency>
+
+        <!-- Test -->
+		<dependency>
+  			<groupId>com.h2database</groupId>
+  			<artifactId>h2</artifactId>
+  			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework.security</groupId>
+		    <artifactId>spring-security-test</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-compiler-plugin</artifactId>
+	            <configuration>
+	                <source>1.8</source>
+	                <target>1.8</target>
+	            </configuration>
+	        </plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+		          	<profiles>
+		            	<profile>${spring-active-profile}</profile>
+		          	</profiles>
+		        </configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.4.11</version>
+				<configuration>
+					<imageName>${project.artifactId}</imageName>
+					<dockerDirectory>src/main/docker</dockerDirectory>
+					<resources>
+						<resource>
+							<targetPath>/</targetPath>
+							<directory>${project.build.directory}</directory>
+							<include>${project.build.finalName}.jar</include>
+						</resource>
+					</resources>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>http://repo.spring.io/libs-snapshot-local</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>http://repo.spring.io/libs-milestone-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-releases</id>
+			<name>Spring Releases</name>
+			<url>http://repo.spring.io/libs-release-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<spring-active-profile>dev</spring-active-profile>
+			</properties>
+		</profile>
+		<profile>
+			<id>qualif</id>
+			<properties>
+				<spring-active-profile>qualif</spring-active-profile>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+					<groupId>com.spotify</groupId>
+					<artifactId>docker-maven-plugin</artifactId>
+					<version>0.4.11</version>
+					<configuration>
+						<dockerHost>${docker-host}</dockerHost>
+						<dockerCertPath>${docker-cert-path}</dockerCertPath>
+						<imageName>${project.artifactId}</imageName>
+						<dockerDirectory>src/main/docker-qualif</dockerDirectory>
+						<resources>
+							<resource>
+								<targetPath>/</targetPath>
+								<directory>${project.build.directory}</directory>
+								<include>${project.build.finalName}.jar</include>
+							</resource>
+						</resources>
+					</configuration>
+				</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

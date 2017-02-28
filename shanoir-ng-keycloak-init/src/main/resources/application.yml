@@ -12,7 +12,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
+      ddl-auto: validate
       # Naming strategy
       naming:
         strategy: org.hibernate.cfg.ImprovedNamingStrategy
@@ -20,29 +20,22 @@ spring:
       hibernate:
         connection:
           charset: UTF-8
-        hbm2ddl:
-          import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
   session:
     store-type: none
 #keycloak
 keycloak:
   realm: shanoir-ng
-  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/keycloak/auth
-  resource: shanoir-ng-users
+  auth-server-url: http://shanoir-ng-nginx/auth
 kc.requests:
   admin:
     login: admin
     password: admin
   client.id: admin-cli
-  front:
-    resource: shanoir-ng-front
-    url: https://shanoir-qualif.irisa.fr/shanoir-ng
-  ms.users.url: https://shanoir-qualif.irisa.fr/shanoir-ng/users
   realm: master
-  temporary.password: true
+  temporary.password: false
 # logging configuration
 logging:
-  file: /vol/log/ms/shanoir-ng-init-keycloak.log
+  file: /vol/log/ms/shanoir-ng-keycloak-init.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
@@ -58,34 +51,48 @@ spring:
     url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: root
     password: 
-    # The SQL dialect makes Hibernate generate better SQL for the chosen database
-    driver-class-name: com.mysql.jdbc.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
-    hibernate:
-      # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: validate
-  jooq:
-    sql-dialect: Mysql
 #keycloak
 keycloak:
   realm: shanoir-ng
   auth-server-url: http://localhost:8080/auth
-  resource: shanoir-ng-users
 kc.requests:
   admin:
     login: admin
     password: admin
   client.id: admin-cli
-  front:
-    resource: shanoir-ng-front
-    url: http://localhost:3000
-  ms.users.url: http://localhost:9901
   realm: master
   temporary.password: false
 # logging configuration
 logging:
-  file: c:\\Temp\\shanoir-ng\\shanoir-ng-init-keycloak.log
+  file: c:\\Temp\\shanoir-ng\\shanoir-ng-keycloak-init.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
+
+---
+
+######################################
+# DO NOT COMMIT VALUES MODIFICATIONS #
+######################################
+spring:
+  profiles: qualif
+  datasource:
+    url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    username: shanoir
+    password: shanoir
+    initialize: false
+  jpa:
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: validate
+#keycloak
+keycloak:
+  realm: shanoir-ng
+  auth-server-url: http://shanoir-ng-nginx/auth
+kc.requests:
+  admin:
+    login: admin
+    password: admin
+  client.id: admin-cli
+  realm: master
+  temporary.password: true
