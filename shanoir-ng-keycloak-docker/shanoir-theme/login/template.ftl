@@ -7,8 +7,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="robots" content="noindex, nofollow">
 	<link rel="stylesheet" href="${properties.shanoirUrl!}/app/shared/css/common.css" />
-	<link rel="stylesheet" href="${properties.shanoirUrl!}/app/shared/login/login.css" />
-	<link rel="icon" type="image/png" href="${properties.shanoirUrl!}/images/simpleLogo.png" />
+	<link rel="stylesheet" href="${properties.shanoirUrl!}/app/shared/css/login.css" />
+	<link rel="icon" type="image/png" href="${properties.shanoirUrl!}/assets/simpleLogo.png" />
 
     <#if properties.meta?has_content>
         <#list properties.meta?split(' ') as meta>
@@ -38,7 +38,7 @@
 
 	<div class="logo">
 		<#if realm.displayName == "shanoir-ng">
-			<img src="http://localhost:3000/images/logo.shanoir.white.png"/>
+			<img src="http://localhost:3000/assets/logo.shanoir.white.png"/>
 		</#if>
 	</div>
 
