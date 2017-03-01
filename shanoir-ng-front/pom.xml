@@ -113,7 +113,7 @@
 	        	<artifactId>maven-resources-plugin</artifactId>
 	        	<executions>
 	          		<execution>
-	            		<id>copy-resources-dist</id>
+	            		<id>copy-resources</id>
 	            		<phase>process-resources</phase>
 	            		<goals>
 	              			<goal>copy-resources</goal>
@@ -123,22 +123,6 @@
 	              			<resources>
 	                			<resource>
 	                  				<directory>${project.basedir}/dist</directory>
-	                  				<filtering>true</filtering>
-	                			</resource>
-	              			</resources>
-	            		</configuration>
-	          		</execution>
-	          		<execution>
-	            		<id>copy-resources-assets</id>
-	            		<phase>process-resources</phase>
-	            		<goals>
-	              			<goal>copy-resources</goal>
-	            		</goals>
-	            		<configuration>
-	              			<outputDirectory>${nginx.webapp.directory}/assets</outputDirectory>
-	              			<resources>
-	                			<resource>
-	                  				<directory>${project.basedir}/src/assets</directory>
 	                  				<filtering>true</filtering>
 	                			</resource>
 	              			</resources>
