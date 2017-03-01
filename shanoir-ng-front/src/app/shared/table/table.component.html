@@ -62,7 +62,7 @@
                 *ngFor="let col of columnDefs" 
                 class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" 
                 [class.bool]="isFieldBoolean(item, col)"
-                [routerLink]="col.type != 'button' ? rowClickAction.target : null" [queryParams]="rowClickAction.getParams != undefined ? rowClickAction.getParams(item) : null" routerLinkActive="active"
+                [routerLink]="col.type != 'button' ? rowClickAction?.target : null" [queryParams]="rowClickAction?.getParams != undefined ? rowClickAction.getParams(item) : null" routerLinkActive="active"
                 >{{renderCell(item, col)}}
                 <span *ngIf="isFieldBoolean(item, col)">
                     <span *ngIf="getCellValue(item, col)" class="bool-true">&#x2713;</span>

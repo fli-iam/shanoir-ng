@@ -39,9 +39,12 @@ spring:
 keycloak:
   cors: true
   realm: shanoir-ng
+  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApreYFO9zjyWA89PCL0DRhP97/ORBTIAEqYGqhJfPEcUZQzVezy+VwWVvRyErPTxg+djjfZdy52i8glXfkgvYym1ApFgUgmuIj0130lbSYFJASDTO1IxKGZ01UZJ0ErTOlJlZcglxm7UkecDC6hm/HuM0LvJBLmmZ70EVC2G4rW7WaZri/RwhomBGgY+nNpnPrEQeuO3R8fAHS+LD3Yu5BGhhCayEd9dqQ0wcyASAJtQi3yYF7Jd9VZDWpD7rQUisssy4NzsciIlcESdgD3Prg6G3tajI9SiwEOrwC8gvQ+9bm8OhfZZTmdD/9qoC9Q0KeDDjFZPx/blQS57gUzAR+wIDAQAB
   auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-centers
+  bearer-only: true
+  credentials.secret: 091dcd93-4c74-43d1-be62-78c806779200
   securityConstraints[0]:
     securityCollections[0]:
       name: spring secured api
@@ -92,6 +95,9 @@ spring:
     host: localhost
 server:
     port: 9902
+#keycloak
+keycloak:
+  auth-server-url: http://localhost/auth
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-centers.log
