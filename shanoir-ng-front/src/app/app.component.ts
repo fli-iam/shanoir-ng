@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
+import '../assets/css/common.css';
+
 @Component({
     selector: 'shanoir-ng-app',
-    moduleId: module.id,
     templateUrl: 'app.component.html'
 })
 

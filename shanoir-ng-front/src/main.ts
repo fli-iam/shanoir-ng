@@ -5,13 +5,12 @@ import { AppModule } from './app/app.module';
 import { KeycloakService } from './app/shared/keycloak/keycloak.service';
 
 // Enable production mode unless running locally
-if (!/localhost/.test(document.location.host)) {
+if (process.env.ENV === 'production') {
   enableProdMode();
 }
 
 KeycloakService.init()
   .then(() => {
-    const platform = platformBrowserDynamic();
-    platform.bootstrapModule(AppModule);
+    platformBrowserDynamic().bootstrapModule(AppModule);
   })
   .catch((err) => console.log(err));

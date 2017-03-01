@@ -3,12 +3,13 @@
         "baseUrl": ".",    
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
+        "lib": ["es2015", "dom"],
         "module": "commonjs",
         "moduleResolution": "node",
-        "noImplicitAny": false,
-        //"outDir": "../../../../shanoir-ng-nginx/webapp/app",
+        "noImplicitAny": true,
         "removeComments": false,
         "sourceMap": true,
+        "suppressImplicitAnyIndexErrors": true,
         "target": "es5"
     }
 }

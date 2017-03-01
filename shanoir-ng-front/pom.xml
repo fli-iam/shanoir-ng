@@ -103,52 +103,17 @@
 	                    </goals>
 	                    <phase>generate-resources</phase>
 	                    <configuration>
-	                        <arguments>run build</arguments>
+	                        <arguments>run build:prod</arguments>
 	                    </configuration>
 	                </execution>
 	
 	            </executions>
 	        </plugin>
-<!-- 	        <plugin> -->
-<!-- 	            <groupId>org.codehaus.mojo</groupId> -->
-<!-- 	            <artifactId>exec-maven-plugin</artifactId> -->
-<!-- 	            <executions> -->
-<!-- 	                <execution> -->
-<!-- 	                    <id>exec-npm-install</id> -->
-<!-- 	                    <phase>generate-sources</phase> -->
-<!-- 				        <goals> -->
-<!--                     		<goal>exec</goal> -->
-<!--                 		</goals> -->
-<!-- 	                    <configuration> -->
-<!-- 	                        <workingDirectory>${project.basedir}</workingDirectory> -->
-<!-- 	                        <executable>${npm.executable}</executable> -->
-<!-- 	                        <arguments> -->
-<!-- 	                            <argument>install</argument> -->
-<!-- 	                        </arguments> -->
-<!-- 	                    </configuration> -->
-<!-- 	                </execution> -->
-<!-- 	                <execution> -->
-<!-- 	                    <id>exec-npm-run-tsc</id> -->
-<!-- 	                    <phase>generate-sources</phase> -->
-<!-- 				        <goals> -->
-<!--                     		<goal>exec</goal> -->
-<!--                 		</goals> -->
-<!-- 	                    <configuration> -->
-<!-- 	                        <workingDirectory>${project.basedir}</workingDirectory> -->
-<!-- 	                        <executable>${npm.executable}</executable> -->
-<!-- 	                        <arguments> -->
-<!-- 	                            <argument>run</argument> -->
-<!-- 	                            <argument>tsc</argument> -->
-<!-- 	                        </arguments> -->
-<!-- 	                    </configuration> -->
-<!-- 	                </execution> -->
-<!-- 	            </executions> -->
-<!-- 	        </plugin> -->
             <plugin>
 	        	<artifactId>maven-resources-plugin</artifactId>
 	        	<executions>
 	          		<execution>
-	            		<id>copy-resources</id>
+	            		<id>copy-resources-dist</id>
 	            		<phase>process-resources</phase>
 	            		<goals>
 	              			<goal>copy-resources</goal>
@@ -157,12 +122,24 @@
 	              			<outputDirectory>${nginx.webapp.directory}</outputDirectory>
 	              			<resources>
 	                			<resource>
-	                  				<directory>${project.basedir}</directory>
+	                  				<directory>${project.basedir}/dist</directory>
 	                  				<filtering>true</filtering>
-										<excludes>
-											<exclude>index*.html</exclude>
-											<exclude>node/**</exclude>
-										</excludes>
+	                			</resource>
+	              			</resources>
+	            		</configuration>
+	          		</execution>
+	          		<execution>
+	            		<id>copy-resources-assets</id>
+	            		<phase>process-resources</phase>
+	            		<goals>
+	              			<goal>copy-resources</goal>
+	            		</goals>
+	            		<configuration>
+	              			<outputDirectory>${nginx.webapp.directory}/assets</outputDirectory>
+	              			<resources>
+	                			<resource>
+	                  				<directory>${project.basedir}/src/assets</directory>
+	                  				<filtering>true</filtering>
 	                			</resource>
 	              			</resources>
 	            		</configuration>

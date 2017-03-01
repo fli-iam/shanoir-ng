@@ -4,7 +4,6 @@ import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms'
 import { AccountRequestInfo } from './account.request.info.model';
 
 @Component ({
-    moduleId: module.id,
     selector: 'account-request-info',
     template: `
         <fieldset [formGroup]="accountRequestInfoForm">
@@ -75,11 +74,11 @@ import { AccountRequestInfo } from './account.request.info.model';
 })
 export class AccountRequestInfoComponent implements OnInit {
     @Input() userAccountRequestInfo: AccountRequestInfo;
-    @Input() accountRequestDemand: Boolean;
-    @Input() requestAccountMode: Boolean;
+    @Input() accountRequestDemand: boolean;
+    @Input() requestAccountMode: boolean;
     @Output() accountRequestInfo: EventEmitter<AccountRequestInfo> = new EventEmitter<AccountRequestInfo>();
-    @Output() isValid: EventEmitter<Boolean> = new EventEmitter<Boolean>();
-    private accountRequestInfoForm: FormGroup;
+    @Output() isValid: EventEmitter<boolean> = new EventEmitter<boolean>();
+    public accountRequestInfoForm: FormGroup;
     ari: AccountRequestInfo = new AccountRequestInfo();
 
     constructor(private formBuilder: FormBuilder) { 

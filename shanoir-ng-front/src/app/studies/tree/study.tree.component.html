@@ -1,7 +1,7 @@
-<node *ngFor="let patient of patients" [label]="patient.name" pictoUrl="/assets/icons/user.png">
-    <node *ngFor="let exam of patient.examinations" [label]="exam.name + ' [' + exam.date + ']'" pictoUrl="/assets/icons/list.png">
-        <node *ngFor="let acq of exam.acquisitions" [label]="acq.name" pictoUrl="/assets/icons/medical/x-ray-2.png">
-            <node *ngFor="let dataset of acq.datasets" [label]="dataset.name" pictoUrl="/assets/icons/medical/brain.png">
+<node *ngFor="let patient of patients" [label]="patient.name" pictoUrl="/assets/images/icons/user.png">
+    <node *ngFor="let exam of patient.examinations" [label]="exam.name + ' [' + exam.date + ']'" pictoUrl="/assets/images/icons/list.png">
+        <node *ngFor="let acq of exam.acquisitions" [label]="acq.name" pictoUrl="/assets/images/icons/medical/x-ray-2.png">
+            <node *ngFor="let dataset of acq.datasets" [label]="dataset.name" pictoUrl="/assets/images/icons/medical/brain.png">
             </node>
         </node>
     </node>

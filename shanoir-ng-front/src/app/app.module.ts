@@ -4,6 +4,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Http, HttpModule, RequestOptions, XHRBackend } from '@angular/http';
 import { MaterialModule } from '@angular/material';
 
+import { MyDatePickerModule } from 'mydatepicker';
+
 import { routing } from './app.routing';
 
 import { AccountEventsService } from './users/account/account.events.service';
@@ -22,7 +24,6 @@ import { HomeComponent }   from './home/home.component';
 import { KeycloakHttp } from "./shared/keycloak/keycloak.http";
 import { KeycloakService } from "./shared/keycloak/keycloak.service";
 import { MenuItemComponent }   from './shared/dropdown-menu/menu-item/menu-item.component';
-import { MyDatePickerModule } from 'mydatepicker';
 import { NavbarComponent }   from './shared/navbar/navbar.component';
 import { RoleService } from './roles/role.service';
 import { StudyTreeComponent }   from './studies/tree/study.tree.component';
@@ -30,6 +31,10 @@ import { TableComponent} from "./shared/table/table.component";
 import { TreeNodeComponent }   from './shared/tree/tree.node.component';
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
+
+export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
+  return new KeycloakHttp(backend, defaultOptions, keycloakService);
+}
 
 @NgModule({
     imports: [
@@ -71,12 +76,7 @@ import { UserService } from './users/shared/user.service';
         UserService,
         {
             provide: Http,
-            useFactory:
-            (
-                backend: XHRBackend,
-                defaultOptions: RequestOptions,
-                keycloakService: KeycloakService
-            ) => new KeycloakHttp(backend, defaultOptions, keycloakService),
+            useFactory: httpFactory,
             deps: [XHRBackend, RequestOptions, KeycloakService]
         }
     ],

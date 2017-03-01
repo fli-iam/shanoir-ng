@@ -13,9 +13,8 @@ import { AccountRequestInfo } from '../accountRequestInfo/account.request.info.m
 
 @Component({
     selector: 'editUser',
-    moduleId: module.id,
     templateUrl: 'edit.user.component.html',
-    styleUrls: ['../../shared/css/common.css', 'edit.user.component.css']
+    styleUrls: ['edit.user.component.css']
 })
 
 export class EditUserComponent implements OnInit {
@@ -27,14 +26,14 @@ export class EditUserComponent implements OnInit {
     editUserForm: FormGroup;
     roles: Role[];
     roleService: RoleService;
-    isUserNameUnique: Boolean = true;
-    isEmailUnique: Boolean = true;
-    isDateValid: Boolean = true;
-    creationMode: Boolean;
+    isUserNameUnique: boolean = true;
+    isEmailUnique: boolean = true;
+    isDateValid: boolean = true;
+    creationMode: boolean;
     userId: number;
     selectedDateNormal: string = '';
     accountRequestInfo: AccountRequestInfo;
-    private accountRequestInfoValid: Boolean = false;
+    private accountRequestInfoValid: boolean = false;
 
     constructor(router: Router, private location: Location, route: ActivatedRoute, userService: UserService, roleService: RoleService, private fb: FormBuilder) {
         this.router = router;
@@ -52,7 +51,8 @@ export class EditUserComponent implements OnInit {
             })
             .catch((error) => {
             // TODO: display error
-            log.error("error getting roles list!");
+            //log.error("error getting roles list!");
+            console.log("error getting roles list!");
         });
     }
 
@@ -100,7 +100,8 @@ export class EditUserComponent implements OnInit {
              })
             .catch((error) => {
                 // TODO: display error
-                log.error("error deny account request!");
+                //log.error("error deny account request!");
+                console.log("error deny account request!");
         });
     }
 
@@ -146,7 +147,7 @@ export class EditUserComponent implements OnInit {
         this.user.accountRequestInfo = this.accountRequestInfo;
     }
 
-    isEditUserFormValid(): Boolean {
+    isEditUserFormValid(): boolean {
         if (this.editUserForm.valid && this.isDateValid) {
             if (this.requestAccountMode) {
                 if (this.accountRequestInfoValid) {
@@ -270,7 +271,7 @@ export class EditUserComponent implements OnInit {
         this.accountRequestInfo = ari;
     }
 
-    updateARIValid(ariValid: Boolean): void {
+    updateARIValid(ariValid: boolean): void {
         this.accountRequestInfoValid = ariValid;
     }
     

@@ -1,11 +1,10 @@
-import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
+import { Component, ViewChild, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
 
 @Component({
     selector: 'navbar',
-    moduleId: module.id,
     templateUrl: 'navbar.component.html',
-    styleUrls: ['../css/common.css', 'navbar.component.css'],
+    styleUrls: ['navbar.component.css'],
     host: {
         '(document:click)': 'closeAll($event)',
     }
@@ -13,11 +12,11 @@ import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
 
 export class NavbarComponent {
 
-    @ViewChild('container') container;
+    @ViewChild('container') container: ElementRef;
     @ViewChildren(DropdownMenuComponent) dropdownMenus: QueryList<DropdownMenuComponent>;
 
-    private colorASave; 
-    private colorBSave;    
+    private colorASave: string; 
+    private colorBSave: string;    
     public pinkMode: boolean = false;
 
     constructor() {
@@ -47,7 +46,7 @@ export class NavbarComponent {
         document.documentElement.style.setProperty("--color-b", colorB);
     }
 
-    closeAll(event) {
+    closeAll(event: Event) {
         if (!this.container.nativeElement.contains(event.target)) {
             this.closeChildren();
         };

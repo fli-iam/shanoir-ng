@@ -1,8 +1,7 @@
-import { Component, Input, ContentChildren, forwardRef } from '@angular/core';
+import { Component, Input, ContentChildren, forwardRef, QueryList } from '@angular/core';
 
 @Component({
     selector: 'node',
-    moduleId: module.id,
     template: `
         <div class="node-wrapper">
             <span *ngIf="hasChildren && isOpen" (click)="close()" class="arrow">&#x25BE;</span>
@@ -14,17 +13,17 @@ import { Component, Input, ContentChildren, forwardRef } from '@angular/core';
             </div>
         </div>
     `,
-    styleUrls: ['../css/common.css', 'tree.node.component.css']
+    styleUrls: ['tree.node.component.css']
 })
 
 export class TreeNodeComponent {
 
     @Input() label: string;
     @Input() pictoUrl: string;
-    @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes; 
-    private isOpen: boolean = false;
-    private loaded: boolean = false;
-    private hasChildren: boolean = false;
+    @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes: QueryList<any>; 
+    public isOpen: boolean = false;
+    public loaded: boolean = false;
+    public hasChildren: boolean = false;
 
     constructor() {
     }

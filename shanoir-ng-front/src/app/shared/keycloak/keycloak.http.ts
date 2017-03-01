@@ -1,8 +1,8 @@
 import {Injectable} from "@angular/core";
 import {Http, Request, ConnectionBackend, RequestOptions, RequestOptionsArgs, Response, Headers} from "@angular/http";
 
-import {KeycloakService} from "./keycloak.service";
-import {Observable} from 'rxjs/Rx';
+import { KeycloakService } from "./keycloak.service";
+import { Observable, Observer } from 'rxjs/Rx';
 
 /**
  * This provides a wrapper over the ng2 Http class that insures tokens are refreshed on each request.
@@ -14,7 +14,6 @@ export class KeycloakHttp extends Http {
     }
 
     private setToken(options: RequestOptionsArgs) {
-
         if (options == null || KeycloakService.auth == null || KeycloakService.auth.authz == null || KeycloakService.auth.authz.token == null) {
             console.log("Need a token, but no token is available, not setting bearer token.");
             return;
@@ -26,7 +25,7 @@ export class KeycloakHttp extends Http {
     private configureRequest(f:Function, url:string | Request, options:RequestOptionsArgs, body?: any):Observable<Response> {
         let tokenPromise:Promise<string> = this._keycloakService.getToken();
         let tokenObservable:Observable<string> = Observable.fromPromise(tokenPromise);
-        let tokenUpdateObservable:Observable<any> = Observable.create((observer) => {
+        let tokenUpdateObservable:Observable<any> = Observable.create((observer: any) => {
             if (options == null) {
                 let headers = new Headers();
                 options = new RequestOptions({ headers: headers });
@@ -37,7 +36,7 @@ export class KeycloakHttp extends Http {
             observer.next();
             observer.complete();
         });
-        let requestObservable:Observable<Response> = Observable.create((observer) => {
+        let requestObservable:Observable<Response> = Observable.create((observer: Observer<Response>) => {
             let result;
             if (body) {
                 result = f.apply(this, [url, body, options]);
@@ -45,10 +44,10 @@ export class KeycloakHttp extends Http {
                 result = f.apply(this, [url, options]);
             }
 
-            result.subscribe((response) => {
+            result.subscribe((response: Response) => {
                 observer.next(response);
                 observer.complete();
-            }, (err) => observer.error(err));
+            }, (err: Error) => observer.error(err));
         });
 
         return <Observable<Response>>Observable

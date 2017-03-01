@@ -2,8 +2,8 @@
     <!-- Control bar -->
     <caption class="controls">
             <span class="select-ctrl">
-                <button (click)="selectAll()" title="select all"><img src="/assets/icons/check-all.png"/></button>
-                <button (click)="unSelectAll()" title="unselect all"><img src="/assets/icons/uncheck-all.png"/></button>
+                <button (click)="selectAll()" title="select all"><img src="/assets/images/icons/check-all.png"/></button>
+                <button (click)="unSelectAll()" title="unselect all"><img src="/assets/images/icons/uncheck-all.png"/></button>
             </span>
             <!-- Text search -->
             <span class="text-search">
@@ -110,7 +110,7 @@
     <tbody *ngIf="isLoading">
         <tr>
             <td [attr.colspan]="columnDefs?.length + 1" class="loading">
-                <img src="/assets/loader.32x32.gif"/><br/>Loading...
+                <img src="/assets/images/loader.32x32.gif"/><br/>Loading...
             </td>
         </tr>
     </tbody>

@@ -2,9 +2,8 @@ import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'shanoir-table',
-    moduleId: module.id,
     templateUrl: 'table.component.html',
-    styleUrls: ['../css/common.css', 'table.component.css'],
+    styleUrls: ['table.component.css'],
 })
 
 export class TableComponent {
@@ -12,11 +11,11 @@ export class TableComponent {
     @Input() items: Object[];
     @Input() customActionDefs: any[];
     @Input() rowClickAction: Object;
-    private isLoading: boolean = false;
     private itemsSave: Object[];
     private itemsLoaded: boolean = false;
     private maxResultsField: number;
 
+    public isLoading: boolean = false;
     public maxResults: number = 20;
     public lastSortedCol: Object = null;
     public lastSortedAsc: boolean = true;
@@ -122,7 +121,7 @@ export class TableComponent {
 
         // Regarding the data type, we set a neg infinity because unless this, 
         // null values can't be compared
-        let negInf;
+        let negInf: any;
         switch (col["type"]) {
             case "number": 
                 negInf = -1*Infinity;
@@ -231,7 +230,7 @@ export class TableComponent {
      * Just get the field value, but not using any renderer!
      */
     private getFieldRawValue(obj: Object, path: string): any {
-        function index(robj, i) {return robj[i]}; 
+        function index(robj: any, i: string) {return robj[i]}; 
         return path.split('.').reduce( index, obj ); 
     }
     
@@ -294,7 +293,7 @@ export class TableComponent {
     /**
      * Get the columns that can be used for searching
      */
-    private getSearchableColumns(): any[] {
+    public getSearchableColumns(): any[] {
         let cols: any[] = [];
         for (let col of this.columnDefs) {
             if (col.type != "boolean" && col.type != "button") {

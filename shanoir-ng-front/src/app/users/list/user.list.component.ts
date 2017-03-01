@@ -9,17 +9,16 @@ import { UserService } from '../shared/user.service';
 
 @Component({
     selector: 'user-list',
-    moduleId: module.id,
     templateUrl: 'user.list.component.html',
-    styleUrls: ['../../shared/css/common.css', 'user.list.component.css']
+    styleUrls: ['user.list.component.css']
 })
 
 export class UserListComponent {
-    private users: User[];
-    private columnDefs: any[];
-    private customActionDefs: any[];
-    private rowClickAction: Object;
-    private loading: boolean = false;
+    public users: User[];
+    public columnDefs: any[];
+    public customActionDefs: any[];
+    public rowClickAction: Object;
+    public loading: boolean = false;
 
     constructor(private userService: UserService, private confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
         this.getUsers();
@@ -43,7 +42,7 @@ export class UserListComponent {
 
     // Grid columns definition
     private createColumnDefs() {
-        function dateRenderer(date) {
+        function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();
             }
@@ -56,28 +55,28 @@ export class UserListComponent {
             {headerName: "Email", field: "email", width: "200%"},
             {headerName: "O.D.", tip: "On Demand", field: "accountRequestDemand", type: "boolean", defaultSortCol: true, defaultAsc: false},
             {headerName: "Role", field: "role.displayName", width: "63px"},
-            {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params) {
+            {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.creationDate);
             }},
-            {headerName: "Expiration", field: "expirationDate", type: "date", cellRenderer: function (params) {
+            {headerName: "Expiration", field: "expirationDate", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.expirationDate);
             }},
-            {headerName: "Active", field: "valid", type: "boolean", cellRenderer: function (params) {
+            {headerName: "Active", field: "valid", type: "boolean", cellRenderer: function (params: any) {
                 return !params.data.expirationDate || params.data.expirationDate >= new Date();
             }},
-            {headerName: "Last Login", field: "lastLogin", type: "date", cellRenderer: function (params) {
+            {headerName: "Last Login", field: "lastLogin", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.lastLogin);
             }},
-            {headerName: "", type: "button", img: "/assets/icons/edit.png", target : "/editUser", getParams: function(item): Object {
+            {headerName: "", type: "button", img: "/assets/images/icons/edit.png", target : "/editUser", getParams: function(item: any): Object {
                 return {id: item.id};
             }},
-            {headerName: "", type: "button", img: "/assets/icons/garbage-1.png", action: this.openDeleteUserConfirmDialog}
+            {headerName: "", type: "button", img: "/assets/images/icons/garbage-1.png", action: this.openDeleteUserConfirmDialog}
         ];
         this.customActionDefs = [
-            {title: "new user", img: "/assets/icons/add-1.png", target: "../editUser"},
-            {title: "delete selected", img: "/assets/icons/garbage-1.png", action: this.deleteAll } 
+            {title: "new user", img: "/assets/images/icons/add-1.png", target: "../editUser"},
+            {title: "delete selected", img: "/assets/images/icons/garbage-1.png", action: this.deleteAll } 
         ];
-        this.rowClickAction = {target : "/editUser", getParams: function(item): Object {
+        this.rowClickAction = {target : "/editUser", getParams: function(item: any): Object {
                 return {id: item.id};
         }};
     }

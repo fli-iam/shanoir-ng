@@ -2,9 +2,8 @@ import { Component, Input, ContentChildren, forwardRef, QueryList } from '@angul
 
 @Component({
     selector: 'menu-item',
-    moduleId: module.id,
     templateUrl: 'menu-item.component.html',
-    styleUrls: ['../../css/common.css', 'menu-item.component.css']
+    styleUrls: ['menu-item.component.css']
 })
 
 export class MenuItemComponent {
@@ -13,7 +12,7 @@ export class MenuItemComponent {
     @Input() link: string;
     @Input() boolVar: boolean;
     @Input() icon: string;
-    @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus;
+    @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
 
     public opened: boolean = false;
     public siblings: QueryList<MenuItemComponent>;

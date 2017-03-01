@@ -3,14 +3,13 @@ import { TreeNodeComponent } from '../../shared/tree/tree.node.component';
 
 @Component({
     selector: 'study-tree',
-    moduleId: module.id,
     templateUrl: 'study.tree.component.html',
-    styleUrls: ['../../shared/css/common.css', 'study.tree.component.css'],
+    styleUrls: ['study.tree.component.css'],
 })
 
 export class StudyTreeComponent {
 
-    private patients;
+    public patients: Object;
 
     constructor() {
        this.patients = [

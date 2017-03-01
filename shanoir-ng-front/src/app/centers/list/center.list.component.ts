@@ -9,16 +9,15 @@ import { CenterService } from '../shared/center.service';
 
 @Component({
     selector: 'center-list',
-    moduleId: module.id,
-    templateUrl: 'center.list.component.html',
-    styleUrls: ['../../shared/css/common.css']
+    templateUrl: 'center.list.component.html'
 })
 
 export class CenterListComponent {
-    private centers: Center[];
-    private columnDefs: any[];
-    private customActionDefs: any[];
-    private loading: boolean = false;
+    public centers: Center[];
+    public columnDefs: any[];
+    public customActionDefs: any[];
+    public rowClickAction: Object;
+    public loading: boolean = false;
 
     constructor(private centerService: CenterService, private confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
         this.getCenters();
@@ -42,7 +41,7 @@ export class CenterListComponent {
 
     // Grid columns definition
     private createColumnDefs() {
-        function dateRenderer(date) {
+        function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();
             }

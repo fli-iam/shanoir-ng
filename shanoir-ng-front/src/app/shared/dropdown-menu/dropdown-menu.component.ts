@@ -3,16 +3,15 @@ import { MenuItemComponent } from '../dropdown-menu/menu-item/menu-item.componen
 
 @Component({
     selector: 'dropdown-menu',
-    moduleId: module.id,
     templateUrl: 'dropdown-menu.component.html',
-    styleUrls: ['../css/common.css', 'dropdown-menu.component.css']
+    styleUrls: ['dropdown-menu.component.css']
 })
 
 export class DropdownMenuComponent {
 
     @Input() label: string;
     @Input() link: string; 
-    @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus; 
+    @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>; 
     @Input() boolVar: boolean;
 
     public opened: boolean;
@@ -23,7 +22,7 @@ export class DropdownMenuComponent {
     }
 
     ngAfterViewInit() {
-        this.itemMenus.forEach((itemMenu) => {
+        this.itemMenus.forEach((itemMenu: MenuItemComponent) => {
             itemMenu.siblings = this.itemMenus;
             itemMenu.parent = this;
         });

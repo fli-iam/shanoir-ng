@@ -3,9 +3,8 @@ import { MdDialogRef } from '@angular/material';
 
 @Component({
     selector: 'confirm-dialog',
-    moduleId: module.id,
     templateUrl: 'confirm.dialog.component.html',
-    styleUrls: ['../css/common.css', 'confirm.dialog.component.css']
+    styleUrls: ['confirm.dialog.component.css']
 })
 export class ConfirmDialogComponent {
     
