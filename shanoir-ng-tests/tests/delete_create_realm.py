@@ -72,12 +72,16 @@ def delete_realm():
 def create_realm(n):
     realm_selector_xpath = "//div[@class='realm-selector']"
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, realm_selector_xpath)))
-    driver.find_element_by_xpath(realm_selector_xpath).click()
 
-    add_realm_xpath = "//div[@class='realm-add']"
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, add_realm_xpath)))
-    driver.find_element_by_xpath(add_realm_xpath).click()
-    time.sleep(1)
+    # driver.find_element_by_xpath(realm_selector_xpath).click()
+
+    driver.get("http://localhost:8080/auth/admin/master/console/#/create/realm")
+    time.sleep(2)
+
+    # add_realm_xpath = "//div[@class='realm-add']"
+    # WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, add_realm_xpath)))
+    # driver.find_element_by_xpath(add_realm_xpath).click()
+    # time.sleep(1)
 
     name_xpath = "//input[@id='name']"
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, name_xpath)))
@@ -181,6 +185,7 @@ def add_execution(path_to_script):
     save_xpath = "//button[contains(.,'Save')]"
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, save_xpath)))
     driver.find_element_by_xpath(save_xpath).click()
+    time.sleep(1)
 
 
 def change_binding(n):
@@ -195,6 +200,25 @@ def change_binding(n):
     option_name_xpath = "//select[@id='browser']/option[@label='"+n+"']"
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, option_name_xpath)))
     driver.find_element_by_xpath(option_name_xpath).click()
+
+    save_xpath = "//button[contains(.,'Save')]"
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, save_xpath)))
+    driver.find_element_by_xpath(save_xpath).click()
+
+
+def change_theme(n):
+    realm_xpath = "//a[@class='navbar-brand']"
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, realm_xpath)))
+    time.sleep(1)
+    driver.find_element_by_xpath(realm_xpath).click()
+
+    theme_xpath = "//a[contains(@href,'theme-settings')]"
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, theme_xpath)))
+    driver.find_element_by_xpath(theme_xpath).click()
+
+    option_new_theme_xpath = "//select[@id='loginTheme']/option[@label='"+n+"']"
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, option_new_theme_xpath)))
+    driver.find_element_by_xpath(option_new_theme_xpath).click()
 
     save_xpath = "//button[contains(.,'Save')]"
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, save_xpath)))
@@ -217,14 +241,14 @@ if __name__ == "__main__":
         client_front = os.path.join(args.json, "shanoir-ng-front.json")
         client_users = os.path.join(args.json, "shanoir-ng-users.json")
         client_sh_old = os.path.join(args.json, "shanoir-old.json")
-        script = os.path.join(args.json, "authentication_checkExpirationDate.js")
+        script = os.path.join(args.json, "authentication_checkExpirationDate_ver2.js")
     else:
         raise ValueError("incorrect path")
 
     start_selenium()
     login(args.user, args.password)
 
-    delete_realm()
+    # delete_realm()
 
     create_realm("shanoir-ng")
     add_client(client_front)
@@ -233,5 +257,6 @@ if __name__ == "__main__":
     copy_browser_flow()
     add_execution(script)
     change_binding("Copy of browser")
+    change_theme("shanoir-theme")
 
     exec_docker()
