@@ -1,5 +1,7 @@
 import { Component, ViewChild, ViewChildren, QueryList, ElementRef } from '@angular/core';
+
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
+import { KeycloakService } from "../keycloak/keycloak.service";
 
 @Component({
     selector: 'navbar',
@@ -15,15 +17,15 @@ export class NavbarComponent {
     @ViewChild('container') container: ElementRef;
     @ViewChildren(DropdownMenuComponent) dropdownMenus: QueryList<DropdownMenuComponent>;
 
-    private colorASave: string; 
-    private colorBSave: string;    
+    private colorASave: string;
+    private colorBSave: string;
     public pinkMode: boolean = false;
 
-    constructor() {
-        
+    constructor(private keycloakService: KeycloakService) {
+
     }
 
-    ngAfterViewInit() { 
+    ngAfterViewInit() {
         this.dropdownMenus.forEach((dropdownMenu) => {
             dropdownMenu.siblings = this.dropdownMenus;
             dropdownMenu.parent = this;
@@ -32,10 +34,9 @@ export class NavbarComponent {
         this.colorASave = document.documentElement.style.getPropertyValue("--color-a");
         this.colorBSave = document.documentElement.style.getPropertyValue("--color-b");
     }
- 
+
     isUserAdmin(): boolean {
-        //return this.loginService.isUserAdmin();
-        return true;
+        return this.keycloakService.isUserAdmin();
     }
 
     togglePink() {

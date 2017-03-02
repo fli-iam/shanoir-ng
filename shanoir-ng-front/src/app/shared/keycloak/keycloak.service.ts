@@ -52,4 +52,9 @@ export class KeycloakService {
       }
     });
   }
+
+  isUserAdmin(): boolean {
+    return KeycloakService.auth.authz.hasRealmRole("adminRole");
+  }
+
 }
