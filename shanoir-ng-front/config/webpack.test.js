@@ -1,5 +1,6 @@
-var webpack = require('webpack');
-var helpers = require('./helpers');
+const webpack = require('webpack');
+const helpers = require('./helpers');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     devtool: 'inline-source-map',
@@ -37,6 +38,10 @@ module.exports = {
     },
 
     plugins: [
+        new HtmlWebpackPlugin({
+            template: 'src/index.html'
+        }),
+
         new webpack.ContextReplacementPlugin(
             // The (\\|\/) piece accounts for path separators in *nix and Windows
             /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,

@@ -23,7 +23,7 @@
 		<npm.executable>npm</npm.executable>
 		<nginx.webapp.directory>${basedir}/../shanoir-ng-nginx/webapp</nginx.webapp.directory>
 		<sonar.skip>true</sonar.skip>
-		<index.file.suffix></index.file.suffix>
+		<npm.build.task>build</npm.build.task>
 	</properties>
 
 	<build>
@@ -43,18 +43,6 @@
 				                <delete dir="${nginx.webapp.directory}" />
 				            </target>
 				        </configuration>
-				    </execution>
-					<execution>
-						<id>copy-index-qualif</id>
-						<phase>package</phase>
-						<configuration>
-							<target>
-								<copy file="src/index${index.file.suffix}.html" tofile="${nginx.webapp.directory}/index.html"/>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
 				    </execution>
 				</executions>
 			</plugin>
@@ -103,7 +91,7 @@
 	                    </goals>
 	                    <phase>generate-resources</phase>
 	                    <configuration>
-	                        <arguments>run build:prod</arguments>
+	                        <arguments>run ${npm.build.task}</arguments>
 	                    </configuration>
 	                </execution>
 	
@@ -151,36 +139,8 @@
 		<profile>
 			<id>qualif</id>
 			<properties>
-				<index.file.suffix>.qualif</index.file.suffix>
+				<npm.build.task>build:qualif</npm.build.task>
 			</properties>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-resources-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>copy-resources</id>
-								<phase>process-resources</phase>
-								<goals>
-									<goal>copy-resources</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${nginx.webapp.directory}</outputDirectory>
-									<resources>
-										<resource>
-											<directory>${project.basedir}</directory>
-											<filtering>true</filtering>
-											<excludes combine.children="append">
-												<exclude>node_modules/**</exclude>
-											</excludes>
-										</resource>
-									</resources>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 	</profiles>
 	

@@ -7,16 +7,12 @@
     "url": "https://github.com/fli-iam/shanoir-ng.git"
   },
   "scripts": {
-    "build:webpack": "webpack --config config/webpack.dev.js",
-    "build": "tsc -p src/",
-    "build:aot": "ngc -p tsconfig-aot.json",
-    "build:prod": "rimraf dist && webpack --config config/webpack.prod.js --progress --profile --bail",
-    "build:watch": "tsc -p src/ -w",
+    "build": "rimraf dist && webpack --config config/webpack.js --progress --profile --bail",
+    "build:aot": "rimraf aot && ngc -p tsconfig-aot.json",
+    "build:prod": "npm run build:aot && rimraf dist && webpack --config config/webpack.prod.js --progress --profile --bail",
+    "build:qualif": "rimraf dist && webpack --config config/webpack.qualif.js --progress --profile --bail",
     "i18n": "ng-xi18n",
-    "serve": "lite-server -c=bs-config.json",
-    "server:dev": "webpack-dev-server --config config/webpack.dev.js --open --progress --profile --watch --content-base src/",
-    "start": "webpack-dev-server --inline --progress --port 8081",
-    "start:webpack": "npm run build:aot && npm run build:webpack && npm run start",
+    "start": "webpack-dev-server --config config/webpack.dev.js --open --progress --profile --watch --content-base src/",
     "test": "karma start"
   },
   "licenses": [
