@@ -30,9 +30,6 @@ public class KeycloakClient {
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(KeycloakClient.class);
 
-	@Value("${keycloak.auth-server-url}")
-	private String keycloakAuthServerUrl;
-
 	@Value("${keycloak.realm}")
 	private String keycloakRealm;
 
@@ -42,6 +39,9 @@ public class KeycloakClient {
 	@Value("${kc.requests.admin.password}")
 	private String keycloakRequestsAdminPassword;
 
+	@Value("${kc.requests.auth-server-url}")
+	private String keycloakRequestsAuthServerUrl;
+	
 	@Value("${kc.requests.client.id}")
 	private String keycloakRequestsClientId;
 
@@ -52,7 +52,7 @@ public class KeycloakClient {
 
 	protected Keycloak getKeycloak() {
 		if (keycloak == null) {
-			keycloak = Keycloak.getInstance(keycloakAuthServerUrl, keycloakRequestsRealm, keycloakRequestsAdminLogin,
+			keycloak = Keycloak.getInstance(keycloakRequestsAuthServerUrl, keycloakRequestsRealm, keycloakRequestsAdminLogin,
 					keycloakRequestsAdminPassword, keycloakRequestsClientId);
 		}
 		return keycloak;
@@ -123,8 +123,8 @@ public class KeycloakClient {
 //			userResource.resetPassword(credential);
 
 			// Add realm role
-			userResource.roles().realmLevel().add(Arrays.asList(
-					getKeycloak().realm(keycloakRealm).roles().get(user.getRole().getName()).toRepresentation()));
+//			userResource.roles().realmLevel().add(Arrays.asList(
+//					getKeycloak().realm(keycloakRealm).roles().get(user.getRole().getName()).toRepresentation()));
 		} catch (Exception e) {
 			LOG.error("Error while updating user with keycloak id " + user.getKeycloakId() + " on Keycloak server", e);
 		}

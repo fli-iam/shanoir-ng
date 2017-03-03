@@ -11,7 +11,7 @@ spring:
     password: shanoir
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
-    data: classpath:/scripts/populate.sql
+    initialize: false
   jackson:
     mapper:
       use-getters-as-setters: false
@@ -39,7 +39,8 @@ spring:
 keycloak:
   cors: true
   realm: shanoir-ng
-  auth-server-url: http://shanoir-ng-nginx/auth
+  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn8sWxnmSz5+npLCJfq3aLSJACF5AJzP0pUXlNfCbOOGJY93RWO5SlKU5o8rE7TPOe6AdDHX306JET6MgQGrJ47CxiXrR/axny/UTUEjqX5x61OSOdQIYsBj2TqtRKkEeZ//SYiwr/zVZmuzwtWvh4cXpofnToPx+OLQ/MuigkBsN/uo0S8fI2ThN/YXLfhAlp1ezFuKTtmJmFgBTf3l9m8lzuMfdqp4QkBOLF866te9nFQuGMLuz/vfsFLHuEi+OE/+V5XDQ0qenBy6eSOeFvZUmRROhKC/Kkk6zGd8JAkpeE1PFnwbG5JcFOTrSsIHBQVtKYvVNIRT1aIVip6HxGwIDAQAB
+  auth-server-url: http://localhost/auth
   ssl-required: external
   resource: shanoir-ng-users
   securityConstraints[0]:
@@ -53,11 +54,12 @@ keycloak:
       patterns:
         - /*
 kc.requests:
-    realm: master
-    client.id: admin-cli
-    admin:
-      login: admin
-      password: admin
+  realm: master
+  auth-server-url: http://shanoir-ng-nginx/auth
+  client.id: admin-cli
+  admin:
+    login: admin
+    password: admin
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-users.log
@@ -78,12 +80,12 @@ spring:
     password: 
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
-    data: classpath:/scripts/import.sql
+    initialize: false
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
+      ddl-auto: update
     # Show or not log for each sql query
     show-sql: true
   jooq:
@@ -93,7 +95,7 @@ spring:
 server:
     port: 9901
 #keycloak
-keycloak:
+kc.requests:
   auth-server-url: http://localhost/auth
 # logging configuration
 logging:
@@ -136,5 +138,4 @@ spring:
       ddl-auto: validate
 #keycloak
 keycloak:
-  auth-server-url: http://shanoir-ng-nginx/auth
-      
+  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth
