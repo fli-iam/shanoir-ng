@@ -20,6 +20,7 @@
 	
 	<modules>
 		<module>../shanoir-ng-users</module>
+		<module>../shanoir-ng-keycloak</module>
 		<module>../shanoir-ng-front</module>
 	</modules>
 
