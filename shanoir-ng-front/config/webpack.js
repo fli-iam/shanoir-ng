@@ -15,7 +15,7 @@ const METADATA = webpackMerge(commonConfig.metadata, {
     BACKEND_API_USERS_MS_URL: BACKEND_API_ROOT_URL + '/users',
     BACKEND_API_CENTERS_MS_URL: BACKEND_API_ROOT_URL + '/centers',
     KEYCLOAK_BASE_URL: 'http://localhost/auth',
-    LOGOUT_REDIRECT_URL: 'http://localhost/index.html',
+    LOGOUT_REDIRECT_URL: 'http://localhost/shanoir-ng/index.html',
     port: 8081,
     ENV: ENV,
 });
