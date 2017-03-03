@@ -9,10 +9,10 @@
 		<relativePath>../shanoir-ng-parent</relativePath>
 	</parent>
 
-	<artifactId>shanoir-ng-keycloak-init</artifactId>
+	<artifactId>shanoir-ng-keycloak</artifactId>
 	<packaging>jar</packaging>
 
-	<name>shanoir-ng-keycloak-init</name>
+	<name>shanoir-ng-keycloak</name>
 	<description>Shanoir-ng project used to initialize Keycloak server</description>
 
 	<properties>
