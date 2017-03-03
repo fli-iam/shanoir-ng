@@ -11,7 +11,7 @@ export class UserService {
     constructor(private http: Http) { }
 
     getUsers(): Promise<User[]> {
-        return this.http.get(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_ALL_URL)
+        return this.http.get(AppUtils.BACKEND_API_USER_ALL_URL)
             .toPromise()
             .then(response => response.json() as User[])
             .catch((error) => {
@@ -21,7 +21,7 @@ export class UserService {
     }
 
     getUser(id: number): Promise<User> {
-        return this.http.get(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id)
+        return this.http.get(AppUtils.BACKEND_API_USER_URL + '/' + id)
             .toPromise()
             .then(response => response.json() as User)
             .catch((error) => {
@@ -31,25 +31,25 @@ export class UserService {
     }
 
     create(user: User): Observable<User> {
-        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL, JSON.stringify(user))
+        return this.http.post(AppUtils.BACKEND_API_USER_URL, JSON.stringify(user))
             .map(this.extractData)
             .catch(this.handleError);
     }
 
     requestAccount(user: User): Observable<User> {
-        return this.http.post(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL+ AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL, JSON.stringify(user))
+        return this.http.post(AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL, JSON.stringify(user))
             .map(this.extractData)
             .catch(this.handleError);
     }
 
     update(id: number, user: User): Observable<User> {
-        return this.http.put(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id, JSON.stringify(user))
+        return this.http.put(AppUtils.BACKEND_API_USER_URL + '/' + id, JSON.stringify(user))
             .map(response => response.json() as User)
             .catch(this.handleError);
     }
 
     delete(id: number): Promise<Response> {
-        return this.http.delete(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id)
+        return this.http.delete(AppUtils.BACKEND_API_USER_URL + '/' + id)
             .toPromise()
             .catch((error) => {
                 console.error('Error delete user', error);
@@ -58,14 +58,14 @@ export class UserService {
     }
 
     confirmAccountRequest(id: number, user: User): Observable<User> {
-        return this.http.put(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL, 
+        return this.http.put(AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL, 
                 JSON.stringify(user))
             .map(response => response.json() as User)
             .catch(this.handleError);
     }
 
     denyAccountRequest(id: number): Promise<Response> {
-        return this.http.delete(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL)
+        return this.http.delete(AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL)
             .toPromise()
             .catch((error) => {
                 console.error('Error deny user account request', error);

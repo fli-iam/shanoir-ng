@@ -9,7 +9,7 @@ export class CenterService {
     constructor(private http: Http) { }
 
     getCenters(): Promise<Center[]> {
-        return this.http.get(AppUtils.BACKEND_API_ROOT_URL + AppUtils.BACKEND_API_CENTER_ALL_URL)
+        return this.http.get(AppUtils.BACKEND_API_CENTER_ALL_URL)
             .toPromise()
             .then(response => response.json() as Center[])
             .catch((error) => {

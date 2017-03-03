@@ -2,6 +2,21 @@ const webpack = require('webpack');
 const helpers = require('./helpers');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+/**
+ * Webpack Constants
+ */
+const ENV = process.env.ENV = process.env.NODE_ENV = 'development';
+const BACKEND_API_ROOT_URL = 'http://localhost/shanoir-ng';
+const METADATA = webpackMerge(commonConfig.metadata, {
+    host: 'localhost',
+    BACKEND_API_USERS_MS_URL: BACKEND_API_ROOT_URL + '/users',
+    BACKEND_API_CENTERS_MS_URL: BACKEND_API_ROOT_URL + '/centers',
+    KEYCLOAK_BASE_URL: 'http://localhost/auth',
+    LOGOUT_REDIRECT_URL: 'http://localhost/index.html',
+    port: 8081,
+    ENV: ENV,
+});
+
 module.exports = {
     devtool: 'inline-source-map',
 
@@ -47,6 +62,31 @@ module.exports = {
             /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
             helpers.root('./src'), // location of your src
             {} // a map of your routes
-        )
+        ),
+
+        /**
+         * Plugin: DefinePlugin
+         * Description: Define free variables.
+         * Useful for having development builds with debug logging or adding global constants.
+         *
+         * Environment helpers
+         *
+         * See: https://webpack.github.io/docs/list-of-plugins.html#defineplugin
+         */
+        new webpack.DefinePlugin({
+            'ENV': JSON.stringify(METADATA.ENV),
+            'BACKEND_API_USERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_USERS_MS_URL),
+            'BACKEND_API_CENTERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_CENTERS_MS_URL),
+            'KEYCLOAK_BASE_URL': JSON.stringify(METADATA.KEYCLOAK_BASE_URL),
+            'LOGOUT_REDIRECT_URL': JSON.stringify(METADATA.LOGOUT_REDIRECT_URL),
+            'process.env': {
+                'ENV': JSON.stringify(METADATA.ENV),
+                'NODE_ENV': JSON.stringify(METADATA.ENV),
+                'BACKEND_API_USERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_USERS_MS_URL),
+                'BACKEND_API_CENTERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_CENTERS_MS_URL),
+                'LOGOUT_REDIRECT_URL': JSON.stringify(METADATA.LOGOUT_REDIRECT_URL),
+                'KEYCLOAK_BASE_URL': JSON.stringify(METADATA.KEYCLOAK_BASE_URL),
+            }
+        })
     ]
 }

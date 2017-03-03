@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 
-import { environment } from '../../../environments/environment';
-
 declare var Keycloak: any;
 
 @Injectable()
@@ -10,7 +8,7 @@ export class KeycloakService {
 
   static init(): Promise<any> {
     const keycloakAuth: any = Keycloak({
-      url: environment.keykloakBaseUrl,
+      url: process.env.KEYCLOAK_BASE_URL,
       realm: 'shanoir-ng',
       clientId: 'shanoir-ng-front',
     });
@@ -22,7 +20,7 @@ export class KeycloakService {
           KeycloakService.auth.loggedIn = true;
           KeycloakService.auth.authz = keycloakAuth;
           KeycloakService.auth.logoutUrl = keycloakAuth.authServerUrl + '/realms/shanoir-ng/protocol/openid-connect/logout?redirect_uri='
-            + environment.logoutRedirectUrl;
+            + process.env.LOGOUT_REDIRECT_URL;
           resolve();
         })
         .error(() => {
