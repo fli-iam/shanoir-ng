@@ -17,4 +17,13 @@ export class CenterService {
                 return Promise.reject(error.message || error);
         });
     }
+
+    delete(id: number): Promise<Response> {
+        return this.http.delete(AppUtils.BACKEND_API_CENTER_URL + '/' + id)
+            .toPromise()
+            .catch((error) => {
+                console.error('Error delete center', error);
+                return Promise.reject(error.message || error);
+        });
+    }
 }
