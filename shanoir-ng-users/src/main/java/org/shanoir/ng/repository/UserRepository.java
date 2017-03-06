@@ -4,12 +4,14 @@ import java.util.Optional;
 
 import org.shanoir.ng.model.User;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * Magic repository for users
  *
  * @author jlouis
  */
+@Repository
 public interface UserRepository extends CrudRepository<User, Long>, UserRepositoryCustom {
 
     /**

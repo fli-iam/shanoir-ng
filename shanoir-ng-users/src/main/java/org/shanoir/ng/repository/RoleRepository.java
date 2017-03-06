@@ -4,13 +4,15 @@ import java.util.Optional;
 
 import org.shanoir.ng.model.Role;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * Magic repository for roles
  *
  * @author jlouis
  */
-public interface RoleRepository extends CrudRepository<Role, Long> {
+@Repository
+public interface RoleRepository extends CrudRepository<Role, Long>, RoleRepositoryCustom {
 
 	/**
 	 * Find role by its name.
