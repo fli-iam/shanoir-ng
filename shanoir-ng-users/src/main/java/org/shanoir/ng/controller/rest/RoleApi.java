@@ -25,7 +25,7 @@ public interface RoleApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Role.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasAuthority('adminRole')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	ResponseEntity<List<Role>> findRoles();
 
 }

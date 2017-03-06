@@ -47,10 +47,10 @@ keycloak:
     securityCollections[0]:
       name: spring secured api
       authRoles: 
-        - adminRole
-        - expertRole
-        - guestRole
-        - userRole
+        - ROLE_ADMIN
+        - ROLE_EXPERT
+        - ROLE_GUEST
+        - ROLE_USER
       patterns:
         - /*
 kc.requests:
@@ -95,6 +95,8 @@ spring:
 server:
     port: 9901
 #keycloak
+keycloak:
+  credentials.secret: 4102f55e-9c70-49cf-9e6c-778433755b41
 kc.requests:
   auth-server-url: http://localhost/auth
 # logging configuration
@@ -117,6 +119,7 @@ spring:
     password: 
     driver-class-name: org.h2.Driver
     data: classpath:/scripts/test-data-h2.sql
+    initialize: true
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:

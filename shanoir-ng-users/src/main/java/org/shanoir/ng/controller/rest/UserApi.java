@@ -32,7 +32,7 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{userId}/confirmaccountrequest", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasAuthority('adminRole')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	ResponseEntity<Void> confirmAccountRequest(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
 			@ApiParam(value = "user to update", required = true) @RequestBody User user, BindingResult result)
@@ -45,7 +45,7 @@ public interface UserApi {
 			@ApiResponse(code = 404, message = "no user found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{userId}", produces = { "application/json" }, method = RequestMethod.DELETE)
-	@PreAuthorize("hasAuthority('adminRole')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	ResponseEntity<Void> deleteUser(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId);
 
@@ -57,7 +57,7 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{userId}/denyaccountrequest", produces = {
 			"application/json" }, method = RequestMethod.DELETE)
-	@PreAuthorize("hasAuthority('adminRole')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	ResponseEntity<Void> denyAccountRequest(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId)
 			throws RestServiceException;
@@ -80,7 +80,7 @@ public interface UserApi {
 			@ApiResponse(code = 403, message = "forbidden", response = User.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasAuthority('adminRole')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	ResponseEntity<List<User>> findUsers();
 
 	@ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
@@ -91,7 +91,7 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasAuthority('adminRole')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	ResponseEntity<User> saveNewUser(@ApiParam(value = "user to create", required = true) @RequestBody User user,
 			BindingResult result) throws RestServiceException;
 	

@@ -6,10 +6,10 @@ use shanoir_ng_users;
 
 INSERT INTO role 
 VALUES 
-	(1,1000,'Administrator','adminRole'),
-	(2,0,'Guest','guestRole'),
-	(3,100,'User','userRole'),
-	(4,200,'Expert','expertRole');
+	(1,1000,'Administrator','ROLE_ADMIN'),
+	(2,0,'Guest','ROLE_GUEST'),
+	(3,100,'User','ROLE_USER'),
+	(4,200,'Expert','ROLE_EXPERT');
 
 INSERT INTO users
 	(id, account_request_demand, can_access_to_dicom_association, creation_date, email, expiration_date, first_name, is_first_expiration_notification_sent, is_medical, is_second_expiration_notification_sent, last_name, password, username, role_id)

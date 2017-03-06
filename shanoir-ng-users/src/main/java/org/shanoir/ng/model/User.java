@@ -51,7 +51,7 @@ public class User extends HalEntity implements UserDetails {
 	@Unique
 	private String email;
 
-	@EditableOnlyBy(roles = { "adminRole" })
+	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
 	private Date expirationDate;
 
 	@NotBlank
@@ -82,7 +82,7 @@ public class User extends HalEntity implements UserDetails {
 
 	@ManyToOne
 	@NotNull
-	@EditableOnlyBy(roles = { "adminRole" })
+	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
 	private Role role;
 
 	/**

@@ -12,10 +12,10 @@ CREATE TABLE `role` (
 
 INSERT INTO role 
 VALUES 
-(1,1000,'Administrator','adminRole'),
-(2,0,'Guest','guestRole'),
-(3,100,'User','userRole'),
-(4,200,'Expert','expertRole');
+(1,1000,'Administrator','ROLE_ADMIN'),
+(2,0,'Guest','ROLE_GUEST'),
+(3,100,'User','ROLE_USER'),
+(4,200,'Expert','ROLE_EXPERT');
 
 CREATE TABLE `account_request_info` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
