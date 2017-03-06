@@ -7,9 +7,15 @@ import javax.persistence.PersistenceContext;
 
 import org.shanoir.ng.model.User;
 import org.shanoir.ng.repository.UserRepositoryCustom;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component
+/**
+ * Implementation of custom repository for users.
+ * 
+ * @author msimon
+ *
+ */
+@Repository
 public class UserRepositoryImpl implements UserRepositoryCustom {
 
 	@PersistenceContext
