@@ -22,6 +22,7 @@
 		<keycloak.version>2.5.1.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<docker.image.name>shanoir-ng/users</docker.image.name>
+		<supervisor.file.name>ms.users.sv.dev.conf</supervisor.file.name>
 	</properties>
 
 	<dependencies>
@@ -165,9 +166,27 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<profiles>
-		            	<profile>${spring.active.profile}</profile>
-		          	</profiles>
+						<profile>${spring.active.profile}</profile>
+					</profiles>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<copy file="src/main/docker/${supervisor.file.name}"
+									tofile="src/main/docker/ms.users.sv.conf" overwrite="true" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>com.spotify</groupId>
@@ -224,6 +243,9 @@
 		</profile>
 		<profile>
 			<id>init-keycloak</id>
+			<properties>
+				<maven.test.skip>true</maven.test.skip>
+			</properties>
 			<build>
 				<plugins>
 					<plugin>
@@ -237,8 +259,8 @@
 								<configuration>
 									<classifier>exec</classifier>
 									<profiles>
-						            	<profile>${spring.active.profile}</profile>
-						          	</profiles>
+										<profile>${spring.active.profile}</profile>
+									</profiles>
 								</configuration>
 							</execution>
 						</executions>
@@ -250,28 +272,9 @@
 			<id>qualif</id>
 			<properties>
 				<spring.active.profile>qualif</spring.active.profile>
+				<supervisor.file.name>ms.users.sv.qualif.conf</supervisor.file.name>
 				<maven.test.skip>true</maven.test.skip>
 			</properties>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.spotify</groupId>
-						<artifactId>docker-maven-plugin</artifactId>
-						<version>0.4.11</version>
-						<configuration>
-							<imageName>${docker.image.name}</imageName>
-							<dockerDirectory>src/main/docker-qualif</dockerDirectory>
-							<resources>
-								<resource>
-									<targetPath>/</targetPath>
-									<directory>${project.build.directory}</directory>
-									<include>${project.build.finalName}.jar</include>
-								</resource>
-							</resources>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 	</profiles>
 </project>

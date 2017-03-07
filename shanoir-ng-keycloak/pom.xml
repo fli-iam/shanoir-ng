@@ -18,7 +18,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.profile.active></spring.profile.active>
-		<users.docker.directory>${basedir}/../shanoir-ng-users/src/main/docker</users.docker.directory>
 	</properties>
 
 	<dependencies>
@@ -56,7 +55,7 @@
 						<phase>package</phase>
 						<configuration>
 							<target>
-								<copy file="target/${project.build.finalName}.jar" tofile="${users.docker.directory}/${project.artifactId}.jar"/>
+								<copy file="target/${project.build.finalName}.jar" tofile="${basedir}/../shanoir-ng-users/src/main/docker/${project.artifactId}.jar"/>
 							</target>
 						</configuration>
 						<goals>
@@ -72,14 +71,12 @@
 			<id>dev</id>
 			<properties>
 				<spring.profile.active>dev</spring.profile.active>
-				<users.docker.directory>${basedir}/../shanoir-ng-users/src/main/docker</users.docker.directory>
 			</properties>
 		</profile>
 		<profile>
 			<id>qualif</id>
 			<properties>
 				<spring.profile.active>qualif</spring.profile.active>
-				<users.docker.directory>${basedir}/../shanoir-ng-users/src/main/docker-qualif</users.docker.directory>
 			</properties>
 		</profile>
 	</profiles>
