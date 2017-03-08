@@ -53,15 +53,7 @@ spring:
     password: 
 #keycloak
 keycloak:
-  realm: shanoir-ng
   auth-server-url: http://localhost:8080/auth
-kc.requests:
-  admin:
-    login: admin
-    password: admin
-  client.id: admin-cli
-  realm: master
-  temporary.password: false
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-keycloak-init.log
@@ -86,13 +78,5 @@ spring:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
 #keycloak
-keycloak:
-  realm: shanoir-ng
-  auth-server-url: http://shanoir-ng-nginx/auth
 kc.requests:
-  admin:
-    login: admin
-    password: admin
-  client.id: admin-cli
-  realm: master
   temporary.password: true
