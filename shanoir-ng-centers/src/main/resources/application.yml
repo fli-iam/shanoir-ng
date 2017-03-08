@@ -49,10 +49,10 @@ keycloak:
     securityCollections[0]:
       name: spring secured api
       authRoles: 
-        - adminRole
-        - expertRole
-        - guestRole
-        - userRole
+        - ROLE_ADMIN
+        - ROLE_EXPERT
+        - ROLE_GUEST
+        - ROLE_USER
       patterns:
         - /*
 kc.requests:
