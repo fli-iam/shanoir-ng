@@ -14,11 +14,11 @@ import { CenterService } from '../shared/center.service';
 })
 
 export class CenterListComponent {
-    private centers: Center[];
-    private columnDefs: any[];
-    private customActionDefs: any[];
-    private rowClickAction: Object;
-    private loading: boolean = false;
+    public centers: Center[];
+    public columnDefs: any[];
+    public customActionDefs: any[];
+    public rowClickAction: Object;
+    public loading: boolean = false;
 
     constructor(private centerService: CenterService, private confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
         this.getCenters();

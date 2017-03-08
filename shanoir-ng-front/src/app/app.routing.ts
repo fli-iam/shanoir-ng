@@ -25,7 +25,7 @@ const appRoutes: Routes = [
     path: 'editUser',
     component: EditUserComponent
   }, {
-    path: 'requestAccount',
+    path: 'accountRequest',
     component: AccountRequestComponent,
   }, {
     path: 'treeTest',

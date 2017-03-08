@@ -246,6 +246,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the keycloakId
 	 */
+	@JsonIgnore
 	public String getKeycloakId() {
 		return keycloakId;
 	}

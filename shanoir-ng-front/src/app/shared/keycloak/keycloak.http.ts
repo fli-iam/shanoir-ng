@@ -1,15 +1,17 @@
-import {Injectable} from "@angular/core";
-import {Http, Request, ConnectionBackend, RequestOptions, RequestOptionsArgs, Response, Headers} from "@angular/http";
+import { Injectable } from "@angular/core";
+import { Http, Request, ConnectionBackend, RequestOptions, RequestOptionsArgs, Response, Headers } from "@angular/http";
 
-import { KeycloakService } from "./keycloak.service";
 import { Observable, Observer } from 'rxjs/Rx';
+
+import * as AppUtils from '../../utils/app.utils';
+import { KeycloakService } from "./keycloak.service";
 
 /**
  * This provides a wrapper over the ng2 Http class that insures tokens are refreshed on each request.
  */
 @Injectable()
 export class KeycloakHttp extends Http {
-    constructor(_backend: ConnectionBackend, _defaultOptions: RequestOptions, private _keycloakService:KeycloakService) {
+    constructor(_backend: ConnectionBackend, _defaultOptions: RequestOptions, private _keycloakService: KeycloakService) {
         super(_backend, _defaultOptions);
     }
 
@@ -22,10 +24,10 @@ export class KeycloakHttp extends Http {
         options.headers.set('Authorization', 'Bearer ' + KeycloakService.auth.authz.token);
     }
 
-    private configureRequest(f:Function, url:string | Request, options:RequestOptionsArgs, body?: any):Observable<Response> {
-        let tokenPromise:Promise<string> = this._keycloakService.getToken();
-        let tokenObservable:Observable<string> = Observable.fromPromise(tokenPromise);
-        let tokenUpdateObservable:Observable<any> = Observable.create((observer: any) => {
+    private configureRequest(f: Function, url: string | Request, options: RequestOptionsArgs, body?: any): Observable<Response> {
+        let tokenPromise: Promise<string> = this._keycloakService.getToken();
+        let tokenObservable: Observable<string> = Observable.fromPromise(tokenPromise);
+        let tokenUpdateObservable: Observable<any> = Observable.create((observer: any) => {
             if (options == null) {
                 let headers = new Headers();
                 options = new RequestOptions({ headers: headers });
@@ -36,7 +38,7 @@ export class KeycloakHttp extends Http {
             observer.next();
             observer.complete();
         });
-        let requestObservable:Observable<Response> = Observable.create((observer: Observer<Response>) => {
+        let requestObservable: Observable<Response> = Observable.create((observer: Observer<Response>) => {
             let result;
             if (body) {
                 result = f.apply(this, [url, body, options]);
@@ -62,7 +64,13 @@ export class KeycloakHttp extends Http {
      * of {@link BaseRequestOptions} before performing the request.
      */
     request(url: string | Request, options?: RequestOptionsArgs): Observable<Response> {
-        return this.configureRequest(super.request, url, options);
+        if (typeof url !== 'string' && AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL === url.url) {
+            // Public URL - no token
+            url.headers.append('Content-Type', 'application/json');
+            return super.request(url, options);
+        } else {
+            return this.configureRequest(super.request, url, options);
+        }
     }
 
     /**
@@ -76,7 +84,11 @@ export class KeycloakHttp extends Http {
      * Performs a request with `post` http method.
      */
     post(url: string, body: any, options?: RequestOptionsArgs): Observable<Response> {
-        return this.configureRequest(super.post, url, options, body);
+        if (AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL === url) {
+            return super.post(url, body, options);
+        } else {
+            return this.configureRequest(super.post, url, options, body);
+        }
     }
 
     /**

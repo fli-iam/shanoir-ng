@@ -9,8 +9,4 @@ if (process.env.ENV === 'production') {
   enableProdMode();
 }
 
-KeycloakService.init()
-  .then(() => {
-    platformBrowserDynamic().bootstrapModule(AppModule);
-  })
-  .catch((err) => console.log(err));
+platformBrowserDynamic().bootstrapModule(AppModule);

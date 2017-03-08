@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-11-18T15:36:13.002Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-07T15:52:25.736Z")
 
 @Api(value = "user", description = "the user API")
 @RequestMapping("/user")
@@ -32,7 +32,7 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{userId}/confirmaccountrequest", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasAuthority('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Void> confirmAccountRequest(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
 			@ApiParam(value = "user to update", required = true) @RequestBody User user, BindingResult result)
@@ -45,7 +45,7 @@ public interface UserApi {
 			@ApiResponse(code = 404, message = "no user found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{userId}", produces = { "application/json" }, method = RequestMethod.DELETE)
-	@PreAuthorize("hasAuthority('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Void> deleteUser(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId);
 
@@ -57,7 +57,7 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{userId}/denyaccountrequest", produces = {
 			"application/json" }, method = RequestMethod.DELETE)
-	@PreAuthorize("hasAuthority('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<Void> denyAccountRequest(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId)
 			throws RestServiceException;
@@ -80,7 +80,7 @@ public interface UserApi {
 			@ApiResponse(code = 403, message = "forbidden", response = User.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasAuthority('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<List<User>> findUsers();
 
 	@ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
@@ -91,19 +91,8 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasAuthority('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<User> saveNewUser(@ApiParam(value = "user to create", required = true) @RequestBody User user,
-			BindingResult result) throws RestServiceException;
-	
-	@ApiOperation(value = "", notes = "Saves a new user from account request", response = User.class, tags={})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created user from account request", response = User.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = User.class),
-			@ApiResponse(code = 403, message = "forbidden", response = User.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = User.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
-	@RequestMapping(value = "/accountrequest", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<User> saveNewUserFromAccountRequest(@ApiParam(value = "user to create from account request", required = true) @RequestBody User user,
 			BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates a user", response = Void.class, tags = {})

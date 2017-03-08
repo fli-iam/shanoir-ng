@@ -170,8 +170,8 @@ public class UserServiceImpl implements UserService {
 				accountRequestInfoRepository.save(user.getAccountRequestInfo());
 				user.setAccountRequestDemand(true);
 				// Set role 'guest'
-				user.setRole(roleRepository.findByName("guestRole")
-						.orElseThrow(() -> new ShanoirUsersException("Error while getting role 'guestRole'")));
+				user.setRole(roleRepository.findByName("ROLE_GUEST")
+						.orElseThrow(() -> new ShanoirUsersException("Error while getting role 'ROLE_GUEST'")));
 			}
 			savedUser = userRepository.save(user);
 		} catch (DataIntegrityViolationException dive) {

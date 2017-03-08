@@ -36,7 +36,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 	    }
 
 		if (accessToken != null
-				&& ((userId.equals(tokenUserId) || accessToken.getRealmAccess().isUserInRole("ADMIN")))) {
+				&& ((userId.equals(tokenUserId) || accessToken.getRealmAccess().isUserInRole("ROLE_ADMIN")))) {
 			return true;
 		}
 		return false;

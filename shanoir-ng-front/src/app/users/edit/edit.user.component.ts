@@ -81,6 +81,10 @@ export class EditUserComponent implements OnInit {
         this.router.navigate(['/userlist']);
     }
 
+    cancelAccountRequest(): void {
+        this.router.navigate(['/home']);
+    }
+
     accept(): void {
         this.submit();
         this.userService.confirmAccountRequest(this.userId, this.user)
@@ -117,11 +121,11 @@ export class EditUserComponent implements OnInit {
             });
     }
 
-    requestAccount(): void {
+    accountRequest(): void {
         this.submit();
         this.userService.requestAccount(this.user)
             .subscribe((user) => {
-                this.cancel();
+                this.cancelAccountRequest();
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;

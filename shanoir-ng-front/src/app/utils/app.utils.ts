@@ -6,9 +6,6 @@ export const STORAGE_REFRESH_TOKEN:string = 'shanoirApp-refreshToken';
 
 // Users http api
 const BACKEND_API_USERS_MS_URL:string = process.env.BACKEND_API_USERS_MS_URL;
-export const BACKEND_API_AUTHENTICATE_PATH:string = BACKEND_API_USERS_MS_URL + '/authenticate';
-export const BACKEND_API_REFRESH_AUTH_TOKEN_PATH:string = BACKEND_API_AUTHENTICATE_PATH + '/token';
-export const BACKEND_API_LOGOUT_PATH:string = BACKEND_API_USERS_MS_URL + '/logout';
 export const BACKEND_API_USER_ALL_URL:string = BACKEND_API_USERS_MS_URL + '/user/all';
 export const BACKEND_API_USER_URL:string = BACKEND_API_USERS_MS_URL + '/user';
 export const BACKEND_API_USER_ACCOUNT_REQUEST_URL:string = BACKEND_API_USERS_MS_URL + '/accountrequest';
