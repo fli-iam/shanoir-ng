@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationStart } from '@angular/router';
 
 import { KeycloakService } from './shared/keycloak/keycloak.service';
 
@@ -14,7 +14,7 @@ export class AppComponent {
 
     constructor(private router: Router) {
         router.events.subscribe(e => {
-            if (e.url !== '/accountRequest') {
+            if (e instanceof NavigationStart && e.url !== '/accountRequest') {
                 if (!KeycloakService.auth.loggedIn) {
                     KeycloakService.init()
                         .then(() => { })
