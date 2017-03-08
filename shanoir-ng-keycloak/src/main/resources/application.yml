@@ -25,7 +25,7 @@ spring:
 #keycloak
 keycloak:
   realm: shanoir-ng
-  auth-server-url: http://shanoir-ng-nginx/auth
+  auth-server-url: http://shanoir-ng-keycloak:8080/auth
 kc.requests:
   admin:
     login: admin
