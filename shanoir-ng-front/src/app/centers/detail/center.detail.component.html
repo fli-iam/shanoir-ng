@@ -1,0 +1,68 @@
+<div class="content-component">
+    <form [formGroup]="centerDetailForm" class="max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="2">
+				<div class="header command-zone" i18n="View center|Title">Center details</div>
+			</td></tr>
+            <tr>
+				<td>
+					<fieldset>
+						<ol>
+							<li>
+								<label i18n="Center detail|Name label" class="required-label">Name</label> 
+								<span class="right-col">
+									{{center.name}}
+								</span>
+							</li>
+                            <li>
+								<label i18n="Center detail|Name label">Street</label> 
+								<span class="right-col">
+									{{center.street}}
+								</span>
+							</li>
+                            <li>
+								<label i18n="Center detail|Name label">Post code</label> 
+								<span class="right-col">
+									{{center.postalCode}}
+								</span>
+							</li>
+                            <li>
+								<label i18n="Center detail|Name label">Town</label> 
+								<span class="right-col">
+									{{center.city}}
+								</span>
+							</li>
+                            <li>
+								<label i18n="Center detail|Name label">Country</label> 
+								<span class="right-col">
+									{{center.country}}
+								</span>
+							</li>
+                            <li>
+								<label i18n="Center detail|Name label">Phone number</label> 
+								<span class="right-col">
+									{{center.phoneNumber}}
+								</span>
+							</li>
+                            <li>
+								<label i18n="Center detail|Name label">Website</label> 
+								<span class="right-col">
+									{{center.website}}
+								</span>
+							</li>
+						</ol>
+					</fieldset>
+				</td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    <div class="footer command-zone">
+                        <button i18n="View center|BackButton label" class="Button" (click)="back()">Back</button>
+                        <button type="submit" i18n="View center|EditButton label" (click)="edit()" class="Button">Edit</button>
+			        </div>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
