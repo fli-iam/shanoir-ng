@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "Initialize MariaDB command"
+/opt/mysql/init/mariadb_init.sh mysqld
+
+echo "Create supervisor log directory"
+mkdir -p /vol/log/supervisor
+
+service mysql start
+echo "Populate database"
+mysql -u shanoir -pshanoir shanoir_ng_centers < /dk/shanoirng_centers.sql
+
+echo "Initialize Keycloak database"
+java -jar /opt/shanoir-ng/shanoir-ng-keycloak-init.jar --spring.profiles.active=qualif
+
+echo "Stop mysql process"
+mysqladmin -u root -p$MYSQL_ROOT_PASSWORD shutdown
