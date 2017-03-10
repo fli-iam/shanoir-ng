@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiResponses;
 
 @Api(value = "study", description = "the study API")
 public interface StudyAPI {
-	
+
 	@ApiOperation(value = "", notes = "Returns all studies", response = Study.class, tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "founded studies", response = Study.class, responseContainer = "List"),
