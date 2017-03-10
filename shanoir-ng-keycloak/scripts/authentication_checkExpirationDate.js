@@ -4,7 +4,7 @@
  */
 
 // import enum for error lookup
-AuthenticationFlowError = Java.type("org.keycloak.authentication.AuthenticationFlowError");
+//AuthenticationFlowError = Java.type("org.keycloak.authentication.AuthenticationFlowError");
 
 /**
  * An example authenticate function.
@@ -29,13 +29,13 @@ function authenticate(context) {
 
     var authShouldFail = false;
     if (authShouldFail) {
-        context.failure(AuthenticationFlowError.INVALID_USER);
+        context.failure("INVALID_USER");
         return;
     }
     
     if (user.attributes['expirationDate'] !== null && new Date().getTime() > user.attributes['expirationDate'][0]) {
         user.enabled = false;
-        context.failure(AuthenticationFlowError.USER_DISABLED);
+        context.failure("USER_DISABLED");
         return;
     }
 
