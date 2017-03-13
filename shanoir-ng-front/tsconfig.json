@@ -9,13 +9,10 @@
         ],
         "module": "commonjs",
         "moduleResolution": "node",
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "removeComments": false,
         "sourceMap": true,
         "suppressImplicitAnyIndexErrors": true,
         "target": "es5"
-    },
-    "exclude": [
-        "node_modules"
-    ]
+    }
 }
