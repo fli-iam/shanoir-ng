@@ -45,7 +45,7 @@ keycloak:
   resource: shanoir-ng-centers
   securityConstraints[0]:
     securityCollections[0]:
-      name: spring secured api
+      name: center secured api
       authRoles: 
         - ROLE_ADMIN
         - ROLE_EXPERT
@@ -110,12 +110,13 @@ spring:
     password: 
     driver-class-name: org.h2.Driver
     data: classpath:/scripts/test-data-h2.sql
+    initialize: true
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
-      
+
 ---
 
 #################
@@ -132,4 +133,3 @@ spring:
 #keycloak
 keycloak:
   auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth
-      
