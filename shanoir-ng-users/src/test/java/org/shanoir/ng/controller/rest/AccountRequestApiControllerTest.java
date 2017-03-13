@@ -68,7 +68,7 @@ public class AccountRequestApiControllerTest {
 
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(user)))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 }
