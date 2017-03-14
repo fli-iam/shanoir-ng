@@ -45,7 +45,7 @@ export class KeycloakService {
             resolve(<string>KeycloakService.auth.authz.token);
           })
           .error(() => {
-            reject('Failed to refresh token');
+            window.location.href = process.env.LOGOUT_REDIRECT_URL;
           });
       }
     });
