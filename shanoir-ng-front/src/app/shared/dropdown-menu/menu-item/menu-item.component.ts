@@ -1,9 +1,22 @@
 import { Component, Input, ContentChildren, forwardRef, QueryList } from '@angular/core';
+import { style, state, animate, transition, trigger } from '@angular/core';
 
 @Component({
     selector: 'menu-item',
     templateUrl: 'menu-item.component.html',
-    styleUrls: ['menu-item.component.css']
+    styleUrls: ['menu-item.component.css'],
+    animations: [
+        trigger('myAnimation', [
+            state('0', style({width: '0'})),
+            state('1', style({width: '*'})),
+            transition(
+                '0 => 1', [
+                    style({opacity: 1, width: 0}),
+                    animate('200ms ease-in-out', style({opacity: 1, width: '*'}))
+                ]
+            )
+        ])
+    ],
 })
 
 export class MenuItemComponent {

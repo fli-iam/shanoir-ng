@@ -1,0 +1,80 @@
+<form>
+
+    <div class="step">
+        <h2><span>1. Choose modality</span><span class="hr"></span></h2>   
+        <p>In this step you are invited to choose the modality of the dataset(s) you want to import into the system.</p>
+        <div>
+            <span>
+                <input type="radio" [(ngModel)]="modality" value="MRI" name="modality">MRI
+                <span class="spacer"></span>
+                <input type="radio" [(ngModel)]="modality" value="PET" name="modality">PET
+            </span>
+        </div>
+    </div>
+
+    <div class="step">
+        <h2><span>2. Choose modality</span><span class="hr"></span></h2>   
+        <p>
+            Please select a DICOM zip archive to import.<br/>
+            <strong class="warning">&#9888; Important notice:</strong> this archive must contain a DICOMDIR file at its root!
+        </p>
+        <input type="file" (change)="uploadArchive($event)" placeholder="Upload file..." />    
+    </div>
+
+
+    <div class="step modality">
+        <h2><span>3. Select series</span><span class="hr"></span></h2>   
+        <p>Please select only the series useful for your study.</p>
+        <div class="middle-content">
+            <div class="tree">
+                <node label="DIR OL" pictoUrl="/assets/images/icons/user.png" deploy=true>
+                    <node label="RECHERCHE WIP NEURO" pictoUrl="/assets/images/icons/medical/x-ray-2.png" hasBox="true">
+                        <node
+                            *ngFor="let dataset of datasets" 
+                            [label]="dataset.name" 
+                            pictoUrl="/assets/images/icons/medical/brain.png" 
+                            hasBox="true" 
+                            [(ngModel)]="dataset.selected" 
+                            buttonPicto="/assets/images/icons/search.png"
+                            (buttonClick)="showThumbnail($event)"
+                            [nodeParams]="dataset"
+                            (labelClick)="showDetails($event)"
+                            [class.selected]="detailedSerie == dataset"
+                            [ngModelOptions]="{standalone: true}">
+                        </node>
+                    </node>
+                </node>
+
+                <div class="modality-test">
+                    TEST : selected datasets
+                    <ul *ngFor="let ds of datasets">
+                        <li *ngIf="ds.selected">{{ds.name}}</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="preview" *ngIf="detailedSerie">
+                <div class="title"><h3>Serie</h3></div>
+                <div class="preview-data">
+                    <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.id}}</div></div>
+                    <div class="item"><div class="label">name</div><div class="value">{{detailedSerie?.name}}</div></div>
+                    <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.name}}</div></div>
+                    <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.name}}</div></div>
+                </div>
+                
+                <div class="thumbnail" *ngIf="thumbnailOn">
+                    <div class="title info"><h3>Thumbnail</h3></div>
+                    <img src="http://www.two-views.com/images/mri-head-side.jpg" />
+                    <div class="paging info">
+                        <button (click)="page = page - 1">&#9664;</button>
+                        <span class="page">{{page}}</span>
+                        <button (click)="page = page + 1">&#9654;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+</form>

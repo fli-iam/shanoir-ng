@@ -31,6 +31,8 @@ import { TableComponent} from "./shared/table/table.component";
 import { TreeNodeComponent }   from './shared/tree/tree.node.component';
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
+import { ImportComponent }   from './import/import.component';
+
 
 export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
   return new KeycloakHttp(backend, defaultOptions, keycloakService);
@@ -61,7 +63,8 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         StudyTreeComponent,
         TableComponent,
         TreeNodeComponent,
-        UserListComponent
+        UserListComponent,
+        ImportComponent
     ],
     entryComponents: [
         ConfirmDialogComponent

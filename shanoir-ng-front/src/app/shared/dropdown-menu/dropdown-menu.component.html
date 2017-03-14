@@ -1,21 +1,28 @@
-<li 
+<li #container
     [class.opened]="opened" 
     [class.closed]="!opened">
     <span 
-        *ngIf="contentWrapper.children.length > 0"
+        *ngIf="contentWrapper.children.length > 0 && mode == 'top'"
         class="label"
         (click)="toggle()"
         >{{label}}
         <span class="menu-arrow">&#x25BE;</span>
     </span>
     <span
-        *ngIf="contentWrapper.children.length == 0"
+        *ngIf="contentWrapper.children.length == 0 && mode == 'top'"
         class="label" 
         (click)="click()"
         [routerLink]="link? link : null"
         [routerLinkActive]="link? 'active' : 'unactive'"
         >{{label}}
     </span>
+    <span 
+        *ngIf="mode == 'tree'"
+        class="plus"
+        (click)="toggle()"
+        ><template [ngIf]="!opened">+</template><template [ngIf]="opened">&#10549;</template></span>
+
+    <!-- ul #contentWrapper class="sub-content" [class.hidden]="!opened" [@myAnimation]="opened" -->
     <ul #contentWrapper class="sub-content" [class.hidden]="!opened">
         <ng-content></ng-content>
     </ul>
