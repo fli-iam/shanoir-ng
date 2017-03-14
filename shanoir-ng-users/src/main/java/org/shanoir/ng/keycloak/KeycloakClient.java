@@ -66,13 +66,15 @@ public class KeycloakClient {
 	}
 
 	/**
-	 * Create a user.
+	 * Create a user with a password.
 	 * 
 	 * @param user
 	 *            user to create.
+	 * @param password
+	 *            user password.
 	 * @return keycloak user id.
 	 */
-	public String createUser(final User user) {
+	public String createUserWithPassword(final User user, final String password) {
 		try {
 			final String keycloakId = KeycloakUtils
 					.getCreatedUserId(getKeycloak().realm(keycloakRealm).users().create(getUserRepresentation(user)));
@@ -82,9 +84,9 @@ public class KeycloakClient {
 			// TODO: manage it
 			final CredentialRepresentation credential = new CredentialRepresentation();
 			credential.setType(CredentialRepresentation.PASSWORD);
-			credential.setValue(user.getPassword());
-			// credential.setTemporary(???);
-			// userResource.resetPassword(credential);
+			credential.setValue(password);
+			credential.setTemporary(Boolean.TRUE);
+			userResource.resetPassword(credential);
 
 			// Get user role
 			final String userRoleName = roleRepository.findOne(user.getRole().getId()).getName();

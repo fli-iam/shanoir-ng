@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private AccountRequestInfoRepository accountRequestInfoRepository;
-
+	
 	@Autowired
 	private KeycloakClient keycloakClient;
 
@@ -152,15 +151,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User save(final User user) throws ShanoirUsersException {
-		String newPassword = null;
-		if (!StringUtils.hasText(user.getPassword())) {
-			newPassword = PasswordUtils.generatePassword();
-			// TODO: send email
-		} else {
-			newPassword = user.getPassword();
-			// Check password
-			PasswordUtils.checkPasswordPolicy(newPassword, user.getUsername());
-		}
+		// Password generation
+		final String newPassword = PasswordUtils.generatePassword();
 		// Save hashed password
 		user.setPassword(PasswordUtils.getHash(newPassword));
 		User savedUser = null;
@@ -177,7 +169,7 @@ public class UserServiceImpl implements UserService {
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirUsersException.logAndThrow(LOG, "Error while creating user: " + dive.getMessage());
 		}
-		String keycloakUserId = keycloakClient.createUser(user);
+		String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
 		if (keycloakUserId != null) {
 			// Save keycloak id
 			savedUser.setKeycloakId(keycloakUserId);
