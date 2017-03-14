@@ -1,5 +1,6 @@
 package org.shanoir.ng.keycloak;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -8,11 +9,14 @@ import java.util.Map;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.model.User;
+import org.shanoir.ng.repository.RoleRepository;
 import org.shanoir.ng.utils.KeycloakUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +45,7 @@ public class KeycloakClient {
 
 	@Value("${kc.requests.auth-server-url}")
 	private String keycloakRequestsAuthServerUrl;
-	
+
 	@Value("${kc.requests.client.id}")
 	private String keycloakRequestsClientId;
 
@@ -50,10 +54,13 @@ public class KeycloakClient {
 
 	private Keycloak keycloak;
 
+	@Autowired
+	private RoleRepository roleRepository;
+
 	protected Keycloak getKeycloak() {
 		if (keycloak == null) {
-			keycloak = Keycloak.getInstance(keycloakRequestsAuthServerUrl, keycloakRequestsRealm, keycloakRequestsAdminLogin,
-					keycloakRequestsAdminPassword, keycloakRequestsClientId);
+			keycloak = Keycloak.getInstance(keycloakRequestsAuthServerUrl, keycloakRequestsRealm,
+					keycloakRequestsAdminLogin, keycloakRequestsAdminPassword, keycloakRequestsClientId);
 		}
 		return keycloak;
 	}
@@ -69,19 +76,21 @@ public class KeycloakClient {
 		try {
 			final String keycloakId = KeycloakUtils
 					.getCreatedUserId(getKeycloak().realm(keycloakRealm).users().create(getUserRepresentation(user)));
-			
+
 			final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
 			// Reset user password
 			// TODO: manage it
 			final CredentialRepresentation credential = new CredentialRepresentation();
 			credential.setType(CredentialRepresentation.PASSWORD);
 			credential.setValue(user.getPassword());
-//			credential.setTemporary(???);
-//			userResource.resetPassword(credential);
+			// credential.setTemporary(???);
+			// userResource.resetPassword(credential);
 
+			// Get user role
+			final String userRoleName = roleRepository.findOne(user.getRole().getId()).getName();
 			// Add realm role
-			userResource.roles().realmLevel().add(Arrays.asList(
-					getKeycloak().realm(keycloakRealm).roles().get(user.getRole().getName()).toRepresentation()));
+			userResource.roles().realmLevel().add(Arrays
+					.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
 			return keycloakId;
 		} catch (Exception e) {
 			LOG.error("Error while creating user with id " + user.getId() + " on Keycloak server", e);
@@ -119,12 +128,23 @@ public class KeycloakClient {
 			final CredentialRepresentation credential = new CredentialRepresentation();
 			credential.setType(CredentialRepresentation.PASSWORD);
 			credential.setValue(user.getPassword());
-//			credential.setTemporary(???);
-//			userResource.resetPassword(credential);
+			// credential.setTemporary(???);
+			// userResource.resetPassword(credential);
 
+			// Remove old realm role
+			final List<String> roleNames = roleRepository.getAllNames();
+			final List<RoleRepresentation> roleRepresentations = new ArrayList<RoleRepresentation>(
+					userResource.roles().realmLevel().listAll());
+			for (RoleRepresentation roleRepresentation : roleRepresentations) {
+				if (roleNames.contains(roleRepresentation.getName())) {
+					userResource.roles().realmLevel().remove(Arrays.asList(roleRepresentation));
+				}
+			}
+			// Get user role
+			final String userRoleName = roleRepository.findOne(user.getRole().getId()).getName();
 			// Add realm role
-//			userResource.roles().realmLevel().add(Arrays.asList(
-//					getKeycloak().realm(keycloakRealm).roles().get(user.getRole().getName()).toRepresentation()));
+			userResource.roles().realmLevel().add(Arrays
+					.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
 		} catch (Exception e) {
 			LOG.error("Error while updating user with keycloak id " + user.getKeycloakId() + " on Keycloak server", e);
 		}

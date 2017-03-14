@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { HomeComponent }       from './home/home.component';
 import { UserListComponent }   from './users/list/user.list.component';
+import { CenterDetailComponent } from './centers/detail/center.detail.component';
 import { CenterListComponent }   from './centers/list/center.list.component';
 import { EditUserComponent }   from './users/edit/edit.user.component';
 import { AccountRequestComponent }   from './users/accountRequest/account.request.component';
@@ -26,7 +27,7 @@ const appRoutes: Routes = [
     path: 'editUser',
     component: EditUserComponent
   }, {
-    path: 'requestAccount',
+    path: 'accountRequest',
     component: AccountRequestComponent,
   }, {
     path: 'treeTest',
@@ -38,6 +39,10 @@ const appRoutes: Routes = [
   }, {
     path: 'import',
     component: ImportComponent
+  }, {
+    path: 'viewCenter',
+    component: CenterDetailComponent,
+    canActivate: [AuthAdminGuard]
   }
 ];
 

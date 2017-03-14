@@ -29,7 +29,7 @@
 							<li *ngIf="creationMode==false">
 								<label i18n="Edit user|Username label" class="required-label">Username</label> 
 								<span class="right-col">
-									<input type="text" id="username" required minlength="4" maxlength="20" formControlName="username" [(ngModel)]="user.username" readonly/>
+									<input type="text" id="username" formControlName="username" [(ngModel)]="user.username" readonly/>
 								</span>
 							</li>
 							<li class="required">
@@ -89,9 +89,10 @@
 			</tr>
 			
 			<tr><td colspan="2"><div class="footer command-zone">
-				<button i18n="Edit user|CancelButton label" class="Button" (click)="cancel()">Cancel</button>
+				<button *ngIf="!requestAccountMode" i18n="Edit user|CancelButton label" class="Button" (click)="cancel()">Cancel</button>
+				<button *ngIf="requestAccountMode" i18n="Edit user|CancelButton label" class="Button" (click)="cancelAccountRequest()">Cancel</button>
 				<button type="submit" *ngIf="creationMode && !requestAccountMode" i18n="Edit user|CreateButton label" (click)="create()" class="Button" [disabled]="!isEditUserFormValid()">Create</button>
-				<button type="submit" *ngIf="creationMode && requestAccountMode" i18n="Edit user|RequestAccountButton label" (click)="requestAccount()" class="Button" [disabled]="!isEditUserFormValid()">Request Account</button>
+				<button type="submit" *ngIf="creationMode && requestAccountMode" i18n="Edit user|RequestAccountButton label" (click)="accountRequest()" class="Button" [disabled]="!isEditUserFormValid()">Request Account</button>
 				<button type="submit" *ngIf="!creationMode && !user.accountRequestDemand" (click)="update()" i18n="Edit user|SaveButton label" class="Button" [disabled]="!isEditUserFormValid()">Save Settings</button>
 				<button type="submit" *ngIf="!creationMode && user.accountRequestDemand" (click)="deny()" i18n="Edit user|DenyAccountRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Deny creation</button>
 				<button type="submit" *ngIf="!creationMode && user.accountRequestDemand" (click)="accept()" i18n="Edit user|AcceptAccountRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Accept</button>

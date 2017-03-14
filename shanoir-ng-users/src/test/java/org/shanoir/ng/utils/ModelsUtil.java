@@ -18,11 +18,11 @@ public final class ModelsUtil {
 	public static final Long ADMIN_ROLE_ID = 1L;
 	public static final int ADMIN_ROLE_ACCESS_LEVEL = 1;
 	public static final String ADMIN_ROLE_DISPLAY_NAME = "admin";
-	public static final String ADMIN_ROLE_NAME = "adminRole";
+	public static final String ADMIN_ROLE_NAME = "ROLE_ADMIN";
 	public static final Long ROLE_ID = 2L;
 	public static final int ROLE_ACCESS_LEVEL = 3;
 	public static final String ROLE_DISPLAY_NAME = "guest";
-	public static final String ROLE_NAME = "guest";
+	public static final String ROLE_NAME = "ROLE_GUEST";
 	
 	// User data
 	public static final String USER_EMAIL = "toto@to.to";

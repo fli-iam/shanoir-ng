@@ -11,7 +11,7 @@ spring:
     password: shanoir
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
-    data: classpath:/scripts/populate.sql
+    initialize: false
   jackson:
     mapper:
       use-getters-as-setters: false
@@ -19,7 +19,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
+      ddl-auto: update
       # Naming strategy
       naming:
         strategy: org.hibernate.cfg.ImprovedNamingStrategy
@@ -39,28 +39,20 @@ spring:
 keycloak:
   cors: true
   realm: shanoir-ng
-  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApreYFO9zjyWA89PCL0DRhP97/ORBTIAEqYGqhJfPEcUZQzVezy+VwWVvRyErPTxg+djjfZdy52i8glXfkgvYym1ApFgUgmuIj0130lbSYFJASDTO1IxKGZ01UZJ0ErTOlJlZcglxm7UkecDC6hm/HuM0LvJBLmmZ70EVC2G4rW7WaZri/RwhomBGgY+nNpnPrEQeuO3R8fAHS+LD3Yu5BGhhCayEd9dqQ0wcyASAJtQi3yYF7Jd9VZDWpD7rQUisssy4NzsciIlcESdgD3Prg6G3tajI9SiwEOrwC8gvQ+9bm8OhfZZTmdD/9qoC9Q0KeDDjFZPx/blQS57gUzAR+wIDAQAB
-  auth-server-url: http://shanoir-ng-nginx/auth
+  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhU1+KuWBHsHp7UMITO4p6G4PfYdSgubXX7PCcX/TNPa9aGDwgVtEjyOVYA3rnvGvGTXit2PaAztExWq4FA7YOIATQuKydNY+uWJKRoBhM7dm1ioyQ+l63lB3vRjSsEL6b9y3U/URTVUn4DJAUBgiK0CGgGR0ihEi/IJFm8L9EKHxE/Cm99x65NzFe7EFZy4mbruLKr1w9XKmY9/1ISz559E1VO4JK4fY5NKAcHK/auaA6XzxlYGcK7M7oZsl1GTeCMBAiOM7rusta4MhcBO+BOPHv5WxhbehheHkTEPB5BYDRuBenP58TS4125qliGmCG8Zfb4JP/D9eaDzaHYoRYwIDAQAB
+  auth-server-url: http://localhost/auth
   ssl-required: external
   resource: shanoir-ng-centers
-  bearer-only: true
-  credentials.secret: 091dcd93-4c74-43d1-be62-78c806779200
   securityConstraints[0]:
     securityCollections[0]:
-      name: spring secured api
+      name: center secured api
       authRoles: 
-        - adminRole
-        - expertRole
-        - guestRole
-        - userRole
+        - ROLE_ADMIN
+        - ROLE_EXPERT
+        - ROLE_GUEST
+        - ROLE_USER
       patterns:
         - /*
-kc.requests:
-    realm: master
-    client.id: admin-cli
-    admin:
-      login: admin
-      password: admin
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-centers.log
@@ -118,12 +110,13 @@ spring:
     password: 
     driver-class-name: org.h2.Driver
     data: classpath:/scripts/test-data-h2.sql
+    initialize: true
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
-      
+
 ---
 
 #################
@@ -139,5 +132,4 @@ spring:
       ddl-auto: validate
 #keycloak
 keycloak:
-  auth-server-url: http://shanoir-ng-nginx/auth
-      
+  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth

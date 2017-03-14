@@ -1,5 +1,5 @@
-<header></header>
-<navbar></navbar>
-<div class="main-content">
+<header *ngIf="isAuthenticated()"></header>
+<navbar *ngIf="isAuthenticated()"></navbar>
+<div class="main-content" *ngIf="isAuthenticated()">
     <router-outlet></router-outlet>
 </div>

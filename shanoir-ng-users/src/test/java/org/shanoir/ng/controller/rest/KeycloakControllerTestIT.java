@@ -26,12 +26,22 @@ public abstract class KeycloakControllerTestIT {
 	@Value("${keycloak.credentials.secret}")
 	private String keycloakCredentialsSecret;
 
+	private String login;
+	private String password;
+	
 	/*
-	 * Obtain headers for Keycloack authentication.
+	 * Obtain headers for Keycloack authentication (administrator or guest).
+	 * 
+	 * @param admin administrator.
 	 * 
 	 * @return headers.
 	 */
-	protected HttpHeaders getHeadersWithToken() {
+	protected HttpHeaders getHeadersWithToken(final boolean admin) {
+		if (admin) {
+			login = password = "admin";
+		} else {
+			login = password = "guest";
+		}
 		final AccessTokenResponse tokenResponse = getToken();
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -49,7 +59,7 @@ public abstract class KeycloakControllerTestIT {
 	 * @return response with Keycloak token.
 	 */
 	private AccessTokenResponse getToken() {
-		Keycloak keycloak = Keycloak.getInstance(keycloakAuthServerUrl, keycloakRealm, "admin", "admin",
+		Keycloak keycloak = Keycloak.getInstance(keycloakAuthServerUrl, keycloakRealm, login, password,
 				keycloakResource, keycloakCredentialsSecret);
 		return keycloak.tokenManager().getAccessToken();
 	}

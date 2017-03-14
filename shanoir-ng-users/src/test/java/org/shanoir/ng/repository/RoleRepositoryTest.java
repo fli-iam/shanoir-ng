@@ -2,6 +2,8 @@ package org.shanoir.ng.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.model.Role;
@@ -27,7 +29,7 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 public class RoleRepositoryTest {
 
 	private static final Long ROLE_TEST_1_ID = 1L;
-	private static final String ROLE_TEST_1_NAME = "adminRole";
+	private static final String ROLE_TEST_1_NAME = "ROLE_ADMIN";
 	
 	@Autowired
 	private RoleRepository repository;
@@ -44,8 +46,14 @@ public class RoleRepositoryTest {
 	
 	@Test
 	public void findOneTest() throws Exception {
-		Role roleDb = repository.findOne(ROLE_TEST_1_ID);
+		final Role roleDb = repository.findOne(ROLE_TEST_1_ID);
 		assertThat(roleDb.getName()).isEqualTo(ROLE_TEST_1_NAME);
+	}
+	
+	@Test
+	public void getAllNamesTest() throws Exception {
+		final List<String> rolesName = repository.getAllNames();
+		assertThat(rolesName.size()).isEqualTo(4);
 	}
 	
 }

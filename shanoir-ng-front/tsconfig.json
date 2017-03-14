@@ -1,15 +1,22 @@
 {
     "compilerOptions": {
-        "baseUrl": ".",    
+        "baseUrl": ".",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "lib": ["es2015", "dom"],
+        "lib": [
+            "es2015",
+            "dom"
+        ],
         "module": "commonjs",
         "moduleResolution": "node",
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "removeComments": false,
         "sourceMap": true,
         "suppressImplicitAnyIndexErrors": true,
         "target": "es5"
-    }
+    },
+    "exclude": [
+        "aot",
+        "node_modules"
+    ]
 }

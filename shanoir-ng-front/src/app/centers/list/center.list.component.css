@@ -1,0 +1,5 @@
+/***********************/
+/* Center list component */
+/***********************/
+.CenterListComponent { float: left; overflow: auto; }
+.title { margin-bottom: 15px; }

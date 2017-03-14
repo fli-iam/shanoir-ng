@@ -52,7 +52,7 @@ export class KeycloakService {
   }
 
   isUserAdmin(): boolean {
-    return KeycloakService.auth.authz.hasRealmRole("adminRole");
+    return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_ADMIN");
   }
 
 }

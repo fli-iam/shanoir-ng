@@ -20,6 +20,8 @@
 		<springfox-version>2.5.0</springfox-version>
 		<spring-active-profile></spring-active-profile>
 		<keycloak.version>2.5.1.Final</keycloak.version>
+		<docker.image.name>shanoir-ng/centers</docker.image.name>
+		<supervisor.file.name>ms.centers.sv.dev.conf</supervisor.file.name>
 	</properties>
 
 	<dependencies>
@@ -126,11 +128,29 @@
 		        </configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<copy file="src/main/docker/${supervisor.file.name}"
+									tofile="src/main/docker/ms.centers.sv.conf" overwrite="true" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
 				<version>0.4.11</version>
 				<configuration>
-					<imageName>${project.artifactId}</imageName>
+					<imageName>${docker.image.name}</imageName>
 					<dockerDirectory>src/main/docker</dockerDirectory>
 					<resources>
 						<resource>
@@ -182,6 +202,8 @@
 			<id>qualif</id>
 			<properties>
 				<spring-active-profile>qualif</spring-active-profile>
+				<supervisor.file.name>ms.centers.sv.qualif.conf</supervisor.file.name>
+				<maven.test.skip>true</maven.test.skip>
 			</properties>
 			<build>
 				<plugins>

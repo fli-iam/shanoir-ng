@@ -2,7 +2,6 @@ package org.shanoir.ng.controller.rest;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,21 +35,20 @@ public class RoleApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void findRolesProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
 	public void findRolesWithLogin() {
-		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken());
+		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken(true));
 		
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
 	@Test
-	@Ignore
 	public void findRolesWithBadRole() {
-		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken());
+		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken(false));
 		
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
