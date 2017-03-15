@@ -181,8 +181,6 @@
 							<target>
 								<copy file="src/main/docker/${supervisor.file.name}"
 									tofile="src/main/docker/ms.users.sv.conf" overwrite="true" />
-							</target>
-							<target>
 								<copy file="src/main/docker/${container_init.file.name}"
 									tofile="src/main/docker/container_init" overwrite="true" />
 							</target>
