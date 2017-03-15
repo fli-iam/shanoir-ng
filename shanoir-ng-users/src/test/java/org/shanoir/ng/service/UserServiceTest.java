@@ -41,20 +41,23 @@ public class UserServiceTest {
 	private static final String UPDATED_USER_FIRSTNAME = "test";
 
 	@Mock
-	private UserRepository userRepository;
-	
-	@Mock
-	private RoleRepository roleRepository;
-
-	@Mock
 	private AccountRequestInfoRepository accountRequestInfoRepository;
 
+	@Mock
+	private EmailService emailService;
+	
 	@Mock
 	private KeycloakClient keycloakClient;
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;
 
+	@Mock
+	private RoleRepository roleRepository;
+	
+	@Mock
+	private UserRepository userRepository;
+	
 	@InjectMocks
 	private UserServiceImpl userService;
 
