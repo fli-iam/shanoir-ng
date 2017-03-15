@@ -16,6 +16,7 @@ import org.shanoir.ng.model.auth.UserContext;
 import org.shanoir.ng.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.repository.RoleRepository;
 import org.shanoir.ng.repository.UserRepository;
+import org.shanoir.ng.service.EmailService;
 import org.shanoir.ng.service.UserService;
 import org.shanoir.ng.utils.KeycloakUtils;
 import org.shanoir.ng.utils.PasswordUtils;
@@ -50,6 +51,9 @@ public class UserServiceImpl implements UserService {
 	private AccountRequestInfoRepository accountRequestInfoRepository;
 	
 	@Autowired
+	private EmailService emailService;
+
+	@Autowired
 	private KeycloakClient keycloakClient;
 
 	@Autowired
@@ -75,7 +79,10 @@ public class UserServiceImpl implements UserService {
 
 		// Confirm and update user
 		userDb.setAccountRequestDemand(false);
-		return updateUserOnAllSystems(userDb, user);
+		final User updatedUser = updateUserOnAllSystems(userDb, user);
+		// Send email
+		emailService.notifyUserAccountRequestAccepted(updatedUser);
+		return updatedUser;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -166,6 +173,8 @@ public class UserServiceImpl implements UserService {
 						.orElseThrow(() -> new ShanoirUsersException("Error while getting role 'ROLE_GUEST'")));
 			}
 			savedUser = userRepository.save(user);
+			// Send email to administrators
+			emailService.notifyAdminAccountRequest(savedUser);
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirUsersException.logAndThrow(LOG, "Error while creating user: " + dive.getMessage());
 		}
@@ -175,6 +184,8 @@ public class UserServiceImpl implements UserService {
 			savedUser.setKeycloakId(keycloakUserId);
 			userRepository.save(savedUser);
 		}
+		// Send email to user
+		emailService.notifyNewUser(savedUser, newPassword);
 		updateShanoirOld(savedUser);
 		return savedUser;
 	}

@@ -78,6 +78,13 @@ public class UserRepositoryTest {
 	}
 	
 	@Test
+	public void findAdminEmailsTest() throws Exception {
+		List<String> emails = repository.findAdminEmails();
+		assertNotNull(emails);
+		assertTrue(!emails.isEmpty());
+	}
+	
+	@Test
 	public void findByUsernameTest() throws Exception {
 		Optional<User> userDb = repository.findByUsername(USER_TEST_1_USERNAME);
 		assertTrue(userDb.isPresent());
