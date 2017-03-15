@@ -25,7 +25,8 @@
 body { margin: 0; background-color: var(--very-light-grey); }
   body.outsilde { background-color: var(--color-a); }
 body, option, table, button, select, input {font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
-h2 { color: var(--color-a); margin: 0; font-size: 28px; }
+h1 { font-size: 28px; }
+h1, h2, h3, h4 { color: var(--color-a); }
 hr { margin: 7px 0 !important; border-bottom: 1px solid var(--grey) !important; border: 0; }
 input { padding: 0 5px; }
 
@@ -52,8 +53,8 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
     form input.invaliddate,
     form textarea.ng-invalid.ng-dirty,
     form select.ng-invalid.ng-dirty { border: 1px solid var(--color-error) !important; background-color: var(--color-light-error) !important; }
-  form input, form select { height: 20px; }
-  form input[type='radio'] { vertical-align: middle; position: relative; top: -3px; left: -3px; }
+  form input:not([type="checkbox"])::not([type="radio"]):not([type="file"]), form select { height: 20px; }
+  form input[type='radio'] { vertical-align: sub; }
   form input[type='radio'] + input[type='radio'] { margin-left: 20px; }
   form textarea { resize: vertical; }
   form button { margin: 10px 0; }
@@ -107,7 +108,7 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form my-date-picker .mydp .sunday { color: var(--color-b) !important; }
 
 
-.content-component { padding: 0 20px 10px 20px; position: relative; z-index: 1; }
+.main-content{ padding: 0 20px 10px 20px; position: relative; z-index: 1; }
 .max-content { width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
 .command-zone { background-color: var(--light-grey); }
 

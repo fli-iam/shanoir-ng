@@ -49,11 +49,31 @@ spring:
   profiles: dev
   datasource:
     url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
-    username: root
-    password: 
+    username: shanoir
+    password: shanoir
+    # The SQL dialect makes Hibernate generate better SQL for the chosen database
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: validate
+  jooq:
+    sql-dialect: Mysql
 #keycloak
 keycloak:
   auth-server-url: http://localhost:8080/auth
+kc.requests:
+  admin:
+    login: admin
+    password: admin
+  client.id: admin-cli
+  front:
+    resource: shanoir-ng-front
+    url: http://localhost:3000
+  ms.users.url: http://localhost:9903
+  realm: master
+  temporary.password: false
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-keycloak-init.log
