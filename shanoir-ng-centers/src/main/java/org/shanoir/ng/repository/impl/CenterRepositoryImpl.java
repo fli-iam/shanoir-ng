@@ -25,7 +25,7 @@ public class CenterRepositoryImpl implements CenterRepositoryCustom {
 	@Override
 	public List<Center> findBy(String fieldName, Object value) {
 		return em.createQuery(
-				"SELECT t FROM center t WHERE t." + fieldName + " LIKE :value")
+				"SELECT c FROM Center c WHERE c." + fieldName + " LIKE :value")
 				.setParameter("value", value)
 				.getResultList();
 	}
