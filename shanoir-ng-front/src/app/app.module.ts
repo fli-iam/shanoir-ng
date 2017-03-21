@@ -13,6 +13,7 @@ import { AccountRequestComponent} from "./users/accountRequest/account.request.c
 import { AccountRequestInfoComponent} from "./users/accountRequestInfo/account.request.info.component";
 import { AppComponent }   from './app.component';
 import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
+import { AuthNotGuestGuard }   from './shared/roles/auth.not.guest.guard';
 import { CenterDetailComponent } from './centers/detail/center.detail.component';
 import { CenterListComponent }   from './centers/list/center.list.component';
 import { CenterService } from './centers/shared/center.service';
@@ -75,6 +76,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
     providers: [
         AccountEventsService,
         AuthAdminGuard,
+        AuthNotGuestGuard,
         CenterService,
         ConfirmDialogService,
         KeycloakService,

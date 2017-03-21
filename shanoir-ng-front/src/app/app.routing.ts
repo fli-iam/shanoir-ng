@@ -9,6 +9,7 @@ import { EditUserComponent }   from './users/edit/edit.user.component';
 import { AccountRequestComponent }   from './users/accountRequest/account.request.component';
 import { StudyTreeComponent }   from './studies/tree/study.tree.component';
 import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
+import { AuthNotGuestGuard }   from './shared/roles/auth.not.guest.guard';
 import { ImportComponent }   from './import/import.component';
 
 const appRoutes: Routes = [
@@ -35,7 +36,7 @@ const appRoutes: Routes = [
   }, {
     path: 'centerlist',
     component: CenterListComponent,
-    canActivate: [AuthAdminGuard]
+    canActivate: [AuthNotGuestGuard]
   }, {
     path: 'import',
     component: ImportComponent

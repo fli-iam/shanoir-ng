@@ -31,7 +31,7 @@ public interface CenterApi {
 			@ApiResponse(code = 404, message = "no center found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{centerId}", produces = { "application/json" }, method = RequestMethod.DELETE)
-	@PreAuthorize("hasAuthority('adminRole')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteCenter(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 
@@ -42,6 +42,7 @@ public interface CenterApi {
 			@ApiResponse(code = 404, message = "no center found", response = Center.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Center.class) })
 	@RequestMapping(value = "/{centerId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<Center> findCenterById(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 
@@ -52,6 +53,7 @@ public interface CenterApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Center.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Center.class) })
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<Center>> findCenters();
 
 	@ApiOperation(value = "", notes = "Saves a new center", response = Center.class, tags = {})
@@ -62,6 +64,7 @@ public interface CenterApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Center.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Center> saveNewCenter(@ApiParam(value = "center to create", required = true) @RequestBody Center center,
 			BindingResult result) throws RestServiceException;
 
@@ -73,6 +76,7 @@ public interface CenterApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{centerId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> updateCenter(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId,
 			@ApiParam(value = "center to update", required = true) @RequestBody Center center, BindingResult result)

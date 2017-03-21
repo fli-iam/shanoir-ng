@@ -8,6 +8,7 @@ import javax.persistence.Table;
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.model.hateoas.HalEntity;
 import org.shanoir.ng.model.hateoas.Links;
+import org.shanoir.ng.model.validation.EditableOnlyBy;
 import org.shanoir.ng.model.validation.Unique;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -28,6 +29,7 @@ public class Center extends HalEntity{
   @NotBlank
   @Column(unique = true)
   @Unique
+  @EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
   private String name = null;
 
   private String street = null;
