@@ -1,4 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
@@ -16,10 +17,13 @@ export class CenterDetailComponent implements OnInit {
     private center: Center = new Center();
     private centerDetailForm: FormGroup;
     private centerId: number;
+    private mode: "view" | "edit" | "create";
+    private isNameUnique: Boolean = true;
     
 
     constructor (private route: ActivatedRoute, private router: Router,
-        private centerService: CenterService,   private fb: FormBuilder) {
+        private centerService: CenterService,   private fb: FormBuilder,
+        private location: Location) {
 
     }
 
@@ -32,6 +36,10 @@ export class CenterDetailComponent implements OnInit {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let centerId = queryParams['id'];
+                let mode = queryParams['mode'];
+                if (mode) {
+                    this.mode = mode;
+                }
                 if (centerId) {
                     // view or edit mode
                     this.centerId = centerId;
@@ -81,7 +89,35 @@ export class CenterDetailComponent implements OnInit {
     };
 
     back(): void {
-        this.router.navigate(['/centerlist']);
+        this.location.back();
+    }
+
+    edit(): void {
+        this.router.navigate(['/detailCenter'], { queryParams: {id: this.centerId, mode: "edit"}});
+    }
+
+    create(): void {
+        this.center = this.centerDetailForm.value;
+        this.centerService.create(this.center)
+        .subscribe((center) => {
+            this.back();
+        }, (err: String) => {
+            if (err.indexOf("name should be unique") != -1) {
+                this.isNameUnique = false;
+            }
+        });
+    }
+
+    update(): void {
+        this.center = this.centerDetailForm.value;
+        this.centerService.update(this.centerId, this.center)
+        .subscribe((center) => {
+            this.back();
+        }, (err: String) => {
+            if (err.indexOf("name should be unique") != -1) {
+                this.isNameUnique = false;
+            }
+        });
     }
 
 }

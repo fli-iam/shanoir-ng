@@ -136,6 +136,12 @@ public class CenterServiceImpl implements CenterService {
 	 */
 	private Center updateCenterValues(final Center centerDb, final Center center) {
 		centerDb.setName(center.getName());
+		centerDb.setStreet(center.getStreet());
+		centerDb.setPostalCode(center.getPostalCode());
+		centerDb.setCity(center.getCity());
+		centerDb.setCountry(center.getCountry());
+		centerDb.setPhoneNumber(center.getPhoneNumber());
+		centerDb.setWebsite(center.getWebsite());
 		return centerDb;
 	}
 

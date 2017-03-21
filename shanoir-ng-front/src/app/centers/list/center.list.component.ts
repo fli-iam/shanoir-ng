@@ -53,31 +53,33 @@ export class CenterListComponent {
             {headerName: "Town", field: "city" },
             {headerName: "Country", field: "country" },
             {headerName: "", type: "button", img: "/assets/images/icons/garbage-1.png", action: this.openDeleteCenterConfirmDialog},
-            {headerName: "", type: "button", img: "/assets/images/icons/edit.png", target : "/editCenter", getParams: function(item: any): Object {
-                return {id: item.id};
+            {headerName: "", type: "button", img: "/assets/images/icons/edit.png", target : "/detailCenter", getParams: function(item: any): Object {
+                return {id: item.id, mode: "edit"};
             }},
-            {headerName: "", type: "button", img: "/assets/images/icons/view-1.png", target : "/viewCenter", getParams: function(item: any): Object {
-                return {id: item.id};
+            {headerName: "", type: "button", img: "/assets/images/icons/view-1.png", target : "/detailCenter", getParams: function(item: any): Object {
+                return {id: item.id, mode: "view"};
             }}
         ];
         this.customActionDefs = [
-            {title: "new center", img: "/assets/images/icons/add-1.png", target: "../editCenter"},
+            {title: "new center", img: "/assets/images/icons/add-1.png", target: "/detailCenter", getParams: function(item: any): Object {
+                return {mode: "create"};
+            }},
             {title: "delete selected", img: "/assets/images/icons/garbage-1.png", action: this.deleteAll } 
         ];
-        this.rowClickAction = {target : "/viewCenter", getParams: function(item: any): Object {
-                return {id: item.id};
+        this.rowClickAction = {target : "/detailCenter", getParams: function(item: any): Object {
+                return {id: item.id, mode: "view"};
         }};
     }
 
     openDeleteCenterConfirmDialog = (item: Center) => {
          this.confirmDialogService
-                .confirm('Delete center', 'Are you sure you want to delete center ' + item.name + ' , ' + item.city + ' , ' + item.country + '?',
-                    this.viewContainerRef)
-                .subscribe(res => {
-                    if (res) {
-                        this.deleteCenter(item.id);
-                    }
-                })
+            .confirm('Delete center', 'Are you sure you want to delete center ' + item.name + ' , ' + item.city + ' , ' + item.country + '?',
+                this.viewContainerRef)
+            .subscribe(res => {
+                if (res) {
+                    this.deleteCenter(item.id);
+                }
+            })
     }
 
     deleteCenter(centerId: number) {

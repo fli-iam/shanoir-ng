@@ -40,9 +40,8 @@ const appRoutes: Routes = [
     path: 'import',
     component: ImportComponent
   }, {
-    path: 'viewCenter',
-    component: CenterDetailComponent,
-    canActivate: [AuthAdminGuard]
+    path: 'detailCenter',
+    component: CenterDetailComponent
   }
 ];
 

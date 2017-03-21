@@ -2,7 +2,14 @@
     <form [formGroup]="centerDetailForm" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
-				<div class="header command-zone" i18n="View center|Title">Center details</div>
+				<span class="right-col" [ngSwitch]="mode">
+					<template [ngSwitchCase]="'view'"> 
+						<div class="header command-zone" i18n="View center|Title">Details on center</div>
+					</template>
+					<template ngSwitchDefault> 
+						<div class="header command-zone" i18n="Edit center|Title">Edit center</div>
+					</template>
+				</span>
 			</td></tr>
             <tr>
 				<td>
@@ -10,56 +17,102 @@
 						<ol>
 							<li>
 								<label i18n="Center detail|Name label" class="required-label">Name</label> 
-								<span class="right-col">
-									{{center.name}}
+								<span class="right-col" [ngSwitch]="mode">
+									<template [ngSwitchCase]="'view'"> 
+										{{center.name}}
+									</template>
+									<template ngSwitchDefault> 
+										<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="center.name"/>
+										<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit center|NameRequiredError label">Name is required!</label>
+										<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit center|NameLengthError label">Name length must be between 2 and 200!</label>
+										<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Edit center|NameUniqueError label">Name should be unique!</label>
+									</template>
 								</span>
 							</li>
                             <li>
 								<label i18n="Center detail|Name label">Street</label> 
-								<span class="right-col">
-									{{center.street}}
+								<span class="right-col" [ngSwitch]="mode">
+									<template [ngSwitchCase]="'view'"> 
+										{{center.street}}
+									</template>
+									<template ngSwitchDefault> 
+										<input type="text" id="street" formControlName="street" [(ngModel)]="center.street"/>
+									</template>
 								</span>
 							</li>
                             <li>
 								<label i18n="Center detail|Name label">Post code</label> 
-								<span class="right-col">
-									{{center.postalCode}}
+								<span class="right-col" [ngSwitch]="mode">
+									<template [ngSwitchCase]="'view'"> 
+										{{center.postalCode}}
+									</template>
+									<template ngSwitchDefault> 
+										<input type="text" id="postalCode" formControlName="postalCode" [(ngModel)]="center.postalCode"/>
+									</template>
 								</span>
 							</li>
                             <li>
 								<label i18n="Center detail|Name label">Town</label> 
-								<span class="right-col">
-									{{center.city}}
+								<span class="right-col" [ngSwitch]="mode">
+									<template [ngSwitchCase]="'view'"> 
+										{{center.city}}
+									</template>
+									<template ngSwitchDefault> 
+										<input type="text" id="city" formControlName="city" [(ngModel)]="center.city"/>
+									</template>
 								</span>
 							</li>
                             <li>
 								<label i18n="Center detail|Name label">Country</label> 
-								<span class="right-col">
-									{{center.country}}
+								<span class="right-col" [ngSwitch]="mode">
+									<template [ngSwitchCase]="'view'"> 
+										{{center.country}}
+									</template>
+									<template ngSwitchDefault> 
+										<input type="text" id="country" formControlName="country" [(ngModel)]="center.country"/>
+									</template>
 								</span>
 							</li>
                             <li>
 								<label i18n="Center detail|Name label">Phone number</label> 
-								<span class="right-col">
-									{{center.phoneNumber}}
+								<span class="right-col" [ngSwitch]="mode">
+									<template [ngSwitchCase]="'view'"> 
+										{{center.phoneNumber}}
+									</template>
+									<template ngSwitchDefault> 
+										<input type="text" id="phoneNumber" formControlName="phoneNumber" [(ngModel)]="center.phoneNumber"/>
+									</template>
 								</span>
 							</li>
                             <li>
 								<label i18n="Center detail|Name label">Website</label> 
-								<span class="right-col">
-									{{center.website}}
+								<span class="right-col" [ngSwitch]="mode">
+									<template [ngSwitchCase]="'view'"> 
+										{{center.website}}
+									</template>
+									<template ngSwitchDefault> 
+										<input type="text" id="website" formControlName="website" [(ngModel)]="center.website"/>
+									</template>
 								</span>
-							</li>
 						</ol>
 					</fieldset>
 				</td>
             </tr>
-
             <tr>
                 <td colspan="2">
                     <div class="footer command-zone">
-                        <button i18n="View center|BackButton label" class="Button" (click)="back()">Back</button>
-                        <button type="submit" i18n="View center|EditButton label" (click)="edit()" class="Button">Edit</button>
+						<span class="right-col" [ngSwitch]="mode">
+							<button i18n="View center|BackButton label" class="Button" (click)="back()">Back</button>	
+							<template [ngSwitchCase]="'view'"> 
+                        		<button type="submit" i18n="View center|EditButton label" (click)="edit()" class="Button">Edit</button>
+							</template>
+							<template [ngSwitchCase]="'edit'"> 
+                        		<button type="submit" i18n="Edit center|UpdateButton label" (click)="update()" class="Button" [disabled]="!centerDetailForm.valid">Update</button>
+							</template>
+							<template [ngSwitchCase]="'create'"> 
+                        		<button type="submit" i18n="Edit center|CreateButton label" (click)="create()" class="Button" [disabled]="!centerDetailForm.valid">Create</button>
+							</template>
+						</span>
 			        </div>
                 </td>
             </tr>

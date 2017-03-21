@@ -20,6 +20,7 @@ import { ConfirmDialogComponent } from "./shared/utils/confirm.dialog.component"
 import { ConfirmDialogService } from "./shared/utils/confirm.dialog.service";
 import { DropdownMenuComponent }   from './shared/dropdown-menu/dropdown-menu.component';
 import { EditUserComponent }   from './users/edit/edit.user.component';
+import { HandleErrorService } from './shared/utils/handle.error.service';
 import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
 import { KeycloakHttp } from "./shared/keycloak/keycloak.http";
@@ -79,6 +80,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         KeycloakService,
         RoleService,
         UserService,
+        HandleErrorService,
         {
             provide: Http,
             useFactory: httpFactory,
