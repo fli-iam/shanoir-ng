@@ -37,6 +37,30 @@ paths:
           description: unexpected error
           schema:
             $ref: "#/definitions/ErrorModel"
+  /login:
+    post:
+      operationId: login
+      description: Updates login date for an user
+      consumes: 
+        - application/json
+      parameters:
+        - name: username
+          in: body
+          description: username of user for login date update
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: login date updated
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
   /user:
     post:
       operationId: saveNewUser

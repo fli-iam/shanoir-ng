@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.keycloak.KeycloakPrincipal;
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.dto.ShanoirOldUserDTO;
+import org.shanoir.ng.exception.ShanoirAuthenticationException;
 import org.shanoir.ng.exception.ShanoirUsersException;
 import org.shanoir.ng.exception.error.ErrorModelCode;
 import org.shanoir.ng.keycloak.KeycloakClient;
@@ -49,7 +50,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private AccountRequestInfoRepository accountRequestInfoRepository;
-	
+
 	@Autowired
 	private EmailService emailService;
 
@@ -237,12 +238,15 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void updateLastLogin(final User user) {
+	public void updateLastLogin(final String username) throws ShanoirUsersException {
+		final User user = userRepository.findByUsername(username)
+				.orElseThrow(() -> new ShanoirUsersException("User with username " + username + " not found"));
 		user.setLastLogin(new Date());
 		try {
 			userRepository.save(user);
 		} catch (Exception e) {
-			LOG.error("Error while updating last login date for user " + user.getId(), e);
+			throw new ShanoirAuthenticationException("Error while updating last login date for user " + user.getId(),
+					e);
 		}
 	}
 

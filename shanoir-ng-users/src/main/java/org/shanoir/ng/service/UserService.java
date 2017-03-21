@@ -110,9 +110,10 @@ public interface UserService extends UniqueCheckableService<User> {
 	/**
 	 * Update last login date.
 	 * 
-	 * @param user
-	 *            user.
+	 * @param username
+	 *            username.
+	 * @throws ShanoirUsersException
 	 */
-	void updateLastLogin(User user);
+	void updateLastLogin(String username) throws ShanoirUsersException;
 
 }
