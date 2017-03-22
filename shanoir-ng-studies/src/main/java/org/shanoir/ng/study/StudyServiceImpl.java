@@ -1,10 +1,7 @@
-package org.shanoir.ng.study.service.impl;
+package org.shanoir.ng.study;
 
 import java.util.List;
 
-import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.repository.StudyRepository;
-import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

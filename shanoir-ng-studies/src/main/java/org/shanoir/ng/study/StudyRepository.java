@@ -1,6 +1,5 @@
-package org.shanoir.ng.study.repository;
+package org.shanoir.ng.study;
 
-import org.shanoir.ng.study.model.Study;
 import org.springframework.data.repository.CrudRepository;
 
 public interface StudyRepository extends CrudRepository<Study, Long>{

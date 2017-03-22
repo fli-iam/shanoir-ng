@@ -1,9 +1,8 @@
-package org.shanoir.ng.study.controller.rest;
+package org.shanoir.ng.study;
 
 import java.util.List;
 
-import org.shanoir.ng.exception.error.ErrorModel;
-import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;

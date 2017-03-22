@@ -1,4 +1,4 @@
-package org.shanoir.ng.study.model;
+package org.shanoir.ng.study;
 
 import java.io.Serializable;
 import java.sql.Date;

@@ -1,4 +1,4 @@
-package org.shanoir.ng.model.error;
+package org.shanoir.ng.shared.error;
 
 public class FieldError {
 

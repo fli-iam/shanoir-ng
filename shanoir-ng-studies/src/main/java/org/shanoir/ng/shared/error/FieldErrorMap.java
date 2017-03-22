@@ -1,4 +1,4 @@
-package org.shanoir.ng.model.error;
+package org.shanoir.ng.shared.error;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,9 +40,9 @@ public class FieldErrorMap extends HashMap<String, List<FieldError>> {
         	for (ObjectError objectError : result.getAllErrors()) {
         		org.springframework.validation.FieldError fieldError = (org.springframework.validation.FieldError) objectError;
         		if (!this.containsKey(fieldError.getField())) {
-        			this.put(fieldError.getField(), new ArrayList<org.shanoir.ng.model.error.FieldError>());
+        			this.put(fieldError.getField(), new ArrayList<org.shanoir.ng.shared.error.FieldError>());
         		}
-        		this.get(fieldError.getField()).add(new org.shanoir.ng.model.error.FieldError(
+        		this.get(fieldError.getField()).add(new org.shanoir.ng.shared.error.FieldError(
         				fieldError.getCode(), fieldError.getDefaultMessage(), fieldError.getRejectedValue()));
         	}
         }

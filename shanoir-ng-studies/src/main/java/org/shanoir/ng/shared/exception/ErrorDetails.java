@@ -1,6 +1,6 @@
-package org.shanoir.ng.exception.error;
+package org.shanoir.ng.shared.exception;
 
-import org.shanoir.ng.model.error.FieldErrorMap;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 
 /**
  * Add whatever details you want here

@@ -1,4 +1,4 @@
-package org.shanoir.ng.study;
+package org.shanoir.ng.mycalc;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -1,4 +1,4 @@
-package org.shanoir.ng.study.configuration.swagger;
+package org.shanoir.ng.configuration.swagger;
 
 import java.util.ArrayList;
 import java.util.List;

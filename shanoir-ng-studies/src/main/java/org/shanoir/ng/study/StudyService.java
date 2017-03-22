@@ -1,8 +1,6 @@
-package org.shanoir.ng.study.service;
+package org.shanoir.ng.study;
 
 import java.util.List;
-
-import org.shanoir.ng.study.model.Study;
 
 
 public interface StudyService {

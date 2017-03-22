@@ -1,4 +1,4 @@
-package org.shanoir.ng.exception.error;
+package org.shanoir.ng.shared.exception;
 
 /**
  * @author msimon
