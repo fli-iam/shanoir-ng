@@ -1,6 +1,6 @@
 package org.shanoir.ng.utils;
 
-import org.shanoir.ng.model.Template;
+import org.shanoir.ng.template.Template;
 
 /**
  * Utility class for test.

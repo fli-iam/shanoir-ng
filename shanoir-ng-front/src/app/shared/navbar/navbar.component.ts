@@ -1,4 +1,4 @@
-import { Component, ViewChild, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, ViewChildren, QueryList } from '@angular/core';
 
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
 import { KeycloakService } from "../keycloak/keycloak.service";
@@ -6,20 +6,16 @@ import { KeycloakService } from "../keycloak/keycloak.service";
 @Component({
     selector: 'navbar',
     templateUrl: 'navbar.component.html',
-    styleUrls: ['navbar.component.css'],
-    host: {
-        '(document:click)': 'closeAll($event)',
-    }
+    styleUrls: ['navbar.component.css']
 })
 
 export class NavbarComponent {
 
-    @ViewChild('container') container: ElementRef;
     @ViewChildren(DropdownMenuComponent) dropdownMenus: QueryList<DropdownMenuComponent>;
 
     private colorASave: string;
     private colorBSave: string;
-    public pinkMode: boolean = false;
+    public mode: "default" | "pink" | "xtremPink" = "default";
 
     constructor(private keycloakService: KeycloakService) {
 
@@ -27,7 +23,6 @@ export class NavbarComponent {
 
     ngAfterViewInit() {
         this.dropdownMenus.forEach((dropdownMenu) => {
-            dropdownMenu.siblings = this.dropdownMenus;
             dropdownMenu.parent = this;
         });
 
@@ -39,18 +34,35 @@ export class NavbarComponent {
         return this.keycloakService.isUserAdmin();
     }
 
-    togglePink() {
-        this.pinkMode = !this.pinkMode;
-        let colorA = this.pinkMode ? "mediumvioletred" : this.colorASave;
-        let colorB = this.pinkMode ? "hotpink" : this.colorBSave;
-        document.documentElement.style.setProperty("--color-a", colorA);
-        document.documentElement.style.setProperty("--color-b", colorB);
+    isUserGuest(): boolean {
+        return this.keycloakService.isUserGuest();
     }
 
-    closeAll(event: Event) {
-        if (!this.container.nativeElement.contains(event.target)) {
-            this.closeChildren();
-        };
+    togglePink() {
+        this.mode = this.mode == "pink" ? "default" : "pink";
+        this.resetColors();
+        document.documentElement.style.setProperty("--color-a", this.mode == "pink" ? "mediumvioletred" : this.colorASave);
+        document.documentElement.style.setProperty("--color-b", this.mode == "pink" ? "hotpink" : this.colorBSave);
+    }
+
+    toggleXtremPink() {
+        this.mode = this.mode == "xtremPink" ? "default" : "xtremPink";
+        this.resetColors();
+        document.documentElement.style.setProperty("--color-a", this.mode == "xtremPink" ? "mediumvioletred" : this.colorASave);
+        document.documentElement.style.setProperty("--color-b", this.mode == "xtremPink" ? "hotpink" : this.colorBSave);
+        document.documentElement.style.setProperty("--color-b-light", this.mode == "xtremPink" ? "hotpink" : this.colorBSave);
+        document.documentElement.style.setProperty("--color-c", this.mode == "xtremPink" ? "hotpink" : this.colorBSave);
+        document.documentElement.style.setProperty("--light-grey", this.mode == "xtremPink" ? "hotpink" : this.colorBSave);
+        document.documentElement.style.setProperty("--grey", this.mode == "xtremPink" ? "mediumvioletred" : this.colorASave);
+    }
+
+    resetColors() {
+        document.documentElement.style.setProperty("--color-a", this.colorASave);
+        document.documentElement.style.setProperty("--color-b", this.colorBSave);
+        document.documentElement.style.setProperty("--color-b-light", this.colorBSave);
+        document.documentElement.style.setProperty("--color-c",  this.colorBSave);
+        document.documentElement.style.setProperty("--light-grey", this.colorBSave);
+        document.documentElement.style.setProperty("--grey", this.colorASave);
     }
 
     closeChildren() {

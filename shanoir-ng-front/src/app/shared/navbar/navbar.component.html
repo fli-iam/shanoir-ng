@@ -1,14 +1,14 @@
-<div #container class="navbar-component command-zone">
+<div class="navbar-component command-zone">
     <nav>
         <ul class="menu-list">
 
-            <dropdown-menu label="Manage data">
+            <dropdown-menu label="Manage data" *ngIf="!isUserGuest()">
                 <menu-item label="Research study" link="" icon="/assets/images/icons/folder-12.png"></menu-item>
                 <menu-item label="Subject" link="" icon="/assets/images/icons/user.png"></menu-item>
                 <menu-item label="Examination" link="" icon="/assets/images/icons/medical/stethoscope.png"></menu-item>
                 <menu-item label="Dataset acquisition" link="" icon="/assets/images/icons/medical/x-ray-1.png"></menu-item>
                 <menu-item label="Dataset" link="" icon="/assets/images/icons/medical/brain.png"></menu-item>
-                <menu-item label="Center" link="centerlist" icon="/assets/images/icons/medical/hospital.png"></menu-item>
+                <menu-item label="Center" link="centerlist" icon="/assets/images/icons/medical/hospital.png"></menu-item>   
                 <menu-item label="Investigator" link="" icon="/assets/images/icons/medical/nurse.png"></menu-item>
                 <menu-item label="Acquisition equipment" link="" icon="/assets/images/icons/medical/cardiogram-1.png"></menu-item>
                 <menu-item label="Coil" link="" icon="/assets/images/icons/wifi.png"></menu-item>
@@ -17,7 +17,7 @@
             </dropdown-menu>
 
             <dropdown-menu label="Import data">
-                <menu-item label="From DICOM CD/DVD" link="accountRequest" icon="/assets/images/icons/compact-disc.png"></menu-item>
+                <menu-item label="From DICOM CD/DVD" link="import" icon="/assets/images/icons/compact-disc.png"></menu-item>
                 <menu-item label="From Neuroinfo PACS" link="" icon="/assets/images/neurinfo-icon.png"></menu-item>
                 <menu-item label="From ShanoirUploader" link="" icon="/assets/images/logo.shanoirUp_transp.128x128.png"></menu-item>
                 <menu-item label="Processed datasets (NifTi)" link="" icon="/assets/images/NifTi.png"></menu-item>
@@ -26,13 +26,15 @@
 
             <dropdown-menu label="Administration" *ngIf="isUserAdmin()">
                 <menu-item label="Manage users" i18n-label="User menu|Manage users label" link="userlist" icon="/assets/images/icons/users-1.png"></menu-item>
+                <menu-item label="Account request" link="accountRequest" icon="/assets/images/icons/users-1.png"></menu-item>
+                <li class="horizontal-bar"><hr/></li>
                 <menu-item label="Tree test page" link="treeTest" icon="/assets/images/icons/share-1.png"></menu-item>
                 <menu-item label="Preferences" i18n-label="Preferences menu|Manage users preferences" icon="/assets/images/icons/controls-7.png">
-                    <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="pinkMode" icon="/assets/images/icons/user-5.png"></menu-item>
+                    <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="this.mode == 'pink'" icon="/assets/images/icons/user-5.png"></menu-item>
+                    <menu-item label="Extreme pink mode" (click)="toggleXtremPink()" [boolVar]="this.mode == 'xtremPink'" icon="/assets/images/icons/user-5.png"></menu-item>
                 </menu-item>
             </dropdown-menu>
 
-            
         </ul>
     </nav>
 

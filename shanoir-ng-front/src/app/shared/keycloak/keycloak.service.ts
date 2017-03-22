@@ -45,7 +45,7 @@ export class KeycloakService {
             resolve(<string>KeycloakService.auth.authz.token);
           })
           .error(() => {
-            reject('Failed to refresh token');
+            window.location.href = process.env.LOGOUT_REDIRECT_URL;
           });
       }
     });
@@ -53,6 +53,10 @@ export class KeycloakService {
 
   isUserAdmin(): boolean {
     return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_ADMIN");
+  }
+
+  isUserGuest(): boolean {
+    return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_GUEST");
   }
 
 }

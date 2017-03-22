@@ -39,7 +39,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -146,6 +154,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.icegreen</groupId>
+			<artifactId>greenmail</artifactId>
+			<version>1.5.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
@@ -181,8 +195,6 @@
 							<target>
 								<copy file="src/main/docker/${supervisor.file.name}"
 									tofile="src/main/docker/ms.users.sv.conf" overwrite="true" />
-							</target>
-							<target>
 								<copy file="src/main/docker/${container_init.file.name}"
 									tofile="src/main/docker/container_init" overwrite="true" />
 							</target>

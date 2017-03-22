@@ -13,6 +13,7 @@ import { AccountRequestComponent} from "./users/accountRequest/account.request.c
 import { AccountRequestInfoComponent} from "./users/accountRequestInfo/account.request.info.component";
 import { AppComponent }   from './app.component';
 import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
+import { AuthNotGuestGuard }   from './shared/roles/auth.not.guest.guard';
 import { CenterDetailComponent } from './centers/detail/center.detail.component';
 import { CenterListComponent }   from './centers/list/center.list.component';
 import { CenterService } from './centers/shared/center.service';
@@ -20,6 +21,7 @@ import { ConfirmDialogComponent } from "./shared/utils/confirm.dialog.component"
 import { ConfirmDialogService } from "./shared/utils/confirm.dialog.service";
 import { DropdownMenuComponent }   from './shared/dropdown-menu/dropdown-menu.component';
 import { EditUserComponent }   from './users/edit/edit.user.component';
+import { HandleErrorService } from './shared/utils/handle.error.service';
 import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
 import { KeycloakHttp } from "./shared/keycloak/keycloak.http";
@@ -32,6 +34,8 @@ import { TableComponent} from "./shared/table/table.component";
 import { TreeNodeComponent }   from './shared/tree/tree.node.component';
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
+import { ImportComponent }   from './import/import.component';
+
 
 export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
   return new KeycloakHttp(backend, defaultOptions, keycloakService);
@@ -63,7 +67,8 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         StudyTreeComponent,
         TableComponent,
         TreeNodeComponent,
-        UserListComponent
+        UserListComponent,
+        ImportComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -71,11 +76,13 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
     providers: [
         AccountEventsService,
         AuthAdminGuard,
+        AuthNotGuestGuard,
         CenterService,
         ConfirmDialogService,
         KeycloakService,
         RoleService,
         UserService,
+        HandleErrorService,
         {
             provide: Http,
             useFactory: httpFactory,
