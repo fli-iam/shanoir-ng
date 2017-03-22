@@ -4,8 +4,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
-import org.shanoir.ng.exception.ShanoirUsersException;
-import org.shanoir.ng.exception.error.ErrorModelCode;
+import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.ShanoirUsersException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
