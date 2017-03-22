@@ -2,9 +2,9 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.util.concurrent.CountDownLatch;
 
-import org.shanoir.ng.exception.ShanoirTemplateException;
-import org.shanoir.ng.model.Template;
-import org.shanoir.ng.service.TemplateService;
+import org.shanoir.ng.shared.exception.ShanoirTemplateException;
+import org.shanoir.ng.template.Template;
+import org.shanoir.ng.template.TemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
