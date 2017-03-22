@@ -103,13 +103,13 @@
                     <div class="footer command-zone">
 						<span class="right-col" [ngSwitch]="mode">
 							<button i18n="View center|BackButton label" class="Button" (click)="back()">Back</button>	
-							<template [ngSwitchCase]="'view'"> 
+							<template [ngSwitchCase]="'view'" *ngIf="canModify"> 
                         		<button type="submit" i18n="View center|EditButton label" (click)="edit()" class="Button">Edit</button>
 							</template>
-							<template [ngSwitchCase]="'edit'"> 
+							<template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
                         		<button type="submit" i18n="Edit center|UpdateButton label" (click)="update()" class="Button" [disabled]="!centerDetailForm.valid">Update</button>
 							</template>
-							<template [ngSwitchCase]="'create'"> 
+							<template [ngSwitchCase]="'create'" *ngIf="canModify"> 
                         		<button type="submit" i18n="Edit center|CreateButton label" (click)="create()" class="Button" [disabled]="!centerDetailForm.valid">Create</button>
 							</template>
 						</span>
