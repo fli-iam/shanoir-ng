@@ -6,6 +6,7 @@ import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms'
 
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 
 @Component({
     selector: 'centerDetail',
@@ -19,17 +20,21 @@ export class CenterDetailComponent implements OnInit {
     private centerId: number;
     private mode: "view" | "edit" | "create";
     private isNameUnique: Boolean = true;
+    private canModify: Boolean = false;
     
 
     constructor (private route: ActivatedRoute, private router: Router,
         private centerService: CenterService,   private fb: FormBuilder,
-        private location: Location) {
+        private location: Location, private keycloakService: KeycloakService) {
 
     }
 
     ngOnInit(): void {
         this.getCenter();
         this.buildForm();
+        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+            this.canModify = true;
+        }
     }
 
     getCenter(): void {

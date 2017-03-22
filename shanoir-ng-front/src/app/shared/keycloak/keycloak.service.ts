@@ -59,4 +59,7 @@ export class KeycloakService {
     return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_GUEST");
   }
 
+  isUserExpert(): boolean {
+    return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_EXPERT");
+  }
 }
