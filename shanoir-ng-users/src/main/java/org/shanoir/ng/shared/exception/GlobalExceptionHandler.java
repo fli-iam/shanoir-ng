@@ -1,7 +1,5 @@
-package org.shanoir.ng.shared.controller;
+package org.shanoir.ng.shared.exception;
 
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
