@@ -1,4 +1,4 @@
-﻿use shanoir_ng_templates;
+﻿use shanoir_ng_template;
 
 CREATE TABLE `template` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
