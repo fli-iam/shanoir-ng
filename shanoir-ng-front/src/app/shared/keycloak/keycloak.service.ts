@@ -30,7 +30,6 @@ export class KeycloakService {
   }
 
   logout() {
-    console.log('*** LOGOUT');
     KeycloakService.auth.loggedIn = false;
     KeycloakService.auth.authz = null;
 
@@ -55,11 +54,12 @@ export class KeycloakService {
     return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_ADMIN");
   }
 
+  isUserExpert(): boolean {
+    return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_EXPERT");
+  }
+
   isUserGuest(): boolean {
     return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_GUEST");
   }
 
-  isUserExpert(): boolean {
-    return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_EXPERT");
-  }
 }

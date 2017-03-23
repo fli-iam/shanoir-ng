@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate } from '@angular/router';
+import { CanActivate, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { KeycloakService } from "../keycloak/keycloak.service";
@@ -7,12 +7,16 @@ import { KeycloakService } from "../keycloak/keycloak.service";
 @Injectable()
 export class AuthNotGuestGuard implements CanActivate {
 
-    constructor(private keycloakService: KeycloakService) {
+    constructor(private keycloakService: KeycloakService, private router: Router) {
 
     }
 
     canActivate() {
-        return Observable.of(!this.keycloakService.isUserGuest());
+        if (this.keycloakService.isUserGuest() === true) {
+            this.router.navigate(['/home']);
+            return false;
+        }
+        return true;
     }
 
 }

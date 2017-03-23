@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
 
 import { KeycloakService } from './shared/keycloak/keycloak.service';
 
@@ -12,16 +11,7 @@ import '../assets/css/common.css';
 
 export class AppComponent {
 
-    constructor(private router: Router) {
-        router.events.subscribe(e => {
-            if (e instanceof NavigationEnd && e.url !== '/accountRequest') {
-                if (!KeycloakService.auth.loggedIn) {
-                    KeycloakService.init()
-                        .then(() => { })
-                        .catch(() => window.location.reload());
-                }
-            }
-        });
+    constructor() {
     }
 
     isAuthenticated(): boolean {
