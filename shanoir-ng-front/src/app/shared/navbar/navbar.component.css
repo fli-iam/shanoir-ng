@@ -1,7 +1,7 @@
 /********************/
 /* Navbar component */
 /********************/
-.navbar-component { box-shadow: 0 0 var(--shadow-height) 0 gray; margin-bottom: 25px; z-index: 100; position: relative; } 
+.navbar-component { box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color); margin-bottom: 25px; z-index: 100; position: relative; } 
 .shadow-fix { display: inline-block; position: static; }
 
 dropdown-menu + dropdown-menu { margin-left: -4px; padding: 0;  border: 0; }

@@ -5,16 +5,19 @@ li.active, li.opened { color: var(--very-light-grey); background-color: var(--co
     li .label:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-a); }
 
 .sub-content { position: absolute; padding: 0; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; z-index: -1; }
-    .sub-content::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; box-shadow: 0 0 var(--shadow-height) 0px gray; }
+    .sub-sub-content { height: 100%; }
+        .sub-sub-content::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; box-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color); }
+            .animate .sub-sub-content { overflow: hidden; }
 
 .menu-arrow { margin: 0 -6px -2px 3px; float: right; }
 .hidden { display: none !important; }
 
 .sub-content-parent { overflow: hidden; }
 
-:host(.tree-mode) { z-index: 10000; position: absolute; background-color: transparent; right: -3.7em; top: 18px; }
+:host(.tree-mode) { z-index: 10000; position: absolute; background-color: transparent; right: -12px; top: 16px; }
     :host(.tree-mode) li:hover, 
     :host(.tree-mode) li.active, 
-    :host(.tree-mode) li.opened { cursor: pointer; color: var(--color-c); background-color: transparent !important; text-shadow: 0 0 var(--shadow-height) 0px gray; }
+    :host(.tree-mode) li.opened { cursor: pointer; color: var(--color-c); background-color: transparent !important; text-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color); }
     :host(.tree-mode) .plus { padding: 0 5px; text-align: center; font-size: 16px; }
     :host(.tree-mode) .sub-content { left: 0px; top: 11px; }
+    :host(.tree-mode) .sub-sub-content:before { display: none; }

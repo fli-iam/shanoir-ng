@@ -1,80 +1,278 @@
+<h1>Import from DICOM</h1>
+
 <form>
-
-    <div class="step">
-        <h2><span>1. Choose modality</span><span class="hr"></span></h2>   
-        <p>In this step you are invited to choose the modality of the dataset(s) you want to import into the system.</p>
-        <div>
-            <span>
-                <input type="radio" [(ngModel)]="modality" value="MRI" name="modality">MRI
-                <span class="spacer"></span>
-                <input type="radio" [(ngModel)]="modality" value="PET" name="modality">PET
-            </span>
-        </div>
+    <div class="step-block active" [class.active]="true">
+        <div class="header command-zone" (click)="tab_modality_open = !tab_modality_open">1. Choose modality<span *ngIf="modality" class="check-mark">&#x2713;</span></div>
+        <fieldset class="step" [@slideDown]="tab_modality_open" *ngIf="tab_modality_open"> 
+            <p>In this step you are invited to choose the modality of the dataset(s) you want to import into the system.</p>
+            <div>
+                <span>
+                    <input type="radio" [(ngModel)]="modality" value="MRI" name="modality" (change)="tab_modality_open = false">MRI
+                    <span class="spacer"></span>
+                    <input type="radio" [(ngModel)]="modality" value="PET" name="modality" (change)="tab_modality_open = false">PET
+                </span>
+            </div>
+        </fieldset>
     </div>
 
-    <div class="step">
-        <h2><span>2. Choose modality</span><span class="hr"></span></h2>   
-        <p>
-            Please select a DICOM zip archive to import.<br/>
-            <strong class="warning">&#9888; Important notice:</strong> this archive must contain a DICOMDIR file at its root!
-        </p>
-        <input type="file" (change)="uploadArchive($event)" placeholder="Upload file..." />    
+    <div class="step-block" [class.active]="modality">
+        <div class="header command-zone" (click)="tab_upload_open = !tab_upload_open">2. Select DICOM archive<span *ngIf="archive" class="check-mark">&#x2713;</span></div>
+        <fieldset class="step dicom" [@slideDown]="tab_upload_open && modality" *ngIf="tab_upload_open && modality">
+            <p>
+                Please select a DICOM zip archive to import.<br/>
+                <strong class="warning">&#9888; Important notice:</strong> this archive must contain a DICOMDIR file at its root!
+            </p>
+            <input type="file" (change)="uploadArchive($event)" placeholder="Upload file..."/> 
+            <progress-bar *ngIf="uploadProgress > 0 && uploadProgress < 1" [progress]="uploadProgress"></progress-bar>
+        </fieldset>
     </div>
 
-
-    <div class="step modality">
-        <h2><span>3. Select series</span><span class="hr"></span></h2>   
-        <p>Please select only the series useful for your study.</p>
-        <div class="middle-content">
-            <div class="tree">
-                <node label="DIR OL" pictoUrl="/assets/images/icons/user.png" deploy=true>
-                    <node label="RECHERCHE WIP NEURO" pictoUrl="/assets/images/icons/medical/x-ray-2.png" hasBox="true">
-                        <node
-                            *ngFor="let dataset of datasets" 
-                            [label]="dataset.name" 
-                            pictoUrl="/assets/images/icons/medical/brain.png" 
-                            hasBox="true" 
-                            [(ngModel)]="dataset.selected" 
-                            buttonPicto="/assets/images/icons/search.png"
-                            (buttonClick)="showThumbnail($event)"
-                            [nodeParams]="dataset"
-                            (labelClick)="showDetails($event)"
-                            [class.selected]="detailedSerie == dataset"
-                            [ngModelOptions]="{standalone: true}">
+    <div class="step-block" [class.active]="archive">
+        <div class="header command-zone" (click)="tab_series_open = !tab_series_open">3. Select series<span *ngIf="true" class="check-mark">&#x2713;</span></div>
+        <fieldset class="step" [@slideDown]="tab_series_open && archive" *ngIf="tab_series_open && archive"> 
+            <p>Please select only the series useful for your study.</p>
+            <div class="middle-content">
+                <div class="tree">
+                    <node label="DIR OL" pictoUrl="/assets/images/icons/user.png" deploy=true>
+                        <node label="RECHERCHE WIP NEURO" pictoUrl="/assets/images/icons/medical/x-ray-2.png" hasBox="true">
+                            <node
+                                *ngFor="let dataset of datasets" 
+                                [label]="dataset.name" 
+                                pictoUrl="/assets/images/icons/medical/brain.png" 
+                                hasBox="true" 
+                                [(ngModel)]="dataset.selected" 
+                                buttonPicto="/assets/images/icons/search.png"
+                                (buttonClick)="showThumbnail($event)"
+                                [nodeParams]="dataset"
+                                (labelClick)="showDetails($event)"
+                                [class.selected]="detailedSerie == dataset"
+                                [ngModelOptions]="{standalone: true}">
+                            </node>
                         </node>
                     </node>
-                </node>
 
-                <div class="modality-test">
-                    TEST : selected datasets
-                    <ul *ngFor="let ds of datasets">
-                        <li *ngIf="ds.selected">{{ds.name}}</li>
-                    </ul>
                 </div>
 
-            </div>
-
-            <div class="preview" *ngIf="detailedSerie">
-                <div class="title"><h3>Serie</h3></div>
-                <div class="preview-data">
-                    <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.id}}</div></div>
-                    <div class="item"><div class="label">name</div><div class="value">{{detailedSerie?.name}}</div></div>
-                    <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.name}}</div></div>
-                    <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.name}}</div></div>
-                </div>
-                
-                <div class="thumbnail" *ngIf="thumbnailOn">
-                    <div class="title info"><h3>Thumbnail</h3></div>
-                    <img src="http://www.two-views.com/images/mri-head-side.jpg" />
-                    <div class="paging info">
-                        <button (click)="page = page - 1">&#9664;</button>
-                        <span class="page">{{page}}</span>
-                        <button (click)="page = page + 1">&#9654;</button>
+                <div class="preview" *ngIf="detailedSerie">
+                    <div class="title"><h3>Serie</h3></div>
+                    <div class="preview-data">
+                        <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.id}}</div></div>
+                        <div class="item"><div class="label">name</div><div class="value">{{detailedSerie?.name}}</div></div>
+                        <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.name}}</div></div>
+                        <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.name}}</div></div>
+                    </div>
+                    
+                    <div class="thumbnail" *ngIf="thumbnailOn">
+                        <div class="title info"><h3>Thumbnail</h3></div>
+                        <img src="http://www.two-views.com/images/mri-head-side.jpg" />
+                        <div class="paging info">
+                            <button (click)="page = page - 1">&#9664;</button>
+                            <span class="page">{{page}}</span>
+                            <button (click)="page = page + 1">&#9654;</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            <div class="commands">
+                <button>A button</button><button>Another button</button>
+            </div>
+        </fieldset>
+    </div>
 
+    <div class="step-block" [class.active]="true">
+        <div class="header command-zone">4. Set the clinical context</div>
+        <fieldset class="step responsive">
+            <ol>
+                <legend>
+                    Research study
+                    <click-tip>A research study is the global study context. Examples: Children dyshpasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</click-tip>
+                </legend>
+                <li class="required">
+                    <label class="required-label">Select an existing research study</label> 
+                    <span class="right-col">
+                        <select>
+                            <option>MS Challenge</option>
+                            <option>PET Challenge</option>
+                        </select>
+                        <button disabled>details</button>
+                    </span>
+                </li>
+                <li class="required">
+                    <label class="required-label">Select an existing study card</label> 
+                    <span class="right-col">
+                        <select>
+                            <option>MS Challenge Testing Rennes (SIEMENS - Verio 3.0T (MR) 40296 - CHU Rennes)</option>
+                            <option>MS Challenge Testing Bordeaux (GE Medical Systems - DISCOVERY MR750w 3.0T (MR) 00000000M4166994 - CHU Bordeaux)</option>
+                        </select>
+                        <button>details</button>
+                        <button>edit</button>
+                    </span>
+                </li>
+                <li class="required">
+                    <label>Nifti converter</label> 
+                    <span class="right-col">mcverter_2.0.7</span>
+                </li>
+            </ol>
+
+            <ol>
+                <legend>
+                    Subject
+                    <click-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</click-tip>
+                </legend>
+                <li>
+                    <span>
+                        <input type="radio" [(ngModel)]="subjectMode" name="subjectMode" value="single">Single subject
+                        <span class="spacer"></span>
+                        <input type="radio" [(ngModel)]="subjectMode" name="subjectMode" value="group">Experimental group of subjects
+                    </span>
+                </li>
+                <li class="required" *ngIf="subjectMode == 'single'">
+                    <label class="required-label">Select a subject</label> 
+                    <span class="right-col">
+                        <select [(ngModel)]="subject" name="subject">
+                            <option [ngValue]="" disabled selected></option>
+                            <option *ngFor="let subject of subjects" [ngValue]="subject.id" [selected]="subject.selected">{{subject.name}}</option>
+                        </select>
+                        <button (click)="createUser = true" [disabled]="subject == ''">details</button>
+                        <button (click)="createUser = true"><img src="/assets/images/icons/add-1.png" />create a subject</button>
+                    </span>
+                </li>
+                <li class="required" *ngIf="subjectMode == 'group'">
+                    <label class="required-label">Select an existing group of subjects</label> 
+                    <span class="right-col">
+                        <select>
+                            <option value="" disabled selected></option>
+                            <option value="1">ABCD0917???????????</option>
+                            <option value="2">STCD4789????????????</option>
+                        </select>
+                        <button disabled>details</button>
+                        <button><img src="/assets/images/icons/add-1.png" />create a group of subjects</button>
+                    </span>
+                </li>
+                <template [ngIf]="subjectMode == 'single' && subject != undefined && subject != null && subject != ''">
+                    <li class="">
+                        <label class="">Common name</label> 
+                        <span class="right-col">
+                            <input type="text"/>
+                        </span>
+                    </li>
+                    <li class=""> 
+                        <label class="">Subject identifier for this research study</label> 
+                        <span class="right-col">
+                            <input type="text"/>
+                        </span>
+                    </li>
+                    <li class="">
+                        <label class="">Is physically involved</label> 
+                        <span class="right-col">
+                            <input type="checkbox"/>
+                        </span>
+                    </li>
+                    <li class="">
+                        <label class="">Subject Type	</label> 
+                        <span class="right-col">
+                            <select>
+                                <option value="" disabled selected></option>
+                                <option>Healthy volunteer</option>
+                                <option>Patient</option>
+                                <option>Phantom</option>
+                            </select>
+                        </span>
+                    </li>
+                </template>
+            </ol>
+
+            <ol>
+                <legend>
+                    Examination
+                    <click-tip>A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent entity: MR Dataset acquisition.</click-tip>
+                </legend>
+                <li class="required">
+                    <label class="required-label">Select an examination</label> 
+                    <span class="right-col">
+                        <select>
+                            <option disabled selected></option>
+                            <option>ABCD0917</option>
+                            <option>STCD4789</option>
+                        </select>
+                        <button disabled>details</button>
+                        <button><img src="/assets/images/icons/add-1.png" />new</button>
+                    </span>
+                </li>
+            </ol>
+        </fieldset>
+    </div>
+
+    <div class="step-block" [class.active]="true">
+        <div class="header command-zone">5. Anonymize</div>
+        <fieldset class="step anonymize"> 
+            <p><strong class="warning">&#9888;</strong> Data is now about to be anonymized. That means that some fields will be removed from the dataset. If for any reason you want to keep some information about the dataset before its anonymization, you can download a XML file that contains the complete information from the dataset. </p>
+            <table class="anonymization-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Signification</th>
+                        <th>Initial value</th>
+                        <th>Final value</th>
+                    </tr>    
+                </thead>
+                <tbody>
+                    <tr *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]" [class.odd]="i%2!=0" [class.even]="i%2==0" >
+                        <td>(0010,0030)</td>
+                        <td>Patient's Birth Date</td>
+                        <td>19870401</td>
+                        <td>20160101</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>You can receive a sum up of the data to be anonymized by email (only medical doctors and residents). You can also print the above table.</p>
+            <div class="console">
+                <console-line label="PACS test" [progress]="pacsProgress" [status]="pacsStatus"></console-line>
+                <console-line label="Extraction/Anonymization" [progress]="anonymProgress" [status]="anonymStatus"></console-line>
+                <console-line label="Conversion to Nifti" [progress]="niftiProgress" [status]="niftiStatus"></console-line>
+                <console-line label="The study card" [progress]="studyCardProgress" [status]="studyCardStatus"></console-line>
+            </div>
+            <div class="commands">
+                <button (click)="startProgressTest()">Start</button>
+            </div>
+        </fieldset>
+    </div>
+
+    <div class="step-block" [class.active]="true">
+        <div class="header command-zone">6. Select study card</div>
+        <fieldset class="step study-card"> 
+            <ol>
+                <li class="required">
+                    <label class="required-label">Select an existing study card</label> 
+                    <span class="right-col">
+                        <select>
+                            <option>MS Challenge Testing Rennes (SIEMENS - Verio 3.0T (MR) 40296 - CHU Rennes)</option>
+                            <option>MS Challenge Testing Bordeaux (GE Medical Systems - DISCOVERY MR750w 3.0T (MR) 00000000M4166994 - CHU Bordeaux)</option>
+                        </select>
+                        <button>details</button>
+                        <button>edit</button>
+                    </span>
+                </li>
+            </ol>
+            <ol>
+                <p class="expandable" (click)="dsAcqOpened = !dsAcqOpened">Review dataset acquisitions<span class="expand-arrow" [class.rotate]="dsAcqOpened">&#9013;</span></p>
+                <ul *ngIf="dsAcqOpened" class="ds-acq-list right-col">
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>localizer (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                </ul>
+            </ol>
+        </fieldset>
     </div>
     
 </form>
+
+<div class="overlay" *ngIf="createUser">
+    <div class="content">
+        <editUser (closing)="closeEditSubject($event)"></editUser>
+    </div>
+</div>

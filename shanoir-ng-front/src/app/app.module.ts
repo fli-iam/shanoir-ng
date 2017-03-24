@@ -33,6 +33,9 @@ import { TreeNodeComponent }   from './shared/tree/tree.node.component';
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
 import { ImportComponent }   from './import/import.component';
+import { ClickTipComponent }   from './shared/clickTip/clickTip.component';
+import { ConsoleComponent }   from './shared/console/console.line.component';
+import { LoadingBarComponent }   from './shared/loadingBar/loadingBar.component';
 
 
 export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
@@ -66,7 +69,10 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         TableComponent,
         TreeNodeComponent,
         UserListComponent,
-        ImportComponent
+        ImportComponent,
+        ClickTipComponent,
+        ConsoleComponent,
+        LoadingBarComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -85,6 +91,6 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
             deps: [XHRBackend, RequestOptions, KeycloakService]
         }
     ],
-    bootstrap:    [ AppComponent ]
+    bootstrap:    [ AppComponent ],
 })
 export class AppModule { }
