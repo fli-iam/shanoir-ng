@@ -70,7 +70,7 @@ public class TemplateApiController implements TemplateApi {
 			final BindingResult result) throws RestServiceException {
 
 		/* Validation */
-		// A basic user can only update certain fields, check that
+		// A basic template can only update certain fields, check that
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(template);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);

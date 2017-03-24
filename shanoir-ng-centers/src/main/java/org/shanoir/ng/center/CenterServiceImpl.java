@@ -146,9 +146,8 @@ public class CenterServiceImpl implements CenterService {
 	 * @see org.shanoir.ng.service.CenterService#findByData(java.lang.String)
 	 */
 	@Override
-	public Optional<Center> findByData(String data) {
-		// TODO Auto-generated method stub
-		return null;
+	public Optional<Center> findByName(String name) {
+		return centerRepository.findByName(name);
 	}
 
 }

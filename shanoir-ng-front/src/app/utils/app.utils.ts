@@ -1,9 +1,3 @@
-// Local storage keys
-export const STORAGE_ACCOUNT_TOKEN:string = 'shanoirApp-account';
-export const STORAGE_TOKEN:string = 'shanoirApp-token';
-export const STORAGE_TOKEN_TIMEOUT:string = 'shanoirApp-tokenTimeout';
-export const STORAGE_REFRESH_TOKEN:string = 'shanoirApp-refreshToken';
-
 // Users http api
 const BACKEND_API_USERS_MS_URL:string = process.env.BACKEND_API_USERS_MS_URL;
 export const BACKEND_API_USER_ALL_URL:string = BACKEND_API_USERS_MS_URL + '/user/all';

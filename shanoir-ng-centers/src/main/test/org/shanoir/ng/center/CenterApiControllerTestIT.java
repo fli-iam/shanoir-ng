@@ -1,4 +1,4 @@
-package org.shanoir.ng.template;
+package org.shanoir.ng.center;
 
 import static org.junit.Assert.assertEquals;
 
@@ -21,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * Integration tests for template controller.
+ * Integration tests for center controller.
  *
  * @author msimon
  *
@@ -29,9 +29,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
-public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
+public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 	
-	private static final String REQUEST_PATH = "/template";
+	private static final String REQUEST_PATH = "/center";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
@@ -39,13 +39,13 @@ public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void findTemplateByIdProtected() {
+	public void findCenterByIdProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
-	public void findTemplateByIdWithLogin() throws ClientProtocolException, IOException {
+	public void findCenterByIdWithLogin() throws ClientProtocolException, IOException {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
@@ -54,47 +54,68 @@ public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 	}
 
 	@Test
-	public void findTemplatesProtected() {
+	public void findCentersProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
-	public void findTemplatesWithLogin() throws ClientProtocolException, IOException {
+	public void findCentersWithLogin() throws ClientProtocolException, IOException {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
-
+	
 	@Test
-	public void saveNewTemplateProtected() {
-		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Template(), String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+	public void findCentersWithBadRole() {
+		// test with guest role
+		final HttpEntity<Center> entity = new HttpEntity<Center>(null, getHeadersWithToken(false));
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
+				String.class);
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
 
 	@Test
-	public void saveNewTemplateWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Template> entity = new HttpEntity<Template>(ModelsUtil.createTemplate(), getHeadersWithToken(true));
+	public void saveNewCenterProtected() {
+		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Center(), String.class);
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+	}
+
+	@Test
+	public void saveNewCenterWithLogin() throws ClientProtocolException, IOException {
+		
+		final Center center = ModelsUtil.createCenter();
+		center.setName("tt"); 
+		final HttpEntity<Center> entity = new HttpEntity<Center>(ModelsUtil.createCenter(), getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
+		
+		// Get center id
+		String centerId = response.getBody().split("\"id\":")[1].split(",")[0];
+
+		// Delete center
+		final ResponseEntity<String> responseDelete = restTemplate
+				.exchange(REQUEST_PATH + "/" + centerId, HttpMethod.DELETE, entity, String.class);
+		assertEquals(HttpStatus.NO_CONTENT, responseDelete.getStatusCode());
 	}
 
 	@Test
-	public void updateNewTemplateProtected() {
-		final HttpEntity<Template> entity = new HttpEntity<Template>(ModelsUtil.createTemplate());
+	public void updateNewCenterProtected() {
+		final HttpEntity<Center> entity = new HttpEntity<Center>(ModelsUtil.createCenter());
 		
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
-	public void updateNewTemplateWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Template> entity = new HttpEntity<Template>(ModelsUtil.createTemplate(), getHeadersWithToken(true));
+	public void updateNewCenterWithLogin() throws ClientProtocolException, IOException {
+		final HttpEntity<Center> entity = new HttpEntity<Center>(ModelsUtil.createCenter(), getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);

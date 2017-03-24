@@ -9,4 +9,13 @@ if (process.env.ENV === 'production') {
   enableProdMode();
 }
 
-platformBrowserDynamic().bootstrapModule(AppModule);
+if (window.location.href.endsWith('/accountRequest')) {
+  // Public URL
+  platformBrowserDynamic().bootstrapModule(AppModule);
+} else {
+  KeycloakService.init()
+    .then(() => {
+      platformBrowserDynamic().bootstrapModule(AppModule);
+    })
+    .catch((err) => console.log(err));
+}

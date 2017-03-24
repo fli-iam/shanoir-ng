@@ -5,5 +5,8 @@
 .header-component { background-color: var(--color-a); height: 54px; z-index: 1000; position: relative; }
 	.header-component .logo { margin: 10px; float: left; }
 		.header-component .logo img { height: 32px; }
-	.header-component .logout { margin: 10px; float: right; }
-		.header-component .logout button { color: var(--color-a); background-color: var(--very-light-grey); border-color: var(--very-light-grey); }
+	.header-component .right { float: right; margin-top: 3px; }
+	
+	.header-component .welcome { color: var(--very-light-grey); }
+		.header-component .welcome img { height: 25px; vertical-align: middle; margin: 0 10px; }
+	.header-component .logout button { margin: 10px; color: var(--color-a); background-color: var(--very-light-grey); border-color: var(--very-light-grey); }

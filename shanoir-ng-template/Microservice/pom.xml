@@ -20,6 +20,9 @@
 		<springfox-version>2.5.0</springfox-version>
 		<spring-active-profile></spring-active-profile>
 		<keycloak.version>2.5.1.Final</keycloak.version>
+		<resteasy.version>3.1.0.Final</resteasy.version>
+		<docker.image.name>shanoir-ng/template</docker.image.name>
+		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
 	</properties>
 
 	<dependencies>
@@ -54,6 +57,28 @@
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-spring-security-adapter</artifactId>
 			<version>${keycloak.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-admin-client</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
+
+		<!-- Resteasy -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jackson2-provider</artifactId>
+			<version>${resteasy.version}</version>
 		</dependency>
         
  		<!-- SpringFox Swagger UI -->
@@ -126,11 +151,29 @@
 		        </configuration>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<copy file="src/main/docker/${supervisor.file.name}"
+									tofile="src/main/docker/ms.users.sv.conf" overwrite="true" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
 				<version>0.4.11</version>
 				<configuration>
-					<imageName>${project.artifactId}</imageName>
+					<imageName>${docker.image.name}</imageName>
 					<dockerDirectory>src/main/docker</dockerDirectory>
 					<resources>
 						<resource>
@@ -181,30 +224,10 @@
 		<profile>
 			<id>qualif</id>
 			<properties>
-				<spring-active-profile>qualif</spring-active-profile>
+				<spring.active.profile>qualif</spring.active.profile>
+				<supervisor.file.name>ms.template.sv.qualif.conf</supervisor.file.name>
+				<maven.test.skip>true</maven.test.skip>
 			</properties>
-			<build>
-				<plugins>
-					<plugin>
-					<groupId>com.spotify</groupId>
-					<artifactId>docker-maven-plugin</artifactId>
-					<version>0.4.11</version>
-					<configuration>
-						<dockerHost>${docker-host}</dockerHost>
-						<dockerCertPath>${docker-cert-path}</dockerCertPath>
-						<imageName>${project.artifactId}</imageName>
-						<dockerDirectory>src/main/docker-qualif</dockerDirectory>
-						<resources>
-							<resource>
-								<targetPath>/</targetPath>
-								<directory>${project.build.directory}</directory>
-								<include>${project.build.finalName}.jar</include>
-							</resource>
-						</resources>
-					</configuration>
-				</plugin>
-				</plugins>
-			</build>
 		</profile>
 	</profiles>
 </project>

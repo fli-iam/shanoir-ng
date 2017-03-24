@@ -1,5 +1,7 @@
 package org.shanoir.ng.center;
 
+import java.util.Optional;
+
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -9,13 +11,13 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface CenterRepository extends CrudRepository<Center, Long>, CenterRepositoryCustom {
 
-//	/**
-//	 * Find center by data.
-//	 *
-//	 * @param data
-//	 *            data.
-//	 * @return a center.
-//	 */
-//	Optional<Center> findByData(String data);
+	/**
+	 * Find center by name.
+	 *
+	 * @param name
+	 *            name.
+	 * @return a center.
+	 */
+	Optional<Center> findByName(String name);
 
 }
