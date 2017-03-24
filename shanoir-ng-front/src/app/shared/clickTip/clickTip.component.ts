@@ -11,8 +11,8 @@ import { Component, ViewChild, ElementRef, Renderer } from '@angular/core';
         </span>
     `,
     styles: [
-        ':host() { vertical-align: text-bottom; }',
-        '.help { border: 1px solid var(--color-c); border-radius: 15px; font-size: 10px; font-weight: bold; cursor: pointer; width: 15px; height: 16px; text-align: center; vertical-align: middle; display: table-cell; position: relative; }',
+        ':host() { vertical-align: top; display: inline-block; }',
+        '.help { border: 1px solid var(--color-c); border-radius: 15px; font-size: 10px; font-weight: bold; cursor: pointer; width: 15px; height: 14px; text-align: center; vertical-align: middle; display: table-cell; position: absolute; z-index: 10; }',
         '.help.opened { box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color); background-color: lightgoldenrodyellow; }',
         '.help .content { position: absolute; width: 250px; font-size: 12px; background-color: lightgoldenrodyellow; padding: 6px 12px; box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color); color: var(--dark-grey); top: 14px; left: 16px; font-weight: normal; text-align: left; }'
     ]
