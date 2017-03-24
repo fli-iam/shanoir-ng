@@ -30,7 +30,6 @@ export class KeycloakService {
   }
 
   logout() {
-    console.log('*** LOGOUT');
     KeycloakService.auth.loggedIn = false;
     KeycloakService.auth.authz = null;
 
@@ -45,7 +44,7 @@ export class KeycloakService {
             resolve(<string>KeycloakService.auth.authz.token);
           })
           .error(() => {
-            reject('Failed to refresh token');
+            window.location.href = process.env.LOGOUT_REDIRECT_URL;
           });
       }
     });
@@ -53,6 +52,14 @@ export class KeycloakService {
 
   isUserAdmin(): boolean {
     return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_ADMIN");
+  }
+
+  isUserExpert(): boolean {
+    return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_EXPERT");
+  }
+
+  isUserGuest(): boolean {
+    return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_GUEST");
   }
 
 }

@@ -2,8 +2,8 @@ package org.shanoir.ng.utils;
 
 import java.util.Date;
 
-import org.shanoir.ng.model.Role;
-import org.shanoir.ng.model.User;
+import org.shanoir.ng.role.Role;
+import org.shanoir.ng.user.User;
 
 /**
  * Utility class for test.

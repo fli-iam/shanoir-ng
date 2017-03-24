@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <p>Dear <span th:text="${firstname}"></span> <span th:text="${lastname}"></span>,</p>
+    <p>Your account request has been granted.</p>
+    <p>Please go to <a th:href="${serverAddress}">Shanoir</a> and login with your username and your password.</p>
+    <p>Regards,</p>
+    <p>Shanoir administrator</p>
+</body>
+</html>

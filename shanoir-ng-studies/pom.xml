@@ -20,7 +20,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		
+		<keycloak.version>2.5.1.Final</keycloak.version>
 		<springfox-version>2.5.0</springfox-version>
 		<spring-active-profile></spring-active-profile>
 	</properties>
@@ -83,6 +83,28 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
+
+				<!-- Keycloak -->
+				<dependency>
+					<groupId>org.keycloak</groupId>
+					<artifactId>keycloak-tomcat8-adapter</artifactId>
+					<version>${keycloak.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.keycloak</groupId>
+					<artifactId>keycloak-spring-boot-adapter</artifactId>
+					<version>${keycloak.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.keycloak</groupId>
+					<artifactId>keycloak-spring-security-adapter</artifactId>
+					<version>${keycloak.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.keycloak</groupId>
+					<artifactId>keycloak-admin-client</artifactId>
+					<version>${keycloak.version}</version>
+				</dependency>
 
         <!-- Test -->
 		<dependency>

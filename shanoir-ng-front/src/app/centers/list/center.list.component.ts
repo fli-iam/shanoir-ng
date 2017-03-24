@@ -6,6 +6,7 @@ import { ConfirmDialogService } from "../../shared/utils/confirm.dialog.service"
 import { TableComponent } from "../../shared/table/table.component";
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 
 @Component({
     selector: 'center-list',
@@ -20,7 +21,8 @@ export class CenterListComponent {
     public rowClickAction: Object;
     public loading: boolean = false;
 
-    constructor(private centerService: CenterService, private confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
+    constructor(private centerService: CenterService, private confirmDialogService: ConfirmDialogService, 
+        private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
         this.getCenters();
         this.createColumnDefs();
     }   
@@ -48,36 +50,47 @@ export class CenterListComponent {
             }
             return null;
         };
+       
         this.columnDefs = [
             {headerName: "Name", field: "name" },
             {headerName: "Town", field: "city" },
-            {headerName: "Country", field: "country" },
-            {headerName: "", type: "button", img: "/assets/images/icons/garbage-1.png", action: this.openDeleteCenterConfirmDialog},
-            {headerName: "", type: "button", img: "/assets/images/icons/edit.png", target : "/editCenter", getParams: function(item: any): Object {
-                return {id: item.id};
-            }},
-            {headerName: "", type: "button", img: "/assets/images/icons/view-1.png", target : "/viewCenter", getParams: function(item: any): Object {
-                return {id: item.id};
-            }}
+            {headerName: "Country", field: "country" }
         ];
-        this.customActionDefs = [
-            {title: "new center", img: "/assets/images/icons/add-1.png", target: "../editCenter"},
-            {title: "delete selected", img: "/assets/images/icons/garbage-1.png", action: this.deleteAll } 
-        ];
-        this.rowClickAction = {target : "/viewCenter", getParams: function(item: any): Object {
-                return {id: item.id};
-        }};
+        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+            this.columnDefs.push({headerName: "", type: "button", img: "/assets/images/icons/garbage-1.png", action: this.openDeleteCenterConfirmDialog},
+            {headerName: "", type: "button", img: "/assets/images/icons/edit.png", target : "/detailCenter", getParams: function(item: any): Object {
+                return {id: item.id, mode: "edit"};
+            }});
+        }
+        if (!this.keycloakService.isUserGuest()) {
+            this.columnDefs.push({headerName: "", type: "button", img: "/assets/images/icons/view-1.png", target : "/detailCenter", getParams: function(item: any): Object {
+                return {id: item.id, mode: "view"};
+            }});
+        }
+
+        this.customActionDefs = [];
+        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+            this.customActionDefs.push({title: "new center", img: "/assets/images/icons/add-1.png", target: "/detailCenter", getParams: function(item: any): Object {
+                    return {mode: "create"};
+            }});
+            this.customActionDefs.push({title: "delete selected", img: "/assets/images/icons/garbage-1.png", action: this.deleteAll });
+        }
+        if (!this.keycloakService.isUserGuest()) {
+            this.rowClickAction = {target : "/detailCenter", getParams: function(item: any): Object {
+                    return {id: item.id, mode: "view"};
+            }};
+        }
     }
 
     openDeleteCenterConfirmDialog = (item: Center) => {
          this.confirmDialogService
-                .confirm('Delete center', 'Are you sure you want to delete center ' + item.name + ' , ' + item.city + ' , ' + item.country + '?',
-                    this.viewContainerRef)
-                .subscribe(res => {
-                    if (res) {
-                        this.deleteCenter(item.id);
-                    }
-                })
+            .confirm('Delete center', 'Are you sure you want to delete center ' + item.name + ' , ' + item.city + ' , ' + item.country + '?',
+                this.viewContainerRef)
+            .subscribe(res => {
+                if (res) {
+                    this.deleteCenter(item.id);
+                }
+            })
     }
 
     deleteCenter(centerId: number) {

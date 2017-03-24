@@ -23,7 +23,6 @@ export class EditUserComponent implements OnInit {
     user: User = new User();
     editUserForm: FormGroup;
     roles: Role[];
-    isUserNameUnique: boolean = true;
     isEmailUnique: boolean = true;
     isDateValid: boolean = true;
     creationMode: boolean;

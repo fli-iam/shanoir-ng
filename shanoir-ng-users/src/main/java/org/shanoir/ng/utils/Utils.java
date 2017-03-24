@@ -3,7 +3,7 @@ package org.shanoir.ng.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.model.AbstractGenericItem;
+import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
  * Utility class

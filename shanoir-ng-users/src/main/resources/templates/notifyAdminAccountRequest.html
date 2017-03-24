@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <p><span>Dear administrator,</span></p>
+    <p><span th:text="${user.firstName}"></span> <span th:text="${user.lastName}"></span> (<span th:text="${user.email}"></span>) is requesting an account on <span th:text="${serverAddress}"></span>.</p>
+    <p><span>Motivation:</span></p>
+    <ul>
+    <li>Contact: <span th:text="${user.accountRequestInfo.contact}"></span></li>
+    <li>Function: <span th:text="${user.accountRequestInfo.function}"></span></li>
+    <li>Institution: <span th:text="${user.accountRequestInfo.institution}"></span></li>
+    <li>Service: <span th:text="${user.accountRequestInfo.service}"></span></li>
+    <li>Study: <span th:text="${user.accountRequestInfo.study}"></span></li>
+    <li>Work: <span th:text="${user.accountRequestInfo.work}"></span></li>
+    </ul>
+    <p><span th:text="Regards"></span></p>
+</body>
+</html>

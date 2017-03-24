@@ -34,6 +34,10 @@ export class NavbarComponent {
         return this.keycloakService.isUserAdmin();
     }
 
+    isUserGuest(): boolean {
+        return this.keycloakService.isUserGuest();
+    }
+
     togglePink() {
         this.mode = this.mode == "pink" ? "default" : "pink";
         this.resetColors();

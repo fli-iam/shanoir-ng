@@ -2,9 +2,9 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.util.concurrent.CountDownLatch;
 
-import org.shanoir.ng.exception.ShanoirUsersException;
-import org.shanoir.ng.model.User;
-import org.shanoir.ng.service.UserService;
+import org.shanoir.ng.shared.exception.ShanoirUsersException;
+import org.shanoir.ng.user.User;
+import org.shanoir.ng.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

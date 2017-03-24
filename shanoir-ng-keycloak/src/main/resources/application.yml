@@ -68,10 +68,6 @@ kc.requests:
     login: admin
     password: admin
   client.id: admin-cli
-  front:
-    resource: shanoir-ng-front
-    url: http://localhost:3000
-  ms.users.url: http://localhost:9903
   realm: master
   temporary.password: false
 # logging configuration
