@@ -5,26 +5,34 @@ import java.sql.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.PostLoad;
+import javax.persistence.Table;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
+import org.shanoir.ng.shared.hateoas.HalEntity;
+import org.shanoir.ng.shared.hateoas.Links;
 import org.hibernate.validator.constraints.Length;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 @Entity
-public class Study implements Serializable{
-	
+@Table(name = "study")
+@JsonPropertyOrder({ "_links", "id", "name" })
+public class Study extends HalEntity {
+
 	/** The Constant serialVersionUID. */
 	//private static final long serialVersionUID = -8001079069163353926L;
 
-	/** ID. */
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "STUDY_ID")
-	private Long id;
+	/**
+	 * Init HATEOAS links
+	 */
+	@PostLoad
+	public void initLinks() {
+		this.addLink(Links.REL_SELF, "template/" + getId());
+	}
 
 	/** Name. */
 	@Length(min = 0, max = 255)
@@ -65,14 +73,6 @@ public class Study implements Serializable{
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "REF_STUDY_STATUS_ID", referencedColumnName = "REF_STUDY_STATUS_ID", nullable = true, updatable = true)
 	private RefStudyStatus refStudyStatus;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getName() {
 		return name;
@@ -184,7 +184,7 @@ public class Study implements Serializable{
 	@Column(name = "PATH")
 	private List<String> protocolFilePathList = new ArrayList<String>();
 */
-	
-	
+
+
 
 }
