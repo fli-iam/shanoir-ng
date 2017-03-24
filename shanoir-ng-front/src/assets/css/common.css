@@ -63,7 +63,7 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form textarea { resize: vertical; }
   form button { margin: 10px 0; }
   form input:not([type]), input[type='text'], input[type='password'], input[type='email'], textarea, select { width: 200px; }
-  form fieldset { border: 0; padding: 0; margin: 15px; overflow: hidden; }
+  form fieldset { border: 0; padding: 0; margin: 15px; }
     form fieldset.responsive { margin-left: -5px; }
   form fieldset.line { border-top: 1px solid var(--grey); padding-top: 11px; }
     form fieldset fieldset { border: none; margin: 3px 0 0; }

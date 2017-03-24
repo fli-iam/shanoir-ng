@@ -32,7 +32,7 @@ form li > label { width: 250px !important; }
 .middle-content { overflow: auto; }
 .tree { clear: none; float: left; margin: 0 50px 20px 0; min-width: 300px; width: 49%; }
 
-.preview { clear: none; float: left; width:400px; border: 1px solid var(--light-grey); background-color: var(--very-light-grey); margin-top: 20px; }
+.preview { clear: none; float: left; width:400px; border: 1px solid var(--light-grey); background-color: var(--very-light-grey); margin-bottom: 20px; }
     .preview .title { background-color: var(--light-grey); padding: 10px; }
         .preview .title h3 { margin: 0; }
 
