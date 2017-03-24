@@ -25,7 +25,7 @@ public interface StudyAPI {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class)
 			})
 	@RequestMapping(value = "/listOfStudies", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasAuthority('adminRole')")
+	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<List<Study>> findStudies();
 
 }
