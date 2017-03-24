@@ -1,4 +1,4 @@
-package org.shanoir.ng.user;
+package org.shanoir.ng.utils;
 
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessTokenResponse;
@@ -50,7 +50,7 @@ public abstract class KeycloakControllerTestIT {
 	}
 
 	/*
-	 * Obtain a token on behalf of ngular2-product. Send credentials through
+	 * Obtain a token on behalf of shanoir-ng-users. Send credentials through
 	 * direct access api:
 	 * http://docs.jboss.org/keycloak/docs/1.2.0.CR1/userguide/html/direct-
 	 * access-grants.html Make sure the realm has the Direct Grant API switch ON

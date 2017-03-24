@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
@@ -19,13 +19,10 @@ import { AccountRequestInfo } from '../accountRequestInfo/account.request.info.m
 
 export class EditUserComponent implements OnInit {
     @Input() requestAccountMode: boolean = false;
+    @Output() closing = new EventEmitter();
     user: User = new User();
-    router: Router;
-    route: ActivatedRoute;
-    userService: UserService;
     editUserForm: FormGroup;
     roles: Role[];
-    roleService: RoleService;
     isEmailUnique: boolean = true;
     isDateValid: boolean = true;
     creationMode: boolean;
@@ -34,11 +31,8 @@ export class EditUserComponent implements OnInit {
     accountRequestInfo: AccountRequestInfo;
     private accountRequestInfoValid: boolean = false;
 
-    constructor(router: Router, private location: Location, route: ActivatedRoute, userService: UserService, roleService: RoleService, private fb: FormBuilder) {
-        this.router = router;
-        this.route = route;
-        this.userService = userService;
-        this.roleService = roleService;
+    constructor(private router: Router, private location: Location, private route: ActivatedRoute, 
+        private userService: UserService, private roleService: RoleService, private fb: FormBuilder) {
     }
 
     getRoles(): void {
@@ -76,8 +70,13 @@ export class EditUserComponent implements OnInit {
             });
     }
 
-    cancel(): void {
-        this.router.navigate(['/userlist']);
+    getOut(user: User = null): void {
+        console.log(this.closing.observers.length);
+        if (this.closing.observers.length > 0) {
+            this.closing.emit(user);
+        } else {
+            this.location.back();
+        }
     }
 
     cancelAccountRequest(): void {
@@ -88,7 +87,7 @@ export class EditUserComponent implements OnInit {
         this.submit();
         this.userService.confirmAccountRequest(this.userId, this.user)
            .subscribe((user) => {
-                this.cancel();
+                this.getOut();
              }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
@@ -99,7 +98,7 @@ export class EditUserComponent implements OnInit {
     deny(): void {
         this.userService.denyAccountRequest(this.userId)
             .then(res => {
-                this.cancel();
+                this.getOut();
              })
             .catch((error) => {
                 // TODO: display error
@@ -112,7 +111,7 @@ export class EditUserComponent implements OnInit {
         this.submit();
         this.userService.create(this.user)
             .subscribe((user) => {
-                this.cancel();
+                this.getOut(user);
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
@@ -136,7 +135,7 @@ export class EditUserComponent implements OnInit {
         this.submit();
         this.userService.update(this.userId, this.user)
            .subscribe((user) => {
-                this.cancel();
+                this.getOut(user);
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
