@@ -86,7 +86,7 @@ spring:
   rabbitmq:
     host: localhost
 server:
-    port: 9904
+    port: 9902
 #keycloak
 keycloak:
   credentials.secret: 209376e5-1d42-4fa3-8cdb-160946fd6383

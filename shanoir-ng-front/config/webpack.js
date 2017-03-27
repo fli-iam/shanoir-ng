@@ -13,10 +13,10 @@ const BACKEND_API_ROOT_URL = 'http://localhost/shanoir-ng';
 const METADATA = webpackMerge(commonConfig.metadata, {
     host: 'localhost',
     BACKEND_API_USERS_MS_URL: BACKEND_API_ROOT_URL + '/users',
-    BACKEND_API_CENTERS_MS_URL: BACKEND_API_ROOT_URL + '/centers',
+    BACKEND_API_STUDIES_MS_URL: BACKEND_API_ROOT_URL + '/studies',
     KEYCLOAK_BASE_URL: 'http://localhost/auth',
     LOGOUT_REDIRECT_URL: 'http://localhost/shanoir-ng/index.html',
-    port: 8081,
+    port: 8080,
     ENV: ENV,
 });
 
@@ -78,14 +78,14 @@ module.exports = webpackMerge(commonConfig, {
         new webpack.DefinePlugin({
             'ENV': JSON.stringify(METADATA.ENV),
             'BACKEND_API_USERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_USERS_MS_URL),
-            'BACKEND_API_CENTERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_CENTERS_MS_URL),
+            'BACKEND_API_STUDIES_MS_URL': JSON.stringify(METADATA.BACKEND_API_STUDIES_MS_URL),
             'KEYCLOAK_BASE_URL': JSON.stringify(METADATA.KEYCLOAK_BASE_URL),
             'LOGOUT_REDIRECT_URL': JSON.stringify(METADATA.LOGOUT_REDIRECT_URL),
             'process.env': {
                 'ENV': JSON.stringify(METADATA.ENV),
                 'NODE_ENV': JSON.stringify(METADATA.ENV),
                 'BACKEND_API_USERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_USERS_MS_URL),
-                'BACKEND_API_CENTERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_CENTERS_MS_URL),
+                'BACKEND_API_STUDIES_MS_URL': JSON.stringify(METADATA.BACKEND_API_STUDIES_MS_URL),
                 'LOGOUT_REDIRECT_URL': JSON.stringify(METADATA.LOGOUT_REDIRECT_URL),
                 'KEYCLOAK_BASE_URL': JSON.stringify(METADATA.KEYCLOAK_BASE_URL),
             }
