@@ -31,13 +31,13 @@ public interface CenterService extends UniqueCheckableService<Center> {
 	List<Center> findAll();
 
 	/**
-	 * Find center by data.
+	 * Find center by name.
 	 *
-	 * @param data
-	 *            data.
+	 * @param name
+	 *            name.
 	 * @return a center.
 	 */
-	Optional<Center> findByData(String data);
+	Optional<Center> findByName(String name);
 
 	/**
 	 * Find center by its id.

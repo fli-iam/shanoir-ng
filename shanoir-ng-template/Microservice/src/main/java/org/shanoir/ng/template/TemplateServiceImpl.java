@@ -95,6 +95,7 @@ public class TemplateServiceImpl implements TemplateService {
 			final Template templateDb = templateRepository.findOne(template.getId());
 			if (templateDb != null) {
 				try {
+					templateDb.setData(template.getData());
 					templateRepository.save(templateDb);
 				} catch (Exception e) {
 					ShanoirTemplateException.logAndThrow(LOG,
