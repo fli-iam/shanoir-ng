@@ -1,5 +1,6 @@
 # server configuration
 server:
+  email-off: true
   port: 9999
 spring:
   datasource:
@@ -22,6 +23,11 @@ spring:
           charset: UTF-8
   session:
     store-type: none
+  mail:
+    host: smtp.inria.fr
+    port: 25
+    properties:
+      mail.smtp.from: do-not-reply@inria.fr
 #keycloak
 keycloak:
   realm: shanoir-ng
@@ -96,3 +102,5 @@ spring:
 #keycloak
 kc.requests:
   temporary.password: true
+server:
+  email-off: false
