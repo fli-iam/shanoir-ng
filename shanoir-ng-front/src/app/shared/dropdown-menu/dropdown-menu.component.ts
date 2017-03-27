@@ -49,7 +49,7 @@ export class DropdownMenuComponent {
 
         if (!DropdownMenuComponent.documentListenerInit) {
             DropdownMenuComponent.documentListenerInit = true;
-            document.addEventListener('click', DropdownMenuComponent.clickDocument.bind(this));
+            document.addEventListener('click', DropdownMenuComponent.closeAll.bind(this));
         }
     }
 
@@ -58,9 +58,9 @@ export class DropdownMenuComponent {
             itemMenu.siblings = this.itemMenus;
             itemMenu.parent = this;
         });
-        this.hasChildren = this.itemMenus.length > 0;
 
         let subscription = Observable.timer(0,100).subscribe (t=> {
+            this.hasChildren = this.itemMenus.length > 0;
             this.opened = false;
             this.overflow = true;
             this.init = true;
@@ -70,10 +70,13 @@ export class DropdownMenuComponent {
         this.renderer.setElementClass(this.elementRef.nativeElement, this.mode+"-mode", true);
     }
 
-    public open() {
+    public open(event: Event) {
         //this.closeSiblings();
         if (DropdownMenuComponent.openedMenus.size > 0) {
-            setTimeout(() => this.openAction(), animDur);
+            event.stopPropagation();
+            DropdownMenuComponent.closeAll(event, () => {
+                this.openAction();
+            });
         } else {
             this.openAction();
         }
@@ -85,20 +88,44 @@ export class DropdownMenuComponent {
         setTimeout(() => this.overflow = false, animDur);
     }
 
-    public close() {
-        this.overflow = true;
-        DropdownMenuComponent.openedMenus.delete(this);
-        this.opened =  false;
-        this.closeChildren();
+    public close(callback: () => void = () => {}) {
+        if (this.hasChildren && this.opened) {
+            this.closeChildren(() => {
+                this.overflow = true;
+                this.opened =  false;
+                DropdownMenuComponent.openedMenus.delete(this);
+                setTimeout(callback, animDur);
+            });
+        } else {
+            callback();
+        }
     }
 
-    public closeChildren() {
-         this.itemMenus.forEach((itemsMenu) => itemsMenu.close());
+    public closeChildren(callback: () => void = () => {}) {
+        let menusToClose: MenuItemComponent[] = [];
+        this.itemMenus.forEach((itemMenu, index) => {
+            if (index!= 0 && itemMenu.hasChildren && itemMenu.opened) // REMOVE index != 0 WHEN BUG FIXED
+                menusToClose.push(itemMenu);
+        });
+        let subMenusRemaining: number = menusToClose.length;
+        if (subMenusRemaining == 0 ) {
+            callback();
+            return;
+        } else {
+            for (let itemMenu of menusToClose) {
+                itemMenu.close(() => {
+                    subMenusRemaining--;
+                    if (subMenusRemaining == 0) {
+                        callback();
+                    }
+                });
+            }
+        }
     }
 
-    public toggle() {
+    public toggle(event: Event) {
         if (this.opened) this.close();
-        else this.open();
+        else this.open(event);
     }
 
     public click() {
@@ -111,11 +138,19 @@ export class DropdownMenuComponent {
         this.parent.cascadingClose();
     }
 
-    public static clickDocument = (event: Event) => {
+    public static closeAll = (event: Event, callback: () => void) => {
+        let remains: number = DropdownMenuComponent.openedMenus.size;
         DropdownMenuComponent.openedMenus.forEach((menu) => {
             if (!menu.container.nativeElement.contains(event.target)) {
-                menu.close();
-            };
+                menu.close(() => {
+                    remains--;
+                    if (remains == 0) {
+                        callback();
+                    }
+                });
+            } else {
+                remains--;
+            }
         });
     }
 }

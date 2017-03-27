@@ -71,7 +71,6 @@ export class EditUserComponent implements OnInit {
     }
 
     getOut(user: User = null): void {
-        console.log(this.closing.observers.length);
         if (this.closing.observers.length > 0) {
             this.closing.emit(user);
         } else {

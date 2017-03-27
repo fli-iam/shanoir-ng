@@ -5,7 +5,7 @@
     <span 
         *ngIf="hasChildren && mode == 'top'"
         class="label"
-        (click)="toggle()"
+        (click)="toggle($event)"
         >{{label}}
         <span class="menu-arrow">&#x25BE;</span>
     </span> 
@@ -20,7 +20,7 @@
     <span 
         *ngIf="mode == 'tree'"
         class="plus"
-        (click)="toggle()"
+        (click)="toggle($event)"
         ><template [ngIf]="!opened">+</template><template [ngIf]="opened">&#10549;</template></span>
 
     <!-- ul #contentWrapper class="sub-content" [class.hidden]="!opened" [@slideDown]="opened" -->
