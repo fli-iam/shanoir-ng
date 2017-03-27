@@ -21,23 +21,24 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<keycloak.version>2.5.1.Final</keycloak.version>
+		<resteasy.version>3.1.0.Final</resteasy.version>
 		<springfox-version>2.5.0</springfox-version>
 		<spring-active-profile></spring-active-profile>
 	</properties>
 
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core
-	 			 Needed for semi-automatically generated Ids -->
+		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core Needed 
+			for semi-automatically generated Ids -->
 		<dependency>
-		    <groupId>org.hibernate</groupId>
-		    <artifactId>hibernate-core</artifactId>
-		    <version>5.0.3.Final</version>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
 		</dependency>
+		
 		<!-- Spring boot -->
-    <dependency>
-    		<groupId>org.springframework.boot</groupId>
-    		<artifactId>spring-boot-starter-data-jpa</artifactId>
-  		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
@@ -55,69 +56,86 @@
 			<artifactId>spring-session</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>org.springframework.security</groupId>
-		    <artifactId>spring-security-test</artifactId>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
 		</dependency>
 
 		<!-- Database connector -->
 		<dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
 
- 		<!-- SpringFox Swagger UI -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-joda</artifactId>
-        </dependency>
+		<!-- SpringFox Swagger UI -->
 		<dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${springfox-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>${springfox-version}</version>
-        </dependency>
-
-		<!-- AMQP -->
-        <dependency>
-		    <groupId>com.google.code.gson</groupId>
-		    <artifactId>gson</artifactId>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-joda</artifactId>
 		</dependency>
 		<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
-
-				<!-- Keycloak -->
-				<dependency>
-					<groupId>org.keycloak</groupId>
-					<artifactId>keycloak-tomcat8-adapter</artifactId>
-					<version>${keycloak.version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.keycloak</groupId>
-					<artifactId>keycloak-spring-boot-adapter</artifactId>
-					<version>${keycloak.version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.keycloak</groupId>
-					<artifactId>keycloak-spring-security-adapter</artifactId>
-					<version>${keycloak.version}</version>
-				</dependency>
-				<dependency>
-					<groupId>org.keycloak</groupId>
-					<artifactId>keycloak-admin-client</artifactId>
-					<version>${keycloak.version}</version>
-				</dependency>
-
-        <!-- Test -->
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${springfox-version}</version>
+		</dependency>
 		<dependency>
-  			<groupId>com.h2database</groupId>
-  			<artifactId>h2</artifactId>
-  			<scope>test</scope>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${springfox-version}</version>
+		</dependency>
+
+		<!-- AMQP -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+
+		<!-- Keycloak -->
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-tomcat8-adapter</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-boot-adapter</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-security-adapter</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-admin-client</artifactId>
+			<version>${keycloak.version}</version>
+		</dependency>
+		
+		<!-- Resteasy -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jackson2-provider</artifactId>
+			<version>${resteasy.version}</version>
+		</dependency>
+
+		<!-- Test -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -129,21 +147,21 @@
 	<build>
 		<plugins>
 			<plugin>
-	            <groupId>org.apache.maven.plugins</groupId>
-	            <artifactId>maven-compiler-plugin</artifactId>
-	            <configuration>
-	                <source>1.8</source>
-	                <target>1.8</target>
-	            </configuration>
-	        </plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-		          	<profiles>
-		            	<profile>${spring-active-profile}</profile>
-		          	</profiles>
-		        </configuration>
+					<profiles>
+						<profile>${spring-active-profile}</profile>
+					</profiles>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>com.spotify</groupId>
@@ -206,23 +224,23 @@
 			<build>
 				<plugins>
 					<plugin>
-					<groupId>com.spotify</groupId>
-					<artifactId>docker-maven-plugin</artifactId>
-					<version>0.4.11</version>
-					<configuration>
-						<dockerHost>${docker-host}</dockerHost>
-						<dockerCertPath>${docker-cert-path}</dockerCertPath>
-						<imageName>${project.artifactId}</imageName>
-						<dockerDirectory>src/main/docker-qualif</dockerDirectory>
-						<resources>
-							<resource>
-								<targetPath>/</targetPath>
-								<directory>${project.build.directory}</directory>
-								<include>${project.build.finalName}.jar</include>
-							</resource>
-						</resources>
-					</configuration>
-				</plugin>
+						<groupId>com.spotify</groupId>
+						<artifactId>docker-maven-plugin</artifactId>
+						<version>0.4.11</version>
+						<configuration>
+							<dockerHost>${docker-host}</dockerHost>
+							<dockerCertPath>${docker-cert-path}</dockerCertPath>
+							<imageName>${project.artifactId}</imageName>
+							<dockerDirectory>src/main/docker-qualif</dockerDirectory>
+							<resources>
+								<resource>
+									<targetPath>/</targetPath>
+									<directory>${project.build.directory}</directory>
+									<include>${project.build.finalName}.jar</include>
+								</resource>
+							</resources>
+						</configuration>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
