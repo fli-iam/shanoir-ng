@@ -20,7 +20,6 @@
 	
 	<modules>
 		<module>../shanoir-ng-users</module>
-		<module>../shanoir-ng-centers</module>
 		<module>../shanoir-ng-studies</module>
 		<module>../shanoir-ng-front</module>
 	</modules>
