@@ -40,14 +40,14 @@ table.layout { border: none; border-collapse: collapse; }
 button { background-color: var(--color-b); border: 0px; border-radius: 2px; color: var(--very-light-grey); padding: 5px 10px; transition-property: transform, box-shadow; transition-duration: 0.3s; transition-timing-function: ease-in-out; }
   button:enabled:hover { cursor: pointer; box-shadow: 0 0 10px var(--shadow-color); -moz-transform: scale(1.1); -webkit-transform: scale(1.1); transform: scale(1.1); }
   button:disabled { background-color: var(--grey); border-color: var(--grey); color: var(--dark-black); cursor: auto; } 
-  button:active { background-color: var(--color-b-light2); }
+  button:active { background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
 
 input[type='date'] { width: 140px; }
 
 .hidden { display: none !important; }
 
 form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1px solid var(--light-grey); }
-  form input,
+  form input:not([type='file']),
   form textarea,
   form select { border: 1px solid var(--grey) !important; border-radius: 2px !important; }
   form input[readonly],

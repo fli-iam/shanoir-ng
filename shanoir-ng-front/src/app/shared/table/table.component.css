@@ -24,13 +24,9 @@
 			.shanoir-table th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
 		.shanoir-table th.checkbox-col { width: 21px; }
 		.shanoir-table th.active, 
-			.shanoir-table th.pager span.active { z-index: 10; }
+			.shanoir-table th.pager span.active { z-index: 10; background-color: var(--color-b-light2); -moz-transform: scale(1.1); -webkit-transform: scale(1.1); transform: scale(1.1); box-shadow: 0 0 10px var(--shadow-color); }
 		.shanoir-table th.sortable:hover, 
-			.shanoir-table th.pager span.clickable:hover { z-index: 5; }
-		.shanoir-table th.active, 
-			.shanoir-table th.pager span.active,
-			.shanoir-table th.sortable:hover, 
-			.shanoir-table th.pager span.clickable:hover { background-color: var(--color-b-light2); -moz-transform: scale(1.1); -webkit-transform: scale(1.1); transform: scale(1.1); box-shadow: 0 0 10px var(--shadow-color); }
+			.shanoir-table th.pager span.clickable:hover { z-index: 5; background-color: var(--color-b-light2); -moz-transform: scale(1.05); -webkit-transform: scale(1.05); transform: scale(1.05); box-shadow: 0 0 5px var(--shadow-color); }
 		.shanoir-table th.col-date { width: 65px; }
 		.shanoir-table th.col-boolean { width: 20px; }
 		.shanoir-table th.col-button { width: 20px; }
