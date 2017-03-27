@@ -4,7 +4,7 @@
         ${msg("loginTitleHtml",(realm.displayNameHtml!''))}
     <#elseif section = "form">
         <div class="login-main"> 
-            <form id="kc-form-login" action="${url.loginAction}" method="post">
+            <form id="kc-reset-password-form" action="${url.loginAction}" method="post">
                 <div class="header command-zone">${msg("emailForgotTitle")}</div>
                 <fieldset>
                     <ol>
