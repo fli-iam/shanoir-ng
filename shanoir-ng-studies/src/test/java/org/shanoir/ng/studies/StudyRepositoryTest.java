@@ -1,4 +1,4 @@
-package org.shanoir.ng;
+package org.shanoir.ng.studies;
 
 import static org.junit.Assert.*;
 
@@ -23,7 +23,7 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 @WebAppConfiguration
 @DataJpaTest
 @ActiveProfiles("test")
-public class RepositoryTest {
+public class StudyRepositoryTest {
 
 	/*
 	 * Mocks used to avoid unsatisfied dependency exceptions.
