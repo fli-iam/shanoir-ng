@@ -7,8 +7,7 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.template.Template;
-import org.shanoir.ng.utils.AccessTokenUtil;
+import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
-public class TemplateApiControllerTestIT {
+public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 	
 	private static final String REQUEST_PATH = "/template";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
@@ -47,7 +46,7 @@ public class TemplateApiControllerTestIT {
 
 	@Test
 	public void findTemplateByIdWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(AccessTokenUtil.getHeadersWithToken());
+		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
 				String.class);
@@ -62,7 +61,7 @@ public class TemplateApiControllerTestIT {
 
 	@Test
 	public void findTemplatesWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(AccessTokenUtil.getHeadersWithToken());
+		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
 				String.class);
@@ -77,7 +76,7 @@ public class TemplateApiControllerTestIT {
 
 	@Test
 	public void saveNewTemplateWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Template> entity = new HttpEntity<Template>(ModelsUtil.createTemplate(), AccessTokenUtil.getHeadersWithToken());
+		final HttpEntity<Template> entity = new HttpEntity<Template>(ModelsUtil.createTemplate(), getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 				String.class);
@@ -95,7 +94,7 @@ public class TemplateApiControllerTestIT {
 
 	@Test
 	public void updateNewTemplateWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Template> entity = new HttpEntity<Template>(ModelsUtil.createTemplate(), AccessTokenUtil.getHeadersWithToken());
+		final HttpEntity<Template> entity = new HttpEntity<Template>(ModelsUtil.createTemplate(), getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);

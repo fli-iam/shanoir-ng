@@ -1,10 +1,15 @@
-.menu-item { display: block; margin: 0; color: var(--dark-grey); background-color: var(--light-grey); position: relative; text-align: right; }
+.menu-item { display: block; margin: 0; color: var(--dark-grey); background-color: var(--light-grey); position: relative; text-align: right; white-space: nowrap; }
 /* .menu-item.active { color: var(--very-light-grey); background-color: var(--color-a); } */
 /* .menu-item.opened { color: var(--very-light-grey); background-color: var(--color-a); } */
 .menu-item:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-a); }
 .sub-content { display: inline-block; padding: 0; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; position: absolute; top: 0px; }
-    .sub-content:before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; box-shadow: 0 0 var(--shadow-height) 0px gray; }
+    .sub-content:before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; }
+
+    .sub-sub-content { width: 100%; }
+        .sub-sub-content::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; box-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color); }
+            .animate .sub-sub-content { overflow: hidden;  }
+
 .label { text-align: left; display: block; padding: 5px 8px;}
-.arrow { text-align: right; float: right; }
+.arrow {  }
 .hidden { display: none !important; }
 img { height: 16px; vertical-align: bottom; margin-right: 7px; }

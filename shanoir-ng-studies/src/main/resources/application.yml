@@ -43,7 +43,6 @@ keycloak:
   auth-server-url: http://localhost/auth
   ssl-required: external
   resource: shanoir-ng-studies
-  credentials.secret: 77ea1470-b201-4bb4-81e0-a16cb1a1de30
   securityConstraints[0]:
     securityCollections[0]:
       name: studies secured api
@@ -97,6 +96,7 @@ keycloak:
   credentials.secret: 
   realmKey: 
   auth-server-url: http://localhost/auth
+
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-studies.log

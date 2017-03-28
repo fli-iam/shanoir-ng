@@ -89,7 +89,7 @@ server:
     port: 9902
 #keycloak
 keycloak:
-  auth-server-url: http://localhost/auth
+  credentials.secret: 3b130530-4e0f-4101-bf56-1a92df705318
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-template.log

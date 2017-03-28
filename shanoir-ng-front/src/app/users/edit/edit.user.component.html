@@ -89,7 +89,7 @@
 			</tr>
 			
 			<tr><td colspan="2"><div class="footer command-zone">
-				<button *ngIf="!requestAccountMode" i18n="Edit user|CancelButton label" class="Button" (click)="cancel()">Cancel</button>
+				<button *ngIf="!requestAccountMode" i18n="Edit user|CancelButton label" class="Button" (click)="getOut()">Cancel</button>
 				<button *ngIf="requestAccountMode" i18n="Edit user|CancelButton label" class="Button" (click)="cancelAccountRequest()">Cancel</button>
 				<button type="submit" *ngIf="creationMode && !requestAccountMode" i18n="Edit user|CreateButton label" (click)="create()" class="Button" [disabled]="!isEditUserFormValid()">Create</button>
 				<button type="submit" *ngIf="creationMode && requestAccountMode" i18n="Edit user|RequestAccountButton label" (click)="accountRequest()" class="Button" [disabled]="!isEditUserFormValid()">Request Account</button>

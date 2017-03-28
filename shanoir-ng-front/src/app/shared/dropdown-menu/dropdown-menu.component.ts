@@ -1,25 +1,30 @@
 import { Component, Input, ContentChildren, forwardRef, QueryList, ViewChild, ElementRef, HostBinding, Renderer } from '@angular/core';
 import { style, state, animate, transition, trigger } from '@angular/core';
 import { MenuItemComponent } from '../dropdown-menu/menu-item/menu-item.component'
+import { Observable } from 'rxjs/Rx';
+
+
+export const animDur: number = 100;
 
 @Component({
     selector: 'dropdown-menu',
     templateUrl: 'dropdown-menu.component.html',
     styleUrls: ['dropdown-menu.component.css'],
-    animations: [
-        trigger('myAnimation', [
-            state('0', style({height: '0'})),
-            state('1', style({height: '*'})),
-            transition(
-                '0 => 1', [
-                    style({opacity: 1, height: 0}),
-                    animate('200ms ease-in-out', style({opacity: 1, height: '*'}))
-                ]
-            )
-        ])
-    ],
+    animations: [trigger('slideDown', [
+        transition(
+            ':enter', [
+                style({height: 0}),
+                animate(animDur+'ms ease-in-out', style({height: '*', 'padding-bottom': '*'}))
+            ]
+        ),
+        transition(
+            ':leave', [
+                style({height: '*'}),
+                animate(animDur+'ms ease-in-out', style({height: 0, 'padding-bottom': '0'}))
+            ]
+        )
+    ])]
 })
-
 export class DropdownMenuComponent {
 
     @Input() label: string;
@@ -29,54 +34,98 @@ export class DropdownMenuComponent {
     @ViewChild('container') container: ElementRef;
     @Input() mode: "top" | "tree";
 
-    public opened: boolean;
+    public opened: boolean = true;
     public parent: any;
+    private hasChildren: boolean = true;
+    private overflow: boolean = false;
+    private init: boolean = false;
 
     private static documentListenerInit = false;
     private static openedMenus: Set<DropdownMenuComponent>; // every opened menu in the document (upgrade idea : named groups of menu)
 
     constructor(public elementRef: ElementRef, private renderer: Renderer) { 
         this.mode = "top"
-        this.opened = false;
         DropdownMenuComponent.openedMenus = new Set<DropdownMenuComponent>();
 
         if (!DropdownMenuComponent.documentListenerInit) {
             DropdownMenuComponent.documentListenerInit = true;
-            document.addEventListener('click', DropdownMenuComponent.clickDocument.bind(this));
+            document.addEventListener('click', DropdownMenuComponent.closeAll.bind(this));
         }
     }
 
-    ngAfterViewInit() {
+    ngAfterViewInit() { 
         this.itemMenus.forEach((itemMenu: MenuItemComponent) => {
             itemMenu.siblings = this.itemMenus;
             itemMenu.parent = this;
         });
 
+        let subscription = Observable.timer(0,100).subscribe (t=> {
+            this.hasChildren = this.itemMenus.length > 0;
+            this.opened = false;
+            this.overflow = true;
+            this.init = true;
+            subscription.unsubscribe();
+        });
+
         this.renderer.setElementClass(this.elementRef.nativeElement, this.mode+"-mode", true);
     }
 
-    public open() {
+    public open(event: Event) {
         //this.closeSiblings();
+        if (DropdownMenuComponent.openedMenus.size > 0) {
+            event.stopPropagation();
+            DropdownMenuComponent.closeAll(event, () => {
+                this.openAction();
+            });
+        } else {
+            this.openAction();
+        }
+    }
+
+    private openAction() {
         this.opened =  true;
         DropdownMenuComponent.openedMenus.add(this);
+        setTimeout(() => this.overflow = false, animDur);
     }
 
-    public close() {
-        DropdownMenuComponent.openedMenus.delete(this);
-        this.opened =  false;
-        this.closeChildren();
-    }
-
-    public closeChildren() {
-         this.itemMenus.forEach((itemsMenu) => itemsMenu.close());
-    }
-
-    public toggle() {
-        if (this.opened) {
-            this.close();
+    public close(callback: () => void = () => {}) {
+        if (this.hasChildren && this.opened) {
+            this.closeChildren(() => {
+                this.overflow = true;
+                this.opened =  false;
+                DropdownMenuComponent.openedMenus.delete(this);
+                setTimeout(callback, animDur);
+            });
         } else {
-            this.open();
+            callback();
         }
+    }
+
+    public closeChildren(callback: () => void = () => {}) {
+        let menusToClose: MenuItemComponent[] = [];
+        this.itemMenus.forEach((itemMenu, index) => {
+            if (index!= 0 && itemMenu.hasChildren && itemMenu.opened) // REMOVE index != 0 WHEN BUG FIXED
+                menusToClose.push(itemMenu);
+        });
+        let subMenusRemaining: number = menusToClose.length;
+        if (subMenusRemaining == 0 ) {
+            callback();
+            return;
+        } else {
+            for (let itemMenu of menusToClose) {
+                itemMenu.close(() => {
+                    subMenusRemaining--;
+                    if (subMenusRemaining == 0) {
+                        callback();
+                    }
+                });
+            }
+        }
+    }
+
+    public toggle(event: Event) {
+        if (this.opened) this.close();
+        else this.open(event);
     }
 
     public click() {
@@ -89,11 +138,19 @@ export class DropdownMenuComponent {
         this.parent.cascadingClose();
     }
 
-    public static clickDocument = (event: Event) => {
+    public static closeAll = (event: Event, callback: () => void) => {
+        let remains: number = DropdownMenuComponent.openedMenus.size;
         DropdownMenuComponent.openedMenus.forEach((menu) => {
             if (!menu.container.nativeElement.contains(event.target)) {
-                menu.close();
-            };
+                menu.close(() => {
+                    remains--;
+                    if (remains == 0) {
+                        callback();
+                    }
+                });
+            } else {
+                remains--;
+            }
         });
     }
 }

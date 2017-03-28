@@ -10,3 +10,5 @@ body { background-color: var(--color-a); }
 		.login-main form a { text-decoration: none; color: var(--color-a); }
 	.login-main .footer { text-align: center; } 
 	.login-main .error { color: var(--color-error); } 
+
+.instructions { line-height: 1.3; }

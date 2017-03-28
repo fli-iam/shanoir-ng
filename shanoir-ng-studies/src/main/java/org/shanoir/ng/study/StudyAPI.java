@@ -18,6 +18,7 @@ import javax.validation.constraints.*;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-23T10:35:29.288Z")
 
 @Api(value = "study", description = "the study API")
+
 public interface StudyApi {
 
     @ApiOperation(value = "", notes = "Deletes a study", response = Void.class, tags={  })
@@ -99,5 +100,6 @@ public interface StudyApi {
         method = RequestMethod.PUT)
     ResponseEntity<Void> updateStudy(@ApiParam(value = "id of the study",required=true ) @PathVariable("studyId") Long studyId,
         @ApiParam(value = "study to update" ,required=true ) @RequestBody Study study);
+
 
 }
