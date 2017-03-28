@@ -79,7 +79,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create-drop
+      ddl-auto: create
     # Show or not log for each sql query
     show-sql: true
   jooq:
@@ -87,16 +87,10 @@ spring:
   rabbitmq:
     host: localhost
 server:
-    port: 9904
-# spring security configuration
-security:
-  sessions: never
+    port: 9902
 #keycloak
 keycloak:
-  credentials.secret: 
-  realmKey: 
-  auth-server-url: http://localhost/auth
-
+  credentials.secret: 209376e5-1d42-4fa3-8cdb-160946fd6383
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-studies.log
@@ -116,7 +110,7 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
-    data: classpath:/scripts/import-h2.sql
+    data: classpath:/scripts/test-data-h2.sql
     initialize: true
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
