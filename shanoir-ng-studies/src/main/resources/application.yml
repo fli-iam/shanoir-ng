@@ -4,9 +4,6 @@ server:
   error:
     whitelabel:
       enabled: false
-# spring security configuration
-security:
-  sessions: never
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/shanoir_ng_studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
@@ -46,7 +43,6 @@ keycloak:
   auth-server-url: http://localhost/auth
   ssl-required: external
   resource: shanoir-ng-studies
-  credentials.secret: 77ea1470-b201-4bb4-81e0-a16cb1a1de30
   securityConstraints[0]:
     securityCollections[0]:
       name: studies secured api
@@ -90,10 +86,10 @@ spring:
   rabbitmq:
     host: localhost
 server:
-    port: 9904
+    port: 9902
 #keycloak
 keycloak:
-  auth-server-url: http://localhost/auth
+  credentials.secret: 209376e5-1d42-4fa3-8cdb-160946fd6383
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-studies.log

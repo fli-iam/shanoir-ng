@@ -39,7 +39,7 @@ public class StudyServiceImpl implements StudyService{
 		studyDb.setWithExamination(study.isWithExamination());
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setDownloadableByDefault(study.isDownloadableByDefault());
-		studyDb.setRefStudyStatus(study.getRefStudyStatus());
+		studyDb.setStudyStatus(study.getStudyStatus());
 
 		studyRepository.save(studyDb);
 
