@@ -12,6 +12,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public abstract class HalEntity extends AbstractGenericItem {
 
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -8580796056437763225L;
+	
 	@JsonIgnore
 	private Links links = new Links();
 
