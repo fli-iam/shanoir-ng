@@ -1,4 +1,4 @@
-import { Component, Input, ContentChildren, forwardRef, QueryList } from '@angular/core';
+import { Component, Input, ContentChildren, forwardRef, QueryList, ChangeDetectorRef } from '@angular/core';
 import { style, state, animate, transition, trigger } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 
@@ -42,7 +42,7 @@ export class MenuItemComponent {
 
     public closeAll: () => void;
 
-    constructor() {
+    constructor(public cdr: ChangeDetectorRef) {
     }
 
     ngAfterViewInit() {
@@ -123,5 +123,13 @@ export class MenuItemComponent {
 
     public cascadingClose() {
         this.parent.cascadingClose();
+    }
+
+    public getMode(): "top" | "tree" {
+        if (this.parent) {
+            return this.parent.getMode();
+        } else {
+            return "top";
+        }
     }
 }

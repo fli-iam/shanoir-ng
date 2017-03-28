@@ -44,7 +44,7 @@ export class DropdownMenuComponent {
     private static openedMenus: Set<DropdownMenuComponent>; // every opened menu in the document (upgrade idea : named groups of menu)
 
     constructor(public elementRef: ElementRef, private renderer: Renderer) { 
-        this.mode = "top"
+        this.mode = "top";
         DropdownMenuComponent.openedMenus = new Set<DropdownMenuComponent>();
 
         if (!DropdownMenuComponent.documentListenerInit) {
@@ -135,10 +135,11 @@ export class DropdownMenuComponent {
     }
 
     public cascadingClose() {
-        this.parent.cascadingClose();
+        if (this.parent != undefined)
+            this.parent.cascadingClose();
     }
 
-    public static closeAll = (event: Event, callback: () => void) => {
+    public static closeAll = (event: Event, callback: () => void = () => {}) => {
         let remains: number = DropdownMenuComponent.openedMenus.size;
         DropdownMenuComponent.openedMenus.forEach((menu) => {
             if (!menu.container.nativeElement.contains(event.target)) {
@@ -152,5 +153,13 @@ export class DropdownMenuComponent {
                 remains--;
             }
         });
+    }
+
+    public getMode(): "top" | "tree" {
+        if (this.mode == "top" || this.mode == "tree") {
+            return this.mode;
+        } else {
+            return "top";
+        }
     }
 }
