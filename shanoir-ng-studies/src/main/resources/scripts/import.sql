@@ -5,8 +5,8 @@
 --use shanoir_ng_studies;
 
 
-INSERT INTO ref_study_status 
-	(REF_STUDY_STATUS_ID, LABEL_NAME)
+INSERT INTO study_status 
+	(id, label_name)
 VALUES 
 	(1,'finished'),
 	(2,'in_progress');

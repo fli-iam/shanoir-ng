@@ -5,14 +5,14 @@
 --use shanoir_ng_studies;
 
 
-INSERT INTO ref_study_status 
-	(REF_STUDY_STATUS_ID, LABEL_NAME)
+INSERT INTO study_status 
+	(id, label_Name)
 VALUES 
 	(1,'finished'),
 	(2,'in_progress');
 
 INSERT INTO study
-	(study_id, name, START_DATE, END_DATE, IS_CLINICAL, IS_WITH_EXAMINATION, IS_VISIBLE_BY_DEFAULT, IS_DOWNLOADABLE_BY_DEFAULT)
+	(id,  name, start_date, end_date, clinical, with_examination, is_visible_by_default, is_downloadable_by_default)
 VALUES 
 	(1,'shanoirStudy1', NOW(),  parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0),
 	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0),

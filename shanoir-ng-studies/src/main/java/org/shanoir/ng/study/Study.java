@@ -29,19 +29,14 @@ import org.shanoir.ng.shared.validation.Unique;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name" })
-@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
+@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class Study extends HalEntity {
 
 	/** The Constant serialVersionUID. */
 	// private static final long serialVersionUID = -8001079069163353926L;
-
-	/** ID. */
-	@Id
-	// @GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "STUDY_ID")
-	private Long id;
 
 	/** Name. */
 	@NotBlank
@@ -69,6 +64,8 @@ public class Study extends HalEntity {
 	/** Is with downloadable by default. */
 	private boolean isDownloadableByDefault;
 
+	
+	
 	/** Users associated to the research study. */
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "study")
@@ -81,11 +78,11 @@ public class Study extends HalEntity {
 
 	@Override
 	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
+	@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
 	public Long getId() {
 		return super.getId();
 	}
-
+	
 	/**
 	 * @return the name
 	 */
@@ -94,8 +91,7 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @param name
-	 *            the name to set
+	 * @param name the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -109,8 +105,7 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @param startDate
-	 *            the startDate to set
+	 * @param startDate the startDate to set
 	 */
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
@@ -124,8 +119,7 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @param endDate
-	 *            the endDate to set
+	 * @param endDate the endDate to set
 	 */
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
@@ -139,8 +133,7 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @param clinical
-	 *            the clinical to set
+	 * @param clinical the clinical to set
 	 */
 	public void setClinical(boolean clinical) {
 		this.clinical = clinical;
@@ -154,8 +147,7 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @param withExamination
-	 *            the withExamination to set
+	 * @param withExamination the withExamination to set
 	 */
 	public void setWithExamination(boolean withExamination) {
 		this.withExamination = withExamination;
@@ -169,8 +161,7 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @param isVisibleByDefault
-	 *            the isVisibleByDefault to set
+	 * @param isVisibleByDefault the isVisibleByDefault to set
 	 */
 	public void setVisibleByDefault(boolean isVisibleByDefault) {
 		this.isVisibleByDefault = isVisibleByDefault;
@@ -184,27 +175,25 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @param isDownloadableByDefault
-	 *            the isDownloadableByDefault to set
+	 * @param isDownloadableByDefault the isDownloadableByDefault to set
 	 */
 	public void setDownloadableByDefault(boolean isDownloadableByDefault) {
 		this.isDownloadableByDefault = isDownloadableByDefault;
 	}
 
-	/**
-	 * @return the studyStatus
-	 */
-	public StudyStatus getStudyStatus() {
-		return studyStatus;
-	}
+/**
+ * @return the studyStatus
+ */
+public StudyStatus getStudyStatus() {
+	return studyStatus;
+}
 
-	/**
-	 * @param studyStatus
-	 *            the studyStatus to set
-	 */
-	public void setStudyStatus(StudyStatus studyStatus) {
-		this.studyStatus = studyStatus;
-	}
+/**
+ * @param studyStatus the studyStatus to set
+ */
+public void setStudyStatus(StudyStatus studyStatus) {
+	this.studyStatus = studyStatus;
+}
 
 	/**
 	 * Return the relStudyUserCollection as a list.
@@ -218,6 +207,7 @@ public class Study extends HalEntity {
 	public void setRelStudyUserList(List<RelStudyUser> relStudyUserList) {
 		this.relStudyUserList = relStudyUserList;
 	}
+	
 
 	/**
 	 * Init HATEOAS links
@@ -226,87 +216,54 @@ public class Study extends HalEntity {
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "template/" + getId());
 	}
+	
+	
+	/*public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
 
-	/*
-	 * public static long getSerialversionuid() { return serialVersionUID; }
-	 * 
-	 * 
-	 * /** Associated experimental groups of subjects.
-	 */
-	/*
-	 * @AuditJoinTable
-	 * 
-	 * @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = {
-	 * CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE })
-	 * 
-	 * @JoinColumn(name = "STUDY_ID")
-	 * 
-	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
-	 * List<ExperimentalGroupOfSubjects> experimentalGroupOfSubjectsList = new
-	 * ArrayList<ExperimentalGroupOfSubjects>(0);
-	 */
+
+	/** Associated experimental groups of subjects. */
+	/*@AuditJoinTable
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE })
+	@JoinColumn(name = "STUDY_ID")
+	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	private List<ExperimentalGroupOfSubjects> experimentalGroupOfSubjectsList = new ArrayList<ExperimentalGroupOfSubjects>(0);
+*/
 	/** Relations between the investigators, the centers and the studies. */
-	/*
-	 * @NotEmpty
-	 * 
-	 * @OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade =
-	 * CascadeType.ALL)
-	 * 
-	 * @JoinColumn(name = "STUDY_ID") private List<RelStudyCenter>
-	 * relStudyCenterList = new ArrayList<RelStudyCenter>(0);
-	 */
+	/*@NotEmpty
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL)
+	@JoinColumn(name = "STUDY_ID")
+	private List<RelStudyCenter> relStudyCenterList = new ArrayList<RelStudyCenter>(0);*/
 
 	/** Dataset list. */
-	/*
-	 * @OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
-	 * 
-	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
-	 * List<RelStudyDataset> relStudyDatasetList = new
-	 * ArrayList<RelStudyDataset>(0);
-	 */
+	/*@OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
+	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	private List<RelStudyDataset> relStudyDatasetList = new ArrayList<RelStudyDataset>(0);
+*/
 	/** Users associated to the research study. */
-	/*
-	 * @OneToMany(cascade = CascadeType.ALL, mappedBy = "study", fetch =
-	 * FetchType.EAGER)
-	 * 
-	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
-	 * List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
-	 */
+	/*@OneToMany(cascade = CascadeType.ALL, mappedBy = "study", fetch = FetchType.EAGER)
+	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	private List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);*/
 
 	/** Relations between the subjects and the studies. */
-	/*
-	 * @AuditJoinTable
-	 * 
-	 * @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade =
-	 * CascadeType.ALL)
-	 * 
-	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
-	 * List<RelSubjectStudy> relSubjectStudyList = new
-	 * ArrayList<RelSubjectStudy>(0);
-	 */
+	/*@AuditJoinTable
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	private List<RelSubjectStudy> relSubjectStudyList = new ArrayList<RelSubjectStudy>(0);
+*/
 	/** Associated study card lists. */
 
-	/*
-	 * @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = {
-	 * CascadeType.MERGE, CascadeType.PERSIST })
-	 * 
-	 * @JoinColumn(name = "STUDY_ID") private List<StudyCard> studyCardList =
-	 * new ArrayList<StudyCard>(0);
-	 */
+	/*@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+	@JoinColumn(name = "STUDY_ID")
+	private List<StudyCard> studyCardList = new ArrayList<StudyCard>(0);*/
 
 	/** List of protocol files directly attached to the study. */
-	/*
-	 * @CollectionOfElements
-	 * 
-	 * @JoinTable(name = "PROTOCOL_FILE_PATH", joinColumns = { @JoinColumn(name
-	 * = "STUDY_ID", nullable = true) })
-	 * 
-	 * @Column(name = "PATH") private List<String> protocolFilePathList = new
-	 * ArrayList<String>();
-	 */
+	/*@CollectionOfElements
+	@JoinTable(name = "PROTOCOL_FILE_PATH", joinColumns = { @JoinColumn(name = "STUDY_ID", nullable = true) })
+	@Column(name = "PATH")
+	private List<String> protocolFilePathList = new ArrayList<String>();
+*/
+	
 
 }
