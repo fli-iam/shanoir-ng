@@ -14,17 +14,16 @@ VALUES
 INSERT INTO study
 	(study_id, name, START_DATE, END_DATE, IS_CLINICAL, IS_WITH_EXAMINATION, IS_VISIBLE_BY_DEFAULT, IS_DOWNLOADABLE_BY_DEFAULT)
 VALUES 
-	(1,'shanoirStudy1', now(), '2017/12/31', 1, 0, 0, 0),
-	(2,'shanoirStudy2', now(), '2017/11/30', 0, 0, 0, 0),
-	(3,'shanoirStudy3', now(), '2017/09/30', 1, 0, 0, 0);
+	(1,'shanoirStudy1', NOW(),  parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0),
+	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0),
+	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0);
 	
 INSERT INTO REL_STUDY_USER
 	(REL_STUDY_USER_ID, USER_ID, study)
 VALUES 
 	(1, 1, 1),
-	(2, 1, 2),
-	(3, 2, 2),
-	(4, 3, 3);
+	(2, 2, 2),
+	(3, 3, 3);
 	
 --INSERT INTO REF_STUDY_USER_TYPE
 --	(id, userId, study, refStudyUserType)
@@ -32,3 +31,4 @@ VALUES
 --	(1, 1 ,1 ,1 ),
 --	(2, 1 ,2 ,1 ),
 --	(3, 2 ,3 ,1 );	
+	

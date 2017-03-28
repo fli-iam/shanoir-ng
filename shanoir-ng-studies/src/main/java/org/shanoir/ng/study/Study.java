@@ -2,7 +2,10 @@ package org.shanoir.ng.study;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,7 +14,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Cascade;
 import org.hibernate.validator.constraints.Length;
 
 @Entity
@@ -22,7 +28,7 @@ public class Study implements Serializable{
 
 	/** ID. */
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	//@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "STUDY_ID")
 	private Long id;
 
@@ -65,6 +71,15 @@ public class Study implements Serializable{
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "REF_STUDY_STATUS_ID", referencedColumnName = "REF_STUDY_STATUS_ID", nullable = true, updatable = true)
 	private RefStudyStatus refStudyStatus;
+	
+	/** Users associated to the research study. */
+	//@OneToMany(cascade = CascadeType.ALL, mappedBy = "study", fetch = FetchType.EAGER)
+	//@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	 /*@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	 @JoinColumn(name = "study", nullable = false)*/
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "study")
+	private List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
 
 	public Long getId() {
 		return id;
@@ -138,6 +153,20 @@ public class Study implements Serializable{
 		this.refStudyStatus = refStudyStatus;
 	}
 
+	/**
+	 * Return the relStudyUserCollection as a list.
+	 *
+	 * @return the rel study user collection
+	 */
+	public List<RelStudyUser> getRelStudyUserList() {
+		return relStudyUserList;
+	}
+
+	public void setRelStudyUserList(List<RelStudyUser> relStudyUserList) {
+		this.relStudyUserList = relStudyUserList;
+	}
+	
+	
 	/*public static long getSerialversionuid() {
 		return serialVersionUID;
 	}

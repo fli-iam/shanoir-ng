@@ -2,6 +2,8 @@ package org.shanoir.ng.study;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+
 
 public interface StudyService {
 	
@@ -11,18 +13,44 @@ public interface StudyService {
      */
     List<Study> findAll();
     
+    
+    /**
+	 * Find study by its id.
+	 *
+	 * @param id
+	 *            study id.
+	 * @return a study or null.
+	 */
+	Study findById(Long id);
+	
     /**
      * add new study
      * @param study
-     * @return
+     * @return created Study
      */
     Study createStudy(Study study);
     
     /**
      *  Update a study
      * @param study
-     * @return
+     * @return updated study
      */
     Study update(Study study);
+    
+	/**
+	 * Delete a Study
+	 * 
+	 * @param id
+	 * @throws ShanoirStudiesException 
+	 */
+	void deleteById(Long id) throws  ShanoirStudiesException;
+	
+	/**
+	 * Find all studies for a user
+	 * @param id
+	 * @return a list of studies
+	 */
+	List<Study> findAllForUser(Long UserId);
+
 
 }
