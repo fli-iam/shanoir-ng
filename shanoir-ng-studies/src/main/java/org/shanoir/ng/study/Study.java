@@ -73,7 +73,6 @@ public class Study extends HalEntity {
 
 	/** Study Status. */
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "STUDY_STATUS", nullable = true, updatable = true)
 	private StudyStatus studyStatus;
 
 	@Override
