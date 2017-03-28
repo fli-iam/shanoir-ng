@@ -20,6 +20,7 @@ export class CenterListComponent {
     public customActionDefs: any[];
     public rowClickAction: Object;
     public loading: boolean = false;
+    private createAcqEquip = false;
 
     constructor(private centerService: CenterService, private confirmDialogService: ConfirmDialogService, 
         private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
@@ -67,6 +68,10 @@ export class CenterListComponent {
                 return {id: item.id, mode: "view"};
             }});
         }
+        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+            this.columnDefs.push({headerName: "", type: "button", img: "/assets/images/icons/medical/x-ray-2.png", tip: "Add acq. equip.",
+            action: this.openCreateAcqEquip});
+        }
 
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -106,6 +111,16 @@ export class CenterListComponent {
         if (ids.length > 0) {
             console.log("TODO : delete those ids : " + ids);
         }
+    }
+
+    openCreateAcqEquip = ()=> {
+        this.createAcqEquip = true;
+    }
+
+    closeEditSubject(subject: any) {
+        // Add the subject to the select box and select it
+        console.log(subject);
+        this.createAcqEquip = false;
     }
 
 }
