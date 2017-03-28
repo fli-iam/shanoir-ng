@@ -1,13 +1,23 @@
 package org.shanoir.ng.study;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.Cascade;
+import org.hibernate.validator.constraints.Length;
 import javax.persistence.PostLoad;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -19,6 +29,7 @@ import org.shanoir.ng.shared.validation.Unique;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
@@ -26,14 +37,6 @@ public class Study extends HalEntity {
 
 	/** The Constant serialVersionUID. */
 	// private static final long serialVersionUID = -8001079069163353926L;
-
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "template/" + getId());
-	}
 
 	/** Name. */
 	@NotBlank
@@ -61,8 +64,16 @@ public class Study extends HalEntity {
 	/** Is with downloadable by default. */
 	private boolean isDownloadableByDefault;
 
+	
+	
+	/** Users associated to the research study. */
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "study")
+	private List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
+
 	/** Study Status. */
 	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "STUDY_STATUS", nullable = true, updatable = true)
 	private StudyStatus studyStatus;
 
 	@Override
@@ -170,18 +181,89 @@ public class Study extends HalEntity {
 		this.isDownloadableByDefault = isDownloadableByDefault;
 	}
 
-	/**
-	 * @return the studyStatus
-	 */
-	public StudyStatus getStudyStatus() {
-		return studyStatus;
-	}
+/**
+ * @return the studyStatus
+ */
+public StudyStatus getStudyStatus() {
+	return studyStatus;
+}
+
+/**
+ * @param studyStatus the studyStatus to set
+ */
+public void setStudyStatus(StudyStatus studyStatus) {
+	this.studyStatus = studyStatus;
+}
 
 	/**
-	 * @param studyStatus the studyStatus to set
+	 * Return the relStudyUserCollection as a list.
+	 *
+	 * @return the rel study user collection
 	 */
-	public void setStudyStatus(StudyStatus studyStatus) {
-		this.studyStatus = studyStatus;
+	public List<RelStudyUser> getRelStudyUserList() {
+		return relStudyUserList;
 	}
+
+	public void setRelStudyUserList(List<RelStudyUser> relStudyUserList) {
+		this.relStudyUserList = relStudyUserList;
+	}
+	
+
+	/**
+	 * Init HATEOAS links
+	 */
+	@PostLoad
+	public void initLinks() {
+		this.addLink(Links.REL_SELF, "template/" + getId());
+	}
+	
+	
+	/*public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+
+	/** Associated experimental groups of subjects. */
+	/*@AuditJoinTable
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE })
+	@JoinColumn(name = "STUDY_ID")
+	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	private List<ExperimentalGroupOfSubjects> experimentalGroupOfSubjectsList = new ArrayList<ExperimentalGroupOfSubjects>(0);
+*/
+	/** Relations between the investigators, the centers and the studies. */
+	/*@NotEmpty
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL)
+	@JoinColumn(name = "STUDY_ID")
+	private List<RelStudyCenter> relStudyCenterList = new ArrayList<RelStudyCenter>(0);*/
+
+	/** Dataset list. */
+	/*@OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
+	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	private List<RelStudyDataset> relStudyDatasetList = new ArrayList<RelStudyDataset>(0);
+*/
+	/** Users associated to the research study. */
+	/*@OneToMany(cascade = CascadeType.ALL, mappedBy = "study", fetch = FetchType.EAGER)
+	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	private List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);*/
+
+	/** Relations between the subjects and the studies. */
+	/*@AuditJoinTable
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	private List<RelSubjectStudy> relSubjectStudyList = new ArrayList<RelSubjectStudy>(0);
+*/
+	/** Associated study card lists. */
+
+	/*@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+	@JoinColumn(name = "STUDY_ID")
+	private List<StudyCard> studyCardList = new ArrayList<StudyCard>(0);*/
+
+	/** List of protocol files directly attached to the study. */
+	/*@CollectionOfElements
+	@JoinTable(name = "PROTOCOL_FILE_PATH", joinColumns = { @JoinColumn(name = "STUDY_ID", nullable = true) })
+	@Column(name = "PATH")
+	private List<String> protocolFilePathList = new ArrayList<String>();
+*/
+	
 
 }
