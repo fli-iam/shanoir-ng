@@ -10,7 +10,10 @@ import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 
 @Component({
     selector: 'centerDetail',
-    templateUrl: 'center.detail.component.html'
+    templateUrl: 'center.detail.component.html',
+    styles: [
+        '.layout { min-width: 410px; }'
+    ]
 })
 
 export class CenterDetailComponent implements OnInit {
