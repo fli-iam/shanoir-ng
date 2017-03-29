@@ -29,7 +29,7 @@ public class Study extends HalEntity {
 	 */
 	@PostLoad
 	public void initLinks() {
-		this.addLink(Links.REL_SELF, "template/" + getId());
+		this.addLink(Links.REL_SELF, "study/" + getId());
 	}
 
 	/** Name. */
