@@ -2,34 +2,27 @@
 -- Has to be executed manually inside the docker container, command example : mysql -u {db user name} -p{password} < populate.sql
 -- ! But remember to wait for the java web server to have started since the schema is created by hibernate on startup !
 --
---use shanoir_ng_studies;
+use shanoir_ng_studies;
 
 
-INSERT INTO study_status 
+INSERT INTO study_status
 	(id, label_name)
-VALUES 
+VALUES
 	(1,'finished'),
 	(2,'in_progress');
-	
---INSERT INTO REF_STUDY_USER_TYPE
---	(id, userId, study, refStudyUserType)
---VALUES 
---	(1, 1 ,1 ,1 ),
---	(2, 1 ,2 ,1 ),
---	(3, 2 ,3 ,1 );	
 
 INSERT INTO study
 	(id, name, start_date, end_date, clinical, with_examination, is_visible_by_default, is_downloadable_by_default, study_status_id)
-VALUES 
+VALUES
 	(1,'Study 1', '2013/01/01', null, 0, 1, 0, 0, null),
 	(2,'Study 2', '2009/12/01', null, 0, 1, 0, 0, null),
 	(3,'Study 3', '2010/02/21', null, 0, 1, 0, 0, null),
 	(4,'Study 4', '2015/10/03', null, 0, 1, 0, 0, null);
-	
-	
-INSERT INTO REL_STUDY_USER
+
+
+INSERT INTO rel_study_user
 	(REL_STUDY_USER_ID, USER_ID, study)
-VALUES 
+VALUES
 	(1, 1, 1),
 	(2, 1, 2),
 	(3, 2, 2),

@@ -1,5 +1,6 @@
 package org.shanoir.ng.study;
 
+import java.io.Serializable;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +8,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.PostLoad;
+import javax.persistence.Table;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,11 +29,11 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
-
+import org.hibernate.validator.constraints.Length;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-
 @Entity
+@Table(name = "study")
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class Study extends HalEntity {
@@ -51,8 +54,9 @@ public class Study extends HalEntity {
 	/** End date. */
 	private Date endDate;
 
+
 	/** Is clinical. */
-	@NotBlank
+	@NotNull
 	private boolean clinical;
 
 	/** Is with examination. */
@@ -64,8 +68,8 @@ public class Study extends HalEntity {
 	/** Is with downloadable by default. */
 	private boolean isDownloadableByDefault;
 
-	
-	
+
+
 	/** Users associated to the research study. */
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "study")
@@ -81,7 +85,7 @@ public class Study extends HalEntity {
 	public Long getId() {
 		return super.getId();
 	}
-	
+
 	/**
 	 * @return the name
 	 */
@@ -206,17 +210,17 @@ public void setStudyStatus(StudyStatus studyStatus) {
 	public void setRelStudyUserList(List<RelStudyUser> relStudyUserList) {
 		this.relStudyUserList = relStudyUserList;
 	}
-	
+
 
 	/**
 	 * Init HATEOAS links
 	 */
 	@PostLoad
 	public void initLinks() {
-		this.addLink(Links.REL_SELF, "template/" + getId());
+		this.addLink(Links.REL_SELF, "study/" + getId());
 	}
-	
-	
+
+
 	/*public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
@@ -263,6 +267,7 @@ public void setStudyStatus(StudyStatus studyStatus) {
 	@Column(name = "PATH")
 	private List<String> protocolFilePathList = new ArrayList<String>();
 */
-	
+
+
 
 }

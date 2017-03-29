@@ -1,9 +1,16 @@
 package org.shanoir.ng.shared.exception;
 
+import java.io.Serializable;
+
 /**
  * ErrorModel
  */
-public class ErrorModel {
+public class ErrorModel implements Serializable {
+
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -1033154956884683082L;
 
 	private Integer code;
 

@@ -14,6 +14,11 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
 @Entity
 public class AccountRequestInfo extends AbstractGenericItem {
 
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -1062233564645766489L;
+
 	@NotNull
 	private String contact;
 

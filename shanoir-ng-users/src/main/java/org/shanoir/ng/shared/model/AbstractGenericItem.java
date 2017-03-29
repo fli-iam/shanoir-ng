@@ -1,5 +1,7 @@
 package org.shanoir.ng.shared.model;
 
+import java.io.Serializable;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -11,8 +13,13 @@ import javax.persistence.MappedSuperclass;
  *
  */
 @MappedSuperclass
-public abstract class AbstractGenericItem {
+public abstract class AbstractGenericItem implements Serializable {
 
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -3276989363792089822L;
+	
 	@Id
 	@GeneratedValue
 	private Long id;
