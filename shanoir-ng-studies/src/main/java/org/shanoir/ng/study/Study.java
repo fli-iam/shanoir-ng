@@ -56,7 +56,7 @@ public class Study extends HalEntity {
 
 
 	/** Is clinical. */
-	@NotBlank
+	@NotNull
 	private boolean clinical;
 
 	/** Is with examination. */
