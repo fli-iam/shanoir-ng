@@ -21,14 +21,13 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class AccountRequestApiController extends AbstractUserRequestApiController implements AccountRequestApi {
 
+	@Override
 	public ResponseEntity<Void> saveNewAccountRequest(
-			@ApiParam(value = "user to create from account request", required = true) @RequestBody User user,
-			BindingResult result) throws RestServiceException {
+			@ApiParam(value = "user to create from account request", required = true) @RequestBody final User user,
+			final BindingResult result) throws RestServiceException {
 		/* Now we generate a username for the new user creation */
-		if (user.getUsername() == null) {
-			if (user.getFirstName() != null && user.getLastName() != null) {
-				generateUsername(user);
-			}
+		if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {
+			generateUsername(user);
 		}
 
 		/* Validation */
@@ -56,14 +55,14 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 		/* Save user in db. */
 		try {
 			getUserService().save(user);
-		} catch (ShanoirUsersException e) {
+		} catch (final ShanoirUsersException e) {
 			if (ErrorModelCode.PASSWORD_NOT_CORRECT == e.getErrorCode()) {
 				throw new RestServiceException(new ErrorModel(422, "Password does not match policy", null));
 			}
 			throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
 		}
-		
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 }

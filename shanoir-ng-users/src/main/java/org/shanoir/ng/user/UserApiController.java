@@ -51,27 +51,27 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 
 		try {
 			getUserService().confirmAccountRequest(userId, user);
-		} catch (ShanoirUsersException e) {
+		} catch (final ShanoirUsersException e) {
 			if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
-				return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
-			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
 	public ResponseEntity<Void> deleteUser(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") final Long userId) {
 		if (getUserService().findById(userId) == null) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		try {
 			getUserService().deleteById(userId);
-		} catch (ShanoirUsersException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+		} catch (final ShanoirUsersException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		}
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
@@ -80,13 +80,13 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			throws RestServiceException {
 		try {
 			getUserService().denyAccountRequest(userId);
-		} catch (ShanoirUsersException e) {
+		} catch (final ShanoirUsersException e) {
 			if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
-				return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
-			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
@@ -94,18 +94,18 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") final Long userId) {
 		final User user = getUserService().findById(userId);
 		if (user == null) {
-			return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<User>(user, HttpStatus.OK);
+		return new ResponseEntity<>(user, HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<List<User>> findUsers() {
 		final List<User> users = getUserService().findAll();
 		if (users.isEmpty()) {
-			return new ResponseEntity<List<User>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<List<User>>(users, HttpStatus.OK);
+		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
 
 	@Override
@@ -114,10 +114,8 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			final BindingResult result) throws RestServiceException {
 
 		/* Now we generate a username for the new user creation */
-		if (user.getUsername() == null) {
-			if (user.getFirstName() != null && user.getLastName() != null) {
-				generateUsername(user);
-			}
+		if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {
+			generateUsername(user);
 		}
 
 		/* Validation */
@@ -145,8 +143,8 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		/* Save user in db. */
 		try {
 			final User createdUser = getUserService().save(user);
-			return new ResponseEntity<User>(createdUser, HttpStatus.OK);
-		} catch (ShanoirUsersException e) {
+			return new ResponseEntity<>(createdUser, HttpStatus.OK);
+		} catch (final ShanoirUsersException e) {
 			if (ErrorModelCode.PASSWORD_NOT_CORRECT == e.getErrorCode()) {
 				throw new RestServiceException(new ErrorModel(422, "Password does not match policy", null));
 			}
@@ -178,12 +176,12 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		/* Update user in db. */
 		try {
 			getUserService().update(user);
-		} catch (ShanoirUsersException e) {
+		} catch (final ShanoirUsersException e) {
 			LOG.error("Error while trying to update user " + userId + " : ", e);
 			throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
 		}
 
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 }
