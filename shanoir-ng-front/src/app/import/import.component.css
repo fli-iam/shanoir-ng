@@ -81,7 +81,4 @@ node.selected { background-color: var(--color-b); color: var(--very-light-grey);
 
 .rotate { -moz-transform: scale(1, -1) translateY(-5px); -webkit-transform: scale(1, -1) translateY(-5px); -o-transform: scale(1, -1) translateY(-5px); -ms-transform: scale(1, -1) translateY(-5px); transform: scale(1, -1) translateY(-5px); }
 
-.overlay { position: fixed; height: 100%; width: 100%; background-color: var(--color-overlay); z-index: 100000; top: 0; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; }
-    .overlay .content { align-self: center; }
-
 .commands button + button { margin-left: 10px; }

@@ -43,7 +43,7 @@
 		.shanoir-table tr.even { background-color: var(--light-grey); }
 		.shanoir-table tr.odd { background-color: var(--lighter-grey); }
 		.shanoir-table tr:hover td:not(.loading):not(.empty) { height: 20px; background-color: var(--color-b-light); cursor: pointer; }
-	.shanoir-table td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.shanoir-table td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
 		.shanoir-table td + td { border-left: 1px dotted var(--grey); }
 		.shanoir-table td.bool { text-align: center; font-weight: bold; }
 			.shanoir-table td.bool .bool-true { color: green; }
@@ -56,3 +56,4 @@
 		.shanoir-table td.loading,
 		.shanoir-table td.empty { padding: 20px 20px; text-align: center; }
 			.shanoir-table td.loading img { vertical-align: middle; margin: 10px; }
+		.shanoir-table td .click-dummy { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 10; }

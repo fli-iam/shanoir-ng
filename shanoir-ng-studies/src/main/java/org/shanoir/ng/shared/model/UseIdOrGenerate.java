@@ -10,19 +10,21 @@ import org.slf4j.LoggerFactory;
 
 public class UseIdOrGenerate extends IdentityGenerator {
 
-private static final Logger log = LoggerFactory.getLogger(UseIdOrGenerate.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(UseIdOrGenerate.class.getName());
 
-  @Override
-  public Serializable generate(SessionImplementor session, Object obj) throws HibernateException {
-      if (obj == null) throw new HibernateException(new NullPointerException()) ;
+	@Override
+	public Serializable generate(SessionImplementor session, Object obj) throws HibernateException {
+		if (obj == null)
+			throw new HibernateException(new NullPointerException());
 
-      if (!(obj instanceof Identifiable )) throw new HibernateException("Object is not a Identifiable. No Id generation");
+		if (!(obj instanceof Identifiable))
+			throw new HibernateException("Object is not a Identifiable. No Id generation");
 
-      if ((((Identifiable) obj).getId()) == null) {
-          Serializable id = super.generate(session, obj) ;
-          return id;
-      } else {
-          return ((Identifiable) obj).getId();
-      }
-  }
+		if ((((Identifiable) obj).getId()) == null) {
+			Serializable id = super.generate(session, obj);
+			return id;
+		} else {
+			return ((Identifiable) obj).getId();
+		}
+	}
 }

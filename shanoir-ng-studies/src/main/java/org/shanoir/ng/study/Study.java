@@ -2,15 +2,29 @@ package org.shanoir.ng.study;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.Cascade;
+import org.hibernate.validator.constraints.Length;
+import javax.persistence.PostLoad;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.hibernate.validator.constraints.Length;
@@ -19,10 +33,182 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @Table(name = "study")
 @JsonPropertyOrder({ "_links", "id", "name" })
+@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class Study extends HalEntity {
 
 	/** The Constant serialVersionUID. */
-	//private static final long serialVersionUID = -8001079069163353926L;
+	// private static final long serialVersionUID = -8001079069163353926L;
+
+	/** Name. */
+	@NotBlank
+	@Column(unique = true)
+	@Unique
+	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
+	private String name;
+
+	/** Start date. */
+	private Date startDate;
+
+	/** End date. */
+	private Date endDate;
+
+
+	/** Is clinical. */
+	@NotBlank
+	private boolean clinical;
+
+	/** Is with examination. */
+	private boolean withExamination;
+
+	/** Is visible by default. */
+	private boolean isVisibleByDefault;
+
+	/** Is with downloadable by default. */
+	private boolean isDownloadableByDefault;
+
+	
+	
+	/** Users associated to the research study. */
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "study")
+	private List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
+
+	/** Study Status. */
+	@ManyToOne(fetch = FetchType.EAGER)
+	private StudyStatus studyStatus;
+
+	@Override
+	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
+	@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+	public Long getId() {
+		return super.getId();
+	}
+	
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the startDate
+	 */
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	/**
+	 * @param startDate the startDate to set
+	 */
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	/**
+	 * @return the endDate
+	 */
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	/**
+	 * @param endDate the endDate to set
+	 */
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	/**
+	 * @return the clinical
+	 */
+	public boolean isClinical() {
+		return clinical;
+	}
+
+	/**
+	 * @param clinical the clinical to set
+	 */
+	public void setClinical(boolean clinical) {
+		this.clinical = clinical;
+	}
+
+	/**
+	 * @return the withExamination
+	 */
+	public boolean isWithExamination() {
+		return withExamination;
+	}
+
+	/**
+	 * @param withExamination the withExamination to set
+	 */
+	public void setWithExamination(boolean withExamination) {
+		this.withExamination = withExamination;
+	}
+
+	/**
+	 * @return the isVisibleByDefault
+	 */
+	public boolean isVisibleByDefault() {
+		return isVisibleByDefault;
+	}
+
+	/**
+	 * @param isVisibleByDefault the isVisibleByDefault to set
+	 */
+	public void setVisibleByDefault(boolean isVisibleByDefault) {
+		this.isVisibleByDefault = isVisibleByDefault;
+	}
+
+	/**
+	 * @return the isDownloadableByDefault
+	 */
+	public boolean isDownloadableByDefault() {
+		return isDownloadableByDefault;
+	}
+
+	/**
+	 * @param isDownloadableByDefault the isDownloadableByDefault to set
+	 */
+	public void setDownloadableByDefault(boolean isDownloadableByDefault) {
+		this.isDownloadableByDefault = isDownloadableByDefault;
+	}
+
+/**
+ * @return the studyStatus
+ */
+public StudyStatus getStudyStatus() {
+	return studyStatus;
+}
+
+/**
+ * @param studyStatus the studyStatus to set
+ */
+public void setStudyStatus(StudyStatus studyStatus) {
+	this.studyStatus = studyStatus;
+}
+
+	/**
+	 * Return the relStudyUserCollection as a list.
+	 *
+	 * @return the rel study user collection
+	 */
+	public List<RelStudyUser> getRelStudyUserList() {
+		return relStudyUserList;
+	}
+
+	public void setRelStudyUserList(List<RelStudyUser> relStudyUserList) {
+		this.relStudyUserList = relStudyUserList;
+	}
+	
 
 	/**
 	 * Init HATEOAS links
@@ -31,111 +217,8 @@ public class Study extends HalEntity {
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "study/" + getId());
 	}
-
-	/** Name. */
-	@Length(min = 0, max = 255)
-	@Column(name = "NAME", unique = true, nullable = false, updatable = true)
-	private String name;
-
-	/** Start date. */
-	@Column(name = "START_DATE", nullable = true, updatable = true)
-	private Date startDate;
-
-	/** End date. */
-	@Column(name = "END_DATE", nullable = true, updatable = true)
-	private Date endDate;
-
-
-	/** Is clinical. */
-	@Column(name = "IS_CLINICAL", nullable = false, updatable = true)
-	private boolean clinical = false;
-
-	/** Is with examination. */
-	@Column(name = "IS_WITH_EXAMINATION", nullable = true, updatable = true)
-	private boolean withExamination = true;
-
-	/** Is visible by default. */
-	@Column(name = "IS_VISIBLE_BY_DEFAULT", nullable = true, updatable = true)
-	private boolean isVisibleByDefault = false;
-
-	/** Is with downloadable by default. */
-	@Column(name = "IS_DOWNLOADABLE_BY_DEFAULT", nullable = true, updatable = true)
-	private boolean isDownloadableByDefault = false;
-
-	/** Coordinator. */
-	/*@ManyToOne
-	@JoinColumn(name = "COORDINATOR_ID", referencedColumnName = "INVESTIGATOR_ID", nullable = true, updatable = true)
-	private Investigator coordinator;*/
-
-	/** Study Status. */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "REF_STUDY_STATUS_ID", referencedColumnName = "REF_STUDY_STATUS_ID", nullable = true, updatable = true)
-	private RefStudyStatus refStudyStatus;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Date getStartDate() {
-		return startDate;
-	}
-
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
-
-	public Date getEndDate() {
-		return endDate;
-	}
-
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
-
-	public boolean isClinical() {
-		return clinical;
-	}
-
-	public void setClinical(boolean clinical) {
-		this.clinical = clinical;
-	}
-
-	public boolean isWithExamination() {
-		return withExamination;
-	}
-
-	public void setWithExamination(boolean withExamination) {
-		this.withExamination = withExamination;
-	}
-
-	public boolean isVisibleByDefault() {
-		return isVisibleByDefault;
-	}
-
-	public void setVisibleByDefault(boolean isVisibleByDefault) {
-		this.isVisibleByDefault = isVisibleByDefault;
-	}
-
-	public boolean isDownloadableByDefault() {
-		return isDownloadableByDefault;
-	}
-
-	public void setDownloadableByDefault(boolean isDownloadableByDefault) {
-		this.isDownloadableByDefault = isDownloadableByDefault;
-	}
-
-	public RefStudyStatus getRefStudyStatus() {
-		return refStudyStatus;
-	}
-
-	public void setRefStudyStatus(RefStudyStatus refStudyStatus) {
-		this.refStudyStatus = refStudyStatus;
-	}
-
+	
+	
 	/*public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
