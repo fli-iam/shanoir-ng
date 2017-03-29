@@ -42,6 +42,12 @@ public final class PasswordUtils {
 	private static final int PASSWORD_HASH_LENGTH = 14;
 
 	/**
+	 * Private constructor
+	 */
+	private PasswordUtils() {
+	}
+	
+	/**
 	 * Check policy of a password.
 	 * 
 	 * @param password password to check.
