@@ -117,9 +117,7 @@ export class CenterListComponent {
         this.createAcqEquip = true;
     }
 
-    closeEditSubject(subject: any) {
-        // Add the subject to the select box and select it
-        console.log(subject);
+    closePopup(subject: any) {
         this.createAcqEquip = false;
     }
 

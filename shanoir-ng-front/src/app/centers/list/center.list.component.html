@@ -9,7 +9,7 @@
     <!-- create acq. equip. popup --> 
     <div class="overlay" *ngIf="createAcqEquip">
         <div class="content">
-            <editUser (closing)="closeEditSubject($event)"></editUser>
+            <acqEquipDetail (closing)="closePopup($event)"></acqEquipDetail>
         </div>
     </div>
 </div>
