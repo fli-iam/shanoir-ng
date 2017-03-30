@@ -11,6 +11,9 @@ import { routing } from './app.routing';
 import { AccountEventsService } from './users/account/account.events.service';
 import { AccountRequestComponent} from "./users/accountRequest/account.request.component";
 import { AccountRequestInfoComponent} from "./users/accountRequestInfo/account.request.info.component";
+import { AcquisitionEquipmentDetailComponent } from "./acqEquip/detail/acqEquip.detail.component";
+import { AcquisitionEquipmentListComponent } from "./acqEquip/list/acqEquip.list.component";
+import { AcquisitionEquipmentService } from "./acqEquip/shared/acqEquip.service";
 import { AppComponent }   from './app.component';
 import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
 import { AuthNotGuestGuard }   from './shared/roles/auth.not.guest.guard';
@@ -57,6 +60,8 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
     declarations: [
         AccountRequestComponent,
         AccountRequestInfoComponent,
+        AcquisitionEquipmentDetailComponent,
+        AcquisitionEquipmentListComponent,
         AppComponent,
         CenterDetailComponent,
         CenterListComponent,
@@ -81,6 +86,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
     ],
     providers: [
         AccountEventsService,
+        AcquisitionEquipmentService,
         AuthAdminGuard,
         AuthNotGuestGuard,
         CenterService,

@@ -1,6 +1,8 @@
 import { ModuleWithProviders }  from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
+import { AcquisitionEquipmentDetailComponent } from './acqEquip/detail/acqEquip.detail.component';
+import { AcquisitionEquipmentListComponent } from './acqEquip/list/acqEquip.list.component';
 import { HomeComponent }       from './home/home.component';
 import { UserListComponent }   from './users/list/user.list.component';
 import { CenterDetailComponent } from './centers/detail/center.detail.component';
@@ -38,11 +40,20 @@ const appRoutes: Routes = [
     component: CenterListComponent,
     canActivate: [AuthNotGuestGuard]
   }, {
+    path: 'acqEquipList',
+    component: AcquisitionEquipmentListComponent,
+    canActivate: [AuthNotGuestGuard]
+  }, {
+    path: 'acqEquipDetail',
+    component: AcquisitionEquipmentDetailComponent,
+    canActivate: [AuthNotGuestGuard]
+  },{
     path: 'import',
     component: ImportComponent
   }, {
     path: 'detailCenter',
-    component: CenterDetailComponent
+    component: CenterDetailComponent,
+    canActivate: [AuthNotGuestGuard]
   }
 ];
 
