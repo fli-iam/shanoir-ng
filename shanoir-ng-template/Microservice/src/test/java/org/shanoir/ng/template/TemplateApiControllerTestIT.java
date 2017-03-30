@@ -41,7 +41,7 @@ public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void findTemplateByIdProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void findTemplatesProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void saveNewTemplateProtected() {
 		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Template(), String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 		
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
