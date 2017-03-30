@@ -33,7 +33,8 @@
 								</span>
 							</li>
 							<li class="required">
-								<label i18n="Edit user|Email label" class="required-label">Email</label> 
+								<label *ngIf="requestAccountMode" i18n="Edit user|Pro email label" class="required-label">Professional email</label> 
+								<label *ngIf="!requestAccountMode" i18n="Edit user|Email label" class="required-label">Email</label> 
 								<span class="right-col">
 									<input type="email" id="email" required formControlName="email" [(ngModel)]="user.email"/>
 									<label *ngIf="formErrors.email.includes('required')" class="form-validation-alert" i18n="Edit user|EmailRequiredError label">Email is required!</label>
@@ -69,13 +70,6 @@
 									<input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="true" i18n="Edit user|canAccessToDicomAssociation label" [checked]="user.canAccessToDicomAssociation == true"/>Yes
 									<input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="false" i18n="Edit user|cannotAccessToDicomAssociation label" 
 										[checked]="'user.canAccessToDicomAssociation'?'user.canAccessToDicomAssociation == false':'true'"/>No
-								</span>
-							</li>
-							<li>
-								<label i18n="Edit user|IsMedical label">Is a medical doctor/resident</label> 
-								<span class="right-col">
-									<input type="radio" formControlName="medical" [(ngModel)]="user.medical" [value]="true" i18n="Edit user|medical label" [checked]="user.medical == true"/>Yes
-									<input type="radio" formControlName="medical" [(ngModel)]="user.medical" [value]="false" i18n="Edit user|notMedical label" [checked]="'user.medical'?'user.medical == false':'true'"/>No
 								</span>
 							</li>
 						</ol>
