@@ -5,5 +5,11 @@
     </div>
   
     <shanoir-table [items]="centers" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
-    
+
+    <!-- create acq. equip. popup --> 
+    <div class="overlay" *ngIf="createAcqEquip">
+        <div class="content">
+            <editUser (closing)="closeEditSubject($event)"></editUser>
+        </div>
+    </div>
 </div>

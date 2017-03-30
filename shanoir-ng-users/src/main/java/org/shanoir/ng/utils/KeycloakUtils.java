@@ -18,6 +18,12 @@ public final class KeycloakUtils {
 	public static final String ATT_USER_ID = "userId";
 	
 	/**
+	 * Private constructor
+	 */
+	private KeycloakUtils() {
+	}
+	
+	/**
 	 * Get created user id from keycloak response.
 	 * 
 	 * @param response

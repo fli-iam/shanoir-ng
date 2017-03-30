@@ -62,6 +62,7 @@
                 *ngFor="let col of columnDefs" 
                 class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" 
                 [class.bool]="isFieldBoolean(item, col)"
+                [attr.title]="col.tip != undefined ? col.tip : null"
                 >{{renderCell(item, col)}}
                 <span *ngIf="isFieldBoolean(item, col)">
                     <span *ngIf="getCellValue(item, col)" class="bool-true">&#x2713;</span>

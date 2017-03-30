@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class CurrentUserServiceImpl implements CurrentUserService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CurrentUserServiceImpl.class);
-	
+
 	private static final String USER_ID_TOKEN_ATT = "userId";
 
 	@SuppressWarnings("rawtypes")
@@ -27,15 +27,17 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 		final KeycloakPrincipal principal = (KeycloakPrincipal) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal();
 		final AccessToken accessToken = principal.getKeycloakSecurityContext().getToken();
-		
+		if (accessToken == null) {
+			return false;
+		}
+
 		Long tokenUserId = null;
 		final Map<String, Object> otherClaims = accessToken.getOtherClaims();
-	    if (otherClaims.containsKey(USER_ID_TOKEN_ATT)) {
-	    	tokenUserId = Long.valueOf(otherClaims.get(USER_ID_TOKEN_ATT).toString());
-	    }
+		if (otherClaims.containsKey(USER_ID_TOKEN_ATT)) {
+			tokenUserId = Long.valueOf(otherClaims.get(USER_ID_TOKEN_ATT).toString());
+		}
 
-		if (accessToken != null
-				&& ((userId.equals(tokenUserId) || accessToken.getRealmAccess().isUserInRole("ROLE_ADMIN")))) {
+		if (userId.equals(tokenUserId) || accessToken.getRealmAccess().isUserInRole("ROLE_ADMIN")) {
 			return true;
 		}
 		return false;

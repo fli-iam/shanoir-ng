@@ -128,4 +128,7 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
 .shanoir-table table { border-collapse: collapse; }
   .shanoir-table table td, .shanoir-table table th { border: 1px solid gray; }
 
+.overlay { position: fixed; height: 100%; width: 100%; background-color: var(--color-overlay); z-index: 100000; top: 0; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; }
+    .overlay .content { align-self: center; }
+
 md-dialog-container { position: fixed; top: 0; background-color: var(--color-overlay); width: 100%; z-index: 10000; max-width: 100% !important; box-shadow: none !important; display: flex !important; justify-content: center !important; }

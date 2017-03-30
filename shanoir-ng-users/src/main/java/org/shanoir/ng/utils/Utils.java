@@ -10,8 +10,14 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  *
  * @author jlouis
  */
-public class Utils {
+public final class Utils {
 
+	/**
+	 * Private constructor
+	 */
+	public Utils() {
+	}
+	
 	/**
 	 * Convert Iterable to List
 	 *
@@ -39,8 +45,8 @@ public class Utils {
 		if (o1 instanceof AbstractGenericItem && o2 instanceof AbstractGenericItem) {
 			return ((AbstractGenericItem) o1).getId().equals(((AbstractGenericItem) o2).getId());
 		}
-		return o1.equals(o2) || o2.equals(o1);
 		// o1.equals(o2) is not equivalent to o2.equals(o1) ! For instance with
 		// java.sql.Timestamp and java.util.Date
+		return o1.equals(o2) || o2.equals(o1);
 	}
 }
