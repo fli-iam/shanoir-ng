@@ -1,13 +1,13 @@
-import { Component } from 'angular2/core';
+import { Component } from '@angular/core';
+import { AppStoreComponent } from './appStore/appStore.component'
+import { SmallAppComponent } from './appStore/smallApp/smallApp.component'
 
 @Component({
     selector: 'my-app',
     template: `
-        <div class="main">
-            <h1>Hello World!</h1>
-        </div>
+            <app-store></app-store>
     `,
-    directives: [],
+    styleUrls: ['app/common.css'],
 })
 export class AppComponent { 
     
