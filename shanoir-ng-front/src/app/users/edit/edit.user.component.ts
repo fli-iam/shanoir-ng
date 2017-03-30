@@ -31,7 +31,7 @@ export class EditUserComponent implements OnInit {
     accountRequestInfo: AccountRequestInfo;
     private accountRequestInfoValid: boolean = false;
 
-    constructor(private router: Router, private location: Location, private route: ActivatedRoute, 
+    constructor(private router: Router, private location: Location, private route: ActivatedRoute,
         private userService: UserService, private roleService: RoleService, private fb: FormBuilder) {
     }
 
@@ -43,10 +43,10 @@ export class EditUserComponent implements OnInit {
                 this.getUser();
             })
             .catch((error) => {
-            // TODO: display error
-            //log.error("error getting roles list!");
-            console.log("error getting roles list!");
-        });
+                // TODO: display error
+                //log.error("error getting roles list!");
+                console.log("error getting roles list!");
+            });
     }
 
     getUser(): void {
@@ -57,7 +57,7 @@ export class EditUserComponent implements OnInit {
                     this.creationMode = false;
                     this.userId = userId;
                     return this.userService.getUser(userId);
-                } else { 
+                } else {
                     this.creationMode = true;
                     return Observable.of<User>();
                 }
@@ -85,25 +85,25 @@ export class EditUserComponent implements OnInit {
     accept(): void {
         this.submit();
         this.userService.confirmAccountRequest(this.userId, this.user)
-           .subscribe((user) => {
+            .subscribe((user) => {
                 this.getOut();
-             }, (err: String) => {
+            }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
                 }
-           });
+            });
     }
 
     deny(): void {
         this.userService.denyAccountRequest(this.userId)
             .then(res => {
                 this.getOut();
-             })
+            })
             .catch((error) => {
                 // TODO: display error
                 //log.error("error deny account request!");
                 console.log("error deny account request!");
-        });
+            });
     }
 
     create(): void {
@@ -122,7 +122,7 @@ export class EditUserComponent implements OnInit {
         this.submit();
         this.userService.requestAccount(this.user)
             .subscribe((user) => {
-                this.cancelAccountRequest();
+                window.location.href = process.env.LOGOUT_REDIRECT_URL;
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
@@ -133,7 +133,7 @@ export class EditUserComponent implements OnInit {
     update(): void {
         this.submit();
         this.userService.update(this.userId, this.user)
-           .subscribe((user) => {
+            .subscribe((user) => {
                 this.getOut(user);
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
@@ -226,7 +226,7 @@ export class EditUserComponent implements OnInit {
     };
 
     onDateChanged(event: IMyDateModel) {
-        if(event.formatted !== '') {
+        if (event.formatted !== '') {
             this.selectedDateNormal = event.formatted;
         }
     }
@@ -251,15 +251,15 @@ export class EditUserComponent implements OnInit {
             this.user.expirationDate = null;
         }
     }
-    
-    getDateToDatePicker(user : User): void {
+
+    getDateToDatePicker(user: User): void {
         if (user && user.expirationDate && !isNaN(new Date(user.expirationDate).getTime())) {
             let date: string = new Date(user.expirationDate).toISOString().split('T')[0];
             this.selectedDateNormal = date;
         }
     }
 
-    getRoleById(id:number): Role {
+    getRoleById(id: number): Role {
         for (let role of this.roles) {
             if (id == role.id) {
                 return role;
@@ -275,5 +275,5 @@ export class EditUserComponent implements OnInit {
     updateARIValid(ariValid: boolean): void {
         this.accountRequestInfoValid = ariValid;
     }
-    
+
 }
