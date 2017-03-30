@@ -1,0 +1,197 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Shanoir NG Study Cards Microservice
+  description: Microservice API for Shanoir NG study card managment
+produces:
+  - application/json
+  
+paths:
+
+  /studyCard:
+    post:
+      operationId: saveNewStudyCard
+      description: Saves a new study card
+      consumes: 
+        - application/json
+      parameters:
+        - name: studyCard
+          in: body
+          description: study Card to create
+          required: true
+          schema:
+            $ref: "#/definitions/StudyCard"
+      responses:
+        '200':
+          description: created study card
+          schema:
+            $ref: "#/definitions/StudyCard"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '500':
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+            
+  /studyCard/{studyCardId}:
+    get:
+      operationId: findStudyCardById
+      description: If exists, returns the study card corresponding to the given id
+      parameters:
+        - $ref: "#/parameters/studyCardId"
+      responses:
+        '200':
+          description: found study card
+          schema:
+            $ref: "#/definitions/StudyCard"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no study card found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    put:
+      operationId: updateStudyCard
+      description: Updates a study card
+      consumes: 
+        - application/json
+      parameters:
+        - $ref: "#/parameters/studyCardId"
+        - name: study
+          in: body
+          description: study card to update
+          required: true
+          schema:
+            $ref: "#/definitions/StudyCard"
+      responses:
+        '204':
+          description: study card updated
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '500':
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    delete:
+      operationId: deleteStudyCard
+      description: Deletes a study card
+      parameters:
+        - $ref: "#/parameters/studyCardId"
+      responses:
+        '204':
+          description: study card deleted
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no study card found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+            
+  /studyCard/all:
+    get:
+      operationId: findStudyCards
+      description: Returns all the study Cards
+      responses:
+        '200':
+          description: found study cards
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/StudyCard"
+        '204':
+          description: no study card found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  /studyCard/{studyId}/allStudyCards:
+    get:
+      operationId: findStudyCardsByStudyId
+      description: If exists, returns the study cards of a study 
+      parameters:
+        - $ref: "#/parameters/studyId"
+      responses:
+        '200':
+          description: found study cards 
+          schema:
+            $ref: "#/definitions/StudyCard"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no study card found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+
+
+parameters:
+
+  studyCardId:
+    name: studyCardId
+    in: path
+    description: id of the study card
+    required: true
+    type: integer
+    format: int64
+    
+  studyId:
+    name: studyId
+    in: path
+    description: id of the study
+    required: true
+    type: integer
+    format: int64
+    
+
+definitions:
+  StudyCard:
+    required:
+      - id
+      - name
+    type: object 
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      disable:
+        type: boolean
+    
+  ErrorModel:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      details:
+        type: object
+      message:
+        type: string

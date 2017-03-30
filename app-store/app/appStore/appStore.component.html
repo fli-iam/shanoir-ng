@@ -1,0 +1,64 @@
+<div class="left-col">
+    <div class="app-block">
+        <h1>&nbsp;</h1>
+        <h2>Medicine apps</h2>
+        <hr/>
+        <div>
+            <div *ngFor="let i of testArr" class="big-app">
+                <img src="https://images-na.ssl-images-amazon.com/images/I/91K2HX-DSbL.png" />
+                <div class="title">Visual Anatomy 3<span class="author">GraphicVizion</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="app-block">
+        <h1>&nbsp;</h1>
+        <h2>All Medicine apps</h2>
+        <hr/>
+        <div>
+            <small-app [rate]="0.2" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
+            <small-app [rate]="0.8" label="Visual Anatomy 3 Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
+            <small-app [rate]="0.5" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
+            <small-app [rate]="1" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
+            <small-app [rate]="0.3" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
+            <small-app [rate]="0.2" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
+            <small-app [rate]="0.8" label="Visual Anatomy 3 Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
+            <small-app [rate]="0.5" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
+            <small-app [rate]="1" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
+            <small-app [rate]="0.3" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
+        </div>
+    </div>
+</div>
+
+<div class="right-col">
+    <h1>Medicine</h1>
+    <div>
+        <h2>All in one click</h2>
+        <hr/>
+        <ul class="quick-links">
+            <li>Hello</li>
+            <li>Account</li>
+            <li>Support</li>
+        </ul>
+        <ul class="other-links">
+            <li>macOS Sierra</li>
+            <li>Apps von Apple</li>
+            <li>New to the Mac App Store</li>
+            <li>macOS Sierra</li>
+            <li>Apps von Apple</li>
+            <li>New to the Mac App Store</li>
+            <li>macOS Sierra</li>
+            <li>Apps von Apple</li>
+            <li>New to the Mac App Store</li>
+            <li>macOS Sierra</li>
+            <li>Apps von Apple</li>
+            <li>New to the Mac App Store</li>
+        </ul>
+    </div>
+    <div class="buyed-container">
+        <h2>Buyed</h2>
+        <hr/>
+        <ol class="buyed-links">
+            <li *ngFor="let i of testArr" >Essential Anatomy {{i}}<span class="author">3D4Medical.com, LLC</span></li>
+        </ol>
+    </div>
+</div>
