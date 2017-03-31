@@ -79,7 +79,7 @@ export class EditUserComponent implements OnInit {
     }
 
     cancelAccountRequest(): void {
-        this.router.navigate(['/home']);
+        window.location.href = process.env.LOGOUT_REDIRECT_URL;
     }
 
     accept(): void {
@@ -188,8 +188,7 @@ export class EditUserComponent implements OnInit {
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
             'expirationDate': [this.user.expirationDate],
             'role': roleFC,
-            'canAccessToDicomAssociation': new FormControl('false'),
-            'medical': new FormControl('false')
+            'canAccessToDicomAssociation': new FormControl('false')
         });
 
         this.editUserForm.valueChanges

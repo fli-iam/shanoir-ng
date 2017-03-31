@@ -61,9 +61,6 @@ public class User extends HalEntity implements UserDetails {
 
 	private boolean isFirstExpirationNotificationSent;
 
-	@NotNull
-	private boolean isMedical;
-
 	private boolean isSecondExpirationNotificationSent;
 
 	private String keycloakId;
@@ -213,21 +210,6 @@ public class User extends HalEntity implements UserDetails {
 	 */
 	public void setFirstExpirationNotificationSent(final boolean isFirstExpirationNotificationSent) {
 		this.isFirstExpirationNotificationSent = isFirstExpirationNotificationSent;
-	}
-
-	/**
-	 * @return the isMedical
-	 */
-	public boolean isMedical() {
-		return isMedical;
-	}
-
-	/**
-	 * @param isMedical
-	 *            the isMedical to set
-	 */
-	public void setMedical(final boolean isMedical) {
-		this.isMedical = isMedical;
 	}
 
 	/**

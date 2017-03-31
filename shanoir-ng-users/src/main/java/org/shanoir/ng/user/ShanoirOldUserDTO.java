@@ -19,7 +19,6 @@ public class ShanoirOldUserDTO {
 	private Date expirationDate;
 	private boolean firstExpirationNotificationSent;
 	private String firstName;
-	private Boolean isMedical;
 	private Date lastLoginOn;
 	private String lastName;
 	private String passwordHash;
@@ -130,21 +129,6 @@ public class ShanoirOldUserDTO {
 	 */
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
-	}
-
-	/**
-	 * @return the isMedical
-	 */
-	public Boolean getIsMedical() {
-		return isMedical;
-	}
-
-	/**
-	 * @param isMedical
-	 *            the isMedical to set
-	 */
-	public void setIsMedical(Boolean isMedical) {
-		this.isMedical = isMedical;
 	}
 
 	/**

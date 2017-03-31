@@ -279,7 +279,6 @@ public class UserServiceImpl implements UserService {
 		shanoirOldUser.setExpirationDate(user.getExpirationDate());
 		shanoirOldUser.setFirstExpirationNotificationSent(user.isFirstExpirationNotificationSent());
 		shanoirOldUser.setFirstName(user.getFirstName());
-		shanoirOldUser.setIsMedical(user.isMedical());
 		shanoirOldUser.setLastLoginOn(user.getLastLogin());
 		shanoirOldUser.setLastName(user.getLastName());
 		shanoirOldUser.setPasswordHash(user.getPassword());
@@ -343,7 +342,6 @@ public class UserServiceImpl implements UserService {
 		userDb.setLastName(user.getLastName());
 		// TODO: password modification
 		userDb.setRole(user.getRole());
-		userDb.setMedical(user.isMedical());
 		userDb.setUsername(user.getUsername());
 		return userDb;
 	}
