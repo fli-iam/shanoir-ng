@@ -4,7 +4,7 @@
         <h2>Medicine apps</h2>
         <hr/>
         <div>
-            <div *ngFor="let i of testArr" class="big-app">
+            <div *ngFor="let i of [1, 2, 3, 4, 5]" class="big-app">
                 <img src="https://images-na.ssl-images-amazon.com/images/I/91K2HX-DSbL.png" />
                 <div class="title">Visual Anatomy 3<span class="author">GraphicVizion</span></div>
             </div>
@@ -15,16 +15,7 @@
         <h2>All Medicine apps</h2>
         <hr/>
         <div>
-            <small-app [rate]="0.2" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
-            <small-app [rate]="0.8" label="Visual Anatomy 3 Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
-            <small-app [rate]="0.5" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
-            <small-app [rate]="1" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
-            <small-app [rate]="0.3" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
-            <small-app [rate]="0.2" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
-            <small-app [rate]="0.8" label="Visual Anatomy 3 Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
-            <small-app [rate]="0.5" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
-            <small-app [rate]="1" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
-            <small-app [rate]="0.3" label="Visual Anatomy 3" author="GraphicVizion" img="./app/images/MSSEG logo.png"></small-app>
+            <small-app *ngFor="let app of apps" [app]="app"></small-app>
         </div>
     </div>
 </div>
