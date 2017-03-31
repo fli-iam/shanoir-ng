@@ -20,4 +20,4 @@ li.active, li.opened { color: var(--very-light-grey); background-color: var(--co
     :host(.tree-mode) li.opened { cursor: pointer; color: var(--color-c); background-color: transparent !important; text-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color); }
     :host(.tree-mode) .plus { padding: 0 5px; text-align: center; font-size: 16px; }
     :host(.tree-mode) .sub-content { left: 0px; top: 11px; }
-    :host(.tree-mode) .sub-sub-content:before { display: none; }
+    :host(.tree-mode) .sub-sub-content:before { box-shadow: 0 0 5px 0 var(--shadow-color); }
