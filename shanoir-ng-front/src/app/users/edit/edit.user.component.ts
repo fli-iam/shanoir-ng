@@ -79,7 +79,7 @@ export class EditUserComponent implements OnInit {
     }
 
     cancelAccountRequest(): void {
-        this.router.navigate(['/home']);
+        window.location.href = process.env.LOGOUT_REDIRECT_URL;
     }
 
     accept(): void {

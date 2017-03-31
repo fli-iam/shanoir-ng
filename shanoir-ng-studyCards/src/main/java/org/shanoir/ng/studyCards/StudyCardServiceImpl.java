@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Study Card service implementation.
- * 
+ *
  * @author msimon
  *
  */
@@ -100,17 +100,20 @@ public class StudyCardServiceImpl implements StudyCardService {
 					studyCardRepository.save(studyCardDb);
 				} catch (Exception e) {
 					ShanoirStudyCardsException.logAndThrow(LOG,
-							"Error while updating template from Shanoir Old: " + e.getMessage());
+							"Error while updating StudyCard from Shanoir Old: " + e.getMessage());
 				}
+			}	else {
+				LOG.warn("Import new study with name " + studyCard.getName() + "  (id: "+ studyCard.getId()+") from shanoir-old");
+				studyCardRepository.save(studyCard);
 			}
 		}
 	}
 
 	/*
 	 * Update Shanoir Old.
-	 * 
+	 *
 	 * @param template template.
-	 * 
+	 *
 	 * @return false if it fails, true if it succeed.
 	 */
 	private boolean updateShanoirOld(final StudyCard studyCard) {
@@ -131,11 +134,11 @@ public class StudyCardServiceImpl implements StudyCardService {
 
 	/*
 	 * Update some values of template to save them in database.
-	 * 
+	 *
 	 * @param templateDb template found in database.
-	 * 
+	 *
 	 * @param template template with new values.
-	 * 
+	 *
 	 * @return database template with new values.
 	 */
 	private StudyCard updateStudyCardValues(final StudyCard studyCardDb, final StudyCard studyCard) {
