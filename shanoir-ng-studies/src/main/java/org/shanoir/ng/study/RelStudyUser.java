@@ -4,24 +4,14 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import org.hibernate.annotations.CascadeType;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-//import org.shanoir.xml.adapters.RefStudyUserTypeXmlAdapter;
 
 /**
  * Relation between the study and the users.
@@ -32,8 +22,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name = "REL_STUDY_USER")
 public class RelStudyUser implements Serializable {
 
-	/** The Constant serialVersionUID. */
-	//private static final long serialVersionUID = 4861516482429952704L;
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -6816811624812002519L;
 
 	/** ID. */
 	@Id
@@ -41,35 +33,34 @@ public class RelStudyUser implements Serializable {
 	@Column(name = "REL_STUDY_USER_ID")
 	private Long id;
 
-
 	/** Type of the relationship. */
-	/*@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "REF_STUDY_USER_TYPE_ID", nullable = false)
-	private RefStudyUserType refStudyUserType;*/
+	/*
+	 * @ManyToOne(fetch = FetchType.EAGER)
+	 * 
+	 * @JoinColumn(name = "REF_STUDY_USER_TYPE_ID", nullable = false) private
+	 * RefStudyUserType refStudyUserType;
+	 */
 
-	
 	/** Study. */
 	@ManyToOne
-	//@JoinColumn(name = "STUDY_ID")
+	// @JoinColumn(name = "STUDY_ID")
 	@JsonIgnore
 	@JoinColumn(name = "study")
 	private Study study;
 
 	/** User. */
 	@Column(name = "USER_ID")
-	private Long  userId;
+	private Long userId;
 
 	/*
 	 * (non-Javadoc)
 	 *
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
-	/*public int compareTo(final RelStudyUser other) {
-		return new Long(this.getId()).compareTo(new Long(other.id));
-	}*/
-
-
-
+	/*
+	 * public int compareTo(final RelStudyUser other) { return new
+	 * Long(this.getId()).compareTo(new Long(other.id)); }
+	 */
 
 	/*
 	 * (non-Javadoc)
@@ -85,17 +76,18 @@ public class RelStudyUser implements Serializable {
 	 *
 	 * @return the refStudyUserType
 	 */
-	//@XmlJavaTypeAdapter(RefStudyUserTypeXmlAdapter.class)
-	/*public RefStudyUserType getRefStudyUserType() {
-		return refStudyUserType;
-	}*/
+	// @XmlJavaTypeAdapter(RefStudyUserTypeXmlAdapter.class)
+	/*
+	 * public RefStudyUserType getRefStudyUserType() { return refStudyUserType;
+	 * }
+	 */
 
 	/**
 	 * Gets the study.
 	 *
 	 * @return the study
 	 */
-	//@XmlTransient
+	// @XmlTransient
 	public Study getStudy() {
 		return study;
 	}
@@ -109,7 +101,6 @@ public class RelStudyUser implements Serializable {
 		return userId;
 	}
 
-
 	/**
 	 * Sets the id.
 	 *
@@ -120,17 +111,16 @@ public class RelStudyUser implements Serializable {
 		this.id = id;
 	}
 
-
-
 	/**
 	 * Sets the ref study user type.
 	 *
 	 * @param refStudyUserType
 	 *            the refStudyUserType to set
 	 */
-	/*public void setRefStudyUserType(final RefStudyUserType refStudyUserType) {
-		this.refStudyUserType = refStudyUserType;
-	}*/
+	/*
+	 * public void setRefStudyUserType(final RefStudyUserType refStudyUserType)
+	 * { this.refStudyUserType = refStudyUserType; }
+	 */
 
 	/**
 	 * Sets the study.
@@ -151,6 +141,5 @@ public class RelStudyUser implements Serializable {
 	public void setUser(final Long userId) {
 		this.userId = userId;
 	}
-
 
 }

@@ -34,6 +34,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @DiscriminatorValue("not null")
 public class ManufacturerModel extends HalEntity {
 
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -99873038897196966L;
+
 	@NotNull
 	@Column(nullable = false, insertable = false, updatable = false)
 	@Enumerated(EnumType.STRING)

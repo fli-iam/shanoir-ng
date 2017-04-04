@@ -1,16 +1,12 @@
 package org.shanoir.ng.shared.model;
 
 import java.io.Serializable;
+
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.IdentityGenerator;
-import org.slf4j.Logger;
-import org.shanoir.ng.shared.model.Identifiable;
-import org.slf4j.LoggerFactory;
 
 public class UseIdOrGenerate extends IdentityGenerator {
-
-	private static final Logger log = LoggerFactory.getLogger(UseIdOrGenerate.class.getName());
 
 	@Override
 	public Serializable generate(SessionImplementor session, Object obj) throws HibernateException {

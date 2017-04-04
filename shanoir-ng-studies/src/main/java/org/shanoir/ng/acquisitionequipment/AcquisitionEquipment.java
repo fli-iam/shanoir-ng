@@ -22,6 +22,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class AcquisitionEquipment extends HalEntity {
 
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = 7137351748882747602L;
+
 	@ManyToOne
 	@NotNull
 	private Center center;

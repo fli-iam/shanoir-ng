@@ -14,6 +14,11 @@ import javax.validation.constraints.NotNull;
 @DiscriminatorValue(DatasetModalityType.Values.MR_DATASET)
 public class ManufacturerMrModel extends ManufacturerModel {
 
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = 2658455437591706240L;
+
 	@NotNull
 	private double magneticField;
 
