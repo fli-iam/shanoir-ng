@@ -40,7 +40,7 @@ public class CenterApiController implements CenterApi {
 		try {
 			centerService.deleteById(centerId);
 		} catch (ShanoirStudyException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
