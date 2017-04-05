@@ -33,6 +33,7 @@ public class RabbitMqReceiver {
 	 */
 	public void receiveMessage(final String message) {
 		LOG.debug(" [x] Received '" + message + "'");
+		// System.out.println(" [x] Received '" + message + "'");
 
 		final Gson oGson = new Gson();
 		final Study study = oGson.fromJson(message, Study.class);

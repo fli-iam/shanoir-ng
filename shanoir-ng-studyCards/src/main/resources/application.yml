@@ -41,11 +41,12 @@ keycloak:
   realm: shanoir-ng
   realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmAAVQSL7TWxiawt+mvgDnETbiqOpS4q4KHdvwDTMoKrozVp7DvSy+iG9otoprQA7gE5Ibw5LG1q9rhyC8VK+Iy4n4mn1ZVLbdYQRQtwg73s2h5gUOoNZ2WQ4kUu6awapAp/uzNPoN25GvXkInIzUxWmjLTFY79m1qMba2rQxM5ISznrSZ2PP7/Ox0oMeqIpQMvHnIhMR6HdI9KN9sJsFKBSk5c5Y7IPhTy6AxFzTLMSXUXJuUH7/gAN0zdUYJezF5UqB1JNCBmDzu7gvC5TH5gJdJv0cFCQbPAkxM3XR5jL0CLcPRNNT7JrwIKoo3B0ZL6FWjWcUl8KedYagKz7oVwIDAQAB
   auth-server-url: http://localhost/auth
+  credentials.secret: f5dfbdc0-4ba4-4f37-abcf-3c3e5bb1e2c4
   ssl-required: external
   resource: shanoir-ng-studyCards
   securityConstraints[0]:
     securityCollections[0]:
-      name: spring secured api
+      name: studycards secured api
       authRoles:
         - ROLE_ADMIN
         - ROLE_EXPERT
@@ -90,9 +91,6 @@ server:
 # # spring security configuration
 security:
   sessions: never
-#keycloak
-keycloak:
-  credentials.secret: f5dfbdc0-4ba4-4f37-abcf-3c3e5bb1e2c4
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-studycard.log
