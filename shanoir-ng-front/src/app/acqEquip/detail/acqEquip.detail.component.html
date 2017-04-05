@@ -1,0 +1,45 @@
+<div class="content-component">
+    <form [formGroup]="acqEquipDetailForm" class="max-content" novalidate>
+		<div class="layout">
+			<span>
+				<template> 
+					<div class="header command-zone" i18n="Edit acq equip|Title">Edit Acquisition Equipment</div>
+				</template>
+			</span>
+			<fieldset>
+				<ol>
+					<li>
+						<label i18n="AcqEquip detail|Manufacturer model name label">Manufacturer model name</label> 
+						<span class="right-col" [ngSwitch]="mode">
+							<template [ngSwitchCase]="'view'"> 
+								{{acqEquip.manuModelName}}
+							</template>
+							<template ngSwitchDefault> 
+								<select id="manuModelName" required formControlName="manuModelName" [(ngModel)]="acqEquip.manuModelName">
+									<option *ngFor="let manuModelName of manuModelNames" [value]="manuModelName">{{manuModelName}}</option>
+								</select>
+							</template>
+						</span>
+					</li>
+					<li>
+						<label i18n="AcqEquip detail|Serial number label">Serial Number</label> 
+						<span class="right-col" [ngSwitch]="mode">
+							<template [ngSwitchCase]="'view'"> 
+								{{acqEquip.serialNumber}}
+							</template>
+							<template ngSwitchDefault> 
+								<input type="text" id="serialNumber" formControlName="serialNumber" [(ngModel)]="acqEquip.serialNumber"/>
+							</template>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+			<div class="footer command-zone">
+				<span>
+					<button i18n="View acqEquip|BackButton label" class="Button" (click)="back()">Back</button>	
+					<button type="submit" i18n="Edit acqEquip|CreateButton label" (click)="create()" class="Button">Create</button>
+				</span>
+			</div>
+        </div>
+    </form>
+</div>

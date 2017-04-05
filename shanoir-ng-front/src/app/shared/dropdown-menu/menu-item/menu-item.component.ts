@@ -124,4 +124,12 @@ export class MenuItemComponent {
     public cascadingClose() {
         this.parent.cascadingClose();
     }
+
+    public getMode(): "top" | "tree" {
+        if (this.parent) {
+            return this.parent.getMode();
+        } else {
+            return "top";
+        }
+    }
 }

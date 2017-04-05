@@ -88,6 +88,7 @@ public class StudyServiceImpl implements StudyService {
 	public void updateFromShanoirOld(final Study study) throws ShanoirStudyException {
 		if (study.getId() == null) {
 				LOG.warn("Skipping import new study without ID " + study.getName() + " from shanoir-old");
+				throw new IllegalArgumentException("Study id cannot be null");
 				// TODO Decide what should be done. Most probably this should never happen.
 				// studyRepository.save(study);
 		} else {

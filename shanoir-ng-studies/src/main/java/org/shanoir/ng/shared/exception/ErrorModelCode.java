@@ -15,4 +15,7 @@ public final class ErrorModelCode {
 	/** No user found */
 	public static final Integer USER_NOT_FOUND = 151;
 	
+	/** No user found */
+	public static final Integer ACQ_EQPT_NOT_FOUND = 251;
+	
 }

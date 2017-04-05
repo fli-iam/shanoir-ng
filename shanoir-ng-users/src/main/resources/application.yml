@@ -166,7 +166,7 @@ spring:
 server:
   email-off: false
 front.server:
-  address: ttps://shanoir-qualif.irisa.fr/shanoir-ng
+  address: https://shanoir-qualif.irisa.fr/shanoir-ng
   url: https://shanoir-qualif.irisa.fr
 #keycloak
 keycloak:

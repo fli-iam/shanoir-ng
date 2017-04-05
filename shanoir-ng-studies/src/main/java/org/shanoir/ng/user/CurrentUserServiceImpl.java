@@ -33,6 +33,9 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 		final KeycloakPrincipal principal = (KeycloakPrincipal) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal();
 		final AccessToken accessToken = principal.getKeycloakSecurityContext().getToken();
+		if (accessToken == null) {
+			return false;
+		}
 
 		Long tokenUserId = null;
 		final Map<String, Object> otherClaims = accessToken.getOtherClaims();
@@ -40,8 +43,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 			tokenUserId = Long.valueOf(otherClaims.get(USER_ID_TOKEN_ATT).toString());
 		}
 
-		if (accessToken != null
-				&& ((userId.equals(tokenUserId) || accessToken.getRealmAccess().isUserInRole("adminRole")))) {
+		if (userId.equals(tokenUserId) || accessToken.getRealmAccess().isUserInRole("adminRole")) {
 			return true;
 		}
 		return false;

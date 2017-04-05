@@ -15,8 +15,13 @@ import org.shanoir.ng.shared.validation.Unique;
  *
  */
 @Entity
-@GenericGenerator(name = "IdOrGenerate", strategy="increment")
+@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class StudyStatus extends AbstractGenericItem {
+
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = 1636061761940084952L;
 
 	/** The label name. */
 	@NotBlank

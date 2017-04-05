@@ -21,8 +21,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name" })
-@GenericGenerator(name = "IdOrGenerate", strategy="increment")
+@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class Center extends HalEntity {
+
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -1965594174611746591L;
 
 	@NotBlank
 	@Column(unique = true)

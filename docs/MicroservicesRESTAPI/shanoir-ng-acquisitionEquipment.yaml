@@ -1,0 +1,223 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Shanoir NG Studies Microservice - Acquisition equipments managment
+  description: Microservice API for Shanoir NG acquisition equipments managment
+produces:
+  - application/json
+  
+paths:
+  /acquisitionequipment:
+    post:
+      operationId: saveNewAcquisitionEquipment
+      description: Saves a new acquisition equipment
+      consumes: 
+        - application/json
+      parameters:
+        - name: acquisitionEquipment
+          in: body
+          description: acquisition equipment to create
+          required: true
+          schema:
+            $ref: "#/definitions/AcquisitionEquipment"
+      responses:
+        '200':
+          description: created acquisition equipment
+          schema:
+            $ref: "#/definitions/AcquisitionEquipment"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '500':
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+  /acquisitionequipment/{acquisitionEquipmentId}:
+    get:
+      operationId: findAcquisitionEquipmentById
+      description: If exists, returns the acquisition equipment corresponding to the given id
+      parameters:
+        - $ref: "#/parameters/acquisitionEquipmentId"
+      responses:
+        '200':
+          description: found acquisition equipment 
+          schema:
+            $ref: "#/definitions/AcquisitionEquipment"
+        '204':
+          description: no acquisition equipment found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    put:
+      operationId: updateAcquisitionEquipment
+      description: Updates a acquisition equipment
+      consumes: 
+        - application/json
+      parameters:
+        - $ref: "#/parameters/acquisitionEquipmentId"
+        - name: acquisitionequipment
+          in: body
+          description: acquisition equipment to update
+          required: true
+          schema:
+            $ref: "#/definitions/AcquisitionEquipment"
+      responses:
+        '200':
+          description: acquisition equipment updated
+        '204':
+          description: acquisition equipment not found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: "#/definitions/ErrorModel"
+        '500':
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+    delete:
+      operationId: deleteAcquisitionEquipment
+      description: Deletes an acquisition equipment
+      parameters:
+        - $ref: "#/parameters/acquisitionEquipmentId"
+      responses:
+        '200':
+          description: acquisition equipment deleted
+        '204':
+          description: no acquisition equipment found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel' 
+  /acquisitionequipment/all:
+    get:
+      operationId: findAcquisitionEquipments
+      description: Returns all the acquisition equipments
+      responses:
+        '200':
+          description: found acquisition equipments 
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/AcquisitionEquipment"
+        '204':
+          description: no acquisition equipment found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/ErrorModel"
+parameters:
+  acquisitionEquipmentId:
+    name: acquisitionEquipmentId
+    in: path
+    description: id of the acquisition equipment
+    required: true
+    type: integer
+    format: int64
+
+definitions:
+  AcquisitionEquipment:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      center:
+        $ref: "#/definitions/Center"
+      manufacturerModel:
+        $ref: "#/definitions/ManufacturerModel"
+      serialNumber:
+        type: string
+  Center:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      street:
+        type: string
+      postalCode:
+        type: string
+      city: 
+        type: string
+      country:
+        type: string
+      phoneNumber:
+        type: string
+      website:
+        type: string
+  DatasetModalityType:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+  Manufacturer:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+  ManufacturerModel:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      datasetModalityType:
+        $ref: "#/definitions/DatasetModalityType"
+      manufacturer:
+        $ref: "#/definitions/Manufacturer"
+      name:
+        type: string
+  ErrorModel:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      details:
+        type: object
+      message:
+        type: string

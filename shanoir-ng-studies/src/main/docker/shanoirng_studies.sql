@@ -11,7 +11,7 @@ CREATE TABLE `center` (
   `website` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK_9ntt4q0n3w4lywq1k9xveiyo8` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8;
 
 INSERT INTO center(id, country, name, phone_number, postal_code, street, city, website)
 VALUES
@@ -39,4 +39,3 @@ CREATE TABLE `study` (
   KEY `FK602whnuqnamogethyglafvqjx` (`study_status_id`),
   CONSTRAINT `FK602whnuqnamogethyglafvqjx` FOREIGN KEY (`study_status_id`) REFERENCES `study_status` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-

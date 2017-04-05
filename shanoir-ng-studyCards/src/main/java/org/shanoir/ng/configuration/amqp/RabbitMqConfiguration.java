@@ -9,15 +9,15 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * RabbitMQ configuration.
- * 
+ *
  * @author msimon
  *
  */
 @Configuration
 public class RabbitMqConfiguration {
 
-	private final static String TEMPLATE_QUEUE_NAME_IN = "template_queue";
-	private final static String TEMPLATE_QUEUE_NAME_OUT = "template_queue_from_ng";
+	private final static String TEMPLATE_QUEUE_NAME_IN = "studycard_queue";
+	private final static String TEMPLATE_QUEUE_NAME_OUT = "studycard_queue_from_ng";
 
     @Bean
     public static Queue queueIn() {

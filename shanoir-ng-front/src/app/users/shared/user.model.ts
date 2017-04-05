@@ -13,7 +13,6 @@ export class User {
     lastLogin: Date;
     lastLoginOn: Date;
     lastName: string;
-    medical: boolean;
     motivation: string;
     role: Role;
     username: string;

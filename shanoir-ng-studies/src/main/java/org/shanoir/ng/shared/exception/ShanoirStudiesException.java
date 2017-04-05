@@ -2,8 +2,13 @@ package org.shanoir.ng.shared.exception;
 
 import org.slf4j.Logger;
 
-public class ShanoirStudiesException extends Exception{
-	
+public class ShanoirStudiesException extends Exception {
+
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -3427894964632186339L;
+
 	private int errorCode;
 
 	/**
@@ -61,6 +66,5 @@ public class ShanoirStudiesException extends Exception{
 		logger.error(message, e);
 		throw e;
 	}
-
 
 }

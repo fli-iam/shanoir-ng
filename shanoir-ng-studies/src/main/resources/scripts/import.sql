@@ -85,3 +85,25 @@ VALUES
 	(1,'subject1', 'sub1', '2013/01/01'),
 	(2,'subject2', 'sub2', '2001/02/01');
 	 
+
+INSERT INTO manufacturer
+	(id, name)
+VALUES 
+	(1, 'GE Healthcare'),
+	(2, 'GE Medical Systems'),
+	(3, 'Philips Healthcare');
+
+INSERT INTO manufacturer_model
+	(id, dataset_modality_type, manufacturer_id, name, magnetic_field)
+VALUES 
+	(1, 'MR_DATASET', 2, 'DISCOVERY MR750', 3),
+	(2, 'PET_DATASET', 2, 'DISCOVERY MR750w', null),
+	(3, 'MR_DATASET', 3, 'Ingenia', 1.5);
+
+INSERT INTO acquisition_equipment
+	(id, center_id, manufacturer_model_id, serial_number)
+VALUES 
+	(1, 1, 1, '123456789'),
+	(2, 2, 1, '234567891'),
+	(3, 1, 2, '345678912');
+

@@ -21,6 +21,7 @@
 	<modules>
 		<module>../shanoir-ng-users</module>
 		<module>../shanoir-ng-studies</module>
+		<module>../shanoir-ng-studyCards</module>
 		<module>../shanoir-ng-front</module>
 	</modules>
 
@@ -70,7 +71,7 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
-					<!-- <execution> <id>post-unit-test</id> <phase>test</phase> <goals> 
+					<!-- <execution> <id>post-unit-test</id> <phase>test</phase> <goals>
 						<goal>report</goal> </goals> </execution> -->
 				</executions>
 			</plugin>

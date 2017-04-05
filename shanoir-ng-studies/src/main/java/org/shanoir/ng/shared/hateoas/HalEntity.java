@@ -12,6 +12,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public abstract class HalEntity extends AbstractGenericItem {
 
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -8580796056437763225L;
+
 	@JsonIgnore
 	private Links links = new Links();
 
@@ -24,13 +29,13 @@ public abstract class HalEntity extends AbstractGenericItem {
 	}
 
 	/**
-	 * @param links the links to set
+	 * @param links
+	 *            the links to set
 	 */
 	@JsonIgnore
 	public void setLinks(Links links) {
 		this.links = links;
 	}
-
 
 	public void addLink(String key, String href) {
 		links.put(key, new Link(key, Links.BASE_URL + href));

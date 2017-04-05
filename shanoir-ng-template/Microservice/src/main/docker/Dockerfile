@@ -2,8 +2,6 @@ FROM shanoir-ng/debianjava8mariadb:latest
 
 COPY shanoir-ng-template-0.0.1-SNAPSHOT.jar /opt/shanoir-ng/shanoir-ng-template.jar
 
-COPY shanoir-ng-keycloak.jar /opt/shanoir-ng/shanoir-ng-keycloak.jar
-
 COPY my.cnf /etc/mysql/conf.d/shanoir-ng-template.cnf
 COPY ms.template.sv.conf /etc/supervisor/conf.d/ms.template.sv.conf
 
