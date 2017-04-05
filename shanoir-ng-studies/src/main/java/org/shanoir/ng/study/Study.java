@@ -29,6 +29,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
+import org.shanoir.ng.subject.SubjectStudy;
 import org.hibernate.validator.constraints.Length;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -78,6 +79,12 @@ public class Study extends HalEntity {
 	/** Study Status. */
 	@ManyToOne(fetch = FetchType.EAGER)
 	private StudyStatus studyStatus;
+	
+	/** Relations between the subjects and the studies. */
+
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	private List<SubjectStudy> subjectStudyList = new ArrayList<SubjectStudy>(0);
 
 	@Override
 	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")

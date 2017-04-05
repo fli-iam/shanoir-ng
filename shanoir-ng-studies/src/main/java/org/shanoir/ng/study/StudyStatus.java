@@ -23,7 +23,7 @@ public class StudyStatus extends AbstractGenericItem {
 	@Column(unique = true)
 	@Unique
 	private String labelName;
-
+	
 	/**
 	 * Gets the label name.
 	 *

@@ -68,7 +68,7 @@ public class StudyCardServiceImpl implements StudyCardService {
 		try {
 			savedStudyCard = studyCardRepository.save(studyCard);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudyCardsException.logAndThrow(LOG, "Error while creating template: " + dive.getMessage());
+			ShanoirStudyCardsException.logAndThrow(LOG, "Error while creating Study Card: " + dive.getMessage());
 		}
 		updateShanoirOld(savedStudyCard);
 		return savedStudyCard;
@@ -81,7 +81,7 @@ public class StudyCardServiceImpl implements StudyCardService {
 		try {
 			studyCardRepository.save(studyCardDb);
 		} catch (Exception e) {
-			ShanoirStudyCardsException.logAndThrow(LOG, "Error while updating template: " + e.getMessage());
+			ShanoirStudyCardsException.logAndThrow(LOG, "Error while updating Study Card: " + e.getMessage());
 		}
 		updateShanoirOld(studyCardDb);
 		return studyCardDb;
@@ -100,11 +100,13 @@ public class StudyCardServiceImpl implements StudyCardService {
 					studyCardRepository.save(studyCardDb);
 				} catch (Exception e) {
 					ShanoirStudyCardsException.logAndThrow(LOG,
-							"Error while updating template from Shanoir Old: " + e.getMessage());
+							"Error while updating Study Card from Shanoir Old: " + e.getMessage());
 				}
 			}
 		}
 	}
+	
+	
 
 	/*
 	 * Update Shanoir Old.
@@ -120,10 +122,10 @@ public class StudyCardServiceImpl implements StudyCardService {
 					new ObjectMapper().writeValueAsString(studyCard));
 			return true;
 		} catch (AmqpException e) {
-			LOG.error("Cannot send template " + studyCard.getId() + " save/update to Shanoir Old on queue : "
+			LOG.error("Cannot send Study Card " + studyCard.getId() + " save/update to Shanoir Old on queue : "
 					+ RabbitMqConfiguration.queueOut().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send template " + studyCard.getId() + " save/update because of an error while serializing template.",
+			LOG.error("Cannot send Study Card " + studyCard.getId() + " save/update because of an error while serializing Study Card.",
 					e);
 		}
 		return false;
@@ -142,6 +144,11 @@ public class StudyCardServiceImpl implements StudyCardService {
 		studyCardDb.setName(studyCard.getName());
 		studyCardDb.setDisabled(studyCard.isDisabled());
 		return studyCardDb;
+	}
+
+	@Override
+	public List<StudyCard> findStudyCardsOfStudy(Long studyId) throws ShanoirStudyCardsException {
+		return null;
 	}
 
 }
