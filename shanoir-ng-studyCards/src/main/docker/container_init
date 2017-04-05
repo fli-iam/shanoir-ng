@@ -8,7 +8,7 @@ mkdir -p /vol/log/supervisor
 
 service mysql start
 echo "Populate database"
-mysql -u shanoir -pshanoir shanoir_ng_template < /dk/shanoirng_template.sql
+mysql -u shanoir -pshanoir shanoir_ng_studycards < /dk/shanoirng_studycards.sql
 
 echo "Stop mysql process"
 mysqladmin -u root -p$MYSQL_ROOT_PASSWORD shutdown
