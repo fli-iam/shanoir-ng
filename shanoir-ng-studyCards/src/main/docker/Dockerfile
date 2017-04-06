@@ -1,6 +1,6 @@
 FROM shanoir-ng/debianjava8mariadb:latest
 
-COPY shanoir-ng-studyCards-0.0.1-SNAPSHOT.jar /opt/shanoir-ng/shanoir-ng-studycards.jar
+COPY shanoir-ng-studycards-0.0.1-SNAPSHOT.jar /opt/shanoir-ng/shanoir-ng-studycards.jar
 
 COPY my.cnf /etc/mysql/conf.d/shanoir-ng-studycards.cnf
 COPY ms.studycards.sv.conf /etc/supervisor/conf.d/ms.studycards.sv.conf
