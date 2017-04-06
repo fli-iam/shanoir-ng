@@ -19,7 +19,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: update
+      ddl-auto: validate
       # Naming strategy
       naming:
         strategy: org.hibernate.cfg.ImprovedNamingStrategy
