@@ -39,3 +39,17 @@ CREATE TABLE `study` (
   KEY `FK602whnuqnamogethyglafvqjx` (`study_status_id`),
   CONSTRAINT `FK602whnuqnamogethyglafvqjx` FOREIGN KEY (`study_status_id`) REFERENCES `study_status` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO study_status
+	(id, label_name)
+VALUES
+	(1,'finished'),
+	(2,'in_progress');
+
+INSERT INTO study
+	(id, name, start_date, end_date, clinical, with_examination, is_visible_by_default, is_downloadable_by_default, study_status_id)
+VALUES
+	(1,'Study 1', '2013/01/01', null, 0, 1, 0, 0, null),
+	(2,'Study 2', '2009/12/01', null, 0, 1, 0, 0, null),
+	(3,'Study 3', '2010/02/21', null, 0, 1, 0, 0, null),
+	(4,'Study 4', '2015/10/03', null, 0, 1, 0, 0, null);
