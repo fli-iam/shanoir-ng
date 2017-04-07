@@ -28,7 +28,8 @@ public class StudyCard extends HalEntity {
 	
 	private boolean isDisabled = false;
 	
-	private List<Long> studyIds;
+	
+	//private List<Long> studyIds;
 
 	/**
 	 * Init HATEOAS links

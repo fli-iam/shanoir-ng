@@ -76,8 +76,8 @@ public class Study extends HalEntity {
 	@ManyToOne(fetch = FetchType.EAGER)
 	private StudyStatus studyStatus;
 	
-	/** Relations between the subjects and the studies. */
-
+	/** Relations between the subjects and the studies. */	
+	
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
 	private List<SubjectStudy> subjectStudyList = new ArrayList<SubjectStudy>(0);

@@ -78,12 +78,21 @@ VALUES
 	(50,'France','CHU St Roch - Nice','','06006','5 rue Pierre Devoluy','Nice',''),
 	(51,'France','CHU Poitiers','','86000','rue de la miletrie','Poitiers','');
 	
-	
+
 INSERT INTO subject
 	(id, name, identifier, birth_date )
 VALUES
 	(1,'subject1', 'sub1', '2013/01/01'),
 	(2,'subject2', 'sub2', '2001/02/01');
+
+INSERT INTO subject_study
+	(id, physically_involved, study, subject )
+VALUES
+	(1, 0, 1, 1),
+	(2, 0, 1, 2),
+	(3, 0, 2, 1);
+	
+
 	 
 
 INSERT INTO manufacturer
