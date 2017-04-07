@@ -1,6 +1,10 @@
 package org.shanoir.ng.studyCards;
 
+import java.util.List;
+
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
@@ -23,6 +27,8 @@ public class StudyCard extends HalEntity {
 	private String name;
 	
 	private boolean isDisabled = false;
+	
+	private List<Long> studyIds;
 
 	/**
 	 * Init HATEOAS links
@@ -47,7 +53,5 @@ public class StudyCard extends HalEntity {
 	public void setDisabled(boolean isDisabled) {
 		this.isDisabled = isDisabled;
 	}
-	
-	
 
 }

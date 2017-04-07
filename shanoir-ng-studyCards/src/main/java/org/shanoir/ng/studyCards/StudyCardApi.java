@@ -71,7 +71,7 @@ public interface StudyCardApi {
     @RequestMapping(value = "/studyCard/{studyId}/allStudyCards",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    ResponseEntity<StudyCard> findStudyCardsByStudyId(@ApiParam(value = "id of the study",required=true ) @PathVariable("studyId") Long studyId);
+    ResponseEntity<List<StudyCard>> findStudyCardsByStudyId(@ApiParam(value = "id of the study",required=true ) @PathVariable("studyId") Long studyId);
 
 
     @ApiOperation(value = "", notes = "Saves a new study card", response = StudyCard.class, tags={  })

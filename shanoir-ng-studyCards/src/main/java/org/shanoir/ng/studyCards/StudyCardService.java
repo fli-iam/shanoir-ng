@@ -75,6 +75,9 @@ public interface StudyCardService extends UniqueCheckableService<StudyCard> {
 	 *            template.
 	 * @throws ShanoirTemplateException
 	 */
+	
+	List<StudyCard> findStudyCardsOfStudy (Long studyId) throws ShanoirStudyCardsException;
+	
 	void updateFromShanoirOld(StudyCard template) throws ShanoirStudyCardsException;
 
 }

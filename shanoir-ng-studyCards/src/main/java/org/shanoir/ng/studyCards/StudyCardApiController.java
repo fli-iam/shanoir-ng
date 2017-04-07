@@ -165,9 +165,12 @@ public class StudyCardApiController implements StudyCardApi  {
 	}
 
 	@Override
-    public ResponseEntity<StudyCard> findStudyCardsByStudyId(@ApiParam(value = "id of the study",required=true ) @PathVariable("studyId") Long studyId) {
-        // do some magic!
-        return new ResponseEntity<StudyCard>(HttpStatus.OK);
+    public ResponseEntity<List<StudyCard>> findStudyCardsByStudyId(@ApiParam(value = "id of the study",required=true ) @PathVariable("studyId") Long studyId) {	
+		final List<StudyCard> studyCards = null;
+		if (studyCards.isEmpty()) {
+			return new ResponseEntity<List<StudyCard>>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<List<StudyCard>>(studyCards, HttpStatus.OK);
     }
 	
 	
