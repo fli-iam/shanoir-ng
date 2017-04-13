@@ -102,4 +102,16 @@ public interface SubjectApi {
         method = RequestMethod.GET)
     ResponseEntity<List<Subject>> findSubjectsByStudyId(@ApiParam(value = "id of the study",required=true ) @PathVariable("studyId") Long studyId);
     
+    @ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given identifier", response = Subject.class, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "found subject", response = Subject.class),
+        @ApiResponse(code = 204, message = "no subject found", response = Subject.class),
+        @ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
+        @ApiResponse(code = 403, message = "forbidden", response = Subject.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
+    @RequestMapping(value = "/subject/findByIdentifier/{subjectIdentifier}",
+        produces = { "application/json" }, 
+        method = RequestMethod.GET)
+    ResponseEntity<Subject> findSubjectByIdentifier(@ApiParam(value = "identifier of the subject",required=true ) @PathVariable("subjectIdentifier") String subjectIdentifier);
+    
 }

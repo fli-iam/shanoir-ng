@@ -12,12 +12,20 @@ import org.springframework.data.repository.CrudRepository;
 public interface SubjectRepository extends CrudRepository<Subject, Long>, SubjectRepositoryCustom {
 
 	/**
-	 * Find template by data.
+	 * Find subject by name.
 	 *
-	 * @param data
-	 *            data.
-	 * @return a template.
+	 * @param name
+	 *            
+	 * @return a Subject.
 	 */
 	Optional<Subject> findByName(String name);
+	/**
+	 * Find subject by identifier.
+	 *
+	 * @param identifier
+	 *            
+	 * @return a Subject.
+	 */
+	Optional<Subject> findByIdentifier(String identifier);
 
 }

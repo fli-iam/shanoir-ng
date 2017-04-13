@@ -5,6 +5,7 @@ import org.shanoir.ng.center.Center;
 import org.shanoir.ng.manufacturermodel.DatasetModalityType;
 import org.shanoir.ng.manufacturermodel.Manufacturer;
 import org.shanoir.ng.manufacturermodel.ManufacturerModel;
+import org.shanoir.ng.subject.Subject;
 
 /**
  * Utility class for test.
@@ -26,6 +27,9 @@ public final class ModelsUtil {
 	
 	// Manufacturer model data
 	public static final String MANUFACTURER_MODEL_NAME = "manufacturerModel";
+	
+	// Subject data
+	public static final String SUBJECT_NAME = "subject";
 	
 	/**
 	 * Create a center.
@@ -73,6 +77,18 @@ public final class ModelsUtil {
 		final Manufacturer manufacturer = new Manufacturer();
 		manufacturer.setName(MANUFACTURER_NAME);
 		return manufacturer;
+	}
+	
+	public static Subject createSubject() {
+		final Subject subject = new Subject();
+		subject.setName(SUBJECT_NAME);
+		/*subject.setBirthDate(null);
+		subject.setIdentifier(null);
+		subject.setPseudonymusHashValues(null);
+		subject.setSex(null);
+		subject.setLinks(null);
+		subject.setSubjectStudyList(null);*/
+		return subject;
 	}
 	
 }

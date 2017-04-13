@@ -84,5 +84,15 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @return list of subjects
 	 */
 	public List<Subject> findAllSubjectsOfStudy(final Long studyId);
+	
+	/**
+	 * Find subject by its identifier.
+	 *
+	 * @param indentifier
+	 *            data.
+	 * @return a indentifier.
+	 */
+	Subject findByIdentifier(String indentifier);
+	
 
 }

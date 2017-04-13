@@ -47,6 +47,6 @@ VALUES
 INSERT INTO subject
 	(id, name, identifier, birth_date )
 VALUES
-	(1,'subject1', 'sub1', '2013/01/01'),
-	(2,'subject2', 'sub2', '2001/02/01');
+	(1,'subject1', 'sub1', parsedatetime('2013/01/01', 'yyyy/MM/dd')),
+	(2,'subject2', 'sub2', parsedatetime('2001/02/01', 'yyyy/MM/dd'));
 

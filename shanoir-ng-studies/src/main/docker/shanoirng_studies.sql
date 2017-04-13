@@ -24,6 +24,22 @@ CREATE TABLE `study_status` (
   UNIQUE KEY `UK_l7kodam6g756cg07p4yw0wog4` (`label_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `ref_study_user_type` (
+  `ref_study_user_type_id` bigint(20) NOT NULL,
+  `label_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`ref_study_user_type_id`),
+  UNIQUE KEY `UK_i7w756cvyekp56j1m546un5m3` (`label_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `rel_study_user` (
+  `rel_study_user_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) DEFAULT NULL,
+  `study` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`rel_study_user_id`),
+  KEY `FK3b20son2nfw5snu78fyuxe13d` (`study`),
+  CONSTRAINT `FK3b20son2nfw5snu78fyuxe13d` FOREIGN KEY (`study`) REFERENCES `study` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+
 CREATE TABLE `study` (
   `id` bigint(20) NOT NULL,
   `clinical` bit(1) NOT NULL,
@@ -53,3 +69,101 @@ VALUES
 	(2,'Study 2', '2009/12/01', null, 0, 1, 0, 0, null),
 	(3,'Study 3', '2010/02/21', null, 0, 1, 0, 0, null),
 	(4,'Study 4', '2015/10/03', null, 0, 1, 0, 0, null);
+	
+CREATE TABLE `pseudonymus_hash_values` (
+  `id` bigint(20) NOT NULL,
+  `birth_date_hash` varchar(255) DEFAULT NULL,
+  `birth_name_hash1` varchar(255) DEFAULT NULL,
+  `birth_name_hash2` varchar(255) DEFAULT NULL,
+  `birth_name_hash3` varchar(255) DEFAULT NULL,
+  `first_name_hash1` varchar(255) DEFAULT NULL,
+  `first_name_hash2` varchar(255) DEFAULT NULL,
+  `first_name_hash3` varchar(255) DEFAULT NULL,
+  `last_name_hash1` varchar(255) DEFAULT NULL,
+  `last_name_hash2` varchar(255) DEFAULT NULL,
+  `last_name_hash3` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+	
+CREATE TABLE `sex` (
+  `id` bigint(20) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `subject_type` (
+  `id` bigint(20) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+	
+	CREATE TABLE `subject` (
+  `id` bigint(20) NOT NULL,
+  `birth_date` datetime DEFAULT NULL,
+  `identifier` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `sex` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKtduy53un9gt43fbb3fx6nokfn` (`sex`),
+  CONSTRAINT `FKtduy53un9gt43fbb3fx6nokfn` FOREIGN KEY (`sex`) REFERENCES `sex` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `subject` VALUES (1,'2013-01-01 00:00:00','sub1','subject1',NULL),(2,'2001-02-01 00:00:00','sub2','subject2',NULL);
+
+CREATE TABLE `subject_study` (
+  `id` bigint(20) NOT NULL,
+  `physically_involved` bit(1) NOT NULL,
+  `subject_study_identifier` varchar(255) DEFAULT NULL,
+  `study` bigint(20) DEFAULT NULL,
+  `subject` bigint(20) DEFAULT NULL,
+  `type` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKelblgk1bc448k1jrlaq0lue5d` (`study`),
+  KEY `FKft8kki1chfo5h4q8l64slqb4c` (`subject`),
+  KEY `FKh9recsf0nwxjoxx3qfjoudtom` (`type`),
+  CONSTRAINT `FKelblgk1bc448k1jrlaq0lue5d` FOREIGN KEY (`study`) REFERENCES `study` (`id`),
+  CONSTRAINT `FKft8kki1chfo5h4q8l64slqb4c` FOREIGN KEY (`subject`) REFERENCES `subject` (`id`),
+  CONSTRAINT `FKh9recsf0nwxjoxx3qfjoudtom` FOREIGN KEY (`type`) REFERENCES `subject_type` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `subject_study` VALUES (1,'\0',NULL,1,1,NULL),(2,'\0',NULL,1,2,NULL),(3,'\0',NULL,2,1,NULL);
+
+CREATE TABLE `acquisition_equipment` (
+  `id` bigint(20) NOT NULL,
+  `serial_number` varchar(255) DEFAULT NULL,
+  `center_id` bigint(20) NOT NULL,
+  `manufacturer_model_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKnfu3vqdsoj1y339uq7alaltjv` (`center_id`),
+  KEY `FKbvbig13gxsu8gxaw9h6uemhk4` (`manufacturer_model_id`),
+  CONSTRAINT `FKbvbig13gxsu8gxaw9h6uemhk4` FOREIGN KEY (`manufacturer_model_id`) REFERENCES `manufacturer_model` (`id`),
+  CONSTRAINT `FKnfu3vqdsoj1y339uq7alaltjv` FOREIGN KEY (`center_id`) REFERENCES `center` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `acquisition_equipment` VALUES (1,'123456789',1,1),(2,'234567891',2,1),(3,'345678912',1,2);
+
+CREATE TABLE `manufacturer` (
+  `id` bigint(20) NOT NULL,
+  `name` varchar(200) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_fvhf6l0xkf8hnay7lvwimnwu1` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `manufacturer` VALUES (1,'GE Healthcare'),(2,'GE Medical Systems'),(3,'Philips Healthcare');
+
+CREATE TABLE `manufacturer_model` (
+  `dataset_modality_type` varchar(31) NOT NULL,
+  `id` bigint(20) NOT NULL,
+  `name` varchar(200) NOT NULL,
+  `magnetic_field` double DEFAULT NULL,
+  `manufacturer_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_i9hga82t5tie3gsf9pvkxkb0m` (`name`),
+  KEY `FKdaf3kbh73wqquhyggxyhaadq7` (`manufacturer_id`),
+  CONSTRAINT `FKdaf3kbh73wqquhyggxyhaadq7` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturer` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `manufacturer_model` VALUES ('MR_DATASET',1,'DISCOVERY MR750',3,2),('PET_DATASET',2,'DISCOVERY MR750w',NULL,2),('MR_DATASET',3,'Ingenia',1.5,3);
+
+
+

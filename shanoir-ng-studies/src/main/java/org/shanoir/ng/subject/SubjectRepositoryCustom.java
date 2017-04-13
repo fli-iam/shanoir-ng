@@ -11,13 +11,13 @@ import java.util.List;
 public interface SubjectRepositoryCustom {
 
 	/**
-	 * Find templates by field value.
+	 * Find Subjects by field value.
 	 * 
 	 * @param fieldName
 	 *            searched field name.
 	 * @param value
 	 *            value.
-	 * @return list of templates.
+	 * @return list of Subjects.
 	 */
 	List<Subject> findBy(String fieldName, Object value);
 

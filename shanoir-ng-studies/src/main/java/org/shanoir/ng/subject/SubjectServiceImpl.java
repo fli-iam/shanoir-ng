@@ -179,5 +179,19 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 	}
 
+	@Override
+	public Subject findByIdentifier(String identifier) {
+		Optional<Subject> opt=subjectRepository.findByIdentifier(identifier);
+		if (opt.isPresent())
+		 return opt.get();
+		else
+		{
+			LOG.info("No existing subjects for identifier " + identifier);
+		    return null;
+		}
+	}
+	
+	
+
 }
 

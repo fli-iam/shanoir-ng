@@ -35,12 +35,12 @@ public class SubjectApiController implements SubjectApi  {
 
 	@Override
 	public ResponseEntity<Void> deleteSubject
-		(@ApiParam(value = "id of the study card",required=true ) @PathVariable("studyCardId") Long studyCardId) {
-		if (subjectService.findById(studyCardId) == null) {
+		(@ApiParam(value = "id of the subject",required=true ) @PathVariable("subjectId") Long subjectId) {
+		if (subjectService.findById(subjectId) == null) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
 		try {
-			subjectService.deleteById(studyCardId);
+			subjectService.deleteById(subjectId);
 		} catch (ShanoirSubjectException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 		}
@@ -175,6 +175,17 @@ public class SubjectApiController implements SubjectApi  {
 			return new ResponseEntity<List<Subject>>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<List<Subject>>(subjects, HttpStatus.OK);
+		
+	}
+
+	@Override
+	public ResponseEntity<Subject> findSubjectByIdentifier(@ApiParam(value = "identifier of the subject",required=true ) @PathVariable("subjectIdentifier") String subjectIdentifier) {
+		
+		final Subject subject = subjectService.findByIdentifier(subjectIdentifier);
+		if (subject == null) {
+			return new ResponseEntity<Subject>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<Subject>(subject, HttpStatus.OK);
 		
 	}
 	
