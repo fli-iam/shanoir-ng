@@ -183,7 +183,7 @@ public class SubjectApiController implements SubjectApi  {
 		
 		final Subject subject = subjectService.findByIdentifier(subjectIdentifier);
 		if (subject == null) {
-			return new ResponseEntity<Subject>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<Subject>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<Subject>(subject, HttpStatus.OK);
 		
