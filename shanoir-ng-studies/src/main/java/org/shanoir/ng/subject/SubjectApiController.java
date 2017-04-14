@@ -84,8 +84,6 @@ public class SubjectApiController implements SubjectApi  {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
 		}
 
-		// Guarantees it is a creation, not an update
-		subject.setId(null);
 
 		/* Save template in db. */
 		try {

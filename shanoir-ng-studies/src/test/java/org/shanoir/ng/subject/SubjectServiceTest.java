@@ -2,7 +2,9 @@ package org.shanoir.ng.subject;
 
 import static org.mockito.BDDMockito.given;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Assert;
@@ -72,14 +74,14 @@ public class SubjectServiceTest {
 
 	@Test
 	public void saveTest() throws ShanoirSubjectException {
-		subjectService.save(createSubject());
+		subjectService.save(createSubjectTosave());
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
 
 	@Test
 	public void updateTest() throws ShanoirSubjectException {
-		final Subject updatedSubject = subjectService.update(createSubject());
+		final Subject updatedSubject = subjectService.update(createSubjectToUpdate());
 		Assert.assertNotNull(updatedSubject);
 		Assert.assertTrue(UPDATED_SUBJECT_DATA.equals(updatedSubject.getName()));
 
@@ -88,16 +90,42 @@ public class SubjectServiceTest {
 
 	@Test
 	public void updateFromShanoirOldTest() throws ShanoirSubjectException {
-		subjectService.updateFromShanoirOld(createSubject());
+		subjectService.updateFromShanoirOld(createSubjectToUpdate());
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).findOne(Mockito.anyLong());
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
 
-	private Subject createSubject() {
+	private Subject createSubjectToUpdate() {
 		final Subject subject = new Subject();
 		subject.setId(SUBJECT_ID);
 		subject.setName(UPDATED_SUBJECT_DATA);
+		return subject;
+	}
+	
+	private Subject createSubjectTosave() {
+		final Subject subject = new Subject();
+		subject.setName("Toto");
+		subject.setBirthDate(new Date(2014, 02, 11));
+		subject.setIdentifier("Titi");
+		
+		subject.setImagedObjectCategory(new ImagedObjectCategory("Phantom"));
+		subject.setLanguageHemisphericDominance(new HemisphericDominance("Left"));
+		subject.setManualRefHemisphericDominance(new HemisphericDominance("Left"));
+		PseudonymusHashValues pseudonymusHashValues= new PseudonymusHashValues();
+		pseudonymusHashValues.setBirthDateHash("uihuizdhuih");
+		subject.setPseudonymusHashValues(pseudonymusHashValues);
+		Sex sex=new Sex();
+		sex.setName("F");
+		subject.setSex(sex);
+		UserPersonalCommentSubject userPersonalCommentList1= new UserPersonalCommentSubject();
+		userPersonalCommentList1.setComment("comment1");
+		UserPersonalCommentSubject userPersonalCommentList2= new UserPersonalCommentSubject();
+		userPersonalCommentList1.setComment("comment2");
+		List<UserPersonalCommentSubject> listSubjectComments = new ArrayList();
+		listSubjectComments.add(userPersonalCommentList1);
+		listSubjectComments.add(userPersonalCommentList2);
+		subject.setUserPersonalCommentList(listSubjectComments);
 		return subject;
 	}
 

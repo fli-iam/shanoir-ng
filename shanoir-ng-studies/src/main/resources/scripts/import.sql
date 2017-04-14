@@ -78,12 +78,44 @@ VALUES
 	(50,'France','CHU St Roch - Nice','','06006','5 rue Pierre Devoluy','Nice',''),
 	(51,'France','CHU Poitiers','','86000','rue de la miletrie','Poitiers','');
 	
+INSERT INTO sex 
+VALUES 
+	(1,'M'),
+	(2,'F');
 
-INSERT INTO subject
-	(id, name, identifier, birth_date )
+INSERT INTO hemispheric_dominance
 VALUES
-	(1,'subject1', 'sub1', '2013/01/01'),
-	(2,'subject2', 'sub2', '2001/02/01');
+	(1, 'Left'),
+	(2, 'Right');
+	
+INSERT INTO imaged_object_category
+VALUES
+	(1, 'Phantom'),
+	(2, 'Living human being'),
+	(3, 'Human cadaver'),
+	(4, 'Anatomical piece');
+	
+INSERT INTO pseudonymus_hash_values
+ (id, birth_name_hash1, birth_name_hash2, birth_name_hash3, last_name_hash1, last_name_hash2, last_name_hash3, first_name_hash1, first_name_hash2, first_name_hash3, birth_date_hash)
+VALUES
+ (  1,
+    'edbee6d1302d1b5a749aeb42e5747ea8503f3f5ae3f2b41247cac3e735106ed5',
+    'f5b1f63c652852724daec3ab2fc51ba20792a0cf85c102066d412746dda72b84',
+    'f7ca8a978bd2ba11ee0d843453103938562b6e48ef3237e2daf3a743f826f7ee',
+    'edbee6d1302d1b5a749aeb42e5747ea8503f3f5ae3f2b41247cac3e735106ed5',
+    'f5b1f63c652852724daec3ab2fc51ba20792a0cf85c102066d412746dda72b84',
+    'f7ca8a978bd2ba11ee0d843453103938562b6e48ef3237e2daf3a743f826f7ee',
+    'edbee6d1302d1b5a749aeb42e5747ea8503f3f5ae3f2b41247cac3e735106ed5',
+    'f5b1f63c652852724daec3ab2fc51ba20792a0cf85c102066d412746dda72b84',
+    'f7ca8a978bd2ba11ee0d843453103938562b6e48ef3237e2daf3a743f826f7ee',
+    'efa0bd9d3793157b8b44cd76814c079e0eb1f8a3a3017dc0a58959f581d7a097');
+  
+INSERT INTO subject
+	(id, name, identifier, birth_date, imaged_object_category_id, language_hemispheric_dominance_id,  manual_ref_hemispheric_dominance_id, sex,  pseudonymus_hash_values_id)
+VALUES
+	(1,'subject1', 'sub1', '2013/01/01', 2,1,1,1,1),
+	(2,'subject2', 'sub2', '2001/02/01', 2,1,1,2,1);
+	
 
 INSERT INTO subject_study
 	(id, physically_involved, study, subject )
@@ -91,9 +123,7 @@ VALUES
 	(1, 0, 1, 1),
 	(2, 0, 1, 2),
 	(3, 0, 2, 1);
-	
 
-	 
 
 INSERT INTO manufacturer
 	(id, name)

@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @Entity
 @Table(name="subject")
-@JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate" })
+@JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate" , "imagedObjectCategory"})
 @GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class Subject extends HalEntity {
 
@@ -42,15 +42,35 @@ public class Subject extends HalEntity {
 	/** Relations between the subjects and the studies. */
 	
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY)
-	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE})
 	private List<SubjectStudy>  subjectStudyList = new ArrayList<SubjectStudy>(0);
 
 	private String identifier;
 
 	
-	@OneToOne (mappedBy = "subject", cascade = CascadeType.ALL)
-	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	@OneToOne 
 	private PseudonymusHashValues pseudonymusHashValues;
+	
+	
+	/** Language Hemispheric dominance. */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn( nullable = true, updatable = true)
+	private HemisphericDominance languageHemisphericDominance;
+
+	/** Manual Hemispheric dominance. */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(nullable = true, updatable = true)
+	private HemisphericDominance manualHemisphericDominance;
+	
+	/** The category of the subject (phantom, human alive, human cadaver, etc.). */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(nullable = true, updatable = true)
+	private ImagedObjectCategory imagedObjectCategory;
+	
+	/** Personal Comments on this subject. */
+	@OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
+	//@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+	private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<UserPersonalCommentSubject>(0);
 
 	/**
 	 * Init HATEOAS links
@@ -114,6 +134,41 @@ public class Subject extends HalEntity {
 	public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
 		this.pseudonymusHashValues = pseudonymusHashValues;
 	}
+
+	public HemisphericDominance getLanguageHemisphericDominance() {
+		return languageHemisphericDominance;
+	}
+
+	public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
+		this.languageHemisphericDominance = languageHemisphericDominance;
+	}
+
+	public HemisphericDominance getManualRefHemisphericDominance() {
+		return manualHemisphericDominance;
+	}
+
+	public void setManualRefHemisphericDominance(HemisphericDominance manualRefHemisphericDominance) {
+		this.manualHemisphericDominance = manualRefHemisphericDominance;
+	}
+
+
+	public ImagedObjectCategory getImagedObjectCategory() {
+		return imagedObjectCategory;
+	}
+
+	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
+		this.imagedObjectCategory = imagedObjectCategory;
+	}
+
+	public List<UserPersonalCommentSubject> getUserPersonalCommentList() {
+		return userPersonalCommentList;
+	}
+
+	public void setUserPersonalCommentList(List<UserPersonalCommentSubject> userPersonalCommentList) {
+		this.userPersonalCommentList = userPersonalCommentList;
+	}
+	
+	
 
 	
 }
