@@ -1,5 +1,6 @@
 package org.shanoir.ng.subject;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,6 +94,8 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @return a indentifier.
 	 */
 	Subject findByIdentifier(String indentifier);
+
+	Subject saveFromJson(File jsonFile) throws ShanoirSubjectException;
 	
 
 }

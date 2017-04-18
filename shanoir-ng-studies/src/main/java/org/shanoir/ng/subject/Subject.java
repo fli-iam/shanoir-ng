@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @Entity
 @Table(name="subject")
-@JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate" , "imagedObjectCategory"})
+@JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate" , "imagedObjectCategory"," pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance", "userPersonalCommentList" })
 @GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class Subject extends HalEntity {
 
@@ -71,7 +71,7 @@ public class Subject extends HalEntity {
 	@OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
 	//@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
 	private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<UserPersonalCommentSubject>(0);
-
+	
 	/**
 	 * Init HATEOAS links
 	 */
@@ -166,6 +166,17 @@ public class Subject extends HalEntity {
 
 	public void setUserPersonalCommentList(List<UserPersonalCommentSubject> userPersonalCommentList) {
 		this.userPersonalCommentList = userPersonalCommentList;
+	}
+
+	@Override
+	public String toString() {
+		return "Subject [getId()=" + getId() + ", getBirthDate()=" + getBirthDate() + ", getName()=" + getName()
+				+ ", getSex()=" + getSex() + ", getSubjectStudyList()=" + getSubjectStudyList() + ", getIdentifier()="
+				+ getIdentifier() + ", getPseudonymusHashValues()=" + getPseudonymusHashValues()
+				+ ", getLanguageHemisphericDominance()=" + getLanguageHemisphericDominance()
+				+ ", getManualRefHemisphericDominance()=" + getManualRefHemisphericDominance()
+				+ ", getImagedObjectCategory()=" + getImagedObjectCategory() + ", getUserPersonalCommentList()="
+				+ getUserPersonalCommentList() + "]";
 	}
 	
 	

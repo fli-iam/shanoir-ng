@@ -2,6 +2,7 @@ package org.shanoir.ng.subject;
 
 import java.util.List;
 
+import javax.validation.Valid;
 
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -84,7 +85,7 @@ public class SubjectApiController implements SubjectApi  {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
 		}
 
-
+		System.out.println(subject.getIdentifier());
 		/* Save template in db. */
 		try {
 			final Subject createdSubject = subjectService.save(subject);

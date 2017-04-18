@@ -9,16 +9,21 @@ import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 @Entity
 @Table(name="pseudonymus_hash_values")
-public class PseudonymusHashValues  implements Serializable {
+@JsonPropertyOrder({ "_links", "id", "birthNameHash1", "birthNameHash2", "birthNameHash3","lastNameHash1","lastNameHash2","lastNameHash3","firstNameHash1","firstNameHash2","firstNameHash3","birthDateHash", "subject" })
+@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+public class PseudonymusHashValues  extends HalEntity implements Serializable {
 	
-	@Id
-	private Long id;
+	/*@Id
+	private Long id;*/
 	
 	/** Subject. */
 	@OneToOne
@@ -44,6 +49,7 @@ public class PseudonymusHashValues  implements Serializable {
 	private String firstNameHash3;
 
 	private String birthDateHash;
+	
 
 	/*
 	 * (non-Javadoc)
@@ -171,13 +177,13 @@ public class PseudonymusHashValues  implements Serializable {
 	
 	
 
-	public Long getId() {
+	/*public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
-	}
+	}*/
 
 	public Subject getSubject() {
 		return subject;

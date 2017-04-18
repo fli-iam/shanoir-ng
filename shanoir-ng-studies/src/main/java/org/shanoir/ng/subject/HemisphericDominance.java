@@ -6,18 +6,27 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.hateoas.HalEntity;
+import org.shanoir.ng.shared.hateoas.Links;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 @Entity
-public class HemisphericDominance implements Serializable, Comparable<HemisphericDominance>, IRefEntity{
+@JsonPropertyOrder({ "_links", "id", "labelName"})
+@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+public class HemisphericDominance extends HalEntity implements Serializable, Comparable<HemisphericDominance>, IRefEntity{
 	
 	/** The id. */
-	@Id
-	//@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	/*@Id
+	private Long id;*/
 
 	/** The label name. */
 	private String labelName;
+
 
 	/**
 	 * Creates a new RefHemisphericDominance object.
@@ -43,18 +52,18 @@ public class HemisphericDominance implements Serializable, Comparable<Hemispheri
 	 * @return the id
 	 */
 
-	public Long getId() {
+	/*public Long getId() {
 		return id;
-	}
+	}*/
 
 	/**
 	 * Sets the id.
 	 *
 	 * @param id the id
 	 */
-	public void setId(final Long id) {
+	/*public void setId(final Long id) {
 		this.id = id;
-	}
+	}*/
 	
 	/**
 	 * Gets the label name.

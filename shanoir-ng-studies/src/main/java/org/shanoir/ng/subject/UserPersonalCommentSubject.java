@@ -10,8 +10,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.hateoas.HalEntity;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 @Entity
-public class UserPersonalCommentSubject implements Serializable, IDisplayableObject, IPersistableEntity{
+@JsonPropertyOrder({ "_links", "id", "subject", "comment" })
+@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+public class UserPersonalCommentSubject extends HalEntity implements Serializable, IDisplayableObject, IPersistableEntity{
 	
 	/** The Constant serialVersionUID. */
 	//private static final long serialVersionUID = 3810595736081979394L;
@@ -29,9 +36,9 @@ public class UserPersonalCommentSubject implements Serializable, IDisplayableObj
 	private User user;*/
 
 	/** The id. */
-	@Id
+	/*@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	private Long id;*.
 
 	/*
 	 * (non-Javadoc)
@@ -123,9 +130,9 @@ public class UserPersonalCommentSubject implements Serializable, IDisplayableObj
 	 *
 	 * @return the id
 	 */
-	public Long getId() {
+	/*public Long getId() {
 		return id;
-	}
+	}*/
 
 	/**
 	 * Sets the id.
@@ -133,9 +140,9 @@ public class UserPersonalCommentSubject implements Serializable, IDisplayableObj
 	 * @param id
 	 *            the id to set
 	 */
-	public void setId(final Long id) {
+	/*public void setId(final Long id) {
 		this.id = id;
-	}
+	}*/
 
 	/*
 	 * (non-Javadoc)

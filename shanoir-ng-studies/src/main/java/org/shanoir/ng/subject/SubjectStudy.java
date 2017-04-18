@@ -8,19 +8,23 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.study.Study;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 @Entity
 @Table(name = "subject_study")
-public class SubjectStudy{
+@JsonPropertyOrder({ "_links", "id", "subject", "subjectType", "study", "subjectStudyIdentifier" , "physicallyInvolved" })
+@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+public class SubjectStudy extends HalEntity{
 	
-	@Id
-	private Long id;
+	/*@Id
+	private Long id;*/
 	
 	private boolean physicallyInvolved;
 	
@@ -44,13 +48,13 @@ public class SubjectStudy{
 	private String subjectStudyIdentifier;
 	
 	
-	public Long getId() {
+	/*public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
-	}
+	}*/
 
 	public boolean isPhysicallyInvolved() {
 		return physicallyInvolved;

@@ -1,5 +1,7 @@
 package org.shanoir.ng.subject;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -74,6 +78,35 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public Subject save(final Subject subject) throws ShanoirSubjectException {
+		Subject savedSubject = null;
+		try {
+			savedSubject = subjectRepository.save(subject);
+		} catch (DataIntegrityViolationException dive) {
+			ShanoirSubjectException.logAndThrow(LOG, "Error while creating Subject: " + dive.getMessage());
+		}
+		updateShanoirOld(savedSubject);
+		return savedSubject;
+	}
+	
+	@Override
+	public Subject saveFromJson(final File jsonFile) throws ShanoirSubjectException {
+		
+		ObjectMapper mapper = new ObjectMapper();
+		Subject subject=new Subject();
+		try {
+			subject = mapper.readValue(jsonFile, Subject.class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 		Subject savedSubject = null;
 		try {
 			savedSubject = subjectRepository.save(subject);

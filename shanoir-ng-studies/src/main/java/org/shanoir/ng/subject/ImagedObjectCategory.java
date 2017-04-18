@@ -5,17 +5,27 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.hateoas.HalEntity;
+import org.shanoir.ng.shared.hateoas.Links;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 @Entity
-public class ImagedObjectCategory implements Serializable, Comparable<ImagedObjectCategory>, IRefEntity{
+@JsonPropertyOrder({ "_links", "id", "labelName"})
+@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+public class ImagedObjectCategory extends HalEntity implements Serializable, Comparable<ImagedObjectCategory>, IRefEntity{
 	/** The id. */
-	@Id
+	/*@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	private Long id;*/
 
 	/** The label name. */
 	private String labelName;
+	
 
 	/**
 	 * Creates a new RefImagedObjectCategory object.
@@ -41,18 +51,18 @@ public class ImagedObjectCategory implements Serializable, Comparable<ImagedObje
 	 * @return the id
 	 */
 
-	public Long getId() {
+	/*public Long getId() {
 		return id;
-	}
+	}*/
 
 	/**
 	 * Sets the id.
 	 *
 	 * @param id the id
 	 */
-	public void setId(final Long id) {
+	/*public void setId(final Long id) {
 		this.id = id;
-	}
+	}*/
 	
 	/**
 	 * Gets the label name.

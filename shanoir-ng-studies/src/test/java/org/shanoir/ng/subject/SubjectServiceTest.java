@@ -2,11 +2,16 @@ package org.shanoir.ng.subject;
 
 import static org.mockito.BDDMockito.given;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +24,14 @@ import org.shanoir.ng.shared.exception.ShanoirSubjectException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
+
 /**
  * Subject service test.
  * 
@@ -30,6 +43,7 @@ public class SubjectServiceTest {
 
 	private static final Long SUBJECT_ID = 1L;
 	private static final String UPDATED_SUBJECT_DATA = "subject1";
+	private static final String JSON_FILE_PATH = "C:/Users/ifakhfak/Documents/Shanoir NG/Study microService/SUBJECT/jsonTest2.json";
 
 	@Mock
 	private SubjectRepository subjectRepository;
@@ -75,6 +89,13 @@ public class SubjectServiceTest {
 	@Test
 	public void saveTest() throws ShanoirSubjectException {
 		subjectService.save(createSubjectTosave());
+
+		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
+	}
+	
+	@Test
+	public void saveJsonTest() throws ShanoirSubjectException {
+		subjectService.save(createJsonSubjectTosave());
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
@@ -127,6 +148,27 @@ public class SubjectServiceTest {
 		listSubjectComments.add(userPersonalCommentList2);
 		subject.setUserPersonalCommentList(listSubjectComments);
 		return subject;
+	}
+	
+	
+	private Subject createJsonSubjectTosave() {
+		ObjectMapper mapper = new ObjectMapper();
+		Subject subject=new Subject();
+		try {
+			subject = mapper.readValue(new File(JSON_FILE_PATH), Subject.class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+		return subject;
+
 	}
 
 }
