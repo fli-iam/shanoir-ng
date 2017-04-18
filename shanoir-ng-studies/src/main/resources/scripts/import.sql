@@ -111,7 +111,7 @@ VALUES
     'efa0bd9d3793157b8b44cd76814c079e0eb1f8a3a3017dc0a58959f581d7a097');
   
 INSERT INTO subject
-	(id, name, identifier, birth_date, imaged_object_category_id, language_hemispheric_dominance_id,  manual_ref_hemispheric_dominance_id, sex,  pseudonymus_hash_values_id)
+	(id, name, identifier, birth_date, imaged_object_category_id, language_hemispheric_dominance_id,  manual_hemispheric_dominance_id, sex,  pseudonymus_hash_values_id)
 VALUES
 	(1,'subject1', 'sub1', '2013/01/01', 2,1,1,1,1),
 	(2,'subject2', 'sub2', '2001/02/01', 2,1,1,2,1);

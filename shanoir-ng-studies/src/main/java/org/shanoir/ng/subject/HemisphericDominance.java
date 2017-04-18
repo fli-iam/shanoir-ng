@@ -13,7 +13,7 @@ public class HemisphericDominance implements Serializable, Comparable<Hemispheri
 	
 	/** The id. */
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	//@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
 	/** The label name. */
