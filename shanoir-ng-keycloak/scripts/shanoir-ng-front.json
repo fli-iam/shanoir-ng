@@ -87,6 +87,21 @@
             }
         },
         {
+            "id": "1822d0d9-98f1-4169-a17c-a81d8a9af8ed",
+            "name": "userId",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+                "userinfo.token.claim": "false",
+                "user.attribute": "userId",
+                "id.token.claim": "false",
+                "access.token.claim": "true",
+                "claim.name": "userId",
+                "jsonType.label": "long"
+            }
+        },
+        {
             "id": "471ecb92-2be5-4757-83df-d33174a36ae6",
             "name": "role list",
             "protocol": "saml",
