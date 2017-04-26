@@ -1,18 +1,16 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  version: "0.0.1"
+  version: 0.0.1
   title: Shanoir NG Subject Microservice
   description: Microservice API for Shanoir NG subject managment
 produces:
   - application/json
-  
 paths:
-
   /subject:
     post:
       operationId: saveNewSubject
       description: Saves a new subject
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: subject
@@ -20,12 +18,12 @@ paths:
           description: subject to create
           required: true
           schema:
-            $ref: "#/definitions/Subject"
+            $ref: '#/definitions/Subject'
       responses:
         '200':
           description: created subject
           schema:
-            $ref: "#/definitions/Subject"
+            $ref: '#/definitions/Subject'
         '401':
           description: unauthorized
         '403':
@@ -33,46 +31,45 @@ paths:
         '422':
           description: bad parameters
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-            
-  /subject/{subjectId}:
+            $ref: '#/definitions/ErrorModel'
+  '/subject/{subjectId}':
     get:
       operationId: findSubjectById
-      description: If exists, returns the subject corresponding to the given id
+      description: 'If exists, returns the subject corresponding to the given id'
       parameters:
-        - $ref: "#/parameters/subjectId"
+        - $ref: '#/parameters/subjectId'
       responses:
         '200':
           description: found bubject
           schema:
-            $ref: "#/definitions/Subject"
+            $ref: '#/definitions/Subject'
+        '204':
+          description: no subject found
         '401':
           description: unauthorized
         '403':
           description: forbidden
-        '204':
-          description: no subject found
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
     put:
       operationId: updateSubject
       description: Updates a subject
-      consumes: 
+      consumes:
         - application/json
       parameters:
-        - $ref: "#/parameters/subjectId"
+        - $ref: '#/parameters/subjectId'
         - name: subject
           in: body
           description: subject to update
           required: true
           schema:
-            $ref: "#/definitions/Subject"
+            $ref: '#/definitions/Subject'
       responses:
         '204':
           description: subject updated
@@ -83,30 +80,29 @@ paths:
         '422':
           description: bad parameters
           schema:
-            $ref: "#/definitions/ErrorModel"
-        '500':
-          description: unexpected error
-          schema:
-            $ref: "#/definitions/ErrorModel"
-    delete:
-      operationId: deleteSubject
-      description: Deletes a subject
-      parameters:
-        - $ref: "#/parameters/subjectId"
-      responses:
-        '200':
-          description: subject deleted
-        '401':
-          description: unauthorized
-        '403':
-          description: forbidden
-        '204':
-          description: no subject found
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-            
+    delete:
+      operationId: deleteSubject
+      description: Deletes a subject
+      parameters:
+        - $ref: '#/parameters/subjectId'
+      responses:
+        '200':
+          description: subject deleted
+        '204':
+          description: no subject found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /subject/all:
     get:
       operationId: findSubject
@@ -117,7 +113,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/Subject"
+              $ref: '#/definitions/Subject'
         '204':
           description: no subject found
         '401':
@@ -127,56 +123,50 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-            
-            
-  /subject/{studyId}/allSubjects:
+            $ref: '#/definitions/ErrorModel'
+  '/subject/{studyId}/allSubjects':
     get:
       operationId: findSubjectsByStudyId
-      description: If exists, returns the subjects of a study 
+      description: 'If exists, returns the subjects of a study'
       parameters:
-        - $ref: "#/parameters/studyId"
+        - $ref: '#/parameters/studyId'
       responses:
         '200':
-          description: found subjects 
+          description: found subjects
           schema:
-            $ref: "#/definitions/Subject"
+            $ref: '#/definitions/Subject'
+        '204':
+          description: no subject found
         '401':
           description: unauthorized
         '403':
           description: forbidden
-        '204':
-          description: no subject found
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-            
-  /subject/findByIdentifier/{subjectIdentifier}:
+            $ref: '#/definitions/ErrorModel'
+  '/subject/findByIdentifier/{subjectIdentifier}':
     get:
       operationId: findSubjectByIdentifier
-      description: If exists, returns the subject corresponding to the given identifier
+      description: 'If exists, returns the subject corresponding to the given identifier'
       parameters:
-        - $ref: "#/parameters/subjectIdentifier"
+        - $ref: '#/parameters/subjectIdentifier'
       responses:
         '200':
           description: found subject
           schema:
-            $ref: "#/definitions/Subject"
+            $ref: '#/definitions/Subject'
+        '204':
+          description: no subject found
         '401':
           description: unauthorized
         '403':
           description: forbidden
-        '204':
-          description: no subject found
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-
-
+            $ref: '#/definitions/ErrorModel'
 parameters:
-
   subjectId:
     name: subjectId
     in: path
@@ -184,15 +174,12 @@ parameters:
     required: true
     type: integer
     format: int64
-    
   subjectIdentifier:
     name: subjectIdentifier
     in: path
     description: identifier of the subject
     required: true
     type: string
-
-    
   studyId:
     name: studyId
     in: path
@@ -200,18 +187,12 @@ parameters:
     required: true
     type: integer
     format: int64
-    
-    
-
 definitions:
-
-  
-
   Subject:
     required:
       - id
       - name
-    type: object 
+    type: object
     properties:
       id:
         type: integer
@@ -222,42 +203,43 @@ definitions:
       name:
         type: string
       sex:
-        $ref: "#/definitions/Sex"
+        type: string
+        enum:
+          - M
+          - F
       subjectStudyList:
-        $ref: "#/definitions/SubjectStudy"
+        $ref: '#/definitions/SubjectStudy'
       identifier:
         type: string
       pseudonymusHashValues:
-        $ref: "#/definitions/PseudonymusHashValues"
+        $ref: '#/definitions/PseudonymusHashValues'
       languageHemisphericDominance:
-        $ref: "#/definitions/HemisphericDominance"
-      manualHemisphericDominance:
-        $ref: "#/definitions/HemisphericDominance"
-      imagedObjectCategory:
-       $ref: "#/definitions/ImagedObjectCategory"
-      userPersonalCommentList:
-       type: array
-       items:
-        $ref: "#/definitions/UserPersonalCommentSubject"
-        
-  Sex:
-    required:
-      - id
-      - name
-    type: object 
-    properties:
-      id:
-        type: integer
-        format: int64
-      name:
         type: string
-        
+        enum:
+          - LEFT
+          - RIGHT
+      manualHemisphericDominance:
+        type: string
+        enum:
+          - LEFT
+          - RIGHT
+      imagedObjectCategory:
+        type: string
+        enum:
+          - PHANTOM
+          - LIVING HUMAN BEING
+          - HUNAM CADAVER
+          - ANATOMICAL PIECE
+      userPersonalCommentList:
+        type: array
+        items:
+          $ref: '#/definitions/UserPersonalCommentSubject'
   SubjectStudy:
     required:
       - id
       - study
       - subject
-    type: object 
+    type: object
     properties:
       id:
         type: integer
@@ -265,33 +247,30 @@ definitions:
       physicallyInvolved:
         type: boolean
       subjectType:
-        $ref: "#/definitions/SubjectType"
+        $ref: '#/definitions/SubjectType'
       study:
-        $ref: "#/definitions/Study"
+        $ref: '#/definitions/Study'
       subject:
-        $ref: "#/definitions/Subject"
+        $ref: '#/definitions/Subject'
       subjectStudyIdentifier:
         type: string
-        
   SubjectType:
     required:
       - id
       - name
-    type: object 
+    type: object
     properties:
       id:
         type: integer
         format: int64
       name:
         type: string
-    
   Study:
     type: object
     required:
       - id
       - name
       - status
-      
     properties:
       id:
         type: integer
@@ -299,13 +278,13 @@ definitions:
       name:
         type: string
       status:
-        $ref: "#/definitions/Status"
+        $ref: '#/definitions/Status'
       startDate:
         type: string
         format: date
       endDate:
         type: string
-        format: date  
+        format: date
       clinical:
         type: boolean
       withExamination:
@@ -314,7 +293,6 @@ definitions:
         type: boolean
       isDownloadableByDefault:
         type: boolean
-        
   Status:
     type: object
     required:
@@ -326,7 +304,6 @@ definitions:
         format: int64
       labelName:
         type: string
-        
   PseudonymusHashValues:
     required:
       - id
@@ -341,13 +318,13 @@ definitions:
       - firstNameHash2
       - firstNameHash3
       - birthDateHash
-    type: object 
+    type: object
     properties:
       id:
         type: integer
         format: int64
       subject:
-        $ref: "#/definitions/Subject"
+        $ref: '#/definitions/Subject'
       birthNameHash1:
         type: string
       birthNameHash2:
@@ -368,35 +345,10 @@ definitions:
         type: string
       birthDateHash:
         type: string
-      
-  HemisphericDominance:
-    required:
-      - id
-      - labelName
-    type: object 
-    properties:
-      id:
-        type: integer
-        format: int64
-      labelName:
-        type: string
-        
-  ImagedObjectCategory:
-    required:
-      - id
-      - labelName
-    type: object 
-    properties:
-      id:
-        type: integer
-        format: int64
-      labelName:
-        type: string
-        
   UserPersonalCommentSubject:
     required:
       - id
-    type: object 
+    type: object
     properties:
       id:
         type: integer
@@ -404,9 +356,7 @@ definitions:
       comment:
         type: string
       subject:
-        $ref: "#/definitions/Subject"
-        
-    
+        $ref: '#/definitions/Subject'
   ErrorModel:
     type: object
     properties:
