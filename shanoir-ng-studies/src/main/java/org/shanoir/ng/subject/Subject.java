@@ -12,8 +12,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
@@ -22,7 +20,6 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.manufacturermodel.DatasetModalityType;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
@@ -32,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @Table(name="subject")
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate" , "imagedObjectCategory"," pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance", "userPersonalCommentList" })
+
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class Subject extends HalEntity {
 
@@ -44,24 +42,23 @@ public class Subject extends HalEntity {
 	@NotNull
 	@Column(nullable = false, insertable = false, updatable = false)
 	@Enumerated(EnumType.STRING)
+
 	private Sex sex;
 
-	
 	/** Relations between the subjects and the studies. */
-	
+
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY)
 	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE})
 	private List<SubjectStudy>  subjectStudyList = new ArrayList<SubjectStudy>(0);
 
 	private String identifier;
 
-	
-	@OneToOne 
-	private PseudonymusHashValues pseudonymusHashValues;
-	
+	@OneToOne
+	private PseudonymusHashValues pseudonymusHashValues;	
 	
 	@Column(insertable = false, updatable = false)
 	@Enumerated(EnumType.STRING)
+
 	private HemisphericDominance languageHemisphericDominance;
 
 	/** Manual Hemispheric dominance. */
@@ -72,13 +69,14 @@ public class Subject extends HalEntity {
 	/** The category of the subject (phantom, human alive, human cadaver, etc.). */	
 	@Column(insertable = false, updatable = false)
 	@Enumerated(EnumType.STRING)
+
 	private ImagedObjectCategory imagedObjectCategory;
-	
+
 	/** Personal Comments on this subject. */
 	@OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
 	//@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
 	private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<UserPersonalCommentSubject>(0);
-	
+
 	/**
 	 * Init HATEOAS links
 	 */
@@ -86,13 +84,15 @@ public class Subject extends HalEntity {
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "subject/" + getId());
 	}
-	
-//	@Override
-//	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-//	@GenericGenerator(name = "IdOrGenerate", strategy="increment")
-//	public Long getId() {
-//		return super.getId();
-//	}
+
+
+	@Override
+	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
+	@GenericGenerator(name = "IdOrGenerate", strategy = "increment")//strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+	public Long getId() {
+		return super.getId();
+	}
+
 
 	public Date getBirthDate() {
 		return birthDate;
@@ -176,8 +176,4 @@ public class Subject extends HalEntity {
 		this.imagedObjectCategory = imagedObjectCategory;
 	}
 
-	
-	
-
-	
 }
