@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "Initialize MariaDB command"
+/opt/mysql/init/mariadb_init.sh mysqld
+
+service mysql start
+echo "Populate database"
+mysql -u keycloak -pkeycloak keycloak < /dk/shanoirng_keycloak.sql
+
+echo "Stop mysql process"
+mysqladmin -u root -p$MYSQL_ROOT_PASSWORD shutdown
