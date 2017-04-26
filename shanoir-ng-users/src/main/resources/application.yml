@@ -39,7 +39,7 @@ spring:
     properties:
       mail.smtp.from: do-not-reply@inria.fr
   rabbitmq:
-    host: rabbitmq
+    host: shanoir-ng-rabbitmq
   session:
     store-type: none
 front.server:
