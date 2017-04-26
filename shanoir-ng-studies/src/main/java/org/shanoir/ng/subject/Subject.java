@@ -5,7 +5,10 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,9 +18,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.manufacturermodel.DatasetModalityType;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
@@ -27,15 +32,18 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @Table(name="subject")
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate" , "imagedObjectCategory"," pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance", "userPersonalCommentList" })
-@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class Subject extends HalEntity {
 
+	private static final long serialVersionUID = 6844259659282875507L;
+	
 	private Date birthDate;
 
 	private String name;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "sex")
+	@NotNull
+	@Column(nullable = false, insertable = false, updatable = false)
+	@Enumerated(EnumType.STRING)
 	private Sex sex;
 
 	
@@ -52,19 +60,18 @@ public class Subject extends HalEntity {
 	private PseudonymusHashValues pseudonymusHashValues;
 	
 	
-	/** Language Hemispheric dominance. */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn( nullable = true, updatable = true)
+	@Column(insertable = false, updatable = false)
+	@Enumerated(EnumType.STRING)
 	private HemisphericDominance languageHemisphericDominance;
 
 	/** Manual Hemispheric dominance. */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(nullable = true, updatable = true)
+	@Column(insertable = false, updatable = false)
+	@Enumerated(EnumType.STRING)
 	private HemisphericDominance manualHemisphericDominance;
 	
-	/** The category of the subject (phantom, human alive, human cadaver, etc.). */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(nullable = true, updatable = true)
+	/** The category of the subject (phantom, human alive, human cadaver, etc.). */	
+	@Column(insertable = false, updatable = false)
+	@Enumerated(EnumType.STRING)
 	private ImagedObjectCategory imagedObjectCategory;
 	
 	/** Personal Comments on this subject. */
@@ -80,12 +87,12 @@ public class Subject extends HalEntity {
 		this.addLink(Links.REL_SELF, "subject/" + getId());
 	}
 	
-	@Override
-	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
-	public Long getId() {
-		return super.getId();
-	}
+//	@Override
+//	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
+//	@GenericGenerator(name = "IdOrGenerate", strategy="increment")
+//	public Long getId() {
+//		return super.getId();
+//	}
 
 	public Date getBirthDate() {
 		return birthDate;
@@ -103,13 +110,6 @@ public class Subject extends HalEntity {
 		this.name = name;
 	}
 
-	public Sex getSex() {
-		return sex;
-	}
-
-	public void setSex(Sex sex) {
-		this.sex = sex;
-	}
 
 	public List<SubjectStudy> getSubjectStudyList() {
 		return subjectStudyList;
@@ -135,30 +135,6 @@ public class Subject extends HalEntity {
 		this.pseudonymusHashValues = pseudonymusHashValues;
 	}
 
-	public HemisphericDominance getLanguageHemisphericDominance() {
-		return languageHemisphericDominance;
-	}
-
-	public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
-		this.languageHemisphericDominance = languageHemisphericDominance;
-	}
-
-	public HemisphericDominance getManualRefHemisphericDominance() {
-		return manualHemisphericDominance;
-	}
-
-	public void setManualRefHemisphericDominance(HemisphericDominance manualRefHemisphericDominance) {
-		this.manualHemisphericDominance = manualRefHemisphericDominance;
-	}
-
-
-	public ImagedObjectCategory getImagedObjectCategory() {
-		return imagedObjectCategory;
-	}
-
-	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
-		this.imagedObjectCategory = imagedObjectCategory;
-	}
 
 	public List<UserPersonalCommentSubject> getUserPersonalCommentList() {
 		return userPersonalCommentList;
@@ -168,16 +144,38 @@ public class Subject extends HalEntity {
 		this.userPersonalCommentList = userPersonalCommentList;
 	}
 
-	@Override
-	public String toString() {
-		return "Subject [getId()=" + getId() + ", getBirthDate()=" + getBirthDate() + ", getName()=" + getName()
-				+ ", getSex()=" + getSex() + ", getSubjectStudyList()=" + getSubjectStudyList() + ", getIdentifier()="
-				+ getIdentifier() + ", getPseudonymusHashValues()=" + getPseudonymusHashValues()
-				+ ", getLanguageHemisphericDominance()=" + getLanguageHemisphericDominance()
-				+ ", getManualRefHemisphericDominance()=" + getManualRefHemisphericDominance()
-				+ ", getImagedObjectCategory()=" + getImagedObjectCategory() + ", getUserPersonalCommentList()="
-				+ getUserPersonalCommentList() + "]";
+	public Sex getSex() {
+		return sex;
 	}
+
+	public void setSex(Sex sex) {
+		this.sex = sex;
+	}
+
+	public HemisphericDominance getLanguageHemisphericDominance() {
+		return languageHemisphericDominance;
+	}
+
+	public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
+		this.languageHemisphericDominance = languageHemisphericDominance;
+	}
+
+	public HemisphericDominance getManualHemisphericDominance() {
+		return manualHemisphericDominance;
+	}
+
+	public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
+		this.manualHemisphericDominance = manualHemisphericDominance;
+	}
+
+	public ImagedObjectCategory getImagedObjectCategory() {
+		return imagedObjectCategory;
+	}
+
+	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
+		this.imagedObjectCategory = imagedObjectCategory;
+	}
+
 	
 	
 

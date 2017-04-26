@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 /**
  * Implementation of custom repository for templates.
@@ -13,7 +14,8 @@ import org.springframework.stereotype.Component;
  * @author msimon
  *
  */
-@Component
+//@Component
+@Repository
 public class SubjectRepositoryImpl implements SubjectRepositoryCustom {
 
 	@PersistenceContext

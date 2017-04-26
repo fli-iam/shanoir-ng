@@ -4,20 +4,13 @@
 --
 use shanoir_ng_studies;
 
-
-INSERT INTO study_status
-	(id, label_name)
-VALUES
-	(1,'finished'),
-	(2,'in_progress');
-
 INSERT INTO study
-	(id, name, start_date, end_date, clinical, with_examination, is_visible_by_default, is_downloadable_by_default, study_status_id)
+	(id, name, start_date, end_date, clinical, with_examination, is_visible_by_default, is_downloadable_by_default, study_status)
 VALUES
-	(1,'Study 1', '2013/01/01', null, 0, 1, 0, 0, null),
-	(2,'Study 2', '2009/12/01', null, 0, 1, 0, 0, null),
-	(3,'Study 3', '2010/02/21', null, 0, 1, 0, 0, null),
-	(4,'Study 4', '2015/10/03', null, 0, 1, 0, 0, null);
+	(1,'Study 1', '2013/01/01', null, 0, 1, 0, 0, 'FINISHED'),
+	(2,'Study 2', '2009/12/01', null, 0, 1, 0, 0, 'IN_PROGRESS'),
+	(3,'Study 3', '2010/02/21', null, 0, 1, 0, 0, 'FINISHED'),
+	(4,'Study 4', '2015/10/03', null, 0, 1, 0, 0, 'IN_PROGRESS');
 
 
 INSERT INTO rel_study_user
@@ -78,22 +71,6 @@ VALUES
 	(50,'France','CHU St Roch - Nice','','06006','5 rue Pierre Devoluy','Nice',''),
 	(51,'France','CHU Poitiers','','86000','rue de la miletrie','Poitiers','');
 	
-INSERT INTO sex 
-VALUES 
-	(1,'M'),
-	(2,'F');
-
-INSERT INTO hemispheric_dominance
-VALUES
-	(1, 'Left'),
-	(2, 'Right');
-	
-INSERT INTO imaged_object_category
-VALUES
-	(1, 'Phantom'),
-	(2, 'Living human being'),
-	(3, 'Human cadaver'),
-	(4, 'Anatomical piece');
 	
 INSERT INTO pseudonymus_hash_values
  (id, birth_name_hash1, birth_name_hash2, birth_name_hash3, last_name_hash1, last_name_hash2, last_name_hash3, first_name_hash1, first_name_hash2, first_name_hash3, birth_date_hash)
@@ -111,10 +88,11 @@ VALUES
     'efa0bd9d3793157b8b44cd76814c079e0eb1f8a3a3017dc0a58959f581d7a097');
   
 INSERT INTO subject
-	(id, name, identifier, birth_date, imaged_object_category_id, language_hemispheric_dominance_id,  manual_hemispheric_dominance_id, sex,  pseudonymus_hash_values_id)
+	(id, name, identifier, birth_date, imaged_object_category, language_hemispheric_dominance,  manual_hemispheric_dominance, sex,  pseudonymus_hash_values_id)
 VALUES
-	(1,'subject1', 'sub1', '2013/01/01', 2,1,1,1,1),
-	(2,'subject2', 'sub2', '2001/02/01', 2,1,1,2,1);
+	(1,'subject1', 'sub1', '2013/01/01', 'LIVING_HUMAN_BEING','LEFT','LEFT','F',1),
+	(2,'subject2', 'sub2', '2001/02/01', 'LIVING_HUMAN_BEING','RIGHT','LEFT','F',1),
+	(3,'0010001', 'sub3', '2001/02/01', 'LIVING_HUMAN_BEING','LEFT','RIGHT','F',1);
 	
 
 INSERT INTO subject_study

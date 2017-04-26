@@ -2,7 +2,9 @@ package org.shanoir.ng.subject;
 
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for Subject.
@@ -27,5 +29,8 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	 * @return a Subject.
 	 */
 	Optional<Subject> findByIdentifier(String identifier);
+	
+	@Query("SELECT MAX(s.name)  FROM Subject s WHERE s.name LIKE CONCAT(:centerCode,'%','%','%','%')")
+	public String find(@Param("centerCode") String centerCode);
 
 }

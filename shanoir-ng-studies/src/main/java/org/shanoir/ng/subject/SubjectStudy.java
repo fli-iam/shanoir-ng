@@ -2,6 +2,8 @@ package org.shanoir.ng.subject;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -20,11 +22,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @Table(name = "subject_study")
 @JsonPropertyOrder({ "_links", "id", "subject", "subjectType", "study", "subjectStudyIdentifier" , "physicallyInvolved" })
-@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class SubjectStudy extends HalEntity{
-	
-	/*@Id
-	private Long id;*/
+
 	
 	private boolean physicallyInvolved;
 	
@@ -48,13 +48,12 @@ public class SubjectStudy extends HalEntity{
 	private String subjectStudyIdentifier;
 	
 	
-	/*public Long getId() {
-		return id;
+	@Override
+	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
+	@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+	public Long getId() {
+		return super.getId();
 	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}*/
 
 	public boolean isPhysicallyInvolved() {
 		return physicallyInvolved;

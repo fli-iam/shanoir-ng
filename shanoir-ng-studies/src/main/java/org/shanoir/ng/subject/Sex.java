@@ -1,56 +1,44 @@
 package org.shanoir.ng.subject;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
+public enum Sex {
 
-import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.hateoas.Links;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-@Entity
-@Table(name="sex")
-@JsonPropertyOrder({ "_links", "id", "name"})
-@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
-public class Sex extends HalEntity {
-	
-	/*@Id
-	private Long id;*/
-	
-	@Column(nullable = false, unique = true)
-	private String name;
-	
 	/**
-	 * Init HATEOAS links
+	 * Male.
 	 */
-	/*@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "subject/" + getId());
-	}*/
+	M(Values.M),
 
-	/*public Long getId() {
-		return id;
+	/**
+	 * Female.
+	 */
+	F(Values.F);
+
+	private String value;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param val
+	 *            value
+	 */
+	private Sex(final String value) {
+		this.value = value;
 	}
 
-
-	public void setId(Long id) {
-		this.id = id;
-	}*/
-
-
-	public String getName() {
-		return name;
+	/**
+	 * @return the value
+	 */
+	public String getValue() {
+		return value;
 	}
-	 
-	
-	public void setName(String name) {
-		this.name = name;
+
+	/**
+	 * List of enum values.
+	 * 
+	 *
+	 */
+	public static class Values {
+		public static final String M = "M";
+		public static final String F = "F";
 	}
-	
-	
 
 }

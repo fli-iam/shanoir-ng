@@ -3,6 +3,8 @@ package org.shanoir.ng.subject;
 import java.io.Serializable;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
@@ -13,20 +15,19 @@ import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 @Entity
 @Table(name="pseudonymus_hash_values")
 @JsonPropertyOrder({ "_links", "id", "birthNameHash1", "birthNameHash2", "birthNameHash3","lastNameHash1","lastNameHash2","lastNameHash3","firstNameHash1","firstNameHash2","firstNameHash3","birthDateHash", "subject" })
-@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class PseudonymusHashValues  extends HalEntity implements Serializable {
-	
-	/*@Id
-	private Long id;*/
 	
 	/** Subject. */
 	@OneToOne
+	@JsonIgnore
 	@JoinColumn(name = "id", referencedColumnName = "id", unique = true, nullable = false, updatable = true)
 	private Subject subject;
 	
@@ -176,14 +177,12 @@ public class PseudonymusHashValues  extends HalEntity implements Serializable {
 	}
 	
 	
-
-	/*public Long getId() {
-		return id;
+	@Override
+	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
+	@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+	public Long getId() {
+		return super.getId();
 	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}*/
 
 	public Subject getSubject() {
 		return subject;
