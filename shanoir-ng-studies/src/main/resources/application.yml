@@ -32,7 +32,7 @@ spring:
   jooq:
     sql-dialect: Mysql
   rabbitmq:
-    host: rabbitmq
+    host: shanoir-ng-rabbitmq
   session:
     store-type: none
 #keycloak

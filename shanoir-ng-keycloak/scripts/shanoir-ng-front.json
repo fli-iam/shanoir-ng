@@ -5,11 +5,11 @@
     "enabled": true,
     "clientAuthenticatorType": "client-secret",
     "redirectUris": [
-        "http://localhost:8081/*",
+        "http://localhost:8080/*",
         "http://localhost/*"
     ],
     "webOrigins": [
-        "http://localhost:8081",
+        "http://localhost:8080",
         "http://localhost"
     ],
     "notBefore": 0,
@@ -84,6 +84,21 @@
                 "access.token.claim": "true",
                 "claim.name": "preferred_username",
                 "jsonType.label": "String"
+            }
+        },
+        {
+            "id": "1822d0d9-98f1-4169-a17c-a81d8a9af8ed",
+            "name": "userId",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+                "userinfo.token.claim": "false",
+                "user.attribute": "userId",
+                "id.token.claim": "false",
+                "access.token.claim": "true",
+                "claim.name": "userId",
+                "jsonType.label": "long"
             }
         },
         {

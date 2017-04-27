@@ -97,5 +97,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 
 	Subject saveFromJson(File jsonFile) throws ShanoirSubjectException;
 	
+	public String findSubjectOfsepByCenter(final String centerCode);
+	
 
 }

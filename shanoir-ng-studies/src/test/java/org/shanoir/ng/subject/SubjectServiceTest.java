@@ -1,17 +1,15 @@
 package org.shanoir.ng.subject;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,13 +22,11 @@ import org.shanoir.ng.shared.exception.ShanoirSubjectException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 
 /**
  * Subject service test.
@@ -58,7 +54,9 @@ public class SubjectServiceTest {
 	public void setup() {
 		given(subjectRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createSubject()));
 		given(subjectRepository.findOne(SUBJECT_ID)).willReturn(ModelsUtil.createSubject());
-		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(ModelsUtil.createSubject());
+		//given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(ModelsUtil.createSubject());
+		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectTosave());
+		
 	}
 
 	@Test
@@ -89,14 +87,12 @@ public class SubjectServiceTest {
 	@Test
 	public void saveTest() throws ShanoirSubjectException {
 		subjectService.save(createSubjectTosave());
-
-		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
+		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));		
 	}
 	
 	@Test
 	public void saveJsonTest() throws ShanoirSubjectException {
 		subjectService.save(createJsonSubjectTosave());
-
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
 
@@ -126,19 +122,18 @@ public class SubjectServiceTest {
 	
 	private Subject createSubjectTosave() {
 		final Subject subject = new Subject();
-		subject.setName("Toto");
+		//subject.setName("Toto");
+		//subject.setId(1L);
 		subject.setBirthDate(new Date(2014, 02, 11));
 		subject.setIdentifier("Titi");
 		
-		subject.setImagedObjectCategory(new ImagedObjectCategory("Phantom"));
-		subject.setLanguageHemisphericDominance(new HemisphericDominance("Left"));
-		subject.setManualRefHemisphericDominance(new HemisphericDominance("Left"));
+		subject.setImagedObjectCategory(ImagedObjectCategory.PHANTOM);
+		subject.setLanguageHemisphericDominance(HemisphericDominance.LEFT);
+		subject.setManualHemisphericDominance(HemisphericDominance.LEFT);
 		PseudonymusHashValues pseudonymusHashValues= new PseudonymusHashValues();
 		pseudonymusHashValues.setBirthDateHash("uihuizdhuih");
 		subject.setPseudonymusHashValues(pseudonymusHashValues);
-		Sex sex=new Sex();
-		sex.setName("F");
-		subject.setSex(sex);
+		subject.setSex(Sex.F);
 		UserPersonalCommentSubject userPersonalCommentList1= new UserPersonalCommentSubject();
 		userPersonalCommentList1.setComment("comment1");
 		UserPersonalCommentSubject userPersonalCommentList2= new UserPersonalCommentSubject();

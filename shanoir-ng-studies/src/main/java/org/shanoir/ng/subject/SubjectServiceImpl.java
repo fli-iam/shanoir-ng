@@ -2,6 +2,7 @@ package org.shanoir.ng.subject;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -79,12 +80,15 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public Subject save(final Subject subject) throws ShanoirSubjectException {
 		Subject savedSubject = null;
+		if (subject.getName()==null || subject.getName()=="")
+			subject.setName(createOfsepCommonName());
+		System.out.println("Common Name="+subject.getName());
 		try {
 			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirSubjectException.logAndThrow(LOG, "Error while creating Subject: " + dive.getMessage());
 		}
-		updateShanoirOld(savedSubject);
+		//updateShanoirOld(savedSubject);
 		return savedSubject;
 	}
 	
@@ -225,6 +229,49 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 	
 	
+	public String createOfsepCommonName()
+	{
+		String commonName="";
+		Long idCenter = 1L;
+		DecimalFormat formatterCenter = new DecimalFormat("000");
+		String commonNameCenter = formatterCenter.format(idCenter);
+		
+		String subjectOfsepCommonNameMaxFoundByCenter = findSubjectOfsepByCenter(commonNameCenter);
+		int maxCommonNameNumber = 0;
+		try {
+			if (subjectOfsepCommonNameMaxFoundByCenter != null) {
+				String maxNameToIncrement=subjectOfsepCommonNameMaxFoundByCenter.substring(3);
+				maxCommonNameNumber = Integer.parseInt(maxNameToIncrement);
+			}
+			maxCommonNameNumber += 1;
+			DecimalFormat formatterSubject = new DecimalFormat("0000");
+			commonName=commonNameCenter + formatterSubject.format(maxCommonNameNumber);
+			
+		} catch (NumberFormatException e) {
+			LOG.error("Th common name found contains non numeric characters : " + e.getMessage());
+
+		}		
+		return commonName;
+	}
+	
+	/**
+	 * Browse through all subject ofsep using the center code (3 digital
+	 * numbers).
+	 * 
+	 * @param centerCode
+	 *            the center code
+	 * 
+	 * @return the string max of the subject common name
+	 */
+	@Override
+	public String findSubjectOfsepByCenter(final String centerCode) {
+
+		if (centerCode == null || "".equals(centerCode)) {
+			return null;
+		}
+		String name=subjectRepository.find(centerCode);
+		return name;
+	}
 
 }
 

@@ -1,51 +1,45 @@
 package org.shanoir.ng.study;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.NotBlank;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
-import org.shanoir.ng.shared.validation.Unique;
-
-/**
- * Study status.
- * 
- * @author msimon
- *
- */
-@Entity
-@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-public class StudyStatus extends AbstractGenericItem {
+public enum StudyStatus {
 
 	/**
-	 * UID
+	 * finished.
 	 */
-	private static final long serialVersionUID = 1636061761940084952L;
+	 FINISHED(Values.FINISHED),
 
-	/** The label name. */
-	@NotBlank
-	@Column(unique = true)
-	@Unique
-	private String labelName;
-	
 	/**
-	 * Gets the label name.
-	 *
-	 * @return the label name
+	 * in_progress.
 	 */
-	public String getLabelName() {
-		return labelName;
+	IN_PROGRESS(Values.IN_PROGRESS);
+
+	private String value;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param val
+	 *            value
+	 */
+	private StudyStatus(final String value) {
+		this.value = value;
 	}
 
 	/**
-	 * Sets the label name.
-	 *
-	 * @param labelName
-	 *            the label name
+	 * @return the value
 	 */
-	public void setLabelName(final String labelName) {
-		this.labelName = labelName;
+	public String getValue() {
+		return value;
+	}
+
+	/**
+	 * List of enum values.
+	 * 
+	 *
+	 */
+	public static class Values {
+		public static final String FINISHED = "FINISHED";
+		public static final String IN_PROGRESS = "IN PROGRESS";
 	}
 
 }

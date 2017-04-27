@@ -7,6 +7,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,7 +26,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
-
+import org.shanoir.ng.subject.Sex;
 import org.shanoir.ng.subject.SubjectStudy;
 import org.hibernate.validator.constraints.Length;
 
@@ -72,8 +74,9 @@ public class Study extends HalEntity {
 	@JoinColumn(name = "study")
 	private List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
 
-	/** Study Status. */
-	@ManyToOne(fetch = FetchType.EAGER)
+	@NotNull
+	@Column(nullable = false, insertable = false, updatable = false)
+	@Enumerated(EnumType.STRING)
 	private StudyStatus studyStatus;
 	
 	/** Relations between the subjects and the studies. */	

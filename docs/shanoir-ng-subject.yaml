@@ -1,0 +1,369 @@
+swagger: '2.0'
+info:
+  version: 0.0.1
+  title: Shanoir NG Subject Microservice
+  description: Microservice API for Shanoir NG subject managment
+produces:
+  - application/json
+paths:
+  /subject:
+    post:
+      operationId: saveNewSubject
+      description: Saves a new subject
+      consumes:
+        - application/json
+      parameters:
+        - name: subject
+          in: body
+          description: subject to create
+          required: true
+          schema:
+            $ref: '#/definitions/Subject'
+      responses:
+        '200':
+          description: created subject
+          schema:
+            $ref: '#/definitions/Subject'
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/subject/{subjectId}':
+    get:
+      operationId: findSubjectById
+      description: 'If exists, returns the subject corresponding to the given id'
+      parameters:
+        - $ref: '#/parameters/subjectId'
+      responses:
+        '200':
+          description: found bubject
+          schema:
+            $ref: '#/definitions/Subject'
+        '204':
+          description: no subject found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      operationId: updateSubject
+      description: Updates a subject
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/subjectId'
+        - name: subject
+          in: body
+          description: subject to update
+          required: true
+          schema:
+            $ref: '#/definitions/Subject'
+      responses:
+        '204':
+          description: subject updated
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      operationId: deleteSubject
+      description: Deletes a subject
+      parameters:
+        - $ref: '#/parameters/subjectId'
+      responses:
+        '200':
+          description: subject deleted
+        '204':
+          description: no subject found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /subject/all:
+    get:
+      operationId: findSubject
+      description: Returns all the subjects
+      responses:
+        '200':
+          description: found subjects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Subject'
+        '204':
+          description: no subject found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/subject/{studyId}/allSubjects':
+    get:
+      operationId: findSubjectsByStudyId
+      description: 'If exists, returns the subjects of a study'
+      parameters:
+        - $ref: '#/parameters/studyId'
+      responses:
+        '200':
+          description: found subjects
+          schema:
+            $ref: '#/definitions/Subject'
+        '204':
+          description: no subject found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/subject/findByIdentifier/{subjectIdentifier}':
+    get:
+      operationId: findSubjectByIdentifier
+      description: 'If exists, returns the subject corresponding to the given identifier'
+      parameters:
+        - $ref: '#/parameters/subjectIdentifier'
+      responses:
+        '200':
+          description: found subject
+          schema:
+            $ref: '#/definitions/Subject'
+        '204':
+          description: no subject found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+parameters:
+  subjectId:
+    name: subjectId
+    in: path
+    description: id of the subject
+    required: true
+    type: integer
+    format: int64
+  subjectIdentifier:
+    name: subjectIdentifier
+    in: path
+    description: identifier of the subject
+    required: true
+    type: string
+  studyId:
+    name: studyId
+    in: path
+    description: id of the study
+    required: true
+    type: integer
+    format: int64
+definitions:
+  Subject:
+    required:
+      - id
+      - name
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      birthDate:
+        type: string
+        format: date
+      name:
+        type: string
+      sex:
+        type: string
+        enum:
+          - M
+          - F
+      subjectStudyList:
+        $ref: '#/definitions/SubjectStudy'
+      identifier:
+        type: string
+      pseudonymusHashValues:
+        $ref: '#/definitions/PseudonymusHashValues'
+      languageHemisphericDominance:
+        type: string
+        enum:
+          - LEFT
+          - RIGHT
+      manualHemisphericDominance:
+        type: string
+        enum:
+          - LEFT
+          - RIGHT
+      imagedObjectCategory:
+        type: string
+        enum:
+          - PHANTOM
+          - LIVING HUMAN BEING
+          - HUNAM CADAVER
+          - ANATOMICAL PIECE
+      userPersonalCommentList:
+        type: array
+        items:
+          $ref: '#/definitions/UserPersonalCommentSubject'
+  SubjectStudy:
+    required:
+      - id
+      - study
+      - subject
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      physicallyInvolved:
+        type: boolean
+      subjectType:
+        $ref: '#/definitions/SubjectType'
+      study:
+        $ref: '#/definitions/Study'
+      subject:
+        $ref: '#/definitions/Subject'
+      subjectStudyIdentifier:
+        type: string
+  SubjectType:
+    required:
+      - id
+      - name
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+  Study:
+    type: object
+    required:
+      - id
+      - name
+      - status
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      status:
+        $ref: '#/definitions/Status'
+      startDate:
+        type: string
+        format: date
+      endDate:
+        type: string
+        format: date
+      clinical:
+        type: boolean
+      withExamination:
+        type: boolean
+      isVisibleByDefault:
+        type: boolean
+      isDownloadableByDefault:
+        type: boolean
+  Status:
+    type: object
+    required:
+      - id
+      - labelName
+    properties:
+      id:
+        type: integer
+        format: int64
+      labelName:
+        type: string
+  PseudonymusHashValues:
+    required:
+      - id
+      - subject
+      - birthNameHash1
+      - birthNameHash2
+      - birthNameHash3
+      - lastNameHash1
+      - lastNameHash2
+      - lastNameHash3
+      - firstNameHash1
+      - firstNameHash2
+      - firstNameHash3
+      - birthDateHash
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      subject:
+        $ref: '#/definitions/Subject'
+      birthNameHash1:
+        type: string
+      birthNameHash2:
+        type: string
+      birthNameHash3:
+        type: string
+      lastNameHash1:
+        type: string
+      lastNameHash2:
+        type: string
+      lastNameHash3:
+        type: string
+      firstNameHash1:
+        type: string
+      firstNameHash2:
+        type: string
+      firstNameHash3:
+        type: string
+      birthDateHash:
+        type: string
+  UserPersonalCommentSubject:
+    required:
+      - id
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      comment:
+        type: string
+      subject:
+        $ref: '#/definitions/Subject'
+  ErrorModel:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      details:
+        type: object
+      message:
+        type: string

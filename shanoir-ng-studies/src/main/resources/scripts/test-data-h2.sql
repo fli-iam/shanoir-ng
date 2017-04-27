@@ -48,5 +48,6 @@ INSERT INTO subject
 	(id, name, identifier, birth_date )
 VALUES
 	(1,'subject1', 'sub1', '2013/01/01'),
-	(2,'subject2', 'sub2', '2001/02/01');
+	(2,'subject2', 'sub2', '2001/02/01'),
+	(2,'0010001', 'sub3', '2001/02/01');
 

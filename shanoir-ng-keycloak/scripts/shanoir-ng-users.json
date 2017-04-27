@@ -35,18 +35,6 @@
     "nodeReRegistrationTimeout": -1,
     "protocolMappers": [
         {
-            "id": "7d3aa69e-be5e-4173-a342-30aa0b849d21",
-            "name": "userId",
-            "protocol": "openid-connect",
-            "protocolMapper": "oidc-usermodel-attribute-mapper",
-            "consentRequired": false,
-            "config": {
-                "user.attribute": "userId",
-                "access.token.claim": "true",
-                "jsonType.label": "long"
-            }
-        },
-        {
             "id": "b874d699-5124-4386-8eb8-aa662caf5c2d",
             "name": "Client ID",
             "protocol": "openid-connect",
