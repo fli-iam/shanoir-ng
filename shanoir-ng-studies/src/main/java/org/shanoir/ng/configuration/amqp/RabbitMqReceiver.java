@@ -25,29 +25,6 @@ public class RabbitMqReceiver {
 
 	private CountDownLatch latch = new CountDownLatch(1);
 
-	// /**
-	//  * Receive message.
-	//  *
-	//  * @param message
-	//  *            message.
-	//  */
-	// public void receiveRPC(final String message) {
-	// 	LOG.info("NEW RPC MESSAGE");
-	// 	LOG.debug(" [x] Received '" + message + "'");
-	// 	System.out.println(" [x] Received '" + message + "'");
-	//
-	// 	// final Gson oGson = new Gson();
-	// 	// final Study study = oGson.fromJson(message, Study.class);
-	// 	//
-	// 	// try {
-	// 	// 	studyService.updateFromShanoirOld(study);
-	// 	// 	latch.countDown();
-	// 	// } catch (ShanoirStudyException e) {
-	// 	// 	// Exception.
-	// 	// 	// TODO: how to manage these exceptions to avoid messages loop
-	// 	// }
-	// }
-
 	/**
 	 * Receive message.
 	 *
