@@ -15,6 +15,7 @@ import org.shanoir.ng.role.RoleRepository;
 import org.shanoir.ng.user.User;
 import org.shanoir.ng.user.UserRepository;
 import org.shanoir.ng.utils.KeycloakUtils;
+import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +41,8 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(KeycloakServerInit.class);
 
-	@Value("${kc.requests.admin.login}")
-	private String keycloakRequestsAdminLogin;
+	private static final String KEYCLOAK_USER_ENV = "KEYCLOAK_USER";
+	private static final String KEYCLOAK_PASSWORD_ENV = "KEYCLOAK_PASSWORD";
 
 	@Value("${keycloak.auth-server-url}")
 	private String keycloakAuthServerUrl;
@@ -49,7 +50,8 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	@Value("${keycloak.realm}")
 	private String keycloakRealm;
 
-	@Value("${kc.requests.admin.password}")
+	private String keycloakRequestsAdminLogin;
+
 	private String keycloakRequestsAdminPassword;
 
 	@Value("${kc.requests.client.id}")
@@ -69,10 +71,30 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 
 	private Keycloak keycloak;
 
+	/**
+	 * @return the keycloakRequestsAdminLogin
+	 */
+	protected String getKeycloakRequestsAdminLogin() {
+		if (keycloakRequestsAdminLogin == null) {
+			keycloakRequestsAdminLogin = System.getenv(KEYCLOAK_USER_ENV);
+		}
+		return keycloakRequestsAdminLogin;
+	}
+
+	/**
+	 * @return the keycloakRequestsAdminPassword
+	 */
+	protected String getKeycloakRequestsAdminPassword() {
+		if (keycloakRequestsAdminPassword == null) {
+			keycloakRequestsAdminPassword = System.getenv(KEYCLOAK_PASSWORD_ENV);
+		}
+		return keycloakRequestsAdminPassword;
+	}
+
 	protected Keycloak getKeycloak() {
 		if (keycloak == null) {
-			keycloak = Keycloak.getInstance(keycloakAuthServerUrl, keycloakRequestsRealm, keycloakRequestsAdminLogin,
-					keycloakRequestsAdminPassword, keycloakRequestsClientId);
+			keycloak = Keycloak.getInstance(keycloakAuthServerUrl, keycloakRequestsRealm,
+					getKeycloakRequestsAdminLogin(), getKeycloakRequestsAdminPassword(), keycloakRequestsClientId);
 		}
 		return keycloak;
 	}
@@ -120,8 +142,11 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 			// Reset user password
 			final CredentialRepresentation credential = new CredentialRepresentation();
 			credential.setType(CredentialRepresentation.PASSWORD);
-			// TODO: generate password
-			credential.setValue(user.getUsername());
+			if (keycloakTemporaryPassword) {
+				credential.setValue(PasswordUtils.generatePassword());
+			} else {
+				credential.setValue("&a1A&a1A");
+			}
 			credential.setTemporary(keycloakTemporaryPassword);
 			userResource.resetPassword(credential);
 

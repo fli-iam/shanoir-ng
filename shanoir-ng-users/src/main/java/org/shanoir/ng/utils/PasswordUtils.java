@@ -21,7 +21,10 @@ public final class PasswordUtils {
 	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
 	/** List of letters for passwords */
-	private static final String ALPHA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	private static final String LOWERCASE_ALPHA = "abcdefghijklmnopqrstuvwxyz";
+
+	/** List of letters for passwords */
+	private static final String UPPERCASE_ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	/** List of numbers for passwords */
 	private static final String NUMERIC = "0123456789";
@@ -30,7 +33,7 @@ public final class PasswordUtils {
 	private static final String SPECIAL_CHARS = "%$#@";
 
 	/** List of allowed characters for passwords */
-	private static final String ALL_CHARS = ALPHA + NUMERIC + SPECIAL_CHARS;
+	private static final String ALL_CHARS = LOWERCASE_ALPHA + UPPERCASE_ALPHA + NUMERIC + SPECIAL_CHARS;
 
 	/** Password minimum length */
 	private static final int PASSWORD_MIN_LENGTH = 8;
@@ -57,19 +60,22 @@ public final class PasswordUtils {
 	public static void checkPasswordPolicy(final String password, final String username) throws ShanoirUsersException {
 		// Shanoir NG password check
 		if (password != null && password.length() >= PASSWORD_MIN_LENGTH) {
-			boolean hasAlpha = false;
+			boolean hasLowerCaseAlpha = false;
+			boolean hasUpperCaseAlpha = false;
 			boolean hasNumeric = false;
 			boolean hasSpecialChar = false;
 			for (int i = 0 ; i < password.length() ; i++) {
 				final String c = String.valueOf(password.charAt(i));
-				if (ALPHA.contains(c)) {
-					hasAlpha = true;
+				if (LOWERCASE_ALPHA.contains(c)) {
+					hasLowerCaseAlpha = true;
+				} else if (UPPERCASE_ALPHA.contains(c)) {
+					hasUpperCaseAlpha = true;
 				} else if (NUMERIC.contains(c)) {
 					hasNumeric = true;
 				} else if (SPECIAL_CHARS.contains(c)) {
 					hasSpecialChar = true;
 				}
-				if (hasAlpha && hasNumeric && hasSpecialChar) {
+				if (hasLowerCaseAlpha && hasUpperCaseAlpha && hasNumeric && hasSpecialChar) {
 					return;
 				}
 			}
@@ -89,9 +95,13 @@ public final class PasswordUtils {
 		final Random rnd = new Random();
 		final char[] pwd = new char[PASSWORD_MIN_LENGTH];
 		
-		// 1 letter
+		// 1 lower case letter
 		int index = getNextIndex(rnd, pwd);
-		pwd[index] = ALPHA.charAt(rnd.nextInt(ALPHA.length()));
+		pwd[index] = LOWERCASE_ALPHA.charAt(rnd.nextInt(LOWERCASE_ALPHA.length()));
+
+		// 1 upper case letter
+		index = getNextIndex(rnd, pwd);
+		pwd[index] = UPPERCASE_ALPHA.charAt(rnd.nextInt(UPPERCASE_ALPHA.length()));
 
 		// 1 number
 		index = getNextIndex(rnd, pwd);
