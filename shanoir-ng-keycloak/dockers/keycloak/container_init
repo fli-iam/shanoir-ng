@@ -3,6 +3,9 @@
 echo "Add user"
 keycloak/bin/add-user-keycloak.sh --user $KEYCLOAK_USER --password $KEYCLOAK_PASSWORD
 
+echo "Configure Shanoir theme"
+cp /opt/jboss/keycloak/themes/shanoir-theme/login/theme-$DOCKER_PROFILE.properties /opt/jboss/keycloak/themes/shanoir-theme/login/theme.properties
+
 echo "Start server"
 /opt/jboss/keycloak/bin/standalone.sh&
 
