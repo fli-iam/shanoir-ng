@@ -6,9 +6,10 @@ import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms'
 
 import { AcquisitionEquipment } from '../shared/acqEquip.model';
 import { AcquisitionEquipmentService } from '../shared/acqEquip.service';
+import { ManufacturerService } from '../shared/manuf.service';
+import { ManufacturerModelService } from '../shared/manufModel.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-
-const MMNS : String [] = ['Signal - GE', 'Vivio - SIEMENS', 'Test - WhyNot'];
+import { ManufacturerModel } from '../shared/manufModel.model';
 
 @Component({
     selector: 'acqEquipDetail',
@@ -18,22 +19,25 @@ const MMNS : String [] = ['Signal - GE', 'Vivio - SIEMENS', 'Test - WhyNot'];
 export class AcquisitionEquipmentDetailComponent implements OnInit {
     
     @Output() closing = new EventEmitter();
+    @Input() modeFromCenterList: "view" | "edit" | "create";
     private acqEquip: AcquisitionEquipment = new AcquisitionEquipment();
     private acqEquipDetailForm: FormGroup;
     private acqEquipId: number;
     private mode: "view" | "edit" | "create";
     private isNameUnique: Boolean = true;
     private canModify: Boolean = false;
-    private manuModelNames = MMNS;
-    
+    private manufModels: ManufacturerModel[];
 
     constructor (private route: ActivatedRoute, private router: Router,
-        private acqEquipService: AcquisitionEquipmentService,   private fb: FormBuilder,
+        private acqEquipService: AcquisitionEquipmentService, private fb: FormBuilder,
+        private manufService: ManufacturerService, private manufModelService: ManufacturerModelService,
         private location: Location, private keycloakService: KeycloakService) {
 
     }
 
     ngOnInit(): void {
+        if (this.modeFromCenterList) {this.mode = this.modeFromCenterList;}
+        this.getManufModels();
         this.getAcquisitionEquipment();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -63,10 +67,32 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
             });
     }   
 
+    getManufModels(): void {
+        this.manufModelService
+            .getManufacturerModels()
+            .then(manufModels => {
+                this.manufModels = manufModels;
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting manufacturer models list!");
+            });
+    }
+
+    getManufModelById(id: number): ManufacturerModel {
+        for (let manufModel of this.manufModels) {
+            if (id == manufModel.id) {
+                return manufModel;
+            }
+        }
+        return null;
+    }
+
     buildForm(): void {
         this.acqEquipDetailForm = this.fb.group({
             'serialNumber': [this.acqEquip.serialNumber],
-            'manuModelName': [this.acqEquip.manuModelName]
+            'manufModel': [this.acqEquip.manufacturerModel, Validators.required],
+            'center': [this.acqEquip.center, Validators.required]
         });
         this.acqEquipDetailForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
@@ -89,7 +115,8 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     }
 
     formErrors = {
-        'manuModelName': ''
+       'manufModel': '',
+       'center': ''
     };
 
     back(): void {
@@ -98,7 +125,7 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     }
 
     edit(): void {
-        this.router.navigate(['/acqEquipDetail'], { queryParams: {id: this.acqEquipId, mode: "edit"}});
+        this.router.navigate(['/acqEquipDetail'], {queryParams: {id: this.acqEquipId, mode: "edit"}});
     }
 
     create(): void {

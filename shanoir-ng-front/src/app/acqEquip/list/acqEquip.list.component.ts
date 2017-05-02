@@ -53,10 +53,10 @@ export class AcquisitionEquipmentListComponent {
         };
        
         this.columnDefs = [
-            {headerName: "Manufacturer", field: "serialNumber" },
-            {headerName: "Manufacturer model name", field: "serialNumber" },
+            {headerName: "Manufacturer", field: "manufacturerModel.manufacturer.name" },
+            {headerName: "Manufacturer model name", field: "manufacturerModel.name" },
             {headerName: "Serial number", field: "serialNumber"},
-            {headerName: "Center", field: "serialNumber" }
+            {headerName: "Center", field: "center.name" }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push({headerName: "", type: "button", img: "/assets/images/icons/garbage-1.png", action: this.openDeleteAcquisitionEquipmentConfirmDialog},

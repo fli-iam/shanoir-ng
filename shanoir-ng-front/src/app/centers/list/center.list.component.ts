@@ -69,7 +69,7 @@ export class CenterListComponent {
             }});
         }
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({headerName: "", type: "button", img: "/assets/images/icons/medical/x-ray-2.png", tip: "Add acq. equip.",
+            this.columnDefs.push({headerName: "", type: "button", img: "/assets/images/icons/medical/cardiogram-1.png", tip: "Add acq. equip.",
             action: this.openCreateAcqEquip});
         }
 
