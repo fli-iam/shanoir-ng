@@ -41,7 +41,10 @@ import { ImportComponent }   from './import/import.component';
 import { ClickTipComponent }   from './shared/clickTip/clickTip.component';
 import { ConsoleComponent }   from './shared/console/console.line.component';
 import { LoadingBarComponent }   from './shared/loadingBar/loadingBar.component';
-
+import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
+import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
+import { ManufacturerModelService } from './acqEquip/shared/manufModel.service';
+import { ManufacturerService } from './acqEquip/shared/manuf.service';
 
 export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
   return new KeycloakHttp(backend, defaultOptions, keycloakService);
@@ -79,7 +82,9 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         ImportComponent,
         ClickTipComponent,
         ConsoleComponent,
-        LoadingBarComponent
+        LoadingBarComponent,
+        ManufacturerDetailComponent,
+        ManufacturerModelDetailComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -95,6 +100,8 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         RoleService,
         UserService,
         HandleErrorService,
+        ManufacturerModelService,
+        ManufacturerService,
         {
             provide: Http,
             useFactory: httpFactory,

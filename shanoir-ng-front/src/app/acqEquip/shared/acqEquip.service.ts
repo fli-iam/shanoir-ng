@@ -11,7 +11,7 @@ export class AcquisitionEquipmentService {
     constructor(private http: Http, private handleErrorService: HandleErrorService) { }
 
     getAcquisitionEquipments(): Promise<AcquisitionEquipment[]> {
-        return this.http.get(AppUtils.BACKEND_API_CENTER_ALL_URL)
+        return this.http.get(AppUtils.BACKEND_API_ACQ_EQUIP_ALL_URL)
             .toPromise()
             .then(response => response.json() as AcquisitionEquipment[])
             .catch((error) => {
@@ -21,7 +21,7 @@ export class AcquisitionEquipmentService {
     }
 
     delete(id: number): Promise<Response> {
-        return this.http.delete(AppUtils.BACKEND_API_CENTER_URL + '/' + id)
+        return this.http.delete(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id)
             .toPromise()
             .catch((error) => {
                 console.error('Error delete acqEquip', error);
@@ -30,7 +30,7 @@ export class AcquisitionEquipmentService {
     }
 
     getAcquisitionEquipment (id: number): Promise<AcquisitionEquipment> {
-        return this.http.get(AppUtils.BACKEND_API_CENTER_URL + '/' + id)
+        return this.http.get(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id)
             .toPromise()
             .then(res => res.json() as AcquisitionEquipment)
             .catch((error) => {
@@ -40,13 +40,13 @@ export class AcquisitionEquipmentService {
     }
 
     create(acqEquip: AcquisitionEquipment): Observable<AcquisitionEquipment> {
-        return this.http.post(AppUtils.BACKEND_API_CENTER_URL, JSON.stringify(acqEquip))
+        return this.http.post(AppUtils.BACKEND_API_ACQ_EQUIP_URL, JSON.stringify(acqEquip))
             .map(this.handleErrorService.extractData)
             .catch(this.handleErrorService.handleError);
     }
 
     update(id: number, acqEquip: AcquisitionEquipment): Observable<AcquisitionEquipment> {
-        return this.http.put(AppUtils.BACKEND_API_CENTER_URL + '/' + id, JSON.stringify(acqEquip))
+        return this.http.put(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id, JSON.stringify(acqEquip))
             .map(response => response.json() as AcquisitionEquipment)
             .catch(this.handleErrorService.handleError);
     }

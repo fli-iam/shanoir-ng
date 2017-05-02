@@ -6,10 +6,10 @@
   
     <shanoir-table [items]="centers" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
 
-    <!-- create acq. equip. popup --> 
+    <!-- create acq. equip. popin --> 
     <div class="overlay" *ngIf="createAcqEquip">
         <div class="content">
-            <acqEquipDetail (closing)="closePopup($event)"></acqEquipDetail>
+            <acqEquipDetail [modeFromCenterList]="'create'" (closing)="closePopup($event)"></acqEquipDetail>
         </div>
     </div>
 </div>
