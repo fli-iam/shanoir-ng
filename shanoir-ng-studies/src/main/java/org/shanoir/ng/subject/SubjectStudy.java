@@ -1,56 +1,54 @@
 package org.shanoir.ng.subject;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.study.Study;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-
 @Entity
-@Table(name = "subject_study")
-@JsonPropertyOrder({ "_links", "id", "subject", "subjectType", "study", "subjectStudyIdentifier" , "physicallyInvolved" })
+@JsonPropertyOrder({ "_links", "id" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-public class SubjectStudy extends HalEntity{
+public class SubjectStudy extends HalEntity {
 
-	
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = 734032331139342460L;
+
+	/** true if the subject is physically involved in the study. */
 	private boolean physicallyInvolved;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "type")
+
+	/** Subject yype. */
+	@Column(nullable = true, updatable = true)
+	@Enumerated(EnumType.STRING)
 	private SubjectType subjectType;
-	
+
 	/** Study. */
 	@ManyToOne
-	@JsonIgnore
 	@JoinColumn(name = "study")
 	private Study study;
-	
+
 	/** Subject. */
 	@ManyToOne
-	@JsonIgnore
 	@JoinColumn(name = "subject")
 	private Subject subject;
-	
-	
+
+	/** Identifier of the subject inside the study. */
 	private String subjectStudyIdentifier;
-	
-	
+
 	@Override
 	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
+	@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 	public Long getId() {
 		return super.getId();
 	}
@@ -94,6 +92,5 @@ public class SubjectStudy extends HalEntity{
 	public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
 		this.subjectStudyIdentifier = subjectStudyIdentifier;
 	}
-	
-	
+
 }

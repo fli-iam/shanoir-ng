@@ -1,26 +1,13 @@
 package org.shanoir.ng.study;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Relation between the study and the users.
  *
  * @author ifakhfak
  */
-@Entity
-@Table(name = "REL_STUDY_USER")
-public class RelStudyUser implements Serializable {
+public class RelStudyUser {
 
 	/**
 	 * UID
@@ -28,9 +15,6 @@ public class RelStudyUser implements Serializable {
 	private static final long serialVersionUID = -6816811624812002519L;
 
 	/** ID. */
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "REL_STUDY_USER_ID")
 	private Long id;
 
 	/** Type of the relationship. */
@@ -42,10 +26,6 @@ public class RelStudyUser implements Serializable {
 	 */
 
 	/** Study. */
-	@ManyToOne
-	// @JoinColumn(name = "STUDY_ID")
-	@JsonIgnore
-	@JoinColumn(name = "study")
 	private Study study;
 
 	/** User. */
