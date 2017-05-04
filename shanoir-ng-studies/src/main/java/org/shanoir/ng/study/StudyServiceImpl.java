@@ -85,12 +85,43 @@ public class StudyServiceImpl implements StudyService {
 			return studyRepository.findOne(id);
 	}
 
+
+	/*
+	 * delete study from Shanoir Old.
+	 *
+	 * @param Study study.
+	 *
+	 */
+	@Override
+	public void deleteFromShanoirOld(final Study study) throws ShanoirStudyException {
+		if (study.getId() != null) {
+				LOG.warn("Delete study with name " + study.getName() + " (id: "+ study.getId() +") from shanoir-old");
+				try{
+					studyRepository.delete(study);
+				} catch (Exception e) {
+					ShanoirStudyException.logAndThrow(LOG,
+							"Error while deleting study from Shanoir Old: " + e.getMessage());
+				}
+			}
+	}
+
+
+	/*
+	 * update study from Shanoir Old.
+	 *
+	 * @param Study study.
+	 *
+	 */
+	@Override
 	public void updateFromShanoirOld(final Study study) throws ShanoirStudyException {
 		if (study.getId() == null) {
-				LOG.warn("Skipping import new study without ID " + study.getName() + " from shanoir-old");
-				throw new IllegalArgumentException("Study id cannot be null");
-				// TODO Decide what should be done. Most probably this should never happen.
-				// studyRepository.save(study);
+				LOG.info("Insert new Study with name " + study.getName() + " from shanoir-old");
+				try{
+					studyRepository.save(study);
+				} catch (Exception e) {
+					ShanoirStudyException.logAndThrow(LOG,
+							"Error while creating new study from Shanoir Old: " + e.getMessage());
+				}
 		} else {
 			final Study studyDb = studyRepository.findOne(study.getId());
 			if (studyDb != null) {

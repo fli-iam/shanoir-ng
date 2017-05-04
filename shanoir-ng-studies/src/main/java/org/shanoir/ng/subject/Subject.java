@@ -34,15 +34,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class Subject extends HalEntity {
 
 	private static final long serialVersionUID = 6844259659282875507L;
-	
+
 	private Date birthDate;
 
 	private String name;
-	
-	@NotNull
-	@Column(nullable = false, insertable = false, updatable = false)
-	@Enumerated(EnumType.STRING)
 
+	//@NotNull
+//	@Column(nullable = false, insertable = false, updatable = false)
+	@Enumerated(EnumType.STRING)
 	private Sex sex;
 
 	/** Relations between the subjects and the studies. */
@@ -54,22 +53,20 @@ public class Subject extends HalEntity {
 	private String identifier;
 
 	@OneToOne
-	private PseudonymusHashValues pseudonymusHashValues;	
-	
-	@Column(insertable = false, updatable = false)
-	@Enumerated(EnumType.STRING)
+	private PseudonymusHashValues pseudonymusHashValues;
 
+	// @Column(insertable = false, updatable = false)
+	@Enumerated(EnumType.STRING)
 	private HemisphericDominance languageHemisphericDominance;
 
 	/** Manual Hemispheric dominance. */
-	@Column(insertable = false, updatable = false)
+	// @Column(insertable = false, updatable = false)
 	@Enumerated(EnumType.STRING)
 	private HemisphericDominance manualHemisphericDominance;
-	
-	/** The category of the subject (phantom, human alive, human cadaver, etc.). */	
-	@Column(insertable = false, updatable = false)
-	@Enumerated(EnumType.STRING)
 
+	/** The category of the subject (phantom, human alive, human cadaver, etc.). */
+	// @Column(insertable = false, updatable = false)
+	@Enumerated(EnumType.STRING)
 	private ImagedObjectCategory imagedObjectCategory;
 
 	/** Personal Comments on this subject. */
@@ -117,6 +114,10 @@ public class Subject extends HalEntity {
 
 	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
 		this.subjectStudyList = subjectStudyList;
+	}
+
+	public void addSubjectStudy(SubjectStudy subjectStudy) {
+		this.subjectStudyList.add(subjectStudy);
 	}
 
 	public String getIdentifier() {

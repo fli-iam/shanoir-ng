@@ -5,6 +5,7 @@ import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -16,25 +17,42 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMqConfiguration {
 
-	private final static String TEMPLATE_QUEUE_NAME_IN = "studycard_queue";
-	private final static String TEMPLATE_QUEUE_NAME_OUT = "studycard_queue_from_ng";
+	private final static String STUDYCARD_QUEUE_NAME_IN = "studycard_queue_to_ng";
+	private final static String STUDYCARD_DELETE_QUEUE_NAME_IN = "studycard_delete_queue_to_ng";
+	private final static String STUDYCARD_QUEUE_NAME_OUT = "studycard_queue_from_ng";
 
     @Bean
     public static Queue queueIn() {
-        return new Queue(TEMPLATE_QUEUE_NAME_IN, true);
+        return new Queue(STUDYCARD_QUEUE_NAME_IN, true);
     }
 
     @Bean
     public static Queue queueOut() {
-    	return new Queue(TEMPLATE_QUEUE_NAME_OUT, true);
+    	return new Queue(STUDYCARD_QUEUE_NAME_OUT, true);
     }
 
-    @Bean
-    SimpleMessageListenerContainer container(final ConnectionFactory connectionFactory,
-            MessageListenerAdapter listenerAdapter) {
+		@Bean
+		public static Queue queueDeleteIn() {
+			return new Queue(STUDYCARD_DELETE_QUEUE_NAME_IN, true);
+		}
+
+
+		@Bean
+    SimpleMessageListenerContainer studyContainer(final ConnectionFactory connectionFactory,
+            @Qualifier("studycardListenerAdapter") MessageListenerAdapter listenerAdapter) {
     	final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(TEMPLATE_QUEUE_NAME_IN);
+        container.setQueueNames(STUDYCARD_QUEUE_NAME_IN);
+        container.setMessageListener(listenerAdapter);
+        return container;
+    }
+
+		@Bean
+    SimpleMessageListenerContainer studycardDeleteContainer(final ConnectionFactory connectionFactory,
+            @Qualifier("studycardDeleteListenerAdapter") MessageListenerAdapter listenerAdapter) {
+    	final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+        container.setConnectionFactory(connectionFactory);
+        container.setQueueNames(STUDYCARD_DELETE_QUEUE_NAME_IN);
         container.setMessageListener(listenerAdapter);
         return container;
     }
@@ -45,8 +63,14 @@ public class RabbitMqConfiguration {
     }
 
     @Bean
-    MessageListenerAdapter listenerAdapter(final RabbitMqReceiver receiver) {
-        return new MessageListenerAdapter(receiver, "receiveMessage");
+    MessageListenerAdapter studycardListenerAdapter(final RabbitMqReceiver receiver) {
+        return new MessageListenerAdapter(receiver, "receiveStudyCardMessage");
+    }
+
+
+		@Bean
+    MessageListenerAdapter studycardDeleteListenerAdapter(final RabbitMqReceiver receiver) {
+        return new MessageListenerAdapter(receiver, "receiveStudyCardDeleteMessage");
     }
 
 

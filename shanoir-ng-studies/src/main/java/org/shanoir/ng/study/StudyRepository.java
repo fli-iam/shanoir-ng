@@ -11,7 +11,8 @@ public interface StudyRepository extends CrudRepository<Study, Long>{
 	/**
 	 * Get all studies
 	 */
-	List<Study> findAll();	
+	List<Study> findAll();
 
+	Study findById(Long studyId);
 
 }

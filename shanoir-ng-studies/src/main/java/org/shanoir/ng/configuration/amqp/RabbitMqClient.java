@@ -22,13 +22,7 @@ public class RabbitMqClient {
 
 	public void send(String message) {
 		System.out.println(" [x] Send subject to sh_old with content (" + message + ")");
-   // 	System.out.println("---------->" + exchange.getName());
 		byte[] response = (byte[]) template.convertSendAndReceive(RabbitMqConfiguration.subjectRPCQueueOut().getName(), message);
-		System.out.println("------------------------------------------------------------");
-		System.out.println(template.getExchange());
-		System.out.println(template.getRoutingKey());
-		System.out.println(template.getUUID());
-		System.out.println("------------------------------------------------------------");
 		String msg = null;
 		try{
 			msg = new String(response,"UTF-8");

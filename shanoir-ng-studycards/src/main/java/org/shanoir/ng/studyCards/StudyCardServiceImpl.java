@@ -90,27 +90,52 @@ public class StudyCardServiceImpl implements StudyCardService {
 	@Override
 	public void updateFromShanoirOld(final StudyCard studyCard) throws ShanoirStudyCardsException {
 		if (studyCard.getId() == null) {
-			throw new IllegalArgumentException("Study Card id cannot be null");
+			LOG.info("Insert new Study Card with name " + studyCard.getName() + " from shanoir-old");
+			System.out.println("Insert new Study Card with name " + studyCard.getName() + " from shanoir-old");
+			try{
+				studyCardRepository.save(studyCard);
+			} catch (Exception e) {
+				ShanoirStudyCardsException.logAndThrow(LOG,
+						"Error while creating new study card from Shanoir Old: " + e.getMessage());
+			}
 		} else {
 			final StudyCard studyCardDb = studyCardRepository.findOne(studyCard.getId());
 			if (studyCardDb != null) {
 				try {
-					studyCardDb.setName(studyCard.getName());
-					studyCardDb.setDisabled(studyCard.isDisabled());
-					studyCardRepository.save(studyCardDb);
+					LOG.info("Update existing Study card with name " + studyCard.getName() + " (id: "+ studyCard.getId() +") from shanoir-old");
+					System.out.println("Update existing Study card with name " + studyCard.getName() + " (id: "+ studyCard.getId() +") from shanoir-old");
+					studyCardRepository.save(studyCard);
 				} catch (Exception e) {
 					ShanoirStudyCardsException.logAndThrow(LOG,
 							"Error while updating Study Card from Shanoir Old: " + e.getMessage());
-
 				}
 			}	else {
-				LOG.warn("Import new study with name " + studyCard.getName() + "  (id: "+ studyCard.getId()+") from shanoir-old");
+				LOG.warn("Import new study card with name " + studyCard.getName() + "  (id: "+ studyCard.getId()+") from shanoir-old");
+				System.out.println("Import new study card with name " + studyCard.getName() + "  (id: "+ studyCard.getId()+") from shanoir-old");
 				studyCardRepository.save(studyCard);
 			}
 		}
 	}
-	
-	
+
+
+	/*
+	 * Delete study card from Shanoir Old.
+	 *
+	 * @param StudyCard studyCard.
+	 *
+	 */
+	public void deleteFromShanoirOld(final StudyCard studyCard) throws ShanoirStudyCardsException {
+		if (studyCard.getId() != null) {
+				LOG.warn("Delete study Card with name " + studyCard.getName() + " (id: "+ studyCard.getId() +") from shanoir-old");
+				System.out.println("Delete study Card with name " + studyCard.getName() + " (id: "+ studyCard.getId() +") from shanoir-old");
+				try{
+					studyCardRepository.delete(studyCard);
+				} catch (Exception e) {
+					ShanoirStudyCardsException.logAndThrow(LOG,
+							"Error while deleting study card from Shanoir Old: " + e.getMessage());
+				}
+			}
+	}
 
 	/*
 	 * Update Shanoir Old.

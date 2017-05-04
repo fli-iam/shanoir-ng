@@ -17,7 +17,7 @@ public enum StudyStatus {
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param val
 	 *            value
 	 */
@@ -34,12 +34,12 @@ public enum StudyStatus {
 
 	/**
 	 * List of enum values.
-	 * 
+	 *
 	 *
 	 */
 	public static class Values {
 		public static final String FINISHED = "FINISHED";
-		public static final String IN_PROGRESS = "IN PROGRESS";
+		public static final String IN_PROGRESS = "IN_PROGRESS";
 	}
 
 }

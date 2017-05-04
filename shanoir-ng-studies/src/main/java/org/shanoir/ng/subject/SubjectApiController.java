@@ -21,18 +21,23 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.shanoir.ng.configuration.amqp.RabbitMqClient;
+import com.google.gson.Gson;
 
 import io.swagger.annotations.ApiParam;
 
 @Controller
 public class SubjectApiController implements SubjectApi  {
-	
-	
+
+
 
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectApiController.class);
 
 	@Autowired
 	private SubjectService subjectService;
+
+	@Autowired
+	private RabbitMqClient rabbitMqClient;
 
 	@Override
 	public ResponseEntity<Void> deleteSubject
@@ -89,6 +94,9 @@ public class SubjectApiController implements SubjectApi  {
 		/* Save template in db. */
 		try {
 			final Subject createdSubject = subjectService.save(subject);
+			final Gson oGson = new Gson();
+			final String subjectJSON = oGson.toJson(subject);
+			rabbitMqClient.send(subjectJSON);
 			return new ResponseEntity<Subject>(createdSubject, HttpStatus.OK);
 		} catch (ShanoirSubjectException e) {
 			throw new RestServiceException(
@@ -133,7 +141,7 @@ public class SubjectApiController implements SubjectApi  {
 	 * Get access rights errors.
 	 *
 	 * @param template template.
-	 * 
+	 *
 	 * @return an error map.
 	 */
 	private FieldErrorMap getUpdateRightsErrors(final Subject subject) {
@@ -146,7 +154,7 @@ public class SubjectApiController implements SubjectApi  {
 	 * Get access rights errors.
 	 *
 	 * @param template template.
-	 * 
+	 *
 	 * @return an error map.
 	 */
 	private FieldErrorMap getCreationRightsErrors(final Subject subject) {
@@ -157,7 +165,7 @@ public class SubjectApiController implements SubjectApi  {
 	 * Get unique constraint errors
 	 *
 	 * @param template
-	 * 
+	 *
 	 * @return an error map
 	 */
 	private FieldErrorMap getUniqueConstraintErrors(final Subject subject) {
@@ -168,26 +176,26 @@ public class SubjectApiController implements SubjectApi  {
 
 	@Override
 	public ResponseEntity<List<Subject>> findSubjectsByStudyId(@ApiParam(value = "id of the study",required=true ) @PathVariable("studyId") Long studyId) {
-		
+
 		final List<Subject> subjects = subjectService.findAllSubjectsOfStudy(studyId);
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<List<Subject>>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<List<Subject>>(subjects, HttpStatus.OK);
-		
+
 	}
 
 	@Override
 	public ResponseEntity<Subject> findSubjectByIdentifier(@ApiParam(value = "identifier of the subject",required=true ) @PathVariable("subjectIdentifier") String subjectIdentifier) {
-		
+
 		final Subject subject = subjectService.findByIdentifier(subjectIdentifier);
 		if (subject == null) {
 			return new ResponseEntity<Subject>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<Subject>(subject, HttpStatus.OK);
-		
+
 	}
-	
-	
+
+
 
 }

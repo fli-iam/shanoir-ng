@@ -31,9 +31,9 @@ public class RabbitMqReceiver {
 	 * @param message
 	 *            message.
 	 */
-	public void receiveMessage(final String message) {
+	public void receiveStudyMessage(final String message) {
 		LOG.info("NEW MESSAGE");
-		LOG.debug(" [x] Received '" + message + "'");
+		LOG.debug(" [x] Received Study Update/Create '" + message + "'");
 		System.out.println(" [x] Received '" + message + "'");
 
 		final Gson oGson = new Gson();
@@ -41,6 +41,29 @@ public class RabbitMqReceiver {
 
 		try {
 			studyService.updateFromShanoirOld(study);
+			latch.countDown();
+		} catch (ShanoirStudyException e) {
+			// Exception.
+			// TODO: how to manage these exceptions to avoid messages loop
+		}
+	}
+
+	/**
+	 * Receive message.
+	 *
+	 * @param message
+	 *            message.
+	 */
+	public void receiveStudyDeleteMessage(final String message) {
+		LOG.info("NEW MESSAGE");
+		LOG.debug(" [x] Received Study Delete'" + message + "'");
+		System.out.println(" [x] Received '" + message + "'");
+
+		final Gson oGson = new Gson();
+		final Study study = oGson.fromJson(message, Study.class);
+
+		try {
+			studyService.deleteFromShanoirOld(study);
 			latch.countDown();
 		} catch (ShanoirStudyException e) {
 			// Exception.

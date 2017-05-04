@@ -70,8 +70,8 @@ VALUES
 	(49,'France','Hopital Pitié Salpétrière','0157274007','75013','47-83 bd de l’hôpital','Paris',''),
 	(50,'France','CHU St Roch - Nice','','06006','5 rue Pierre Devoluy','Nice',''),
 	(51,'France','CHU Poitiers','','86000','rue de la miletrie','Poitiers','');
-	
-	
+
+
 INSERT INTO pseudonymus_hash_values
  (id, birth_name_hash1, birth_name_hash2, birth_name_hash3, last_name_hash1, last_name_hash2, last_name_hash3, first_name_hash1, first_name_hash2, first_name_hash3, birth_date_hash)
 VALUES
@@ -86,14 +86,14 @@ VALUES
     'f5b1f63c652852724daec3ab2fc51ba20792a0cf85c102066d412746dda72b84',
     'f7ca8a978bd2ba11ee0d843453103938562b6e48ef3237e2daf3a743f826f7ee',
     'efa0bd9d3793157b8b44cd76814c079e0eb1f8a3a3017dc0a58959f581d7a097');
-  
+
 INSERT INTO subject
 	(id, name, identifier, birth_date, imaged_object_category, language_hemispheric_dominance,  manual_hemispheric_dominance, sex,  pseudonymus_hash_values_id)
 VALUES
-	(1,'subject1', 'sub1', '2013/01/01', 'LIVING_HUMAN_BEING','LEFT','LEFT','F',1),
-	(2,'subject2', 'sub2', '2001/02/01', 'LIVING_HUMAN_BEING','RIGHT','LEFT','F',1),
-	(3,'0010001', 'sub3', '2001/02/01', 'LIVING_HUMAN_BEING','LEFT','RIGHT','F',1);
-	
+	(1,'subject1', 'sub1', '2013/01/01', 'LIVING_HUMAN_BEING','Left','Left','F',1),
+	(2,'subject2', 'sub2', '2001/02/01', 'LIVING_HUMAN_BEING','Right','Left','F',1),
+	(50,'0010001', 'sub3', '2001/02/01', 'LIVING_HUMAN_BEING','Left','Right','F',1);
+
 
 INSERT INTO subject_study
 	(id, physically_involved, study, subject )
@@ -105,22 +105,21 @@ VALUES
 
 INSERT INTO manufacturer
 	(id, name)
-VALUES 
+VALUES
 	(1, 'GE Healthcare'),
 	(2, 'GE Medical Systems'),
 	(3, 'Philips Healthcare');
 
 INSERT INTO manufacturer_model
 	(id, dataset_modality_type, manufacturer_id, name, magnetic_field)
-VALUES 
+VALUES
 	(1, 'MR_DATASET', 2, 'DISCOVERY MR750', 3),
 	(2, 'PET_DATASET', 2, 'DISCOVERY MR750w', null),
 	(3, 'MR_DATASET', 3, 'Ingenia', 1.5);
 
 INSERT INTO acquisition_equipment
 	(id, center_id, manufacturer_model_id, serial_number)
-VALUES 
+VALUES
 	(1, 1, 1, '123456789'),
 	(2, 2, 1, '234567891'),
 	(3, 1, 2, '345678912');
-

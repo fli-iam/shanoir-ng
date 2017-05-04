@@ -16,7 +16,7 @@ public interface StudyCardService extends UniqueCheckableService<StudyCard> {
 
 	/**
 	 * Delete a template.
-	 * 
+	 *
 	 * @param id
 	 *            template id.
 	 * @throws ShanoirTemplateException
@@ -25,7 +25,7 @@ public interface StudyCardService extends UniqueCheckableService<StudyCard> {
 
 	/**
 	 * Get all the template.
-	 * 
+	 *
 	 * @return a list of templates.
 	 */
 	List<StudyCard> findAll();
@@ -70,14 +70,30 @@ public interface StudyCardService extends UniqueCheckableService<StudyCard> {
 
 	/**
 	 * Update a template from the old Shanoir
-	 * 
+	 *
 	 * @param template
 	 *            template.
 	 * @throws ShanoirTemplateException
 	 */
-	
+
 	List<StudyCard> findStudyCardsOfStudy (Long studyId) throws ShanoirStudyCardsException;
-	
-	void updateFromShanoirOld(StudyCard template) throws ShanoirStudyCardsException;
+
+	/**
+	 * delete study cardfrom Shanoir Old.
+	 *
+	 * @param StudyCard studyCard.
+	 *
+	 * @throws ShanoirStudyCardsException
+	 */
+	void deleteFromShanoirOld(StudyCard studyCard) throws ShanoirStudyCardsException;
+
+	/**
+	 * update study cardfrom Shanoir Old.
+	 *
+	 * @param StudyCard studyCard.
+	 *
+ 	 * @throws ShanoirStudyCardsException
+	 */
+	void updateFromShanoirOld(StudyCard studyCard) throws ShanoirStudyCardsException;
 
 }

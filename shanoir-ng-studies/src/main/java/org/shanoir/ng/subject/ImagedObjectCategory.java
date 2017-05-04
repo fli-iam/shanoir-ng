@@ -5,14 +5,14 @@ public enum ImagedObjectCategory {
 
 	PHANTOM(Values.PHANTOM),
 	LIVING_HUMAN_BEING(Values.LIVING_HUMAN_BEING),
-	HUNAM_CADAVER(Values.HUNAM_CADAVER),
+	HUMAN_CADAVER(Values.HUMAN_CADAVER),
 	ANATOMICAL_PIECE(Values.ANATOMICAL_PIECE);
 
 	private String value;
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param val
 	 *            value
 	 */
@@ -29,13 +29,13 @@ public enum ImagedObjectCategory {
 
 	/**
 	 * List of enum values.
-	 * 
+	 *
 	 */
 	public static class Values {
-		public static final String PHANTOM = "PHANTOM";
-		public static final String LIVING_HUMAN_BEING = "LIVING HUMAN BEING";
-		public static final String HUNAM_CADAVER = "HUNAM CADAVER";
-		public static final String ANATOMICAL_PIECE = "ANATOMICAL PIECE";
+		public static final String PHANTOM = "Phantom";
+		public static final String LIVING_HUMAN_BEING = "Living human being";
+		public static final String HUMAN_CADAVER = "Human cadaver";
+		public static final String ANATOMICAL_PIECE = "Anatomical piece";
 	}
 
 }

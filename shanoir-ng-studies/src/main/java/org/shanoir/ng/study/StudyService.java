@@ -13,8 +13,8 @@ public interface StudyService {
      * @return a list of studies
      */
     List<Study> findAll();
-    
-    
+
+
     /**
 	 * Find study by its id.
 	 *
@@ -23,7 +23,7 @@ public interface StudyService {
 	 * @return a study or null.
 	 */
 	Study findById(Long id);
-	
+
 
     /**
      * add new study
@@ -38,15 +38,15 @@ public interface StudyService {
      * @return updated study
      */
     Study update(Study study);
-    
+
 	/**
 	 * Delete a Study
-	 * 
+	 *
 	 * @param id
-	 * @throws ShanoirStudiesException 
+	 * @throws ShanoirStudiesException
 	 */
 	void deleteById(Long id) throws  ShanoirStudiesException;
-	
+
 	/**
 	 * Find all studies for a user
 	 * @param id
@@ -54,7 +54,14 @@ public interface StudyService {
 	 */
 	List<Study> findAllForUser(Long UserId);
 
-
+    /**
+     * delete a Study from the old Shanoir
+     *
+     * @param Study
+     *            Study.
+     * @throws ShanoirStudyException
+     */
+    void deleteFromShanoirOld(Study study) throws ShanoirStudyException;
 
 		/**
 		 * Update a Study from the old Shanoir

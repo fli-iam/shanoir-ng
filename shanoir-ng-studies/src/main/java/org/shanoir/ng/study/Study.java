@@ -75,12 +75,13 @@ public class Study extends HalEntity {
 	private List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
 
 	@NotNull
-	@Column(nullable = false, insertable = false, updatable = false)
+	// ATO : @Column commented for this field
+	//@Column(nullable = false, insertable = false, updatable = false)
 	@Enumerated(EnumType.STRING)
 	private StudyStatus studyStatus;
-	
-	/** Relations between the subjects and the studies. */	
-	
+
+	/** Relations between the subjects and the studies. */
+
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
 	private List<SubjectStudy> subjectStudyList = new ArrayList<SubjectStudy>(0);
@@ -235,18 +236,18 @@ public class Study extends HalEntity {
 
 	/*
 	 * public static long getSerialversionuid() { return serialVersionUID; }
-	 * 
-	 * 
+	 *
+	 *
 	 * /** Associated experimental groups of subjects.
 	 */
 	/*
 	 * @AuditJoinTable
-	 * 
+	 *
 	 * @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = {
 	 * CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE })
-	 * 
+	 *
 	 * @JoinColumn(name = "STUDY_ID")
-	 * 
+	 *
 	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
 	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
 	 * List<ExperimentalGroupOfSubjects> experimentalGroupOfSubjectsList = new
@@ -255,10 +256,10 @@ public class Study extends HalEntity {
 	/** Relations between the investigators, the centers and the studies. */
 	/*
 	 * @NotEmpty
-	 * 
+	 *
 	 * @OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade =
 	 * CascadeType.ALL)
-	 * 
+	 *
 	 * @JoinColumn(name = "STUDY_ID") private List<RelStudyCenter>
 	 * relStudyCenterList = new ArrayList<RelStudyCenter>(0);
 	 */
@@ -266,7 +267,7 @@ public class Study extends HalEntity {
 	/** Dataset list. */
 	/*
 	 * @OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
-	 * 
+	 *
 	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
 	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
 	 * List<RelStudyDataset> relStudyDatasetList = new
@@ -276,7 +277,7 @@ public class Study extends HalEntity {
 	/*
 	 * @OneToMany(cascade = CascadeType.ALL, mappedBy = "study", fetch =
 	 * FetchType.EAGER)
-	 * 
+	 *
 	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
 	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
 	 * List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
@@ -285,10 +286,10 @@ public class Study extends HalEntity {
 	/** Relations between the subjects and the studies. */
 	/*
 	 * @AuditJoinTable
-	 * 
+	 *
 	 * @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade =
 	 * CascadeType.ALL)
-	 * 
+	 *
 	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
 	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
 	 * List<RelSubjectStudy> relSubjectStudyList = new
@@ -299,7 +300,7 @@ public class Study extends HalEntity {
 	/*
 	 * @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = {
 	 * CascadeType.MERGE, CascadeType.PERSIST })
-	 * 
+	 *
 	 * @JoinColumn(name = "STUDY_ID") private List<StudyCard> studyCardList =
 	 * new ArrayList<StudyCard>(0);
 	 */
@@ -307,10 +308,10 @@ public class Study extends HalEntity {
 	/** List of protocol files directly attached to the study. */
 	/*
 	 * @CollectionOfElements
-	 * 
+	 *
 	 * @JoinTable(name = "PROTOCOL_FILE_PATH", joinColumns = { @JoinColumn(name
 	 * = "STUDY_ID", nullable = true) })
-	 * 
+	 *
 	 * @Column(name = "PATH") private List<String> protocolFilePathList = new
 	 * ArrayList<String>();
 	 */

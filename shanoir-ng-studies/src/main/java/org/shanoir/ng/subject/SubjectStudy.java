@@ -25,29 +25,29 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class SubjectStudy extends HalEntity{
 
-	
+
 	private boolean physicallyInvolved;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "type")
 	private SubjectType subjectType;
-	
+
 	/** Study. */
 	@ManyToOne
 	@JsonIgnore
 	@JoinColumn(name = "study")
 	private Study study;
-	
+
 	/** Subject. */
 	@ManyToOne
 	@JsonIgnore
-	@JoinColumn(name = "subject")
+	@JoinColumn(name = "subject",updatable = true, insertable = true)
 	private Subject subject;
-	
-	
+
+
 	private String subjectStudyIdentifier;
-	
-	
+
+
 	@Override
 	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
 	@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
@@ -94,6 +94,16 @@ public class SubjectStudy extends HalEntity{
 	public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
 		this.subjectStudyIdentifier = subjectStudyIdentifier;
 	}
-	
-	
+
+	@Override
+	public String toString(){
+		return 	"[ID : " + this.getId() + ", "
+						+ "physicallyInvolved : " + this.isPhysicallyInvolved() + ", "
+				//		+ "subjectType : " + this.getSubjectType().getName() + ", "
+			//			+ "study.id : " + this.getStudy().getId() + ", "
+						+ "subjectStudyIdentifier : " + this.getSubjectStudyIdentifier() + "]";
+
+	}
+
+
 }

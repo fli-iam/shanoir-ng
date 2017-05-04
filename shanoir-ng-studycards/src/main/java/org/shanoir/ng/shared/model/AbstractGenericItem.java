@@ -1,20 +1,24 @@
 package org.shanoir.ng.shared.model;
 
+import java.io.Serializable;
+
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 /**
  * Generic class used to manage entities common data.
- * 
+ *
  * @author msimon
  *
  */
 @MappedSuperclass
-public abstract class AbstractGenericItem {
+public abstract class AbstractGenericItem implements Identifiable<Long>, Serializable {
+
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
 	private Long id;
 
 	/**
@@ -25,7 +29,8 @@ public abstract class AbstractGenericItem {
 	}
 
 	/**
-	 * @param id the id to set
+	 * @param id
+	 *            the id to set
 	 */
 	public void setId(Long id) {
 		this.id = id;

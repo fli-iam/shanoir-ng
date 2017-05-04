@@ -21,7 +21,8 @@ public class RabbitMqConfiguration {
 		private final static String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 		private final static String MANUFACTURER_MODEL_QUEUE_NAME_OUT = "manufacturer_model_queue_from_ng";
 		private final static String MANUFACTURER_QUEUE_NAME_OUT = "manufacturer_queue_from_ng";
-		private final static String STUDY_QUEUE_NAME_IN = "study_queue";
+		private final static String STUDY_QUEUE_NAME_IN = "study_queue_to_ng";
+		private final static String STUDY_DELETE_QUEUE_NAME_IN = "study_delete_queue_to_ng";
 		private final static String STUDY_QUEUE_NAME_OUT = "study_queue_from_ng";
 		private final static String SUBJECT_RPC_QUEUE_OUT = "subject_queue_with_RPC_from_ng";
 		private final static String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
@@ -52,6 +53,11 @@ public class RabbitMqConfiguration {
     	return new Queue(STUDY_QUEUE_NAME_IN, true);
     }
 
+		@Bean
+    public static Queue queueDeleteIn() {
+    	return new Queue(STUDY_DELETE_QUEUE_NAME_IN, true);
+    }
+
     @Bean
     public static Queue queueOut() {
     	return new Queue(STUDY_QUEUE_NAME_OUT, true);
@@ -73,6 +79,17 @@ public class RabbitMqConfiguration {
     	final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         container.setQueueNames(STUDY_QUEUE_NAME_IN);
+        container.setMessageListener(listenerAdapter);
+        return container;
+    }
+
+
+		@Bean
+    SimpleMessageListenerContainer studyDeleteContainer(final ConnectionFactory connectionFactory,
+            @Qualifier("studyDeleteListenerAdapter") MessageListenerAdapter listenerAdapter) {
+    	final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+        container.setConnectionFactory(connectionFactory);
+        container.setQueueNames(STUDY_DELETE_QUEUE_NAME_IN);
         container.setMessageListener(listenerAdapter);
         return container;
     }
@@ -100,8 +117,14 @@ public class RabbitMqConfiguration {
 
     @Bean
     MessageListenerAdapter studyListenerAdapter(final RabbitMqReceiver receiver) {
-        return new MessageListenerAdapter(receiver, "receiveMessage");
+        return new MessageListenerAdapter(receiver, "receiveStudyMessage");
     }
+
+		@Bean
+    MessageListenerAdapter studyDeleteListenerAdapter(final RabbitMqReceiver receiver) {
+        return new MessageListenerAdapter(receiver, "receiveStudyDeleteMessage");
+    }
+
 
 		@Bean
     MessageListenerAdapter rpcListenerAdapter(final RPCMqReceiver receiver) {

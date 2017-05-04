@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Subject service implementation.
- * 
+ *
  * @author msimon
  *
  */
@@ -43,10 +43,10 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	private SubjectRepository subjectRepository;
-	
+
 	@Autowired
 	private StudyRepository studyRepository;
-	
+
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
 
@@ -83,6 +83,7 @@ public class SubjectServiceImpl implements SubjectService {
 		if (subject.getName()==null || subject.getName()=="")
 			subject.setName(createOfsepCommonName());
 		System.out.println("Common Name="+subject.getName());
+		System.out.println("Sex="+subject.getSex());
 		try {
 			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
@@ -91,10 +92,10 @@ public class SubjectServiceImpl implements SubjectService {
 		//updateShanoirOld(savedSubject);
 		return savedSubject;
 	}
-	
+
 	@Override
 	public Subject saveFromJson(final File jsonFile) throws ShanoirSubjectException {
-		
+
 		ObjectMapper mapper = new ObjectMapper();
 		Subject subject=new Subject();
 		try {
@@ -109,8 +110,8 @@ public class SubjectServiceImpl implements SubjectService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
+
 		Subject savedSubject = null;
 		try {
 			savedSubject = subjectRepository.save(subject);
@@ -151,14 +152,14 @@ public class SubjectServiceImpl implements SubjectService {
 			}
 		}
 	}
-	
-	
+
+
 
 	/*
 	 * Update Shanoir Old.
-	 * 
+	 *
 	 * @param template template.
-	 * 
+	 *
 	 * @return false if it fails, true if it succeed.
 	 */
 	private boolean updateShanoirOld(final Subject subject) {
@@ -179,11 +180,11 @@ public class SubjectServiceImpl implements SubjectService {
 
 	/*
 	 * Update some values of template to save them in database.
-	 * 
+	 *
 	 * @param templateDb template found in database.
-	 * 
+	 *
 	 * @param template template with new values.
-	 * 
+	 *
 	 * @return database template with new values.
 	 */
 	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) {
@@ -195,7 +196,7 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setSubjectStudyList(subject.getSubjectStudyList());
 		return subjectDb;
 	}
-	
+
 	@Override
 	public List<Subject> findAllSubjectsOfStudy(final Long studyId) {
 		List<Subject> listSubjects=new ArrayList<Subject>();
@@ -206,7 +207,7 @@ public class SubjectServiceImpl implements SubjectService {
 				SubjectStudy rel = relList.get(i);
 		        Subject sub=rel.getSubject();
 		        listSubjects.add(sub);
-		        
+
 		}
 			return listSubjects;
 		}
@@ -227,15 +228,15 @@ public class SubjectServiceImpl implements SubjectService {
 		    return null;
 		}
 	}
-	
-	
+
+
 	public String createOfsepCommonName()
 	{
 		String commonName="";
 		Long idCenter = 1L;
 		DecimalFormat formatterCenter = new DecimalFormat("000");
 		String commonNameCenter = formatterCenter.format(idCenter);
-		
+
 		String subjectOfsepCommonNameMaxFoundByCenter = findSubjectOfsepByCenter(commonNameCenter);
 		int maxCommonNameNumber = 0;
 		try {
@@ -246,21 +247,21 @@ public class SubjectServiceImpl implements SubjectService {
 			maxCommonNameNumber += 1;
 			DecimalFormat formatterSubject = new DecimalFormat("0000");
 			commonName=commonNameCenter + formatterSubject.format(maxCommonNameNumber);
-			
+
 		} catch (NumberFormatException e) {
 			LOG.error("Th common name found contains non numeric characters : " + e.getMessage());
 
-		}		
+		}
 		return commonName;
 	}
-	
+
 	/**
 	 * Browse through all subject ofsep using the center code (3 digital
 	 * numbers).
-	 * 
+	 *
 	 * @param centerCode
 	 *            the center code
-	 * 
+	 *
 	 * @return the string max of the subject common name
 	 */
 	@Override
@@ -274,4 +275,3 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 }
-

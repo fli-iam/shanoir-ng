@@ -16,7 +16,7 @@ public enum Sex {
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param val
 	 *            value
 	 */
@@ -33,7 +33,7 @@ public enum Sex {
 
 	/**
 	 * List of enum values.
-	 * 
+	 *
 	 *
 	 */
 	public static class Values {

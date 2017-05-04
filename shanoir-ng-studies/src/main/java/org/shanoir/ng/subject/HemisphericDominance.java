@@ -7,18 +7,18 @@ public enum HemisphericDominance {
 	/**
 	 * Left.
 	 */
-	LEFT(Values.LEFT),
+	Left(Values.Left),
 
 	/**
 	 * Right.
 	 */
-	RIGHT(Values.RIGHT);
+	Right(Values.Right);
 
 	private String value;
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param val
 	 *            value
 	 */
@@ -35,12 +35,12 @@ public enum HemisphericDominance {
 
 	/**
 	 * List of enum values.
-	 * 
+	 *
 	 *
 	 */
 	public static class Values {
-		public static final String LEFT = "LEFT";
-		public static final String RIGHT = "RIGHT";
+		public static final String Left = "Left";
+		public static final String Right = "Right";
 	}
 
 }
