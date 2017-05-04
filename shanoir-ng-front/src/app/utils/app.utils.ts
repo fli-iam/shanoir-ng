@@ -11,3 +11,15 @@ export const BACKEND_API_ROLE_ALL_URL:string = BACKEND_API_USERS_MS_URL + '/role
 const BACKEND_API_STUDIES_MS_URL: string = process.env.BACKEND_API_STUDIES_MS_URL;
 export const BACKEND_API_CENTER_ALL_URL: string = BACKEND_API_STUDIES_MS_URL + '/center/all';
 export const BACKEND_API_CENTER_URL:string = BACKEND_API_STUDIES_MS_URL + '/center';
+
+// Acquisition equipment http api
+export const BACKEND_API_ACQ_EQUIP_ALL_URL: string = BACKEND_API_STUDIES_MS_URL + '/acquisitionequipment/all';
+export const BACKEND_API_ACQ_EQUIP_URL:string = BACKEND_API_STUDIES_MS_URL + '/acquisitionequipment';
+
+// Manufacturer model http api
+export const BACKEND_API_MANUF_MODEL_ALL_URL: string = BACKEND_API_STUDIES_MS_URL + '/manufacturermodel/all';
+export const BACKEND_API_MANUF_MODEL_URL:string = BACKEND_API_STUDIES_MS_URL + '/manufacturermodel';
+
+// Manufacturer http api
+export const BACKEND_API_MANUF_ALL_URL: string = BACKEND_API_STUDIES_MS_URL + '/manufacturer/all';
+export const BACKEND_API_MANUF_URL:string = BACKEND_API_STUDIES_MS_URL + '/manufacturer';

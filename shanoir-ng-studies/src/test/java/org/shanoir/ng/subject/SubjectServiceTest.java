@@ -30,9 +30,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Subject service test.
- * 
+ *
  * @author msimon
- * 
+ *
  */
 @RunWith(MockitoJUnitRunner.class)
 public class SubjectServiceTest {
@@ -56,7 +56,7 @@ public class SubjectServiceTest {
 		given(subjectRepository.findOne(SUBJECT_ID)).willReturn(ModelsUtil.createSubject());
 		//given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(ModelsUtil.createSubject());
 		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectTosave());
-		
+
 	}
 
 	@Test
@@ -87,9 +87,9 @@ public class SubjectServiceTest {
 	@Test
 	public void saveTest() throws ShanoirSubjectException {
 		subjectService.save(createSubjectTosave());
-		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));		
+		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
-	
+
 	@Test
 	public void saveJsonTest() throws ShanoirSubjectException {
 		subjectService.save(createJsonSubjectTosave());
@@ -119,17 +119,17 @@ public class SubjectServiceTest {
 		subject.setName(UPDATED_SUBJECT_DATA);
 		return subject;
 	}
-	
+
 	private Subject createSubjectTosave() {
 		final Subject subject = new Subject();
 		//subject.setName("Toto");
 		//subject.setId(1L);
 		subject.setBirthDate(new Date(2014, 02, 11));
 		subject.setIdentifier("Titi");
-		
+
 		subject.setImagedObjectCategory(ImagedObjectCategory.PHANTOM);
-		subject.setLanguageHemisphericDominance(HemisphericDominance.LEFT);
-		subject.setManualHemisphericDominance(HemisphericDominance.LEFT);
+		subject.setLanguageHemisphericDominance(HemisphericDominance.Left);
+		subject.setManualHemisphericDominance(HemisphericDominance.Left);
 		PseudonymusHashValues pseudonymusHashValues= new PseudonymusHashValues();
 		pseudonymusHashValues.setBirthDateHash("uihuizdhuih");
 		subject.setPseudonymusHashValues(pseudonymusHashValues);
@@ -144,8 +144,8 @@ public class SubjectServiceTest {
 		subject.setUserPersonalCommentList(listSubjectComments);
 		return subject;
 	}
-	
-	
+
+
 	private Subject createJsonSubjectTosave() {
 		ObjectMapper mapper = new ObjectMapper();
 		Subject subject=new Subject();
@@ -161,7 +161,7 @@ public class SubjectServiceTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
+
 		return subject;
 
 	}

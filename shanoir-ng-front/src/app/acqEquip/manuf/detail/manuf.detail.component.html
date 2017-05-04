@@ -1,0 +1,46 @@
+<div class="content-component">
+    <form [formGroup]="manufDetailForm" class="max-content" novalidate>
+		<div class="layout">
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'"> 
+					<div class="header command-zone" i18n="View manuf|Title">Details on manufacturer</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'"> 
+					<div class="header command-zone" i18n="Edit manuf|Title">Edit manufacturer</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'"> 
+					<div class="header command-zone" i18n="Create manuf|Title">Create manufacturer</div>
+				</ng-template>
+			</span>
+			<fieldset>
+				<ol>
+					<li>
+						<label i18n="ManufModel detail|Name label">Manufacturer name</label> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								{{manuf.name}}
+							</ng-template>
+							<ng-template ngSwitchDefault> 
+								<input type="text" id="name" formControlName="name" [(ngModel)]="manuf.name"/>
+							</ng-template>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+			<div class="footer command-zone">
+				<span [ngSwitch]="mode">
+					<button i18n="View manuf|BackButton label" class="Button" (click)="back()">Back</button>	
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
+						<button type="submit" i18n="View manuf|EditButton label" (click)="edit()" class="Button">Edit</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
+						<button type="submit" i18n="Edit manuf|UpdateButton label" (click)="update()" class="Button">Update</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
+						<button type="submit" i18n="Edit manuf|CreateButton label" (click)="create()" class="Button">Create</button>
+					</ng-template>
+				</span>
+			</div>
+        </div>
+    </form>
+</div>

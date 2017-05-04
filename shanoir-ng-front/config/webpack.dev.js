@@ -19,6 +19,8 @@ const METADATA = webpackMerge(commonConfig.metadata, {
     ENV: ENV,
 });
 
+var path = require("path");
+
 module.exports = webpackMerge(commonConfig, {
     devtool: 'cheap-module-eval-source-map',
 
@@ -47,6 +49,12 @@ module.exports = webpackMerge(commonConfig, {
         }),
 
         new ExtractTextPlugin('[name].css'),
+
+        new webpack.ContextReplacementPlugin(
+            /angular(\\|\/)core(\\|\/)@angular/,
+            path.resolve('./src'),
+            {}
+        ),
 
         /**
          * Plugin: DefinePlugin

@@ -1,13 +1,15 @@
 package org.shanoir.ng.studies;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import org.shanoir.ng.study.*;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.study.RelStudyUser;
+import org.shanoir.ng.study.RelStudyUserRepository;
+import org.shanoir.ng.study.Study;
+import org.shanoir.ng.study.StudyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

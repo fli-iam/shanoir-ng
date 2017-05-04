@@ -13,6 +13,8 @@ import { StudyTreeComponent }   from './studies/tree/study.tree.component';
 import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
 import { AuthNotGuestGuard }   from './shared/roles/auth.not.guest.guard';
 import { ImportComponent }   from './import/import.component';
+import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
+import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
 
 const appRoutes: Routes = [
   {
@@ -47,7 +49,15 @@ const appRoutes: Routes = [
     path: 'acqEquipDetail',
     component: AcquisitionEquipmentDetailComponent,
     canActivate: [AuthNotGuestGuard]
-  },{
+  }, {
+    path: 'manufModelDetail',
+    component: ManufacturerModelDetailComponent,
+    canActivate: [AuthNotGuestGuard]
+  }, {
+    path: 'manufDetail',
+    component: ManufacturerDetailComponent,
+    canActivate: [AuthNotGuestGuard]
+  }, {
     path: 'import',
     component: ImportComponent
   }, {

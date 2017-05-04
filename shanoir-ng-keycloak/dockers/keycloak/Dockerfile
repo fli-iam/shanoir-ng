@@ -5,10 +5,19 @@ RUN java -jar /usr/share/java/saxon.jar -s:/opt/jboss/keycloak/standalone/config
 RUN mkdir -p /opt/jboss/keycloak/modules/system/layers/base/com/mysql/jdbc/main; cd /opt/jboss/keycloak/modules/system/layers/base/com/mysql/jdbc/main && curl -O http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.18/mysql-connector-java-5.1.18.jar
 ADD module.xml /opt/jboss/keycloak/modules/system/layers/base/com/mysql/jdbc/main/
 
-ARG profile=dev
+USER root
+
+COPY container_init /dk/container_init
+RUN chmod +x /dk/container_init
+
+ADD scripts /dk/scripts_init
 
 ADD shanoir-theme /opt/jboss/keycloak/themes/shanoir-theme
+RUN chmod -R 777 /opt/jboss/keycloak/themes/shanoir-theme
+
+USER jboss
+
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
 
 COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/providers/shanoir-ng-keycloak-auth.jar
-
-COPY shanoir-theme/login/theme-$profile.properties /opt/jboss/keycloak/themes/shanoir-theme/login/theme.properties
+COPY shanoir-ng-keycloak-init.jar /dk/shanoir-ng-keycloak-init.jar

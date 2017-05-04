@@ -1,39 +1,56 @@
 package org.shanoir.ng.subject;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Table;
+/**
+ * Subject type.
+ * 
+ * @author msimon
+ *
+ */
+public enum SubjectType {
 
-import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.shared.hateoas.HalEntity;
+	/**
+	 * Healthy volunteer.
+	 */
+	HEALTHY_VOLUNTEER(Values.HEALTHY_VOLUNTEER),
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+	/**
+	 * Patient.
+	 */
+	PATIENT(Values.PATIENT),
 
-@Entity
-@Table(name="subject_type")
-@JsonPropertyOrder({ "_links", "id", "name" })
-@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-public class SubjectType extends HalEntity{
+	/**
+	 * Phantom.
+	 */
+	PHANTOM(Values.PHANTOM);
 
-	
-	private String name;
-	
-	@Override
-	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
-	public Long getId() {
-		return super.getId();
+	private String value;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param val
+	 *            value
+	 */
+	private SubjectType(final String value) {
+		this.value = value;
 	}
 
-	public String getName() {
-		return name;
+	/**
+	 * @return the value
+	 */
+	public String getValue() {
+		return value;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	/**
+	 * List of enum values.
+	 * 
+	 *
+	 */
+	public static class Values {
+		public static final String HEALTHY_VOLUNTEER = "Healthy volunteer";
+		public static final String PATIENT = "Patient";
+		public static final String PHANTOM = "Phantom";
 	}
-	
-	
 
 }

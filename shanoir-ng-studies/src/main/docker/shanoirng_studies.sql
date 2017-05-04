@@ -24,22 +24,6 @@ CREATE TABLE `study_status` (
   UNIQUE KEY `UK_l7kodam6g756cg07p4yw0wog4` (`label_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `ref_study_user_type` (
-  `ref_study_user_type_id` bigint(20) NOT NULL,
-  `label_name` varchar(255) NOT NULL,
-  PRIMARY KEY (`ref_study_user_type_id`),
-  UNIQUE KEY `UK_i7w756cvyekp56j1m546un5m3` (`label_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `rel_study_user` (
-  `rel_study_user_id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) DEFAULT NULL,
-  `study` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`rel_study_user_id`),
-  KEY `FK3b20son2nfw5snu78fyuxe13d` (`study`),
-  CONSTRAINT `FK3b20son2nfw5snu78fyuxe13d` FOREIGN KEY (`study`) REFERENCES `study` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
-
 CREATE TABLE `study` (
   `id` bigint(20) NOT NULL,
   `clinical` bit(1) NOT NULL,
@@ -85,12 +69,6 @@ CREATE TABLE `pseudonymus_hash_values` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 	
-CREATE TABLE `sex` (
-  `id` bigint(20) NOT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE `subject_type` (
   `id` bigint(20) NOT NULL,
   `name` varchar(255) DEFAULT NULL,

@@ -1,0 +1,37 @@
+#!/bin/bash
+
+echo "Add user"
+keycloak/bin/add-user-keycloak.sh --user $KEYCLOAK_USER --password $KEYCLOAK_PASSWORD
+
+echo "Configure Shanoir theme"
+cp /opt/jboss/keycloak/themes/shanoir-theme/login/theme-$DOCKER_PROFILE.properties /opt/jboss/keycloak/themes/shanoir-theme/login/theme.properties
+
+echo "Start server"
+/opt/jboss/keycloak/bin/standalone.sh&
+
+sleep 2
+tail -f /opt/jboss/keycloak/standalone/log/server.log | while read LOGLINE
+do
+   [[ "${LOGLINE}" == *"started in"* ]] && pkill -P $$ tail
+done
+
+echo "Server authentication"
+keycloak/bin/kcadm.sh config credentials --server http://localhost:8080/auth --realm master --user $KEYCLOAK_USER --password $KEYCLOAK_PASSWORD
+
+echo "Create realm"
+keycloak/bin/kcadm.sh create realms -s realm=shanoir-ng -s enabled=true
+
+echo "Create client shanoir-ng-front"
+keycloak/bin/kcadm.sh create clients -r shanoir-ng -f /dk/scripts_init/shanoir-ng-front.json
+
+echo "Create client shanoir-ng-studies"
+keycloak/bin/kcadm.sh create clients -r shanoir-ng -f /dk/scripts_init/shanoir-ng-studies.json
+
+echo "Create client shanoir-ng-users"
+keycloak/bin/kcadm.sh create clients -r shanoir-ng -f /dk/scripts_init/shanoir-ng-users.json
+
+echo "Create client shanoir-old"
+keycloak/bin/kcadm.sh create clients -r shanoir-ng -f /dk/scripts_init/shanoir-old.json
+
+echo "Initialize Keycloak configuration"
+java -jar /dk/shanoir-ng-keycloak-init.jar

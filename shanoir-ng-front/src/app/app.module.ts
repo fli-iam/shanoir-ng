@@ -1,8 +1,9 @@
-import { NgModule }      from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Http, HttpModule, RequestOptions, XHRBackend } from '@angular/http';
 import { MaterialModule } from '@angular/material';
+import { NgModule } from '@angular/core';
 
 import { MyDatePickerModule } from 'mydatepicker';
 
@@ -41,7 +42,10 @@ import { ImportComponent }   from './import/import.component';
 import { ClickTipComponent }   from './shared/clickTip/clickTip.component';
 import { ConsoleComponent }   from './shared/console/console.line.component';
 import { LoadingBarComponent }   from './shared/loadingBar/loadingBar.component';
-
+import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
+import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
+import { ManufacturerModelService } from './acqEquip/shared/manufModel.service';
+import { ManufacturerService } from './acqEquip/shared/manuf.service';
 
 export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
   return new KeycloakHttp(backend, defaultOptions, keycloakService);
@@ -49,7 +53,8 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
 
 @NgModule({
     imports: [
-        BrowserModule,
+        BrowserAnimationsModule,
+        CommonModule,
         FormsModule,
         HttpModule,
         MaterialModule.forRoot(),
@@ -79,7 +84,9 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         ImportComponent,
         ClickTipComponent,
         ConsoleComponent,
-        LoadingBarComponent
+        LoadingBarComponent,
+        ManufacturerDetailComponent,
+        ManufacturerModelDetailComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -95,6 +102,8 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         RoleService,
         UserService,
         HandleErrorService,
+        ManufacturerModelService,
+        ManufacturerService,
         {
             provide: Http,
             useFactory: httpFactory,

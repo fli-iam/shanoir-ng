@@ -1,0 +1,78 @@
+<div class="content-component">
+    <form [formGroup]="manufModelDetailForm" class="max-content" novalidate>
+		<div class="layout">
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'"> 
+					<div class="header command-zone" i18n="View manufModel|Title">Details on manufacturer model</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'"> 
+					<div class="header command-zone" i18n="Edit manufModel|Title">Edit manufacturer model</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'"> 
+					<div class="header command-zone" i18n="Create manufModel|Title">Create manufacturer model</div>
+				</ng-template>
+			</span>
+			<fieldset>
+				<ol>
+                    <li>
+                        <label i18n="ManufModel detail|Modality type label">Modality type</label> 
+                        <select id="datasetModalityType" required formControlName="datasetModalityType" [(ngModel)]="manufModel.datasetModalityType">
+                            <option *ngFor="let datasetModalityType of datasetModalityTypes" [value]="datasetModalityType.key">{{datasetModalityType.value}}</option>
+                        </select>
+                    </li>
+					<li>
+						<label i18n="ManufModel detail|Manufacturer label">Manufacturer</label> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								{{manufModel.manuf}}
+							</ng-template>
+							<ng-template ngSwitchDefault> 
+								<select id="name" required formControlName="name" [(ngModel)]="manufModel.name">
+									<option *ngFor="let name of names" [value]="name">{{name}}</option>
+								</select>
+                                <a i18n="ManufModel detail|Create new model label" [routerLink] = "['/manufDetail']">Create new manufacturer</a>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="ManufModel detail|Model name label">Model name</label> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								{{manufModel.name}}
+							</ng-template>
+							<ng-template ngSwitchDefault> 
+								<input type="text" id="name" formControlName="name" [(ngModel)]="manufModel.name"/>
+							</ng-template>
+						</span>
+					</li>
+                    <li>
+						<label i18n="ManufModel detail|Magnetic field label">Magnetic field</label> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								{{manufModel.magneticField}}
+							</ng-template>
+							<ng-template ngSwitchDefault> 
+								<input type="text" id="magneticField" formControlName="magneticField" [(ngModel)]="manufModel.magneticField"/>
+							</ng-template>
+                            T
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+			<div class="footer command-zone">
+				<span [ngSwitch]="mode">
+					<button i18n="View manufModel|BackButton label" class="Button" (click)="back()">Back</button>	
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
+						<button type="submit" i18n="View manufModel|EditButton label" (click)="edit()" class="Button">Edit</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
+						<button type="submit" i18n="Edit manufModel|UpdateButton label" (click)="update()" class="Button">Update</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
+						<button type="submit" i18n="Edit manufModel|CreateButton label" (click)="create()" class="Button">Create</button>
+					</ng-template>
+				</span>
+			</div>
+        </div>
+    </form>
+</div>

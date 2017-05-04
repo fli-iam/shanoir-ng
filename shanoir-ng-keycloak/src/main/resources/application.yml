@@ -33,9 +33,6 @@ keycloak:
   realm: shanoir-ng
   auth-server-url: http://shanoir-ng-keycloak:8080/auth
 kc.requests:
-  admin:
-    login: admin
-    password: admin
   client.id: admin-cli
   realm: master
   temporary.password: false
@@ -68,14 +65,7 @@ spring:
     sql-dialect: Mysql
 #keycloak
 keycloak:
-  auth-server-url: http://localhost:8080/auth
-kc.requests:
-  admin:
-    login: admin
-    password: admin
-  client.id: admin-cli
-  realm: master
-  temporary.password: false
+  auth-server-url: http://localhost/auth
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-keycloak-init.log

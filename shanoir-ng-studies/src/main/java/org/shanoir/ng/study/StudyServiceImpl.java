@@ -24,7 +24,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private StudyRepository studyRepository;
-	@Autowired
+//	@Autowired
 	private RelStudyUserRepository relStudyUserRepository;
 
 
