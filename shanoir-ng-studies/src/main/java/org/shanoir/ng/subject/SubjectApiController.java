@@ -1,9 +1,7 @@
 package org.shanoir.ng.subject;
 
 import java.util.List;
-
 import javax.validation.Valid;
-
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -21,23 +19,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.shanoir.ng.configuration.amqp.RabbitMqClient;
-import com.google.gson.Gson;
-
 import io.swagger.annotations.ApiParam;
 
 @Controller
 public class SubjectApiController implements SubjectApi  {
 
-
-
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectApiController.class);
 
 	@Autowired
 	private SubjectService subjectService;
-
-	@Autowired
-	private RabbitMqClient rabbitMqClient;
 
 	@Override
 	public ResponseEntity<Void> deleteSubject
@@ -90,13 +80,8 @@ public class SubjectApiController implements SubjectApi  {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
 		}
 
-		System.out.println(subject.getIdentifier());
-		/* Save template in db. */
 		try {
 			final Subject createdSubject = subjectService.save(subject);
-			final Gson oGson = new Gson();
-			final String subjectJSON = oGson.toJson(subject);
-			rabbitMqClient.send(subjectJSON);
 			return new ResponseEntity<Subject>(createdSubject, HttpStatus.OK);
 		} catch (ShanoirSubjectException e) {
 			throw new RestServiceException(
