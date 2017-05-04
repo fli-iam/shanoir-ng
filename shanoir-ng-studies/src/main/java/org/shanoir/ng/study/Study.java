@@ -71,7 +71,7 @@ public class Study extends HalEntity {
 //	private List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
 
 	@NotNull
-	// ATO : @Column commented for this field
+	//TODO : Fix annotation ATO : @Column commented for this field
 	//@Column(nullable = false, insertable = false, updatable = false)
 	@Enumerated(EnumType.STRING)
 	private StudyStatus studyStatus;

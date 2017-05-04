@@ -29,8 +29,8 @@ public class RabbitMqConfiguration {
 
 
 		@Bean
-		public RabbitMqClient client() {
-			return new RabbitMqClient();
+		public RabbitMqRPCClient client() {
+			return new RabbitMqRPCClient();
 		}
 
     @Bean
@@ -111,8 +111,8 @@ public class RabbitMqConfiguration {
     }
 
 		@Bean
-		RPCMqReceiver receiverRPC() {
-				return new RPCMqReceiver();
+		RabbitMqRPCReceiver receiverRPC() {
+				return new RabbitMqRPCReceiver();
 		}
 
     @Bean
@@ -127,7 +127,7 @@ public class RabbitMqConfiguration {
 
 
 		@Bean
-    MessageListenerAdapter rpcListenerAdapter(final RPCMqReceiver receiver) {
+    MessageListenerAdapter rpcListenerAdapter(final RabbitMqRPCReceiver receiver) {
         return new MessageListenerAdapter(receiver, "receiveMessage");
     }
 
