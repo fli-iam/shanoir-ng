@@ -81,6 +81,10 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId,
 			@ApiParam(value = "acquisition equipment to update", required = true) @RequestBody final AcquisitionEquipment acquisitionequipment,
 			final BindingResult result) throws RestServiceException {
+		
+		// IMPORTANT : avoid any confusion that could lead to security breach
+		acquisitionequipment.setId(acquisitionEquipmentId);
+				
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
 		/* Merge errors. */
