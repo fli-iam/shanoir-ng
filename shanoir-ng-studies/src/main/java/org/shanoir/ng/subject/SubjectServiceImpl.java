@@ -82,8 +82,6 @@ public class SubjectServiceImpl implements SubjectService {
 		Subject savedSubject = null;
 		if (subject.getName()==null || subject.getName()=="")
 			subject.setName(createOfsepCommonName());
-		System.out.println("Common Name="+subject.getName());
-		System.out.println("Sex="+subject.getSex());
 		try {
 			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
