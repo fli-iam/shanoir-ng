@@ -2,96 +2,96 @@
     <form [formGroup]="centerDetailForm" class="max-content" novalidate>
 		<div class="layout">
 			<span class="right-col" [ngSwitch]="mode">
-				<template [ngSwitchCase]="'view'"> 
+				<ng-template [ngSwitchCase]="'view'"> 
 					<div class="header command-zone" i18n="View center|Title">Details on center</div>
-				</template>
-				<template [ngSwitchCase]="'edit'"> 
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'"> 
 					<div class="header command-zone" i18n="Edit center|Title">Edit center</div>
-				</template>
-				<template [ngSwitchCase]="'create'"> 
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'"> 
 					<div class="header command-zone" i18n="Create center|Title">Create center</div>
-				</template>
+				</ng-template>
 			</span>
 			<fieldset>
 				<ol>
 					<li>
 						<label i18n="Center detail|Name label" class="required-label">Name</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{center.name}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="center.name"/>
 								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit center|NameRequiredError label">Name is required!</label>
 								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit center|NameLengthError label">Name length must be between 2 and 200!</label>
 								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Edit center|NameUniqueError label">Name should be unique!</label>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 					<li>
 						<label i18n="Center detail|Name label">Street</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{center.street}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<input type="text" id="street" formControlName="street" [(ngModel)]="center.street"/>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 					<li>
 						<label i18n="Center detail|Name label">Post code</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{center.postalCode}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<input type="text" id="postalCode" formControlName="postalCode" [(ngModel)]="center.postalCode"/>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 					<li>
 						<label i18n="Center detail|Name label">Town</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{center.city}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<input type="text" id="city" formControlName="city" [(ngModel)]="center.city"/>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 					<li>
 						<label i18n="Center detail|Name label">Country</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{center.country}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<input type="text" id="country" formControlName="country" [(ngModel)]="center.country"/>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 					<li>
 						<label i18n="Center detail|Name label">Phone number</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{center.phoneNumber}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<input type="text" id="phoneNumber" formControlName="phoneNumber" [(ngModel)]="center.phoneNumber"/>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 					<li>
 						<label i18n="Center detail|Name label">Website</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{center.website}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<input type="text" id="website" formControlName="website" [(ngModel)]="center.website"/>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 				</ol>
@@ -99,15 +99,15 @@
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
 					<button i18n="View center|BackButton label" class="Button" (click)="back()">Back</button>	
-					<template [ngSwitchCase]="'view'" *ngIf="canModify"> 
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
 						<button type="submit" i18n="View center|EditButton label" (click)="edit()" class="Button">Edit</button>
-					</template>
-					<template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
 						<button type="submit" i18n="Edit center|UpdateButton label" (click)="update()" class="Button" [disabled]="!centerDetailForm.valid">Update</button>
-					</template>
-					<template [ngSwitchCase]="'create'" *ngIf="canModify"> 
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
 						<button type="submit" i18n="Edit center|CreateButton label" (click)="create()" class="Button" [disabled]="!centerDetailForm.valid">Create</button>
-					</template>
+					</ng-template>
 				</span>
 			</div>
 		</div>

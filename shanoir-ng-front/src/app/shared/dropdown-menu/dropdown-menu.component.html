@@ -21,7 +21,7 @@
         *ngIf="mode == 'tree'"
         class="plus"
         (click)="toggle($event)"
-        ><template [ngIf]="!opened">+</template><template [ngIf]="opened">&#10549;</template></span>
+        ><ng-template [ngIf]="!opened">+</ng-template><ng-template [ngIf]="opened">&#10549;</ng-template></span>
 
     <!-- ul #contentWrapper class="sub-content" [class.hidden]="!opened" [@slideDown]="opened" -->
     <ul #contentWrapper class="sub-content" *ngIf="opened" [@slideDown]="opened" [hidden]="!init">

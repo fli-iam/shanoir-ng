@@ -2,15 +2,15 @@
     <form [formGroup]="manufModelDetailForm" class="max-content" novalidate>
 		<div class="layout">
 			<span class="right-col" [ngSwitch]="mode">
-				<template [ngSwitchCase]="'view'"> 
+				<ng-template [ngSwitchCase]="'view'"> 
 					<div class="header command-zone" i18n="View manufModel|Title">Details on manufacturer model</div>
-				</template>
-				<template [ngSwitchCase]="'edit'"> 
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'"> 
 					<div class="header command-zone" i18n="Edit manufModel|Title">Edit manufacturer model</div>
-				</template>
-				<template [ngSwitchCase]="'create'"> 
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'"> 
 					<div class="header command-zone" i18n="Create manufModel|Title">Create manufacturer model</div>
-				</template>
+				</ng-template>
 			</span>
 			<fieldset>
 				<ol>
@@ -23,37 +23,37 @@
 					<li>
 						<label i18n="ManufModel detail|Manufacturer label">Manufacturer</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{manufModel.manuf}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<select id="name" required formControlName="name" [(ngModel)]="manufModel.name">
 									<option *ngFor="let name of names" [value]="name">{{name}}</option>
 								</select>
                                 <a i18n="ManufModel detail|Create new model label" [routerLink] = "['/manufDetail']">Create new manufacturer</a>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 					<li>
 						<label i18n="ManufModel detail|Model name label">Model name</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{manufModel.name}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<input type="text" id="name" formControlName="name" [(ngModel)]="manufModel.name"/>
-							</template>
+							</ng-template>
 						</span>
 					</li>
                     <li>
 						<label i18n="ManufModel detail|Magnetic field label">Magnetic field</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{manufModel.magneticField}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<input type="text" id="magneticField" formControlName="magneticField" [(ngModel)]="manufModel.magneticField"/>
-							</template>
+							</ng-template>
                             T
 						</span>
 					</li>
@@ -62,15 +62,15 @@
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
 					<button i18n="View manufModel|BackButton label" class="Button" (click)="back()">Back</button>	
-					<template [ngSwitchCase]="'view'" *ngIf="canModify"> 
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
 						<button type="submit" i18n="View manufModel|EditButton label" (click)="edit()" class="Button">Edit</button>
-					</template>
-					<template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
 						<button type="submit" i18n="Edit manufModel|UpdateButton label" (click)="update()" class="Button">Update</button>
-					</template>
-					<template [ngSwitchCase]="'create'" *ngIf="canModify"> 
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
 						<button type="submit" i18n="Edit manufModel|CreateButton label" (click)="create()" class="Button">Create</button>
-					</template>
+					</ng-template>
 				</span>
 			</div>
         </div>

@@ -2,27 +2,27 @@
     <form [formGroup]="manufDetailForm" class="max-content" novalidate>
 		<div class="layout">
 			<span class="right-col" [ngSwitch]="mode">
-				<template [ngSwitchCase]="'view'"> 
+				<ng-template [ngSwitchCase]="'view'"> 
 					<div class="header command-zone" i18n="View manuf|Title">Details on manufacturer</div>
-				</template>
-				<template [ngSwitchCase]="'edit'"> 
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'"> 
 					<div class="header command-zone" i18n="Edit manuf|Title">Edit manufacturer</div>
-				</template>
-				<template [ngSwitchCase]="'create'"> 
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'"> 
 					<div class="header command-zone" i18n="Create manuf|Title">Create manufacturer</div>
-				</template>
+				</ng-template>
 			</span>
 			<fieldset>
 				<ol>
 					<li>
 						<label i18n="ManufModel detail|Name label">Manufacturer name</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{manuf.name}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<input type="text" id="name" formControlName="name" [(ngModel)]="manuf.name"/>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 				</ol>
@@ -30,15 +30,15 @@
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
 					<button i18n="View manuf|BackButton label" class="Button" (click)="back()">Back</button>	
-					<template [ngSwitchCase]="'view'" *ngIf="canModify"> 
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
 						<button type="submit" i18n="View manuf|EditButton label" (click)="edit()" class="Button">Edit</button>
-					</template>
-					<template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
 						<button type="submit" i18n="Edit manuf|UpdateButton label" (click)="update()" class="Button">Update</button>
-					</template>
-					<template [ngSwitchCase]="'create'" *ngIf="canModify"> 
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
 						<button type="submit" i18n="Edit manuf|CreateButton label" (click)="create()" class="Button">Create</button>
-					</template>
+					</ng-template>
 				</span>
 			</div>
         </div>

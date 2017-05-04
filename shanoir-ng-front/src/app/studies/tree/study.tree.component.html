@@ -1,6 +1,6 @@
-<template ngFor let-patient [ngForOf]="patients">
+<ng-template ngFor let-patient [ngForOf]="patients">
     <node [label]="patient.name" pictoUrl="/assets/images/icons/user.png">
-        <template ngFor let-exam [ngForOf]="patient.examinations">
+        <ng-template ngFor let-exam [ngForOf]="patient.examinations">
             <node [label]="exam.name + ' [' + exam.date + ']'" pictoUrl="/assets/images/icons/list.png">
                 <node *ngFor="let acq of exam.acquisitions" [label]="acq.name" pictoUrl="/assets/images/icons/medical/x-ray-2.png">
                     <node *ngFor="let dataset of acq.datasets" [label]="dataset.name" pictoUrl="/assets/images/icons/medical/brain.png">
@@ -24,11 +24,11 @@
                 <menu-item label="Experimental group of subjects" icon="/assets/images/icons/users.png"></menu-item>
                 <menu-item label="Score" link="" icon="/assets/images/icons/podium.png"></menu-item>
             </dropdown-menu>
-        </template>
+        </ng-template>
     </node>
     <!--dropdown-menu mode="tree">
         <menu-item label="Research study" link="" icon="/assets/images/icons/folder-12.png"></menu-item>
         <menu-item label="Subject" link="" icon="/assets/images/icons/user.png"></menu-item>
         <menu-item label="Examination" link="" icon="/assets/images/icons/medical/stethoscope.png"></menu-item>
     </dropdown-menu-->
-</template>
+</ng-template>

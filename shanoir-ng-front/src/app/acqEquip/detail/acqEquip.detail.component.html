@@ -2,15 +2,15 @@
     <form [formGroup]="acqEquipDetailForm" class="max-content" novalidate>
 		<div class="layout">
 			<span class="right-col" [ngSwitch]="mode">
-				<template [ngSwitchCase]="'view'"> 
+				<ng-template [ngSwitchCase]="'view'"> 
 					<div class="header command-zone" i18n="View acqEquip|Title">Details on acquisition equipment</div>
-				</template>
-				<template [ngSwitchCase]="'edit'"> 
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'"> 
 					<div class="header command-zone" i18n="Edit acqEquip|Title">Edit acquisition equipment</div>
-				</template>
-				<template [ngSwitchCase]="'create'"> 
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'"> 
 					<div class="header command-zone" i18n="Create acqEquip|Title">Create acquisition equipment</div>
-				</template>
+				</ng-template>
 			</span>
 			<fieldset>
 				<ol>
@@ -25,17 +25,17 @@
 					<li class="required">
 						<label i18n="AcqEquip detail|Manufacturer model label" class="required-label">Manufacturer model</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								<!--<a [routerLink]="['/manufModelDetail']">-->
 									{{acqEquip.manufacturerModel?.name}}
 								<!--</a>-->
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<select id="manufModel" required formControlName="manufModel" [(ngModel)]="acqEquip.manufacturerModel">
 									<option *ngFor="let manufModel of manufModels" [value]="manufModel">{{manufModel.name}}</option>
 								</select>
 								<a i18n="AcqEquip detail|Create new model label" [routerLink] = "['/manufModelDetail']">Create new manufacturer model</a>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 					<li *ngIf="mode=='view'">
@@ -47,26 +47,26 @@
 					<li class="required">
 						<label i18n="AcqEquip detail|Center label" class="required-label">Center</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{acqEquip.center?.name}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<select id="center" required formControlName="center" [(ngModel)]="acqEquip.center">
 									<option *ngFor="let center of centers" [value]="center">{{center.name}}</option>
 								</select>
 								<a i18n="AcqEquip detail|Center details label" [routerLink] = "['/detailCenter']">details</a>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 					<li>
 						<label i18n="AcqEquip detail|Serial number label">Serial Number</label> 
 						<span class="right-col" [ngSwitch]="mode">
-							<template [ngSwitchCase]="'view'"> 
+							<ng-template [ngSwitchCase]="'view'"> 
 								{{acqEquip.serialNumber}}
-							</template>
-							<template ngSwitchDefault> 
+							</ng-template>
+							<ng-template ngSwitchDefault> 
 								<input type="text" id="serialNumber" formControlName="serialNumber" [(ngModel)]="acqEquip.serialNumber"/>
-							</template>
+							</ng-template>
 						</span>
 					</li>
 				</ol>
@@ -74,15 +74,15 @@
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
 					<button i18n="View acqEquip|BackButton label" class="Button" (click)="back()">Back</button>	
-					<template [ngSwitchCase]="'view'" *ngIf="canModify"> 
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
 						<button type="submit" i18n="View acqEquip|EditButton label" (click)="edit()" class="Button">Edit</button>
-					</template>
-					<template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
 						<button type="submit" i18n="Edit acqEquip|UpdateButton label" (click)="update()" class="Button">Update</button>
-					</template>
-					<template [ngSwitchCase]="'create'" *ngIf="canModify"> 
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
 						<button type="submit" i18n="Edit acqEquip|CreateButton label" (click)="create()" class="Button">Create</button>
-					</template>
+					</ng-template>
 				</span>
 			</div>
         </div>

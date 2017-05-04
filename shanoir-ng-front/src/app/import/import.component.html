@@ -149,7 +149,7 @@
                         <button><img src="/assets/images/icons/add-1.png" />create a group of subjects</button>
                     </span>
                 </li>
-                <template [ngIf]="subjectMode == 'single' && subject != undefined && subject != null && subject != ''">
+                <ng-template [ngIf]="subjectMode == 'single' && subject != undefined && subject != null && subject != ''">
                     <li class="">
                         <label class="">Common name</label> 
                         <span class="right-col">
@@ -179,7 +179,7 @@
                             </select>
                         </span>
                     </li>
-                </template>
+                </ng-template>
             </ol>
 
             <ol>

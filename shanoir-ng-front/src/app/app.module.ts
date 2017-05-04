@@ -1,8 +1,9 @@
-import { NgModule }      from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Http, HttpModule, RequestOptions, XHRBackend } from '@angular/http';
 import { MaterialModule } from '@angular/material';
+import { NgModule } from '@angular/core';
 
 import { MyDatePickerModule } from 'mydatepicker';
 
@@ -52,7 +53,8 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
 
 @NgModule({
     imports: [
-        BrowserModule,
+        BrowserAnimationsModule,
+        CommonModule,
         FormsModule,
         HttpModule,
         MaterialModule.forRoot(),
