@@ -33,7 +33,7 @@ public class PasswordUtilsTest {
 	
     @Test
 	public void checkPasswordPolicyTest() throws ShanoirUsersException {
-		PasswordUtils.checkPasswordPolicy("aa11@@22", null);
+		PasswordUtils.checkPasswordPolicy("aA11@@22", null);
 	}
 	
     @Test
