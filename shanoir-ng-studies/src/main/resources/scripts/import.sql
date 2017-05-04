@@ -13,14 +13,6 @@ VALUES
 	(4,'Study 4', '2015/10/03', null, 0, 1, 0, 0, 'IN_PROGRESS');
 
 
-INSERT INTO rel_study_user
-	(REL_STUDY_USER_ID, USER_ID, study)
-VALUES
-	(1, 1, 1),
-	(2, 1, 2),
-	(3, 2, 2),
-	(4, 3, 3);
-
 INSERT INTO `center`
 	(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`)
 VALUES

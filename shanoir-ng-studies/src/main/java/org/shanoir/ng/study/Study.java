@@ -12,8 +12,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
@@ -26,9 +24,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
-import org.shanoir.ng.subject.Sex;
 import org.shanoir.ng.subject.SubjectStudy;
-import org.hibernate.validator.constraints.Length;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -70,9 +66,9 @@ public class Study extends HalEntity {
 	private boolean isDownloadableByDefault;
 
 	/** Users associated to the research study. */
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "study")
-	private List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
+//	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//	@JoinColumn(name = "study")
+//	private List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
 
 	@NotNull
 	@Column(nullable = false, insertable = false, updatable = false)
@@ -217,13 +213,13 @@ public class Study extends HalEntity {
 	 *
 	 * @return the rel study user collection
 	 */
-	public List<RelStudyUser> getRelStudyUserList() {
-		return relStudyUserList;
-	}
-
-	public void setRelStudyUserList(List<RelStudyUser> relStudyUserList) {
-		this.relStudyUserList = relStudyUserList;
-	}
+//	public List<RelStudyUser> getRelStudyUserList() {
+//		return relStudyUserList;
+//	}
+//
+//	public void setRelStudyUserList(List<RelStudyUser> relStudyUserList) {
+//		this.relStudyUserList = relStudyUserList;
+//	}
 
 	/**
 	 * Init HATEOAS links
