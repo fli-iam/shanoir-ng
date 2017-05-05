@@ -112,8 +112,8 @@ CREATE TABLE `acquisition_equipment` (
   `center_id` bigint(20) NOT NULL,
   `manufacturer_model_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `model_number_idx` (`manufacturer_model_id`,`serial_number`),
   KEY `FKnfu3vqdsoj1y339uq7alaltjv` (`center_id`),
-  KEY `FKbvbig13gxsu8gxaw9h6uemhk4` (`manufacturer_model_id`),
   CONSTRAINT `FKbvbig13gxsu8gxaw9h6uemhk4` FOREIGN KEY (`manufacturer_model_id`) REFERENCES `manufacturer_model` (`id`),
   CONSTRAINT `FKnfu3vqdsoj1y339uq7alaltjv` FOREIGN KEY (`center_id`) REFERENCES `center` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
