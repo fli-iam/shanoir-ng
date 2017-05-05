@@ -1,4 +1,4 @@
-package org.shanoir.ng.template;
+package org.shanoir.ng.studycard;
 
 import static org.mockito.BDDMockito.given;
 
@@ -14,9 +14,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.ShanoirStudyCardsException;
-import org.shanoir.ng.studyCards.StudyCard;
-import org.shanoir.ng.studyCards.StudyCardRepository;
-import org.shanoir.ng.studyCards.StudyCardServiceImpl;
+import org.shanoir.ng.studycard.StudyCard;
+import org.shanoir.ng.studycard.StudyCardRepository;
+import org.shanoir.ng.studycard.StudyCardServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 

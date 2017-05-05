@@ -1,4 +1,4 @@
-package org.shanoir.ng.template;
+package org.shanoir.ng.studycard;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -10,8 +10,8 @@ import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.studyCards.StudyCard;
-import org.shanoir.ng.studyCards.StudyCardRepository;
+import org.shanoir.ng.studycard.StudyCard;
+import org.shanoir.ng.studycard.StudyCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

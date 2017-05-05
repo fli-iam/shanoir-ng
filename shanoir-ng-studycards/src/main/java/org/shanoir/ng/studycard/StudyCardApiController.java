@@ -1,4 +1,4 @@
-package org.shanoir.ng.studyCards;
+package org.shanoir.ng.studycard;
 
 import java.util.List;
 

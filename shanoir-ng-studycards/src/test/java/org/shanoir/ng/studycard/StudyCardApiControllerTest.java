@@ -1,4 +1,4 @@
-package org.shanoir.ng.template;
+package org.shanoir.ng.studycard;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -11,9 +11,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.exception.ShanoirStudyCardsException;
-import org.shanoir.ng.studyCards.StudyCard;
-import org.shanoir.ng.studyCards.StudyCardApiController;
-import org.shanoir.ng.studyCards.StudyCardService;
+import org.shanoir.ng.studycard.StudyCard;
+import org.shanoir.ng.studycard.StudyCardApiController;
+import org.shanoir.ng.studycard.StudyCardService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
