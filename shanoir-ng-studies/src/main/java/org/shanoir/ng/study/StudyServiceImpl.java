@@ -22,6 +22,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -89,6 +90,9 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public List<SimpleStudyDTO> findStudiesWithStudyCardsByUserId(final Long userId) throws ShanoirStudiesException {
 		final List<Study> studies = findStudiesByUserId(userId);
+		if (CollectionUtils.isEmpty(studies)) {
+			return new ArrayList<>();
+		}
 
 		final IdListDTO studyIds = new IdListDTO();
 		for (final Study study : studies) {

@@ -12,8 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
-
-import io.swagger.annotations.ApiParam;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 public class StudyApiController implements StudyApi {
@@ -22,8 +21,7 @@ public class StudyApiController implements StudyApi {
 	private StudyService studyService;
 
 	@Override
-	public ResponseEntity<Void> deleteStudy(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
 			studyService.deleteById(studyId);
 		} catch (ShanoirStudiesException e) {
@@ -70,7 +68,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<Study> findStudyById(final Long studyId) {
+	public ResponseEntity<Study> findStudyById(@PathVariable("studyId") final Long studyId) {
 		final Study study = studyService.findById(studyId);
 		if (study == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -79,7 +77,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<Study> saveNewStudy(final Study study) throws RestServiceException {
+	public ResponseEntity<Study> saveNewStudy(@RequestBody final Study study) throws RestServiceException {
 		// Guarantees it is a creation, not an update
 		study.setId(null);
 
@@ -93,9 +91,10 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> updateStudy(final Long studyId, final Study study) throws RestServiceException {
+	public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study)
+			throws RestServiceException {
 		study.setId(studyId);
-		
+
 		/* Update study in db. */
 		try {
 			studyService.update(study);

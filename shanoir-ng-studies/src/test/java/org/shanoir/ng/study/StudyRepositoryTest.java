@@ -1,4 +1,4 @@
-package org.shanoir.ng.studies;
+package org.shanoir.ng.study;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
