@@ -8,7 +8,7 @@
 
     <xsl:template match="//ds:subsystem/ds:datasources/ds:datasource[@jndi-name='java:jboss/datasources/KeycloakDS']">
         <ds:datasource jndi-name="java:jboss/datasources/KeycloakDS" pool-name="KeycloakDS" enabled="true" use-java-context="true" use-ccm="true">
-            <ds:connection-url>jdbc:mysql://${env.MYSQL_PORT_3306_TCP_ADDR}:${env.MYSQL_PORT_3306_TCP_PORT}/${env.MYSQL_DATABASE:keycloak}</ds:connection-url>
+            <ds:connection-url>jdbc:mysql://${env.MYSQL_PORT_3306_TCP_ADDR}:${env.MYSQL_PORT_3306_TCP_PORT}/${env.MYSQL_DATABASE:keycloak}?useUnicode=true&amp;characterEncoding=UTF-8</ds:connection-url>
             <ds:driver>mysql</ds:driver>
             <ds:security>
                 <ds:user-name>${env.MYSQL_USERNAME:keycloak}</ds:user-name>
