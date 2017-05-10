@@ -2,7 +2,7 @@ package org.shanoir.ng.acquisitionequipment;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 
 /**
  * Acquisition equipment service.
@@ -17,9 +17,9 @@ public interface AcquisitionEquipmentService {
 	 * 
 	 * @param id
 	 *            acquisition equipment id.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	void deleteById(Long id) throws ShanoirStudyException;
+	void deleteById(Long id) throws ShanoirStudiesException;
 
 	/**
 	 * Get all the acquisition equipments.
@@ -43,9 +43,9 @@ public interface AcquisitionEquipmentService {
 	 * @param acquisitionEquipment
 	 *            acquisition equipment to create.
 	 * @return created acquisition equipment.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	AcquisitionEquipment save(AcquisitionEquipment acquisitionEquipment) throws ShanoirStudyException;
+	AcquisitionEquipment save(AcquisitionEquipment acquisitionEquipment) throws ShanoirStudiesException;
 
 	/**
 	 * Update an acquisition equipment.
@@ -53,8 +53,8 @@ public interface AcquisitionEquipmentService {
 	 * @param acquisitionEquipment
 	 *            acquisition equipment to update.
 	 * @return updated acquisition equipment.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	AcquisitionEquipment update(AcquisitionEquipment acquisitionEquipment) throws ShanoirStudyException;
+	AcquisitionEquipment update(AcquisitionEquipment acquisitionEquipment) throws ShanoirStudiesException;
 
 }

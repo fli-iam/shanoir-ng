@@ -3,7 +3,7 @@ package org.shanoir.ng.manufacturermodel;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,12 +52,12 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 	}
 
 	@Override
-	public Manufacturer save(final Manufacturer manufacturer) throws ShanoirStudyException {
+	public Manufacturer save(final Manufacturer manufacturer) throws ShanoirStudiesException {
 		Manufacturer savedManufacturer = null;
 		try {
 			savedManufacturer = manufacturerRepository.save(manufacturer);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudyException.logAndThrow(LOG, "Error while creating acquisition equipment: " + dive.getMessage());
+			ShanoirStudiesException.logAndThrow(LOG, "Error while creating acquisition equipment: " + dive.getMessage());
 		}
 		updateShanoirOld(savedManufacturer);
 		return savedManufacturer;

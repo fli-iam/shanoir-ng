@@ -1,7 +1,6 @@
 package org.shanoir.ng.studycard;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirStudyCardsException;
@@ -53,11 +52,6 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
-	public Optional<StudyCard> findByData(final String name) {
-		return studyCardRepository.findByName(name);
-	}
-
-	@Override
 	public StudyCard findById(final Long id) {
 		return studyCardRepository.findOne(id);
 	}
@@ -72,6 +66,11 @@ public class StudyCardServiceImpl implements StudyCardService {
 		}
 		updateShanoirOld(savedStudyCard);
 		return savedStudyCard;
+	}
+
+	@Override
+	public List<StudyCard> search(final List<Long> studyIdList) {
+		return studyCardRepository.findByStudyIdIn(studyIdList);
 	}
 
 	@Override

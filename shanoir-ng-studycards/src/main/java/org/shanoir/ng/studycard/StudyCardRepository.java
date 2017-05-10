@@ -1,23 +1,23 @@
 package org.shanoir.ng.studycard;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
 /**
- * Repository for templates.
+ * Repository for study cards.
  *
  * @author msimon
  */
 public interface StudyCardRepository extends CrudRepository<StudyCard, Long>, StudyCardRepositoryCustom {
 
 	/**
-	 * Find template by data.
-	 *
-	 * @param data
-	 *            data.
-	 * @return a template.
+	 * Find list of study card by their study id.
+	 * 
+	 * @param studyIdList
+	 *            list of study ids.
+	 * @return list of study cards.
 	 */
-	Optional<StudyCard> findByName(String name);
+	List<StudyCard> findByStudyIdIn(List<Long> studyIdList);
 
 }

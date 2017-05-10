@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -46,7 +46,7 @@ public class AcquisitionEquipmentServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirStudyException {
+	public void deleteByIdTest() throws ShanoirStudiesException {
 		acquisitionEquipmentService.deleteById(ACQ_EQPT_ID);
 
 		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -71,14 +71,14 @@ public class AcquisitionEquipmentServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirStudyException {
+	public void saveTest() throws ShanoirStudiesException {
 		acquisitionEquipmentService.save(createAcquisitionEquipment());
 
 		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).save(Mockito.any(AcquisitionEquipment.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirStudyException {
+	public void updateTest() throws ShanoirStudiesException {
 		final AcquisitionEquipment updatedEquipment = acquisitionEquipmentService.update(createAcquisitionEquipment());
 		Assert.assertNotNull(updatedEquipment);
 		Assert.assertTrue(UPDATED_ACQ_EQPT_SERIAL_NUMBER.equals(updatedEquipment.getSerialNumber()));

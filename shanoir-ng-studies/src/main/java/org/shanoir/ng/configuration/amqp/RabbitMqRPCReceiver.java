@@ -2,7 +2,7 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.util.concurrent.CountDownLatch;
 
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.study.Study;
 import org.shanoir.ng.study.StudyService;
 import org.slf4j.Logger;

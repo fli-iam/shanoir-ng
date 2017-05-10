@@ -1,14 +1,11 @@
 package org.shanoir.ng.studycard;
 
-import java.util.List;
-
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
@@ -28,12 +25,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class StudyCard extends HalEntity {
 
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = 1751168445500120935L;
+
+	private boolean disabled;
+
 	private String name;
 
-	private boolean isDisabled = false;
-
-
-	//private List<Long> studyIds;
+	@NotNull
+	private Long studyId;
 
 	/**
 	 * Init HATEOAS links
@@ -50,20 +52,49 @@ public class StudyCard extends HalEntity {
 		return super.getId();
 	}
 
+	/**
+	 * @return the disabled
+	 */
+	public boolean isDisabled() {
+		return disabled;
+	}
+
+	/**
+	 * @param disabled
+	 *            the disabled to set
+	 */
+	public void setDisabled(boolean disabled) {
+		this.disabled = disabled;
+	}
+
+	/**
+	 * @return the name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * @param name
+	 *            the name to set
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	public boolean isDisabled() {
-		return isDisabled;
+	/**
+	 * @return the studyId
+	 */
+	public Long getStudyId() {
+		return studyId;
 	}
 
-	public void setDisabled(boolean isDisabled) {
-		this.isDisabled = isDisabled;
+	/**
+	 * @param studyId
+	 *            the studyId to set
+	 */
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
 }

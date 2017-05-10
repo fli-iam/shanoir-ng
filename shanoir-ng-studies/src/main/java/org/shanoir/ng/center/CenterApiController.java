@@ -8,7 +8,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class CenterApiController implements CenterApi {
 		}
 		try {
 			centerService.deleteById(centerId);
-		} catch (ShanoirStudyException e) {
+		} catch (ShanoirStudiesException e) {
 			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
@@ -90,7 +90,7 @@ public class CenterApiController implements CenterApi {
 		try {
 			final Center createdCenter = centerService.save(center);
 			return new ResponseEntity<Center>(createdCenter, HttpStatus.OK);
-		} catch (ShanoirStudyException e) {
+		} catch (ShanoirStudiesException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -121,7 +121,7 @@ public class CenterApiController implements CenterApi {
 		/* Update center in db. */
 		try {
 			centerService.update(center);
-		} catch (ShanoirStudyException e) {
+		} catch (ShanoirStudiesException e) {
 			LOG.error("Error while trying to update center " + centerId + " : ", e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));

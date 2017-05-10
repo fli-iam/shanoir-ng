@@ -35,7 +35,7 @@ spring:
     host: shanoir-ng-rabbitmq
   session:
     store-type: none
-#keycloak
+# keycloak
 keycloak:
   cors: true
   realm: shanoir-ng
@@ -53,6 +53,9 @@ keycloak:
         - ROLE_USER
       patterns:
         - /*
+# microservices url
+ms.url:
+  shanoir-ng-studycard: http://shanoir-ng-studycard/
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-studies.log
@@ -88,9 +91,12 @@ spring:
     host: localhost
 server:
     port: 9902
-#keycloak
+# keycloak
 keycloak:
   credentials.secret: 209376e5-1d42-4fa3-8cdb-160946fd6383
+# microservices url
+ms.url:
+  shanoir-ng-studycard: http://localhost:9905/studycard
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-studies.log

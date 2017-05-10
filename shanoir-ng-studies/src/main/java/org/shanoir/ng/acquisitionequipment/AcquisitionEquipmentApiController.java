@@ -7,7 +7,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		try {
 			acquisitionEquipmentService.deleteById(acquisitionEquipmentId);
-		} catch (ShanoirStudyException e) {
+		} catch (ShanoirStudiesException e) {
 			if (ErrorModelCode.ACQ_EQPT_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -72,7 +72,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		/* Save acquisition equipment in db. */
 		try {
 			return new ResponseEntity<>(acquisitionEquipmentService.save(acquisitionEquipment), HttpStatus.OK);
-		} catch (final ShanoirStudyException e) {
+		} catch (final ShanoirStudiesException e) {
 			throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));
 		}
 	}
@@ -96,7 +96,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		/* Update user in db. */
 		try {
 			acquisitionEquipmentService.update(acquisitionequipment);
-		} catch (final ShanoirStudyException e) {
+		} catch (final ShanoirStudiesException e) {
 			if (ErrorModelCode.ACQ_EQPT_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
