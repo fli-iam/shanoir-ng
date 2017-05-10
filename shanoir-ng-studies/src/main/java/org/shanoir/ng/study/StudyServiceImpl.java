@@ -5,12 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.shanoir.ng.shared.dto.IdListDto;
+import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.dto.SimpleStudyCardDTO;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
+import org.shanoir.ng.study.dto.StudyStudyCardDTO;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Implementation of study service.
+ * 
+ * @author msimon
+ *
+ */
 @Service
 public class StudyServiceImpl implements StudyService {
 
@@ -83,11 +90,11 @@ public class StudyServiceImpl implements StudyService {
 	public List<SimpleStudyDTO> findStudiesWithStudyCardsByUserId(final Long userId) throws ShanoirStudiesException {
 		final List<Study> studies = findStudiesByUserId(userId);
 
-		final IdListDto studyIds = new IdListDto();
+		final IdListDTO studyIds = new IdListDTO();
 		for (final Study study : studies) {
 			studyIds.getIdList().add(study.getId());
 		}
-		final HttpEntity<IdListDto> entity = new HttpEntity<>(studyIds, KeycloakUtil.getKeycloakHeader());
+		final HttpEntity<IdListDTO> entity = new HttpEntity<>(studyIds, KeycloakUtil.getKeycloakHeader());
 
 		// Request to studycard MS to get cards for list of studies
 		ResponseEntity<List<SimpleStudyCardDTO>> studyCardResponse = null;
@@ -144,6 +151,32 @@ public class StudyServiceImpl implements StudyService {
 		studyRepository.save(studyDb);
 
 		return studyDb;
+	}
+
+	@Override
+	public void updateFromMsStudyCard(StudyStudyCardDTO studyStudyCardDTO) throws ShanoirStudiesException {
+		if (studyStudyCardDTO.getNewStudyId() != null) {
+			// Add link
+			LOG.debug("Create new link between study (id: " + studyStudyCardDTO.getNewStudyId()
+					+ ") and study card (id: " + studyStudyCardDTO.getStudyCardId() + ")");
+			final Study study = studyRepository.findOne(studyStudyCardDTO.getNewStudyId());
+			if (study == null) {
+				LOG.error("Study with id " + studyStudyCardDTO.getNewStudyId() + " not found");
+				throw new ShanoirStudiesException(ErrorModelCode.STUDY_NOT_FOUND);
+			}
+			study.getStudyCardIds().add(studyStudyCardDTO.getStudyCardId());
+		}
+		if (studyStudyCardDTO.getOldStudyId() != null) {
+			// Delete link
+			LOG.debug("Delete link between study (id: " + studyStudyCardDTO.getOldStudyId() + ") and study card (id: "
+					+ studyStudyCardDTO.getStudyCardId() + ")");
+			final Study study = studyRepository.findOne(studyStudyCardDTO.getOldStudyId());
+			if (study == null) {
+				LOG.error("Study with id " + studyStudyCardDTO.getOldStudyId() + " not found");
+				throw new ShanoirStudiesException(ErrorModelCode.STUDY_NOT_FOUND);
+			}
+			study.getStudyCardIds().remove(studyStudyCardDTO.getOldStudyId());
+		}
 	}
 
 	@Override

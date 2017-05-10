@@ -2,7 +2,7 @@ package org.shanoir.ng.studycard;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdListDto;
+import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -97,7 +97,7 @@ public class StudyCardApiController implements StudyCardApi {
 
 	@Override
 	public ResponseEntity<List<StudyCard>> searchStudyCards(
-			@ApiParam(value = "study ids", required = true) @RequestBody final IdListDto studyIds) {
+			@ApiParam(value = "study ids", required = true) @RequestBody final IdListDTO studyIds) {
 		final List<StudyCard> studyCards = studyCardService.search(studyIds.getIdList());
 		if (studyCards.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
