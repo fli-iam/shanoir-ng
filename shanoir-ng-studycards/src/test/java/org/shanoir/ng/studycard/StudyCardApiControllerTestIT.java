@@ -22,7 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * Integration tests for template controller.
+ * Integration tests for study card controller.
  *
  * @author msimon
  *
@@ -32,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("dev")
 public class StudyCardApiControllerTestIT extends KeycloakControllerTestIT {
 	
-	private static final String REQUEST_PATH = "/studyCard";
+	private static final String REQUEST_PATH = "/studycard";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
