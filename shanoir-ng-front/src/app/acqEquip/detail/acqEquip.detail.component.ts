@@ -12,6 +12,7 @@ import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { ManufacturerModel } from '../shared/manufModel.model';
+import { DatasetModalityType } from "../../shared/enum/datasetModalityType";
 
 @Component({
     selector: 'acqEquipDetail',
@@ -30,6 +31,7 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     private canModify: Boolean = false;
     private manufModels: ManufacturerModel[];
     private centers: Center[];
+    private datasetModalityTypeEnumValue: String;
 
     constructor (private route: ActivatedRoute, private router: Router,
         private acqEquipService: AcquisitionEquipmentService, private fb: FormBuilder,
@@ -73,6 +75,7 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
                     acqEquip.manufacturerModel = this.getManufModelById(acqEquip.manufacturerModel.id);
                 }
                 this.acqEquip = acqEquip;
+                this.datasetModalityTypeEnumValue = DatasetModalityType[this.acqEquip.manufacturerModel.datasetModalityType];
             });
     }   
 
