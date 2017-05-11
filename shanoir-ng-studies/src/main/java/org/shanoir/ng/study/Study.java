@@ -11,8 +11,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
@@ -44,11 +42,19 @@ public class Study extends HalEntity {
 	@NotNull
 	private boolean clinical;
 
+	/** Coordinator. */
+	// TODO: replace by investigator
+	private Long coordinatorId;
+
 	/** Is with downloadable by default. */
 	private boolean downloadableByDefault;
 
 	/** End date. */
 	private Date endDate;
+
+	/** The is mono center. */
+	@NotNull
+	private boolean monoCenter;
 
 	@NotBlank
 	@Column(unique = true)
@@ -79,18 +85,15 @@ public class Study extends HalEntity {
 	@OneToMany(mappedBy = "studyId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<StudyUser> studyUsers;
 
+	@NotNull
+	@Enumerated(EnumType.STRING)
+	private StudyType studyType;
+
 	/** Is visible by default. */
 	private boolean visibleByDefault;
 
 	/** Is with examination. */
 	private boolean withExamination;
-
-	@Override
-	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-	public Long getId() {
-		return super.getId();
-	}
 
 	/**
 	 * Init HATEOAS links
@@ -113,6 +116,21 @@ public class Study extends HalEntity {
 	 */
 	public void setClinical(boolean clinical) {
 		this.clinical = clinical;
+	}
+
+	/**
+	 * @return the coordinatorId
+	 */
+	public Long getCoordinatorId() {
+		return coordinatorId;
+	}
+
+	/**
+	 * @param coordinatorId
+	 *            the coordinatorId to set
+	 */
+	public void setCoordinatorId(Long coordinatorId) {
+		this.coordinatorId = coordinatorId;
 	}
 
 	/**
@@ -143,6 +161,21 @@ public class Study extends HalEntity {
 	 */
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
+	}
+
+	/**
+	 * @return the monoCenter
+	 */
+	public boolean isMonoCenter() {
+		return monoCenter;
+	}
+
+	/**
+	 * @param monoCenter
+	 *            the monoCenter to set
+	 */
+	public void setMonoCenter(boolean monoCenter) {
+		this.monoCenter = monoCenter;
 	}
 
 	/**
@@ -223,7 +256,7 @@ public class Study extends HalEntity {
 	/**
 	 * @return the studyUsers
 	 */
-	public List<StudyUser> getStudyUserList() {
+	public List<StudyUser> getStudyUsers() {
 		return studyUsers;
 	}
 
@@ -231,8 +264,23 @@ public class Study extends HalEntity {
 	 * @param studyUsers
 	 *            the studyUsers to set
 	 */
-	public void setStudyUserList(List<StudyUser> studyUsers) {
+	public void setStudyUsers(List<StudyUser> studyUsers) {
 		this.studyUsers = studyUsers;
+	}
+
+	/**
+	 * @return the studyType
+	 */
+	public StudyType getStudyType() {
+		return studyType;
+	}
+
+	/**
+	 * @param studyType
+	 *            the studyType to set
+	 */
+	public void setStudyType(StudyType studyType) {
+		this.studyType = studyType;
 	}
 
 	/**
