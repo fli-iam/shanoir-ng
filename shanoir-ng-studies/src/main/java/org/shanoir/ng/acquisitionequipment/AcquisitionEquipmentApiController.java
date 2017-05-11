@@ -9,6 +9,8 @@ import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,8 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class AcquisitionEquipmentApiController implements AcquisitionEquipmentApi {
 
+	private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentApiController.class);
+	
 	@Autowired
 	private AcquisitionEquipmentService acquisitionEquipmentService;
 
@@ -105,14 +109,12 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		try {
 			acquisitionEquipmentService.update(acquisitionEquipment);
 		} catch (final ShanoirStudiesException e) {
-			if (ErrorModelCode.ACQ_EQPT_NOT_FOUND.equals(e.getErrorCode())) {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			}
+			LOG.error("Error while trying to update acquisition equipment " + acquisitionEquipmentId + " : ", e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
 
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	/**
