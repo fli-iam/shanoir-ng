@@ -1,4 +1,3 @@
-import { Center } from '../../centers/shared/center.model';
 import { Manufacturer } from './manuf.model';
 import { DatasetModalityType } from "../../shared/enum/datasetModalityType";
 

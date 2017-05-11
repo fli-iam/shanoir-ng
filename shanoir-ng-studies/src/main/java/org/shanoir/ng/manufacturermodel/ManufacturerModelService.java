@@ -2,7 +2,7 @@ package org.shanoir.ng.manufacturermodel;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
@@ -35,8 +35,8 @@ public interface ManufacturerModelService extends UniqueCheckableService<Manufac
 	 * @param manufacturerModel
 	 *            manufacturer model to create.
 	 * @return created manufacturer model.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	ManufacturerModel save(ManufacturerModel manufacturerModel) throws ShanoirStudyException;
+	ManufacturerModel save(ManufacturerModel manufacturerModel) throws ShanoirStudiesException;
 
 }

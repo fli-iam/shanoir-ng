@@ -3,8 +3,8 @@ package org.shanoir.ng.configuration.amqp;
 import java.util.concurrent.CountDownLatch;
 
 import org.shanoir.ng.shared.exception.ShanoirStudyCardsException;
-import org.shanoir.ng.studyCards.StudyCard;
-import org.shanoir.ng.studyCards.StudyCardService;
+import org.shanoir.ng.studycard.StudyCard;
+import org.shanoir.ng.studycard.StudyCardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

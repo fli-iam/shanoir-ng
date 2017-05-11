@@ -2,7 +2,8 @@ package org.shanoir.ng.acquisitionequipment;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
  * Acquisition equipment service.
@@ -10,16 +11,16 @@ import org.shanoir.ng.shared.exception.ShanoirStudyException;
  * @author msimon
  *
  */
-public interface AcquisitionEquipmentService {
+public interface AcquisitionEquipmentService extends UniqueCheckableService<AcquisitionEquipment>{
 
 	/**
 	 * Delete an acquisition equipment.
 	 * 
 	 * @param id
 	 *            acquisition equipment id.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	void deleteById(Long id) throws ShanoirStudyException;
+	void deleteById(Long id) throws ShanoirStudiesException;
 
 	/**
 	 * Get all the acquisition equipments.
@@ -43,9 +44,9 @@ public interface AcquisitionEquipmentService {
 	 * @param acquisitionEquipment
 	 *            acquisition equipment to create.
 	 * @return created acquisition equipment.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	AcquisitionEquipment save(AcquisitionEquipment acquisitionEquipment) throws ShanoirStudyException;
+	AcquisitionEquipment save(AcquisitionEquipment acquisitionEquipment) throws ShanoirStudiesException;
 
 	/**
 	 * Update an acquisition equipment.
@@ -53,8 +54,19 @@ public interface AcquisitionEquipmentService {
 	 * @param acquisitionEquipment
 	 *            acquisition equipment to update.
 	 * @return updated acquisition equipment.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	AcquisitionEquipment update(AcquisitionEquipment acquisitionEquipment) throws ShanoirStudyException;
+	AcquisitionEquipment update(AcquisitionEquipment acquisitionEquipment) throws ShanoirStudiesException;
+
+	/**
+	 * @param fieldName1
+	 * @param value1
+	 * @param fieldName2
+	 * @param value2
+	 * @return
+	 * @author yyao
+	 */
+	List<AcquisitionEquipment> findByCoupleOfFieldValue(String fieldName1, Object value1, String fieldName2,
+			Object value2);
 
 }

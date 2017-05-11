@@ -1,8 +1,8 @@
-package org.shanoir.ng.studyCards;
+package org.shanoir.ng.studycard;
 
 import java.util.List;
 
-
+import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.annotations.ApiParam;
 
 @Controller
-public class StudyCardApiController implements StudyCardApi  {
+public class StudyCardApiController implements StudyCardApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(StudyCardApiController.class);
 
@@ -31,41 +31,42 @@ public class StudyCardApiController implements StudyCardApi  {
 	private StudyCardService studyCardService;
 
 	@Override
-	public ResponseEntity<Void> deleteStudyCard
-		(@ApiParam(value = "id of the study card",required=true ) @PathVariable("studyCardId") Long studyCardId) {
+	public ResponseEntity<Void> deleteStudyCard(
+			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
 		if (studyCardService.findById(studyCardId) == null) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		try {
 			studyCardService.deleteById(studyCardId);
 		} catch (ShanoirStudyCardsException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 		}
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
 	public ResponseEntity<StudyCard> findStudyCardById(
-				@ApiParam(value = "id of the study card",required=true ) @PathVariable("studyCardId") Long studyCardId) {
+			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
 		final StudyCard studyCard = studyCardService.findById(studyCardId);
 		if (studyCard == null) {
-			return new ResponseEntity<StudyCard>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<StudyCard>(studyCard, HttpStatus.OK);
+		return new ResponseEntity<>(studyCard, HttpStatus.OK);
 	}
 
 	@Override
-	  public ResponseEntity<List<StudyCard>> findStudyCards() {
+	public ResponseEntity<List<StudyCard>> findStudyCards() {
 		final List<StudyCard> studyCards = studyCardService.findAll();
 		if (studyCards.isEmpty()) {
-			return new ResponseEntity<List<StudyCard>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<List<StudyCard>>(studyCards, HttpStatus.OK);
+		return new ResponseEntity<>(studyCards, HttpStatus.OK);
 	}
 
-	//@Override
-	  public ResponseEntity<StudyCard> saveNewStudyCard(
-			@ApiParam(value = "study Card to create" ,required=true ) @RequestBody StudyCard studyCard, final BindingResult result) throws RestServiceException {
+	@Override
+	public ResponseEntity<StudyCard> saveNewStudyCard(
+			@ApiParam(value = "study Card to create", required = true) @RequestBody StudyCard studyCard,
+			final BindingResult result) throws RestServiceException {
 
 		/* Validation */
 		// A basic template can only update certain fields, check that
@@ -87,7 +88,7 @@ public class StudyCardApiController implements StudyCardApi  {
 		/* Save template in db. */
 		try {
 			final StudyCard createdStudyCard = studyCardService.save(studyCard);
-			return new ResponseEntity<StudyCard>(createdStudyCard, HttpStatus.OK);
+			return new ResponseEntity<>(createdStudyCard, HttpStatus.OK);
 		} catch (ShanoirStudyCardsException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -95,8 +96,19 @@ public class StudyCardApiController implements StudyCardApi  {
 	}
 
 	@Override
-	 public ResponseEntity<Void> updateStudyCard(@ApiParam(value = "id of the study card",required=true ) @PathVariable("studyCardId") Long studyCardId,
-		        @ApiParam(value = "study card to update" ,required=true ) @RequestBody StudyCard studyCard,
+	public ResponseEntity<List<StudyCard>> searchStudyCards(
+			@ApiParam(value = "study ids", required = true) @RequestBody final IdListDTO studyIds) {
+		final List<StudyCard> studyCards = studyCardService.search(studyIds.getIdList());
+		if (studyCards.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(studyCards, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Void> updateStudyCard(
+			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
+			@ApiParam(value = "study card to update", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException {
 
 		// IMPORTANT : avoid any confusion that could lead to security breach
@@ -124,7 +136,7 @@ public class StudyCardApiController implements StudyCardApi  {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
 
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	/*
@@ -136,7 +148,8 @@ public class StudyCardApiController implements StudyCardApi  {
 	 */
 	private FieldErrorMap getUpdateRightsErrors(final StudyCard studyCard) {
 		final StudyCard previousStateTemplate = studyCardService.findById(studyCard.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<StudyCard>().validate(previousStateTemplate, studyCard);
+		final FieldErrorMap accessErrors = new EditableOnlyByValidator<StudyCard>().validate(previousStateTemplate,
+				studyCard);
 		return accessErrors;
 	}
 
@@ -163,16 +176,5 @@ public class StudyCardApiController implements StudyCardApi  {
 		final FieldErrorMap uniqueErrors = uniqueValidator.validate(studyCard);
 		return uniqueErrors;
 	}
-
-	@Override
-    public ResponseEntity<List<StudyCard>> findStudyCardsByStudyId(@ApiParam(value = "id of the study",required=true ) @PathVariable("studyId") Long studyId) {	
-		final List<StudyCard> studyCards = null;
-		if (studyCards.isEmpty()) {
-			return new ResponseEntity<List<StudyCard>>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<List<StudyCard>>(studyCards, HttpStatus.OK);
-    }
-	
-	
 
 }

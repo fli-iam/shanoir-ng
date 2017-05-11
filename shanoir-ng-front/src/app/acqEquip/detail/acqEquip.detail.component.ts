@@ -8,8 +8,11 @@ import { AcquisitionEquipment } from '../shared/acqEquip.model';
 import { AcquisitionEquipmentService } from '../shared/acqEquip.service';
 import { ManufacturerService } from '../shared/manuf.service';
 import { ManufacturerModelService } from '../shared/manufModel.service';
+import { Center } from '../../centers/shared/center.model';
+import { CenterService } from '../../centers/shared/center.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { ManufacturerModel } from '../shared/manufModel.model';
+import { DatasetModalityType } from "../../shared/enum/datasetModalityType";
 
 @Component({
     selector: 'acqEquipDetail',
@@ -24,13 +27,16 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     private acqEquipDetailForm: FormGroup;
     private acqEquipId: number;
     private mode: "view" | "edit" | "create";
-    private isNameUnique: Boolean = true;
+    private isModelNumberUnique: Boolean = true;
     private canModify: Boolean = false;
     private manufModels: ManufacturerModel[];
+    private centers: Center[];
+    private datasetModalityTypeEnumValue: String;
 
     constructor (private route: ActivatedRoute, private router: Router,
         private acqEquipService: AcquisitionEquipmentService, private fb: FormBuilder,
         private manufService: ManufacturerService, private manufModelService: ManufacturerModelService,
+        private centerService: CenterService,
         private location: Location, private keycloakService: KeycloakService) {
 
     }
@@ -38,6 +44,7 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     ngOnInit(): void {
         if (this.modeFromCenterList) {this.mode = this.modeFromCenterList;}
         this.getManufModels();
+        this.getCenters();
         this.getAcquisitionEquipment();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -63,7 +70,12 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
                 }
             })
             .subscribe((acqEquip: AcquisitionEquipment) => {
+                if (this.mode == "edit") {
+                    acqEquip.center = this.getCenterById(acqEquip.center.id);
+                    acqEquip.manufacturerModel = this.getManufModelById(acqEquip.manufacturerModel.id);
+                }
                 this.acqEquip = acqEquip;
+                this.datasetModalityTypeEnumValue = DatasetModalityType[this.acqEquip.manufacturerModel.datasetModalityType];
             });
     }   
 
@@ -75,8 +87,20 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
             })
             .catch((error) => {
                 // TODO: display error
-                console.log("error getting manufacturer models list!");
+                console.log("error getting manufacturer model list!");
             });
+    }
+
+    getCenters(): void {
+        this.centerService
+            .getCenters()
+            .then(centers => {
+                this.centers = centers;
+        })
+        .catch((error) => {
+            // TODO: display error
+            console.log("error getting center list!");
+        });
     }
 
     getManufModelById(id: number): ManufacturerModel {
@@ -88,10 +112,19 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
         return null;
     }
 
+    getCenterById(id: number): Center {
+        for (let center of this.centers) {
+            if (id == center.id) {
+                return center;
+            }
+        }
+        return null;
+    }
+
     buildForm(): void {
         this.acqEquipDetailForm = this.fb.group({
             'serialNumber': [this.acqEquip.serialNumber],
-            'manufModel': [this.acqEquip.manufacturerModel, Validators.required],
+            'manufacturerModel': [this.acqEquip.manufacturerModel, Validators.required],
             'center': [this.acqEquip.center, Validators.required]
         });
         this.acqEquipDetailForm.valueChanges
@@ -115,13 +148,13 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     }
 
     formErrors = {
-       'manufModel': '',
+       'manufacturerModel': '',
        'center': ''
     };
 
     back(): void {
-        //this.location.back();
-        this.getOut();
+        this.location.back();
+        // this.getOut();
     }
 
     edit(): void {
@@ -132,10 +165,10 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
         this.acqEquip = this.acqEquipDetailForm.value;
         this.acqEquipService.create(this.acqEquip)
         .subscribe((acqEquip) => {
-            this.getOut();
+            this.back();
         }, (err: String) => {
-            if (err.indexOf("name should be unique") != -1) {
-                this.isNameUnique = false;
+            if (err.indexOf("should be unique") != -1) {
+                this.isModelNumberUnique = false;
             }
         });
     }
@@ -144,20 +177,20 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
         this.acqEquip = this.acqEquipDetailForm.value;
         this.acqEquipService.update(this.acqEquipId, this.acqEquip)
         .subscribe((acqEquip) => {
-            this.getOut();
+            this.back();
         }, (err: String) => {
-            if (err.indexOf("name should be unique") != -1) {
-                this.isNameUnique = false;
+            if (err.indexOf("should be unique") != -1) {
+                this.isModelNumberUnique = false;
             }
         });
     }
 
-    getOut(acqEquip: AcquisitionEquipment = null): void {
-        if (this.closing.observers.length > 0) {
-            this.closing.emit(acqEquip);
-        } else {
-            this.location.back();
-        }
-    }
+    // getOut(acqEquip: AcquisitionEquipment = null): void {
+    //     if (this.closing.observers.length > 0) {
+    //         this.closing.emit(acqEquip);
+    //     } else {
+    //         this.location.back();
+    //     }
+    // }
 
 }

@@ -6,7 +6,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -64,7 +64,7 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 		/* Save center in db. */
 		try {
 			return new ResponseEntity<ManufacturerModel>(manufacturerModelService.save(manufacturerModel), HttpStatus.OK);
-		} catch (ShanoirStudyException e) {
+		} catch (ShanoirStudiesException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}

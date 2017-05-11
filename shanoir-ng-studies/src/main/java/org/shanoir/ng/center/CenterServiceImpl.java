@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class CenterServiceImpl implements CenterService {
 	private CenterRepository centerRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirStudyException {
+	public void deleteById(final Long id) throws ShanoirStudiesException {
 		centerRepository.delete(id);
 	}
 
@@ -58,32 +58,32 @@ public class CenterServiceImpl implements CenterService {
 	}
 
 	@Override
-	public Center save(final Center center) throws ShanoirStudyException {
+	public Center save(final Center center) throws ShanoirStudiesException {
 		Center savedCenter = null;
 		try {
 			savedCenter = centerRepository.save(center);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudyException.logAndThrow(LOG, "Error while creating center: " + dive.getMessage());
+			ShanoirStudiesException.logAndThrow(LOG, "Error while creating center: " + dive.getMessage());
 		}
 		updateShanoirOld(savedCenter);
 		return savedCenter;
 	}
 
 	@Override
-	public Center update(final Center center) throws ShanoirStudyException {
+	public Center update(final Center center) throws ShanoirStudiesException {
 		final Center centerDb = centerRepository.findOne(center.getId());
 		updateCenterValues(centerDb, center);
 		try {
 			centerRepository.save(centerDb);
 		} catch (Exception e) {
-			ShanoirStudyException.logAndThrow(LOG, "Error while updating center: " + e.getMessage());
+			ShanoirStudiesException.logAndThrow(LOG, "Error while updating center: " + e.getMessage());
 		}
 		updateShanoirOld(centerDb);
 		return centerDb;
 	}
 
 	@Override
-	public void updateFromShanoirOld(final Center center) throws ShanoirStudyException {
+	public void updateFromShanoirOld(final Center center) throws ShanoirStudiesException {
 		if (center.getId() == null) {
 			throw new IllegalArgumentException("center id cannot be null");
 		} else {
@@ -92,7 +92,7 @@ public class CenterServiceImpl implements CenterService {
 				try {
 					centerRepository.save(centerDb);
 				} catch (Exception e) {
-					ShanoirStudyException.logAndThrow(LOG,
+					ShanoirStudiesException.logAndThrow(LOG,
 							"Error while updating center from Shanoir Old: " + e.getMessage());
 				}
 			}

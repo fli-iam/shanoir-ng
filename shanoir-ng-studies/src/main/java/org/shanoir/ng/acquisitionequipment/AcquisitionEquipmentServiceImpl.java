@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.shared.exception.ErrorModelCode;
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,11 +38,11 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	private RabbitTemplate rabbitTemplate;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirStudyException {
+	public void deleteById(final Long id) throws ShanoirStudiesException {
 		final AcquisitionEquipment equipment = acquisitionEquipmentRepository.findOne(id);
 		if (equipment == null) {
 			LOG.error("Acquisition equipment with id " + id + " not found");
-			throw new ShanoirStudyException(ErrorModelCode.ACQ_EQPT_NOT_FOUND);
+			throw new ShanoirStudiesException(ErrorModelCode.ACQ_EQPT_NOT_FOUND);
 		}
 		acquisitionEquipmentRepository.delete(id);
 	}
@@ -58,29 +58,29 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	}
 
 	@Override
-	public AcquisitionEquipment save(final AcquisitionEquipment acquisitionEquipment) throws ShanoirStudyException {
+	public AcquisitionEquipment save(final AcquisitionEquipment acquisitionEquipment) throws ShanoirStudiesException {
 		AcquisitionEquipment savedEquipment = null;
 		try {
 			savedEquipment = acquisitionEquipmentRepository.save(acquisitionEquipment);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudyException.logAndThrow(LOG, "Error while creating acquisition equipment: " + dive.getMessage());
+			ShanoirStudiesException.logAndThrow(LOG, "Error while creating acquisition equipment: " + dive.getMessage());
 		}
 		updateShanoirOld(savedEquipment);
 		return savedEquipment;
 	}
 
 	@Override
-	public AcquisitionEquipment update(final AcquisitionEquipment acquisitionEquipment) throws ShanoirStudyException {
+	public AcquisitionEquipment update(final AcquisitionEquipment acquisitionEquipment) throws ShanoirStudiesException {
 		final AcquisitionEquipment equipmentDb = acquisitionEquipmentRepository.findOne(acquisitionEquipment.getId());
 		if (equipmentDb == null) {
 			LOG.error("Acquisition equipment with id " + acquisitionEquipment.getId() + " not found");
-			throw new ShanoirStudyException(ErrorModelCode.ACQ_EQPT_NOT_FOUND);
+			throw new ShanoirStudiesException(ErrorModelCode.ACQ_EQPT_NOT_FOUND);
 		}
 		updateUserValues(equipmentDb, acquisitionEquipment);
 		try {
 			acquisitionEquipmentRepository.save(equipmentDb);
 		} catch (Exception e) {
-			ShanoirStudyException.logAndThrow(LOG, "Error while updating acquisition equipment: " + e.getMessage());
+			ShanoirStudiesException.logAndThrow(LOG, "Error while updating acquisition equipment: " + e.getMessage());
 		}
 		updateShanoirOld(equipmentDb);
 		return equipmentDb;
@@ -126,6 +126,22 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 					+ " save/update because of an error while serializing acquisition equipment.", e);
 		}
 		return false;
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public List<AcquisitionEquipment> findBy(String fieldName, Object value) {
+		return acquisitionEquipmentRepository.findBy(fieldName, value);
+	}
+	
+	/**
+	 * 
+	 */
+	@Override
+	public List<AcquisitionEquipment> findByCoupleOfFieldValue(String fieldName1, Object value1, String fieldName2, Object value2) {
+		return acquisitionEquipmentRepository.findByCoupleOfFieldValue(fieldName1, value1, fieldName2, value2);
 	}
 
 }

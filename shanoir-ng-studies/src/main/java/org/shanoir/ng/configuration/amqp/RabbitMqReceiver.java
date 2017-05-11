@@ -2,7 +2,7 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.util.concurrent.CountDownLatch;
 
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.study.Study;
 import org.shanoir.ng.study.StudyService;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class RabbitMqReceiver {
 		try {
 			studyService.updateFromShanoirOld(study);
 			latch.countDown();
-		} catch (ShanoirStudyException e) {
+		} catch (ShanoirStudiesException e) {
 			// Exception.
 			// TODO: how to manage these exceptions to avoid messages loop
 			LOG.error("Cannot create/update study " + study.getName() + " : ", e);
@@ -60,7 +60,7 @@ public class RabbitMqReceiver {
 		try {
 			studyService.deleteFromShanoirOld(study);
 			latch.countDown();
-		} catch (ShanoirStudyException e) {
+		} catch (ShanoirStudiesException e) {
 			// Exception.
 			// TODO: how to manage these exceptions to avoid messages loop
 			LOG.error("Cannot delete study " + study.getId() + " : ", e);

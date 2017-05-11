@@ -1,13 +1,12 @@
 package org.shanoir.ng.configuration.amqp;
 
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.amqp.core.DirectExchange;
 
 /**
  * RabbitMQ configuration.
@@ -28,6 +27,8 @@ public class RabbitMqConfiguration {
 		private final static String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
 		private final static String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
 
+		// Queue from MS studycard
+		private final static String STUDYCARD_QUEUE_TO_STUDY = "studycard_queue_to_study";
 
 		@Bean
 		public RabbitMqRPCClient client() {
@@ -87,6 +88,11 @@ public class RabbitMqConfiguration {
 		@Bean
 		public static Queue subjectQueueOut() {
 			return new Queue(SUBJECT_QUEUE_OUT, true);
+		}
+
+		@Bean
+		public static Queue studycardQueue() {
+			return new Queue(STUDYCARD_QUEUE_TO_STUDY, true);
 		}
 
     // @Bean

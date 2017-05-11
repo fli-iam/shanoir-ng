@@ -1,17 +1,15 @@
-package org.shanoir.ng.template;
+package org.shanoir.ng.studycard;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.studyCards.StudyCard;
-import org.shanoir.ng.studyCards.StudyCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -35,6 +33,7 @@ public class StudyCardRepositoryTest {
 
 	private static final String STUDYCARD_TEST_1_DATA = "StudyCard1";
 	private static final Long STUDYCARD_TEST_1_ID = 1L;
+	private static final Long STUDY_TEST_1_ID = 1L;
 	
 	@Autowired
 	private StudyCardRepository studyCardRepository;
@@ -71,10 +70,10 @@ public class StudyCardRepositoryTest {
 	}
 	
 	@Test
-	public void findByDataTest() throws Exception {
-		Optional<StudyCard> studyCardDb = studyCardRepository.findByName(STUDYCARD_TEST_1_DATA);
-		assertTrue(studyCardDb.isPresent());
-		assertThat(studyCardDb.get().getId()).isEqualTo(STUDYCARD_TEST_1_ID);
+	public void findByStudyIdInTest() throws Exception {
+		List<StudyCard> studyCards = studyCardRepository.findByStudyIdIn(Arrays.asList(STUDY_TEST_1_ID));
+		assertNotNull(studyCards);
+		assertTrue(studyCards.size() == 2);
 	}
 	
 	@Test

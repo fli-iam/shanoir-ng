@@ -3,7 +3,7 @@ package org.shanoir.ng.center;
 import java.util.List;
 import java.util.Optional;
 
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
@@ -19,9 +19,9 @@ public interface CenterService extends UniqueCheckableService<Center> {
 	 * 
 	 * @param id
 	 *            center id.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	void deleteById(Long id) throws ShanoirStudyException;
+	void deleteById(Long id) throws ShanoirStudiesException;
 
 	/**
 	 * Get all the center.
@@ -54,9 +54,9 @@ public interface CenterService extends UniqueCheckableService<Center> {
 	 * @param center
 	 *            center to create.
 	 * @return created center.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	Center save(Center center) throws ShanoirStudyException;
+	Center save(Center center) throws ShanoirStudiesException;
 
 	/**
 	 * Update a center.
@@ -64,17 +64,17 @@ public interface CenterService extends UniqueCheckableService<Center> {
 	 * @param center
 	 *            center to update.
 	 * @return updated center.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	Center update(Center center) throws ShanoirStudyException;
+	Center update(Center center) throws ShanoirStudiesException;
 
 	/**
 	 * Update a center from the old Shanoir
 	 * 
 	 * @param center
 	 *            center.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	void updateFromShanoirOld(Center center) throws ShanoirStudyException;
+	void updateFromShanoirOld(Center center) throws ShanoirStudiesException;
 
 }

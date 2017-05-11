@@ -1,7 +1,6 @@
-package org.shanoir.ng.studyCards;
+package org.shanoir.ng.studycard;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.shanoir.ng.shared.exception.ShanoirStudyCardsException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
@@ -31,15 +30,6 @@ public interface StudyCardService extends UniqueCheckableService<StudyCard> {
 	List<StudyCard> findAll();
 
 	/**
-	 * Find template by data.
-	 *
-	 * @param data
-	 *            data.
-	 * @return a template.
-	 */
-	Optional<StudyCard> findByData(String data);
-
-	/**
 	 * Find template by its id.
 	 *
 	 * @param id
@@ -57,6 +47,15 @@ public interface StudyCardService extends UniqueCheckableService<StudyCard> {
 	 * @throws ShanoirTemplateException
 	 */
 	StudyCard save(StudyCard template) throws ShanoirStudyCardsException;
+
+	/**
+	 * Search study cards by their study id.
+	 * 
+	 * @param studyIdList
+	 *            list of study ids.
+	 * @return list of study cards.
+	 */
+	List<StudyCard> search(List<Long> studyIdList);
 
 	/**
 	 * Update a template.

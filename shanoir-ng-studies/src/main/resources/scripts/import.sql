@@ -5,13 +5,65 @@
 use shanoir_ng_studies;
 
 INSERT INTO study
-	(id, name, start_date, end_date, clinical, with_examination, is_visible_by_default, is_downloadable_by_default, study_status)
+	(id, name, start_date, end_date, clinical, with_examination, visible_by_default, downloadable_by_default, study_status)
 VALUES
-	(1,'Study 1', '2013/01/01', null, 0, 1, 0, 0, 'FINISHED'),
-	(2,'Study 2', '2009/12/01', null, 0, 1, 0, 0, 'IN_PROGRESS'),
-	(3,'Study 3', '2010/02/21', null, 0, 1, 0, 0, 'FINISHED'),
-	(4,'Study 4', '2015/10/03', null, 0, 1, 0, 0, 'IN_PROGRESS');
+	(1, 'Study 1', '2013/01/01', null, 0, 1, 0, 0, 'FINISHED'),
+	(2, 'Study 2', '2009/12/01', null, 0, 1, 0, 0, 'IN_PROGRESS'),
+	(3, 'Study 3', '2010/02/21', null, 0, 1, 0, 0, 'FINISHED'),
+	(4, 'Study 4', '2015/10/03', null, 0, 1, 0, 0, 'IN_PROGRESS');
 
+INSERT INTO study_user
+	(receive_anonymization_report, receive_new_import_report, study_id, study_user_type, user_id)
+VALUES
+	(0, 1, 1, 'RESPONSIBLE', 3),
+	(0, 1, 3, 'RESPONSIBLE', 3),
+	(0, 1, 4, 'RESPONSIBLE', 3),
+	(0, 0, 4, 'SEE_DOWNLOAD', 11),
+	(0, 0, 4, 'SEE_DOWNLOAD_IMPORT', 9),
+	(0, 0, 1, 'SEE_DOWNLOAD_IMPORT', 9),
+	(0, 1, 2, 'RESPONSIBLE', 3),
+	(0, 0, 2, 'SEE_DOWNLOAD_IMPORT_MODIFY', 9),
+	(0, 0, 2, 'SEE_DOWNLOAD_IMPORT', 17),
+	(0, 1, 2, 'SEE_DOWNLOAD_IMPORT_MODIFY', 19),
+	(0, 0, 4, 'SEE_DOWNLOAD_IMPORT', 23),
+	(0, 0, 2, 'SEE_DOWNLOAD_IMPORT_MODIFY', 23),
+	(0, 0, 2, 'SEE_DOWNLOAD', 24),
+	(0, 0, 4, 'SEE_DOWNLOAD', 24),
+	(0, 0, 2, 'RESPONSIBLE', 12),
+	(0, 0, 2, 'SEE_DOWNLOAD', 29),
+	(0, 1, 2, 'SEE_DOWNLOAD', 32),
+	(0, 0, 2, 'SEE_DOWNLOAD', 33),
+	(0, 0, 2, 'SEE_DOWNLOAD_IMPORT', 28),
+	(0, 0, 2, 'SEE_DOWNLOAD_IMPORT', 41),
+	(0, 0, 2, 'SEE_DOWNLOAD', 30),
+	(0, 0, 1, 'SEE_DOWNLOAD_IMPORT', 23),
+	(0, 0, 2, 'SEE_DOWNLOAD', 68),
+	(0, 0, 2, 'SEE_DOWNLOAD', 69),
+	(0, 0, 2, 'SEE_DOWNLOAD', 66),
+	(0, 0, 2, 'SEE_DOWNLOAD', 67),
+	(0, 0, 2, 'SEE_DOWNLOAD_IMPORT_MODIFY', 77),
+	(0, 0, 2, 'SEE_DOWNLOAD', 83),
+	(0, 0, 2, 'SEE_DOWNLOAD', 105),
+	(0, 0, 2, 'SEE_DOWNLOAD', 106),
+	(0, 0, 2, 'SEE_DOWNLOAD', 143),
+	(0, 0, 2, 'SEE_DOWNLOAD', 107),
+	(0, 0, 2, 'SEE_DOWNLOAD', 78),
+	(0, 0, 4, 'SEE_DOWNLOAD', 166),
+	(0, 0, 4, 'SEE_DOWNLOAD', 98),
+	(0, 0, 4, 'SEE_DOWNLOAD', 17),
+	(0, 0, 2, 'SEE_DOWNLOAD', 86),
+	(0, 0, 2, 'SEE_DOWNLOAD', 205);
+
+INSERT INTO study_study_card
+	(study_id, study_card_id)
+VALUES
+	(1, 1),
+	(1, 3),
+	(2, 2),
+	(4, 1),
+	(1, 2),
+	(2, 1),
+	(3, 4);
 
 INSERT INTO `center`
 	(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`)
