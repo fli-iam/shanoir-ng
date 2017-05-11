@@ -8,6 +8,6 @@ import org.springframework.data.repository.CrudRepository;
  * @author msimon
  *
  */
-public interface AcquisitionEquipmentRepository extends CrudRepository<AcquisitionEquipment, Long> {
+public interface AcquisitionEquipmentRepository extends CrudRepository<AcquisitionEquipment, Long>, AcquisitionEquipmentRepositoryCustom {
 
 }

@@ -3,6 +3,7 @@ package org.shanoir.ng.acquisitionequipment;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
  * Acquisition equipment service.
@@ -10,7 +11,7 @@ import org.shanoir.ng.shared.exception.ShanoirStudiesException;
  * @author msimon
  *
  */
-public interface AcquisitionEquipmentService {
+public interface AcquisitionEquipmentService extends UniqueCheckableService<AcquisitionEquipment>{
 
 	/**
 	 * Delete an acquisition equipment.
@@ -56,5 +57,16 @@ public interface AcquisitionEquipmentService {
 	 * @throws ShanoirStudiesException
 	 */
 	AcquisitionEquipment update(AcquisitionEquipment acquisitionEquipment) throws ShanoirStudiesException;
+
+	/**
+	 * @param fieldName1
+	 * @param value1
+	 * @param fieldName2
+	 * @param value2
+	 * @return
+	 * @author yyao
+	 */
+	List<AcquisitionEquipment> findByCoupleOfFieldValue(String fieldName1, Object value1, String fieldName2,
+			Object value2);
 
 }

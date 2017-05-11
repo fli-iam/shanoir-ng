@@ -1,6 +1,7 @@
 package org.shanoir.ng.acquisitionequipment;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -20,7 +21,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  *
  */
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"manufacturer_model_id", "serialNumber"}, name = "model_number_idx")})
+@Table(uniqueConstraints = {
+		@UniqueConstraint(columnNames = { "manufacturer_model_id", "serialNumber" }, name = "model_number_idx") })
 @JsonPropertyOrder({ "_links", "id", "serialNumber" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class AcquisitionEquipment extends HalEntity {
@@ -36,6 +38,7 @@ public class AcquisitionEquipment extends HalEntity {
 
 	@ManyToOne
 	@NotNull
+	@JoinColumn(name = "manufacturer_model_id")
 	private ManufacturerModel manufacturerModel;
 
 	private String serialNumber;
