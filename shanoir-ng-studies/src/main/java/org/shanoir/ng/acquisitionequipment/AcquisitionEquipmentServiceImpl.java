@@ -128,4 +128,20 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		return false;
 	}
 
+	/**
+	 * 
+	 */
+	@Override
+	public List<AcquisitionEquipment> findBy(String fieldName, Object value) {
+		return acquisitionEquipmentRepository.findBy(fieldName, value);
+	}
+	
+	/**
+	 * 
+	 */
+	@Override
+	public List<AcquisitionEquipment> findByCoupleOfFieldValue(String fieldName1, Object value1, String fieldName2, Object value2) {
+		return acquisitionEquipmentRepository.findByCoupleOfFieldValue(fieldName1, value1, fieldName2, value2);
+	}
+
 }

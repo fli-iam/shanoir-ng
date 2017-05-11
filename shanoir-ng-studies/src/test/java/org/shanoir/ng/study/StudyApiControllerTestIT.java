@@ -1,4 +1,4 @@
-package org.shanoir.ng.studycard;
+package org.shanoir.ng.study;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.studycard.StudyCard;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * Integration tests for study card controller.
+ * Integration tests for study controller.
  *
  * @author msimon
  *
@@ -30,9 +29,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
-public class StudyCardApiControllerTestIT extends KeycloakControllerTestIT {
-	
-	private static final String REQUEST_PATH = "/studycard";
+public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
+
+	private static final String REQUEST_PATH = "/study";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
@@ -40,13 +39,13 @@ public class StudyCardApiControllerTestIT extends KeycloakControllerTestIT {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void findStudyCardByIdProtected() {
+	public void findStudyByIdProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
-	public void findStudyCardByIdWithLogin() throws ClientProtocolException, IOException {
+	public void findStudyByIdWithLogin() throws ClientProtocolException, IOException {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
@@ -55,13 +54,13 @@ public class StudyCardApiControllerTestIT extends KeycloakControllerTestIT {
 	}
 
 	@Test
-	public void findTemplatesProtected() {
+	public void findStudysProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
-	public void findTemplatesWithLogin() throws ClientProtocolException, IOException {
+	public void findStudiesWithLogin() throws ClientProtocolException, IOException {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
@@ -70,36 +69,54 @@ public class StudyCardApiControllerTestIT extends KeycloakControllerTestIT {
 	}
 
 	@Test
-	public void saveNewTemplateProtected() {
-		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new StudyCard(), String.class);
+	public void saveNewStudyProtected() {
+		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Study(), String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
-	public void saveNewTemplateWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<StudyCard> entity = new HttpEntity<StudyCard>(ModelsUtil.createStudyCard(), getHeadersWithToken(true));
+	public void saveNewStudyWithLogin() throws ClientProtocolException, IOException {
+
+		final Study study = createStudy();
+		study.setName("test");
+		final HttpEntity<Study> entity = new HttpEntity<Study>(study, getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		// Get study id
+		String studyId = response.getBody().split("\"id\":")[1].split(",")[0];
+
+		// Delete study
+		final ResponseEntity<String> responseDelete = restTemplate.exchange(REQUEST_PATH + "/" + studyId,
+				HttpMethod.DELETE, entity, String.class);
+		assertEquals(HttpStatus.OK, responseDelete.getStatusCode());
 	}
 
 	@Test
-	public void updateNewTemplateProtected() {
-		final HttpEntity<StudyCard> entity = new HttpEntity<StudyCard>(ModelsUtil.createStudyCard());
-		
+	public void updateNewStudyProtected() {
+		final HttpEntity<Study> entity = new HttpEntity<Study>(ModelsUtil.createStudy());
+
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
-	public void updateNewTemplateWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<StudyCard> entity = new HttpEntity<StudyCard>(ModelsUtil.createStudyCard(), getHeadersWithToken(true));
+	public void updateNewStudyWithLogin() throws ClientProtocolException, IOException {
+		final HttpEntity<Study> entity = new HttpEntity<Study>(createStudy(), getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
-		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
+
+	private Study createStudy() {
+		final Study study = new Study();
+		study.setId(1L);
+		study.setName("test");
+		return study;
 	}
 
 }

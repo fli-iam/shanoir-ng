@@ -2,7 +2,7 @@ package org.shanoir.ng.studycard;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdListDto;
+import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -73,7 +73,7 @@ public interface StudyCardApi {
 	@RequestMapping(value = "/search", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	ResponseEntity<List<StudyCard>> searchStudyCards(
-			@ApiParam(value = "study ids", required = true) @RequestBody IdListDto studyIds);
+			@ApiParam(value = "study ids", required = true) @RequestBody IdListDTO studyIds);
 
 	@ApiOperation(value = "", notes = "Updates a study card", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "study card updated", response = Void.class),

@@ -1,4 +1,4 @@
-package org.shanoir.ng.studycard;
+package org.shanoir.ng.study;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -10,10 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.exception.ShanoirStudyCardsException;
-import org.shanoir.ng.studycard.StudyCard;
-import org.shanoir.ng.studycard.StudyCardApiController;
-import org.shanoir.ng.studycard.StudyCardService;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,17 +26,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * Unit tests for study card controller.
+ * Unit tests for study controller.
  *
  * @author msimon
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = StudyCardApiController.class)
+@WebMvcTest(controllers = StudyApiController.class)
 @AutoConfigureMockMvc(secure = false)
-public class StudyCardApiControllerTest {
+public class StudyApiControllerTest {
 
-	private static final String REQUEST_PATH = "/studycard";
+	private static final String REQUEST_PATH = "/study";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
@@ -49,50 +46,51 @@ public class StudyCardApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
-	private StudyCardService studyCardServiceMock;
+	private StudyService studyServiceMock;
 
 	@Before
-	public void setup() throws ShanoirStudyCardsException {
+	public void setup() throws ShanoirStudiesException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		doNothing().when(studyCardServiceMock).deleteById(1L);
-		given(studyCardServiceMock.findAll()).willReturn(Arrays.asList(new StudyCard()));
-		given(studyCardServiceMock.findById(1L)).willReturn(new StudyCard());
-		given(studyCardServiceMock.save(Mockito.mock(StudyCard.class))).willReturn(new StudyCard());
+		doNothing().when(studyServiceMock).deleteById(1L);
+		given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
+		given(studyServiceMock.findById(1L)).willReturn(new Study());
+		given(studyServiceMock.save(Mockito.mock(Study.class)))
+				.willReturn(new Study());
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
-	public void deleteStudyCardTest() throws Exception {
+	@WithMockUser(authorities = { "ROLE_ADMIN" })
+	public void deleteStudyTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void findStudyCardByIdTest() throws Exception {
+	public void findStudyByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
-	public void findStudyCardsTest() throws Exception {
+	public void findStudysTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_ALL).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
-	@WithMockUser
-	public void saveNewStudyCardTest() throws Exception {
+	@WithMockUser(authorities = { "ROLE_ADMIN" })
+	public void saveNewStudyTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudyCard())))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudy())))
 				.andExpect(status().isOk());
 	}
 
 	@Test
-	@WithMockUser
-	public void updateTemplateTest() throws Exception {
+	@WithMockUser(authorities = { "ROLE_ADMIN" })
+	public void updateStudyTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudyCard())))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudy())))
 				.andExpect(status().isNoContent());
 	}
 

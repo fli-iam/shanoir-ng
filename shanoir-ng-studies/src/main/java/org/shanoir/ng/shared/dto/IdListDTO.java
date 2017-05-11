@@ -9,17 +9,17 @@ import java.util.List;
  * @author msimon
  *
  */
-public class IdListDto {
+public class IdListDTO {
 
 	private List<Long> idList;
 
 	/**
 	 * Default constructor.
 	 */
-	public IdListDto() {
+	public IdListDTO() {
 		this.idList = new ArrayList<>();
 	}
-	
+
 	/**
 	 * @return the idList
 	 */

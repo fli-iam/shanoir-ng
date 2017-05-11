@@ -1,25 +1,20 @@
 package org.shanoir.ng.configuration.amqp;
 
-import java.util.concurrent.CountDownLatch;
-
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
-import org.shanoir.ng.study.Study;
-import org.shanoir.ng.study.StudyService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.shanoir.ng.mapper.SubjectMapper;
 
-import org.springframework.amqp.core.Message;
-import org.shanoir.ng.subject.dto.SubjectDTO;
-import org.shanoir.ng.subject.dto.SubjectStudyDTO;
-import org.shanoir.ng.subject.SubjectStudy;
+import org.shanoir.ng.mapper.SubjectMapper;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.ShanoirSubjectException;
+import org.shanoir.ng.study.StudyService;
+import org.shanoir.ng.study.dto.StudyStudyCardDTO;
 import org.shanoir.ng.subject.Subject;
 import org.shanoir.ng.subject.SubjectService;
-import org.shanoir.ng.shared.exception.ShanoirSubjectException;
+import org.shanoir.ng.subject.dto.SubjectDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.google.gson.Gson;
 
 /**
@@ -28,11 +23,13 @@ import com.google.gson.Gson;
  * @author atouboul
  *
  */
- public class RabbitMqRPCReceiver {
+public class RabbitMqRPCReceiver {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMqRPCReceiver.class);
 
-	// private CountDownLatch latch = new CountDownLatch(1);
+	@Autowired
+	private StudyService studyService;
+
 	@Autowired
 	private SubjectMapper subjectMapper;
 
@@ -41,29 +38,47 @@ import com.google.gson.Gson;
 
 	@RabbitListener(queues = "subject_queue_with_RPC_to_ng")
 	public String receiveAndReply(byte[] msg) {
-    Subject newSubject = null;
+		Subject newSubject = null;
 		String message = null;
-		try{
-			message = new String(msg,"UTF-8");
-		}catch(IOException ioe){
-			System.out.println(" IO EXCEPTION " + ioe );
+		try {
+			message = new String(msg, "UTF-8");
+		} catch (IOException ioe) {
+			LOG.error("Error while getting rabbitmq message", ioe);
 		}
 
 		LOG.info(" [x] Received request for " + message);
 		final Gson oGson = new Gson();
 		final SubjectDTO subjectDTO = oGson.fromJson(message, SubjectDTO.class);
 		Subject subject = subjectMapper.subjectDTOToSubject(subjectDTO);
-    System.out.println(subject.getManualHemisphericDominance());
 
 		try {
-  		newSubject = subjectService.save(subject);
-  	} catch (ShanoirSubjectException e) {
-  		System.out.println(e);
-  	}
+			newSubject = subjectService.save(subject);
+		} catch (ShanoirSubjectException e) {
+			System.out.println(e);
+		}
 
-		String result = message;
 		LOG.info(" [.] Returned Subject Id" + String.valueOf(newSubject.getId()));
 		return String.valueOf(newSubject.getId());
+	}
+
+	@RabbitListener(queues = "studycard_queue_to_study")
+	public void receiveMessageFromMsStudyCard(byte[] msg) {
+		String message = null;
+		try {
+			message = new String(msg, "UTF-8");
+		} catch (IOException ioe) {
+			LOG.error("Error while getting rabbitmq message", ioe);
+		}
+
+		LOG.info(" [x] Received request for " + message);
+		final Gson oGson = new Gson();
+		final StudyStudyCardDTO dto = oGson.fromJson(message, StudyStudyCardDTO.class);
+
+		try {
+			studyService.updateFromMsStudyCard(dto);
+		} catch (ShanoirStudiesException e) {
+			// Error logged on service.
+		}
 	}
 
 }

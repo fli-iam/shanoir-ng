@@ -3,6 +3,8 @@ package org.shanoir.ng.study.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Simple DTO for studies.
  * 
@@ -11,6 +13,7 @@ import java.util.List;
  */
 public class SimpleStudyDTO {
 
+	@NotNull
 	private Long id;
 
 	private String name;

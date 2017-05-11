@@ -1,20 +1,21 @@
 package org.shanoir.ng.studycard;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
+import org.shanoir.ng.shared.validation.Unique;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
- * Template.
+ * Study card.
  *
  * @author msimon
  *
@@ -30,10 +31,27 @@ public class StudyCard extends HalEntity {
 	 */
 	private static final long serialVersionUID = 1751168445500120935L;
 
+	/** The acquisition equipment. */
+	private Long acquisitionEquipmentId;
+
+	/** The center of the study card. */
+	@NotNull
+	private Long centerId;
+
+	/** A studycard might be disabled */
 	private boolean disabled;
 
+	/** The name of the study card. */
+	@NotBlank
+	@Column(unique = true)
+	@Unique
 	private String name;
 
+	/** The nifti converter of the study card. */
+	@NotNull
+	private Long niftiConverterId;
+
+	/** The study for which is defined the study card. */
 	@NotNull
 	private Long studyId;
 
@@ -42,14 +60,37 @@ public class StudyCard extends HalEntity {
 	 */
 	@PostLoad
 	public void initLinks() {
-		this.addLink(Links.REL_SELF, "studyCard/" + getId());
+		this.addLink(Links.REL_SELF, "studycard/" + getId());
 	}
 
-	@Override
-	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-	public Long getId() {
-		return super.getId();
+	/**
+	 * @return the acquisitionEquipmentId
+	 */
+	public Long getAcquisitionEquipmentId() {
+		return acquisitionEquipmentId;
+	}
+
+	/**
+	 * @param acquisitionEquipmentId
+	 *            the acquisitionEquipmentId to set
+	 */
+	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
+		this.acquisitionEquipmentId = acquisitionEquipmentId;
+	}
+
+	/**
+	 * @return the centerId
+	 */
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	/**
+	 * @param centerId
+	 *            the centerId to set
+	 */
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
 	}
 
 	/**
@@ -80,6 +121,21 @@ public class StudyCard extends HalEntity {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the niftiConverterId
+	 */
+	public Long getNiftiConverterId() {
+		return niftiConverterId;
+	}
+
+	/**
+	 * @param niftiConverterId
+	 *            the niftiConverterId to set
+	 */
+	public void setNiftiConverterId(Long niftiConverterId) {
+		this.niftiConverterId = niftiConverterId;
 	}
 
 	/**

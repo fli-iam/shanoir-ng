@@ -3,7 +3,9 @@ package org.shanoir.ng.studycard;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudyCardsException;
+import org.shanoir.ng.studycard.dto.StudyStudyCardDTO;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,16 @@ public class StudyCardServiceImpl implements StudyCardService {
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirStudyCardsException {
+		final StudyCard studyCard = studyCardRepository.findOne(id);
+		if (studyCard == null) {
+			LOG.error("Study card with id " + id + " not found");
+			throw new ShanoirStudyCardsException(ErrorModelCode.STUDY_CARD_NOT_FOUND);
+		}
 		studyCardRepository.delete(id);
+
+		// Delete study card on MS studies
+		final StudyStudyCardDTO studyCardDTO = new StudyStudyCardDTO(studyCard.getId(), null, studyCard.getStudyId());
+		updateMsStudies(studyCardDTO);
 	}
 
 	@Override
@@ -64,7 +75,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirStudyCardsException.logAndThrow(LOG, "Error while creating Study Card: " + dive.getMessage());
 		}
-		updateShanoirOld(savedStudyCard);
+		final StudyStudyCardDTO studyCardDTO = new StudyStudyCardDTO(studyCard.getId(), studyCard.getStudyId(), null);
+		updateMsStudies(studyCardDTO);
 		return savedStudyCard;
 	}
 
@@ -76,13 +88,15 @@ public class StudyCardServiceImpl implements StudyCardService {
 	@Override
 	public StudyCard update(final StudyCard studyCard) throws ShanoirStudyCardsException {
 		final StudyCard studyCardDb = studyCardRepository.findOne(studyCard.getId());
+		final Long oldStudyId = studyCardDb.getStudyId();
 		updateStudyCardValues(studyCardDb, studyCard);
 		try {
 			studyCardRepository.save(studyCardDb);
 		} catch (Exception e) {
 			ShanoirStudyCardsException.logAndThrow(LOG, "Error while updating Study Card: " + e.getMessage());
 		}
-		updateShanoirOld(studyCardDb);
+		final StudyStudyCardDTO studyCardDTO = new StudyStudyCardDTO(studyCard.getId(), studyCard.getStudyId(), oldStudyId);
+		updateMsStudies(studyCardDTO);
 		return studyCardDb;
 	}
 
@@ -91,7 +105,7 @@ public class StudyCardServiceImpl implements StudyCardService {
 		if (studyCard.getId() == null) {
 			LOG.info("Insert new Study Card with name " + studyCard.getName() + " from shanoir-old");
 			System.out.println("Insert new Study Card with name " + studyCard.getName() + " from shanoir-old");
-			try{
+			try {
 				studyCardRepository.save(studyCard);
 			} catch (Exception e) {
 				ShanoirStudyCardsException.logAndThrow(LOG,
@@ -101,60 +115,60 @@ public class StudyCardServiceImpl implements StudyCardService {
 			final StudyCard studyCardDb = studyCardRepository.findOne(studyCard.getId());
 			if (studyCardDb != null) {
 				try {
-					LOG.info("Update existing Study card with name " + studyCard.getName() + " (id: "+ studyCard.getId() +") from shanoir-old");
-					System.out.println("Update existing Study card with name " + studyCard.getName() + " (id: "+ studyCard.getId() +") from shanoir-old");
+					LOG.info("Update existing Study card with name " + studyCard.getName() + " (id: "
+							+ studyCard.getId() + ") from shanoir-old");
+					System.out.println("Update existing Study card with name " + studyCard.getName() + " (id: "
+							+ studyCard.getId() + ") from shanoir-old");
 					studyCardRepository.save(studyCard);
 				} catch (Exception e) {
 					ShanoirStudyCardsException.logAndThrow(LOG,
 							"Error while updating Study Card from Shanoir Old: " + e.getMessage());
 				}
-			}	else {
-				LOG.warn("Import new study card with name " + studyCard.getName() + "  (id: "+ studyCard.getId()+") from shanoir-old");
-				System.out.println("Import new study card with name " + studyCard.getName() + "  (id: "+ studyCard.getId()+") from shanoir-old");
+			} else {
+				LOG.warn("Import new study card with name " + studyCard.getName() + "  (id: " + studyCard.getId()
+						+ ") from shanoir-old");
+				System.out.println("Import new study card with name " + studyCard.getName() + "  (id: "
+						+ studyCard.getId() + ") from shanoir-old");
 				studyCardRepository.save(studyCard);
 			}
 		}
 	}
 
-
-	/*
-	 * Delete study card from Shanoir Old.
-	 *
-	 * @param StudyCard studyCard.
-	 *
-	 */
+	@Override
 	public void deleteFromShanoirOld(final StudyCard studyCard) throws ShanoirStudyCardsException {
 		if (studyCard.getId() != null) {
-				LOG.warn("Delete study Card with name " + studyCard.getName() + " (id: "+ studyCard.getId() +") from shanoir-old");
-				System.out.println("Delete study Card with name " + studyCard.getName() + " (id: "+ studyCard.getId() +") from shanoir-old");
-				try{
-					studyCardRepository.delete(studyCard);
-				} catch (Exception e) {
-					ShanoirStudyCardsException.logAndThrow(LOG,
-							"Error while deleting study card from Shanoir Old: " + e.getMessage());
-				}
+			LOG.warn("Delete study Card with name " + studyCard.getName() + " (id: " + studyCard.getId()
+					+ ") from shanoir-old");
+			System.out.println("Delete study Card with name " + studyCard.getName() + " (id: " + studyCard.getId()
+					+ ") from shanoir-old");
+			try {
+				studyCardRepository.delete(studyCard);
+			} catch (Exception e) {
+				ShanoirStudyCardsException.logAndThrow(LOG,
+						"Error while deleting study card from Shanoir Old: " + e.getMessage());
 			}
+		}
 	}
 
 	/*
-	 * Update Shanoir Old.
+	 * Update MS studies to link study to current study card.
 	 *
-	 * @param template template.
+	 * @param StudyStudyCardDTO DTO with link between study card and study.
 	 *
 	 * @return false if it fails, true if it succeed.
 	 */
-	private boolean updateShanoirOld(final StudyCard studyCard) {
+	private boolean updateMsStudies(final StudyStudyCardDTO StudyStudyCardDTO) {
 		try {
-			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(),
-					new ObjectMapper().writeValueAsString(studyCard));
+			LOG.info("Send update to MS studies");
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueToStudy().getName(),
+					new ObjectMapper().writeValueAsString(StudyStudyCardDTO));
 			return true;
 		} catch (AmqpException e) {
-			LOG.error("Cannot send Study Card " + studyCard.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.queueOut().getName(), e);
+			LOG.error("Cannot send link for study card " + StudyStudyCardDTO.getStudyCardId()
+					+ " to MS studies queue : " + RabbitMqConfiguration.queueToStudy().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send Study Card " + studyCard.getId() + " save/update because of an error while serializing Study Card.",
-					e);
+			LOG.error("Cannot send link for study card " + StudyStudyCardDTO.getStudyCardId()
+					+ " to MS studies queue because of an error while serializing Study Card.", e);
 		}
 		return false;
 	}

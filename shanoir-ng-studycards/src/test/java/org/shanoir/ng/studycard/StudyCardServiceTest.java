@@ -21,7 +21,7 @@ import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
- * Template service test.
+ * Study card service test.
  * 
  * @author msimon
  * 
