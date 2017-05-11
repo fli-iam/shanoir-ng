@@ -12,7 +12,7 @@ import javax.persistence.ManyToOne;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.study.Study;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @Entity
@@ -42,6 +42,7 @@ public class SubjectStudy extends HalEntity {
 	/** Subject. */
 	@ManyToOne
 	@JoinColumn(name = "subject",updatable = true, insertable = true)
+	@JsonIgnore
 	private Subject subject;
 
 	/** Identifier of the subject inside the study. */

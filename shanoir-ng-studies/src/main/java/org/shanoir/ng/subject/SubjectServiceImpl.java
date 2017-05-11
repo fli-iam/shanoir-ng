@@ -160,10 +160,12 @@ public class SubjectServiceImpl implements SubjectService {
 	 *
 	 * @return false if it fails, true if it succeed.
 	 */
-	private boolean updateShanoirOld(final Subject subject) {
+	@Override
+	public boolean updateShanoirOld(final Subject subject) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(),
+			System.out.println("Send update to Shanoir Old :" + new ObjectMapper().writeValueAsString(subject));
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.subjectQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(subject));
 			return true;
 		} catch (AmqpException e) {

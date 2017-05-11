@@ -43,25 +43,28 @@ import com.google.gson.Gson;
 	public String receiveAndReply(byte[] msg) {
     Subject newSubject = null;
 		String message = null;
+
+    // Try to read incoming msg
 		try{
 			message = new String(msg,"UTF-8");
+  		LOG.info(" [x] Received request for " + message);
 		}catch(IOException ioe){
-			System.out.println(" IO EXCEPTION " + ioe );
+			LOG.error("IO EXCEPTION " + ioe );
 		}
 
-		LOG.info(" [x] Received request for " + message);
+    // msg deserialization into Subject DTO and then into subject
 		final Gson oGson = new Gson();
 		final SubjectDTO subjectDTO = oGson.fromJson(message, SubjectDTO.class);
 		Subject subject = subjectMapper.subjectDTOToSubject(subjectDTO);
-    System.out.println(subject.getManualHemisphericDominance());
 
+    // try to save subject into db
 		try {
   		newSubject = subjectService.save(subject);
   	} catch (ShanoirSubjectException e) {
-  		System.out.println(e);
+  		LOG.error("ShanoirSubjectException : " + e);
   	}
 
-		String result = message;
+    // return rabbitmq message with newly created subject id
 		LOG.info(" [.] Returned Subject Id" + String.valueOf(newSubject.getId()));
 		return String.valueOf(newSubject.getId());
 	}

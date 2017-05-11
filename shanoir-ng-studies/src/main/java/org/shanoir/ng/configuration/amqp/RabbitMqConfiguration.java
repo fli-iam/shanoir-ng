@@ -26,11 +26,22 @@ public class RabbitMqConfiguration {
 		private final static String STUDY_QUEUE_NAME_OUT = "study_queue_from_ng";
 		private final static String SUBJECT_RPC_QUEUE_OUT = "subject_queue_with_RPC_from_ng";
 		private final static String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
+		private final static String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
 
 
 		@Bean
 		public RabbitMqRPCClient client() {
-			return new RabbitMqRPCClient();
+				return new RabbitMqRPCClient();
+		}
+
+		@Bean
+		RabbitMqReceiver receiver() {
+				return new RabbitMqReceiver();
+		}
+
+		@Bean
+		RabbitMqRPCReceiver receiverRPC() {
+				return new RabbitMqRPCReceiver();
 		}
 
     @Bean
@@ -73,26 +84,31 @@ public class RabbitMqConfiguration {
 			return new Queue(SUBJECT_RPC_QUEUE_IN, true);
 		}
 
-    @Bean
-    SimpleMessageListenerContainer studyContainer(final ConnectionFactory connectionFactory,
-            @Qualifier("studyListenerAdapter") MessageListenerAdapter listenerAdapter) {
-    	final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(STUDY_QUEUE_NAME_IN);
-        container.setMessageListener(listenerAdapter);
-        return container;
-    }
-
-
 		@Bean
-    SimpleMessageListenerContainer studyDeleteContainer(final ConnectionFactory connectionFactory,
-            @Qualifier("studyDeleteListenerAdapter") MessageListenerAdapter listenerAdapter) {
-    	final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(STUDY_DELETE_QUEUE_NAME_IN);
-        container.setMessageListener(listenerAdapter);
-        return container;
-    }
+		public static Queue subjectQueueOut() {
+			return new Queue(SUBJECT_QUEUE_OUT, true);
+		}
+
+    // @Bean
+    // SimpleMessageListenerContainer studyContainer(final ConnectionFactory connectionFactory,
+    //         @Qualifier("studyListenerAdapter") MessageListenerAdapter listenerAdapter) {
+    // 	final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+    //     container.setConnectionFactory(connectionFactory);
+    //     container.setQueueNames(STUDY_QUEUE_NAME_IN);
+    //     container.setMessageListener(listenerAdapter);
+    //     return container;
+    // }
+
+
+		// @Bean
+    // SimpleMessageListenerContainer studyDeleteContainer(final ConnectionFactory connectionFactory,
+    //         @Qualifier("studyDeleteListenerAdapter") MessageListenerAdapter listenerAdapter) {
+    // 	final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+    //     container.setConnectionFactory(connectionFactory);
+    //     container.setQueueNames(STUDY_DELETE_QUEUE_NAME_IN);
+    //     container.setMessageListener(listenerAdapter);
+    //     return container;
+    // }
 
 		// @Bean
     // SimpleMessageListenerContainer subjectRpcContainer(final ConnectionFactory connectionFactory,
@@ -105,30 +121,22 @@ public class RabbitMqConfiguration {
     //     return container;
     // }
 
-    @Bean
-    RabbitMqReceiver receiver() {
-        return new RabbitMqReceiver();
-    }
-
-		@Bean
-		RabbitMqRPCReceiver receiverRPC() {
-				return new RabbitMqRPCReceiver();
-		}
-
-    @Bean
-    MessageListenerAdapter studyListenerAdapter(final RabbitMqReceiver receiver) {
-        return new MessageListenerAdapter(receiver, "receiveStudyMessage");
-    }
-
-		@Bean
-    MessageListenerAdapter studyDeleteListenerAdapter(final RabbitMqReceiver receiver) {
-        return new MessageListenerAdapter(receiver, "receiveStudyDeleteMessage");
-    }
 
 
-		@Bean
-    MessageListenerAdapter rpcListenerAdapter(final RabbitMqRPCReceiver receiver) {
-        return new MessageListenerAdapter(receiver, "receiveMessage");
-    }
+    // @Bean
+    // MessageListenerAdapter studyListenerAdapter(final RabbitMqReceiver receiver) {
+    //     return new MessageListenerAdapter(receiver, "receiveStudyMessage");
+    // }
+		//
+		// @Bean
+    // MessageListenerAdapter studyDeleteListenerAdapter(final RabbitMqReceiver receiver) {
+    //     return new MessageListenerAdapter(receiver, "receiveStudyDeleteMessage");
+    // }
+		//
+		//
+		// @Bean
+    // MessageListenerAdapter rpcListenerAdapter(final RabbitMqRPCReceiver receiver) {
+    //     return new MessageListenerAdapter(receiver, "receiveMessage");
+    // }
 
 }

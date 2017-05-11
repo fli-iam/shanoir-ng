@@ -52,7 +52,7 @@ public class Subject extends HalEntity {
 
 	private String identifier;
 
-	@OneToOne
+	@OneToOne(cascade=CascadeType.ALL)
 	private PseudonymusHashValues pseudonymusHashValues;
 
 	// @Column(insertable = false, updatable = false)

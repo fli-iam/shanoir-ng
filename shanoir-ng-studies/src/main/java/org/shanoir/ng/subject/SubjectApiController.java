@@ -82,6 +82,7 @@ public class SubjectApiController implements SubjectApi  {
 
 		try {
 			final Subject createdSubject = subjectService.save(subject);
+			subjectService.updateShanoirOld(createdSubject);
 			return new ResponseEntity<Subject>(createdSubject, HttpStatus.OK);
 		} catch (ShanoirSubjectException e) {
 			throw new RestServiceException(
