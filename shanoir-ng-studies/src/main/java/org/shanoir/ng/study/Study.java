@@ -26,6 +26,7 @@ import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.subject.SubjectStudy;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @Entity
@@ -69,10 +70,12 @@ public class Study extends HalEntity {
 	private StudyStatus studyStatus;
 
 	/** Relations between the subjects and the studies. */
+	@JsonIgnore
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<SubjectStudy> subjectStudyList;
 
 	/** Users associated to the research study. */
+	
 	@OneToMany(mappedBy = "studyId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<StudyUser> studyUsers;
 
