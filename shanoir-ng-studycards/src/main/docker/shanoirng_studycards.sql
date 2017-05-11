@@ -13,9 +13,10 @@ CREATE TABLE `study_cards` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO study_cards
+	(id, acquisition_equipment_id, center_id, disabled, name, study_id, nifti_converter_id)
 VALUES 
 	(1, 1, 1, '\0', 'NATIVE Membres inférieurs', 1, 1),
-	(2, 1, 1, '1', 'Old - Study Card USPIO-6', 2, 1),
+	(2, 1, 1, 1, 'Old - Study Card USPIO-6', 2, 1),
 	(3, 1, 1, '\0', 'Phantom Qualite', 3, 1),
 	(4, 1, 1, '\0', 'AtlasDIR@Neurinfo', 4, 1),
 	(5, 1, 1, '\0', 'DIR@Epilepsie', 5, 1),
@@ -35,8 +36,8 @@ VALUES
 	(21, 1, 1, '\0', 'ASLft', 23, 1),
 	(22, 2, 1, '\0', 'Jonin', 24, 1),
 	(23, 1, 1, '\0', 'DEEP', 25, 1),
-	(24, 3, 2, '1', 'Old - Study Card USPIO-6 Reims', 2, 1),
-	(25, 4, 4, '1', 'Old - Study Card USPIO-6 CEMEREM', 2, 1),
+	(24, 3, 2, 1, 'Old - Study Card USPIO-6 Reims', 2, 1),
+	(25, 4, 4, 1, 'Old - Study Card USPIO-6 CEMEREM', 2, 1),
 	(26, 1, 1, '\0', 'ASLf mt', 27, 1),
 	(27, 1, 1, '\0', 'ASL IP', 26, 1),
 	(28, 1, 1, '\0', 'asl_tum', 28, 1),
@@ -95,7 +96,7 @@ VALUES
 	(84, 1, 1, '\0', 'HEPAT_M', 61, 1),
 	(85, 25, 23, '\0', 'OFSEP_Pilot_U825', 62, 1),
 	(86, 1, 1, '\0', 'GRECCAR 4', 63, 1),
-	(87, 2, 1, '1', 'SEP_Rennes', 64, 1),
+	(87, 2, 1, 1, 'SEP_Rennes', 64, 1),
 	(88, 26, 24, '\0', 'SEP_site001', 64, 1),
 	(89, 27, 25, '\0', 'SEP_Vannes', 65, 1),
 	(90, 1, 1, '\0', 'TMS Depression', 66, 1),

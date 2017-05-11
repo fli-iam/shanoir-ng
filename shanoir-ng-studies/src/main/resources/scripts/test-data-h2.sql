@@ -1,11 +1,11 @@
 -- Populates database for test
 
 INSERT INTO study
-	(id,  name, start_date, end_date, clinical, with_examination, visible_by_default, downloadable_by_default, study_status)
+	(id,  name, start_date, end_date, clinical, with_examination, visible_by_default, downloadable_by_default, study_status, mono_center, study_type)
 VALUES 
-	(1,'shanoirStudy1', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 'IN_PROGRESS'),
-	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0, 'IN_PROGRESS'),
-	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 'IN_PROGRESS');
+	(1,'shanoirStudy1', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 'IN_PROGRESS', 1, 'CLINICAL'),
+	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0, 'IN_PROGRESS', 1, 'CLINICAL'),
+	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 'IN_PROGRESS', 0, 'CLINICAL');
 
 INSERT INTO study_user
 	(receive_anonymization_report, receive_new_import_report, study_id, study_user_type, user_id)
