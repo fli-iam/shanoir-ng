@@ -21,7 +21,7 @@ public enum StudyType {
 	/**
 	 * Methodological.
 	 */
-	SEE_DOWNLOAD_IMPORT_MODIFY(Values.METHODOLOGICAL);
+	METHODOLOGICAL(Values.METHODOLOGICAL);
 
 	private String value;
 

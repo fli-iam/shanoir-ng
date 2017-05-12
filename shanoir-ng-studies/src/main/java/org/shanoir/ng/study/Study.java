@@ -85,7 +85,6 @@ public class Study extends HalEntity {
 	@OneToMany(mappedBy = "studyId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<StudyUser> studyUsers;
 
-	@NotNull
 	@Enumerated(EnumType.STRING)
 	private StudyType studyType;
 
