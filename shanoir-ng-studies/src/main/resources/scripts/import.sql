@@ -54,7 +54,16 @@ VALUES
 	(0, 0, 2, 'SEE_DOWNLOAD', 86),
 	(0, 0, 2, 'SEE_DOWNLOAD', 205);
 
-
+INSERT INTO study_study_card
+	(study_id, study_card_id)
+VALUES
+	(1, 1),
+	(1, 3),
+	(2, 2),
+	(4, 1),
+	(1, 2),
+	(2, 1),
+	(3, 4);
 
 INSERT INTO `center`
 	(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`)
