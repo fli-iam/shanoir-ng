@@ -57,7 +57,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         CommonModule,
         FormsModule,
         HttpModule,
-        MaterialModule.forRoot(),
+        MaterialModule,
         MyDatePickerModule,
         ReactiveFormsModule,
         routing
