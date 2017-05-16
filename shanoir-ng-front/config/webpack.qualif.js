@@ -14,7 +14,7 @@ const METADATA = webpackMerge(commonConfig.metadata, {
     host: 'localhost',
     BACKEND_API_USERS_MS_URL: BACKEND_API_ROOT_URL + '/users',
     BACKEND_API_STUDIES_MS_URL: BACKEND_API_ROOT_URL + '/studies',
-    KEYCLOAK_BASE_URL: 'https://shanoir-qualif.irisa.fr/shanoir-ng/auth',
+    KEYCLOAK_BASE_URL: 'https://shanoir-qualif.irisa.fr/auth',
     LOGOUT_REDIRECT_URL: 'https://shanoir-qualif.irisa.fr/shanoir-ng/index.html',
     port: 8081,
     ENV: ENV,
