@@ -26,13 +26,8 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                exclude: helpers.root('src', 'app'),
-                loader: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader?sourceMap' })
-            },
-            {
-                test: /\.css$/,
-                include: helpers.root('src', 'app'),
-                loader: 'raw-loader'
+                use: ['to-string-loader', 'css-loader'],
+                exclude: [helpers.root('src', 'assets')]
             }
         ]
     },
@@ -41,7 +36,7 @@ module.exports = {
         // Workaround for angular/angular#11580
         new webpack.ContextReplacementPlugin(
             // The (\\|\/) piece accounts for path separators in *nix and Windows
-            /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
+            /angular(\\|\/)core(\\|\/)@angular/,
             helpers.root('./src'), // location of your src
             {} // a map of your routes
         ),

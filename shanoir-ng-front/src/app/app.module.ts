@@ -47,6 +47,8 @@ import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detai
 import { ManufacturerModelService } from './acqEquip/shared/manufModel.service';
 import { ManufacturerService } from './acqEquip/shared/manuf.service';
 
+import '../assets/css/common.css';
+
 export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
   return new KeycloakHttp(backend, defaultOptions, keycloakService);
 }
@@ -57,7 +59,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         CommonModule,
         FormsModule,
         HttpModule,
-        MaterialModule.forRoot(),
+        MaterialModule,
         MyDatePickerModule,
         ReactiveFormsModule,
         routing

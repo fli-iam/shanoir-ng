@@ -16,7 +16,7 @@ const METADATA = webpackMerge(commonConfig.metadata, {
     BACKEND_API_STUDIES_MS_URL: BACKEND_API_ROOT_URL + '/studies',
     KEYCLOAK_BASE_URL: 'https://shanoir-qualif.irisa.fr/shanoir-ng/auth',
     LOGOUT_REDIRECT_URL: 'https://shanoir-qualif.irisa.fr/shanoir-ng/index.html',
-    port: 8081,
+    port: 8080,
     ENV: ENV,
 });
 
@@ -46,17 +46,15 @@ module.exports = webpackMerge(commonConfig, {
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
+
         new webpack.optimize.UglifyJsPlugin({ // https://github.com/angular/angular/issues/10618
             mangle: {
                 keep_fnames: true
             }
         }),
+
         new ExtractTextPlugin('[name].[hash].css'),
-        new webpack.DefinePlugin({
-            'process.env': {
-                'ENV': JSON.stringify(ENV)
-            }
-        }),
+        
         new webpack.LoaderOptionsPlugin({
             htmlLoader: {
                 minimize: false // workaround for ng2
