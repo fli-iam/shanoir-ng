@@ -35,6 +35,18 @@ module.exports = webpackMerge(commonConfig, {
             {
                 test: /\.ts$/,
                 loaders: ['awesome-typescript-loader', 'angular2-template-loader']
+            },
+
+            /**
+             * Extract CSS files from .src/styles directory to external CSS file
+             */
+            {
+                test: /\.css$/,
+                loader: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: 'css-loader'
+                }),
+                include: [helpers.root('src', 'assets')]
             }
         ]
     },
