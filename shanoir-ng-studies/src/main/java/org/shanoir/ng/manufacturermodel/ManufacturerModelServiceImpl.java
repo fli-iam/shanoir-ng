@@ -57,7 +57,7 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 		try {
 			savedManufacturerModel = manufacturerModelRepository.save(manufacturerModel);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while creating acquisition equipment: " + dive.getMessage());
+			ShanoirStudiesException.logAndThrow(LOG, "Error while creating manufacturer model: " + dive.getMessage());
 		}
 		updateShanoirOld(savedManufacturerModel);
 		return savedManufacturerModel;
