@@ -58,23 +58,23 @@ public class ManufacturerModelApiControllerTest {
 	}
 
 	@Test
-	public void findAcquisitionEquipmentByIdTest() throws Exception {
+	public void findManufacturerModelByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void findAcquisitionEquipmentsTest() throws Exception {
+	public void findManufacturerModelsTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_ALL).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void saveNewAcquisitionEquipmentTest() throws Exception {
+	public void saveNewManufacturerModelTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createAcquisitionEquipment())))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createManufacturerModel())))
 				.andExpect(status().isOk());
 	}
 
