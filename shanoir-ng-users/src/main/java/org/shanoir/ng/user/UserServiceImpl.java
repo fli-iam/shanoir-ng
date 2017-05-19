@@ -74,12 +74,17 @@ public class UserServiceImpl implements UserService {
 
 		// Confirm and update user
 		if (userDb.isExtensionRequest()) {
+			// Date extension
 			userDb.setExtensionMotivation(null);
 			userDb.setExtensionRequest(false);
 			userDb.setFirstExpirationNotificationSent(false);
 			userDb.setSecondExpirationNotificationSent(false);
-			return updateUserOnAllSystems(userDb, user);
+			final User updatedUser = updateUserOnAllSystems(userDb, user);
+			// Send email
+			emailService.notifyUserExtensionRequestAccepted(updatedUser);
+			return updatedUser;
 		} else {
+			// Account creation
 			userDb.setAccountRequestDemand(false);
 			final User updatedUser = updateUserOnAllSystems(userDb, user);
 			// Send email
@@ -138,6 +143,8 @@ public class UserServiceImpl implements UserService {
 			user.setExtensionMotivation(null);
 			user.setExtensionRequest(false);
 			updateUserOnAllSystems(user, null);
+			// Send email
+			emailService.notifyUserExtensionRequestDenied(user);
 		}
 	}
 
@@ -226,24 +233,21 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void updateFromShanoirOld(final User user) throws ShanoirUsersException {
-		final Optional<User> userDb = userRepository.findByUsername(user.getUsername());
-		if (!userDb.isPresent()) {
-			throw new ShanoirUsersException("Username " + user.getUsername() + " not found.");
+		final User userDb = userRepository.findByUsername(user.getUsername()).orElseThrow(
+				() -> new ShanoirUsersException("User with username " + user.getUsername() + " not found"));
+		if (user.isExtensionRequest()) {
+			// Extension request
+			userDb.setExtensionRequest(true);
+			userDb.setExtensionDate(user.getExpirationDate());
+			userDb.setExtensionMotivation(user.getExtensionMotivation());
 		} else {
-			final User currentUser = userDb.get();
-			if (user.isExtensionRequest()) {
-				// Extension request
-				currentUser.setExtensionMotivation(user.getExtensionMotivation());
-				currentUser.setExtensionRequest(user.isExtensionRequest());
-			} else {
-				// User update
-				updateUserValues(currentUser, user);
-			}
-			try {
-				userRepository.save(currentUser);
-			} catch (Exception e) {
-				ShanoirUsersException.logAndThrow(LOG, "Error while updating user from Shanoir Old: " + e.getMessage());
-			}
+			// User update
+			updateUserValues(userDb, user);
+		}
+		try {
+			userRepository.save(userDb);
+		} catch (Exception e) {
+			ShanoirUsersException.logAndThrow(LOG, "Error while updating user from Shanoir Old: " + e.getMessage());
 		}
 	}
 

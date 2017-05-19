@@ -84,6 +84,7 @@ public final class ModelsUtil {
 		final User user = new User();
 		user.setCreationDate(new Date());
 		user.setEmail(USER_EMAIL);
+		user.setExpirationDate(new Date());
 		user.setFirstName(USER_FIRSTNAME);
 		user.setLastName(USER_LASTNAME);
 		user.setRole(role);

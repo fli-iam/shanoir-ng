@@ -24,7 +24,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -57,6 +56,8 @@ public class User extends HalEntity implements UserDetails {
 	
 	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
 	private Date expirationDate;
+
+	private Date extensionDate;
 
 	private String extensionMotivation;
 
@@ -184,6 +185,20 @@ public class User extends HalEntity implements UserDetails {
 	 */
 	public void setExpirationDate(final Date expirationDate) {
 		this.expirationDate = expirationDate;
+	}
+
+	/**
+	 * @return the extensionDate
+	 */
+	public Date getExtensionDate() {
+		return extensionDate;
+	}
+
+	/**
+	 * @param extensionDate the extensionDate to set
+	 */
+	public void setExtensionDate(Date extensionDate) {
+		this.extensionDate = extensionDate;
 	}
 
 	/**
