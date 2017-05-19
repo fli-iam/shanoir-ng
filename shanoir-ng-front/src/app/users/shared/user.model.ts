@@ -9,11 +9,15 @@ export class User {
     creationDate: Date;
     email: string;
     expirationDate: Date;
+    extensionDate: Date;
+    extensionMotivation: string;
+    extensionRequest: boolean;
     firstName: string;
     lastLogin: Date;
     lastLoginOn: Date;
     lastName: string;
     motivation: string;
+    onDemand: boolean;
     role: Role;
     username: string;
     valid: boolean;

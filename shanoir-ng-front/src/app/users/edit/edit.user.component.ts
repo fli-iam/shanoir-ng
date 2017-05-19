@@ -65,6 +65,9 @@ export class EditUserComponent implements OnInit {
             .subscribe((user: User) => {
                 user.role = this.getRoleById(user.role.id);
                 this.user = user;
+                if (user.extensionRequest) {
+                    this.user.expirationDate = user.extensionDate;
+                }
                 this.getDateToDatePicker(this.user);
                 this.accountRequestInfo = this.user.accountRequestInfo;
             });
@@ -187,6 +190,7 @@ export class EditUserComponent implements OnInit {
             'username': new FormControl(this.user.username),
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
             'expirationDate': [this.user.expirationDate],
+            'extensionMotivation': [this.user.extensionMotivation],
             'role': roleFC,
             'canAccessToDicomAssociation': new FormControl('false')
         });
