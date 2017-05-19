@@ -18,6 +18,7 @@ import org.shanoir.ng.role.Role;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
+import org.shanoir.ng.shared.validation.ExtensionWithMotivation;
 import org.shanoir.ng.shared.validation.Unique;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @Table(name = "users")
 @JsonPropertyOrder({ "_links", "id", "firstName", "lastName", "username", "email" })
+@ExtensionWithMotivation
 public class User extends HalEntity implements UserDetails {
 
 	/**
@@ -52,10 +54,14 @@ public class User extends HalEntity implements UserDetails {
 	@Column(unique = true)
 	@Unique
 	private String email;
-
+	
 	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
 	private Date expirationDate;
 
+	private String extensionMotivation;
+
+	private boolean extensionRequest;
+	
 	@NotBlank
 	private String firstName;
 
@@ -64,25 +70,25 @@ public class User extends HalEntity implements UserDetails {
 	private boolean isSecondExpirationNotificationSent;
 
 	private String keycloakId;
-	
+
 	private Date lastLogin;
 
 	@NotNull
 	private String lastName;
-	
+
 	private String password;
 
+	@ManyToOne
+	@NotNull
+	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
+	private Role role;
+	
 	@NotBlank
 	@Column(unique = true)
 	@Unique
 	private String username;
 
 	private String teamName;
-
-	@ManyToOne
-	@NotNull
-	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
-	private Role role;
 
 	/**
 	 * Init HATEOAS links
@@ -183,6 +189,35 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
+	 * @return the extensionMotivation
+	 */
+	public String getExtensionMotivation() {
+		return extensionMotivation;
+	}
+
+	/**
+	 * @param extensionMotivation the extensionMotivation to set
+	 */
+	public void setExtensionMotivation(String extensionMotivation) {
+		this.extensionMotivation = extensionMotivation;
+	}
+
+	/**
+	 * @return the extensionRequest
+	 */
+	public boolean isExtensionRequest() {
+		return extensionRequest;
+	}
+	
+	/**
+	 * @param extensionRequest
+	 *            the extensionRequest to set
+	 */
+	public void setExtensionRequest(boolean extensionRequest) {
+		this.extensionRequest = extensionRequest;
+	}
+	
+	/**
 	 * @return the firstName
 	 */
 	public String getFirstName() {
@@ -236,7 +271,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param keycloakId the keycloakId to set
+	 * @param keycloakId
+	 *            the keycloakId to set
 	 */
 	public void setKeycloakId(String keycloakId) {
 		this.keycloakId = keycloakId;

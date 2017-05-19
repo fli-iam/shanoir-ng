@@ -176,6 +176,13 @@ public class UserServiceTest {
 	}
 
 	@Test
+	public void requestExtensionTest() throws ShanoirUsersException {
+		userService.requestExtension(USER_ID, "motivation");
+		
+		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+	}
+
+	@Test
 	public void saveTest() throws ShanoirUsersException {
 		userService.save(createUser());
 

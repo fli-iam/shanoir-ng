@@ -82,6 +82,16 @@ public interface UserApi {
 	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<List<User>> findUsers();
 
+	@ApiOperation(value = "", notes = "Requests a date extension for current user", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "request ok", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "/extension", produces = { "application/json" }, consumes = {
+			"application/json" }, method = RequestMethod.PUT)
+	ResponseEntity<Void> requestExtension(
+			@ApiParam(value = "request motivation", required = true) @RequestBody String motivation);
+
 	@ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created user", response = User.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = User.class),

@@ -67,17 +67,25 @@ public class UserServiceImpl implements UserService {
 			LOG.error("User with id " + userId + " not found");
 			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
 		}
-		if (!userDb.isAccountRequestDemand()) {
-			LOG.error("User with id " + userId + " has no account request");
+		if (!userDb.isAccountRequestDemand() && !userDb.isExtensionRequest()) {
+			LOG.error("User with id " + userId + " has no request (account or extension)");
 			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
 		}
 
 		// Confirm and update user
-		userDb.setAccountRequestDemand(false);
-		final User updatedUser = updateUserOnAllSystems(userDb, user);
-		// Send email
-		emailService.notifyUserAccountRequestAccepted(updatedUser);
-		return updatedUser;
+		if (userDb.isExtensionRequest()) {
+			userDb.setExtensionMotivation(null);
+			userDb.setExtensionRequest(false);
+			userDb.setFirstExpirationNotificationSent(false);
+			userDb.setSecondExpirationNotificationSent(false);
+			return updateUserOnAllSystems(userDb, user);
+		} else {
+			userDb.setAccountRequestDemand(false);
+			final User updatedUser = updateUserOnAllSystems(userDb, user);
+			// Send email
+			emailService.notifyUserAccountRequestAccepted(updatedUser);
+			return updatedUser;
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -94,8 +102,8 @@ public class UserServiceImpl implements UserService {
 		} else {
 			final Map<String, Object> otherClaims = ((KeycloakPrincipal) principal).getKeycloakSecurityContext()
 					.getToken().getOtherClaims();
-			if (otherClaims.containsKey(KeycloakUtils.ATT_USER_ID)
-					&& id.equals(Long.valueOf(otherClaims.get(KeycloakUtils.ATT_USER_ID).toString()))) {
+			if (otherClaims.containsKey(KeycloakUtils.USER_ID_TOKEN_ATT)
+					&& id.equals(Long.valueOf(otherClaims.get(KeycloakUtils.USER_ID_TOKEN_ATT).toString()))) {
 				ShanoirUsersException.logAndThrow(LOG, "Forbidden to delete connected user.");
 			}
 		}
@@ -117,13 +125,20 @@ public class UserServiceImpl implements UserService {
 			LOG.error("User with id " + userId + " not found");
 			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
 		}
-		if (!user.isAccountRequestDemand()) {
-			LOG.error("User with id " + userId + " has no account request");
+		if (!user.isAccountRequestDemand() && !user.isExtensionRequest()) {
+			LOG.error("User with id " + userId + " has no request (account or extension)");
 			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
 		}
-		// Remove user
-		userRepository.delete(userId);
-		keycloakClient.deleteUser(user.getKeycloakId());
+		if (user.isAccountRequestDemand()) {
+			// Remove user
+			userRepository.delete(userId);
+			keycloakClient.deleteUser(user.getKeycloakId());
+		} else {
+			// Deny extension request
+			user.setExtensionMotivation(null);
+			user.setExtensionRequest(false);
+			updateUserOnAllSystems(user, null);
+		}
 	}
 
 	@Override
@@ -149,6 +164,22 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Optional<User> findByUsername(final String username) {
 		return userRepository.findByUsername(username);
+	}
+
+	@Override
+	public void requestExtension(Long userId, String motivation) throws ShanoirUsersException {
+		final User user = userRepository.findOne(userId);
+		if (user == null) {
+			LOG.error("User with id " + userId + " not found");
+			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
+		}
+		user.setExtensionRequest(Boolean.TRUE);
+		user.setExtensionMotivation(motivation);
+		try {
+			userRepository.save(user);
+		} catch (DataIntegrityViolationException dive) {
+			ShanoirUsersException.logAndThrow(LOG, "Error on request extension: " + dive.getMessage());
+		}
 	}
 
 	@Override
@@ -314,7 +345,9 @@ public class UserServiceImpl implements UserService {
 	 * @throws ShanoirUsersException
 	 */
 	private User updateUserOnAllSystems(final User userDb, final User user) throws ShanoirUsersException {
-		updateUserValues(userDb, user);
+		if (user != null) {
+			updateUserValues(userDb, user);
+		}
 		try {
 			userRepository.save(userDb);
 		} catch (Exception e) {

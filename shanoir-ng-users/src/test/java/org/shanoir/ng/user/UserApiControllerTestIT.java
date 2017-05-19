@@ -77,6 +77,24 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 	}
 
 	@Test
+	public void requestExtensionProtected() {
+		final HttpEntity<String> entity = new HttpEntity<String>("motivation");
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH + "/extension", HttpMethod.PUT, entity,
+				String.class);
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+	}
+
+	@Test
+	public void requestExtensionWithLogin() {
+		final HttpEntity<String> entity = new HttpEntity<String>("motivation", getHeadersWithToken(true));
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH + "/extension", HttpMethod.PUT, entity,
+				String.class);
+		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+	}
+
+	@Test
 	public void saveNewUserProtected() {
 		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new User(), String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
