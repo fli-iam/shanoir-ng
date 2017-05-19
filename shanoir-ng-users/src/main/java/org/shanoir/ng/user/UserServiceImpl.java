@@ -186,8 +186,6 @@ public class UserServiceImpl implements UserService {
 	public User save(final User user) throws ShanoirUsersException {
 		// Password generation
 		final String newPassword = PasswordUtils.generatePassword();
-		// Save hashed password
-		user.setPassword(PasswordUtils.getHash(newPassword));
 		User savedUser = null;
 		try {
 			if (user.getAccountRequestInfo() != null) {
@@ -204,7 +202,7 @@ public class UserServiceImpl implements UserService {
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirUsersException.logAndThrow(LOG, "Error while creating user: " + dive.getMessage());
 		}
-		String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
+		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
 		if (keycloakUserId != null) {
 			// Save keycloak id
 			savedUser.setKeycloakId(keycloakUserId);
@@ -312,7 +310,6 @@ public class UserServiceImpl implements UserService {
 		shanoirOldUser.setFirstName(user.getFirstName());
 		shanoirOldUser.setLastLoginOn(user.getLastLogin());
 		shanoirOldUser.setLastName(user.getLastName());
-		shanoirOldUser.setPasswordHash(user.getPassword());
 		shanoirOldUser.setRole(user.getRole());
 		shanoirOldUser.setSecondExpirationNotificationSent(user.isSecondExpirationNotificationSent());
 		shanoirOldUser.setUsername(user.getUsername());
@@ -373,7 +370,6 @@ public class UserServiceImpl implements UserService {
 		userDb.setExpirationDate(user.getExpirationDate());
 		userDb.setFirstName(user.getFirstName());
 		userDb.setLastName(user.getLastName());
-		// TODO: password modification
 		userDb.setRole(user.getRole());
 		userDb.setUsername(user.getUsername());
 		return userDb;

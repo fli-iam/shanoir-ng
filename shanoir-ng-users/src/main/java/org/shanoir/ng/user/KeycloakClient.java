@@ -80,7 +80,6 @@ public class KeycloakClient {
 
 			final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
 			// Reset user password
-			// TODO: manage it
 			final CredentialRepresentation credential = new CredentialRepresentation();
 			credential.setType(CredentialRepresentation.PASSWORD);
 			credential.setValue(password);
@@ -123,14 +122,6 @@ public class KeycloakClient {
 		try {
 			final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(user.getKeycloakId());
 			userResource.update(getUserRepresentation(user));
-
-			// New user password
-			// TODO: manage it
-			final CredentialRepresentation credential = new CredentialRepresentation();
-			credential.setType(CredentialRepresentation.PASSWORD);
-			credential.setValue(user.getPassword());
-			// credential.setTemporary(???);
-			// userResource.resetPassword(credential);
 
 			// Remove old realm role
 			final List<String> roleNames = roleRepository.getAllNames();

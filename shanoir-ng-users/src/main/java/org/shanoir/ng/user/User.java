@@ -76,8 +76,6 @@ public class User extends HalEntity implements UserDetails {
 	@NotNull
 	private String lastName;
 
-	private String password;
-
 	@ManyToOne
 	@NotNull
 	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
@@ -309,23 +307,6 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @return the password
-	 */
-	@JsonIgnore
-	public String getPassword() {
-		return password;
-	}
-
-	/**
-	 * @param password
-	 *            the password to set
-	 */
-	@JsonProperty
-	public void setPassword(final String password) {
-		this.password = password;
-	}
-
-	/**
 	 * @return the role
 	 */
 	public Role getRole() {
@@ -374,6 +355,12 @@ public class User extends HalEntity implements UserDetails {
 	@JsonIgnore
 	public Collection<GrantedAuthority> getAuthorities() {
 		return Arrays.asList(role);
+	}
+
+	@Override
+	@JsonIgnore
+	public String getPassword() {
+		return null;
 	}
 
 	@Override

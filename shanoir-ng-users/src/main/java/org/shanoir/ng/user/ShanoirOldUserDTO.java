@@ -21,7 +21,6 @@ public class ShanoirOldUserDTO {
 	private String firstName;
 	private Date lastLoginOn;
 	private String lastName;
-	private String passwordHash;
 	private Role role;
 	private boolean secondExpirationNotificationSent;
 	private String username;
@@ -159,21 +158,6 @@ public class ShanoirOldUserDTO {
 	 */
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
-	}
-
-	/**
-	 * @return the passwordHash
-	 */
-	public String getPasswordHash() {
-		return passwordHash;
-	}
-
-	/**
-	 * @param passwordHash
-	 *            the passwordHash to set
-	 */
-	public void setPasswordHash(String passwordHash) {
-		this.passwordHash = passwordHash;
 	}
 
 	/**
