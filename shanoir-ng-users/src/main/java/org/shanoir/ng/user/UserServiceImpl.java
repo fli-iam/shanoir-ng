@@ -226,36 +226,23 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void updateFromShanoirOld(final User user) throws ShanoirUsersException {
-		if (user.getId() == null) {
-			if (user.isAccountRequestDemand()) {
-				// User account request
-				// Set role 'guest'
-				user.setRole(roleRepository.findByName("guestRole")
-						.orElseThrow(() -> new ShanoirUsersException("Error while getting role 'guestRole'")));
-				try {
-					if (user.getAccountRequestInfo() != null) {
-						// Save account request info
-						accountRequestInfoRepository.save(user.getAccountRequestInfo());
-					}
-					// Save user
-					userRepository.save(user);
-				} catch (Exception e) {
-					ShanoirUsersException.logAndThrow(LOG,
-							"Error while creating user from Shanoir Old: " + e.getMessage());
-				}
-			} else {
-				throw new IllegalArgumentException("User id cannot be null if not an account request");
-			}
+		final Optional<User> userDb = userRepository.findByUsername(user.getUsername());
+		if (!userDb.isPresent()) {
+			throw new ShanoirUsersException("Username " + user.getUsername() + " not found.");
 		} else {
-			final User userDb = userRepository.findOne(user.getId());
-			if (userDb != null) {
-				updateUserValues(userDb, user);
-				try {
-					userRepository.save(userDb);
-				} catch (Exception e) {
-					ShanoirUsersException.logAndThrow(LOG,
-							"Error while updating user from Shanoir Old: " + e.getMessage());
-				}
+			final User currentUser = userDb.get();
+			if (user.isExtensionRequest()) {
+				// Extension request
+				currentUser.setExtensionMotivation(user.getExtensionMotivation());
+				currentUser.setExtensionRequest(user.isExtensionRequest());
+			} else {
+				// User update
+				updateUserValues(currentUser, user);
+			}
+			try {
+				userRepository.save(currentUser);
+			} catch (Exception e) {
+				ShanoirUsersException.logAndThrow(LOG, "Error while updating user from Shanoir Old: " + e.getMessage());
 			}
 		}
 	}
