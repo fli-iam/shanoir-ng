@@ -123,11 +123,13 @@ export class EditUserComponent implements OnInit {
     accountRequest(): void {
         this.submit();
         this.userService.requestAccount(this.user)
-            .subscribe((user) => {
-                window.location.href = process.env.LOGOUT_REDIRECT_URL;
+            .subscribe((res) => {
+                this.getOut(res);
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
+                } else {
+                    this.getOut();
                 }
             });
     }

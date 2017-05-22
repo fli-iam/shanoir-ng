@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.joda.time.DateTime;
 import org.keycloak.KeycloakPrincipal;
 import org.shanoir.ng.accountrequest.AccountRequestInfoRepository;
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
@@ -202,6 +203,7 @@ public class UserServiceImpl implements UserService {
 				// Set role 'guest'
 				user.setRole(roleRepository.findByName("ROLE_GUEST")
 						.orElseThrow(() -> new ShanoirUsersException("Error while getting role 'ROLE_GUEST'")));
+				user.setExpirationDate(new DateTime().plusYears(1).toDate());
 			}
 			savedUser = userRepository.save(user);
 			// Send email to administrators

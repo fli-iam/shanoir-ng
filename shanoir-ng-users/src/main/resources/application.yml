@@ -113,7 +113,7 @@ spring:
     host: localhost
 server:
     port: 9901
-front.server.url: http://localhost:8081
+front.server.url: http://localhost:8080
 #keycloak
 keycloak:
   credentials.secret: 3b130530-4e0f-4101-bf56-1a92df705318

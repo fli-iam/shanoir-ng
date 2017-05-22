@@ -1,17 +1,19 @@
 <div class="EditUserComponent">
-    <form [formGroup]="editUserForm" class="EditUserContent max-content" novalidate>
+	<form [formGroup]="editUserForm" class="EditUserContent max-content" novalidate>
 		<table class="layout">
-			<tr><td colspan="2">
-				<div class="header command-zone" *ngIf="creationMode && !requestAccountMode" i18n="Create user|Title">Create an user</div>
-				<div class="header command-zone" *ngIf="creationMode && requestAccountMode" i18n="Request account|Title">Request an account</div>
-				<div class="header command-zone" *ngIf="!creationMode" i18n="Edit user|Title">Edit user</div>
-			</td></tr>
+			<tr>
+				<td colspan="2">
+					<div class="header command-zone" *ngIf="creationMode && !requestAccountMode" i18n="Create user|Title">Create an user</div>
+					<div class="header command-zone" *ngIf="creationMode && requestAccountMode" i18n="Create user|RequestAccountTitle">Request an account</div>
+					<div class="header command-zone" *ngIf="!creationMode" i18n="Edit user|Title">Edit user</div>
+				</td>
+			</tr>
 			<tr>
 				<td>
 					<fieldset>
 						<ol>
 							<li class="required">
-								<label i18n="Edit user|FirstName label" class="required-label">First Name</label> 
+								<label i18n="Edit user|FirstName label" class="required-label">First Name</label>
 								<span class="right-col">
 									<input type="text" id="firstName" required minlength="2" maxlength="50" formControlName="firstName" [(ngModel)]="user.firstName"/>
 									<label *ngIf="formErrors.firstName.includes('required')" class="form-validation-alert" i18n="Edit user|FirstNameRequiredError label">First Name is required!</label>
@@ -19,7 +21,7 @@
 								</span>
 							</li>
 							<li class="required">
-								<label i18n="Edit user|LastName label" class="required-label">Last Name</label> 
+								<label i18n="Edit user|LastName label" class="required-label">Last Name</label>
 								<span class="right-col">
 									<input type="text" id="lastName" required minlength="2" maxlength="50" formControlName="lastName" [(ngModel)]="user.lastName"/>
 									<label *ngIf="formErrors.lastName.includes('required')" class="form-validation-alert" i18n="Edit user|LastNameRequiredError label">Last Name is required!</label>
@@ -27,14 +29,14 @@
 								</span>
 							</li>
 							<li *ngIf="creationMode==false">
-								<label i18n="Edit user|Username label" class="required-label">Username</label> 
+								<label i18n="Edit user|Username label" class="required-label">Username</label>
 								<span class="right-col">
 									<input type="text" id="username" formControlName="username" [(ngModel)]="user.username" readonly/>
 								</span>
 							</li>
 							<li class="required">
-								<label *ngIf="requestAccountMode" i18n="Edit user|Pro email label" class="required-label">Professional email</label> 
-								<label *ngIf="!requestAccountMode" i18n="Edit user|Email label" class="required-label">Email</label> 
+								<label *ngIf="requestAccountMode" i18n="Edit user|Pro email label" class="required-label">Professional email</label>
+								<label *ngIf="!requestAccountMode" i18n="Edit user|Email label" class="required-label">Email</label>
 								<span class="right-col">
 									<input type="email" id="email" required formControlName="email" [(ngModel)]="user.email"/>
 									<label *ngIf="formErrors.email.includes('required')" class="form-validation-alert" i18n="Edit user|EmailRequiredError label">Email is required!</label>
@@ -47,7 +49,7 @@
 					<fieldset>
 						<ol>
 							<li *ngIf="!requestAccountMode">
-								<label i18n="Edit user|ExpirationDate label" [class.important-text]="user.extensionRequestDemand">Expiration Date</label> 
+								<label i18n="Edit user|ExpirationDate label" [class.important-text]="user.extensionRequestDemand">Expiration Date</label>
 								<span class="right-col">
 									<my-date-picker id="expirationDate" [options]="myDatePickerOptions" formControlName="expirationDate" [(ngModel)]="expirationDate" 
 										(dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
@@ -56,7 +58,7 @@
 								</span>
 							</li>
 							<li *ngIf="!requestAccountMode" class="required">
-								<label i18n="Edit user|Role label" class="required-label">Role of the user</label> 
+								<label i18n="Edit user|Role label" class="required-label">Role of the user</label>
 								<span class="right-col">
 									<select id="role" required formControlName="role" [(ngModel)]="user.role">
 										<option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>
@@ -64,8 +66,8 @@
 									<label *ngIf="formErrors.role.includes('required')" class="form-validation-alert" i18n="Edit user|RoleRequiredError label">Role is required!</label>
 								</span>
 							</li>
-							<li>   
-								<label i18n="Edit user|CanAccessToDicomAssociation label">Can import from Neurinfo-PACS</label> 
+							<li>
+								<label i18n="Edit user|CanAccessToDicomAssociation label">Can import from Neurinfo-PACS</label>
 								<span class="right-col">
 									<input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="true" i18n="Edit user|canAccessToDicomAssociation label" [checked]="user.canAccessToDicomAssociation == true"/>Yes
 									<input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="false" i18n="Edit user|cannotAccessToDicomAssociation label" 
@@ -76,14 +78,14 @@
 					</fieldset>
 				</td>
 				<td *ngIf="requestAccountMode || user.accountRequestInfo || user.extensionRequestDemand">
-					<account-request-info *ngIf="requestAccountMode || user.accountRequestInfo"
-						[userAccountRequestInfo]='accountRequestInfo' [requestAccountMode]='requestAccountMode' [accountRequestDemand]='user.accountRequestDemand'
-						(accountRequestInfo)="saveARI($event)" (isValid)="updateARIValid($event)"></account-request-info>
+					<account-request-info *ngIf="requestAccountMode || user.accountRequestInfo" [userAccountRequestInfo]='accountRequestInfo'
+					 [requestAccountMode]='requestAccountMode' [accountRequestDemand]='user.accountRequestDemand' (accountRequestInfo)="saveARI($event)"
+					 (isValid)="updateARIValid($event)"></account-request-info>
 					<hr *ngIf="(requestAccountMode || user.accountRequestInfo) && user.extensionRequestDemand">
 					<fieldset *ngIf="user.extensionRequestDemand">
 						<ol>
 							<li>
-								<label i18n="Extension comment |ExtensionComment label">Extension comment</label> 
+								<label i18n="Extension comment |ExtensionComment label">Extension comment</label>
 								<span class="right-col">
 									<textarea autosize id="extensionMotivation" formControlName="extensionMotivation" [(ngModel)]="user.extensionRequestInfo.extensionMotivation" readonly></textarea>
 								</span>
@@ -92,17 +94,27 @@
 					</fieldset>
 				</td>
 			</tr>
-			
-			<tr><td colspan="2"><div class="footer command-zone">
-				<button *ngIf="!requestAccountMode" i18n="Edit user|CancelButton label" class="Button" (click)="getOut()">Cancel</button>
-				<button *ngIf="requestAccountMode" i18n="Edit user|CancelButton label" class="Button" (click)="cancelAccountRequest()">Cancel</button>
-				<button type="submit" *ngIf="creationMode && !requestAccountMode" i18n="Edit user|CreateButton label" (click)="create()" class="Button" [disabled]="!isEditUserFormValid()">Create</button>
-				<button type="submit" *ngIf="creationMode && requestAccountMode" i18n="Edit user|RequestAccountButton label" (click)="accountRequest()" class="Button" [disabled]="!isEditUserFormValid()">Request Account</button>
-				<button type="submit" *ngIf="!creationMode && !user.accountRequestDemand && !user.extensionRequestDemand" (click)="update()" i18n="Edit user|SaveButton label" class="Button" [disabled]="!isEditUserFormValid()">Save Settings</button>
-				<button type="submit" *ngIf="!creationMode && user.accountRequestDemand" (click)="deny()" i18n="Edit user|DenyAccountRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Deny creation</button>
-				<button type="submit" *ngIf="!creationMode && user.extensionRequestDemand" (click)="deny()" i18n="Edit user|DenyExtensionRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Deny extension</button>
-				<button type="submit" *ngIf="!creationMode && (user.accountRequestDemand || user.extensionRequestDemand)" (click)="accept()" i18n="Edit user|AcceptAccountRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Accept</button>
-			</div></td></tr>
+
+			<tr>
+				<td colspan="2">
+					<div class="footer command-zone">
+						<button *ngIf="!requestAccountMode" i18n="Edit user|CancelButton label" class="Button" (click)="getOut()">Cancel</button>
+						<button *ngIf="requestAccountMode" i18n="Edit user|CancelButton label" class="Button" (click)="cancelAccountRequest()">Cancel</button>
+						<button type="submit" *ngIf="creationMode && !requestAccountMode" i18n="Edit user|CreateButton label" (click)="create()"
+						 class="Button" [disabled]="!isEditUserFormValid()">Create</button>
+						<button type="submit" *ngIf="creationMode && requestAccountMode" i18n="Edit user|RequestAccountButton label" (click)="accountRequest()"
+						 class="Button" [disabled]="!isEditUserFormValid()">Request Account</button>
+						<button type="submit" *ngIf="!creationMode && !user.accountRequestDemand && !user.extensionRequestDemand" (click)="update()"
+						 i18n="Edit user|SaveButton label" class="Button" [disabled]="!isEditUserFormValid()">Save Settings</button>
+						<button type="submit" *ngIf="!creationMode && user.accountRequestDemand" (click)="deny()" i18n="Edit user|DenyAccountRequestButton label"
+						 class="Button" [disabled]="!isEditUserFormValid()">Deny creation</button>
+						<button type="submit" *ngIf="!creationMode && user.extensionRequestDemand" (click)="deny()" i18n="Edit user|DenyExtensionRequestButton label"
+						 class="Button" [disabled]="!isEditUserFormValid()">Deny extension</button>
+						<button type="submit" *ngIf="!creationMode && (user.accountRequestDemand || user.extensionRequestDemand)" (click)="accept()"
+						 i18n="Edit user|AcceptAccountRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Accept</button>
+					</div>
+				</td>
+			</tr>
 		</table>
-    </form>
+	</form>
 </div>

@@ -1,6 +1,32 @@
 <div class="root">
-    <img class="logo" src="/assets/images/logo.shanoir.white.png"/>
+    <img class="logo" src="/assets/images/logo.shanoir.white.png" />
     <div class="content">
-        <editUser [requestAccountMode]="true"></editUser>
+        <editUser *ngIf="!requestSent" [requestAccountMode]="true" (closing)="closeAccountRequest($event)"></editUser>
+        <div *ngIf="requestSent" class="EditUserComponent">
+            <form class="EditUserContent max-content content" novalidate>
+                <table class="layout">
+                    <tr>
+                        <td>
+                            <div class="header command-zone" i18n="Request account|Title">Request an account</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <fieldset>
+                                <label *ngIf="!errorOnRequest" i18n="Account request|RequestSent label">An email has been sent to the administrator who will validate your request.<br/>You will receive an email once your account activated.</label>
+                                <label *ngIf="errorOnRequest" i18n="Account request|ErrorOnRequest label">An error occurs.<br/>Please try again later.</label>
+                            </fieldset>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="footer command-zone">
+                                <button i18n="Account request|OkButton label" class="Button" (click)="getOut()">OK</button>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
     </div>
-</div>
