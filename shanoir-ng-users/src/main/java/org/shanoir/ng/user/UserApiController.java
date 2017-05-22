@@ -104,9 +104,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	}
 
 	@Override
-	public ResponseEntity<Void> requestExtension(@RequestBody String motivation) {
+	public ResponseEntity<Void> requestExtension(@RequestBody final ExtensionRequestInfo requestInfo) {
 		try {
-			getUserService().requestExtension(KeycloakUtils.getTokenUserId(), motivation);
+			getUserService().requestExtension(KeycloakUtils.getTokenUserId(), requestInfo);
 		} catch (final ShanoirUsersException e) {
 			if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);

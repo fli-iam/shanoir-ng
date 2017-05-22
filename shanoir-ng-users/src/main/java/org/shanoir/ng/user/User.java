@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -57,11 +58,10 @@ public class User extends HalEntity implements UserDetails {
 	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
 	private Date expirationDate;
 
-	private Date extensionDate;
+	@Embedded
+	private ExtensionRequestInfo extensionRequestInfo;
 
-	private String extensionMotivation;
-
-	private boolean extensionRequest;
+	private boolean extensionRequestDemand;
 	
 	@NotBlank
 	private String firstName;
@@ -188,46 +188,32 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @return the extensionDate
+	 * @return the extensionRequestInfo
 	 */
-	public Date getExtensionDate() {
-		return extensionDate;
+	public ExtensionRequestInfo getExtensionRequestInfo() {
+		return extensionRequestInfo;
 	}
 
 	/**
-	 * @param extensionDate the extensionDate to set
+	 * @param extensionRequestInfo the extensionRequestInfo to set
 	 */
-	public void setExtensionDate(Date extensionDate) {
-		this.extensionDate = extensionDate;
+	public void setExtensionRequestInfo(ExtensionRequestInfo extensionRequestInfo) {
+		this.extensionRequestInfo = extensionRequestInfo;
 	}
 
 	/**
-	 * @return the extensionMotivation
+	 * @return the extensionRequestDemand
 	 */
-	public String getExtensionMotivation() {
-		return extensionMotivation;
-	}
-
-	/**
-	 * @param extensionMotivation the extensionMotivation to set
-	 */
-	public void setExtensionMotivation(String extensionMotivation) {
-		this.extensionMotivation = extensionMotivation;
-	}
-
-	/**
-	 * @return the extensionRequest
-	 */
-	public boolean isExtensionRequest() {
-		return extensionRequest;
+	public boolean isExtensionRequestDemand() {
+		return extensionRequestDemand;
 	}
 	
 	/**
-	 * @param extensionRequest
-	 *            the extensionRequest to set
+	 * @param extensionRequestDemand
+	 *            the extensionRequestDemand to set
 	 */
-	public void setExtensionRequest(boolean extensionRequest) {
-		this.extensionRequest = extensionRequest;
+	public void setExtensionRequestDemand(boolean extensionRequestDemand) {
+		this.extensionRequestDemand = extensionRequestDemand;
 	}
 	
 	/**

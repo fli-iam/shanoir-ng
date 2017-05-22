@@ -28,6 +28,7 @@ import { ConfirmDialogService } from "./shared/utils/confirm.dialog.service";
 import { ConsoleComponent }   from './shared/console/console.line.component';
 import { DropdownMenuComponent }   from './shared/dropdown-menu/dropdown-menu.component';
 import { EditUserComponent }   from './users/edit/edit.user.component';
+import { ExtensionRequestComponent } from './users/extensionRequest/extension.request.component';
 import { HandleErrorService } from './shared/utils/handle.error.service';
 import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
@@ -77,6 +78,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         ConfirmDialogComponent,
         DropdownMenuComponent,
         EditUserComponent,
+        ExtensionRequestComponent,
         HeaderComponent,
         HomeComponent,
         MenuItemComponent,

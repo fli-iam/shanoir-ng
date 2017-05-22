@@ -83,11 +83,11 @@ public interface UserService extends UniqueCheckableService<User> {
 	 * 
 	 * @param userId
 	 *            user id.
-	 * @param motivation
-	 *            request motivation.
+	 * @param requestInfo
+	 *            request info.
 	 * @throws ShanoirUsersException
 	 */
-	void requestExtension(Long userId, String motivation) throws ShanoirUsersException;
+	void requestExtension(Long userId, ExtensionRequestInfo requestInfo) throws ShanoirUsersException;
 
 	/**
 	 * Save a user.

@@ -1,5 +1,6 @@
-import { Role } from '../../roles/role.model';
 import { AccountRequestInfo } from '../accountRequestInfo/account.request.info.model';
+import { ExtensionRequestInfo } from '../extensionRequest/extension.request.info.model';
+import { Role } from '../../roles/role.model';
 
 export class User {
     id: number;
@@ -9,9 +10,8 @@ export class User {
     creationDate: Date;
     email: string;
     expirationDate: Date;
-    extensionDate: Date;
-    extensionMotivation: string;
-    extensionRequest: boolean;
+    extensionRequestInfo: ExtensionRequestInfo;
+    extensionRequestDemand: boolean;
     firstName: string;
     lastLogin: Date;
     lastLoginOn: Date;

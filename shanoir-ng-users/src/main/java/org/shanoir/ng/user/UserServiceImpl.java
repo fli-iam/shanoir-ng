@@ -67,16 +67,16 @@ public class UserServiceImpl implements UserService {
 			LOG.error("User with id " + userId + " not found");
 			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
 		}
-		if (!userDb.isAccountRequestDemand() && !userDb.isExtensionRequest()) {
+		if (!userDb.isAccountRequestDemand() && !userDb.isExtensionRequestDemand()) {
 			LOG.error("User with id " + userId + " has no request (account or extension)");
 			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
 		}
 
 		// Confirm and update user
-		if (userDb.isExtensionRequest()) {
+		if (userDb.isExtensionRequestDemand()) {
 			// Date extension
-			userDb.setExtensionMotivation(null);
-			userDb.setExtensionRequest(false);
+			userDb.setExtensionRequestInfo(null);
+			userDb.setExtensionRequestDemand(false);
 			userDb.setFirstExpirationNotificationSent(false);
 			userDb.setSecondExpirationNotificationSent(false);
 			final User updatedUser = updateUserOnAllSystems(userDb, user);
@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
 			LOG.error("User with id " + userId + " not found");
 			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
 		}
-		if (!user.isAccountRequestDemand() && !user.isExtensionRequest()) {
+		if (!user.isAccountRequestDemand() && !user.isExtensionRequestDemand()) {
 			LOG.error("User with id " + userId + " has no request (account or extension)");
 			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
 		}
@@ -140,8 +140,8 @@ public class UserServiceImpl implements UserService {
 			keycloakClient.deleteUser(user.getKeycloakId());
 		} else {
 			// Deny extension request
-			user.setExtensionMotivation(null);
-			user.setExtensionRequest(false);
+			user.setExtensionRequestInfo(null);
+			user.setExtensionRequestDemand(false);
 			updateUserOnAllSystems(user, null);
 			// Send email
 			emailService.notifyUserExtensionRequestDenied(user);
@@ -174,14 +174,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void requestExtension(Long userId, String motivation) throws ShanoirUsersException {
+	public void requestExtension(Long userId, ExtensionRequestInfo requestInfo) throws ShanoirUsersException {
 		final User user = userRepository.findOne(userId);
 		if (user == null) {
 			LOG.error("User with id " + userId + " not found");
 			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
 		}
-		user.setExtensionRequest(Boolean.TRUE);
-		user.setExtensionMotivation(motivation);
+		user.setExtensionRequestDemand(Boolean.TRUE);
+		user.setExtensionRequestInfo(requestInfo);
 		try {
 			userRepository.save(user);
 		} catch (DataIntegrityViolationException dive) {
@@ -235,11 +235,10 @@ public class UserServiceImpl implements UserService {
 	public void updateFromShanoirOld(final User user) throws ShanoirUsersException {
 		final User userDb = userRepository.findByUsername(user.getUsername()).orElseThrow(
 				() -> new ShanoirUsersException("User with username " + user.getUsername() + " not found"));
-		if (user.isExtensionRequest()) {
+		if (user.isExtensionRequestDemand()) {
 			// Extension request
-			userDb.setExtensionRequest(true);
-			userDb.setExtensionDate(user.getExpirationDate());
-			userDb.setExtensionMotivation(user.getExtensionMotivation());
+			userDb.setExtensionRequestDemand(true);
+			userDb.setExtensionRequestInfo(user.getExtensionRequestInfo());
 		} else {
 			// User update
 			updateUserValues(userDb, user);

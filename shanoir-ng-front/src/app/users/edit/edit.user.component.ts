@@ -44,7 +44,6 @@ export class EditUserComponent implements OnInit {
             })
             .catch((error) => {
                 // TODO: display error
-                //log.error("error getting roles list!");
                 console.log("error getting roles list!");
             });
     }
@@ -65,8 +64,8 @@ export class EditUserComponent implements OnInit {
             .subscribe((user: User) => {
                 user.role = this.getRoleById(user.role.id);
                 this.user = user;
-                if (user.extensionRequest) {
-                    this.user.expirationDate = user.extensionDate;
+                if (user.extensionRequestDemand) {
+                    this.user.expirationDate = user.extensionRequestInfo.extensionDate;
                 }
                 this.getDateToDatePicker(this.user);
                 this.accountRequestInfo = this.user.accountRequestInfo;
@@ -190,7 +189,7 @@ export class EditUserComponent implements OnInit {
             'username': new FormControl(this.user.username),
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
             'expirationDate': [this.user.expirationDate],
-            'extensionMotivation': [this.user.extensionMotivation],
+            'extensionMotivation': [(this.user.extensionRequestInfo) ? this.user.extensionRequestInfo.extensionMotivation : ''],
             'role': roleFC,
             'canAccessToDicomAssociation': new FormControl('false')
         });

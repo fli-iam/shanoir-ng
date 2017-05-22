@@ -90,7 +90,7 @@ public interface UserApi {
 	@RequestMapping(value = "/extension", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
 	ResponseEntity<Void> requestExtension(
-			@ApiParam(value = "request motivation", required = true) @RequestBody String motivation);
+			@ApiParam(value = "request motivation", required = true) @RequestBody ExtensionRequestInfo requestInfo);
 
 	@ApiOperation(value = "", notes = "Saves a new user", response = User.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created user", response = User.class),

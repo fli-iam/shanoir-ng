@@ -54,7 +54,7 @@ export class UserListComponent {
             {headerName: "Last Name", field: "lastName" },
             {headerName: "Email", field: "email", width: "200%"},
             {headerName: "O.D.", tip: "On Demand", field: "onDemand", type: "boolean", defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
-                return params.data.accountRequestDemand || params.data.extensionRequest;
+                return params.data.accountRequestDemand || params.data.extensionRequestDemand;
             }},
             {headerName: "Role", field: "role.displayName", width: "63px"},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params: any) {

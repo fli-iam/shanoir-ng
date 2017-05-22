@@ -47,7 +47,7 @@
 					<fieldset>
 						<ol>
 							<li *ngIf="!requestAccountMode">
-								<label i18n="Edit user|ExpirationDate label" [class.important-text]="user.extensionRequest">Expiration Date</label> 
+								<label i18n="Edit user|ExpirationDate label" [class.important-text]="user.extensionRequestDemand">Expiration Date</label> 
 								<span class="right-col">
 									<my-date-picker id="expirationDate" [options]="myDatePickerOptions" formControlName="expirationDate" [(ngModel)]="expirationDate" 
 										(dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
@@ -75,17 +75,17 @@
 						</ol>
 					</fieldset>
 				</td>
-				<td *ngIf="requestAccountMode || user.accountRequestInfo || user.extensionRequest">
+				<td *ngIf="requestAccountMode || user.accountRequestInfo || user.extensionRequestDemand">
 					<account-request-info *ngIf="requestAccountMode || user.accountRequestInfo"
 						[userAccountRequestInfo]='accountRequestInfo' [requestAccountMode]='requestAccountMode' [accountRequestDemand]='user.accountRequestDemand'
 						(accountRequestInfo)="saveARI($event)" (isValid)="updateARIValid($event)"></account-request-info>
-					<hr *ngIf="(requestAccountMode || user.accountRequestInfo) && user.extensionRequest">
-					<fieldset *ngIf="user.extensionRequest">
+					<hr *ngIf="(requestAccountMode || user.accountRequestInfo) && user.extensionRequestDemand">
+					<fieldset *ngIf="user.extensionRequestDemand">
 						<ol>
 							<li>
 								<label i18n="Extension comment |ExtensionComment label">Extension comment</label> 
 								<span class="right-col">
-									<textarea autosize id="extensionMotivation" formControlName="extensionMotivation" [(ngModel)]="user.extensionMotivation" readonly></textarea>
+									<textarea autosize id="extensionMotivation" formControlName="extensionMotivation" [(ngModel)]="user.extensionRequestInfo.extensionMotivation" readonly></textarea>
 								</span>
 							</li>
 						</ol>
@@ -98,10 +98,10 @@
 				<button *ngIf="requestAccountMode" i18n="Edit user|CancelButton label" class="Button" (click)="cancelAccountRequest()">Cancel</button>
 				<button type="submit" *ngIf="creationMode && !requestAccountMode" i18n="Edit user|CreateButton label" (click)="create()" class="Button" [disabled]="!isEditUserFormValid()">Create</button>
 				<button type="submit" *ngIf="creationMode && requestAccountMode" i18n="Edit user|RequestAccountButton label" (click)="accountRequest()" class="Button" [disabled]="!isEditUserFormValid()">Request Account</button>
-				<button type="submit" *ngIf="!creationMode && !user.accountRequestDemand && !user.extensionRequest" (click)="update()" i18n="Edit user|SaveButton label" class="Button" [disabled]="!isEditUserFormValid()">Save Settings</button>
+				<button type="submit" *ngIf="!creationMode && !user.accountRequestDemand && !user.extensionRequestDemand" (click)="update()" i18n="Edit user|SaveButton label" class="Button" [disabled]="!isEditUserFormValid()">Save Settings</button>
 				<button type="submit" *ngIf="!creationMode && user.accountRequestDemand" (click)="deny()" i18n="Edit user|DenyAccountRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Deny creation</button>
-				<button type="submit" *ngIf="!creationMode && user.extensionRequest" (click)="deny()" i18n="Edit user|DenyExtensionRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Deny extension</button>
-				<button type="submit" *ngIf="!creationMode && (user.accountRequestDemand || user.extensionRequest)" (click)="accept()" i18n="Edit user|AcceptAccountRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Accept</button>
+				<button type="submit" *ngIf="!creationMode && user.extensionRequestDemand" (click)="deny()" i18n="Edit user|DenyExtensionRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Deny extension</button>
+				<button type="submit" *ngIf="!creationMode && (user.accountRequestDemand || user.extensionRequestDemand)" (click)="accept()" i18n="Edit user|AcceptAccountRequestButton label" class="Button" [disabled]="!isEditUserFormValid()">Accept</button>
 			</div></td></tr>
 		</table>
     </form>

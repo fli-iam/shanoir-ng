@@ -1,20 +1,21 @@
 import { ModuleWithProviders }  from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
+import { AccountRequestComponent }   from './users/accountRequest/account.request.component';
 import { AcquisitionEquipmentDetailComponent } from './acqEquip/detail/acqEquip.detail.component';
 import { AcquisitionEquipmentListComponent } from './acqEquip/list/acqEquip.list.component';
-import { HomeComponent }       from './home/home.component';
-import { UserListComponent }   from './users/list/user.list.component';
+import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
+import { AuthNotGuestGuard }   from './shared/roles/auth.not.guest.guard';
 import { CenterDetailComponent } from './centers/detail/center.detail.component';
 import { CenterListComponent }   from './centers/list/center.list.component';
 import { EditUserComponent }   from './users/edit/edit.user.component';
-import { AccountRequestComponent }   from './users/accountRequest/account.request.component';
-import { StudyTreeComponent }   from './studies/tree/study.tree.component';
-import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
-import { AuthNotGuestGuard }   from './shared/roles/auth.not.guest.guard';
+import { ExtensionRequestComponent } from './users/extensionRequest/extension.request.component';
+import { HomeComponent }       from './home/home.component';
 import { ImportComponent }   from './import/import.component';
-import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
 import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
+import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
+import { StudyTreeComponent }   from './studies/tree/study.tree.component';
+import { UserListComponent }   from './users/list/user.list.component';
 
 const appRoutes: Routes = [
   {
@@ -34,6 +35,9 @@ const appRoutes: Routes = [
   }, {
     path: 'accountRequest',
     component: AccountRequestComponent,
+  }, {
+    path: 'extensionrequest',
+    component: ExtensionRequestComponent,
   }, {
     path: 'treeTest',
     component: StudyTreeComponent,
