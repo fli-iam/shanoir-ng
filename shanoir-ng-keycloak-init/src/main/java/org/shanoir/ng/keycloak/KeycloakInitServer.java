@@ -32,7 +32,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(KeycloakInitServer.class);
 
-	private static final String BASE_URL_ENV = "BASE_URL";
+	private static final String SHANOIR_SERVER_URL_ENV = "SHANOIR_SERVER_URL";
 	private static final String BROWSER_FLOW = "browser";
 	private static final String FRONT_CLIENT_ID = "shanoir-ng-front";
 	private static final String NEW_BROWSER_FLOW = "Browser script";
@@ -55,15 +55,15 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	private static void updateFrontClient() {
 		LOG.info("Update front client");
 
-		final String baseUrl = System.getenv(BASE_URL_ENV);
+		final String shanoirServerUrl = System.getenv(SHANOIR_SERVER_URL_ENV);
 
-		if (baseUrl != null && !baseUrl.contains("localhost")) {
+		if (shanoirServerUrl != null && !shanoirServerUrl.contains("localhost")) {
 			final ClientsResource clientsResource = getKeycloak().realm(getKeycloakRealm()).clients();
 			final List<ClientRepresentation> clientRepresentations = clientsResource.findByClientId(FRONT_CLIENT_ID);
 			if (clientRepresentations != null && !clientRepresentations.isEmpty()) {
 				final ClientRepresentation clientRepresentation = clientRepresentations.get(0);
-				clientRepresentation.setRedirectUris(Arrays.asList(baseUrl + "/*"));
-				clientRepresentation.setWebOrigins(Arrays.asList(baseUrl));
+				clientRepresentation.setRedirectUris(Arrays.asList(shanoirServerUrl + "/*"));
+				clientRepresentation.setWebOrigins(Arrays.asList(shanoirServerUrl));
 				final ClientResource clientResource = clientsResource.get(clientRepresentation.getId());
 				clientResource.update(clientRepresentation);
 			}
