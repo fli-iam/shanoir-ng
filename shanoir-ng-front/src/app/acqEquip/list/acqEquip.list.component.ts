@@ -59,23 +59,23 @@ export class AcquisitionEquipmentListComponent {
             {headerName: "Center", field: "center.name" }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({headerName: "", type: "button", img: "/assets/images/icons/garbage-1.png", action: this.openDeleteAcquisitionEquipmentConfirmDialog},
-            {headerName: "", type: "button", img: "/assets/images/icons/edit.png", target : "/acqEquipDetail", getParams: function(item: any): Object {
+            this.columnDefs.push({headerName: "", type: "button", img: "assets/images/icons/garbage-1.png", action: this.openDeleteAcquisitionEquipmentConfirmDialog},
+            {headerName: "", type: "button", img: "assets/images/icons/edit.png", target : "/acqEquipDetail", getParams: function(item: any): Object {
                 return {id: item.id, mode: "edit"};
             }});
         }
         if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({headerName: "", type: "button", img: "/assets/images/icons/view-1.png", target : "/acqEquipDetail", getParams: function(item: any): Object {
+            this.columnDefs.push({headerName: "", type: "button", img: "assets/images/icons/view-1.png", target : "/acqEquipDetail", getParams: function(item: any): Object {
                 return {id: item.id, mode: "view"};
             }});
         }
 
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.customActionDefs.push({title: "new acq. equip.", img: "/assets/images/icons/add-1.png", target: "/acqEquipDetail", getParams: function(item: any): Object {
+            this.customActionDefs.push({title: "new acq. equip.", img: "assets/images/icons/add-1.png", target: "/acqEquipDetail", getParams: function(item: any): Object {
                     return {mode: "create"};
             }});
-            this.customActionDefs.push({title: "delete selected", img: "/assets/images/icons/garbage-1.png", action: this.deleteAll });
+            this.customActionDefs.push({title: "delete selected", img: "assets/images/icons/garbage-1.png", action: this.deleteAll });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.rowClickAction = {target : "/acqEquipDetail", getParams: function(item: any): Object {
