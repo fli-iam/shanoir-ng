@@ -49,28 +49,22 @@ front.server:
 keycloak:
   cors: true
   realm: shanoir-ng
-  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn8sWxnmSz5+npLCJfq3aLSJACF5AJzP0pUXlNfCbOOGJY93RWO5SlKU5o8rE7TPOe6AdDHX306JET6MgQGrJ47CxiXrR/axny/UTUEjqX5x61OSOdQIYsBj2TqtRKkEeZ//SYiwr/zVZmuzwtWvh4cXpofnToPx+OLQ/MuigkBsN/uo0S8fI2ThN/YXLfhAlp1ezFuKTtmJmFgBTf3l9m8lzuMfdqp4QkBOLF866te9nFQuGMLuz/vfsFLHuEi+OE/+V5XDQ0qenBy6eSOeFvZUmRROhKC/Kkk6zGd8JAkpeE1PFnwbG5JcFOTrSsIHBQVtKYvVNIRT1aIVip6HxGwIDAQAB
   auth-server-url: http://localhost/auth
   ssl-required: external
   resource: shanoir-ng-users
-  securityConstraints[0]:
-    securityCollections[0]:
-      name: user secured api
-      authRoles: 
-        - ROLE_ADMIN
-        - ROLE_EXPERT
-        - ROLE_GUEST
-        - ROLE_USER
-      patterns:
+  securityConstraints:
+    - authRoles: 
+      - ROLE_ADMIN
+      - ROLE_EXPERT
+      - ROLE_GUEST
+      - ROLE_USER
+    - securityCollections:
+      - name: user secured api
+      - patterns:
         - /user/*
-    securityCollections[1]:
-      name: role secured api
-      authRoles: 
-        - ROLE_ADMIN
-        - ROLE_EXPERT
-        - ROLE_GUEST
-        - ROLE_USER
-      patterns:
+    - securityCollections:
+      - name: role secured api
+      - patterns:
         - /role/*
 kc.requests:
   realm: master
@@ -170,5 +164,5 @@ front.server:
   url: https://shanoir-qualif.irisa.fr
 #keycloak
 keycloak:
-  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth
+  auth-server-url: https://shanoir-qualif.irisa.fr/auth
   

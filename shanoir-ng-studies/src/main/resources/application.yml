@@ -39,19 +39,18 @@ spring:
 keycloak:
   cors: true
   realm: shanoir-ng
-  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhU1+KuWBHsHp7UMITO4p6G4PfYdSgubXX7PCcX/TNPa9aGDwgVtEjyOVYA3rnvGvGTXit2PaAztExWq4FA7YOIATQuKydNY+uWJKRoBhM7dm1ioyQ+l63lB3vRjSsEL6b9y3U/URTVUn4DJAUBgiK0CGgGR0ihEi/IJFm8L9EKHxE/Cm99x65NzFe7EFZy4mbruLKr1w9XKmY9/1ISz559E1VO4JK4fY5NKAcHK/auaA6XzxlYGcK7M7oZsl1GTeCMBAiOM7rusta4MhcBO+BOPHv5WxhbehheHkTEPB5BYDRuBenP58TS4125qliGmCG8Zfb4JP/D9eaDzaHYoRYwIDAQAB
   auth-server-url: http://localhost/auth
   ssl-required: external
   resource: shanoir-ng-studies
-  securityConstraints[0]:
-    securityCollections[0]:
-      name: studies secured api
-      authRoles:
-        - ROLE_ADMIN
-        - ROLE_EXPERT
-        - ROLE_GUEST
-        - ROLE_USER
-      patterns:
+  securityConstraints:
+    - authRoles: 
+      - ROLE_ADMIN
+      - ROLE_EXPERT
+      - ROLE_GUEST
+      - ROLE_USER
+    - securityCollections:
+      - name: studies secured api
+      - patterns:
         - /*
 # logging configuration
 logging:
@@ -90,7 +89,8 @@ server:
     port: 9902
 #keycloak
 keycloak:
-  credentials.secret: 209376e5-1d42-4fa3-8cdb-160946fd6383
+  credentials:
+    secret: 209376e5-1d42-4fa3-8cdb-160946fd6383
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-studies.log
@@ -133,4 +133,4 @@ spring:
       ddl-auto: validate
 #keycloak
 keycloak:
-  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth
+  auth-server-url: https://shanoir-qualif.irisa.fr/auth

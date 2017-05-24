@@ -1,4 +1,4 @@
-FROM jboss/keycloak:2.5.1.Final
+FROM jboss/keycloak:3.1.0.Final
 
 ADD changeDatabase.xsl /opt/jboss/keycloak/
 RUN \
