@@ -33,13 +33,6 @@ module.exports = {
                 test: /\.css$/,
                 include: helpers.root('src', 'app'),
                 loader: 'raw-loader'
-            },
-            /**
-             * File loader for supporting images, for example, in CSS files.
-             */
-            {
-                test: /\.(jpg|png|gif)$/,
-                loader: 'file-loader?name=/img/[name].[ext]'
             }
         ]
     },
