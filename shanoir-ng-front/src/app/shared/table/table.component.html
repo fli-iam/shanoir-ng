@@ -117,7 +117,7 @@
     <tbody *ngIf="isLoading">
         <tr>
             <td [attr.colspan]="columnDefs?.length + 1" class="loading">
-                <img src="/assets/images/loader.32x32.gif"/><br/>Loading...
+                <img [src]="loaderImageUrl"/><br/>Loading...
             </td>
         </tr>
     </tbody>

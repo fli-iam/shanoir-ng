@@ -16,6 +16,7 @@ export class TableComponent {
     private maxResultsField: number;
 
     private checkAllImageUrl: string;
+    private loaderImageUrl: string;
     private uncheckAllImageUrl: string;
 
     public isLoading: boolean = false;
@@ -28,6 +29,7 @@ export class TableComponent {
 
     constructor() {
         this.checkAllImageUrl = 'assets/images/icons/check-all.png';
+        this.loaderImageUrl = 'assets/images/loader.32x32.gif';
         this.uncheckAllImageUrl = 'assets/images/icons/uncheck-all.png';
         this.maxResultsField = this.maxResults;
     }
