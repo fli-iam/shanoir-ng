@@ -15,6 +15,9 @@ export class TableComponent {
     private itemsLoaded: boolean = false;
     private maxResultsField: number;
 
+    private checkAllImageUrl: string;
+    private uncheckAllImageUrl: string;
+
     public isLoading: boolean = false;
     public maxResults: number = 20;
     public lastSortedCol: Object = null;
@@ -24,6 +27,8 @@ export class TableComponent {
     public currentPage: number = 1;
 
     constructor() {
+        this.checkAllImageUrl = 'assets/images/icons/check-all.png';
+        this.uncheckAllImageUrl = 'assets/images/icons/uncheck-all.png';
         this.maxResultsField = this.maxResults;
     }
 

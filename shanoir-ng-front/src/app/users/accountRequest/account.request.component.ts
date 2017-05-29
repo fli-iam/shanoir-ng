@@ -9,5 +9,10 @@ const GUEST_ROLE_ID: number = 2;
 })
 
 export class AccountRequestComponent {
+    private shanoirLogoUrl: string;
+
+    constructor() {
+        this.shanoirLogoUrl = 'assets/images/logo.shanoir.white.png';
+    }
 
 }

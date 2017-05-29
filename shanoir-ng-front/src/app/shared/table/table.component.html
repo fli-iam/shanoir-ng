@@ -2,8 +2,8 @@
     <!-- Control bar -->
     <caption class="controls">
             <span class="select-ctrl">
-                <button (click)="selectAll()" title="select all"><img src="/assets/images/icons/check-all.png"/></button>
-                <button (click)="unSelectAll()" title="unselect all"><img src="/assets/images/icons/uncheck-all.png"/></button>
+                <button (click)="selectAll()" title="select all"><img [src]="checkAllImageUrl"/></button>
+                <button (click)="unSelectAll()" title="unselect all"><img [src]="uncheckAllImageUrl"/></button>
             </span>
             <!-- Text search -->
             <span class="text-search">
