@@ -16,7 +16,7 @@ const METADATA = webpackMerge(commonConfig.metadata, {
     BACKEND_API_STUDIES_MS_URL: BACKEND_API_ROOT_URL + '/studies',
     KEYCLOAK_BASE_URL: 'https://shanoir-qualif.irisa.fr/auth',
     LOGOUT_REDIRECT_URL: 'https://shanoir-qualif.irisa.fr/shanoir-ng/index.html',
-    port: 8081,
+    port: 8080,
     ENV: ENV,
 });
 
@@ -36,10 +36,13 @@ module.exports = webpackMerge(commonConfig, {
                 test: /\.ts$/,
                 loaders: ['awesome-typescript-loader', 'angular2-template-loader']
             },
+            /**
+             * File loader for supporting images, for example, in CSS files.
+             */
             {
-                test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
-                loader: 'file-loader?name=assets/[name].[ext]'
-            }
+                test: /\.(jpg|png|gif)$/,
+                loader: 'file-loader'
+           }
         ]
     },
 
