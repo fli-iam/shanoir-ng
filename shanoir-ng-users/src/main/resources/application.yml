@@ -49,7 +49,7 @@ front.server:
 keycloak:
   cors: true
   realm: shanoir-ng
-  auth-server-url: http://localhost/auth
+  auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-users
   securityConstraints:
