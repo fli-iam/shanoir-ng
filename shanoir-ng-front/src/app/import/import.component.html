@@ -33,15 +33,15 @@
             <p>Please select only the series useful for your study.</p>
             <div class="middle-content">
                 <div class="tree">
-                    <node label="DIR OL" pictoUrl="assets/images/icons/user.png" deploy=true>
-                        <node label="RECHERCHE WIP NEURO" pictoUrl="assets/images/icons/medical/x-ray-2.png" hasBox="true">
+                    <node label="DIR OL" pictoUrl="/assets/images/icons/user.png" deploy=true>
+                        <node label="RECHERCHE WIP NEURO" pictoUrl="/assets/images/icons/medical/x-ray-2.png" hasBox="true">
                             <node
                                 *ngFor="let dataset of datasets" 
                                 [label]="dataset.name" 
-                                pictoUrl="assets/images/icons/medical/brain.png" 
+                                pictoUrl="/assets/images/icons/medical/brain.png" 
                                 hasBox="true" 
                                 [(ngModel)]="dataset.selected" 
-                                buttonPicto="assets/images/icons/search.png"
+                                buttonPicto="/assets/images/icons/search.png"
                                 (buttonClick)="showThumbnail($event)"
                                 [nodeParams]="dataset"
                                 (labelClick)="showDetails($event)"
@@ -134,7 +134,7 @@
                             <option *ngFor="let subject of subjects" [ngValue]="subject.id" [selected]="subject.selected">{{subject.name}}</option>
                         </select>
                         <button (click)="createUser = true" [disabled]="subject == ''">details</button>
-                        <button (click)="createUser = true"><img src="assets/images/icons/add-1.png" />create a subject</button>
+                        <button (click)="createUser = true"><img src="/assets/images/icons/add-1.png" />create a subject</button>
                     </span>
                 </li>
                 <li class="required" *ngIf="subjectMode == 'group'">
@@ -146,7 +146,7 @@
                             <option value="2">STCD4789????????????</option>
                         </select>
                         <button disabled>details</button>
-                        <button><img src="assets/images/icons/add-1.png" />create a group of subjects</button>
+                        <button><img src="/assets/images/icons/add-1.png" />create a group of subjects</button>
                     </span>
                 </li>
                 <ng-template [ngIf]="subjectMode == 'single' && subject != undefined && subject != null && subject != ''">
@@ -196,7 +196,7 @@
                             <option>STCD4789</option>
                         </select>
                         <button disabled>details</button>
-                        <button><img src="assets/images/icons/add-1.png" />new</button>
+                        <button><img src="/assets/images/icons/add-1.png" />new</button>
                     </span>
                 </li>
             </ol>
@@ -257,13 +257,13 @@
             <ol>
                 <p class="expandable" (click)="dsAcqOpened = !dsAcqOpened">Review dataset acquisitions<span class="expand-arrow" [class.rotate]="dsAcqOpened">&#9013;</span></p>
                 <ul *ngIf="dsAcqOpened" class="ds-acq-list right-col">
-                    <li class="ds-acq"><img src="assets/images/icons/medical/x-ray-1.png"/>localizer (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>localizer (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
+                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
                 </ul>
             </ol>
         </fieldset>
