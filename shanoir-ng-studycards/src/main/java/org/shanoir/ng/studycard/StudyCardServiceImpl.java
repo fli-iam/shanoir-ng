@@ -193,4 +193,10 @@ public class StudyCardServiceImpl implements StudyCardService {
 		return null;
 	}
 
+	@Override
+	public Long searchCenterId(Long studyCardId) {		
+		StudyCard studyCard=studyCardRepository.findOne(studyCardId);
+		return studyCard.getCenterId();
+	}
+
 }

@@ -8,16 +8,29 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.shared.dto.IdListDTO;
+import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.ShanoirSubjectException;
+import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.StudyRepository;
+import org.shanoir.ng.study.dto.SimpleStudyCardDTO;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -51,6 +64,12 @@ public class SubjectServiceImpl implements SubjectService {
 	private SubjectStudyRepository subjectStudyRepository;
 
 	private Object rel;
+	
+	@Autowired
+	private RestTemplate restTemplate;
+	
+	@Autowired
+	private MicroserviceRequestsService microservicesRequestsService;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirSubjectException {
@@ -80,8 +99,23 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public Subject save(final Subject subject) throws ShanoirSubjectException {
 		Subject savedSubject = null;
-		if (subject.getName()==null || subject.getName()=="")
-			subject.setName(createOfsepCommonName());
+		try {
+			savedSubject = subjectRepository.save(subject);
+		} catch (DataIntegrityViolationException dive) {
+			ShanoirSubjectException.logAndThrow(LOG, "Error while creating Subject: " + dive.getMessage());
+		}
+		//updateShanoirOld(savedSubject);
+		return savedSubject;
+	}
+	
+	@Override
+	public Subject saveForOFSEP(final Subject subject, final Long studyCardId) throws ShanoirSubjectException {
+		Subject savedSubject = null;
+		String commonName=createOfsepCommonName(studyCardId);
+		if (commonName==null || commonName.equals(""))
+			subject.setName("NoCommonName");
+		else
+			subject.setName(commonName);
 		try {
 			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
@@ -230,10 +264,18 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 
-	public String createOfsepCommonName()
+	public String createOfsepCommonName(Long studyCardId)
 	{
 		String commonName="";
-		Long idCenter = 1L;
+		Long idCenter=null;
+		try {
+			idCenter = getCenterIdFromStudyCard(studyCardId);
+		} catch (ShanoirStudiesException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			return null;
+		}
+		
 		DecimalFormat formatterCenter = new DecimalFormat("000");
 		String commonNameCenter = formatterCenter.format(idCenter);
 
@@ -253,6 +295,31 @@ public class SubjectServiceImpl implements SubjectService {
 
 		}
 		return commonName;
+	}
+
+	private Long getCenterIdFromStudyCard(Long studyCardId) throws ShanoirStudiesException {
+		
+		final HttpEntity<Long> entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
+		// Request to studycard MS to get center id
+		ResponseEntity<Long> centerIdResponse = null;
+		try {
+			centerIdResponse = restTemplate.exchange(
+					microservicesRequestsService.getStudycardMsUrl() + MicroserviceRequestsService.CENTERID + "/" + studyCardId,
+					HttpMethod.GET, entity, Long.class);
+		} catch (RestClientException e) {
+			LOG.error("Error on study card microservice request", e);
+			throw new ShanoirStudiesException("Error while getting study card list", ErrorModelCode.SC_MS_COMM_FAILURE);
+		}
+		
+		Long centerId = null;
+		if (HttpStatus.OK.equals(centerIdResponse.getStatusCode())
+				|| HttpStatus.NO_CONTENT.equals(centerIdResponse.getStatusCode())) {
+			centerId = centerIdResponse.getBody();
+		} else {
+			throw new ShanoirStudiesException(ErrorModelCode.SC_MS_COMM_FAILURE);
+		}
+		
+		return centerId;
 	}
 
 	/**

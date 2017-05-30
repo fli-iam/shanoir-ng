@@ -10,6 +10,7 @@ import org.shanoir.ng.shared.exception.ShanoirSubjectException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.study.Study;
+import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +63,7 @@ public class SubjectApiController implements SubjectApi  {
 		return new ResponseEntity<List<Subject>>(subject, HttpStatus.OK);
 	}
 
-	//@Override
+	@Override
 	  public ResponseEntity<Subject> saveNewSubject(
 			@ApiParam(value = "subject to create" ,required=true ) @RequestBody Subject subject, final BindingResult result) throws RestServiceException {
 
@@ -89,7 +90,41 @@ public class SubjectApiController implements SubjectApi  {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
 	}
+	
 
+	@Override
+	public ResponseEntity<Subject> saveNewOFSEPSubject(
+			@ApiParam(value = "subject to create" ,required=true )
+			@RequestBody SubjectStudyCardIdDTO subjectStudyCardIdDTO,
+			final BindingResult result) throws RestServiceException {
+		
+		Long studyCardId=subjectStudyCardIdDTO.getStudyCardId();
+		Subject subject=subjectStudyCardIdDTO.getSubject();
+		/* Validation */
+		// A basic template can only update certain fields, check that
+		final FieldErrorMap accessErrors = this.getCreationRightsErrors(subject);
+		// Check hibernate validation
+		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+		// Check unique constrainte
+		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(subject);
+		/* Merge errors. */
+		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		if (!errors.isEmpty()) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+		}
+
+		try {
+			final Subject createdSubject = subjectService.saveForOFSEP(subject, studyCardId);
+			subjectService.updateShanoirOld(createdSubject);
+			return new ResponseEntity<Subject>(createdSubject, HttpStatus.OK);
+		} catch (ShanoirSubjectException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+		}
+
+	}
+	  
 	@Override
 	 public ResponseEntity<Void> updateSubject(@ApiParam(value = "id of the subject",required=true ) @PathVariable("subjectId") Long subjectId,
 		        @ApiParam(value = "subject to update" ,required=true ) @RequestBody Subject subject,
@@ -181,6 +216,11 @@ public class SubjectApiController implements SubjectApi  {
 		return new ResponseEntity<Subject>(subject, HttpStatus.OK);
 
 	}
+
+
+
+	
+	
 
 
 

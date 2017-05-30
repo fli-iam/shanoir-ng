@@ -5,6 +5,7 @@ package org.shanoir.ng.subject;
 import io.swagger.annotations.*;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -74,6 +75,19 @@ public interface SubjectApi {
         consumes = { "application/json" },
         method = RequestMethod.POST)
     ResponseEntity<Subject> saveNewSubject(@ApiParam(value = "subject to create" ,required=true ) @RequestBody Subject subject, final BindingResult result)throws RestServiceException;
+    
+    @ApiOperation(value = "", notes = "Saves a new subject with auto generated common name", response = Subject.class, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "created subject", response = Subject.class),
+        @ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
+        @ApiResponse(code = 403, message = "forbidden", response = Subject.class),
+        @ApiResponse(code = 422, message = "bad parameters", response = Subject.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
+    @RequestMapping(value = "/subject/OFSEP/",
+        produces = { "application/json" }, 
+        consumes = { "application/json" },
+        method = RequestMethod.POST)
+    ResponseEntity<Subject> saveNewOFSEPSubject(@ApiParam(value = "subject to create and the id of the study card" ,required=true ) @RequestBody SubjectStudyCardIdDTO subjectStudyCardIdDTO, final BindingResult result)throws RestServiceException;
 
 
     @ApiOperation(value = "", notes = "Updates a subject", response = Void.class, tags={  })
