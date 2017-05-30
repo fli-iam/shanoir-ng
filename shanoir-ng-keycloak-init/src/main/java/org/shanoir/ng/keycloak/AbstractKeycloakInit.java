@@ -55,9 +55,7 @@ public abstract class AbstractKeycloakInit {
 		LOG.info("Load parameters");
 		
 		keycloakRequestsAdminLogin = System.getenv(KEYCLOAK_USER_ENV);
-		LOG.info("keycloakRequestsAdminLogin: " + keycloakRequestsAdminLogin);
 		keycloakRequestsAdminPassword = System.getenv(KEYCLOAK_PASSWORD_ENV);
-		LOG.info("keycloakRequestsAdminPassword: " + keycloakRequestsAdminPassword);
 		
 		Properties prop = new Properties();
 		InputStream input = null;
@@ -71,13 +69,9 @@ public abstract class AbstractKeycloakInit {
 
 			// get the property value and print it out
 			keycloakAuthServerUrl = prop.getProperty("keycloak.auth-server-url");
-			LOG.info("keycloakAuthServerUrl: " + keycloakAuthServerUrl);
 			keycloakRealm = prop.getProperty("keycloak.realm");
-			LOG.info("keycloakRealm: " + keycloakRealm);
 			keycloakRequestsClientId = prop.getProperty("kc.requests.client.id");
-			LOG.info("keycloakRequestsClientId: " + keycloakRequestsClientId);
 			keycloakRequestsRealm = prop.getProperty("kc.requests.client.realm");
-			LOG.info("keycloakRequestsRealm: " + keycloakRequestsRealm);
 
 		} catch (IOException e) {
 			LOG.error("Error while getting properties", e);

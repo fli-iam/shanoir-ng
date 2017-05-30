@@ -91,7 +91,7 @@ public class AcquisitionEquipmentApiControllerTest {
 	public void updateAcquisitionEquipmentTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createAcquisitionEquipment())))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 }
