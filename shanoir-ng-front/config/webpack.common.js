@@ -20,15 +20,32 @@ module.exports = {
                 test: /\.html$/,
                 loader: 'html-loader'
             },
-            {
-                test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
-                loader: 'file-loader?name=assets/[name].[hash].[ext]'
-            },
+
             {
                 test: /\.css$/,
                 use: ['to-string-loader', 'css-loader'],
                 exclude: [helpers.root('src', 'assets')]
-            }
+            },
+
+            /**
+             * Extract CSS files from .src/assets directory to external CSS file
+             */
+            {
+                test: /\.css$/,
+                loader: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: 'css-loader'
+                }),
+                include: [helpers.root('src', 'assets')]
+            },
+            
+            /**
+             * File loader for supporting images, for example, in CSS files.
+             */
+            {
+                test: /\.(jpg|png|gif)$/,
+                loader: 'file-loader'
+           }
         ]
     },
 

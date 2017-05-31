@@ -1,5 +1,5 @@
 <div class="root">
-    <img class="logo" src="/assets/images/logo.shanoir.white.png" />
+    <img class="logo" [src]="shanoirLogoUrl" />
     <div class="content">
         <editUser *ngIf="!requestSent" [requestAccountMode]="true" (closing)="closeAccountRequest($event)"></editUser>
         <div *ngIf="requestSent" class="EditUserComponent">
