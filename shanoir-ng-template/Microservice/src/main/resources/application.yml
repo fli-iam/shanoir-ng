@@ -35,6 +35,7 @@ spring:
     host: shanoir-ng-rabbitmq
   session:
     store-type: none
+front.server.url: http://shanoir-ng-nginx
 #keycloak
 keycloak:
   cors: true
@@ -43,15 +44,15 @@ keycloak:
   auth-server-url: http://localhost/auth
   ssl-required: external
   resource: shanoir-ng-template
-  securityConstraints[0]:
-    securityCollections[0]:
-      name: spring secured api
-      authRoles: 
-        - ROLE_ADMIN
-        - ROLE_EXPERT
-        - ROLE_GUEST
-        - ROLE_USER
-      patterns:
+  securityConstraints:
+    - authRoles: 
+      - ROLE_ADMIN
+      - ROLE_EXPERT
+      - ROLE_GUEST
+      - ROLE_USER
+    - securityCollections:
+      - name: spring secured api
+      - patterns:
         - /*
 # logging configuration
 logging:
@@ -87,9 +88,12 @@ spring:
     host: localhost
 server:
     port: 9902
+front.server.url: http://localhost:8080
 #keycloak
 keycloak:
-  credentials.secret: 3b130530-4e0f-4101-bf56-1a92df705318
+  auth-server-url: http://localhost/auth
+  credentials:
+    secret: 3b130530-4e0f-4101-bf56-1a92df705318
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-template.log
@@ -132,4 +136,4 @@ spring:
       ddl-auto: validate
 #keycloak
 keycloak:
-  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth
+  auth-server-url: https://shanoir-qualif.irisa.fr/auth

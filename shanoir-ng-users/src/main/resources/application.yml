@@ -44,34 +44,28 @@ spring:
     store-type: none
 front.server:
   address: http://localhost/shanoir-ng/
-  url: http://localhost
+  url: http://shanoir-ng-nginx
 #keycloak
 keycloak:
   cors: true
   realm: shanoir-ng
-  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn8sWxnmSz5+npLCJfq3aLSJACF5AJzP0pUXlNfCbOOGJY93RWO5SlKU5o8rE7TPOe6AdDHX306JET6MgQGrJ47CxiXrR/axny/UTUEjqX5x61OSOdQIYsBj2TqtRKkEeZ//SYiwr/zVZmuzwtWvh4cXpofnToPx+OLQ/MuigkBsN/uo0S8fI2ThN/YXLfhAlp1ezFuKTtmJmFgBTf3l9m8lzuMfdqp4QkBOLF866te9nFQuGMLuz/vfsFLHuEi+OE/+V5XDQ0qenBy6eSOeFvZUmRROhKC/Kkk6zGd8JAkpeE1PFnwbG5JcFOTrSsIHBQVtKYvVNIRT1aIVip6HxGwIDAQAB
-  auth-server-url: http://localhost/auth
+  auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-users
-  securityConstraints[0]:
-    securityCollections[0]:
-      name: user secured api
-      authRoles: 
-        - ROLE_ADMIN
-        - ROLE_EXPERT
-        - ROLE_GUEST
-        - ROLE_USER
-      patterns:
-        - /user/*
-    securityCollections[1]:
-      name: role secured api
-      authRoles: 
-        - ROLE_ADMIN
-        - ROLE_EXPERT
-        - ROLE_GUEST
-        - ROLE_USER
-      patterns:
-        - /role/*
+  securityConstraints:
+    - authRoles: 
+      - ROLE_ADMIN
+      - ROLE_EXPERT
+      - ROLE_GUEST
+      - ROLE_USER
+    - securityCollections:
+      - name: user secured api
+      - patterns:
+        - /user
+    - securityCollections:
+      - name: user secured api
+      - patterns:
+        - /role
 kc.requests:
   realm: master
   auth-server-url: http://shanoir-ng-nginx/auth
@@ -113,10 +107,14 @@ spring:
     host: localhost
 server:
     port: 9901
-front.server.url: http://localhost:8080
+front.server:
+  address: http://localhost:8080/shanoir-ng/
+  url: http://localhost:8080
 #keycloak
 keycloak:
-  credentials.secret: 3b130530-4e0f-4101-bf56-1a92df705318
+  auth-server-url: http://localhost/auth
+  credentials:
+    secret: 3b130530-4e0f-4101-bf56-1a92df705318
 kc.requests:
   auth-server-url: http://localhost/auth
 # logging configuration
@@ -170,5 +168,5 @@ front.server:
   url: https://shanoir-qualif.irisa.fr
 #keycloak
 keycloak:
-  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth
+  auth-server-url: https://shanoir-qualif.irisa.fr/auth
   
