@@ -56,6 +56,15 @@ public interface StudyCardService extends UniqueCheckableService<StudyCard> {
 	 * @return list of study cards.
 	 */
 	List<StudyCard> search(List<Long> studyIdList);
+	
+	/**
+	 * Search center id of a study card.
+	 * 
+	 * @param studyCardId
+	 *            the id of the study card.
+	 * @return the id of the center.
+	 */
+	Long searchCenterId(Long studyCardId);
 
 	/**
 	 * Update a template.

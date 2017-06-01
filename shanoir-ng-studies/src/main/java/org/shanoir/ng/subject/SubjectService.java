@@ -58,6 +58,19 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @throws ShanoirSubjectException
 	 */
 	Subject save(Subject subject) throws ShanoirSubjectException;
+	
+	/**
+	 * Save a subject for OFSEP.
+	 *
+	 * @param subject
+	 *            subject to create.
+	 * @param studyCardId
+	 * 			id of the study card used to generate the subject common name
+	 * @return created subject.
+	 * @throws ShanoirSubjectException
+	 */
+
+	Subject saveForOFSEP( Subject subject,  Long studyCardId) throws ShanoirSubjectException;
 
 	/**
 	 * Update a subject.

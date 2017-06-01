@@ -17,6 +17,8 @@ public class MicroserviceRequestsService {
 	 */
 	public static final String SEARCH = "/search";
 	
+	public static final String CENTERID = "/centerid";
+	
 	@Value("${ms.url.shanoir-ng-studycard}")
 	private String studycardMsUrl;
 

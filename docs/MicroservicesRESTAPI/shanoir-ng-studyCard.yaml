@@ -152,6 +152,30 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  '/studycard/centerid/{studyCardId}':
+    get:
+      operationId: searchCenterId
+      description: 'If exists, returns center id'
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/studyCardId'
+      responses:
+        '200':
+          description: found center id
+          schema:
+            type: integer
+            format: int64
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no center id found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
 parameters:
   studyCardId:
     name: studyCardId

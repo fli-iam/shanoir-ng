@@ -58,23 +58,14 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		super.configure(http);
-		http
-			.csrf().disable()
-			.authorizeRequests()
-			.anyRequest().permitAll();
+		http.csrf().disable().authorizeRequests().anyRequest().permitAll();
 	}
 
 	@Bean
 	public KeycloakConfigResolver KeycloakConfigResolver() {
 		return new KeycloakSpringBootConfigResolver();
 	}
-	
-	/**
-	 * http://stackoverflow.com/a/31748398/122441 until
-	 * https://jira.spring.io/browse/DATAREST-573
-	 * 
-	 * @return
-	 */
+
 	@Bean
 	public FilterRegistrationBean corsFilter() {
 		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -82,9 +73,8 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 		config.setAllowCredentials(true);
 		config.addAllowedOrigin(frontServerUrl);
 		config.addAllowedHeader("*");
-		config.addAllowedMethod("OPTIONS");
-		config.addAllowedMethod("POST");
-		source.registerCorsConfiguration("/accountrequest", config);
+		config.addAllowedMethod("*");
+		source.registerCorsConfiguration("/**", config);
 		final FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
 		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
 		return bean;

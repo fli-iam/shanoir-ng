@@ -74,6 +74,18 @@ public interface StudyCardApi {
 			"application/json" }, method = RequestMethod.POST)
 	ResponseEntity<List<StudyCard>> searchStudyCards(
 			@ApiParam(value = "study ids", required = true) @RequestBody IdListDTO studyIds);
+	
+    @ApiOperation(value = "", notes = "If exists, returns center id", response = Long.class, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "found center id", response = Long.class),
+        @ApiResponse(code = 401, message = "unauthorized", response = Long.class),
+        @ApiResponse(code = 403, message = "forbidden", response = Long.class),
+        @ApiResponse(code = 404, message = "no center id found", response = Long.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = Long.class) })
+    @RequestMapping(value = "/centerid/{studyCardId}",
+        produces = { "application/json" }, 
+        method = RequestMethod.GET)
+    ResponseEntity<Long> searchCenterId(@ApiParam(value = "id of the study card",required=true ) @PathVariable("studyCardId") Long studyCardId);
 
 	@ApiOperation(value = "", notes = "Updates a study card", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "study card updated", response = Void.class),

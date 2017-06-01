@@ -19,7 +19,7 @@
 	<properties>
 		<springfox-version>2.5.0</springfox-version>
 		<spring.active.profile></spring.active.profile>
-		<keycloak.version>2.5.1.Final</keycloak.version>
+		<keycloak.version>3.1.0.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<docker.image.name>shanoir-ng/users</docker.image.name>
 		<supervisor.file.name>ms.users.sv.dev.conf</supervisor.file.name>
