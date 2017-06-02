@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.mapper.CenterMapper;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -29,43 +30,46 @@ public class CenterApiController implements CenterApi {
 	private static final Logger LOG = LoggerFactory.getLogger(CenterApiController.class);
 
 	@Autowired
+	private CenterMapper centerMapper;
+
+	@Autowired
 	private CenterService centerService;
 
 	@Override
 	public ResponseEntity<Void> deleteCenter(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
 		if (centerService.findById(centerId) == null) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		try {
 			centerService.deleteById(centerId);
 		} catch (ShanoirStudiesException e) {
-			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
-	public ResponseEntity<Center> findCenterById(
+	public ResponseEntity<CenterDTO> findCenterById(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
 		final Center center = centerService.findById(centerId);
 		if (center == null) {
-			return new ResponseEntity<Center>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Center>(center, HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centerToCenterDTO(center), HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<List<Center>> findCenters() {
+	public ResponseEntity<List<CenterDTO>> findCenters() {
 		final List<Center> centers = centerService.findAll();
 		if (centers.isEmpty()) {
-			return new ResponseEntity<List<Center>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<List<Center>>(centers, HttpStatus.OK);
+		return new ResponseEntity<>(centerMapper.centersToCenterDTOs(centers), HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<Center> saveNewCenter(
+	public ResponseEntity<CenterDTO> saveNewCenter(
 			@ApiParam(value = "the center to create", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
 
@@ -89,7 +93,7 @@ public class CenterApiController implements CenterApi {
 		/* Save center in db. */
 		try {
 			final Center createdCenter = centerService.save(center);
-			return new ResponseEntity<Center>(createdCenter, HttpStatus.OK);
+			return new ResponseEntity<>(centerMapper.centerToCenterDTO(createdCenter), HttpStatus.OK);
 		} catch (ShanoirStudiesException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -127,7 +131,7 @@ public class CenterApiController implements CenterApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
 
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	/*

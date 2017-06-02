@@ -2,6 +2,7 @@ package org.shanoir.ng.acquisitionequipment;
 
 import java.util.List;
 
+import org.shanoir.ng.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -25,7 +26,10 @@ import io.swagger.annotations.ApiParam;
 public class AcquisitionEquipmentApiController implements AcquisitionEquipmentApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentApiController.class);
-	
+
+	@Autowired
+	private AcquisitionEquipmentMapper acquisitionEquipmentMapper;
+
 	@Autowired
 	private AcquisitionEquipmentService acquisitionEquipmentService;
 
@@ -42,31 +46,33 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
-	public ResponseEntity<AcquisitionEquipment> findAcquisitionEquipmentById(
+	public ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(acquisitionEquipmentId);
 		if (equipment == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(equipment, HttpStatus.OK);
+		return new ResponseEntity<>(acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(equipment),
+				HttpStatus.OK);
 	}
 
-	public ResponseEntity<List<AcquisitionEquipment>> findAcquisitionEquipments() {
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments() {
 		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAll();
 		if (equipments.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(equipments, HttpStatus.OK);
+		return new ResponseEntity<>(
+				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
 	}
 
-	public ResponseEntity<AcquisitionEquipment> saveNewAcquisitionEquipment(
+	public ResponseEntity<AcquisitionEquipmentDTO> saveNewAcquisitionEquipment(
 			@ApiParam(value = "acquisition equipment to create", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException {
 		/* Validation */
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
 		// Check unique constrainte
-        final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(acquisitionEquipment);
+		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(acquisitionEquipment);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -79,7 +85,8 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 		/* Save acquisition equipment in db. */
 		try {
-			return new ResponseEntity<>(acquisitionEquipmentService.save(acquisitionEquipment), HttpStatus.OK);
+			return new ResponseEntity<>(acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(
+					acquisitionEquipmentService.save(acquisitionEquipment)), HttpStatus.OK);
 		} catch (final ShanoirStudiesException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -90,14 +97,14 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId,
 			@ApiParam(value = "acquisition equipment to update", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException {
-		
+
 		// IMPORTANT : avoid any confusion that could lead to security breach
 		acquisitionEquipment.setId(acquisitionEquipmentId);
-				
+
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
 		// Check unique constrainte
-        final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(acquisitionEquipment);
+		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(acquisitionEquipment);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
@@ -125,7 +132,8 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	 * @author yyao
 	 */
 	private FieldErrorMap getUniqueConstraintErrors(final AcquisitionEquipment acquisitionEquipment) {
-		final UniqueValidator<AcquisitionEquipment> uniqueValidator = new UniqueValidator<AcquisitionEquipment>(acquisitionEquipmentService);
+		final UniqueValidator<AcquisitionEquipment> uniqueValidator = new UniqueValidator<AcquisitionEquipment>(
+				acquisitionEquipmentService);
 		FieldErrorMap uniqueErrorsFromField = uniqueValidator.validate(acquisitionEquipment);
 		FieldErrorMap uniqueErrorsFromTable = uniqueValidator.validateFromTable(acquisitionEquipment);
 		final FieldErrorMap uniqueErrors = new FieldErrorMap(uniqueErrorsFromField, uniqueErrorsFromTable);

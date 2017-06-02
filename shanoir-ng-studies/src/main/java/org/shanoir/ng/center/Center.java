@@ -1,15 +1,22 @@
 package org.shanoir.ng.center;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
+import org.shanoir.ng.acquisitionequipment.AcquisitionEquipment;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
+import org.shanoir.ng.study.StudyCenter;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -29,21 +36,29 @@ public class Center extends HalEntity {
 	 */
 	private static final long serialVersionUID = -1965594174611746591L;
 
+	/** List of the acquisition equipments related to this center. */
+	@OneToMany(mappedBy = "center", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+	private List<AcquisitionEquipment> acquisitionEquipmentList;
+
+	private String city;
+
+	private String country;
+
 	@NotBlank
 	@Column(unique = true)
 	@Unique
 	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
 	private String name;
 
-	private String street;
+	private String phoneNumber;
 
 	private String postalCode;
 
-	private String city;
+	private String street;
 
-	private String country;
-
-	private String phoneNumber;
+	/** Relations between the investigators, the centers and the studies. */
+	@OneToMany(mappedBy = "center", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<StudyCenter> studyCenterList;
 
 	private String website;
 
@@ -56,48 +71,18 @@ public class Center extends HalEntity {
 	}
 
 	/**
-	 * @return the name
+	 * @return the acquisitionEquipmentList
 	 */
-	public String getName() {
-		return name;
+	public List<AcquisitionEquipment> getAcquisitionEquipmentList() {
+		return acquisitionEquipmentList;
 	}
 
 	/**
-	 * @param name
-	 *            the name to set
+	 * @param acquisitionEquipmentList
+	 *            the acquisitionEquipmentList to set
 	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * @return the street
-	 */
-	public String getStreet() {
-		return street;
-	}
-
-	/**
-	 * @param street
-	 *            the street to set
-	 */
-	public void setStreet(String street) {
-		this.street = street;
-	}
-
-	/**
-	 * @return the postalCode
-	 */
-	public String getPostalCode() {
-		return postalCode;
-	}
-
-	/**
-	 * @param postalCode
-	 *            the postalCode to set
-	 */
-	public void setPostalCode(String postalCode) {
-		this.postalCode = postalCode;
+	public void setAcquisitionEquipmentList(List<AcquisitionEquipment> acquisitionEquipmentList) {
+		this.acquisitionEquipmentList = acquisitionEquipmentList;
 	}
 
 	/**
@@ -131,6 +116,21 @@ public class Center extends HalEntity {
 	}
 
 	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
 	 * @return the phoneNumber
 	 */
 	public String getPhoneNumber() {
@@ -143,6 +143,51 @@ public class Center extends HalEntity {
 	 */
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
+	}
+
+	/**
+	 * @return the postalCode
+	 */
+	public String getPostalCode() {
+		return postalCode;
+	}
+
+	/**
+	 * @param postalCode
+	 *            the postalCode to set
+	 */
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
+	}
+
+	/**
+	 * @return the street
+	 */
+	public String getStreet() {
+		return street;
+	}
+
+	/**
+	 * @param street
+	 *            the street to set
+	 */
+	public void setStreet(String street) {
+		this.street = street;
+	}
+
+	/**
+	 * @return the studyCenterList
+	 */
+	public List<StudyCenter> getStudyCenterList() {
+		return studyCenterList;
+	}
+
+	/**
+	 * @param studyCenterList
+	 *            the studyCenterList to set
+	 */
+	public void setStudyCenterList(List<StudyCenter> studyCenterList) {
+		this.studyCenterList = studyCenterList;
 	}
 
 	/**
