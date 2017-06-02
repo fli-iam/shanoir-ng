@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,11 +47,21 @@ public class AcquisitionEquipmentApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
+	private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
+
+	@MockBean
 	private AcquisitionEquipmentService acquisitionEquipmentServiceMock;
 
 	@Before
 	public void setup() throws ShanoirStudiesException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+
+		given(acquisitionEquipmentMapperMock
+				.acquisitionEquipmentsToAcquisitionEquipmentDTOs(Mockito.anyListOf(AcquisitionEquipment.class)))
+						.willReturn(Arrays.asList(new AcquisitionEquipmentDTO()));
+		given(acquisitionEquipmentMapperMock
+				.acquisitionEquipmentToAcquisitionEquipmentDTO(Mockito.any(AcquisitionEquipment.class)))
+						.willReturn(new AcquisitionEquipmentDTO());
 
 		doNothing().when(acquisitionEquipmentServiceMock).deleteById(1L);
 		given(acquisitionEquipmentServiceMock.findAll()).willReturn(Arrays.asList(new AcquisitionEquipment()));

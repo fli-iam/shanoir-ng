@@ -43,15 +43,15 @@ keycloak:
   auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-studyCards
-  securityConstraints:
-    - authRoles:
-      - ROLE_ADMIN
-      - ROLE_EXPERT
-      - ROLE_GUEST
-      - ROLE_USER
-    - securityCollections:
-      - name: studycards secured api
-      - patterns:
+  securityConstraints[0]:
+    securityCollections[0]:
+      name: studycards secured api
+      authRoles:
+        - ROLE_ADMIN
+        - ROLE_EXPERT
+        - ROLE_GUEST
+        - ROLE_USER
+      patterns:
         - /*
 # logging configuration
 logging:

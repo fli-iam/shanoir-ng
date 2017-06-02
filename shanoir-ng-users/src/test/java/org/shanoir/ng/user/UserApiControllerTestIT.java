@@ -33,6 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 
 	private static final String REQUEST_PATH = "/user";
+	private static final String REQUEST_PATH_EXTENSION = REQUEST_PATH + "/extension";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
@@ -82,7 +83,7 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 	public void requestExtensionProtected() {
 		final HttpEntity<ExtensionRequestInfo> entity = new HttpEntity<>(createExtensionRequestInfo());
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH + "/extension", HttpMethod.PUT, entity,
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_EXTENSION, HttpMethod.PUT, entity,
 				String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
@@ -91,7 +92,7 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 	public void requestExtensionWithLogin() {
 		final HttpEntity<ExtensionRequestInfo> entity = new HttpEntity<>(createExtensionRequestInfo(), getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH + "/extension", HttpMethod.PUT, entity,
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_EXTENSION, HttpMethod.PUT, entity,
 				String.class);
 		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 	}

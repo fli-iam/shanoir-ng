@@ -43,15 +43,15 @@ keycloak:
   auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-studies
-  securityConstraints:
-    - authRoles:
-      - ROLE_ADMIN
-      - ROLE_EXPERT
-      - ROLE_GUEST
-      - ROLE_USER
-    - securityCollections:
-      - name: studies secured api
-      - patterns:
+  securityConstraints[0]:
+    securityCollections[0]:
+      name: studies secured api
+      authRoles:
+        - ROLE_ADMIN
+        - ROLE_EXPERT
+        - ROLE_GUEST
+        - ROLE_USER
+      patterns:
         - /*
 # microservices url
 ms.url:

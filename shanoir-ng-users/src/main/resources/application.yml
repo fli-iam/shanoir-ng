@@ -52,20 +52,25 @@ keycloak:
   auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-users
-  securityConstraints:
-    - authRoles: 
-      - ROLE_ADMIN
-      - ROLE_EXPERT
-      - ROLE_GUEST
-      - ROLE_USER
-    - securityCollections:
-      - name: user secured api
-      - patterns:
-        - /user
-    - securityCollections:
-      - name: user secured api
-      - patterns:
-        - /role
+  securityConstraints[0]:
+    securityCollections[0]:
+      name: user secured api
+      authRoles: 
+        - ROLE_ADMIN
+        - ROLE_EXPERT
+        - ROLE_GUEST
+        - ROLE_USER
+      patterns:
+        - /user/*
+    securityCollections[1]:
+      name: role secured api
+      authRoles: 
+        - ROLE_ADMIN
+        - ROLE_EXPERT
+        - ROLE_GUEST
+        - ROLE_USER
+      patterns:
+        - /role/*
 kc.requests:
   realm: master
   auth-server-url: http://shanoir-ng-nginx/auth
