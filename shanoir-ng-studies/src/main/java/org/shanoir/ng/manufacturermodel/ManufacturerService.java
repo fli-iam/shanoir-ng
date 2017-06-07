@@ -30,7 +30,7 @@ public interface ManufacturerService extends UniqueCheckableService<Manufacturer
 	Manufacturer findById(Long id);
 
 	/**
-	 * Save an manufacturer.
+	 * Save a manufacturer.
 	 *
 	 * @param manufacturer
 	 *            manufacturer to create.
@@ -38,5 +38,15 @@ public interface ManufacturerService extends UniqueCheckableService<Manufacturer
 	 * @throws ShanoirStudiesException
 	 */
 	Manufacturer save(Manufacturer manufacturer) throws ShanoirStudiesException;
+
+	/**
+	 * Update a manufacturer.
+	 *
+	 * @param manufacturer
+	 *            manufacturer to update.
+	 * @return updated manufacturer.
+	 * @throws ShanoirStudiesException
+	 */
+	Manufacturer update(Manufacturer manufacturer) throws ShanoirStudiesException;
 
 }

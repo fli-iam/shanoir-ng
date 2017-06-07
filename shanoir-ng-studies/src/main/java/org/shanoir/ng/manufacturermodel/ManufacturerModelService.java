@@ -39,4 +39,14 @@ public interface ManufacturerModelService extends UniqueCheckableService<Manufac
 	 */
 	ManufacturerModel save(ManufacturerModel manufacturerModel) throws ShanoirStudiesException;
 
+	/**
+	 * Update a manufacturer model.
+	 *
+	 * @param manufacturerModel
+	 *            manufacturer model to update.
+	 * @return updated manufacturer model.
+	 * @throws ShanoirStudiesException
+	 */
+	ManufacturerModel update(ManufacturerModel manufacturerModel) throws ShanoirStudiesException;
+
 }

@@ -3,6 +3,7 @@ package org.shanoir.ng.manufacturermodel;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -57,10 +58,27 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 		try {
 			savedManufacturer = manufacturerRepository.save(manufacturer);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while creating acquisition equipment: " + dive.getMessage());
+			ShanoirStudiesException.logAndThrow(LOG, "Error while creating manufacturer: " + dive.getMessage());
 		}
 		updateShanoirOld(savedManufacturer);
 		return savedManufacturer;
+	}
+
+	@Override
+	public Manufacturer update(final Manufacturer manufacturer) throws ShanoirStudiesException {
+		final Manufacturer manufacturerDb = manufacturerRepository.findOne(manufacturer.getId());
+		if (manufacturerDb == null) {
+			LOG.error("Manufacturer with id " + manufacturer.getId() + " not found");
+			throw new ShanoirStudiesException(ErrorModelCode.MANUFACTURER_NOT_FOUND);
+		}
+		manufacturerDb.setName(manufacturer.getName());
+		try {
+			manufacturerRepository.save(manufacturerDb);
+		} catch (Exception e) {
+			ShanoirStudiesException.logAndThrow(LOG, "Error while updating manufacturer: " + e.getMessage());
+		}
+		updateShanoirOld(manufacturerDb);
+		return manufacturerDb;
 	}
 
 	/*
@@ -77,10 +95,8 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 					new ObjectMapper().writeValueAsString(manufacturer));
 			return true;
 		} catch (AmqpException e) {
-			LOG.error(
-					"Cannot send manufacturer " + manufacturer.getId()
-							+ " save/update to Shanoir Old on queue : " + RabbitMqConfiguration.queueOut().getName(),
-					e);
+			LOG.error("Cannot send manufacturer " + manufacturer.getId() + " save/update to Shanoir Old on queue : "
+					+ RabbitMqConfiguration.manufacturerQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send manufacturer " + manufacturer.getId()
 					+ " save/update because of an error while serializing manufacturer.", e);

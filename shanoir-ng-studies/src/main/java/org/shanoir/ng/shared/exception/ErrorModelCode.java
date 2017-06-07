@@ -18,7 +18,13 @@ public final class ErrorModelCode {
 	/** No study found */
 	public static final Integer STUDY_NOT_FOUND = 201;
 	
-	/** No user found */
+	/** No acquisition equipment found */
 	public static final Integer ACQ_EQPT_NOT_FOUND = 251;
+	
+	/** No manufacturer model found */
+	public static final Integer MANUFACTURER_MODEL_NOT_FOUND = 261;
+	
+	/** No manufacturer found */
+	public static final Integer MANUFACTURER_NOT_FOUND = 271;
 	
 }

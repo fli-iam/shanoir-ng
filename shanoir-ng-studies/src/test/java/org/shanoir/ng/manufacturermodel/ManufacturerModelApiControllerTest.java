@@ -49,7 +49,7 @@ public class ManufacturerModelApiControllerTest {
 
 	@Before
 	public void setup() throws ShanoirStudiesException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+		gson = new GsonBuilder().create();
 
 		given(manufacturerModelServiceMock.findAll()).willReturn(Arrays.asList(new ManufacturerModel()));
 		given(manufacturerModelServiceMock.findById(1L)).willReturn(new ManufacturerModel());
@@ -76,6 +76,14 @@ public class ManufacturerModelApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createManufacturerModel())))
 				.andExpect(status().isOk());
+	}
+
+	@Test
+	@WithMockUser(authorities = { "ROLE_ADMIN" })
+	public void updateManufacturerModelTTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createManufacturerModel())))
+				.andExpect(status().isNoContent());
 	}
 
 }

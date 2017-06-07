@@ -8,6 +8,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
+import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -29,7 +30,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
 public class ManufacturerModelApiControllerTestIT extends KeycloakControllerTestIT {
-	
+
 	private static final String REQUEST_PATH = "/manufacturermodel";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
@@ -66,10 +67,11 @@ public class ManufacturerModelApiControllerTestIT extends KeycloakControllerTest
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
-	
+
 	@Test
 	public void findManufacturerModelsWithBadRole() {
-		final HttpEntity<ManufacturerModel> entity = new HttpEntity<ManufacturerModel>(null, getHeadersWithToken(false));
+		final HttpEntity<ManufacturerModel> entity = new HttpEntity<ManufacturerModel>(null,
+				getHeadersWithToken(false));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
 				String.class);
@@ -78,8 +80,28 @@ public class ManufacturerModelApiControllerTestIT extends KeycloakControllerTest
 
 	@Test
 	public void saveNewManufacturerModelProtected() {
-		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new ManufacturerModel(), String.class);
+		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new ManufacturerModel(),
+				String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+	}
+
+	@Test
+	public void updateManufacturerModelProtected() {
+		final HttpEntity<ManufacturerModel> entity = new HttpEntity<>(ModelsUtil.createManufacturerModel());
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+				String.class);
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+	}
+
+	@Test
+	public void updateManufacturerModelWithLogin() throws ClientProtocolException, IOException {
+		final HttpEntity<ManufacturerModel> entity = new HttpEntity<>(ModelsUtil.createManufacturerModel(),
+				getHeadersWithToken(true));
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
+				String.class);
+		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 	}
 
 }

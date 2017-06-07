@@ -82,6 +82,15 @@ public class ManufacturerServiceTest {
 		Mockito.verify(manufacturerRepository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
 	}
 
+	@Test
+	public void updateTest() throws ShanoirStudiesException {
+		final Manufacturer updatedManufacturer = manufacturerService.update(createManufacturer());
+		Assert.assertNotNull(updatedManufacturer);
+		Assert.assertTrue(UPDATED_MANUFACTURER_NAME.equals(updatedManufacturer.getName()));
+
+		Mockito.verify(manufacturerRepository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
+	}
+
 	private Manufacturer createManufacturer() {
 		final Manufacturer manufacturer = new Manufacturer();
 		manufacturer.setId(MANUFACTURER_ID);
