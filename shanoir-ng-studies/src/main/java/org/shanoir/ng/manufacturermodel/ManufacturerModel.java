@@ -43,9 +43,7 @@ public class ManufacturerModel extends HalEntity {
 	@NotNull
 	private Manufacturer manufacturer;
 
-	@NotBlank
-	@Column(unique = true)
-	@Unique
+	@NotNull
 	@Length(min = 2, max = 200)
 	private String name;
 
