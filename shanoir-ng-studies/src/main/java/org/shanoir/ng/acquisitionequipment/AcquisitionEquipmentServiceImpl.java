@@ -119,7 +119,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		} catch (AmqpException e) {
 			LOG.error(
 					"Cannot send acquisition equipment " + acquisitionEquipment.getId()
-							+ " save/update to Shanoir Old on queue : " + RabbitMqConfiguration.queueOut().getName(),
+							+ " save/update to Shanoir Old on queue : " + RabbitMqConfiguration.acqEqptQueueOut().getName(),
 					e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send acquisition equipment " + acquisitionEquipment.getId()

@@ -187,6 +187,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			getUserService().update(user);
 		} catch (final ShanoirUsersException e) {
 			LOG.error("Error while trying to update user " + userId + " : ", e);
+			if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}

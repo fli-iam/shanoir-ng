@@ -109,12 +109,12 @@ public class CenterServiceImpl implements CenterService {
 	private boolean updateShanoirOld(final Center center) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.centerQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(center));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send center " + center.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.queueOut().getName(), e);
+					+ RabbitMqConfiguration.centerQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send center " + center.getId() + " save/update because of an error while serializing center.",
 					e);
