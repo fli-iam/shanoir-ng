@@ -13,7 +13,6 @@ import org.mockito.Mockito;
 import org.shanoir.ng.center.Center;
 import org.shanoir.ng.center.CenterApiController;
 import org.shanoir.ng.center.CenterService;
-import org.shanoir.ng.mapper.CenterMapper;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;

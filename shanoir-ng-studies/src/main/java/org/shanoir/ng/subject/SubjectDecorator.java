@@ -1,10 +1,6 @@
-package org.shanoir.ng.mapper.decorator;
+package org.shanoir.ng.subject;
 
-import org.shanoir.ng.mapper.SubjectMapper;
 import org.shanoir.ng.study.StudyRepository;
-import org.shanoir.ng.subject.ImagedObjectCategory;
-import org.shanoir.ng.subject.Subject;
-import org.shanoir.ng.subject.SubjectStudy;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectStudyDTO;
 import org.springframework.beans.factory.annotation.Autowired;

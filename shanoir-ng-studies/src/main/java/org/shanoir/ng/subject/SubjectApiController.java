@@ -1,7 +1,7 @@
 package org.shanoir.ng.subject;
 
 import java.util.List;
-import javax.validation.Valid;
+
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -9,7 +9,6 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirSubjectException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
-import org.shanoir.ng.study.Study;
 import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +19,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import io.swagger.annotations.ApiParam;
 
 @Controller
-public class SubjectApiController implements SubjectApi  {
+public class SubjectApiController implements SubjectApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectApiController.class);
 
@@ -31,8 +31,8 @@ public class SubjectApiController implements SubjectApi  {
 	private SubjectService subjectService;
 
 	@Override
-	public ResponseEntity<Void> deleteSubject
-		(@ApiParam(value = "id of the subject",required=true ) @PathVariable("subjectId") Long subjectId) {
+	public ResponseEntity<Void> deleteSubject(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		if (subjectService.findById(subjectId) == null) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
@@ -46,7 +46,7 @@ public class SubjectApiController implements SubjectApi  {
 
 	@Override
 	public ResponseEntity<Subject> findSubjectById(
-				@ApiParam(value = "id of the subject",required=true ) @PathVariable("subjectId") Long subjectId) {
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		final Subject subject = subjectService.findById(subjectId);
 		if (subject == null) {
 			return new ResponseEntity<Subject>(HttpStatus.NOT_FOUND);
@@ -55,7 +55,7 @@ public class SubjectApiController implements SubjectApi  {
 	}
 
 	@Override
-	  public ResponseEntity<List<Subject>> findSubjects() {
+	public ResponseEntity<List<Subject>> findSubjects() {
 		final List<Subject> subject = subjectService.findAll();
 		if (subject.isEmpty()) {
 			return new ResponseEntity<List<Subject>>(HttpStatus.NO_CONTENT);
@@ -64,8 +64,9 @@ public class SubjectApiController implements SubjectApi  {
 	}
 
 	@Override
-	  public ResponseEntity<Subject> saveNewSubject(
-			@ApiParam(value = "subject to create" ,required=true ) @RequestBody Subject subject, final BindingResult result) throws RestServiceException {
+	public ResponseEntity<Subject> saveNewSubject(
+			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
+			final BindingResult result) throws RestServiceException {
 
 		/* Validation */
 		// A basic template can only update certain fields, check that
@@ -90,16 +91,14 @@ public class SubjectApiController implements SubjectApi  {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
 	}
-	
 
 	@Override
 	public ResponseEntity<Subject> saveNewOFSEPSubject(
-			@ApiParam(value = "subject to create" ,required=true )
-			@RequestBody SubjectStudyCardIdDTO subjectStudyCardIdDTO,
+			@ApiParam(value = "subject to create", required = true) @RequestBody SubjectStudyCardIdDTO subjectStudyCardIdDTO,
 			final BindingResult result) throws RestServiceException {
-		
-		Long studyCardId=subjectStudyCardIdDTO.getStudyCardId();
-		Subject subject=subjectStudyCardIdDTO.getSubject();
+
+		Long studyCardId = subjectStudyCardIdDTO.getStudyCardId();
+		Subject subject = subjectStudyCardIdDTO.getSubject();
 		/* Validation */
 		// A basic template can only update certain fields, check that
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(subject);
@@ -124,10 +123,11 @@ public class SubjectApiController implements SubjectApi  {
 		}
 
 	}
-	  
+
 	@Override
-	 public ResponseEntity<Void> updateSubject(@ApiParam(value = "id of the subject",required=true ) @PathVariable("subjectId") Long subjectId,
-		        @ApiParam(value = "subject to update" ,required=true ) @RequestBody Subject subject,
+	public ResponseEntity<Void> updateSubject(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "subject to update", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException {
 
 		// IMPORTANT : avoid any confusion that could lead to security breach
@@ -167,7 +167,8 @@ public class SubjectApiController implements SubjectApi  {
 	 */
 	private FieldErrorMap getUpdateRightsErrors(final Subject subject) {
 		final Subject previousStateTemplate = subjectService.findById(subject.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<Subject>().validate(previousStateTemplate, subject);
+		final FieldErrorMap accessErrors = new EditableOnlyByValidator<Subject>().validate(previousStateTemplate,
+				subject);
 		return accessErrors;
 	}
 
@@ -196,7 +197,8 @@ public class SubjectApiController implements SubjectApi  {
 	}
 
 	@Override
-	public ResponseEntity<List<Subject>> findSubjectsByStudyId(@ApiParam(value = "id of the study",required=true ) @PathVariable("studyId") Long studyId) {
+	public ResponseEntity<List<Subject>> findSubjectsByStudyId(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 
 		final List<Subject> subjects = subjectService.findAllSubjectsOfStudy(studyId);
 		if (subjects.isEmpty()) {
@@ -207,7 +209,8 @@ public class SubjectApiController implements SubjectApi  {
 	}
 
 	@Override
-	public ResponseEntity<Subject> findSubjectByIdentifier(@ApiParam(value = "identifier of the subject",required=true ) @PathVariable("subjectIdentifier") String subjectIdentifier) {
+	public ResponseEntity<Subject> findSubjectByIdentifier(
+			@ApiParam(value = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
 
 		final Subject subject = subjectService.findByIdentifier(subjectIdentifier);
 		if (subject == null) {
@@ -216,12 +219,5 @@ public class SubjectApiController implements SubjectApi  {
 		return new ResponseEntity<Subject>(subject, HttpStatus.OK);
 
 	}
-
-
-
-	
-	
-
-
 
 }

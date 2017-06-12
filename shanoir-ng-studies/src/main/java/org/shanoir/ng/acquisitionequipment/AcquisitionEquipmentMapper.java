@@ -1,10 +1,9 @@
-package org.shanoir.ng.mapper;
+package org.shanoir.ng.acquisitionequipment;
 
 import java.util.List;
 
 import org.mapstruct.Mapper;
-import org.shanoir.ng.acquisitionequipment.AcquisitionEquipment;
-import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentDTO;
+import org.shanoir.ng.center.CenterMapper;
 
 /**
  * Mapper for acquisition equipments.

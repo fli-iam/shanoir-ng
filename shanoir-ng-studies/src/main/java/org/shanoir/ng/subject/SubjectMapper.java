@@ -1,13 +1,9 @@
-package org.shanoir.ng.mapper;
+package org.shanoir.ng.subject;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import org.mapstruct.factory.Mappers;
-import org.shanoir.ng.subject.SubjectStudy;
-import org.shanoir.ng.subject.Subject;
-import org.shanoir.ng.mapper.decorator.SubjectDecorator;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectStudyDTO;
 

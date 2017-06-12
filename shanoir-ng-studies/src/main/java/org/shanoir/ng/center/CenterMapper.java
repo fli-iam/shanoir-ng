@@ -1,10 +1,8 @@
-package org.shanoir.ng.mapper;
+package org.shanoir.ng.center;
 
 import java.util.List;
 
 import org.mapstruct.Mapper;
-import org.shanoir.ng.center.Center;
-import org.shanoir.ng.center.CenterDTO;
 
 /**
  * Mapper for centers.

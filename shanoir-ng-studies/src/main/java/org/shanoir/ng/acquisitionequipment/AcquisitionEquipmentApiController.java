@@ -2,7 +2,6 @@ package org.shanoir.ng.acquisitionequipment;
 
 import java.util.List;
 
-import org.shanoir.ng.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
