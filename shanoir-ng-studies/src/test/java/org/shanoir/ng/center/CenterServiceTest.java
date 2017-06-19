@@ -33,6 +33,9 @@ public class CenterServiceTest {
 	private static final String UPDATED_CENTER_NAME = "test";
 
 	@Mock
+	private CenterMapper centerMapper;
+
+	@Mock
 	private CenterRepository centerRepository;
 
 	@Mock
@@ -43,6 +46,8 @@ public class CenterServiceTest {
 
 	@Before
 	public void setup() {
+		given(centerMapper.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
+		
 		given(centerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCenter()));
 		given(centerRepository.findOne(CENTER_ID)).willReturn(ModelsUtil.createCenter());
 		given(centerRepository.save(Mockito.any(Center.class))).willReturn(ModelsUtil.createCenter());

@@ -1,6 +1,6 @@
 package org.shanoir.ng.acquisitionequipment;
 
-import org.shanoir.ng.center.CenterDTO;
+import org.shanoir.ng.center.SimpleCenterDTO;
 import org.shanoir.ng.manufacturermodel.ManufacturerModel;
 
 /**
@@ -11,7 +11,7 @@ import org.shanoir.ng.manufacturermodel.ManufacturerModel;
  */
 public class AcquisitionEquipmentDTO {
 
-	private CenterDTO center;
+	private SimpleCenterDTO center;
 
 	private Long id;
 
@@ -28,7 +28,7 @@ public class AcquisitionEquipmentDTO {
 	/**
 	 * @return the center
 	 */
-	public CenterDTO getCenter() {
+	public SimpleCenterDTO getCenter() {
 		return center;
 	}
 
@@ -36,7 +36,7 @@ public class AcquisitionEquipmentDTO {
 	 * @param center
 	 *            the center to set
 	 */
-	public void setCenter(CenterDTO center) {
+	public void setCenter(SimpleCenterDTO center) {
 		this.center = center;
 	}
 

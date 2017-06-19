@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
+import javax.validation.constraints.Pattern;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
@@ -38,7 +39,7 @@ public class Center extends HalEntity {
 
 	/** List of the acquisition equipments related to this center. */
 	@OneToMany(mappedBy = "center", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-	private List<AcquisitionEquipment> acquisitionEquipmentList;
+	private List<AcquisitionEquipment> acquisitionEquipments;
 
 	private String city;
 
@@ -50,8 +51,10 @@ public class Center extends HalEntity {
 	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
 	private String name;
 
+	@Pattern(regexp = "[\\d]*")
 	private String phoneNumber;
 
+	@Pattern(regexp = "[\\d]*")
 	private String postalCode;
 
 	private String street;
@@ -71,18 +74,18 @@ public class Center extends HalEntity {
 	}
 
 	/**
-	 * @return the acquisitionEquipmentList
+	 * @return the acquisitionEquipments
 	 */
-	public List<AcquisitionEquipment> getAcquisitionEquipmentList() {
-		return acquisitionEquipmentList;
+	public List<AcquisitionEquipment> getAcquisitionEquipments() {
+		return acquisitionEquipments;
 	}
 
 	/**
-	 * @param acquisitionEquipmentList
-	 *            the acquisitionEquipmentList to set
+	 * @param acquisitionEquipments
+	 *            the acquisitionEquipments to set
 	 */
-	public void setAcquisitionEquipmentList(List<AcquisitionEquipment> acquisitionEquipmentList) {
-		this.acquisitionEquipmentList = acquisitionEquipmentList;
+	public void setAcquisitionEquipments(List<AcquisitionEquipment> acquisitionEquipments) {
+		this.acquisitionEquipments = acquisitionEquipments;
 	}
 
 	/**

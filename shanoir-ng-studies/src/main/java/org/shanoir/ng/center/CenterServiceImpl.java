@@ -32,10 +32,13 @@ public class CenterServiceImpl implements CenterService {
 	private static final Logger LOG = LoggerFactory.getLogger(CenterServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
+	private CenterMapper centerMapper;
 
 	@Autowired
 	private CenterRepository centerRepository;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirStudiesException {
@@ -107,17 +110,19 @@ public class CenterServiceImpl implements CenterService {
 	 * @return false if it fails, true if it succeed.
 	 */
 	private boolean updateShanoirOld(final Center center) {
+		final CenterDTO centerDTO = centerMapper.centerToCenterDTO(center);
+		centerDTO.setAcquisitionEquipments(null);
 		try {
 			LOG.info("Send update to Shanoir Old");
 			rabbitTemplate.convertAndSend(RabbitMqConfiguration.centerQueueOut().getName(),
-					new ObjectMapper().writeValueAsString(center));
+					new ObjectMapper().writeValueAsString(centerDTO));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send center " + center.getId() + " save/update to Shanoir Old on queue : "
 					+ RabbitMqConfiguration.centerQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send center " + center.getId() + " save/update because of an error while serializing center.",
-					e);
+			LOG.error("Cannot send center " + center.getId()
+					+ " save/update because of an error while serializing center.", e);
 		}
 		return false;
 	}
@@ -132,17 +137,19 @@ public class CenterServiceImpl implements CenterService {
 	 * @return database center with new values.
 	 */
 	private Center updateCenterValues(final Center centerDb, final Center center) {
-		centerDb.setName(center.getName());
-		centerDb.setStreet(center.getStreet());
-		centerDb.setPostalCode(center.getPostalCode());
 		centerDb.setCity(center.getCity());
 		centerDb.setCountry(center.getCountry());
+		centerDb.setName(center.getName());
 		centerDb.setPhoneNumber(center.getPhoneNumber());
+		centerDb.setPostalCode(center.getPostalCode());
+		centerDb.setStreet(center.getStreet());
 		centerDb.setWebsite(center.getWebsite());
 		return centerDb;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.shanoir.ng.service.CenterService#findByData(java.lang.String)
 	 */
 	@Override

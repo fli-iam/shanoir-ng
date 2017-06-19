@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMqConfiguration {
 
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
-	private static final String CNETER_QUEUE_NAME_OUT = "center_queue_from_ng";
+	private static final String CENTER_QUEUE_NAME_OUT = "center_queue_from_ng";
 	private static final String MANUFACTURER_MODEL_QUEUE_NAME_OUT = "manufacturer_model_queue_from_ng";
 	private static final String MANUFACTURER_QUEUE_NAME_OUT = "manufacturer_queue_from_ng";
 	private static final String STUDY_QUEUE_NAME_IN = "study_queue_to_ng";
@@ -49,7 +49,7 @@ public class RabbitMqConfiguration {
 
 	@Bean
 	public static Queue centerQueueOut() {
-		return new Queue(CNETER_QUEUE_NAME_OUT, true);
+		return new Queue(CENTER_QUEUE_NAME_OUT, true);
 	}
 
 	@Bean
