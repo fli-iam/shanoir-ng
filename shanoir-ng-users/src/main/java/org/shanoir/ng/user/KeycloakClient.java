@@ -42,7 +42,7 @@ public class KeycloakClient {
 	@Value("${kc.requests.admin.password}")
 	private String keycloakRequestsAdminPassword;
 
-	@Value("${kc.requests.auth-server-url}")
+	@Value("${keycloak.auth-server-url}")
 	private String keycloakRequestsAuthServerUrl;
 
 	@Value("${kc.requests.client.id}")

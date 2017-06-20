@@ -1,5 +1,6 @@
 # server configuration
 server:
+  administrator.email: shanoir-dev-test@lists.gforge.inria.fr
   display-name: Shanoir
   email-off: true
   port: 9900
@@ -49,7 +50,6 @@ front.server:
 keycloak:
   cors: true
   realm: shanoir-ng
-  auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-users
   securityConstraints[0]:
@@ -120,8 +120,6 @@ keycloak:
   auth-server-url: http://localhost/auth
   credentials:
     secret: 3b130530-4e0f-4101-bf56-1a92df705318
-kc.requests:
-  auth-server-url: http://localhost/auth
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-users.log
@@ -169,6 +167,7 @@ spring:
   rabbitmq:
     host: qualif-ng-rabbitmq
 server:
+  administrator.email: shanoir-dev-admin@lists.gforge.inria.fr
   email-off: false
 front.server:
   address: https://shanoir-qualif.irisa.fr/shanoir-ng
