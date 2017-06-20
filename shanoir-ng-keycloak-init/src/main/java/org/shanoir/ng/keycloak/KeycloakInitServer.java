@@ -150,6 +150,13 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		realm.setLoginTheme("shanoir-theme");
 		realm.setPasswordPolicy("hashIterations and length and specialChars and digits and upperCase and lowerCase");
 		realm.setResetPasswordAllowed(Boolean.TRUE);
+		// SMTP server
+		Map<String, String> config = new HashMap<>();
+		config.put("from", getSmtpFrom());
+		config.put("fromDisplayName", getSmtpFromDisplayName());
+		config.put("host", getSmtpHost());
+		config.put("port", getSmtpPort());
+		realm.setSmtpServer(config);
 		getKeycloak().realm(getKeycloakRealm()).update(realm);
 	}
 
