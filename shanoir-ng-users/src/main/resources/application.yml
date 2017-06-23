@@ -48,10 +48,11 @@ front.server:
   url: http://shanoir-ng-nginx
 #keycloak
 keycloak:
+  auth-server-url: http://shanoir-ng-nginx/auth
   cors: true
   realm: shanoir-ng
-  ssl-required: external
   resource: shanoir-ng-users
+  ssl-required: external
   securityConstraints[0]:
     securityCollections[0]:
       name: user secured api
@@ -73,7 +74,6 @@ keycloak:
         - /role/*
 kc.requests:
   realm: master
-  auth-server-url: http://shanoir-ng-nginx/auth
   client.id: admin-cli
   admin:
     login: admin
