@@ -1,4 +1,4 @@
-import { Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ViewContainerRef } from '@angular/core';
 import { MdDialog, MdDialogConfig, MdDialogRef } from '@angular/material';
 
 import { ConfirmDialogComponent } from "../../shared/utils/confirm.dialog.component";
@@ -21,6 +21,8 @@ export class CenterListComponent {
     public rowClickAction: Object;
     public loading: boolean = false;
     private createAcqEquip = false;
+    public visible = false;
+    private visibleAnimate = false;
 
     constructor(private centerService: CenterService, private confirmDialogService: ConfirmDialogService, 
         private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
@@ -115,10 +117,27 @@ export class CenterListComponent {
 
     openCreateAcqEquip = ()=> {
         this.createAcqEquip = true;
+        this.show();
     }
 
-    closePopup(subject: any) {
+    closePopin() {
         this.createAcqEquip = false;
+        this.hide();
     }
 
+    public show(): void {
+        this.visible = true;
+        setTimeout(() => this.visibleAnimate = true, 100);
+    }
+
+    public hide(): void {
+        this.visibleAnimate = false;
+        setTimeout(() => this.visible = false, 300);
+    }
+
+    public onContainerClicked(event: MouseEvent): void {
+    if ((<HTMLElement>event.target).classList.contains('modal')) {
+      this.hide();
+    }
+  }
 }
