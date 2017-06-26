@@ -46,11 +46,21 @@ public class AcquisitionEquipmentApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
+	private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
+
+	@MockBean
 	private AcquisitionEquipmentService acquisitionEquipmentServiceMock;
 
 	@Before
 	public void setup() throws ShanoirStudiesException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+
+		given(acquisitionEquipmentMapperMock
+				.acquisitionEquipmentsToAcquisitionEquipmentDTOs(Mockito.anyListOf(AcquisitionEquipment.class)))
+						.willReturn(Arrays.asList(new AcquisitionEquipmentDTO()));
+		given(acquisitionEquipmentMapperMock
+				.acquisitionEquipmentToAcquisitionEquipmentDTO(Mockito.any(AcquisitionEquipment.class)))
+						.willReturn(new AcquisitionEquipmentDTO());
 
 		doNothing().when(acquisitionEquipmentServiceMock).deleteById(1L);
 		given(acquisitionEquipmentServiceMock.findAll()).willReturn(Arrays.asList(new AcquisitionEquipment()));

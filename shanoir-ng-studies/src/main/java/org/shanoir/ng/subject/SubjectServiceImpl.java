@@ -204,7 +204,7 @@ public class SubjectServiceImpl implements SubjectService {
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send Subject " + subject.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.queueOut().getName(), e);
+					+ RabbitMqConfiguration.studyQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send Subject " + subject.getId() + " save/update because of an error while serializing Subject.",
 					e);

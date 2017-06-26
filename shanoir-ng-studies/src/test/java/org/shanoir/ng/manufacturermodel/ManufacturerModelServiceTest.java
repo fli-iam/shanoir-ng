@@ -43,7 +43,8 @@ public class ManufacturerModelServiceTest {
 		given(manufacturerModelRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturerModel()));
 		given(manufacturerModelRepository.findBy("name", ModelsUtil.MANUFACTURER_MODEL_NAME))
 				.willReturn(Arrays.asList(ModelsUtil.createManufacturerModel()));
-		given(manufacturerModelRepository.findOne(MANUFACTURER_MODEL_ID)).willReturn(ModelsUtil.createManufacturerModel());
+		given(manufacturerModelRepository.findOne(MANUFACTURER_MODEL_ID))
+				.willReturn(ModelsUtil.createManufacturerModel());
 		given(manufacturerModelRepository.save(Mockito.any(ManufacturerModel.class)))
 				.willReturn(ModelsUtil.createManufacturerModel());
 	}
@@ -80,6 +81,15 @@ public class ManufacturerModelServiceTest {
 	@Test
 	public void saveTest() throws ShanoirStudiesException {
 		manufacturerModelService.save(createManufacturerModel());
+
+		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).save(Mockito.any(ManufacturerModel.class));
+	}
+
+	@Test
+	public void updateTest() throws ShanoirStudiesException {
+		final ManufacturerModel updatedManufacturerModel = manufacturerModelService.update(createManufacturerModel());
+		Assert.assertNotNull(updatedManufacturerModel);
+		Assert.assertTrue(UPDATED_MANUFACTURER_MODEL_NAME.equals(updatedManufacturerModel.getName()));
 
 		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).save(Mockito.any(ManufacturerModel.class));
 	}

@@ -3,6 +3,7 @@ package org.shanoir.ng.manufacturermodel;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -63,6 +64,26 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 		return savedManufacturerModel;
 	}
 
+	@Override
+	public ManufacturerModel update(final ManufacturerModel manufacturerModel) throws ShanoirStudiesException {
+		final ManufacturerModel manufacturerModelDb = manufacturerModelRepository.findOne(manufacturerModel.getId());
+		if (manufacturerModelDb == null) {
+			LOG.error("Manufacturer model with id " + manufacturerModel.getId() + " not found");
+			throw new ShanoirStudiesException(ErrorModelCode.MANUFACTURER_MODEL_NOT_FOUND);
+		}
+		manufacturerModelDb.setDatasetModalityType(manufacturerModel.getDatasetModalityType());
+		manufacturerModelDb.setMagneticField(manufacturerModel.getMagneticField());
+		manufacturerModelDb.setManufacturer(manufacturerModel.getManufacturer());
+		manufacturerModelDb.setName(manufacturerModel.getName());
+		try {
+			manufacturerModelRepository.save(manufacturerModelDb);
+		} catch (Exception e) {
+			ShanoirStudiesException.logAndThrow(LOG, "Error while updating manufacturer model: " + e.getMessage());
+		}
+		updateShanoirOld(manufacturerModelDb);
+		return manufacturerModelDb;
+	}
+
 	/*
 	 * Update Shanoir Old.
 	 * 
@@ -77,10 +98,9 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 					new ObjectMapper().writeValueAsString(manufacturerModel));
 			return true;
 		} catch (AmqpException e) {
-			LOG.error(
-					"Cannot send manufacturer model " + manufacturerModel.getId()
-							+ " save/update to Shanoir Old on queue : " + RabbitMqConfiguration.queueOut().getName(),
-					e);
+			LOG.error("Cannot send manufacturer model " + manufacturerModel.getId()
+					+ " save/update to Shanoir Old on queue : "
+					+ RabbitMqConfiguration.manufacturerModelQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send manufacturer model " + manufacturerModel.getId()
 					+ " save/update because of an error while serializing manufacturer model.", e);
