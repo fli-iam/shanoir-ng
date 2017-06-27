@@ -25,14 +25,14 @@ base-ms-image:
 	docker build -t shanoir-ng/debianjava8mariadb:latest shanoir-ng-template/DockerWithJdk8AndMariaDb
 
 # shanoir-ng-users
-users: base-ms-image
+users studies studycards: %: base-ms-image
 	# https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-4%29-Docker-shanoir-ng-users
-	(cd shanoir-ng-users/ && mvn clean package docker:build -DskipTests -Pqualif)
+	(cd 'shanoir-ng-$@/' && mvn clean package docker:build -DskipTests -Pqualif)
 
 # shanoir-ng-nginx
 #
 # https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-6%29-Docker-Nginx-with-statics
-nginx: keycloak users
+nginx: keycloak users studies studycards
 	npm set registry https://registry.npmjs.org
 
 	# FIXME: is -Pqualif still needed ?
