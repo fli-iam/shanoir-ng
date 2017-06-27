@@ -8,6 +8,9 @@ FROM debian:jessie
 #  - add backports repository and use it only for jdk8
 ADD apt/. /etc/apt/
 
+# add users shanoir & mysql (with fixed ids)
+RUN	groupadd -g 500 -r shanoir && useradd -r -u 500 -g shanoir shanoir &&\
+	groupadd -g 501 -r mysql   && useradd -r -u 501 -g mysql   mysql
 
 # install packages (supervisor + java8 + mariadb)
 RUN	apt-get update  -qqy	&&\
@@ -17,5 +20,3 @@ RUN	apt-get update  -qqy	&&\
 # supervisor base configuration
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 
-# add user shanoir
-RUN groupadd -r shanoir && useradd -r -g shanoir shanoir
