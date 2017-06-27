@@ -45,9 +45,6 @@ module.exports = {
             {
                 test: /\.(jpg|png|gif)$/,
                 loader: 'file-loader'
-                    use: 'css-loader'
-                }),
-                include: [helpers.root('src', 'assets')]
            }
         ]
     },
