@@ -31,8 +31,9 @@ public abstract class SubjectDecorator implements SubjectMapper {
 		// Subject Image Object Category manual mapping
 		if (subjectDTO.getImagedObjectCategory() != null) {
 			for (ImagedObjectCategory i : ImagedObjectCategory.values()) {
-				if (i.getValue().equals(subjectDTO.getImagedObjectCategory())) {
+				if (i.name().equals(subjectDTO.getImagedObjectCategory())) {
 					subject.setImagedObjectCategory(i);
+					break;
 				}
 			}
 		}
@@ -47,26 +48,5 @@ public abstract class SubjectDecorator implements SubjectMapper {
 		}
 		return subjectStudy;
 	}
-
-	//
-	// @Override
-	// public Subject subjectDTOToSubject(SubjectDTO subjectDTO){
-	// Subject subject = delegate.subjectDTOToSubject(subjectDTO);
-	//
-	// }
-	//
-	// @Override
-	// public SubjectDTO subjectToSubjectDTO(Subject subject) {
-	// SubjectDTO dto = delegate.subjectToSubjectDTO(subject);
-	// List<SubjectStudyDTO> studyList = new ArrayList<SubjectStudyDTO>();
-	// for (RelSubjectStudy r : subject.getRelSubjectStudyList()){
-	// SubjectStudyDTO s = this.INSTANCE.RelSubjectStudyTosubjectStudyDTO(r);
-	// studyList.add(s);
-	// }
-	// if (studyList != null){
-	// dto.setSubjectStudyList(studyList);
-	// }
-	// return dto;
-	// }
 
 }

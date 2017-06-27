@@ -26,6 +26,7 @@ import { ClickTipComponent }   from './shared/clickTip/clickTip.component';
 import { ConfirmDialogComponent } from "./shared/utils/confirm.dialog.component";
 import { ConfirmDialogService } from "./shared/utils/confirm.dialog.service";
 import { ConsoleComponent }   from './shared/console/console.line.component';
+import { ModalComponent } from "./shared/utils/modal.component";
 import { DropdownMenuComponent }   from './shared/dropdown-menu/dropdown-menu.component';
 import { EditUserComponent }   from './users/edit/edit.user.component';
 import { ExtensionRequestComponent } from './users/extensionRequest/extension.request.component';
@@ -49,6 +50,7 @@ import { TreeNodeComponent }   from './shared/tree/tree.node.component';
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
 
+import '../assets/css/modal.css';
 import '../assets/css/common.css';
 
 export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
@@ -92,7 +94,8 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         ConsoleComponent,
         LoadingBarComponent,
         ManufacturerDetailComponent,
-        ManufacturerModelDetailComponent
+        ManufacturerModelDetailComponent,
+        ModalComponent
     ],
     entryComponents: [
         ConfirmDialogComponent

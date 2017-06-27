@@ -1,4 +1,4 @@
-FROM shanoir-ng/debianjava8mariadb:latest
+FROM shanoir-ng/debianjava8mariadbpython:latest
 
 COPY shanoir-ng-users-0.0.1-SNAPSHOT.jar /opt/shanoir-ng/shanoir-ng-users.jar
 
@@ -14,6 +14,10 @@ COPY container_init /dk/container_init
 RUN chmod +x /dk/container_init
 
 COPY shanoirng_users.sql /dk/shanoirng_users.sql
+COPY shanoirng_users_tables.sql /dk/shanoirng_users_tables.sql
+
+COPY usersMigration.py /dk/usersMigration.py
+RUN chmod +x /dk/usersMigration.py
 
 EXPOSE 9900
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]

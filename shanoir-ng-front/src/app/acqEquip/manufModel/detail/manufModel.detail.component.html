@@ -31,8 +31,11 @@
 								<select id="name" required formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer">
 									<option *ngFor="let manufacturer of manufs" [ngValue]="manufacturer">{{manufacturer.name}}</option>
 								</select>
-								
-                                <a i18n="ManufModel detail|Create new manuf label" [routerLink] = "['/manufDetail']" [queryParams]="{mode: 'create'}">Create new manufacturer</a>
+								<button i18n="ManufModel detail|Create manuf label" (click)="manufModal.show()">
+									<img src="/assets/images/icons/add-1.png"/>
+									new manufacturer
+								</button>
+                                <!--<a i18n="ManufModel detail|Create new manuf label" [routerLink] = "['/manufDetail']" [queryParams]="{mode: 'create'}">Create new manufacturer</a>-->
 							</ng-template>
 						</span>
 					</li>
@@ -82,3 +85,9 @@
         </div>
     </form>
 </div>
+
+<app-modal #manufModal>
+    <div class="app-modal-body">
+      <manufDetail [modeFromManufModel]="'create'" (closing)="closePopin($event)"></manufDetail>
+    </div>
+</app-modal>

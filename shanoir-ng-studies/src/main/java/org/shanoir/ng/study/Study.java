@@ -8,8 +8,6 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
@@ -73,8 +71,7 @@ public class Study extends HalEntity {
 	private List<Long> studyCardIds;
 
 	@NotNull
-	@Enumerated(EnumType.STRING)
-	private StudyStatus studyStatus;
+	private Integer studyStatus;
 
 	/** Relations between the subjects and the studies. */
 	@JsonIgnore
@@ -86,8 +83,7 @@ public class Study extends HalEntity {
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<StudyCenter> studyCenterList;
 
-	@Enumerated(EnumType.STRING)
-	private StudyType studyType;
+	private Integer studyType;
 	
 	/** Users associated to the research study. */
 	@OneToMany(mappedBy = "studyId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -231,7 +227,7 @@ public class Study extends HalEntity {
 	 * @return the studyStatus
 	 */
 	public StudyStatus getStudyStatus() {
-		return studyStatus;
+		return StudyStatus.getStatus(studyStatus);
 	}
 
 	/**
@@ -239,7 +235,11 @@ public class Study extends HalEntity {
 	 *            the studyStatus to set
 	 */
 	public void setStudyStatus(StudyStatus studyStatus) {
-		this.studyStatus = studyStatus;
+		if (studyStatus == null) {
+			this.studyStatus = null;
+		} else {
+			this.studyStatus = studyStatus.getId();
+		}
 	}
 
 	/**
@@ -275,7 +275,7 @@ public class Study extends HalEntity {
 	 * @return the studyType
 	 */
 	public StudyType getStudyType() {
-		return studyType;
+		return StudyType.getType(studyType);
 	}
 	
 	/**
@@ -283,7 +283,11 @@ public class Study extends HalEntity {
 	 *            the studyType to set
 	 */
 	public void setStudyType(StudyType studyType) {
-		this.studyType = studyType;
+		if (studyType == null) {
+			this.studyType = null;
+		} else {
+			this.studyType = studyType.getId();
+		}
 	}
 	
 	/**

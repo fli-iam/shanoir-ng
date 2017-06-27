@@ -32,7 +32,7 @@
 			</fieldset>
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
-					<!--<button i18n="Manuf detail|BackButton label" class="Button" (click)="back()">Back</button>	-->
+					<button i18n="Manuf detail|BackButton label" class="Button" (click)="back()">Back</button>	
 					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
 						<button type="submit" i18n="Manuf detail|EditButton label" (click)="edit()" class="Button">Edit</button>
 					</ng-template>

@@ -1,5 +1,5 @@
 <div class="content-component">
-    <form [formGroup]="acqEquipDetailForm" class="max-content" novalidate>
+	<form [formGroup]="acqEquipDetailForm" class="max-content" novalidate>
 		<div class="layout">
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
@@ -16,7 +16,7 @@
 				<ol>
 					<label *ngIf="isModelNumberUnique==false" class="form-validation-alert" i18n="Edit center|ModelNumberUniqueError label">This equipment (same Manufacturer model and same serial number) already exists!</label>
 					<li *ngIf="mode=='view'">
-						<label i18n="AcqEquip detail|Manufacturer label">Manufacturer</label> 
+						<label i18n="AcqEquip detail|Manufacturer label">Manufacturer</label>
 						<span class="right-col">
 							<!--<a [routerLink]="['/manufModelDetail']">-->
 								{{acqEquip.manufacturerModel?.manufacturer?.name}}
@@ -24,7 +24,7 @@
 						</span>
 					</li>
 					<li class="required">
-						<label i18n="AcqEquip detail|Manufacturer model label" class="required-label">Manufacturer model</label> 
+						<label i18n="AcqEquip detail|Manufacturer model label" class="required-label">Manufacturer model</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								<!--<a [routerLink]="['/manufModelDetail']">-->
@@ -35,19 +35,23 @@
 								<select id="manufModel" required formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel">
 									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel.name}}</option>
 								</select>
-								<a i18n="AcqEquip detail|Create new model label" [routerLink] = "['/manufModelDetail']">Create new manufacturer model</a>
+								<!--<a i18n="AcqEquip detail|Create new model label" [routerLink] = "['/manufModelDetail']" [queryParams]="{mode: 'create'}">Create new manufacturer model</a>-->
+								<button i18n="AcqEquip detail|Create new model label" (click)="manufModelModal.show()">
+									<img src="/assets/images/icons/add-1.png"/>
+									new manufacturer model
+								</button>
 								<label *ngIf="formErrors.manufacturerModel.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|ManufModelRequiredError label">Manufacturer model is required!</label>
 							</ng-template>
 						</span>
 					</li>
 					<li *ngIf="mode=='view'">
-						<label i18n="AcqEquip detail|Model modality label">Model modality</label> 
+						<label i18n="AcqEquip detail|Model modality label">Model modality</label>
 						<span class="right-col">
 							{{datasetModalityTypeEnumValue}}
 						</span>
 					</li>
 					<li class="required">
-						<label i18n="AcqEquip detail|Center label" class="required-label">Center</label> 
+						<label i18n="AcqEquip detail|Center label" class="required-label">Center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								{{acqEquip.center?.name}}
@@ -62,7 +66,7 @@
 						</span>
 					</li>
 					<li>
-						<label i18n="AcqEquip detail|Serial number label">Serial Number</label> 
+						<label i18n="AcqEquip detail|Serial number label">Serial Number</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								{{acqEquip.serialNumber}}
@@ -88,6 +92,12 @@
 					</ng-template>
 				</span>
 			</div>
-        </div>
-    </form>
+		</div>
+	</form>
 </div>
+
+<app-modal #manufModelModal>
+    <div class="app-modal-body">
+      <manufModelDetail [modeFromAcqEquip]="'create'" (closing)="closePopin($event)"></manufModelDetail>
+    </div>
+</app-modal>

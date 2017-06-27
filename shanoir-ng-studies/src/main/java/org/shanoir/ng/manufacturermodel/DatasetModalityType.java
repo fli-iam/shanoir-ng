@@ -11,65 +11,69 @@ public enum DatasetModalityType {
 	/**
 	 * MR dataset.
 	 */
-	MR_DATASET(Values.MR_DATASET),
+	MR_DATASET(1),
 
 	/**
 	 * MEG Dataset.
 	 */
-	MEG_DATASET(Values.MEG_DATASET),
+	MEG_DATASET(2),
 
 	/**
 	 * CT Dataset.
 	 */
-	CT_DATASET(Values.CT_DATASET),
+	CT_DATASET(3),
 
 	/**
 	 * SPECT Dataset.
 	 */
-	SPECT_DATASET(Values.SPECT_DATASET),
+	SPECT_DATASET(4),
 
 	/**
 	 * PET Dataset
 	 */
-	PET_DATASET(Values.PET_DATASET),
+	PET_DATASET(5),
 
 	/**
 	 * EEG Dataset
 	 */
-	EEG_DATASET(Values.EEG_DATASET);
+	EEG_DATASET(6);
 
-	private String value;
+	private int id;
 
 	/**
 	 * Constructor.
 	 * 
-	 * @param val
-	 *            value
+	 * @param id
+	 *            id
 	 */
-	private DatasetModalityType(final String value) {
-		this.value = value;
+	private DatasetModalityType(final int id) {
+		this.id = id;
 	}
 
 	/**
-	 * @return the value
-	 */
-	public String getValue() {
-		return value;
-	}
-
-	/**
-	 * List of enum values.
+	 * Get a dataset modality type by its id.
 	 * 
-	 * @author msimon
-	 *
+	 * @param id
+	 *            type id.
+	 * @return dataset modality type.
 	 */
-	public static class Values {
-		public static final String MR_DATASET = "MR_DATASET";
-		public static final String MEG_DATASET = "MEG_DATASET";
-		public static final String CT_DATASET = "CT_DATASET";
-		public static final String SPECT_DATASET = "SPECT_DATASET";
-		public static final String PET_DATASET = "PET_DATASET";
-		public static final String EEG_DATASET = "EEG_DATASET";
+	public static DatasetModalityType getType(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (DatasetModalityType type : DatasetModalityType.values()) {
+			if (id.equals(type.getId())) {
+				return type;
+			}
+		}
+		throw new IllegalArgumentException("No matching dataset modality type for id " + id);
+	}
+
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
 	}
 
 }

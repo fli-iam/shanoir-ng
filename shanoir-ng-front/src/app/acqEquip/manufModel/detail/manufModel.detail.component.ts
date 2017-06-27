@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -8,6 +8,7 @@ import { ManufacturerModel } from '../../shared/manufModel.model';
 import { ManufacturerModelService } from '../../shared/manufModel.service';
 import { Manufacturer } from '../../shared/manuf.model';
 import { ManufacturerService } from '../../shared/manuf.service';
+import { ModalComponent } from '../../../shared/utils/modal.component';
 import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
 import { DatasetModalityType } from "../../../shared/enum/datasetModalityType";
 import { Enum } from "../../../shared/utils/enum";
@@ -23,6 +24,9 @@ export class ManufacturerModelDetailComponent implements OnInit {
     private manufModelDetailForm: FormGroup;
     private manufModelId: number;
     private mode: "view" | "edit" | "create";
+    @Input() modeFromAcqEquip: "view" | "edit" | "create";
+    @Output() closing: EventEmitter<any> = new EventEmitter();
+    @ViewChild('manufModal') manufModal: ModalComponent;
     private isNameUnique: Boolean = true;
     private canModify: Boolean = false;
     private datasetModalityTypes: Enum[] = []; 
@@ -37,6 +41,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        if (this.modeFromAcqEquip) {this.mode = this.modeFromAcqEquip;}
         this.getEnum();
         this.getManufs();
         this.getManufacturerModel();
@@ -72,11 +77,13 @@ export class ManufacturerModelDetailComponent implements OnInit {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let manufModelId = queryParams['id'];
-                let mode = queryParams['mode'];
-                if (mode) {
-                    this.mode = mode;
+                if (!this.modeFromAcqEquip) {
+                    let mode = queryParams['mode'];
+                    if (mode) {
+                        this.mode = mode;
+                    }
                 }
-                if (manufModelId) {
+                if (manufModelId && this.mode !== 'create') {
                     // view or edit mode
                     this.manufModelId = manufModelId;
                     return this.manufModelService.getManufacturerModel(manufModelId);
@@ -140,8 +147,11 @@ export class ManufacturerModelDetailComponent implements OnInit {
     };
 
     back(): void {
-        this.location.back();
-        // this.getOut();
+        if (this.closing.observers.length > 0) {
+            this.closing.emit(null);
+        } else {
+            this.location.back();
+        }
     }
 
     edit(): void {
@@ -178,12 +188,8 @@ export class ManufacturerModelDetailComponent implements OnInit {
         });
     }
 
-    // getOut(manufModel: ManufacturerModel = null): void {
-    //     if (this.closing.observers.length > 0) {
-    //         this.closing.emit(manufModel);
-    //     } else {
-    //         this.location.back();
-    //     }
-    // }
-
+    closePopin () {
+        this.manufModal.hide();
+        this.getManufs();
+    }
 }

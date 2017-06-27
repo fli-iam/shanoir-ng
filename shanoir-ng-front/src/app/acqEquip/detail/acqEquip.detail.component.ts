@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -8,6 +8,7 @@ import { AcquisitionEquipment } from '../shared/acqEquip.model';
 import { AcquisitionEquipmentService } from '../shared/acqEquip.service';
 import { ManufacturerService } from '../shared/manuf.service';
 import { ManufacturerModelService } from '../shared/manufModel.service';
+import { ModalComponent } from '../../shared/utils/modal.component';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
@@ -21,8 +22,9 @@ import { DatasetModalityType } from "../../shared/enum/datasetModalityType";
 
 export class AcquisitionEquipmentDetailComponent implements OnInit {
     
-    @Output() closing = new EventEmitter();
+    @Output() closing: EventEmitter<any> = new EventEmitter();
     @Input() modeFromCenterList: "view" | "edit" | "create";
+    @ViewChild('manufModelModal') manufModelModal: ModalComponent;
     private acqEquip: AcquisitionEquipment = new AcquisitionEquipment();
     private acqEquipDetailForm: FormGroup;
     private acqEquipId: number;
@@ -153,8 +155,11 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     };
 
     back(): void {
-        this.location.back();
-        // this.getOut();
+        if (this.closing.observers.length > 0) {
+            this.closing.emit(null);
+        } else {
+            this.location.back();
+        }
     }
 
     edit(): void {
@@ -185,12 +190,8 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
         });
     }
 
-    // getOut(acqEquip: AcquisitionEquipment = null): void {
-    //     if (this.closing.observers.length > 0) {
-    //         this.closing.emit(acqEquip);
-    //     } else {
-    //         this.location.back();
-    //     }
-    // }
-
+    closePopin () {
+        this.manufModelModal.hide();
+        this.getManufModels();
+    }
 }

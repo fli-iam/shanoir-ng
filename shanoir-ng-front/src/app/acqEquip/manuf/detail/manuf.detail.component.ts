@@ -19,6 +19,8 @@ export class ManufacturerDetailComponent implements OnInit {
     private manufDetailForm: FormGroup;
     private manufId: number;
     private mode: "view" | "edit" | "create";
+    @Input() modeFromManufModel: "view" | "edit" | "create";
+    @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
     private canModify: Boolean = false;
 
@@ -29,6 +31,7 @@ export class ManufacturerDetailComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        if (this.modeFromManufModel) {this.mode = this.modeFromManufModel;}
         this.getManufacturer();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -40,11 +43,13 @@ export class ManufacturerDetailComponent implements OnInit {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let manufId = queryParams['id'];
-                let mode = queryParams['mode'];
-                if (mode) {
-                    this.mode = mode;
+                if (!this.modeFromManufModel) {
+                    let mode = queryParams['mode'];
+                    if (mode) {
+                        this.mode = mode;
+                    }
                 }
-                if (manufId) {
+                if (manufId && this.mode !== 'create') {
                     // view or edit mode
                     this.manufId = manufId;
                     return this.manufService.getManufacturer(manufId);
@@ -87,8 +92,11 @@ export class ManufacturerDetailComponent implements OnInit {
     };
 
     back(): void {
-        this.location.back();
-        // this.getOut();
+        if (this.closing.observers.length > 0) {
+            this.closing.emit(null);
+        } else {
+            this.location.back();
+        }
     }
 
     edit(): void {
@@ -118,13 +126,4 @@ export class ManufacturerDetailComponent implements OnInit {
             }
         });
     }
-
-    // getOut(manuf: Manufacturer = null): void {
-    //     if (this.closing.observers.length > 0) {
-    //         this.closing.emit(manuf);
-    //     } else {
-    //         this.location.back();
-    //     }
-    // }
-
 }
