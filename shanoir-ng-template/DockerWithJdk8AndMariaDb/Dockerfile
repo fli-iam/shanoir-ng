@@ -14,9 +14,12 @@ RUN	groupadd -g 500 -r shanoir && useradd -r -u 500 -g shanoir shanoir &&\
 
 # install packages (supervisor + java8 + mariadb)
 RUN	apt-get update  -qqy	&&\
+	DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -qqy --no-install-recommends	&&\
 	DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends supervisor openjdk-8-jdk-headless openjdk-8-jre-headless ca-certificates-java mariadb-server	&&\
 	rm -rf /var/lib/apt/lists/*
 
 # supervisor base configuration
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 
+# automatic upgrade script
+ADD dk /dk
