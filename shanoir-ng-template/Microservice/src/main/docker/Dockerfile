@@ -12,6 +12,10 @@ COPY container_init /dk/container_init
 RUN chmod +x /dk/container_init
 
 COPY shanoirng_template.sql /dk/shanoirng_template.sql
+COPY shanoirng_template_tables.sql /dk/shanoirng_template_tables.sql
+
+COPY templateMigration.py /dk/templateMigration.py
+RUN chmod +x /dk/templateMigration.py
 
 EXPOSE 9900
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]

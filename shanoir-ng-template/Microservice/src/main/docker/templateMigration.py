@@ -10,16 +10,16 @@ targetConn = pymysql.connect(host="localhost",user=os.environ['MYSQL_USER'],pass
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
 
-print("Import study cards: start")
+print("Import template: start")
     
-sourceCursor.execute("SELECT STUDY_CARD_ID, ACQUISITION_EQUIPMENT_ID, CENTER_ID, IS_DISABLED, NAME, NIFTI_CONVERTER_ID, STUDY_ID FROM study_card")
+sourceCursor.execute("SELECT DATA_ID, DATA FROM data")
 
-query = "INSERT INTO study_cards (id, acquisition_equipment_id, center_id, disabled, name, nifti_converter_id, study_id) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+query = "INSERT INTO template (id, data) VALUES (%s, %s)"
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 
-print("Import study cards: end")
+print("Import template: end")
 
 sourceConn.close()
 targetConn.close()

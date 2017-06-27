@@ -23,6 +23,7 @@
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<docker.image.name>shanoir-ng/template</docker.image.name>
 		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
+		<container_init.file.name>container_init.dev</container_init.file.name>
 	</properties>
 
 	<dependencies>
@@ -176,6 +177,8 @@
 							<target>
 								<copy file="src/main/docker/${supervisor.file.name}"
 									tofile="src/main/docker/ms.users.sv.conf" overwrite="true" />
+								<copy file="src/main/docker/${container_init.file.name}"
+									tofile="src/main/docker/container_init" overwrite="true" />
 							</target>
 						</configuration>
 						<goals>
@@ -242,6 +245,7 @@
 			<properties>
 				<spring.active.profile>qualif</spring.active.profile>
 				<supervisor.file.name>ms.template.sv.qualif.conf</supervisor.file.name>
+				<container_init.file.name>container_init.qualif</container_init.file.name>
 				<maven.test.skip>true</maven.test.skip>
 			</properties>
 		</profile>
