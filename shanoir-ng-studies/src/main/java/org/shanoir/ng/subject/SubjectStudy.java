@@ -1,9 +1,6 @@
 package org.shanoir.ng.subject;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.JoinColumn;
@@ -29,9 +26,7 @@ public class SubjectStudy extends AbstractGenericItem {
 	private boolean physicallyInvolved;
 
 	/** Subject yype. */
-	@Column(nullable = true, updatable = true)
-	@Enumerated(EnumType.STRING)
-	private SubjectType subjectType;
+	private Integer subjectType;
 
 	/** Study. */
 	@ManyToOne
@@ -63,11 +58,15 @@ public class SubjectStudy extends AbstractGenericItem {
 	}
 
 	public SubjectType getSubjectType() {
-		return subjectType;
+		return SubjectType.getType(subjectType);
 	}
 
 	public void setSubjectType(SubjectType subjectType) {
-		this.subjectType = subjectType;
+		if (subjectType == null) {
+			this.subjectType = null;
+		} else {
+			this.subjectType = subjectType.getId();
+		}
 	}
 
 	public Study getStudy() {

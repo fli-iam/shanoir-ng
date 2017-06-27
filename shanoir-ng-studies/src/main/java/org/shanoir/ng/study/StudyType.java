@@ -11,46 +11,54 @@ public enum StudyType {
 	/**
 	 * Clinical.
 	 */
-	CLINICAL(Values.CLINICAL),
+	CLINICAL(1),
 
 	/**
 	 * Preclinical.
 	 */
-	PRECLINICAL(Values.PRECLINICAL),
+	PRECLINICAL(2),
 
 	/**
 	 * Methodological.
 	 */
-	METHODOLOGICAL(Values.METHODOLOGICAL);
+	METHODOLOGICAL(3);
 
-	private String value;
+	private int id;
 
 	/**
 	 * Constructor.
 	 * 
-	 * @param val
-	 *            value
+	 * @param id
+	 *            id
 	 */
-	private StudyType(final String value) {
-		this.value = value;
+	private StudyType(final int id) {
+		this.id = id;
 	}
 
 	/**
-	 * @return the value
-	 */
-	public String getValue() {
-		return value;
-	}
-
-	/**
-	 * List of enum values.
+	 * Get a study type by its id.
 	 * 
-	 *
+	 * @param id
+	 *            type id.
+	 * @return study type.
 	 */
-	public static class Values {
-		public static final String CLINICAL = "Clinical";
-		public static final String PRECLINICAL = "Preclinical";
-		public static final String METHODOLOGICAL = "Methodological";
+	public static StudyType getType(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (StudyType type : StudyType.values()) {
+			if (id.equals(type.getId())) {
+				return type;
+			}
+		}
+		throw new IllegalArgumentException("No matching study type for id " + id);
+	}
+
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
 	}
 
 }

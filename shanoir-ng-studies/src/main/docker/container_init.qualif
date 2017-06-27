@@ -12,13 +12,10 @@ chown shanoir /vol/log/ms
 
 service mysql start
 echo "Populate database - create tables"
-mysql -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE < /dk/shanoirng_users_tables.sql
+mysql -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE < /dk/shanoirng_studies_tables.sql
 
 echo "Populate database - insert rows"
-python /dk/usersMigration.py
-
-echo "Initialize Keycloak database"
-java -jar /opt/shanoir-ng/shanoir-ng-keycloak.jar --spring.profiles.active=qualif
+python /dk/studiesMigration.py
 
 echo "Stop mysql process"
 mysqladmin -u root -p$MYSQL_ROOT_PASSWORD shutdown

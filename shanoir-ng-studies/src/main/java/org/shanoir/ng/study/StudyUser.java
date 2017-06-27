@@ -3,8 +3,6 @@ package org.shanoir.ng.study;
 import java.io.Serializable;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -35,9 +33,8 @@ public class StudyUser implements Serializable {
 	private Long studyId;
 
 	/** Type of the relationship. */
-	@Enumerated(EnumType.STRING)
 	@NotNull
-	private StudyUserType studyUserType;
+	private Integer studyUserType;
 
 	/** User id. */
 	@Id
@@ -92,7 +89,7 @@ public class StudyUser implements Serializable {
 	 * @return the studyUserType
 	 */
 	public StudyUserType getStudyUserType() {
-		return studyUserType;
+		return StudyUserType.getType(studyUserType);
 	}
 
 	/**
@@ -100,7 +97,11 @@ public class StudyUser implements Serializable {
 	 *            the studyUserType to set
 	 */
 	public void setStudyUserType(StudyUserType studyUserType) {
-		this.studyUserType = studyUserType;
+		if (studyUserType == null) {
+			this.studyUserType = null;
+		} else {
+			this.studyUserType = studyUserType.getId();
+		}
 	}
 
 	/**

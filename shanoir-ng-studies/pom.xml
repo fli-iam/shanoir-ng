@@ -23,14 +23,15 @@
 		<keycloak.version>2.5.1.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<springfox-version>2.5.0</springfox-version>
+		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
 		<spring-active-profile></spring-active-profile>
 		<docker.image.name>shanoir-ng/studies</docker.image.name>
 		<supervisor.file.name>ms.studies.sv.dev.conf</supervisor.file.name>
-		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
+		<container_init.file.name>container_init.dev</container_init.file.name>
 	</properties>
 
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core Needed
+		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core Needed 
 			for semi-automatically generated Ids -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -39,9 +40,9 @@
 
 		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
 		<dependency>
-		    <groupId>org.mapstruct</groupId>
-		    <artifactId>mapstruct-jdk8</artifactId>
-		    <version>${org.mapstruct.version}</version>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct-jdk8</artifactId>
+			<version>${org.mapstruct.version}</version>
 		</dependency>
 
 		<!-- Spring boot -->
@@ -91,10 +92,10 @@
 			<artifactId>springfox-swagger-ui</artifactId>
 			<version>${springfox-version}</version>
 			<exclusions>
-					<exclusion>
-							<artifactId>org.mapstruct</artifactId>
-							<groupId>mapstruct</groupId>
-					</exclusion>
+				<exclusion>
+					<artifactId>org.mapstruct</artifactId>
+					<groupId>mapstruct</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -169,43 +170,44 @@
 					<source>1.8</source>
 					<target>1.8</target>
 					<annotationProcessorPaths>
-							<path>
-									<groupId>org.mapstruct</groupId>
-									<artifactId>mapstruct-processor</artifactId>
-									<version>${org.mapstruct.version}</version>
-							</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${org.mapstruct.version}</version>
+						</path>
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
-			<!--  Plugin needed to generate impl classes of mapstruct interfaces & abstract class -->
+			<!-- Plugin needed to generate impl classes of mapstruct interfaces & 
+				abstract class -->
 			<plugin>
-					<groupId>org.bsc.maven</groupId>
-					<artifactId>maven-processor-plugin</artifactId>
-					<version>2.2.4</version>
-					<configuration>
-							<defaultOutputDirectory>
-									${project.build.directory}/generated-sources
-							</defaultOutputDirectory>
-							<processors>
-									<processor>org.mapstruct.ap.MappingProcessor</processor>
-							</processors>
-					</configuration>
-					<executions>
-							<execution>
-									<id>process</id>
-									<phase>generate-sources</phase>
-									<goals>
-											<goal>process</goal>
-									</goals>
-							</execution>
-					</executions>
-					<dependencies>
-							<dependency>
-									<groupId>org.mapstruct</groupId>
-									<artifactId>mapstruct-processor</artifactId>
-									<version>${org.mapstruct.version}</version>
-							</dependency>
-					</dependencies>
+				<groupId>org.bsc.maven</groupId>
+				<artifactId>maven-processor-plugin</artifactId>
+				<version>2.2.4</version>
+				<configuration>
+					<defaultOutputDirectory>
+						${project.build.directory}/generated-sources
+					</defaultOutputDirectory>
+					<processors>
+						<processor>org.mapstruct.ap.MappingProcessor</processor>
+					</processors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>process</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>process</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.mapstruct</groupId>
+						<artifactId>mapstruct-processor</artifactId>
+						<version>${org.mapstruct.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -226,6 +228,8 @@
 							<target>
 								<copy file="src/main/docker/${supervisor.file.name}"
 									tofile="src/main/docker/ms.studies.sv.conf" overwrite="true" />
+								<copy file="src/main/docker/${container_init.file.name}"
+									tofile="src/main/docker/container_init" overwrite="true" />
 							</target>
 						</configuration>
 						<goals>
@@ -292,28 +296,29 @@
 			<properties>
 				<spring-active-profile>qualif</spring-active-profile>
 				<supervisor.file.name>ms.studies.sv.qualif.conf</supervisor.file.name>
+				<container_init.file.name>container_init.qualif</container_init.file.name>
 				<maven.test.skip>true</maven.test.skip>
 			</properties>
 			<build>
 				<plugins>
 					<plugin>
-					<groupId>com.spotify</groupId>
-					<artifactId>docker-maven-plugin</artifactId>
-					<version>0.4.11</version>
-					<configuration>
-						<dockerHost>${docker-host}</dockerHost>
-						<dockerCertPath>${docker-cert-path}</dockerCertPath>
-						<imageName>${project.artifactId}</imageName>
-						<dockerDirectory>src/main/docker-qualif</dockerDirectory>
-						<resources>
-							<resource>
-								<targetPath>/</targetPath>
-								<directory>${project.build.directory}</directory>
-								<include>${project.build.finalName}.jar</include>
-							</resource>
-						</resources>
-					</configuration>
-				</plugin>
+						<groupId>com.spotify</groupId>
+						<artifactId>docker-maven-plugin</artifactId>
+						<version>0.4.11</version>
+						<configuration>
+							<dockerHost>${docker-host}</dockerHost>
+							<dockerCertPath>${docker-cert-path}</dockerCertPath>
+							<imageName>${project.artifactId}</imageName>
+							<dockerDirectory>src/main/docker-qualif</dockerDirectory>
+							<resources>
+								<resource>
+									<targetPath>/</targetPath>
+									<directory>${project.build.directory}</directory>
+									<include>${project.build.finalName}.jar</include>
+								</resource>
+							</resources>
+						</configuration>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
