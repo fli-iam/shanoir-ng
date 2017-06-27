@@ -17,14 +17,11 @@
 	<description>Studies management project for Shanoir-ng</description>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
 		<keycloak.version>2.5.1.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<springfox-version>2.5.0</springfox-version>
 		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
-		<spring-active-profile></spring-active-profile>
+		<spring.active.profile></spring.active.profile>
 		<docker.image.name>shanoir-ng/studies</docker.image.name>
 		<supervisor.file.name>ms.studies.sv.dev.conf</supervisor.file.name>
 		<container_init.file.name>container_init.dev</container_init.file.name>
@@ -214,7 +211,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<profiles>
-						<profile>${spring-active-profile}</profile>
+						<profile>${spring.active.profile}</profile>
 					</profiles>
 				</configuration>
 			</plugin>
@@ -288,41 +285,18 @@
 		<profile>
 			<id>dev</id>
 			<properties>
-				<spring-active-profile>dev</spring-active-profile>
+				<spring.active.profile>dev</spring.active.profile>
 			</properties>
 		</profile>
 		<profile>
 			<id>qualif</id>
 			<properties>
-				<spring-active-profile>qualif</spring-active-profile>
+				<spring.active.profile>qualif</spring.active.profile>
 				<supervisor.file.name>ms.studies.sv.qualif.conf</supervisor.file.name>
 				<container_init.file.name>container_init.qualif</container_init.file.name>
 				<maven.test.skip>true</maven.test.skip>
 			</properties>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.spotify</groupId>
-						<artifactId>docker-maven-plugin</artifactId>
-						<version>0.4.11</version>
-						<configuration>
-							<dockerHost>${docker-host}</dockerHost>
-							<dockerCertPath>${docker-cert-path}</dockerCertPath>
-							<imageName>${project.artifactId}</imageName>
-							<dockerDirectory>src/main/docker-qualif</dockerDirectory>
-							<resources>
-								<resource>
-									<targetPath>/</targetPath>
-									<directory>${project.build.directory}</directory>
-									<include>${project.build.finalName}.jar</include>
-								</resource>
-							</resources>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 	</profiles>
-
 
 </project>
