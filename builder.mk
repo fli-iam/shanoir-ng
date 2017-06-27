@@ -23,6 +23,7 @@ keycloak:
 # base image for the microservices
 base-ms-image:
 	docker build -t shanoir-ng/debianjava8mariadb:latest shanoir-ng-template/DockerWithJdk8AndMariaDb
+	docker build -t shanoir-ng/debianjava8mariadbpython:latest shanoir-ng-template/DockerWithJdk8AndMariaDbAndPython
 
 # shanoir-ng-users
 users studies studycards: %: base-ms-image
