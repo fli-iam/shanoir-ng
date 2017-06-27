@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,8 +48,8 @@ public class ManufacturerModelApiControllerTest {
 	private ManufacturerModelService manufacturerModelServiceMock;
 
 	@Before
-	public void setup() throws ShanoirStudyException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+	public void setup() throws ShanoirStudiesException {
+		gson = new GsonBuilder().create();
 
 		given(manufacturerModelServiceMock.findAll()).willReturn(Arrays.asList(new ManufacturerModel()));
 		given(manufacturerModelServiceMock.findById(1L)).willReturn(new ManufacturerModel());
@@ -58,24 +58,32 @@ public class ManufacturerModelApiControllerTest {
 	}
 
 	@Test
-	public void findAcquisitionEquipmentByIdTest() throws Exception {
+	public void findManufacturerModelByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void findAcquisitionEquipmentsTest() throws Exception {
+	public void findManufacturerModelsTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_ALL).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void saveNewAcquisitionEquipmentTest() throws Exception {
+	public void saveNewManufacturerModelTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createAcquisitionEquipment())))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createManufacturerModel())))
 				.andExpect(status().isOk());
+	}
+
+	@Test
+	@WithMockUser(authorities = { "ROLE_ADMIN" })
+	public void updateManufacturerModelTTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createManufacturerModel())))
+				.andExpect(status().isNoContent());
 	}
 
 }

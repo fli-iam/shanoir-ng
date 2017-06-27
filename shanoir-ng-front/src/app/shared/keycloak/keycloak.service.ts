@@ -19,6 +19,8 @@ export class KeycloakService {
         .success(() => {
           KeycloakService.auth.loggedIn = true;
           KeycloakService.auth.authz = keycloakAuth;
+          // Connected user id
+          KeycloakService.auth.userId = keycloakAuth.tokenParsed.userId;
           KeycloakService.auth.logoutUrl = keycloakAuth.authServerUrl + '/realms/shanoir-ng/protocol/openid-connect/logout?redirect_uri='
             + process.env.LOGOUT_REDIRECT_URL;
           resolve();

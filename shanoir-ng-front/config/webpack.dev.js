@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const OpenBrowserPlugin = require('open-browser-webpack-plugin');
 const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
 
@@ -14,7 +15,7 @@ const METADATA = webpackMerge(commonConfig.metadata, {
     BACKEND_API_USERS_MS_URL: 'http://localhost:9901',
     BACKEND_API_STUDIES_MS_URL: 'http://localhost:9902',
     KEYCLOAK_BASE_URL: 'http://localhost/auth',
-    LOGOUT_REDIRECT_URL: 'http://localhost:8080/index.html',
+    LOGOUT_REDIRECT_URL: 'http://localhost:8080/shanoir-ng/index.html',
     port: 8080,
     ENV: ENV,
 });
@@ -26,7 +27,7 @@ module.exports = webpackMerge(commonConfig, {
 
     output: {
         path: helpers.root('dist'),
-        publicPath: 'http://localhost:8080/',
+        publicPath: '/shanoir-ng',
         filename: '[name].js',
         chunkFilename: '[id].chunk.js'
     },
@@ -41,17 +42,14 @@ module.exports = webpackMerge(commonConfig, {
     },
 
     plugins: [
+        new OpenBrowserPlugin({ url: 'http://localhost:8080/shanoir-ng' }),
+
         new HtmlWebpackPlugin({
-            template: 'src/index.html'
+            filename: 'index.html',
+            template: 'src/index-dev.html'
         }),
 
         new ExtractTextPlugin('[name].css'),
-
-        new webpack.ContextReplacementPlugin(
-            /angular(\\|\/)core(\\|\/)@angular/,
-            path.resolve('./src'),
-            {}
-        ),
 
         /**
          * Plugin: DefinePlugin

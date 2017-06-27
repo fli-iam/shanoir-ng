@@ -16,7 +16,11 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class AbstractGenericItem implements Identifiable<Long>, Serializable {
 
-
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = 6844259659282870007L;
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
 	private Long id;

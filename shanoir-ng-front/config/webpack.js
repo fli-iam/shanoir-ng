@@ -14,7 +14,7 @@ const METADATA = webpackMerge(commonConfig.metadata, {
     host: 'localhost',
     BACKEND_API_USERS_MS_URL: BACKEND_API_ROOT_URL + '/users',
     BACKEND_API_STUDIES_MS_URL: BACKEND_API_ROOT_URL + '/studies',
-    KEYCLOAK_BASE_URL: 'http://localhost/auth',
+    KEYCLOAK_BASE_URL: 'http://shanoir-ng-nginx/auth',
     LOGOUT_REDIRECT_URL: 'http://localhost/shanoir-ng/index.html',
     port: 8080,
     ENV: ENV,
@@ -25,7 +25,7 @@ module.exports = webpackMerge(commonConfig, {
 
     output: {
         path: helpers.root('dist'),
-        publicPath: '/',
+        publicPath: '/shanoir-ng/',
         filename: '[name].js',
         chunkFilename: '[id].chunk.js'
     },

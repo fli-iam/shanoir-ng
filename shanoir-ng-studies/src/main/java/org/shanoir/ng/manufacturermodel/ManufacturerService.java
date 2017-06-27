@@ -2,7 +2,7 @@ package org.shanoir.ng.manufacturermodel;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
@@ -30,13 +30,23 @@ public interface ManufacturerService extends UniqueCheckableService<Manufacturer
 	Manufacturer findById(Long id);
 
 	/**
-	 * Save an manufacturer.
+	 * Save a manufacturer.
 	 *
 	 * @param manufacturer
 	 *            manufacturer to create.
 	 * @return created manufacturer.
-	 * @throws ShanoirStudyException
+	 * @throws ShanoirStudiesException
 	 */
-	Manufacturer save(Manufacturer manufacturer) throws ShanoirStudyException;
+	Manufacturer save(Manufacturer manufacturer) throws ShanoirStudiesException;
+
+	/**
+	 * Update a manufacturer.
+	 *
+	 * @param manufacturer
+	 *            manufacturer to update.
+	 * @return updated manufacturer.
+	 * @throws ShanoirStudiesException
+	 */
+	Manufacturer update(Manufacturer manufacturer) throws ShanoirStudiesException;
 
 }

@@ -54,4 +54,19 @@ public interface ManufacturerApi {
 			@ApiParam(value = "manufacturer to create", required = true) @RequestBody Manufacturer manufacturer,
 			final BindingResult result) throws RestServiceException;
 
+	@ApiOperation(value = "", notes = "Updates a manufacturer", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "manufacturer updated", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "manufacturer not found", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "/{manufacturerId}", produces = { "application/json" }, consumes = {
+			"application/json" }, method = RequestMethod.PUT)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	ResponseEntity<Void> updateManufacturer(
+			@ApiParam(value = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId,
+			@ApiParam(value = "manufacturer to update", required = true) @RequestBody Manufacturer manufacturer,
+			BindingResult result) throws RestServiceException;
+
 }

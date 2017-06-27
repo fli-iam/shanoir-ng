@@ -1,18 +1,16 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  version: "0.0.1"
+  version: 0.0.1
   title: Shanoir NG Study Cards Microservice
   description: Microservice API for Shanoir NG study card managment
 produces:
   - application/json
-  
 paths:
-
-  /studyCard:
+  /studycard:
     post:
       operationId: saveNewStudyCard
       description: Saves a new study card
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: studyCard
@@ -20,12 +18,12 @@ paths:
           description: study Card to create
           required: true
           schema:
-            $ref: "#/definitions/StudyCard"
+            $ref: '#/definitions/StudyCard'
       responses:
         '200':
           description: created study card
           schema:
-            $ref: "#/definitions/StudyCard"
+            $ref: '#/definitions/StudyCard'
         '401':
           description: unauthorized
         '403':
@@ -33,23 +31,22 @@ paths:
         '422':
           description: bad parameters
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-            
-  /studyCard/{studyCardId}:
+            $ref: '#/definitions/ErrorModel'
+  '/studycard/{studyCardId}':
     get:
       operationId: findStudyCardById
-      description: If exists, returns the study card corresponding to the given id
+      description: 'If exists, returns the study card corresponding to the given id'
       parameters:
-        - $ref: "#/parameters/studyCardId"
+        - $ref: '#/parameters/studyCardId'
       responses:
         '200':
           description: found study card
           schema:
-            $ref: "#/definitions/StudyCard"
+            $ref: '#/definitions/StudyCard'
         '401':
           description: unauthorized
         '403':
@@ -59,20 +56,20 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
     put:
       operationId: updateStudyCard
       description: Updates a study card
-      consumes: 
+      consumes:
         - application/json
       parameters:
-        - $ref: "#/parameters/studyCardId"
+        - $ref: '#/parameters/studyCardId'
         - name: study
           in: body
           description: study card to update
           required: true
           schema:
-            $ref: "#/definitions/StudyCard"
+            $ref: '#/definitions/StudyCard'
       responses:
         '204':
           description: study card updated
@@ -83,16 +80,16 @@ paths:
         '422':
           description: bad parameters
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
     delete:
       operationId: deleteStudyCard
       description: Deletes a study card
       parameters:
-        - $ref: "#/parameters/studyCardId"
+        - $ref: '#/parameters/studyCardId'
       responses:
         '204':
           description: study card deleted
@@ -106,8 +103,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-            
-  /studyCard/all:
+  /studycard/all:
     get:
       operationId: findStudyCards
       description: Returns all the study Cards
@@ -117,7 +113,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/StudyCard"
+              $ref: '#/definitions/StudyCard'
         '204':
           description: no study card found
         '401':
@@ -127,18 +123,25 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-  /studyCard/{studyId}/allStudyCards:
-    get:
-      operationId: findStudyCardsByStudyId
-      description: If exists, returns the study cards of a study 
+            $ref: '#/definitions/ErrorModel'
+  /studycard/search:
+    post:
+      operationId: searchStudyCards
+      description: 'If exists, returns searched study cards'
+      consumes:
+        - application/json
       parameters:
-        - $ref: "#/parameters/studyId"
+        - name: studyIds
+          in: body
+          description: study ids
+          required: true
+          schema:
+            $ref: '#/definitions/IdListDto'
       responses:
         '200':
-          description: found study cards 
+          description: found study cards
           schema:
-            $ref: "#/definitions/StudyCard"
+            $ref: '#/definitions/StudyCard'
         '401':
           description: unauthorized
         '403':
@@ -148,11 +151,32 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-
-
+            $ref: '#/definitions/ErrorModel'
+  '/studycard/centerid/{studyCardId}':
+    get:
+      operationId: searchCenterId
+      description: 'If exists, returns center id'
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/studyCardId'
+      responses:
+        '200':
+          description: found center id
+          schema:
+            type: integer
+            format: int64
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no center id found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
 parameters:
-
   studyCardId:
     name: studyCardId
     in: path
@@ -160,22 +184,12 @@ parameters:
     required: true
     type: integer
     format: int64
-    
-  studyId:
-    name: studyId
-    in: path
-    description: id of the study
-    required: true
-    type: integer
-    format: int64
-    
-
 definitions:
   StudyCard:
     required:
       - id
       - name
-    type: object 
+    type: object
     properties:
       id:
         type: integer
@@ -184,7 +198,14 @@ definitions:
         type: string
       disable:
         type: boolean
-    
+  IdListDto:
+    type: object
+    properties:
+      idList:
+        type: array
+        items:
+          type: integer
+          format: int64
   ErrorModel:
     type: object
     properties:

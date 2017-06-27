@@ -17,7 +17,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 
 	/**
 	 * Delete a subject.
-	 * 
+	 *
 	 * @param id
 	 *            subject id.
 	 * @throws ShanoirSubjectException
@@ -26,7 +26,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 
 	/**
 	 * Get all the subjects.
-	 * 
+	 *
 	 * @return a list of subjects.
 	 */
 	List<Subject> findAll();
@@ -58,6 +58,19 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @throws ShanoirSubjectException
 	 */
 	Subject save(Subject subject) throws ShanoirSubjectException;
+	
+	/**
+	 * Save a subject for OFSEP.
+	 *
+	 * @param subject
+	 *            subject to create.
+	 * @param studyCardId
+	 * 			id of the study card used to generate the subject common name
+	 * @return created subject.
+	 * @throws ShanoirSubjectException
+	 */
+
+	Subject saveForOFSEP( Subject subject,  Long studyCardId) throws ShanoirSubjectException;
 
 	/**
 	 * Update a subject.
@@ -71,21 +84,31 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 
 	/**
 	 * Update a subject from the old Shanoir
-	 * 
+	 *
 	 * @param subject
 	 *            subject.
 	 * @throws ShanoirSubjectException
 	 */
 	void updateFromShanoirOld(Subject subject) throws ShanoirSubjectException;
-	
+
+	/*
+	 * Update Shanoir Old with new subject.
+	 *
+	 * @param Subject subject.
+	 *
+	 * @return false if it fails, true if it succeed.
+	 */
+	boolean updateShanoirOld(final Subject subject);
+
+
 	/**
 	 * Get all the subjects of a study
-	 * 
+	 *
 	 * @param studyId
 	 * @return list of subjects
 	 */
 	public List<Subject> findAllSubjectsOfStudy(final Long studyId);
-	
+
 	/**
 	 * Find subject by its identifier.
 	 *
@@ -96,8 +119,8 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	Subject findByIdentifier(String indentifier);
 
 	Subject saveFromJson(File jsonFile) throws ShanoirSubjectException;
-	
+
 	public String findSubjectOfsepByCenter(final String centerCode);
-	
+
 
 }

@@ -16,7 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.center.Center;
 import org.shanoir.ng.center.CenterRepository;
 import org.shanoir.ng.center.CenterServiceImpl;
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -33,6 +33,9 @@ public class CenterServiceTest {
 	private static final String UPDATED_CENTER_NAME = "test";
 
 	@Mock
+	private CenterMapper centerMapper;
+
+	@Mock
 	private CenterRepository centerRepository;
 
 	@Mock
@@ -43,13 +46,15 @@ public class CenterServiceTest {
 
 	@Before
 	public void setup() {
+		given(centerMapper.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
+		
 		given(centerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCenter()));
 		given(centerRepository.findOne(CENTER_ID)).willReturn(ModelsUtil.createCenter());
 		given(centerRepository.save(Mockito.any(Center.class))).willReturn(ModelsUtil.createCenter());
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirStudyException {
+	public void deleteByIdTest() throws ShanoirStudiesException {
 		centerService.deleteById(CENTER_ID);
 
 		Mockito.verify(centerRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -74,14 +79,14 @@ public class CenterServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirStudyException {
+	public void saveTest() throws ShanoirStudiesException {
 		centerService.save(createCenter());
 
 		Mockito.verify(centerRepository, Mockito.times(1)).save(Mockito.any(Center.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirStudyException {
+	public void updateTest() throws ShanoirStudiesException {
 		final Center updatedCenter = centerService.update(createCenter());
 		Assert.assertNotNull(updatedCenter);
 		Assert.assertTrue(UPDATED_CENTER_NAME.equals(updatedCenter.getName()));
@@ -90,7 +95,7 @@ public class CenterServiceTest {
 	}
 
 	@Test
-	public void updateFromShanoirOldTest() throws ShanoirStudyException {
+	public void updateFromShanoirOldTest() throws ShanoirStudiesException {
 		centerService.updateFromShanoirOld(createCenter());
 
 		Mockito.verify(centerRepository, Mockito.times(1)).findOne(Mockito.anyLong());

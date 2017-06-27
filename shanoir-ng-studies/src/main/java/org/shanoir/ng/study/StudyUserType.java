@@ -1,6 +1,8 @@
 package org.shanoir.ng.study;
 
 /**
+ * Study rights for an user.
+ * 
  * @author msimon
  *
  */

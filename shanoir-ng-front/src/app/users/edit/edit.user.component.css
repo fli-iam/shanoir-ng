@@ -2,3 +2,7 @@
 /* Edit user component */
 /***********************/
 .EditUserComponent { display: inline-block; }
+
+.important-text {
+    color: var(--color-important);
+}

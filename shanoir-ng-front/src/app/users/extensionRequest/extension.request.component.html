@@ -1,0 +1,39 @@
+<div class="ExtensionRequestComponent">
+    <form [formGroup]="extensionRequestForm" class="EditUserContent max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="1">
+				<div class="header command-zone" i18n="Extension request|Title">Extension request</div>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+						<ol>
+							<li class="required">
+								<label i18n="Extension request|ExpirationDate label" class="required-label">New expiration Date</label> 
+								<span class="right-col">
+									<my-date-picker id="extensionDate" [options]="myDatePickerOptions" formControlName="extensionDate" [(ngModel)]="extensionDate" 
+										(dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
+									</my-date-picker>
+								</span>
+							</li>
+							<li class="required">
+								<label i18n="Extension request|Motivation" class="required-label">Why do you want to extend your account?</label> 
+								<span class="right-col">
+									<textarea autosize id="extensionMotivation" formControlName="extensionMotivation" [(ngModel)]="extensionMotivation"></textarea>
+								</span>
+							</li>
+						</ol>
+					</fieldset>
+				</td>
+			</tr>
+			
+			<tr>
+				<td colspan="2">
+					<div class="footer command-zone">
+						<button type="submit" i18n="Extension request|RequestButton label" (click)="extensionRequest()" class="Button" [disabled]="!isEditUserFormValid()">Request an extension</button>
+					</div>
+				</td>
+			</tr>
+		</table>
+    </form>
+</div>

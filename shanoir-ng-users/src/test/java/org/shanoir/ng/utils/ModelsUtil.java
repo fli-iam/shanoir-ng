@@ -31,7 +31,6 @@ public final class ModelsUtil {
 	
 	// Login/password
 	public static final String NEW_USER_LOGIN = "user";
-	public static final String NEW_USER_PASSWORD = "password";
 	public static final Long USER_ID = 1L;
 	public static final String USER_LOGIN = "admin";
 	public static final String USER_PASSWORD = "D0-483351E2-30";
@@ -85,9 +84,9 @@ public final class ModelsUtil {
 		final User user = new User();
 		user.setCreationDate(new Date());
 		user.setEmail(USER_EMAIL);
+		user.setExpirationDate(new Date());
 		user.setFirstName(USER_FIRSTNAME);
 		user.setLastName(USER_LASTNAME);
-		user.setPassword(NEW_USER_PASSWORD);
 		user.setRole(role);
 		user.setUsername(NEW_USER_LOGIN);
 		return user;

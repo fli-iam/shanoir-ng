@@ -1,17 +1,16 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  version: "0.0.1"
+  version: 0.0.1
   title: Shanoir NG Studies Microservice - Acquisition equipments managment
   description: Microservice API for Shanoir NG acquisition equipments managment
 produces:
   - application/json
-  
 paths:
   /acquisitionequipment:
     post:
       operationId: saveNewAcquisitionEquipment
       description: Saves a new acquisition equipment
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: acquisitionEquipment
@@ -19,12 +18,12 @@ paths:
           description: acquisition equipment to create
           required: true
           schema:
-            $ref: "#/definitions/AcquisitionEquipment"
+            $ref: '#/definitions/AcquisitionEquipment'
       responses:
         '200':
           description: created acquisition equipment
           schema:
-            $ref: "#/definitions/AcquisitionEquipment"
+            $ref: '#/definitions/AcquisitionEquipmentDTO'
         '401':
           description: unauthorized
         '403':
@@ -32,22 +31,24 @@ paths:
         '422':
           description: bad parameters
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-  /acquisitionequipment/{acquisitionEquipmentId}:
+            $ref: '#/definitions/ErrorModel'
+  '/acquisitionequipment/{acquisitionEquipmentId}':
     get:
       operationId: findAcquisitionEquipmentById
-      description: If exists, returns the acquisition equipment corresponding to the given id
+      description: >-
+        If exists, returns the acquisition equipment corresponding to the given
+        id
       parameters:
-        - $ref: "#/parameters/acquisitionEquipmentId"
+        - $ref: '#/parameters/acquisitionEquipmentId'
       responses:
         '200':
-          description: found acquisition equipment 
+          description: found acquisition equipment
           schema:
-            $ref: "#/definitions/AcquisitionEquipment"
+            $ref: '#/definitions/AcquisitionEquipmentDTO'
         '204':
           description: no acquisition equipment found
         '401':
@@ -57,20 +58,20 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
     put:
       operationId: updateAcquisitionEquipment
       description: Updates a acquisition equipment
-      consumes: 
+      consumes:
         - application/json
       parameters:
-        - $ref: "#/parameters/acquisitionEquipmentId"
+        - $ref: '#/parameters/acquisitionEquipmentId'
         - name: acquisitionequipment
           in: body
           description: acquisition equipment to update
           required: true
           schema:
-            $ref: "#/definitions/AcquisitionEquipment"
+            $ref: '#/definitions/AcquisitionEquipment'
       responses:
         '200':
           description: acquisition equipment updated
@@ -83,16 +84,16 @@ paths:
         '422':
           description: bad parameters
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
     delete:
       operationId: deleteAcquisitionEquipment
       description: Deletes an acquisition equipment
       parameters:
-        - $ref: "#/parameters/acquisitionEquipmentId"
+        - $ref: '#/parameters/acquisitionEquipmentId'
       responses:
         '200':
           description: acquisition equipment deleted
@@ -105,18 +106,18 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: '#/definitions/ErrorModel' 
+            $ref: '#/definitions/ErrorModel'
   /acquisitionequipment/all:
     get:
       operationId: findAcquisitionEquipments
       description: Returns all the acquisition equipments
       responses:
         '200':
-          description: found acquisition equipments 
+          description: found acquisition equipments
           schema:
             type: array
             items:
-              $ref: "#/definitions/AcquisitionEquipment"
+              $ref: '#/definitions/AcquisitionEquipmentDTO'
         '204':
           description: no acquisition equipment found
         '401':
@@ -126,7 +127,7 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
 parameters:
   acquisitionEquipmentId:
     name: acquisitionEquipmentId
@@ -135,7 +136,6 @@ parameters:
     required: true
     type: integer
     format: int64
-
 definitions:
   AcquisitionEquipment:
     type: object
@@ -146,34 +146,29 @@ definitions:
         type: integer
         format: int64
       center:
-        $ref: "#/definitions/Center"
+        $ref: '#/definitions/Center'
       manufacturerModel:
-        $ref: "#/definitions/ManufacturerModel"
+        $ref: '#/definitions/ManufacturerModel'
       serialNumber:
         type: string
-  Center:
+  AcquisitionEquipmentDTO:
     type: object
     required:
       - id
-      - name
     properties:
       id:
         type: integer
         format: int64
-      name:
+      center:
+        $ref: '#/definitions/CenterDTO'
+      manufacturerModel:
+        $ref: '#/definitions/ManufacturerModel'
+      serialNumber:
         type: string
-      street:
-        type: string
-      postalCode:
-        type: string
-      city: 
-        type: string
-      country:
-        type: string
-      phoneNumber:
-        type: string
-      website:
-        type: string
+  Center:
+    type: object
+  CenterDTO:
+    type: object
   DatasetModalityType:
     type: object
     required:
@@ -206,9 +201,9 @@ definitions:
         type: integer
         format: int64
       datasetModalityType:
-        $ref: "#/definitions/DatasetModalityType"
+        $ref: '#/definitions/DatasetModalityType'
       manufacturer:
-        $ref: "#/definitions/Manufacturer"
+        $ref: '#/definitions/Manufacturer'
       name:
         type: string
   ErrorModel:

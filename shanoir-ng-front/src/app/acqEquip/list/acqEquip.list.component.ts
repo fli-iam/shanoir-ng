@@ -86,7 +86,7 @@ export class AcquisitionEquipmentListComponent {
 
     openDeleteAcquisitionEquipmentConfirmDialog = (item: AcquisitionEquipment) => {
          this.confirmDialogService
-            .confirm('Delete acqEquip', 'Are you sure you want to delete acqEquip ' + '?',
+            .confirm('Delete acqEquip', 'Are you sure you want to delete the following entity?',
                 this.viewContainerRef)
             .subscribe(res => {
                 if (res) {

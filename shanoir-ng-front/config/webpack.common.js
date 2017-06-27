@@ -37,7 +37,18 @@ module.exports = {
                     use: 'css-loader'
                 }),
                 include: [helpers.root('src', 'assets')]
-            }
+            },
+            
+            /**
+             * File loader for supporting images, for example, in CSS files.
+             */
+            {
+                test: /\.(jpg|png|gif)$/,
+                loader: 'file-loader'
+                    use: 'css-loader'
+                }),
+                include: [helpers.root('src', 'assets')]
+           }
         ]
     },
 

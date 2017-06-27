@@ -1,21 +1,44 @@
 package org.shanoir.ng.study;
 
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.study.dto.SimpleStudyDTO;
+import org.shanoir.ng.study.dto.StudyStudyCardDTO;
 
-
+/**
+ * Study service.
+ * 
+ * @author msimon
+ *
+ */
 public interface StudyService {
 
 	/**
-     * Get all the studies
-     * @return a list of studies
-     */
-    List<Study> findAll();
+	 * Delete a Study
+	 *
+	 * @param id
+	 * @throws ShanoirStudiesException
+	 */
+	void deleteById(Long id) throws ShanoirStudiesException;
 
+	/**
+	 * delete a Study from the old Shanoir
+	 *
+	 * @param Study
+	 *            Study.
+	 * @throws ShanoirStudiesException
+	 */
+	void deleteFromShanoirOld(Study study) throws ShanoirStudiesException;
 
-    /**
+	/**
+	 * Get all the studies
+	 * 
+	 * @return a list of studies
+	 */
+	List<Study> findAll();
+
+	/**
 	 * Find study by its id.
 	 *
 	 * @param id
@@ -24,52 +47,59 @@ public interface StudyService {
 	 */
 	Study findById(Long id);
 
-
-    /**
-     * add new study
-     * @param study
-     * @return created Study
-     */
-    Study createStudy(Study study);
-
-    /**
-     *  Update a study
-     * @param study
-     * @return updated study
-     */
-    Study update(Study study);
+	/**
+	 * Find all studies for a user.
+	 * 
+	 * @param userId
+	 *            user id.
+	 * @return a list of studies.
+	 */
+	List<Study> findStudiesByUserId(Long userId);
 
 	/**
-	 * Delete a Study
-	 *
+	 * Find all studies with theirs study cards for a user.
+	 * 
 	 * @param id
+	 *            user id.
+	 * @return a list of simple studies.
 	 * @throws ShanoirStudiesException
 	 */
-	void deleteById(Long id) throws  ShanoirStudiesException;
+	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserId(Long UserId) throws ShanoirStudiesException;
 
 	/**
-	 * Find all studies for a user
-	 * @param id
-	 * @return a list of studies
+	 * add new study
+	 * 
+	 * @param study
+	 * @return created Study
+	 * @throws ShanoirStudiesException
 	 */
-	List<Study> findAllForUser(Long UserId);
+	Study save(Study study) throws ShanoirStudiesException;
 
-    /**
-     * delete a Study from the old Shanoir
-     *
-     * @param Study
-     *            Study.
-     * @throws ShanoirStudyException
-     */
-    void deleteFromShanoirOld(Study study) throws ShanoirStudyException;
+	/**
+	 * Update a study
+	 * 
+	 * @param study
+	 * @return updated study
+	 * @throws ShanoirStudiesException
+	 */
+	Study update(Study study) throws ShanoirStudiesException;
 
-		/**
-		 * Update a Study from the old Shanoir
-		 *
-		 * @param Study
-		 *            Study.
-		 * @throws ShanoirStudyException
-		 */
-		void updateFromShanoirOld(Study study) throws ShanoirStudyException;
+	/**
+	 * Manage link between a study and a study card (CUD)
+	 *
+	 * @param studyStudyCardDTO
+	 *            DTO with link between study and study card.
+	 * @throws ShanoirStudiesException
+	 */
+	void updateFromMsStudyCard(StudyStudyCardDTO studyStudyCardDTO) throws ShanoirStudiesException;
+	
+	/**
+	 * Update a Study from the old Shanoir
+	 *
+	 * @param Study
+	 *            Study.
+	 * @throws ShanoirStudiesException
+	 */
+	void updateFromShanoirOld(Study study) throws ShanoirStudiesException;
 
 }

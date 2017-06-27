@@ -38,10 +38,11 @@ public abstract class KeycloakControllerTestIT {
 	 */
 	protected HttpHeaders getHeadersWithToken(final boolean admin) {
 		if (admin) {
-			login = password = "admin";
+			login = "admin";
 		} else {
-			login = password = "guest";
+			login = "guest";
 		}
+		password = "&a1A&a1A";
 		final AccessTokenResponse tokenResponse = getToken();
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);

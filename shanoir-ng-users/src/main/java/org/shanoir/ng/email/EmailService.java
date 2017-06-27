@@ -36,4 +36,20 @@ public interface EmailService {
 	 */
 	void notifyUserAccountRequestAccepted(User user);
 
+	/**
+	 * Send an email on extension request validation.
+	 * 
+	 * @param user
+	 *            user.
+	 */
+	void notifyUserExtensionRequestAccepted(User user);
+
+	/**
+	 * Send an email on extension request deny.
+	 * 
+	 * @param user
+	 *            user.
+	 */
+	void notifyUserExtensionRequestDenied(User user);
+
 }

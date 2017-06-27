@@ -5,6 +5,7 @@ import { Http, HttpModule, RequestOptions, XHRBackend } from '@angular/http';
 import { MaterialModule } from '@angular/material';
 import { NgModule } from '@angular/core';
 
+import { Autosize } from 'angular2-autosize/angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
 
 import { routing } from './app.routing';
@@ -21,15 +22,24 @@ import { AuthNotGuestGuard }   from './shared/roles/auth.not.guest.guard';
 import { CenterDetailComponent } from './centers/detail/center.detail.component';
 import { CenterListComponent }   from './centers/list/center.list.component';
 import { CenterService } from './centers/shared/center.service';
+import { ClickTipComponent }   from './shared/clickTip/clickTip.component';
 import { ConfirmDialogComponent } from "./shared/utils/confirm.dialog.component";
 import { ConfirmDialogService } from "./shared/utils/confirm.dialog.service";
+import { ConsoleComponent }   from './shared/console/console.line.component';
 import { DropdownMenuComponent }   from './shared/dropdown-menu/dropdown-menu.component';
 import { EditUserComponent }   from './users/edit/edit.user.component';
+import { ExtensionRequestComponent } from './users/extensionRequest/extension.request.component';
 import { HandleErrorService } from './shared/utils/handle.error.service';
 import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
 import { KeycloakHttp } from "./shared/keycloak/keycloak.http";
 import { KeycloakService } from "./shared/keycloak/keycloak.service";
+import { ImportComponent }   from './import/import.component';
+import { LoadingBarComponent }   from './shared/loadingBar/loadingBar.component';
+import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
+import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
+import { ManufacturerModelService } from './acqEquip/shared/manufModel.service';
+import { ManufacturerService } from './acqEquip/shared/manuf.service';
 import { MenuItemComponent }   from './shared/dropdown-menu/menu-item/menu-item.component';
 import { NavbarComponent }   from './shared/navbar/navbar.component';
 import { RoleService } from './roles/role.service';
@@ -38,14 +48,8 @@ import { TableComponent} from "./shared/table/table.component";
 import { TreeNodeComponent }   from './shared/tree/tree.node.component';
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
-import { ImportComponent }   from './import/import.component';
-import { ClickTipComponent }   from './shared/clickTip/clickTip.component';
-import { ConsoleComponent }   from './shared/console/console.line.component';
-import { LoadingBarComponent }   from './shared/loadingBar/loadingBar.component';
-import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
-import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
-import { ManufacturerModelService } from './acqEquip/shared/manufModel.service';
-import { ManufacturerService } from './acqEquip/shared/manuf.service';
+
+import '../assets/css/common.css';
 
 export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
   return new KeycloakHttp(backend, defaultOptions, keycloakService);
@@ -68,11 +72,13 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         AcquisitionEquipmentDetailComponent,
         AcquisitionEquipmentListComponent,
         AppComponent,
+        Autosize,
         CenterDetailComponent,
         CenterListComponent,
         ConfirmDialogComponent,
         DropdownMenuComponent,
         EditUserComponent,
+        ExtensionRequestComponent,
         HeaderComponent,
         HomeComponent,
         MenuItemComponent,

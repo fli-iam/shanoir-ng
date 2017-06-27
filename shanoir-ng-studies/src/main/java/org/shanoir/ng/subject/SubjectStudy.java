@@ -10,15 +10,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.shared.hateoas.HalEntity;
+import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.shanoir.ng.study.Study;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@JsonPropertyOrder({ "_links", "id" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-public class SubjectStudy extends HalEntity {
+public class SubjectStudy extends AbstractGenericItem {
 
 	/**
 	 * UID
@@ -42,6 +41,7 @@ public class SubjectStudy extends HalEntity {
 	/** Subject. */
 	@ManyToOne
 	@JoinColumn(name = "subject",updatable = true, insertable = true)
+	@JsonIgnore
 	private Subject subject;
 
 	/** Identifier of the subject inside the study. */

@@ -43,7 +43,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(code = 403, message = "forbidden", response = AcquisitionEquipment.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = AcquisitionEquipment.class) })
 	@RequestMapping(value = "/{acquisitionEquipmentId}", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<AcquisitionEquipment> findAcquisitionEquipmentById(
+	ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
 
 	@ApiOperation(value = "", notes = "Returns all the acquisition equipments", response = AcquisitionEquipment.class, responseContainer = "List", tags = {})
@@ -54,7 +54,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(code = 403, message = "forbidden", response = AcquisitionEquipment.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = AcquisitionEquipment.class) })
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<AcquisitionEquipment>> findAcquisitionEquipments();
+	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments();
 
 	@ApiOperation(value = "", notes = "Saves a new acquisition equipment", response = AcquisitionEquipment.class, tags = {})
 	@ApiResponses(value = {
@@ -66,7 +66,7 @@ public interface AcquisitionEquipmentApi {
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	ResponseEntity<AcquisitionEquipment> saveNewAcquisitionEquipment(
+	ResponseEntity<AcquisitionEquipmentDTO> saveNewAcquisitionEquipment(
 			@ApiParam(value = "acquisition equipment to create", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,
 			BindingResult result) throws RestServiceException;
 
