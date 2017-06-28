@@ -22,7 +22,6 @@ keycloak:
 
 # base image for the microservices
 base-ms-image:
-	docker build -t shanoir-ng/debianjava8mariadb:latest shanoir-ng-template/DockerWithJdk8AndMariaDb
 	docker build -t shanoir-ng/debianjava8mariadbpython:latest shanoir-ng-template/DockerWithJdk8AndMariaDbAndPython
 
 # shanoir-ng-users
@@ -36,7 +35,8 @@ users studies studycards: %: base-ms-image
 nginx: keycloak users studies studycards
 	npm set registry https://registry.npmjs.org
 
-	# FIXME: is -Pqualif still needed ?
 	(cd shanoir-ng-front && mvn package -Pqualif)
 	(cd shanoir-ng-nginx && docker build -t shanoir-ng/nginx:latest .)
 
+# all images for shanoir NG
+all: keycloak users studies studycards nginx
