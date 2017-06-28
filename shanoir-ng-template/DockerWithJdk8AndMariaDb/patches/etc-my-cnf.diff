@@ -1,0 +1,16 @@
+--- etc/mysql/my.cnf
++++ etc/mysql/my.cnf
+@@ -40,1 +40,4 @@
+-datadir		= /var/lib/mysql
++datadir		= /vol/rw
++collation-server	= utf8_unicode_ci
++init-connect		= 'SET NAMES utf8'
++character-set-server	= utf8
+@@ -77,1 +77,1 @@
+-log_error = /var/log/mysql/error.log
++log_error = /vol/log/mysql/error.log
+@@ -118,2 +118,3 @@
+ [mysql]
++default-character-set	= utf8
+ #no-auto-rehash	# faster start of mysql but no tab completition
+

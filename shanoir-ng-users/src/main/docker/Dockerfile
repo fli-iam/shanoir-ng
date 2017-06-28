@@ -4,16 +4,15 @@ COPY shanoir-ng-users-0.0.1-SNAPSHOT.jar /opt/shanoir-ng/shanoir-ng-users.jar
 
 COPY shanoir-ng-keycloak.jar /opt/shanoir-ng/shanoir-ng-keycloak.jar
 
-COPY my.cnf /etc/mysql/conf.d/shanoir-ng-users.cnf
+# enable mysql daemon
+RUN  cd /etc/supervisor && cp template.d/mysql.conf conf.d/
 COPY ms.users.sv.conf /etc/supervisor/conf.d/ms.users.sv.conf
 
-COPY docker-entrypoint.sh /opt/mysql/init/mariadb_init.sh
-RUN chmod +x /opt/mysql/init/mariadb_init.sh
 
-COPY container_init /dk/container_init
-RUN chmod +x /dk/container_init
+COPY dk/. dk/.
 
-COPY shanoirng_users.sql /dk/shanoirng_users.sql
+# microservice name
+ENV MS="shanoir-ng-users"
 
 EXPOSE 9900
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]

@@ -23,3 +23,20 @@ COPY supervisord.conf /etc/supervisor/supervisord.conf
 
 # automatic upgrade script
 ADD dk /dk
+
+RUN apt-get update && apt-get install patch
+COPY patches /tmp/patches
+RUN set -e ; for p in /tmp/patches/*.diff ; do patch -F0 -p0 <"$p" ; done
+
+COPY supervisor /etc/supervisor/template.d/
+COPY init-* run-* wait-* /usr/local/sbin/
+
+# MS: microservice name (eg: shanoir-ng-users)
+# 	Shall be set in the child image. The name of the mysql database is
+# 	derived from this variable (with '-' changed into'_')
+ENV MS=""
+
+# PROFILE: configuration profile (eg: prod, qualif, dev)
+#	Shall be set by the sysadmin
+ENV PROFILE=""
+

@@ -1,0 +1,41 @@
+#!/bin/sh
+
+die() {
+	echo "error: $*" >&2
+	exit 1
+}
+
+case "$PROFILE" in
+	'')
+		die "env var PROFILE is empty (should contain either prod, qualif or dev)"
+		;;
+	qualif)
+		kc_args="--spring.profiles.active=qualif"
+		;;
+	*)
+		kc_args=""
+		;;
+esac
+
+
+# abort on error
+set -e
+
+echo "Initialize MariaDB and populate it"
+init-mysql < /dk/data/shanoirng_users.sql
+
+echo "Create supervisor log directory"
+mkdir -p /vol/log/supervisor
+
+echo "Start the mysql server"
+run-mysql </dev/null &
+pid=$!
+wait-mysql --timeout=5
+
+echo "Initialize Keycloak database"
+# FIXME: perhaps this should be run as user 'shanoir'
+java -jar /opt/shanoir-ng/shanoir-ng-keycloak.jar $kc_args
+
+echo "Stop mysql process"
+kill $pid
+wait
