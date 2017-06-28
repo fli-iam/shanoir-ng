@@ -6,9 +6,11 @@ COPY shanoir-ng-keycloak.jar /opt/shanoir-ng/shanoir-ng-keycloak.jar
 
 # enable mysql daemon
 RUN  cd /etc/supervisor && cp template.d/mysql.conf conf.d/
-COPY ms.users.sv.conf /etc/supervisor/conf.d/ms.users.sv.conf
 
+# enable microservice
+COPY ms.users.sv.dev.conf /etc/supervisor/conf.d/
 
+COPY run-* /usr/local/sbin/
 COPY dk/. dk/.
 
 # microservice name

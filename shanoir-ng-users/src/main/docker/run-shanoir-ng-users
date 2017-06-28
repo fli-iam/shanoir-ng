@@ -1,0 +1,8 @@
+#!/bin/sh
+
+wait-mysql
+
+exec su - shanoir -c 'exec java -jar /opt/shanoir-ng/shanoir-ng-users.jar'
+
+
+
