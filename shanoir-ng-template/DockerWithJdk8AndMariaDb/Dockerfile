@@ -40,3 +40,4 @@ ENV MS=""
 #	Shall be set by the sysadmin
 ENV PROFILE=""
 
+CMD ["run-supervisor"]

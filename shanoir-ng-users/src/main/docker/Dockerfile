@@ -15,4 +15,3 @@ COPY dk/. dk/.
 ENV MS="shanoir-ng-users"
 
 EXPOSE 9900
-CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
