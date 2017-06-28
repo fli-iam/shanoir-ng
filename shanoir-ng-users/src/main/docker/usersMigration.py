@@ -4,14 +4,14 @@
 import os
 import pymysql
 
-sourceConn = pymysql.connect(host=os.environ['SHANOIR_OLD_MYSQL_HOST'],user=os.environ['SHANOIR_OLD_MYSQL_USER'],password=os.environ['SHANOIR_OLD_MYSQL_PWD'], database="shanoirdb", charset="utf8")
+sourceConn = pymysql.connect(host=os.environ['ENV']+"-mysql",user=shanoir,password=shanoir, database="shanoirdb", charset="utf8")
 targetConn = pymysql.connect(host="localhost",user=os.environ['MYSQL_USER'],password=os.environ['MYSQL_PASSWORD'], database=os.environ['MYSQL_DATABASE'], charset="utf8")
 
-print("Import roles: start")
-    
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
 
+print("Import roles: start")
+    
 sourceCursor.execute("SELECT ROLE_ID, ACCESS_LEVEL, DISPLAY_NAME, NAME FROM role")
 
 def changeRoleName(x):
