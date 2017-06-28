@@ -4,8 +4,8 @@
 import os
 import pymysql
 
-sourceConn = pymysql.connect(host=os.environ['ENV']+"-mysql",user=shanoir,password=shanoir, database="shanoirdb", charset="utf8")
-targetConn = pymysql.connect(host="localhost",user=os.environ['MYSQL_USER'],password=os.environ['MYSQL_PASSWORD'], database=os.environ['MYSQL_DATABASE'], charset="utf8")
+sourceConn = pymysql.connect(host=os.environ['ENV']+"-mysql", user="shanoir", password="shanoir", database="shanoirdb", charset="utf8")
+targetConn = pymysql.connect(host="localhost", user=os.environ['MYSQL_USER'], password=os.environ['MYSQL_PASSWORD'], database=os.environ['MYSQL_DATABASE'], charset="utf8")
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
