@@ -12,7 +12,7 @@ targetCursor = targetConn.cursor()
 
 print("Import template: start")
     
-sourceCursor.execute("SELECT DATA_ID, DATA FROM data")
+sourceCursor.execute("SELECT TEMPLATE_ID, DATA FROM TEMPLATE")
 
 query = "INSERT INTO template (id, data) VALUES (%s, %s)"
 

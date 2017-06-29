@@ -12,7 +12,7 @@ targetCursor = targetConn.cursor()
 
 print("Import roles: start")
     
-sourceCursor.execute("SELECT ROLE_ID, ACCESS_LEVEL, DISPLAY_NAME, NAME FROM role")
+sourceCursor.execute("SELECT ROLE_ID, ACCESS_LEVEL, DISPLAY_NAME, NAME FROM ROLE")
 
 def changeRoleName(x):
     return {
@@ -44,7 +44,7 @@ print("Import roles: end")
 print("Import users: start")
     
 sourceCursor.execute("""SELECT USER_ID, CAN_ACCESS_TO_DICOM_ASSOCIATION, CREATED_ON, EMAIL, FIRST_NAME, LAST_LOGIN_ON, LAST_NAME, USERNAME, ROLE_ID,
-    EXPIRATION_DATE, IS_FIRST_EXPIRATION_NOTIFICATION_SENT, IS_SECOND_EXPIRATION_NOTIFICATION_SENT, false FROM users""")
+    EXPIRATION_DATE, IS_FIRST_EXPIRATION_NOTIFICATION_SENT, IS_SECOND_EXPIRATION_NOTIFICATION_SENT, false FROM USERS""")
 
 users = []
 emails= []

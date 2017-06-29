@@ -12,7 +12,7 @@ targetCursor = targetConn.cursor()
 
 print("Import centers: start")
     
-sourceCursor.execute("SELECT CENTER_ID, TOWN, COUNTRY, NAME, PHONE_NUMBER, POSTCODE, STREET, WEBSITE FROM center")
+sourceCursor.execute("SELECT CENTER_ID, TOWN, COUNTRY, NAME, PHONE_NUMBER, POSTCODE, STREET, WEBSITE FROM CENTER")
 
 query = "INSERT INTO center (id, city, country, name, phone_number, postal_code, street, website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
 
@@ -24,7 +24,7 @@ print("Import centers: end")
 print("Import studies: start")
     
 sourceCursor.execute("""SELECT STUDY_ID, IS_CLINICAL, COORDINATOR_ID, IS_DOWNLOADABLE_BY_DEFAULT, END_DATE, IS_MONO_CENTER, NAME,
-    START_DATE, REF_STUDY_STATUS_ID, REF_STUDY_TYPE_ID, IS_VISIBLE_BY_DEFAULT, IS_WITH_EXAMINATION FROM study""")
+    START_DATE, REF_STUDY_STATUS_ID, REF_STUDY_TYPE_ID, IS_VISIBLE_BY_DEFAULT, IS_WITH_EXAMINATION FROM STUDY""")
 
 query = """INSERT INTO study
     (id, clinical, coordinator_id, downloadable_by_default, end_date, mono_center, name, start_date, study_status, study_type, visible_by_default, with_examination)
