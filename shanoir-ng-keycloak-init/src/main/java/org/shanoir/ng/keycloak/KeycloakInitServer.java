@@ -32,12 +32,13 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(KeycloakInitServer.class);
 
-	private static final String SHANOIR_SERVER_URL_ENV = "SHANOIR_SERVER_URL";
 	private static final String BROWSER_FLOW = "browser";
 	private static final String FRONT_CLIENT_ID = "shanoir-ng-front";
 	private static final String NEW_BROWSER_FLOW = "Browser script";
 	private static final String NEW_EXECUTION_CONFIG_NAME = "CheckExpirationDateConfig";
 	private static final String REQUIRED_ACTION_NAME = "Record Login Date Action";
+	private static final String SHANOIR_REALM_DISPLAY_NAME = "Shanoir";
+	private static final String SHANOIR_SERVER_URL_ENV = "SHANOIR_SERVER_URL";
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
@@ -147,9 +148,17 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 
 		final RealmRepresentation realm = getKeycloak().realm(getKeycloakRealm()).toRepresentation();
 		realm.setBrowserFlow(NEW_BROWSER_FLOW);
+		realm.setDisplayName(SHANOIR_REALM_DISPLAY_NAME);
 		realm.setLoginTheme("shanoir-theme");
 		realm.setPasswordPolicy("hashIterations and length and specialChars and digits and upperCase and lowerCase");
 		realm.setResetPasswordAllowed(Boolean.TRUE);
+		// SMTP server
+		Map<String, String> config = new HashMap<>();
+		config.put("from", getSmtpFrom());
+		config.put("fromDisplayName", getSmtpFromDisplayName());
+		config.put("host", getSmtpHost());
+		config.put("port", getSmtpPort());
+		realm.setSmtpServer(config);
 		getKeycloak().realm(getKeycloakRealm()).update(realm);
 	}
 

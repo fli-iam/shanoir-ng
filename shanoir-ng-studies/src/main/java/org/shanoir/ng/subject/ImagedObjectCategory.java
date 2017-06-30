@@ -1,41 +1,69 @@
 package org.shanoir.ng.subject;
 
-
+/**
+ * Imaged object category.
+ * 
+ * @author msimon
+ *
+ */
 public enum ImagedObjectCategory {
 
-	PHANTOM(Values.PHANTOM),
-	LIVING_HUMAN_BEING(Values.LIVING_HUMAN_BEING),
-	HUMAN_CADAVER(Values.HUMAN_CADAVER),
-	ANATOMICAL_PIECE(Values.ANATOMICAL_PIECE);
+	/**
+	 * Phantom
+	 */
+	PHANTOM(1),
 
-	private String value;
+	/**
+	 * Living human being
+	 */
+	LIVING_HUMAN_BEING(2),
+
+	/**
+	 * Human cadaver
+	 */
+	HUMAN_CADAVER(3),
+
+	/**
+	 * Anatomical piece
+	 */
+	ANATOMICAL_PIECE(5);
+
+	private int id;
 
 	/**
 	 * Constructor.
-	 *
-	 * @param val
-	 *            value
+	 * 
+	 * @param id
+	 *            id
 	 */
-	private ImagedObjectCategory(final String value) {
-		this.value = value;
+	private ImagedObjectCategory(final int id) {
+		this.id = id;
 	}
 
 	/**
-	 * @return the value
+	 * Get an imaged object category by its id.
+	 * 
+	 * @param id
+	 *            category id.
+	 * @return imaged object category.
 	 */
-	public String getValue() {
-		return value;
+	public static ImagedObjectCategory getCategory(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (ImagedObjectCategory category : ImagedObjectCategory.values()) {
+			if (id.equals(category.getId())) {
+				return category;
+			}
+		}
+		throw new IllegalArgumentException("No matching imaged object category for id " + id);
 	}
 
 	/**
-	 * List of enum values.
-	 *
+	 * @return the id
 	 */
-	public static class Values {
-		public static final String PHANTOM = "Phantom";
-		public static final String LIVING_HUMAN_BEING = "Living human being";
-		public static final String HUMAN_CADAVER = "Human cadaver";
-		public static final String ANATOMICAL_PIECE = "Anatomical piece";
+	public int getId() {
+		return id;
 	}
 
 }

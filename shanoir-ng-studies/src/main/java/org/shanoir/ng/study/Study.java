@@ -8,8 +8,6 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
@@ -18,6 +16,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
@@ -72,21 +71,23 @@ public class Study extends HalEntity {
 	private List<Long> studyCardIds;
 
 	@NotNull
-	@Enumerated(EnumType.STRING)
-	private StudyStatus studyStatus;
+	private Integer studyStatus;
 
 	/** Relations between the subjects and the studies. */
 	@JsonIgnore
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<SubjectStudy> subjectStudyList;
 
-	/** Users associated to the research study. */
+	/** Relations between the investigators, the centers and the studies. */
+	@NotEmpty
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<StudyCenter> studyCenterList;
+
+	private Integer studyType;
 	
+	/** Users associated to the research study. */
 	@OneToMany(mappedBy = "studyId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<StudyUser> studyUsers;
-
-	@Enumerated(EnumType.STRING)
-	private StudyType studyType;
 
 	/** Is visible by default. */
 	private boolean visibleByDefault;
@@ -226,7 +227,7 @@ public class Study extends HalEntity {
 	 * @return the studyStatus
 	 */
 	public StudyStatus getStudyStatus() {
-		return studyStatus;
+		return StudyStatus.getStatus(studyStatus);
 	}
 
 	/**
@@ -234,7 +235,11 @@ public class Study extends HalEntity {
 	 *            the studyStatus to set
 	 */
 	public void setStudyStatus(StudyStatus studyStatus) {
-		this.studyStatus = studyStatus;
+		if (studyStatus == null) {
+			this.studyStatus = null;
+		} else {
+			this.studyStatus = studyStatus.getId();
+		}
 	}
 
 	/**
@@ -253,6 +258,39 @@ public class Study extends HalEntity {
 	}
 
 	/**
+	 * @return the studyCenterList
+	 */
+	public List<StudyCenter> getStudyCenterList() {
+		return studyCenterList;
+	}
+
+	/**
+	 * @param studyCenterList the studyCenterList to set
+	 */
+	public void setStudyCenterList(List<StudyCenter> studyCenterList) {
+		this.studyCenterList = studyCenterList;
+	}
+
+	/**
+	 * @return the studyType
+	 */
+	public StudyType getStudyType() {
+		return StudyType.getType(studyType);
+	}
+	
+	/**
+	 * @param studyType
+	 *            the studyType to set
+	 */
+	public void setStudyType(StudyType studyType) {
+		if (studyType == null) {
+			this.studyType = null;
+		} else {
+			this.studyType = studyType.getId();
+		}
+	}
+	
+	/**
 	 * @return the studyUsers
 	 */
 	public List<StudyUser> getStudyUsers() {
@@ -265,21 +303,6 @@ public class Study extends HalEntity {
 	 */
 	public void setStudyUsers(List<StudyUser> studyUsers) {
 		this.studyUsers = studyUsers;
-	}
-
-	/**
-	 * @return the studyType
-	 */
-	public StudyType getStudyType() {
-		return studyType;
-	}
-
-	/**
-	 * @param studyType
-	 *            the studyType to set
-	 */
-	public void setStudyType(StudyType studyType) {
-		this.studyType = studyType;
 	}
 
 	/**

@@ -1,45 +1,59 @@
 package org.shanoir.ng.study;
 
-
+/**
+ * Study status.
+ * 
+ * @author msimon
+ *
+ */
 public enum StudyStatus {
-
-	/**
-	 * finished.
-	 */
-	 FINISHED(Values.FINISHED),
 
 	/**
 	 * in_progress.
 	 */
-	IN_PROGRESS(Values.IN_PROGRESS);
+	IN_PROGRESS(1),
 
-	private String value;
+	/**
+	 * finished.
+	 */
+	FINISHED(2);
+
+	private int id;
 
 	/**
 	 * Constructor.
-	 *
-	 * @param val
-	 *            value
+	 * 
+	 * @param id
+	 *            id
 	 */
-	private StudyStatus(final String value) {
-		this.value = value;
+	private StudyStatus(final int id) {
+		this.id = id;
 	}
 
 	/**
-	 * @return the value
+	 * Get a study status by its id.
+	 * 
+	 * @param id
+	 *            status id.
+	 * @return study status.
 	 */
-	public String getValue() {
-		return value;
+	public static StudyStatus getStatus(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (StudyStatus status : StudyStatus.values()) {
+			if (id.equals(status.getId())) {
+				return status;
+			}
+		}
+		throw new IllegalArgumentException("No matching study status for id " + id);
 	}
 
 	/**
-	 * List of enum values.
-	 *
-	 *
+	 * @return the id
 	 */
-	public static class Values {
-		public static final String FINISHED = "FINISHED";
-		public static final String IN_PROGRESS = "IN_PROGRESS";
+	public int getId() {
+		return id;
 	}
 
 }

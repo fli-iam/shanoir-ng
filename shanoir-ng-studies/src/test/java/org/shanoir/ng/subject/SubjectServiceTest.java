@@ -1,6 +1,5 @@
 package org.shanoir.ng.subject;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 
 import java.io.File;
@@ -21,7 +20,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.ShanoirSubjectException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -124,7 +122,7 @@ public class SubjectServiceTest {
 		final Subject subject = new Subject();
 		//subject.setName("Toto");
 		//subject.setId(1L);
-		subject.setBirthDate(new Date(2014, 02, 11));
+		subject.setBirthDate(new Date(1392122691000L));
 		subject.setIdentifier("Titi");
 
 		subject.setImagedObjectCategory(ImagedObjectCategory.PHANTOM);
@@ -138,7 +136,7 @@ public class SubjectServiceTest {
 		userPersonalCommentList1.setComment("comment1");
 		UserPersonalCommentSubject userPersonalCommentList2= new UserPersonalCommentSubject();
 		userPersonalCommentList1.setComment("comment2");
-		List<UserPersonalCommentSubject> listSubjectComments = new ArrayList();
+		List<UserPersonalCommentSubject> listSubjectComments = new ArrayList<>();
 		listSubjectComments.add(userPersonalCommentList1);
 		listSubjectComments.add(userPersonalCommentList2);
 		subject.setUserPersonalCommentList(listSubjectComments);

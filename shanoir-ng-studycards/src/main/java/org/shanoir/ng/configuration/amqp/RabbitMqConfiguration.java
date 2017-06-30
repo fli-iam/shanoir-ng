@@ -17,9 +17,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMqConfiguration {
 
-	private final static String STUDYCARD_QUEUE_NAME_IN = "studycard_queue_to_ng";
-	private final static String STUDYCARD_QUEUE_TO_STUDY = "studycard_queue_to_study";
-	private final static String STUDYCARD_DELETE_QUEUE_NAME_IN = "studycard_delete_queue_to_ng";
+	private static final String STUDYCARD_QUEUE_NAME_IN = "studycard_queue_to_ng";
+	private static final String STUDYCARD_QUEUE_TO_STUDY = "studycard_queue_to_study";
+	private static final String STUDYCARD_DELETE_QUEUE_NAME_IN = "studycard_delete_queue_to_ng";
 
 	@Bean
 	public static Queue queueIn() {

@@ -10,6 +10,7 @@
                     <ol>
                         <li class="instructions">
                             ${msg("newPasswordInstruction")}
+                            <img src="${properties.assets!}/images/icons/information.16x16.png" title="${msg("passwordPolicyInstruction")}"/>
                         </li>
                         <li>
                             <input type="password" id="password-new" name="password-new" autofocus autocomplete="off" placeholder="${msg("password")}" />
@@ -19,6 +20,13 @@
                         </li>
                     </ol>
                     <ol>
+                    	<#if message.type = 'error'>
+							<div class="error">
+								<div class="alert alert-${message.type}">
+									<span class="kc-feedback-text">${message.summary}</span>
+								</div>
+							</div>
+						</#if>
                         <div id="kc-form-options" class="${properties.kcFormOptionsClass!}">
                             <div class="${properties.kcFormOptionsWrapperClass!}">
                             </div>

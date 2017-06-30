@@ -1,44 +1,59 @@
 package org.shanoir.ng.subject;
 
+/**
+ * Sex.
+ * 
+ * @author msimon
+ *
+ */
 public enum Sex {
 
 	/**
 	 * Male.
 	 */
-	M(Values.M),
+	M(1),
 
 	/**
 	 * Female.
 	 */
-	F(Values.F);
+	F(2);
 
-	private String value;
+	private int id;
 
 	/**
 	 * Constructor.
-	 *
-	 * @param val
-	 *            value
+	 * 
+	 * @param id
+	 *            id
 	 */
-	private Sex(final String value) {
-		this.value = value;
+	private Sex(final int id) {
+		this.id = id;
 	}
 
 	/**
-	 * @return the value
+	 * Get a sex by its id.
+	 * 
+	 * @param id
+	 *            sex id.
+	 * @return sex.
 	 */
-	public String getValue() {
-		return value;
+	public static Sex getSex(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (Sex sex : Sex.values()) {
+			if (id.equals(sex.getId())) {
+				return sex;
+			}
+		}
+		throw new IllegalArgumentException("No matching sex for id " + id);
 	}
 
 	/**
-	 * List of enum values.
-	 *
-	 *
+	 * @return the id
 	 */
-	public static class Values {
-		public static final String M = "M";
-		public static final String F = "F";
+	public int getId() {
+		return id;
 	}
 
 }

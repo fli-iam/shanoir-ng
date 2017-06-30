@@ -29,7 +29,7 @@ export class ManufacturerService {
         });
     }
 
-    getManufacturer (id: number): Promise<Manufacturer> {
+    getManufacturer(id: number): Promise<Manufacturer> {
         return this.http.get(AppUtils.BACKEND_API_MANUF_URL + '/' + id)
             .toPromise()
             .then(res => res.json() as Manufacturer)

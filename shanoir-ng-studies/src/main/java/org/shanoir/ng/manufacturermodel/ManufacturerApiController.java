@@ -2,9 +2,12 @@ package org.shanoir.ng.manufacturermodel;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueValidator;
@@ -16,8 +19,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
-
 @Controller
 public class ManufacturerApiController implements ManufacturerApi {
 
@@ -25,7 +26,7 @@ public class ManufacturerApiController implements ManufacturerApi {
 	private ManufacturerService manufacturerService;
 
 	public ResponseEntity<Manufacturer> findManufacturerById(
-			@ApiParam(value = "id of the manufacturer", required = true) @PathVariable("manufacturerId") final Long manufacturerId) {
+			@PathVariable("manufacturerId") final Long manufacturerId) {
 		final Manufacturer manufacturer = manufacturerService.findById(manufacturerId);
 		if (manufacturer == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -41,8 +42,7 @@ public class ManufacturerApiController implements ManufacturerApi {
 		return new ResponseEntity<>(manufacturers, HttpStatus.OK);
 	}
 
-	public ResponseEntity<Manufacturer> saveNewManufacturer(
-			@ApiParam(value = "manufacturer to create", required = true) @RequestBody final Manufacturer manufacturer,
+	public ResponseEntity<Manufacturer> saveNewManufacturer(@RequestBody final Manufacturer manufacturer,
 			final BindingResult result) throws RestServiceException {
 		/* Validation */
 		// Check hibernate validation
@@ -61,11 +61,40 @@ public class ManufacturerApiController implements ManufacturerApi {
 
 		/* Save center in db. */
 		try {
-			return new ResponseEntity<Manufacturer>(manufacturerService.save(manufacturer), HttpStatus.OK);
+			return new ResponseEntity<>(manufacturerService.save(manufacturer), HttpStatus.OK);
 		} catch (ShanoirStudiesException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
+	}
+
+	public ResponseEntity<Void> updateManufacturer(@PathVariable("manufacturerId") final Long manufacturerId,
+			@RequestBody @Valid final Manufacturer manufacturer, final BindingResult result) throws RestServiceException {
+		manufacturer.setId(manufacturerId);
+
+		// Check hibernate validation
+		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+		// Check unique constrainte
+		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(manufacturer);
+		/* Merge errors. */
+		final FieldErrorMap errors = new FieldErrorMap(hibernateErrors, uniqueErrors);
+		if (!errors.isEmpty()) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+		}
+
+		/* Update user in db. */
+		try {
+			manufacturerService.update(manufacturer);
+		} catch (final ShanoirStudiesException e) {
+			if (ErrorModelCode.MANUFACTURER_NOT_FOUND.equals(e.getErrorCode())) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+		}
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	/*

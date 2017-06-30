@@ -36,6 +36,36 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  /subject/OFSEP/:
+    post:
+      operationId: saveNewOFSEPSubject
+      description: Saves a new subject with auto generated common name
+      consumes:
+        - application/json
+      parameters:
+        - name: subjectStudyCardIdDTO
+          in: body
+          description: subject to create and the id of the study card
+          required: true
+          schema:
+            $ref: '#/definitions/SubjectStudyCardIdDTO'
+      responses:
+        '200':
+          description: created subject
+          schema:
+            $ref: '#/definitions/Subject'
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   '/subject/{subjectId}':
     get:
       operationId: findSubjectById
@@ -367,3 +397,14 @@ definitions:
         type: object
       message:
         type: string
+  SubjectStudyCardIdDTO:
+    required:
+      - idStudyCard
+      - subject
+    type: object
+    properties:
+      idStudyCard:
+        type: integer
+        format: int64
+      subject:
+        $ref: '#/definitions/Subject'

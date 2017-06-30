@@ -12,9 +12,9 @@ import org.springframework.context.annotation.Profile;
 @Profile("!test")
 public class RabbitMqConfiguration {
 
-	private final static String USER_QUEUE_NAME_IN = "user_queue";
-	private final static String USER_QUEUE_NAME_OUT = "user_queue_from_ng";
-	private final static String DELETE_USER_QUEUE_NAME_OUT = "delete_user_queue_from_ng";
+	private static final String USER_QUEUE_NAME_IN = "user_queue";
+	private static final String USER_QUEUE_NAME_OUT = "user_queue_from_ng";
+	private static final String DELETE_USER_QUEUE_NAME_OUT = "delete_user_queue_from_ng";
 
     @Bean
     public static Queue queueIn() {

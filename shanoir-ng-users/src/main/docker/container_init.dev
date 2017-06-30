@@ -6,6 +6,10 @@ echo "Initialize MariaDB command"
 echo "Create supervisor log directory"
 mkdir -p /vol/log/supervisor
 
+echo "Create microservice log directory"
+mkdir -p /vol/log/ms
+chown shanoir /vol/log/ms
+
 service mysql start
 echo "Populate database"
 mysql -u shanoir -pshanoir shanoir_ng_users < /dk/shanoirng_users.sql

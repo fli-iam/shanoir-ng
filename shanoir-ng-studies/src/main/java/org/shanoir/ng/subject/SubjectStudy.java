@@ -1,24 +1,20 @@
 package org.shanoir.ng.subject;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.shared.hateoas.HalEntity;
+import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.shanoir.ng.study.Study;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @Entity
-@JsonPropertyOrder({ "_links", "id" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-public class SubjectStudy extends HalEntity {
+public class SubjectStudy extends AbstractGenericItem {
 
 	/**
 	 * UID
@@ -30,9 +26,7 @@ public class SubjectStudy extends HalEntity {
 	private boolean physicallyInvolved;
 
 	/** Subject yype. */
-	@Column(nullable = true, updatable = true)
-	@Enumerated(EnumType.STRING)
-	private SubjectType subjectType;
+	private Integer subjectType;
 
 	/** Study. */
 	@ManyToOne
@@ -64,11 +58,15 @@ public class SubjectStudy extends HalEntity {
 	}
 
 	public SubjectType getSubjectType() {
-		return subjectType;
+		return SubjectType.getType(subjectType);
 	}
 
 	public void setSubjectType(SubjectType subjectType) {
-		this.subjectType = subjectType;
+		if (subjectType == null) {
+			this.subjectType = null;
+		} else {
+			this.subjectType = subjectType.getId();
+		}
 	}
 
 	public Study getStudy() {

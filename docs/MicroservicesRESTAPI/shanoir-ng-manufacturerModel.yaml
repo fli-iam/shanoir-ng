@@ -1,17 +1,16 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  version: "0.0.1"
+  version: 0.0.1
   title: Shanoir NG Studies Microservice - Manufacturer models management
   description: Microservice API for Shanoir NG manufacturer models management
 produces:
   - application/json
-  
 paths:
   /manufacturermodel:
     post:
       operationId: saveNewManufacturerModel
       description: Saves a new manufacturer model
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: manufacturerModel
@@ -19,12 +18,12 @@ paths:
           description: manufacturer model to create
           required: true
           schema:
-            $ref: "#/definitions/ManufacturerModel"
+            $ref: '#/definitions/ManufacturerModel'
       responses:
         '200':
           description: created manufacturer model
           schema:
-            $ref: "#/definitions/ManufacturerModel"
+            $ref: '#/definitions/ManufacturerModel'
         '401':
           description: unauthorized
         '403':
@@ -32,22 +31,22 @@ paths:
         '422':
           description: bad parameters
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-  /manufacturermodel/{manufacturerModelId}:
+            $ref: '#/definitions/ErrorModel'
+  '/manufacturermodel/{manufacturerModelId}':
     get:
       operationId: findManufacturerModelById
-      description: If exists, returns the manufacturer model corresponding to the given id
+      description: 'If exists, returns the manufacturer model corresponding to the given id'
       parameters:
-        - $ref: "#/parameters/manufacturerModelId"
+        - $ref: '#/parameters/manufacturerModelId'
       responses:
         '200':
           description: found manufacturer model
           schema:
-            $ref: "#/definitions/ManufacturerModel"
+            $ref: '#/definitions/ManufacturerModel'
         '204':
           description: no manufacturer model found
         '401':
@@ -57,18 +56,48 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
+    put:
+      operationId: updateManufacturerModel
+      description: Updates a manufacturer model
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/manufacturerModelId'
+        - name: manufacturer model
+          in: body
+          description: manufacturer model to update
+          required: true
+          schema:
+            $ref: '#/definitions/ManufacturerModel'
+      responses:
+        '204':
+          description: manufacturer model updated
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: manufacturer model not found
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /manufacturermodel/all:
     get:
       operationId: findManufacturerModels
       description: Returns all the manufacturer models
       responses:
         '200':
-          description: found manufacturer models 
+          description: found manufacturer models
           schema:
             type: array
             items:
-              $ref: "#/definitions/ManufacturerModel"
+              $ref: '#/definitions/ManufacturerModel'
         '204':
           description: no manufacturer model found
         '401':
@@ -78,12 +107,12 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
   /manufacturer:
     post:
       operationId: saveNewManufacturer
       description: Saves a new manufacturer
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: manufacturer
@@ -91,12 +120,12 @@ paths:
           description: manufacturer to create
           required: true
           schema:
-            $ref: "#/definitions/Manufacturer"
+            $ref: '#/definitions/Manufacturer'
       responses:
         '200':
           description: created manufacturer
           schema:
-            $ref: "#/definitions/Manufacturer"
+            $ref: '#/definitions/Manufacturer'
         '401':
           description: unauthorized
         '403':
@@ -104,22 +133,22 @@ paths:
         '422':
           description: bad parameters
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-  /manufacturer/{manufacturerId}:
+            $ref: '#/definitions/ErrorModel'
+  '/manufacturer/{manufacturerId}':
     get:
       operationId: findManufacturerById
-      description: If exists, returns the manufacturer corresponding to the given id
+      description: 'If exists, returns the manufacturer corresponding to the given id'
       parameters:
-        - $ref: "#/parameters/manufacturerId"
+        - $ref: '#/parameters/manufacturerId'
       responses:
         '200':
           description: found manufacturer
           schema:
-            $ref: "#/definitions/Manufacturer"
+            $ref: '#/definitions/Manufacturer'
         '204':
           description: no manufacturer found
         '401':
@@ -129,18 +158,48 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
+    put:
+      operationId: updateManufacturer
+      description: Updates a manufacturer
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/manufacturerId'
+        - name: manufacturer
+          in: body
+          description: manufacturer to update
+          required: true
+          schema:
+            $ref: '#/definitions/Manufacturer'
+      responses:
+        '204':
+          description: manufacturer updated
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: manufacturer not found
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /manufacturer/all:
     get:
       operationId: findManufacturers
       description: Returns all the manufacturers
       responses:
         '200':
-          description: found manufacturers 
+          description: found manufacturers
           schema:
             type: array
             items:
-              $ref: "#/definitions/Manufacturer"
+              $ref: '#/definitions/Manufacturer'
         '204':
           description: no manufacturer found
         '401':
@@ -150,7 +209,7 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
 parameters:
   manufacturerModelId:
     name: manufacturerModelId
@@ -166,7 +225,6 @@ parameters:
     required: true
     type: integer
     format: int64
-
 definitions:
   DatasetModalityType:
     type: object
@@ -200,9 +258,9 @@ definitions:
         type: integer
         format: int64
       datasetModalityType:
-        $ref: "#/definitions/DatasetModalityType"
+        $ref: '#/definitions/DatasetModalityType'
       manufacturer:
-        $ref: "#/definitions/Manufacturer"
+        $ref: '#/definitions/Manufacturer'
       name:
         type: string
   ErrorModel:

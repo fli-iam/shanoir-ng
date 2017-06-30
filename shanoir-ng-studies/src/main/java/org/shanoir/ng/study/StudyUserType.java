@@ -11,58 +11,64 @@ public enum StudyUserType {
 	/**
 	 * Is responsible for the research study.
 	 */
-	RESPONSIBLE(Values.RESPONSIBLE),
+	RESPONSIBLE(1),
 
 	/**
 	 * Can see, download, import datasets and modify the study parameters.
 	 */
-	SEE_DOWNLOAD_IMPORT_MODIFY(Values.SEE_DOWNLOAD_IMPORT_MODIFY),
+	SEE_DOWNLOAD_IMPORT_MODIFY(2),
 
 	/**
 	 * Can see, download and import datasets.
 	 */
-	SEE_DOWNLOAD_IMPORT(Values.SEE_DOWNLOAD_IMPORT),
+	SEE_DOWNLOAD_IMPORT(3),
 
 	/**
 	 * Cannot see or download datasets.
 	 */
-	NOT_SEE_DOWNLOAD(Values.NOT_SEE_DOWNLOAD),
+	NOT_SEE_DOWNLOAD(4),
 
 	/**
 	 * Can see and download datasets.
 	 */
-	SEE_DOWNLOAD(Values.SEE_DOWNLOAD);
+	SEE_DOWNLOAD(5);
 
-	private String value;
+	private int id;
 
 	/**
 	 * Constructor.
 	 * 
-	 * @param val
-	 *            value
+	 * @param id
+	 *            id
 	 */
-	private StudyUserType(final String value) {
-		this.value = value;
+	private StudyUserType(final int id) {
+		this.id = id;
 	}
 
 	/**
-	 * @return the value
-	 */
-	public String getValue() {
-		return value;
-	}
-
-	/**
-	 * List of enum values.
+	 * Get a study right for an user by its id.
 	 * 
-	 *
+	 * @param id
+	 *            right id.
+	 * @return study right.
 	 */
-	public static class Values {
-		public static final String RESPONSIBLE = "Is responsible for the research study";
-		public static final String SEE_DOWNLOAD_IMPORT_MODIFY = "Can see, download, import datasets and modify the study parameters";
-		public static final String SEE_DOWNLOAD_IMPORT = "Can see, download and import datasets";
-		public static final String NOT_SEE_DOWNLOAD = "Cannot see or download datasets";
-		public static final String SEE_DOWNLOAD = "Can see and download datasets";
+	public static StudyUserType getType(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (StudyUserType type : StudyUserType.values()) {
+			if (id.equals(type.getId())) {
+				return type;
+			}
+		}
+		throw new IllegalArgumentException("No matching study right for id " + id);
+	}
+
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
 	}
 
 }

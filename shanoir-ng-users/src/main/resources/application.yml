@@ -1,5 +1,6 @@
 # server configuration
 server:
+  administrator.email: shanoir-dev-test@lists.gforge.inria.fr
   display-name: Shanoir
   email-off: true
   port: 9900
@@ -44,15 +45,14 @@ spring:
     store-type: none
 front.server:
   address: http://localhost/shanoir-ng/
-  url: http://localhost
+  url: http://shanoir-ng-nginx
 #keycloak
 keycloak:
+  auth-server-url: http://shanoir-ng-nginx/auth
   cors: true
   realm: shanoir-ng
-  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn8sWxnmSz5+npLCJfq3aLSJACF5AJzP0pUXlNfCbOOGJY93RWO5SlKU5o8rE7TPOe6AdDHX306JET6MgQGrJ47CxiXrR/axny/UTUEjqX5x61OSOdQIYsBj2TqtRKkEeZ//SYiwr/zVZmuzwtWvh4cXpofnToPx+OLQ/MuigkBsN/uo0S8fI2ThN/YXLfhAlp1ezFuKTtmJmFgBTf3l9m8lzuMfdqp4QkBOLF866te9nFQuGMLuz/vfsFLHuEi+OE/+V5XDQ0qenBy6eSOeFvZUmRROhKC/Kkk6zGd8JAkpeE1PFnwbG5JcFOTrSsIHBQVtKYvVNIRT1aIVip6HxGwIDAQAB
-  auth-server-url: http://localhost/auth
-  ssl-required: external
   resource: shanoir-ng-users
+  ssl-required: external
   securityConstraints[0]:
     securityCollections[0]:
       name: user secured api
@@ -74,7 +74,6 @@ keycloak:
         - /role/*
 kc.requests:
   realm: master
-  auth-server-url: http://shanoir-ng-nginx/auth
   client.id: admin-cli
   admin:
     login: admin
@@ -113,12 +112,14 @@ spring:
     host: localhost
 server:
     port: 9901
-front.server.url: http://localhost:8080
+front.server:
+  address: http://localhost:8080/shanoir-ng/
+  url: http://localhost:8080
 #keycloak
 keycloak:
-  credentials.secret: 3b130530-4e0f-4101-bf56-1a92df705318
-kc.requests:
   auth-server-url: http://localhost/auth
+  credentials:
+    secret: 3b130530-4e0f-4101-bf56-1a92df705318
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-users.log
@@ -163,12 +164,15 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
+  rabbitmq:
+    host: qualif-ng-rabbitmq
 server:
+  administrator.email: shanoir-dev-admin@lists.gforge.inria.fr
   email-off: false
 front.server:
   address: https://shanoir-qualif.irisa.fr/shanoir-ng
   url: https://shanoir-qualif.irisa.fr
 #keycloak
 keycloak:
-  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth
+  auth-server-url: https://shanoir-qualif.irisa.fr/auth
   

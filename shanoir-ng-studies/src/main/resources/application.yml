@@ -35,12 +35,12 @@ spring:
     host: shanoir-ng-rabbitmq
   session:
     store-type: none
+front.server.url: http://shanoir-ng-nginx
 # keycloak
 keycloak:
   cors: true
   realm: shanoir-ng
-  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhU1+KuWBHsHp7UMITO4p6G4PfYdSgubXX7PCcX/TNPa9aGDwgVtEjyOVYA3rnvGvGTXit2PaAztExWq4FA7YOIATQuKydNY+uWJKRoBhM7dm1ioyQ+l63lB3vRjSsEL6b9y3U/URTVUn4DJAUBgiK0CGgGR0ihEi/IJFm8L9EKHxE/Cm99x65NzFe7EFZy4mbruLKr1w9XKmY9/1ISz559E1VO4JK4fY5NKAcHK/auaA6XzxlYGcK7M7oZsl1GTeCMBAiOM7rusta4MhcBO+BOPHv5WxhbehheHkTEPB5BYDRuBenP58TS4125qliGmCG8Zfb4JP/D9eaDzaHYoRYwIDAQAB
-  auth-server-url: http://localhost/auth
+  auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-studies
   securityConstraints[0]:
@@ -91,9 +91,12 @@ spring:
     host: localhost
 server:
     port: 9902
+front.server.url: http://localhost:8080
 # keycloak
 keycloak:
-  credentials.secret: 209376e5-1d42-4fa3-8cdb-160946fd6383
+  auth-server-url: http://localhost/auth
+  credentials:
+    secret: 209376e5-1d42-4fa3-8cdb-160946fd6383
 # microservices url
 ms.url:
   shanoir-ng-studycard: http://localhost:9905/studycard
@@ -137,6 +140,8 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
+  rabbitmq:
+    host: qualif-ng-rabbitmq
 #keycloak
 keycloak:
-  auth-server-url: https://shanoir-qualif.irisa.fr/shanoir-ng/auth
+  auth-server-url: https://shanoir-qualif.irisa.fr/auth

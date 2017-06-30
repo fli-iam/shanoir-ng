@@ -11,46 +11,54 @@ public enum SubjectType {
 	/**
 	 * Healthy volunteer.
 	 */
-	HEALTHY_VOLUNTEER(Values.HEALTHY_VOLUNTEER),
+	HEALTHY_VOLUNTEER(1),
 
 	/**
 	 * Patient.
 	 */
-	PATIENT(Values.PATIENT),
+	PATIENT(2),
 
 	/**
 	 * Phantom.
 	 */
-	PHANTOM(Values.PHANTOM);
+	PHANTOM(3);
 
-	private String value;
+	private int id;
 
 	/**
 	 * Constructor.
 	 * 
-	 * @param val
-	 *            value
+	 * @param id
+	 *            id
 	 */
-	private SubjectType(final String value) {
-		this.value = value;
+	private SubjectType(final int id) {
+		this.id = id;
 	}
 
 	/**
-	 * @return the value
-	 */
-	public String getValue() {
-		return value;
-	}
-
-	/**
-	 * List of enum values.
+	 * Get a subject type by its id.
 	 * 
-	 *
+	 * @param id
+	 *            type id.
+	 * @return subject type.
 	 */
-	public static class Values {
-		public static final String HEALTHY_VOLUNTEER = "Healthy volunteer";
-		public static final String PATIENT = "Patient";
-		public static final String PHANTOM = "Phantom";
+	public static SubjectType getType(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (SubjectType type : SubjectType.values()) {
+			if (id.equals(type.getId())) {
+				return type;
+			}
+		}
+		throw new IllegalArgumentException("No matching subject type for id " + id);
+	}
+
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
 	}
 
 }

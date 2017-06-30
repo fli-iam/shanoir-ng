@@ -2,12 +2,12 @@ package org.shanoir.ng.configuration.amqp;
 
 import java.io.IOException;
 
-import org.shanoir.ng.mapper.SubjectMapper;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.ShanoirSubjectException;
 import org.shanoir.ng.study.StudyService;
 import org.shanoir.ng.study.dto.StudyStudyCardDTO;
 import org.shanoir.ng.subject.Subject;
+import org.shanoir.ng.subject.SubjectMapper;
 import org.shanoir.ng.subject.SubjectService;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.slf4j.Logger;

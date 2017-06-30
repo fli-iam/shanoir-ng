@@ -49,11 +49,18 @@ public class CenterApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
+	private CenterMapper centerMapperMock;
+
+	@MockBean
 	private CenterService centerServiceMock;
 
 	@Before
 	public void setup() throws ShanoirStudiesException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+
+		given(centerMapperMock.centersToCenterDTOs(Mockito.anyListOf(Center.class)))
+				.willReturn(Arrays.asList(new CenterDTO()));
+		given(centerMapperMock.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
 
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(new Center()));

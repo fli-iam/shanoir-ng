@@ -9,8 +9,10 @@ import { KeycloakService } from '../shared/keycloak/keycloak.service';
 })
 
 export class HomeComponent {
+    shanoirBigLogoUrl: string;
 
     constructor() {
+        this.shanoirBigLogoUrl = 'assets/images/logo.shanoir.black.png';
     }
     
     isAuthenticated(): boolean {

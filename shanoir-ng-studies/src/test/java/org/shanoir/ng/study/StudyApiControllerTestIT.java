@@ -3,6 +3,7 @@ package org.shanoir.ng.study;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
@@ -116,6 +117,11 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 		final Study study = new Study();
 		study.setId(1L);
 		study.setName("test");
+		study.setStudyStatus(StudyStatus.FINISHED);
+		final StudyCenter studyCenter = new StudyCenter();
+		studyCenter.setCenter(ModelsUtil.createCenter());
+		studyCenter.setStudy(study);
+		study.setStudyCenterList(Arrays.asList(studyCenter));
 		return study;
 	}
 

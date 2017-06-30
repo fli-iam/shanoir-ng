@@ -206,8 +206,10 @@ public class UserServiceImpl implements UserService {
 				user.setExpirationDate(new DateTime().plusYears(1).toDate());
 			}
 			savedUser = userRepository.save(user);
-			// Send email to administrators
-			emailService.notifyAdminAccountRequest(savedUser);
+			if (user.getAccountRequestInfo() != null) {
+				// Send email to administrators
+				emailService.notifyAdminAccountRequest(savedUser);
+			}
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirUsersException.logAndThrow(LOG, "Error while creating user: " + dive.getMessage());
 		}

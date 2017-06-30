@@ -67,7 +67,9 @@ public final class ModelsUtil {
 		final ManufacturerModel manufacturerModel = new ManufacturerModel();
 		manufacturerModel.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 		manufacturerModel.setMagneticField(3D);
-		manufacturerModel.setManufacturer(createManufacturer());
+		final Manufacturer manufacturer = createManufacturer();
+		manufacturer.setId(1L);
+		manufacturerModel.setManufacturer(manufacturer);
 		manufacturerModel.setName(MANUFACTURER_MODEL_NAME);
 		return manufacturerModel;
 	}
