@@ -3,8 +3,12 @@ package org.shanoir.ng.Import.anonymization;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -12,10 +16,13 @@ import java.util.Properties;
 import org.dcm4che2.data.DicomElement;
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
+import org.dcm4che2.data.VR;
 import org.dcm4che2.io.DicomInputStream;
 import org.dcm4che2.io.DicomOutputStream;
 import org.shanoir.ng.Import.Serie;
 import org.shanoir.ng.Import.dto.ImportSubjectDTO;
+import org.shanoir.ng.utils.ShanoirExec;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -35,7 +42,8 @@ public class AnonymizationServiceImpl implements AnonymizationServcie{
 	private RabbitTemplate rabbitTemplate;
 	
 	
-	private static final String ANONYMIZATION_FILE_PATH = "anonymizationOld.properties";
+	//private static final String ANONYMIZATION_FILE_PATH = "anonymizationOld.properties";
+	private static final String ANONYMIZATION_FILE_PATH = "anonymization.properties";
 	
 	@Override
 	public void anonymize(List<Serie> serieList, int startCount, String folderPath, ImportSubjectDTO subject) {
@@ -114,17 +122,20 @@ public class AnonymizationServiceImpl implements AnonymizationServcie{
 			dcmObj = din.readDicomObject();
 			din.close();
 			final String sourceTransferSyntaxUID = dcmObj.getString(Tag.TransferSyntaxUID);
-			/*if (sourceTransferSyntaxUID != null && sourceTransferSyntaxUID.startsWith("1.2.840.10008.1.2.4")) {
+			if (sourceTransferSyntaxUID != null && sourceTransferSyntaxUID.startsWith("1.2.840.10008.1.2.4")) {
 				// uncompress dicom image
-				ShanoirExec.dcmdjpeg(ShanoirUtil.getDcmdjpegPath(), imagePath, imagePath);
+				ShanoirExec.dcmdjpeg(Utils.getDcmdjpegPath(), imagePath, imagePath);
 				din = new DicomInputStream(new File(imagePath));
 				dcmObj = din.readDicomObject();
 				din.close();
-			}*/
+			}
 
 			for (final int tag : getAnonymizationTags().keySet()) {
+				
 				final String value = getFinalValueForTag(subject, tag);
-				dcmObj.putString(tag, null, value);
+				
+				anonymizeTagAccordingToVR(dcmObj, tag , value);
+												
 				DicomElement el = dcmObj.get(tag);
 			}
 
@@ -266,21 +277,106 @@ public class AnonymizationServiceImpl implements AnonymizationServcie{
 				}
 			}
 			// patient birth date : return the 01/01 of the same year
-			/*else if (tag == Tag.PatientBirthDate) {
+			else if (tag == Tag.PatientBirthDate && subject.getBirthDate() != null) {
 				final GregorianCalendar birthDate = new GregorianCalendar();
 				birthDate.setTime(subject.getBirthDate());
 				// set day and month to 01/01
 				birthDate.set(Calendar.MONTH, Calendar.JANUARY);
 				birthDate.set(Calendar.DAY_OF_MONTH, 1);
 				birthDate.set(Calendar.HOUR, 1);
-				result = ShanoirUtil.convertDicomDateToString(birthDate.getTime());
-			}*/
+				result = convertDicomDateToString(birthDate.getTime());
+			}
 			// else : return value from the configuration file
 			else {
 				result = getAnonymizationTags().get(tag);
 			}
 		}
 		return result;
+	}
+	
+	private String convertDicomDateToString(final Date date) {
+		final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+		return formatter.format(date);
+	}
+	
+	private void anonymizeTagAccordingToVR(DicomObject dcmObj, int tag , String value)
+	{
+		VR vr = dcmObj.vrOf(tag);
+		// VR.AT = Attribute Tag
+		// VR.SL = Signed Long || VR.UL = Unsigned Long
+		if (vr.equals(VR.SL) || vr.equals(VR.UL)
+				|| vr.equals(VR.AT)) {
+			Integer i_value = Integer.decode(value);
+			dcmObj.putInt(tag, vr, i_value);
+		}
+
+		// VR.SS = Signed Short || VR.US = Unsigned Short
+		if (vr.equals(VR.SS) || vr.equals(VR.US)) {
+			short[] i_value = new short[1];
+			dcmObj.putShorts(tag, vr, i_value);
+		}
+
+		// VR.FD = Floating Point Double
+		else if (vr.equals(VR.FD)) {
+			Double d_value = Double.valueOf(value);
+			dcmObj.putDouble(tag, vr, d_value);
+		}
+
+		// VR.FL = Floating Point Single
+		else if (vr.equals(VR.FL)) {
+			Float f_value = Float.valueOf(value);
+			dcmObj.putFloat(tag, vr, f_value);
+		}
+
+		// VR.OB = Other Byte String
+		else if (vr.equals(VR.OB)) {
+			byte[] b = new byte[1];
+			dcmObj.putBytes(tag, vr, b);
+		}
+
+		// VR.SQ = Sequence of Items || VR.UN = Unknown
+		else if (vr.equals(VR.SQ) || vr.equals(VR.UN)) {
+			dcmObj.putSequence(tag);
+		}
+
+		// Unlimited string:
+		// VR.AE = Age String
+		// VR.AS = Application Entity
+		// VR.CS = Code String
+		// VR.DA = Date
+		// VR.DS = Date Time
+		// VR.DT = Decimal String
+		// VR.IS = Integer String
+		// VR.LO = Long String
+		// VR.LT = Long Text
+		// VR.OF = Other Float String
+		// VR.OW = Other Word String
+		// VR.PN = Person Name
+		// VR.SH = Short String
+		// VR.ST = Short Text
+		// VR.TM = Time
+		// VR.UI = Unique Identifier (UID)
+		// VR.UT = Unlimited Text
+		else if (vr.equals(VR.AE) || vr.equals(VR.AS)
+				|| vr.equals(VR.CS) || vr.equals(VR.DA)
+				|| vr.equals(VR.DS) || vr.equals(VR.DT)
+				|| vr.equals(VR.IS) || vr.equals(VR.LO)
+				|| vr.equals(VR.LT) || vr.equals(VR.OW)
+				|| vr.equals(VR.PN) || vr.equals(VR.SH)
+				|| vr.equals(VR.ST) || vr.equals(VR.TM)
+				|| vr.equals(VR.UI) || vr.equals(VR.UT)
+				|| vr.equals(VR.OF)) {
+			dcmObj.putString(tag, vr, value);
+		}
+
+		else {
+			dcmObj.putString(tag, vr, value);
+		}
+
+		// N.B.: Doesn't exist in the library:
+		// VR.UR = Universal Resource Identifier or Universal
+		// Resource Locator (URI/URL)
+		// VR.OD = Other Double String
 	}
 	
 
