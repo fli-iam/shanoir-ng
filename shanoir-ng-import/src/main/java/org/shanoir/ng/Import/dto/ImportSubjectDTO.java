@@ -1,10 +1,13 @@
 package org.shanoir.ng.Import.dto;
 
+import java.util.Date;
+
 public class ImportSubjectDTO {
 	
 	 private Long id;
 	 private String name;
 	 private String identifier;
+	 private Date birthDate;
 	 
 	 
 	public Long getId() {
@@ -24,6 +27,12 @@ public class ImportSubjectDTO {
 	}
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
+	}
+	public Date getBirthDate() {
+		return birthDate;
+	}
+	public void setBirthDate(Date birthDate) {
+		this.birthDate = birthDate;
 	}
 	 
 	 
