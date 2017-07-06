@@ -32,7 +32,8 @@ public interface CenterApi {
 	@RequestMapping(value = "/{centerId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteCenter(
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId)
+			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the center corresponding to the given id", response = Center.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found center", response = Center.class),
@@ -64,8 +65,9 @@ public interface CenterApi {
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	ResponseEntity<CenterDTO> saveNewCenter(@ApiParam(value = "center to create", required = true) @RequestBody Center center,
-			BindingResult result) throws RestServiceException;
+	ResponseEntity<CenterDTO> saveNewCenter(
+			@ApiParam(value = "center to create", required = true) @RequestBody Center center, BindingResult result)
+			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates a center", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "center updated", response = Void.class),

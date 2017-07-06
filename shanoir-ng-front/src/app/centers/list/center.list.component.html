@@ -4,6 +4,20 @@
         <!-- hr/ -->
     </div>
 
+    <div *ngIf="deletionInternalError" class="error-message">
+        <label class="error-message" i18n="Manage centers|DeletionError label">An error occured. This center cannot be deleted. Please contact an administrator.</label>
+    </div>
+    <div *ngIf="isLinkedWithEqpts || isLinkedWithStudies" class="error-message">
+        <label class="error-message" i18n="Manage centers|DeletionError label">This center cannot be deleted. It is associated with:</label>
+        <ul>
+            <li *ngIf="isLinkedWithEqpts">
+                <label i18n="Manage centers|LinkedWithEqptsError label">acquisition equipment(s)</label>
+            </li>
+            <li *ngIf="isLinkedWithStudies">
+                <label i18n="Manage centers|LinkedWithStudiesError label">study(ies)</label>
+            </li>
+        </ul>
+    </div>
     <shanoir-table [items]="centers" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
 
     <!-- create acq. equip. popin -->

@@ -19,16 +19,19 @@ export class CenterListComponent {
     public columnDefs: any[];
     public customActionDefs: any[];
     public rowClickAction: Object;
+    private deletionInternalError: boolean = false;
+    private isLinkedWithEqpts: boolean = false;
+    private isLinkedWithStudies: boolean = false;
     public loading: boolean = false;
     private createAcqEquip = false;
     public visible = false;
     private visibleAnimate = false;
 
-    constructor(private centerService: CenterService, private confirmDialogService: ConfirmDialogService, 
+    constructor(private centerService: CenterService, private confirmDialogService: ConfirmDialogService,
         private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
         this.getCenters();
         this.createColumnDefs();
-    }   
+    }
 
     // Grid data
     getCenters(): void {
@@ -39,10 +42,10 @@ export class CenterListComponent {
             }
             this.loading = false;
         })
-        .catch((error) => {
-            // TODO: display error
-            this.centers = [];
-        });
+            .catch((error) => {
+                // TODO: display error
+                this.centers = [];
+            });
     }
 
     // Grid columns definition
@@ -53,46 +56,56 @@ export class CenterListComponent {
             }
             return null;
         };
-       
+
         this.columnDefs = [
-            {headerName: "Name", field: "name" },
-            {headerName: "Town", field: "city" },
-            {headerName: "Country", field: "country" }
+            { headerName: "Name", field: "name" },
+            { headerName: "Town", field: "city" },
+            { headerName: "Country", field: "country" }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({headerName: "", type: "button", img: "assets/images/icons/garbage-1.png", action: this.openDeleteCenterConfirmDialog},
-            {headerName: "", type: "button", img: "assets/images/icons/edit.png", target : "/detailCenter", getParams: function(item: any): Object {
-                return {id: item.id, mode: "edit"};
-            }});
+            this.columnDefs.push({ headerName: "", type: "button", img: "assets/images/icons/garbage-1.png", action: this.openDeleteCenterConfirmDialog },
+                {
+                    headerName: "", type: "button", img: "assets/images/icons/edit.png", target: "/detailCenter", getParams: function (item: any): Object {
+                        return { id: item.id, mode: "edit" };
+                    }
+                });
         }
         if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({headerName: "", type: "button", img: "assets/images/icons/view-1.png", target : "/detailCenter", getParams: function(item: any): Object {
-                return {id: item.id, mode: "view"};
-            }});
+            this.columnDefs.push({
+                headerName: "", type: "button", img: "assets/images/icons/view-1.png", target: "/detailCenter", getParams: function (item: any): Object {
+                    return { id: item.id, mode: "view" };
+                }
+            });
         }
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({headerName: "", type: "button", img: "assets/images/icons/medical/cardiogram-1.png", tip: "Add acq. equip.",
-            action: this.openCreateAcqEquip});
+            this.columnDefs.push({
+                headerName: "", type: "button", img: "assets/images/icons/medical/cardiogram-1.png", tip: "Add acq. equip.",
+                action: this.openCreateAcqEquip
+            });
         }
 
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.customActionDefs.push({title: "new center", img: "assets/images/icons/add-1.png", target: "/detailCenter", getParams: function(item: any): Object {
-                    return {mode: "create"};
-            }});
-            this.customActionDefs.push({title: "delete selected", img: "assets/images/icons/garbage-1.png", action: this.deleteAll });
+            this.customActionDefs.push({
+                title: "new center", img: "assets/images/icons/add-1.png", target: "/detailCenter", getParams: function (item: any): Object {
+                    return { mode: "create" };
+                }
+            });
+            this.customActionDefs.push({ title: "delete selected", img: "assets/images/icons/garbage-1.png", action: this.deleteAll });
         }
         if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {target : "/detailCenter", getParams: function(item: any): Object {
-                    return {id: item.id, mode: "view"};
-            }};
+            this.rowClickAction = {
+                target: "/detailCenter", getParams: function (item: any): Object {
+                    return { id: item.id, mode: "view" };
+                }
+            };
         }
     }
 
     openDeleteCenterConfirmDialog = (item: Center) => {
-         this.confirmDialogService
+        this.confirmDialogService
             .confirm('Delete center', 'Are you sure you want to delete center ' + item.name + ' , ' + item.city + ' , ' + item.country + '?',
-                this.viewContainerRef)
+            this.viewContainerRef)
             .subscribe(res => {
                 if (res) {
                     this.deleteCenter(item.id);
@@ -102,7 +115,22 @@ export class CenterListComponent {
 
     deleteCenter(centerId: number) {
         // Delete center and refresh page
-        this.centerService.delete(centerId).then((res) => this.getCenters());
+        this.centerService.delete(centerId).then((res) => this.getCenters()).catch((error) => {
+            if (error.status == 422) {
+                let errDetails = error.json().details.fieldErrors["delete"] || '';
+                for (var errKey in errDetails) {
+                    if (errDetails[errKey]["givenValue"] == "acquisitionEquipments") {
+                        this.isLinkedWithEqpts = true;
+                    }
+                    if (errDetails[errKey]["givenValue"] == "studies") {
+                        this.isLinkedWithStudies = true;
+                    }
+                }
+            } else if (error.status == 500) {
+                this.deletionInternalError = true;
+            }
+            setTimeout(this.removeErroLabel.bind(this), 5000);
+        });
     }
 
     deleteAll = () => {
@@ -115,7 +143,7 @@ export class CenterListComponent {
         }
     }
 
-    openCreateAcqEquip = ()=> {
+    openCreateAcqEquip = () => {
         this.createAcqEquip = true;
         this.show();
     }
@@ -136,8 +164,14 @@ export class CenterListComponent {
     }
 
     public onContainerClicked(event: MouseEvent): void {
-    if ((<HTMLElement>event.target).classList.contains('modal')) {
-      this.hide();
+        if ((<HTMLElement>event.target).classList.contains('modal')) {
+            this.hide();
+        }
     }
-  }
+
+    public removeErroLabel(): void {
+        this.deletionInternalError = false;
+        this.isLinkedWithEqpts = false;
+        this.isLinkedWithStudies = false
+    }
 }

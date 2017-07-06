@@ -1,5 +1,7 @@
 package org.shanoir.ng.utils;
 
+import java.util.ArrayList;
+
 import org.shanoir.ng.acquisitionequipment.AcquisitionEquipment;
 import org.shanoir.ng.center.Center;
 import org.shanoir.ng.manufacturermodel.DatasetModalityType;
@@ -41,7 +43,9 @@ public final class ModelsUtil {
 	 */
 	public static Center createCenter() {
 		final Center center = new Center();
+		center.setAcquisitionEquipments(new ArrayList<>());
 		center.setName(CENTER_NAME);
+		center.setStudyCenterList(new ArrayList<>());
 		return center;
 	}
 

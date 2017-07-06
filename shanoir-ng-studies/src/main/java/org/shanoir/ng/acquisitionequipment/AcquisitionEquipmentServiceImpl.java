@@ -45,6 +45,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 			throw new ShanoirStudiesException(ErrorModelCode.ACQ_EQPT_NOT_FOUND);
 		}
 		acquisitionEquipmentRepository.delete(id);
+		deleteEquipmentOnShanoirOld(id);
 	}
 
 	@Override
@@ -76,7 +77,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 			LOG.error("Acquisition equipment with id " + acquisitionEquipment.getId() + " not found");
 			throw new ShanoirStudiesException(ErrorModelCode.ACQ_EQPT_NOT_FOUND);
 		}
-		updateUserValues(equipmentDb, acquisitionEquipment);
+		updateEquipmentValues(equipmentDb, acquisitionEquipment);
 		try {
 			acquisitionEquipmentRepository.save(equipmentDb);
 		} catch (Exception e) {
@@ -87,15 +88,33 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	}
 
 	/*
-	 * Update some values of user to save them in database.
+	 * Send a message to Shanoir old to delete an equipment.
 	 * 
-	 * @param userDb user found in database.
-	 * 
-	 * @param user user with new values.
-	 * 
-	 * @return database user with new values.
+	 * @param equipmentId equipment id.
 	 */
-	private AcquisitionEquipment updateUserValues(final AcquisitionEquipment equipmentDb,
+	private void deleteEquipmentOnShanoirOld(final Long equipmentId) {
+		try {
+			LOG.info("Send update to Shanoir Old");
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteAcqEqptQueueOut().getName(),
+					new ObjectMapper().writeValueAsString(equipmentId));
+		} catch (AmqpException e) {
+			LOG.error("Cannot send equipment " + equipmentId + " delete to Shanoir Old on queue : "
+					+ RabbitMqConfiguration.deleteAcqEqptQueueOut().getName(), e);
+		} catch (JsonProcessingException e) {
+			LOG.error("Cannot send equipment " + equipmentId + " because of an error while serializing equipment.", e);
+		}
+	}
+
+	/*
+	 * Update some values of equipment to save them in database.
+	 * 
+	 * @param equipmentDb equipment found in database.
+	 * 
+	 * @param equipment equipment with new values.
+	 * 
+	 * @return database equipment with new values.
+	 */
+	private AcquisitionEquipment updateEquipmentValues(final AcquisitionEquipment equipmentDb,
 			final AcquisitionEquipment equipment) {
 		equipmentDb.setCenter(equipment.getCenter());
 		equipmentDb.setManufacturerModel(equipment.getManufacturerModel());

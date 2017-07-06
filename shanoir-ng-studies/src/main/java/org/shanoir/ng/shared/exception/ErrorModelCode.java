@@ -18,6 +18,9 @@ public final class ErrorModelCode {
 	/** No study found */
 	public static final Integer STUDY_NOT_FOUND = 201;
 	
+	/** No center found */
+	public static final Integer CENTER_NOT_FOUND = 211;
+	
 	/** No acquisition equipment found */
 	public static final Integer ACQ_EQPT_NOT_FOUND = 251;
 	
