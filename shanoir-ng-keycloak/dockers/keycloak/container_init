@@ -31,7 +31,7 @@ echo "Create client shanoir-ng-users"
 keycloak/bin/kcadm.sh create clients -r shanoir-ng -f /dk/scripts_init/shanoir-ng-users.json
 
 echo "Create client shanoir-old"
-keycloak/bin/kcadm.sh create clients -r shanoir-ng -f /dk/scripts_init/shanoir-old.json
+keycloak/bin/kcadm.sh create clients -r shanoir-ng -f /dk/scripts_init/shanoir-old-$DOCKER_PROFILE.json
 
 echo "Initialize Keycloak configuration"
 java -jar /dk/shanoir-ng-keycloak-init.jar
