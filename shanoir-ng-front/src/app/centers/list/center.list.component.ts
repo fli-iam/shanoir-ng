@@ -61,12 +61,12 @@ export class CenterListComponent {
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push({headerName: "", type: "button", img: "assets/images/icons/garbage-1.png", action: this.openDeleteCenterConfirmDialog},
-            {headerName: "", type: "button", img: "assets/images/icons/edit.png", target : "/detailCenter", getParams: function(item: any): Object {
+            {headerName: "", type: "button", img: "assets/images/icons/edit.png", target : "/centerDetail", getParams: function(item: any): Object {
                 return {id: item.id, mode: "edit"};
             }});
         }
         if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({headerName: "", type: "button", img: "assets/images/icons/view-1.png", target : "/detailCenter", getParams: function(item: any): Object {
+            this.columnDefs.push({headerName: "", type: "button", img: "assets/images/icons/view-1.png", target : "/centerDetail", getParams: function(item: any): Object {
                 return {id: item.id, mode: "view"};
             }});
         }
@@ -77,13 +77,13 @@ export class CenterListComponent {
 
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.customActionDefs.push({title: "new center", img: "assets/images/icons/add-1.png", target: "/detailCenter", getParams: function(item: any): Object {
+            this.customActionDefs.push({title: "new center", img: "assets/images/icons/add-1.png", target: "/centerDetail", getParams: function(item: any): Object {
                     return {mode: "create"};
             }});
             this.customActionDefs.push({title: "delete selected", img: "assets/images/icons/garbage-1.png", action: this.deleteAll });
         }
         if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {target : "/detailCenter", getParams: function(item: any): Object {
+            this.rowClickAction = {target : "/centerDetail", getParams: function(item: any): Object {
                     return {id: item.id, mode: "view"};
             }};
         }

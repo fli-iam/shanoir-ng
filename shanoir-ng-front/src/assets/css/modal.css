@@ -12,6 +12,7 @@
   overflow: hidden;
   -webkit-overflow-scrolling: touch;
   outline: 0;
+  background: var(--color-overlay);
 }
 .modal.fade .modal-dialog {
   -webkit-transition: -webkit-transform .3s ease-out;

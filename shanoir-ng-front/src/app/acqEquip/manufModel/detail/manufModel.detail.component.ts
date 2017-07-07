@@ -32,6 +32,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
     private datasetModalityTypes: Enum[] = []; 
     private isMR: Boolean = false;
     private manufs: Manufacturer[];
+    private datasetModalityTypeEnumValue: String;
 
     constructor (private route: ActivatedRoute, private router: Router,
         private manufModelService: ManufacturerModelService, private manufService: ManufacturerService,   
@@ -44,7 +45,6 @@ export class ManufacturerModelDetailComponent implements OnInit {
         if (this.modeFromAcqEquip) {this.mode = this.modeFromAcqEquip;}
         this.getEnum();
         this.getManufs();
-        this.getManufacturerModel();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
@@ -66,6 +66,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
         .getManufacturers()
         .then(manufs => {
             this.manufs = manufs;
+            this.getManufacturerModel();
         })
         .catch((error) => {
             // TODO: display error
@@ -93,7 +94,11 @@ export class ManufacturerModelDetailComponent implements OnInit {
                 }
             })
             .subscribe((manufModel: ManufacturerModel) => {
+                if (this.mode == "edit") {
+                    manufModel.manufacturer = this.getManufById(manufModel.manufacturer.id);
+                }
                 this.manufModel = manufModel;
+                this.datasetModalityTypeEnumValue = DatasetModalityType[this.manufModel.datasetModalityType];
             });
     }   
 
@@ -186,6 +191,15 @@ export class ManufacturerModelDetailComponent implements OnInit {
                 this.isNameUnique = false;
             }
         });
+    }
+
+    getManufById(id: number): Manufacturer {
+        for (let manuf of this.manufs) {
+            if (id == manuf.id) {
+                return manuf;
+            }
+        }
+        return null;
     }
 
     closePopin () {
