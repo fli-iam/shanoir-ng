@@ -37,7 +37,7 @@
 								</select>
 								<!--<a i18n="AcqEquip detail|Create new model label" [routerLink] = "['/manufModelDetail']" [queryParams]="{mode: 'create'}">Create new manufacturer model</a>-->
 								<button i18n="AcqEquip detail|Create new model label" (click)="manufModelModal.show()">
-									<img src="/assets/images/icons/add-1.png"/>
+									<img [src]="addIconPath"/>
 									new manufacturer model
 								</button>
 								<label *ngIf="formErrors.manufacturerModel.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|ManufModelRequiredError label">Manufacturer model is required!</label>

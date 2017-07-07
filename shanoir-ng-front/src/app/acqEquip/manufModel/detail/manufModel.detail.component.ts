@@ -4,14 +4,15 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 
+import { DatasetModalityType } from "../../../shared/enum/datasetModalityType";
+import { Enum } from "../../../shared/utils/enum";
+import { ImagesUrlUtil } from "../../../shared/utils/images.url.util";
+import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
 import { ManufacturerModel } from '../../shared/manufModel.model';
 import { ManufacturerModelService } from '../../shared/manufModel.service';
 import { Manufacturer } from '../../shared/manuf.model';
 import { ManufacturerService } from '../../shared/manuf.service';
 import { ModalComponent } from '../../../shared/utils/modal.component';
-import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
-import { DatasetModalityType } from "../../../shared/enum/datasetModalityType";
-import { Enum } from "../../../shared/utils/enum";
 
 @Component({
     selector: 'manufModelDetail',
@@ -32,6 +33,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
     private datasetModalityTypes: Enum[] = []; 
     private isMR: Boolean = false;
     private manufs: Manufacturer[];
+    private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
 
     constructor (private route: ActivatedRoute, private router: Router,
         private manufModelService: ManufacturerModelService, private manufService: ManufacturerService,   

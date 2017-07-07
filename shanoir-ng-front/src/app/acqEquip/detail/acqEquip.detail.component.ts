@@ -10,6 +10,7 @@ import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { DatasetModalityType } from "../../shared/enum/datasetModalityType";
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { ImagesUrlUtil } from "../../shared/utils/images.url.util";
 import { ManufacturerModel } from '../shared/manufModel.model';
 import { ManufacturerModelService } from '../shared/manufModel.service';
 import { ManufacturerService } from '../shared/manuf.service';
@@ -34,6 +35,7 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     private manufModels: ManufacturerModel[];
     private centers: Center[];
     private datasetModalityTypeEnumValue: String;
+    private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
 
     constructor(private route: ActivatedRoute, private router: Router,
         private acqEquipService: AcquisitionEquipmentService, private fb: FormBuilder,
