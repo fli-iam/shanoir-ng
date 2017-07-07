@@ -101,7 +101,7 @@ export class CenterDetailComponent implements OnInit {
     }
 
     edit(): void {
-        this.router.navigate(['/detailCenter'], { queryParams: {id: this.centerId, mode: "edit"}});
+        this.router.navigate(['/centerDetail'], { queryParams: {id: this.centerId, mode: "edit"}});
     }
 
     create(): void {
