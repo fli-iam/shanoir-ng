@@ -76,7 +76,6 @@ export class UserListComponent {
         ];
         this.customActionDefs = [
             {title: "new user", img: "assets/images/icons/add-1.png", target: "../editUser"},
-            {title: "delete selected", img: "assets/images/icons/garbage-1.png", action: this.deleteAll } 
         ];
         this.rowClickAction = {target : "/editUser", getParams: function(item: any): Object {
                 return {id: item.id};

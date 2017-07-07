@@ -91,7 +91,6 @@ export class CenterListComponent {
                     return { mode: "create" };
                 }
             });
-            this.customActionDefs.push({ title: "delete selected", img: "assets/images/icons/garbage-1.png", action: this.deleteAll });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.rowClickAction = {

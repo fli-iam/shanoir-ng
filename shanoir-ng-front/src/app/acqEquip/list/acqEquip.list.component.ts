@@ -75,7 +75,6 @@ export class AcquisitionEquipmentListComponent {
             this.customActionDefs.push({title: "new acq. equip.", img: "assets/images/icons/add-1.png", target: "/acqEquipDetail", getParams: function(item: any): Object {
                     return {mode: "create"};
             }});
-            this.customActionDefs.push({title: "delete selected", img: "assets/images/icons/garbage-1.png", action: this.deleteAll });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.rowClickAction = {target : "/acqEquipDetail", getParams: function(item: any): Object {
