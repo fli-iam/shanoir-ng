@@ -101,6 +101,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
                 }
                 this.manufModel = manufModel;
                 this.datasetModalityTypeEnumValue = DatasetModalityType[this.manufModel.datasetModalityType];
+                this.checkDatasetModalityType(this.datasetModalityTypeEnumValue);
             });
     }   
 
@@ -138,12 +139,16 @@ export class ManufacturerModelDetailComponent implements OnInit {
     }
 
     onSelect(datasetModalityType) {
+        this.checkDatasetModalityType(datasetModalityType);
+         this.buildForm();
+    }
+
+    checkDatasetModalityType(datasetModalityType) {
         if (datasetModalityType.indexOf("MR") != -1) {
             this.isMR = true;
         } else {
             this.isMR = false;
         }
-         this.buildForm();
     }
 
     formErrors = {

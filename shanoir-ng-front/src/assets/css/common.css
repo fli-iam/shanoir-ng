@@ -83,7 +83,6 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form .required-label:after{ content:" *"; }
   form .form-validation-alert { color: var(--color-error); }
   form .right-col label { text-align: right; display: block; }
-  form .right-col a { margin: 0 0 0 10px; } 
   form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--greyer); height: 18px; }
     form .right-col button:active { background-color: var(--color-b-light); }
     form .right-col button:disabled { color: var(--grey); } 
