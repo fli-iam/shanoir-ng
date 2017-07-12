@@ -94,7 +94,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	 */
 	private void deleteEquipmentOnShanoirOld(final Long equipmentId) {
 		try {
-			LOG.info("Send update to Shanoir Old");
+			LOG.info("Send delete to Shanoir Old");
 			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteAcqEqptQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(equipmentId));
 		} catch (AmqpException e) {
