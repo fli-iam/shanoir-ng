@@ -36,6 +36,7 @@ import { HomeComponent }   from './home/home.component';
 import { KeycloakHttp } from "./shared/keycloak/keycloak.http";
 import { KeycloakService } from "./shared/keycloak/keycloak.service";
 import { ImportComponent }   from './import/import.component';
+import { ListComponent } from "./shared/utils/list.component";
 import { LoadingBarComponent }   from './shared/loadingBar/loadingBar.component';
 import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
 import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
@@ -87,6 +88,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         HeaderComponent,
         HomeComponent,
         ImportComponent,
+        ListComponent,
         LoadingBarComponent,
         ManufacturerDetailComponent,
         ManufacturerModelDetailComponent,

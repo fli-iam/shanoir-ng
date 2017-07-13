@@ -52,9 +52,7 @@ public interface AcquisitionEquipmentMapper {
 	 *            acquisition equipment to map.
 	 * @return acquisition equipment DTO.
 	 */
-	@Mappings({ @Mapping(source = "center.name", target = "centerName"),
-			@Mapping(source = "manufacturerModel.name", target = "manufacturerModelName"),
-			@Mapping(source = "manufacturerModel.manufacturer.name", target = "manufacturerName") })
+	@Mappings({ @Mapping(source = "center.name", target = "centerName")})
 	SimpleAcquisitionEquipmentDTO acquisitionEquipmentToSimpleAcquisitionEquipmentDTO(
 			AcquisitionEquipment acquisitionEquipment);
 
