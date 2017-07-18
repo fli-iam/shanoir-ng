@@ -47,6 +47,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
         if (this.modeFromAcqEquip) {this.mode = this.modeFromAcqEquip;}
         this.getEnum();
         this.getManufs();
+        this.getManufacturerModel();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
