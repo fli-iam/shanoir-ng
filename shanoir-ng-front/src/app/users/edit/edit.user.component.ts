@@ -224,7 +224,7 @@ export class EditUserComponent implements OnInit {
     };
 
     private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'yyyy-mm-dd',
+        dateFormat: 'dd/mm/yyyy',
         height: '20px',
         width: '160px'
     };
@@ -249,8 +249,9 @@ export class EditUserComponent implements OnInit {
     }
 
     setDateFromDatePicker(): void {
-        if (this.selectedDateNormal && !isNaN(new Date(this.selectedDateNormal).getTime())) {
-            this.user.expirationDate = new Date(this.selectedDateNormal);
+        if (this.selectedDateNormal) {
+            var from = this.selectedDateNormal.valueOf().split("/");
+            this.user.expirationDate = new Date(from[2], from[1] - 1, from[0]);
         } else {
             this.user.expirationDate = null;
         }
@@ -258,7 +259,7 @@ export class EditUserComponent implements OnInit {
 
     getDateToDatePicker(user: User): void {
         if (user && user.expirationDate && !isNaN(new Date(user.expirationDate).getTime())) {
-            let date: string = new Date(user.expirationDate).toISOString().split('T')[0];
+            let date: string = new Date(user.expirationDate).toLocaleDateString();
             this.selectedDateNormal = date;
         }
     }

@@ -102,7 +102,7 @@ export class ExtensionRequestComponent implements OnInit {
     };
 
     private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'yyyy-mm-dd',
+        dateFormat: 'dd/mm/yyyy',
         height: '20px',
         width: '160px'
     };
@@ -127,8 +127,9 @@ export class ExtensionRequestComponent implements OnInit {
     }
 
     setDateFromDatePicker(): void {
-        if (this.selectedDateNormal && !isNaN(new Date(this.selectedDateNormal).getTime())) {
-            this.extensionRequestInfo.extensionDate = new Date(this.selectedDateNormal);
+        if (this.selectedDateNormal) {
+            var from = this.selectedDateNormal.valueOf().split("/");
+            this.extensionRequestInfo.extensionDate = new Date(from[2], from[1] - 1, from[0]);
         } else {
             this.extensionRequestInfo.extensionDate = null;
         }
@@ -136,7 +137,7 @@ export class ExtensionRequestComponent implements OnInit {
 
     getDateToDatePicker(extensionRequestInfo: ExtensionRequestInfo): void {
         if (extensionRequestInfo && extensionRequestInfo.extensionDate && !isNaN(new Date(extensionRequestInfo.extensionDate).getTime())) {
-            let date: string = new Date(extensionRequestInfo.extensionDate).toISOString().split('T')[0];
+            let date: string = new Date(extensionRequestInfo.extensionDate).toLocaleDateString();
             this.selectedDateNormal = date;
         }
     }
