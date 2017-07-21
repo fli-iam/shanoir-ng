@@ -129,7 +129,10 @@ export class ExtensionRequestComponent implements OnInit {
     setDateFromDatePicker(): void {
         if (this.selectedDateNormal) {
             var from = this.selectedDateNormal.valueOf().split("/");
-            this.extensionRequestInfo.extensionDate = new Date(from[2], from[1] - 1, from[0]);
+            var f0 = from[0]; 
+            var f1 = +from[1] - 1; 
+            var f2 = from[2];
+            this.extensionRequestInfo.extensionDate = new Date(+f2, f1, +f0);
         } else {
             this.extensionRequestInfo.extensionDate = null;
         }
