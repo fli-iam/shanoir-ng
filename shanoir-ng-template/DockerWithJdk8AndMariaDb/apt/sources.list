@@ -1,5 +1,5 @@
-deb http://miroir.irisa.fr/debian	jessie			main
-deb http://miroir.irisa.fr/debian	jessie-updates		main
-deb http://miroir.irisa.fr/debian	jessie-backports	main
-deb http://security.debian.org		jessie/updates		main
+deb http://miroir.irisa.fr/debian	stretch			main
+deb http://miroir.irisa.fr/debian	stretch-updates		main
+deb http://miroir.irisa.fr/debian	stretch-backports	main
+deb http://security.debian.org		stretch/updates		main
 

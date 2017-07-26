@@ -1,7 +1,7 @@
-# Debian "Jessie" with Java 8 and MariaDB installed.
+# Debian "Stretch" with Java 8 and MariaDB installed.
 # Build image with:  docker build -t shanoir-ng/debianjava8mariadb:latest .
 
-FROM debian:jessie
+FROM debian:stretch
 
 # apt config
 #  - use miroir.irisa.fr
