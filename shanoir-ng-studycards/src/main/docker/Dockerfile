@@ -1,4 +1,4 @@
-FROM shanoir-ng/debianjava8mariadb:latest
+FROM shanoir-ng/debianjava8mariadbpython:latest
 
 COPY shanoir-ng-studycards-0.0.1-SNAPSHOT.jar /opt/shanoir-ng/shanoir-ng-studycards.jar
 
@@ -12,6 +12,10 @@ COPY container_init /dk/container_init
 RUN chmod +x /dk/container_init
 
 COPY shanoirng_studycards.sql /dk/shanoirng_studycards.sql
+COPY shanoirng_studycards_tables.sql /dk/shanoirng_studycards_tables.sql
+
+COPY studycardsMigration.py /dk/studycardsMigration.py
+RUN chmod +x /dk/studycardsMigration.py
 
 EXPOSE 9900
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]

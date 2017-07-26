@@ -75,7 +75,6 @@ export class AcquisitionEquipmentListComponent {
             this.customActionDefs.push({title: "new acq. equip.", img: "assets/images/icons/add-1.png", target: "/acqEquipDetail", getParams: function(item: any): Object {
                     return {mode: "create"};
             }});
-            this.customActionDefs.push({title: "delete selected", img: "assets/images/icons/garbage-1.png", action: this.deleteAll });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.rowClickAction = {target : "/acqEquipDetail", getParams: function(item: any): Object {
@@ -86,7 +85,7 @@ export class AcquisitionEquipmentListComponent {
 
     openDeleteAcquisitionEquipmentConfirmDialog = (item: AcquisitionEquipment) => {
          this.confirmDialogService
-            .confirm('Delete acqEquip', 'Are you sure you want to delete acqEquip ' + '?',
+            .confirm('Delete acqEquip', 'Are you sure you want to delete the following entity?',
                 this.viewContainerRef)
             .subscribe(res => {
                 if (res) {

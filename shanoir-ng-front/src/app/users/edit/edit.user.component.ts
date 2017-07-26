@@ -44,7 +44,6 @@ export class EditUserComponent implements OnInit {
             })
             .catch((error) => {
                 // TODO: display error
-                //log.error("error getting roles list!");
                 console.log("error getting roles list!");
             });
     }
@@ -65,6 +64,9 @@ export class EditUserComponent implements OnInit {
             .subscribe((user: User) => {
                 user.role = this.getRoleById(user.role.id);
                 this.user = user;
+                if (user.extensionRequestDemand) {
+                    this.user.expirationDate = user.extensionRequestInfo.extensionDate;
+                }
                 this.getDateToDatePicker(this.user);
                 this.accountRequestInfo = this.user.accountRequestInfo;
             });
@@ -121,11 +123,13 @@ export class EditUserComponent implements OnInit {
     accountRequest(): void {
         this.submit();
         this.userService.requestAccount(this.user)
-            .subscribe((user) => {
-                window.location.href = process.env.LOGOUT_REDIRECT_URL;
+            .subscribe((res) => {
+                this.getOut(res);
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
+                } else {
+                    this.getOut();
                 }
             });
     }
@@ -187,6 +191,7 @@ export class EditUserComponent implements OnInit {
             'username': new FormControl(this.user.username),
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex)]],
             'expirationDate': [this.user.expirationDate],
+            'extensionMotivation': [(this.user.extensionRequestInfo) ? this.user.extensionRequestInfo.extensionMotivation : ''],
             'role': roleFC,
             'canAccessToDicomAssociation': new FormControl('false')
         });
@@ -219,7 +224,7 @@ export class EditUserComponent implements OnInit {
     };
 
     private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'yyyy-mm-dd',
+        dateFormat: 'dd/mm/yyyy',
         height: '20px',
         width: '160px'
     };
@@ -244,8 +249,12 @@ export class EditUserComponent implements OnInit {
     }
 
     setDateFromDatePicker(): void {
-        if (this.selectedDateNormal && !isNaN(new Date(this.selectedDateNormal).getTime())) {
-            this.user.expirationDate = new Date(this.selectedDateNormal);
+        if (this.selectedDateNormal) {
+            var from = this.selectedDateNormal.valueOf().split("/");
+            var f0 = from[0]; 
+            var f1 = +from[1] - 1; 
+            var f2 = from[2];
+            this.user.expirationDate = new Date(+f2, f1, +f0);
         } else {
             this.user.expirationDate = null;
         }
@@ -253,7 +262,7 @@ export class EditUserComponent implements OnInit {
 
     getDateToDatePicker(user: User): void {
         if (user && user.expirationDate && !isNaN(new Date(user.expirationDate).getTime())) {
-            let date: string = new Date(user.expirationDate).toISOString().split('T')[0];
+            let date: string = new Date(user.expirationDate).toLocaleDateString();
             this.selectedDateNormal = date;
         }
     }

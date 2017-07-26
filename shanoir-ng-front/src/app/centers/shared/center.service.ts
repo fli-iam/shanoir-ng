@@ -25,7 +25,7 @@ export class CenterService {
             .toPromise()
             .catch((error) => {
                 console.error('Error delete center', error);
-                return Promise.reject(error.message || error);
+                return Promise.reject(error);
         });
     }
 

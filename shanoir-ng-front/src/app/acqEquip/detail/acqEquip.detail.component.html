@@ -1,5 +1,5 @@
 <div class="content-component">
-    <form [formGroup]="acqEquipDetailForm" class="max-content" novalidate>
+	<form [formGroup]="acqEquipDetailForm" class="max-content" novalidate>
 		<div class="layout">
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
@@ -14,52 +14,60 @@
 			</span>
 			<fieldset>
 				<ol>
+					<label *ngIf="isModelNumberUnique==false" class="form-validation-alert" i18n="Edit center|ModelNumberUniqueError label">This equipment (same Manufacturer model and same serial number) already exists!</label>
 					<li *ngIf="mode=='view'">
-						<label i18n="AcqEquip detail|Manufacturer label">Manufacturer</label> 
+						<label i18n="AcqEquip detail|Manufacturer label">Manufacturer</label>
 						<span class="right-col">
-							<!--<a [routerLink]="['/manufModelDetail']">-->
+							<a [routerLink]="['/manufDetail']" [queryParams]="{mode: 'view', id: acqEquip.manufacturerModel?.manufacturer?.id}">
 								{{acqEquip.manufacturerModel?.manufacturer?.name}}
-							<!--</a>-->
+							</a>
 						</span>
 					</li>
 					<li class="required">
-						<label i18n="AcqEquip detail|Manufacturer model label" class="required-label">Manufacturer model</label> 
+						<label i18n="AcqEquip detail|Manufacturer model label" class="required-label">Manufacturer model</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
-								<!--<a [routerLink]="['/manufModelDetail']">-->
+								<a [routerLink]="['/manufModelDetail']" [queryParams]="{mode: 'view', id: acqEquip.manufacturerModel?.id}">
 									{{acqEquip.manufacturerModel?.name}}
-								<!--</a>-->
+								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select id="manufModel" required formControlName="manufModel" [(ngModel)]="acqEquip.manufacturerModel">
-									<option *ngFor="let manufModel of manufModels" [value]="manufModel">{{manufModel.name}}</option>
+								<select id="manufModel" required formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel">
+									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</option>
 								</select>
-								<a i18n="AcqEquip detail|Create new model label" [routerLink] = "['/manufModelDetail']">Create new manufacturer model</a>
+								<button i18n="AcqEquip detail|Create new model label" (click)="manufModelModal.show()">
+									<img [src]="addIconPath"/>
+									new manufacturer model
+								</button>
+								<label *ngIf="formErrors.manufacturerModel.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|ManufModelRequiredError label">Manufacturer model is required!</label>
 							</ng-template>
 						</span>
 					</li>
 					<li *ngIf="mode=='view'">
-						<label i18n="AcqEquip detail|Model modality label">Model modality</label> 
+						<label i18n="AcqEquip detail|Model modality label">Model modality</label>
 						<span class="right-col">
-							{{acqEquip.manufacturerModel?.datasetModalityType}}
+							{{datasetModalityTypeEnumValue}}
 						</span>
 					</li>
 					<li class="required">
-						<label i18n="AcqEquip detail|Center label" class="required-label">Center</label> 
+						<label i18n="AcqEquip detail|Center label" class="required-label">Center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
-								{{acqEquip.center?.name}}
+								<a [routerLink]="['/centerDetail']" [queryParams]="{mode: 'view', id: acqEquip.center?.id}">
+									{{acqEquip.center?.name}}
+								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
 								<select id="center" required formControlName="center" [(ngModel)]="acqEquip.center">
-									<option *ngFor="let center of centers" [value]="center">{{center.name}}</option>
+									<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
 								</select>
-								<a i18n="AcqEquip detail|Center details label" [routerLink] = "['/detailCenter']">details</a>
+								<label *ngIf="formErrors.center.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|CenterRequiredError label">Center is required!</label>
+								<a [routerLink] = "['/centerDetail']" [queryParams]="{mode: 'view', id: acqEquip.center?.id}">details</a>
 							</ng-template>
 						</span>
 					</li>
 					<li>
-						<label i18n="AcqEquip detail|Serial number label">Serial Number</label> 
+						<label i18n="AcqEquip detail|Serial number label">Serial Number</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								{{acqEquip.serialNumber}}
@@ -78,13 +86,19 @@
 						<button type="submit" i18n="View acqEquip|EditButton label" (click)="edit()" class="Button">Edit</button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
-						<button type="submit" i18n="Edit acqEquip|UpdateButton label" (click)="update()" class="Button">Update</button>
+						<button type="submit" i18n="Edit acqEquip|UpdateButton label" (click)="update()" class="Button" [disabled]="!acqEquipDetailForm.valid">Update</button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
-						<button type="submit" i18n="Edit acqEquip|CreateButton label" (click)="create()" class="Button">Create</button>
+						<button type="submit" i18n="Edit acqEquip|CreateButton label" (click)="create()" class="Button" [disabled]="!acqEquipDetailForm.valid">Create</button>
 					</ng-template>
 				</span>
 			</div>
-        </div>
-    </form>
+		</div>
+	</form>
 </div>
+
+<app-modal #manufModelModal>
+    <div class="app-modal-body">
+      <manufModelDetail [modeFromAcqEquip]="'create'" (closing)="closePopin($event)"></manufModelDetail>
+    </div>
+</app-modal>

@@ -11,9 +11,7 @@ import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 @Component({
     selector: 'centerDetail',
     templateUrl: 'center.detail.component.html',
-    styles: [
-        '.layout { min-width: 410px; }'
-    ]
+    styleUrls: ['center.detail.component.css']
 })
 
 export class CenterDetailComponent implements OnInit {
@@ -24,7 +22,6 @@ export class CenterDetailComponent implements OnInit {
     private mode: "view" | "edit" | "create";
     private isNameUnique: Boolean = true;
     private canModify: Boolean = false;
-    
 
     constructor (private route: ActivatedRoute, private router: Router,
         private centerService: CenterService,   private fb: FormBuilder,
@@ -101,7 +98,7 @@ export class CenterDetailComponent implements OnInit {
     }
 
     edit(): void {
-        this.router.navigate(['/detailCenter'], { queryParams: {id: this.centerId, mode: "edit"}});
+        this.router.navigate(['/centerDetail'], { queryParams: {id: this.centerId, mode: "edit"}});
     }
 
     create(): void {

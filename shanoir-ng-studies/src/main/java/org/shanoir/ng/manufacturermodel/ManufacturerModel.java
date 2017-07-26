@@ -1,22 +1,13 @@
 package org.shanoir.ng.manufacturermodel;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.validation.Unique;
+import org.shanoir.ng.shared.validation.ManufactureModelTypeCheck;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -29,9 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "datasetModalityType", discriminatorType = DiscriminatorType.STRING)
-@DiscriminatorValue("not null")
+@ManufactureModelTypeCheck
 public class ManufacturerModel extends HalEntity {
 
 	/**
@@ -40,17 +29,15 @@ public class ManufacturerModel extends HalEntity {
 	private static final long serialVersionUID = -99873038897196966L;
 
 	@NotNull
-	@Column(nullable = false, insertable = false, updatable = false)
-	@Enumerated(EnumType.STRING)
-	private DatasetModalityType datasetModalityType;
+	private Integer datasetModalityType;
+
+	private Double magneticField;
 
 	@ManyToOne
 	@NotNull
 	private Manufacturer manufacturer;
 
-	@NotBlank
-	@Column(unique = true)
-	@Unique
+	@NotNull
 	@Length(min = 2, max = 200)
 	private String name;
 
@@ -58,7 +45,7 @@ public class ManufacturerModel extends HalEntity {
 	 * @return the datasetModalityType
 	 */
 	public DatasetModalityType getDatasetModalityType() {
-		return datasetModalityType;
+		return DatasetModalityType.getType(datasetModalityType);
 	}
 
 	/**
@@ -66,7 +53,26 @@ public class ManufacturerModel extends HalEntity {
 	 *            the datasetModalityType to set
 	 */
 	public void setDatasetModalityType(DatasetModalityType datasetModalityType) {
-		this.datasetModalityType = datasetModalityType;
+		if (datasetModalityType == null) {
+			this.datasetModalityType = null;
+		} else {
+			this.datasetModalityType = datasetModalityType.getId();
+		}
+	}
+
+	/**
+	 * @return the magneticField
+	 */
+	public Double getMagneticField() {
+		return magneticField;
+	}
+
+	/**
+	 * @param magneticField
+	 *            the magneticField to set
+	 */
+	public void setMagneticField(Double magneticField) {
+		this.magneticField = magneticField;
 	}
 
 	/**

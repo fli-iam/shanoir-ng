@@ -35,11 +35,12 @@ spring:
     host: shanoir-ng-rabbitmq
   session:
     store-type: none
+front.server.url: http://shanoir-ng-nginx
 #keycloak
 keycloak:
   cors: true
   realm: shanoir-ng
-  auth-server-url: http://localhost/auth
+  auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-studyCards
   securityConstraints:
@@ -83,11 +84,12 @@ spring:
     sql-dialect: Mysql
   rabbitmq:
     host: localhost
-
 server:
     port: 9905
+front.server.url: http://localhost:8080
 #keycloak
 keycloak:
+  auth-server-url: http://localhost/auth
   credentials:
     secret: f5dfbdc0-4ba4-4f37-abcf-3c3e5bb1e2c4
 # logging configuration

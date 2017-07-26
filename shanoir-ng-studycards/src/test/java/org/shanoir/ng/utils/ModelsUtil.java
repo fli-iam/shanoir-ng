@@ -1,6 +1,6 @@
 package org.shanoir.ng.utils;
 
-import org.shanoir.ng.studyCards.StudyCard;
+import org.shanoir.ng.studycard.StudyCard;
 
 /**
  * Utility class for test.

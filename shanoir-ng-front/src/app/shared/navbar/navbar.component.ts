@@ -16,6 +16,7 @@ export class NavbarComponent {
     private colorASave: string;
     private colorBSave: string;
     public mode: "default" | "pink" | "xtremPink" = "default";
+    private dev: boolean = false;
 
     constructor(private keycloakService: KeycloakService) {
 

@@ -2,6 +2,9 @@
 
 wait-mysql
 
+mkdir -p	/vol/log/ms
+chown shanoir:	/vol/log/ms
+
 exec su - shanoir -c 'exec java -jar /opt/shanoir-ng/shanoir-ng-users.jar'
 
 

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -18,12 +19,12 @@ import org.shanoir.ng.role.Role;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
+import org.shanoir.ng.shared.validation.ExtensionWithMotivation;
 import org.shanoir.ng.shared.validation.Unique;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @Table(name = "users")
 @JsonPropertyOrder({ "_links", "id", "firstName", "lastName", "username", "email" })
+@ExtensionWithMotivation
 public class User extends HalEntity implements UserDetails {
 
 	/**
@@ -52,10 +54,15 @@ public class User extends HalEntity implements UserDetails {
 	@Column(unique = true)
 	@Unique
 	private String email;
-
+	
 	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
 	private Date expirationDate;
 
+	@Embedded
+	private ExtensionRequestInfo extensionRequestInfo;
+
+	private boolean extensionRequestDemand;
+	
 	@NotBlank
 	private String firstName;
 
@@ -64,25 +71,23 @@ public class User extends HalEntity implements UserDetails {
 	private boolean isSecondExpirationNotificationSent;
 
 	private String keycloakId;
-	
+
 	private Date lastLogin;
 
 	@NotNull
 	private String lastName;
-	
-	private String password;
 
+	@ManyToOne
+	@NotNull
+	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
+	private Role role;
+	
 	@NotBlank
 	@Column(unique = true)
 	@Unique
 	private String username;
 
 	private String teamName;
-
-	@ManyToOne
-	@NotNull
-	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
-	private Role role;
 
 	/**
 	 * Init HATEOAS links
@@ -183,6 +188,35 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
+	 * @return the extensionRequestInfo
+	 */
+	public ExtensionRequestInfo getExtensionRequestInfo() {
+		return extensionRequestInfo;
+	}
+
+	/**
+	 * @param extensionRequestInfo the extensionRequestInfo to set
+	 */
+	public void setExtensionRequestInfo(ExtensionRequestInfo extensionRequestInfo) {
+		this.extensionRequestInfo = extensionRequestInfo;
+	}
+
+	/**
+	 * @return the extensionRequestDemand
+	 */
+	public boolean isExtensionRequestDemand() {
+		return extensionRequestDemand;
+	}
+	
+	/**
+	 * @param extensionRequestDemand
+	 *            the extensionRequestDemand to set
+	 */
+	public void setExtensionRequestDemand(boolean extensionRequestDemand) {
+		this.extensionRequestDemand = extensionRequestDemand;
+	}
+	
+	/**
 	 * @return the firstName
 	 */
 	public String getFirstName() {
@@ -236,7 +270,8 @@ public class User extends HalEntity implements UserDetails {
 	}
 
 	/**
-	 * @param keycloakId the keycloakId to set
+	 * @param keycloakId
+	 *            the keycloakId to set
 	 */
 	public void setKeycloakId(String keycloakId) {
 		this.keycloakId = keycloakId;
@@ -270,23 +305,6 @@ public class User extends HalEntity implements UserDetails {
 	 */
 	public void setLastName(final String lastName) {
 		this.lastName = lastName;
-	}
-
-	/**
-	 * @return the password
-	 */
-	@JsonIgnore
-	public String getPassword() {
-		return password;
-	}
-
-	/**
-	 * @param password
-	 *            the password to set
-	 */
-	@JsonProperty
-	public void setPassword(final String password) {
-		this.password = password;
 	}
 
 	/**
@@ -338,6 +356,12 @@ public class User extends HalEntity implements UserDetails {
 	@JsonIgnore
 	public Collection<GrantedAuthority> getAuthorities() {
 		return Arrays.asList(role);
+	}
+
+	@Override
+	@JsonIgnore
+	public String getPassword() {
+		return null;
 	}
 
 	@Override

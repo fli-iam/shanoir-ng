@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -6,10 +6,15 @@ import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms'
 
 import { AcquisitionEquipment } from '../shared/acqEquip.model';
 import { AcquisitionEquipmentService } from '../shared/acqEquip.service';
-import { ManufacturerService } from '../shared/manuf.service';
-import { ManufacturerModelService } from '../shared/manufModel.service';
+import { Center } from '../../centers/shared/center.model';
+import { CenterService } from '../../centers/shared/center.service';
+import { DatasetModalityType } from "../../shared/enum/datasetModalityType";
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { ImagesUrlUtil } from "../../shared/utils/images.url.util";
 import { ManufacturerModel } from '../shared/manufModel.model';
+import { ManufacturerModelService } from '../shared/manufModel.service';
+import { ManufacturerService } from '../shared/manuf.service';
+import { ModalComponent } from '../../shared/utils/modal.component';
 
 @Component({
     selector: 'acqEquipDetail',
@@ -17,28 +22,33 @@ import { ManufacturerModel } from '../shared/manufModel.model';
 })
 
 export class AcquisitionEquipmentDetailComponent implements OnInit {
-    
-    @Output() closing = new EventEmitter();
+
+    @Output() closing: EventEmitter<any> = new EventEmitter();
     @Input() modeFromCenterList: "view" | "edit" | "create";
+    @ViewChild('manufModelModal') manufModelModal: ModalComponent;
     private acqEquip: AcquisitionEquipment = new AcquisitionEquipment();
     private acqEquipDetailForm: FormGroup;
     private acqEquipId: number;
     private mode: "view" | "edit" | "create";
-    private isNameUnique: Boolean = true;
+    private isModelNumberUnique: Boolean = true;
     private canModify: Boolean = false;
     private manufModels: ManufacturerModel[];
+    private centers: Center[];
+    private datasetModalityTypeEnumValue: String;
+    private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
 
-    constructor (private route: ActivatedRoute, private router: Router,
+    constructor(private route: ActivatedRoute, private router: Router,
         private acqEquipService: AcquisitionEquipmentService, private fb: FormBuilder,
         private manufService: ManufacturerService, private manufModelService: ManufacturerModelService,
+        private centerService: CenterService,
         private location: Location, private keycloakService: KeycloakService) {
 
     }
 
     ngOnInit(): void {
-        if (this.modeFromCenterList) {this.mode = this.modeFromCenterList;}
+        if (this.modeFromCenterList) { this.mode = this.modeFromCenterList; }
         this.getManufModels();
-        this.getAcquisitionEquipment();
+        this.getCenters();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
@@ -57,25 +67,44 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
                     // view or edit mode
                     this.acqEquipId = acqEquipId;
                     return this.acqEquipService.getAcquisitionEquipment(acqEquipId);
-                } else { 
+                } else {
                     // create mode
                     return Observable.of<AcquisitionEquipment>();
                 }
             })
             .subscribe((acqEquip: AcquisitionEquipment) => {
+                if (this.mode == "edit") {
+                    acqEquip.center = this.getCenterById(acqEquip.center.id);
+                    acqEquip.manufacturerModel = this.getManufModelById(acqEquip.manufacturerModel.id);
+                }
                 this.acqEquip = acqEquip;
+                this.datasetModalityTypeEnumValue = DatasetModalityType[this.acqEquip.manufacturerModel.datasetModalityType];
             });
-    }   
+    }
 
     getManufModels(): void {
         this.manufModelService
             .getManufacturerModels()
             .then(manufModels => {
                 this.manufModels = manufModels;
+                this.getAcquisitionEquipment();
             })
             .catch((error) => {
                 // TODO: display error
-                console.log("error getting manufacturer models list!");
+                console.log("error getting manufacturer model list!");
+            });
+    }
+
+    getCenters(): void {
+        this.centerService
+            .getCenters()
+            .then(centers => {
+                this.centers = centers;
+                this.getAcquisitionEquipment();
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting center list!");
             });
     }
 
@@ -88,10 +117,19 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
         return null;
     }
 
+    getCenterById(id: number): Center {
+        for (let center of this.centers) {
+            if (id == center.id) {
+                return center;
+            }
+        }
+        return null;
+    }
+
     buildForm(): void {
         this.acqEquipDetailForm = this.fb.group({
             'serialNumber': [this.acqEquip.serialNumber],
-            'manufModel': [this.acqEquip.manufacturerModel, Validators.required],
+            'manufacturerModel': [this.acqEquip.manufacturerModel, Validators.required],
             'center': [this.acqEquip.center, Validators.required]
         });
         this.acqEquipDetailForm.valueChanges
@@ -115,49 +153,48 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     }
 
     formErrors = {
-       'manufModel': '',
-       'center': ''
+        'manufacturerModel': '',
+        'center': ''
     };
 
     back(): void {
-        //this.location.back();
-        this.getOut();
-    }
-
-    edit(): void {
-        this.router.navigate(['/acqEquipDetail'], {queryParams: {id: this.acqEquipId, mode: "edit"}});
-    }
-
-    create(): void {
-        this.acqEquip = this.acqEquipDetailForm.value;
-        this.acqEquipService.create(this.acqEquip)
-        .subscribe((acqEquip) => {
-            this.getOut();
-        }, (err: String) => {
-            if (err.indexOf("name should be unique") != -1) {
-                this.isNameUnique = false;
-            }
-        });
-    }
-
-    update(): void {
-        this.acqEquip = this.acqEquipDetailForm.value;
-        this.acqEquipService.update(this.acqEquipId, this.acqEquip)
-        .subscribe((acqEquip) => {
-            this.getOut();
-        }, (err: String) => {
-            if (err.indexOf("name should be unique") != -1) {
-                this.isNameUnique = false;
-            }
-        });
-    }
-
-    getOut(acqEquip: AcquisitionEquipment = null): void {
         if (this.closing.observers.length > 0) {
-            this.closing.emit(acqEquip);
+            this.closing.emit(null);
         } else {
             this.location.back();
         }
     }
 
+    edit(): void {
+        this.router.navigate(['/acqEquipDetail'], { queryParams: { id: this.acqEquipId, mode: "edit" } });
+    }
+
+    create(): void {
+        this.acqEquip = this.acqEquipDetailForm.value;
+        this.acqEquipService.create(this.acqEquip)
+            .subscribe((acqEquip) => {
+                this.back();
+            }, (err: String) => {
+                if (err.indexOf("should be unique") != -1) {
+                    this.isModelNumberUnique = false;
+                }
+            });
+    }
+
+    update(): void {
+        this.acqEquip = this.acqEquipDetailForm.value;
+        this.acqEquipService.update(this.acqEquipId, this.acqEquip)
+            .subscribe((acqEquip) => {
+                this.back();
+            }, (err: String) => {
+                if (err.indexOf("should be unique") != -1) {
+                    this.isModelNumberUnique = false;
+                }
+            });
+    }
+
+    closePopin() {
+        this.manufModelModal.hide();
+        this.getManufModels();
+    }
 }

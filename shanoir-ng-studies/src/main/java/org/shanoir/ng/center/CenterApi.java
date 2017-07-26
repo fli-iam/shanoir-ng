@@ -32,7 +32,8 @@ public interface CenterApi {
 	@RequestMapping(value = "/{centerId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteCenter(
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId)
+			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the center corresponding to the given id", response = Center.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found center", response = Center.class),
@@ -42,7 +43,7 @@ public interface CenterApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Center.class) })
 	@RequestMapping(value = "/{centerId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<Center> findCenterById(
+	ResponseEntity<CenterDTO> findCenterById(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 
 	@ApiOperation(value = "", notes = "Returns all the centers", response = Center.class, responseContainer = "List", tags = {})
@@ -53,7 +54,7 @@ public interface CenterApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Center.class) })
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<Center>> findCenters();
+	ResponseEntity<List<CenterDTO>> findCenters();
 
 	@ApiOperation(value = "", notes = "Saves a new center", response = Center.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created center", response = Center.class),
@@ -64,8 +65,9 @@ public interface CenterApi {
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	ResponseEntity<Center> saveNewCenter(@ApiParam(value = "center to create", required = true) @RequestBody Center center,
-			BindingResult result) throws RestServiceException;
+	ResponseEntity<CenterDTO> saveNewCenter(
+			@ApiParam(value = "center to create", required = true) @RequestBody Center center, BindingResult result)
+			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates a center", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "center updated", response = Void.class),

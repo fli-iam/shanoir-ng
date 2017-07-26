@@ -32,6 +32,17 @@ run-mysql </dev/null &
 pid=$!
 wait-mysql --timeout=5
 
+if [ "$PROFILE" != dev ] ; then
+	# name of the mysql table
+	tbl="`echo "$MS" | sed s/-/_/g`"
+
+	echo "Populate database - create tables"
+	mysql -u root "$tbl" < /dk/data/shanoirng_users_tables.sql
+
+	echo "Populate database - import users from shanoir old"
+	/dk/data/usersMigration.py
+fi
+
 echo "Initialize Keycloak database"
 # FIXME: perhaps this should be run as user 'shanoir'
 java -jar /opt/shanoir-ng/shanoir-ng-keycloak.jar $kc_args

@@ -53,7 +53,9 @@ export class UserListComponent {
             {headerName: "First Name", field: "firstName" },
             {headerName: "Last Name", field: "lastName" },
             {headerName: "Email", field: "email", width: "200%"},
-            {headerName: "O.D.", tip: "On Demand", field: "accountRequestDemand", type: "boolean", defaultSortCol: true, defaultAsc: false},
+            {headerName: "O.D.", tip: "On Demand", field: "onDemand", type: "boolean", defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
+                return params.data.accountRequestDemand || params.data.extensionRequestDemand;
+            }},
             {headerName: "Role", field: "role.displayName", width: "63px"},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.creationDate);
@@ -74,7 +76,6 @@ export class UserListComponent {
         ];
         this.customActionDefs = [
             {title: "new user", img: "assets/images/icons/add-1.png", target: "../editUser"},
-            {title: "delete selected", img: "assets/images/icons/garbage-1.png", action: this.deleteAll } 
         ];
         this.rowClickAction = {target : "/editUser", getParams: function(item: any): Object {
                 return {id: item.id};

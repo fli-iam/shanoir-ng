@@ -80,7 +80,7 @@ public class AcquisitionEquipmentApiControllerTestIT extends KeycloakControllerT
 	public void saveNewAcquisitionEquipmentWithLogin() throws ClientProtocolException, IOException {
 		
 		final AcquisitionEquipment equipment = createAcquisitionEquipment();
-		equipment.setSerialNumber("test");
+		equipment.setSerialNumber("test2");
 		final HttpEntity<AcquisitionEquipment> entity = new HttpEntity<AcquisitionEquipment>(equipment, getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
@@ -111,7 +111,7 @@ public class AcquisitionEquipmentApiControllerTestIT extends KeycloakControllerT
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 	}
 
 	private AcquisitionEquipment createAcquisitionEquipment() {

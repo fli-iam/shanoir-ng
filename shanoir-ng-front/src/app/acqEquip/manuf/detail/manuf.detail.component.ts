@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 
 import { Manufacturer } from '../../shared/manuf.model';
-import { AcquisitionEquipmentService } from '../../shared/acqEquip.service';
+import { ManufacturerService } from '../../shared/manuf.service';
 import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
 
 @Component({
@@ -15,55 +15,57 @@ import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
 
 export class ManufacturerDetailComponent implements OnInit {
     
-    @Output() closing = new EventEmitter();
-    @Input() modeFromCenterList: "view" | "edit" | "create";
     private manuf: Manufacturer = new Manufacturer();
     private manufDetailForm: FormGroup;
     private manufId: number;
     private mode: "view" | "edit" | "create";
+    @Input() modeFromManufModel: "view" | "edit" | "create";
+    @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
     private canModify: Boolean = false;
 
     constructor (private route: ActivatedRoute, private router: Router,
-        private acqEquipService: AcquisitionEquipmentService,   private fb: FormBuilder,
+        private manufService: ManufacturerService,   private fb: FormBuilder,
         private location: Location, private keycloakService: KeycloakService) {
 
     }
 
     ngOnInit(): void {
-        if (this.modeFromCenterList) {this.mode = this.modeFromCenterList;}
-        // this.getManufacturer();
+        if (this.modeFromManufModel) {this.mode = this.modeFromManufModel;}
+        this.getManufacturer();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
         }
     }
 
-    // getManufacturer(): void {
-    //     this.route.queryParams
-    //         .switchMap((queryParams: Params) => {
-    //             let manufId = queryParams['id'];
-    //             let mode = queryParams['mode'];
-    //             if (mode) {
-    //                 this.mode = mode;
-    //             }
-    //             if (manufId) {
-    //                 // view or edit mode
-    //                 this.manufId = manufId;
-    //                 return this.acqEquipService.getManufacturer(manufId);
-    //             } else { 
-    //                 // create mode
-    //                 return Observable.of<Manufacturer>();
-    //             }
-    //         })
-    //         .subscribe((manuf: Manufacturer) => {
-    //             this.manuf = manuf;
-    //         });
-    // }   
+    getManufacturer(): void {
+        this.route.queryParams
+            .switchMap((queryParams: Params) => {
+                let manufId = queryParams['id'];
+                if (!this.modeFromManufModel) {
+                    let mode = queryParams['mode'];
+                    if (mode) {
+                        this.mode = mode;
+                    }
+                }
+                if (manufId && this.mode !== 'create') {
+                    // view or edit mode
+                    this.manufId = manufId;
+                    return this.manufService.getManufacturer(manufId);
+                } else { 
+                    // create mode
+                    return Observable.of<Manufacturer>();
+                }
+            })
+            .subscribe((manuf: Manufacturer) => {
+                this.manuf = manuf;
+            });
+    }   
 
     buildForm(): void {
         this.manufDetailForm = this.fb.group({
-            'name': [this.manuf.name]
+            'name': [this.manuf.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]]
         });
         this.manufDetailForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
@@ -90,44 +92,38 @@ export class ManufacturerDetailComponent implements OnInit {
     };
 
     back(): void {
-        //this.location.back();
-        this.getOut();
+        if (this.closing.observers.length > 0) {
+            this.closing.emit(null);
+        } else {
+            this.location.back();
+        }
     }
 
     edit(): void {
         this.router.navigate(['/manufDetail'], { queryParams: {id: this.manufId, mode: "edit"}});
     }
 
-    // create(): void {
-    //     this.manuf = this.manufDetailForm.value;
-    //     this.acqEquipService.create(this.manuf)
-    //     .subscribe((manuf) => {
-    //         this.getOut();
-    //     }, (err: String) => {
-    //         if (err.indexOf("name should be unique") != -1) {
-    //             this.isNameUnique = false;
-    //         }
-    //     });
-    // }
-
-    // update(): void {
-    //     this.manuf = this.manufDetailForm.value;
-    //     this.acqEquipService.update(this.manufId, this.manuf)
-    //     .subscribe((manuf) => {
-    //         this.getOut();
-    //     }, (err: String) => {
-    //         if (err.indexOf("name should be unique") != -1) {
-    //             this.isNameUnique = false;
-    //         }
-    //     });
-    // }
-
-    getOut(manuf: Manufacturer = null): void {
-        if (this.closing.observers.length > 0) {
-            this.closing.emit(manuf);
-        } else {
-            this.location.back();
-        }
+    create(): void {
+        this.manuf = this.manufDetailForm.value;
+        this.manufService.create(this.manuf)
+        .subscribe((manuf) => {
+            this.back();
+        }, (err: String) => {
+            if (err.indexOf("name should be unique") != -1) {
+                this.isNameUnique = false;
+            }
+        });
     }
 
+    update(): void {
+        this.manuf = this.manufDetailForm.value;
+        this.manufService.update(this.manufId, this.manuf)
+        .subscribe((manuf) => {
+            this.back();
+        }, (err: String) => {
+            if (err.indexOf("name should be unique") != -1) {
+                this.isNameUnique = false;
+            }
+        });
+    }
 }

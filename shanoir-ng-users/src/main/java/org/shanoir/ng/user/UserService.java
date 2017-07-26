@@ -79,6 +79,17 @@ public interface UserService extends UniqueCheckableService<User> {
 	Optional<User> findByUsername(String username);
 
 	/**
+	 * Request a date extension for an user.
+	 * 
+	 * @param userId
+	 *            user id.
+	 * @param requestInfo
+	 *            request info.
+	 * @throws ShanoirUsersException
+	 */
+	void requestExtension(Long userId, ExtensionRequestInfo requestInfo) throws ShanoirUsersException;
+
+	/**
 	 * Save a user.
 	 *
 	 * @param user

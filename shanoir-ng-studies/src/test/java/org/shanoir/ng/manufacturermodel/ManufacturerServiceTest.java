@@ -13,12 +13,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
- * Manufacturer model service test.
+ * Manufacturer service test.
  * 
  * @author msimon
  * 
@@ -26,69 +26,76 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 @RunWith(MockitoJUnitRunner.class)
 public class ManufacturerServiceTest {
 
-	private static final Long MANUFACTURER_MODEL_ID = 1L;
-	private static final String UPDATED_MANUFACTURER_MODEL_NAME = "test";
+	private static final Long MANUFACTURER_ID = 1L;
+	private static final String UPDATED_MANUFACTURER_NAME = "test";
 
 	@Mock
-	private ManufacturerModelRepository manufacturerModelRepository;
+	private ManufacturerRepository manufacturerRepository;
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;
 
 	@InjectMocks
-	private ManufacturerModelServiceImpl manufacturerModelService;
+	private ManufacturerServiceImpl manufacturerService;
 
 	@Before
 	public void setup() {
-		given(manufacturerModelRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturerModel()));
-		given(manufacturerModelRepository.findBy("name", ModelsUtil.MANUFACTURER_NAME))
-				.willReturn(Arrays.asList(ModelsUtil.createManufacturerModel()));
-		given(manufacturerModelRepository.findOne(MANUFACTURER_MODEL_ID)).willReturn(ModelsUtil.createManufacturerModel());
-		given(manufacturerModelRepository.save(Mockito.any(ManufacturerModel.class)))
-				.willReturn(ModelsUtil.createManufacturerModel());
+		given(manufacturerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturer()));
+		given(manufacturerRepository.findBy("name", ModelsUtil.MANUFACTURER_NAME))
+				.willReturn(Arrays.asList(ModelsUtil.createManufacturer()));
+		given(manufacturerRepository.findOne(MANUFACTURER_ID)).willReturn(ModelsUtil.createManufacturer());
+		given(manufacturerRepository.save(Mockito.any(Manufacturer.class))).willReturn(ModelsUtil.createManufacturer());
 	}
 
 	@Test
 	public void findAllTest() {
-		final List<ManufacturerModel> manufacturerModels = manufacturerModelService.findAll();
-		Assert.assertNotNull(manufacturerModels);
-		Assert.assertTrue(manufacturerModels.size() == 1);
+		final List<Manufacturer> manufacturers = manufacturerService.findAll();
+		Assert.assertNotNull(manufacturers);
+		Assert.assertTrue(manufacturers.size() == 1);
 
-		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).findAll();
+		Mockito.verify(manufacturerRepository, Mockito.times(1)).findAll();
 	}
 
 	@Test
 	public void findByTest() {
-		final List<ManufacturerModel> manufacturerModels = manufacturerModelService.findBy("name",
-				ModelsUtil.MANUFACTURER_NAME);
-		Assert.assertNotNull(manufacturerModels);
-		Assert.assertTrue(manufacturerModels.size() == 1);
-		Assert.assertTrue(ModelsUtil.MANUFACTURER_NAME.equals(manufacturerModels.get(0).getName()));
+		final List<Manufacturer> manufacturers = manufacturerService.findBy("name", ModelsUtil.MANUFACTURER_NAME);
+		Assert.assertNotNull(manufacturers);
+		Assert.assertTrue(manufacturers.size() == 1);
+		Assert.assertTrue(ModelsUtil.MANUFACTURER_NAME.equals(manufacturers.get(0).getName()));
 
-		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).findBy(Mockito.anyString(), Mockito.anyObject());
+		Mockito.verify(manufacturerRepository, Mockito.times(1)).findBy(Mockito.anyString(), Mockito.anyObject());
 	}
 
 	@Test
 	public void findByIdTest() {
-		final ManufacturerModel manufacturerModel = manufacturerModelService.findById(MANUFACTURER_MODEL_ID);
-		Assert.assertNotNull(manufacturerModel);
-		Assert.assertTrue(ModelsUtil.MANUFACTURER_NAME.equals(manufacturerModel.getName()));
+		final Manufacturer manufacturer = manufacturerService.findById(MANUFACTURER_ID);
+		Assert.assertNotNull(manufacturer);
+		Assert.assertTrue(ModelsUtil.MANUFACTURER_NAME.equals(manufacturer.getName()));
 
-		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(manufacturerRepository, Mockito.times(1)).findOne(Mockito.anyLong());
 	}
 
 	@Test
-	public void saveTest() throws ShanoirStudyException {
-		manufacturerModelService.save(createManufacturerModel());
+	public void saveTest() throws ShanoirStudiesException {
+		manufacturerService.save(createManufacturer());
 
-		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).save(Mockito.any(ManufacturerModel.class));
+		Mockito.verify(manufacturerRepository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
 	}
 
-	private ManufacturerModel createManufacturerModel() {
-		final ManufacturerModel manufacturerModel = new ManufacturerModel();
-		manufacturerModel.setId(MANUFACTURER_MODEL_ID);
-		manufacturerModel.setName(UPDATED_MANUFACTURER_MODEL_NAME);
-		return manufacturerModel;
+	@Test
+	public void updateTest() throws ShanoirStudiesException {
+		final Manufacturer updatedManufacturer = manufacturerService.update(createManufacturer());
+		Assert.assertNotNull(updatedManufacturer);
+		Assert.assertTrue(UPDATED_MANUFACTURER_NAME.equals(updatedManufacturer.getName()));
+
+		Mockito.verify(manufacturerRepository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
+	}
+
+	private Manufacturer createManufacturer() {
+		final Manufacturer manufacturer = new Manufacturer();
+		manufacturer.setId(MANUFACTURER_ID);
+		manufacturer.setName(UPDATED_MANUFACTURER_NAME);
+		return manufacturer;
 	}
 
 }

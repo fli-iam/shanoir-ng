@@ -44,3 +44,6 @@ COPY docker-entrypoint.sh ./docker-entrypoint.sh
 
 COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/providers/shanoir-ng-keycloak-auth.jar
 COPY shanoir-ng-keycloak-init.jar /dk/shanoir-ng-keycloak-init.jar
+
+ENV SMTP_HOST qualif-smtpsink
+ENV SMTP_PORT 25

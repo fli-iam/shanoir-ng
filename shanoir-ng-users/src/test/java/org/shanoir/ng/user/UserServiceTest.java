@@ -3,6 +3,7 @@ package org.shanoir.ng.user;
 import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +40,7 @@ public class UserServiceTest {
 
 	private static final Long USER_ID = 1L;
 	private static final String UPDATED_USER_FIRSTNAME = "test";
+	private static final String USER_USERNAME = "name";
 
 	@Mock
 	private AccountRequestInfoRepository accountRequestInfoRepository;
@@ -64,6 +66,7 @@ public class UserServiceTest {
 	@Before
 	public void setup() {
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
+		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
 		given(userRepository.findOne(USER_ID)).willReturn(ModelsUtil.createUser());
 		given(userRepository.save(Mockito.any(User.class))).willReturn(ModelsUtil.createUser());
 		given(roleRepository.findByName(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createGuestRole()));
@@ -176,6 +179,16 @@ public class UserServiceTest {
 	}
 
 	@Test
+	public void requestExtensionTest() throws ShanoirUsersException {
+		ExtensionRequestInfo requestInfo = new ExtensionRequestInfo();
+		requestInfo.setExtensionDate(new Date());
+		requestInfo.setExtensionMotivation("motivation");
+		userService.requestExtension(USER_ID, requestInfo);
+		
+		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+	}
+
+	@Test
 	public void saveTest() throws ShanoirUsersException {
 		userService.save(createUser());
 
@@ -214,7 +227,7 @@ public class UserServiceTest {
 	public void updateFromShanoirOldTest() throws ShanoirUsersException {
 		userService.updateFromShanoirOld(createUser());
 
-		Mockito.verify(userRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(userRepository, Mockito.times(1)).findByUsername(Mockito.anyString());
 		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
 	}
 
@@ -222,6 +235,7 @@ public class UserServiceTest {
 		final User user = new User();
 		user.setId(USER_ID);
 		user.setFirstName(UPDATED_USER_FIRSTNAME);
+		user.setUsername(USER_USERNAME);
 		return user;
 	}
 

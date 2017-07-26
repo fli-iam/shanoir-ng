@@ -8,6 +8,7 @@ import org.hibernate.id.IdentityGenerator;
 
 public class UseIdOrGenerate extends IdentityGenerator {
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Serializable generate(SessionImplementor session, Object obj) throws HibernateException {
 		if (obj == null)

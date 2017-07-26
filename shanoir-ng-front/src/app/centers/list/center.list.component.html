@@ -3,13 +3,39 @@
         <h2 i18n="Manage centers|Title">Manage centers</h2>
         <!-- hr/ -->
     </div>
-  
+
+    <div *ngIf="deletionInternalError" class="error-message">
+        <label class="error-message" i18n="Manage centers|DeletionError label">An error occured. This center cannot be deleted. Please contact an administrator.</label>
+    </div>
+    <div *ngIf="isLinkedWithEqpts || isLinkedWithStudies" class="error-message">
+        <label class="error-message" i18n="Manage centers|DeletionError label">This center cannot be deleted. It is associated with:</label>
+        <ul>
+            <li *ngIf="isLinkedWithEqpts">
+                <label i18n="Manage centers|LinkedWithEqptsError label">acquisition equipment(s)</label>
+            </li>
+            <li *ngIf="isLinkedWithStudies">
+                <label i18n="Manage centers|LinkedWithStudiesError label">study(ies)</label>
+            </li>
+        </ul>
+    </div>
     <shanoir-table [items]="centers" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
 
-    <!-- create acq. equip. popin --> 
-    <div class="overlay" *ngIf="createAcqEquip">
-        <div class="content">
-            <acqEquipDetail [modeFromCenterList]="'create'" (closing)="closePopup($event)"></acqEquipDetail>
+    <!-- create acq. equip. popin -->
+    <div *ngIf="createAcqEquip">
+        <div (click)="onContainerClicked($event)" class="modal fade" tabindex="-1" [ngClass]="{'in': visibleAnimate}" [ngStyle]="{'display': visible ? 'block' : 'none', 'opacity': visibleAnimate ? 1 : 0}">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <ng-content select=".app-modal-header"></ng-content>
+                    </div>
+                    <div class="modal-body-centerList">
+                        <acqEquipDetail [modeFromCenterList]="'create'" (closing)="closePopin($event)"></acqEquipDetail>
+                    </div>
+                    <div class="modal-footer">
+                        <ng-content select=".app-modal-footer"></ng-content>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

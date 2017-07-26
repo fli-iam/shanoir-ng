@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.joda.time.DateTime;
 import org.keycloak.KeycloakPrincipal;
 import org.shanoir.ng.accountrequest.AccountRequestInfoRepository;
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
@@ -67,17 +68,30 @@ public class UserServiceImpl implements UserService {
 			LOG.error("User with id " + userId + " not found");
 			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
 		}
-		if (!userDb.isAccountRequestDemand()) {
-			LOG.error("User with id " + userId + " has no account request");
+		if (!userDb.isAccountRequestDemand() && !userDb.isExtensionRequestDemand()) {
+			LOG.error("User with id " + userId + " has no request (account or extension)");
 			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
 		}
 
 		// Confirm and update user
-		userDb.setAccountRequestDemand(false);
-		final User updatedUser = updateUserOnAllSystems(userDb, user);
-		// Send email
-		emailService.notifyUserAccountRequestAccepted(updatedUser);
-		return updatedUser;
+		if (userDb.isExtensionRequestDemand()) {
+			// Date extension
+			userDb.setExtensionRequestInfo(null);
+			userDb.setExtensionRequestDemand(false);
+			userDb.setFirstExpirationNotificationSent(false);
+			userDb.setSecondExpirationNotificationSent(false);
+			final User updatedUser = updateUserOnAllSystems(userDb, user);
+			// Send email
+			emailService.notifyUserExtensionRequestAccepted(updatedUser);
+			return updatedUser;
+		} else {
+			// Account creation
+			userDb.setAccountRequestDemand(false);
+			final User updatedUser = updateUserOnAllSystems(userDb, user);
+			// Send email
+			emailService.notifyUserAccountRequestAccepted(updatedUser);
+			return updatedUser;
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -94,8 +108,8 @@ public class UserServiceImpl implements UserService {
 		} else {
 			final Map<String, Object> otherClaims = ((KeycloakPrincipal) principal).getKeycloakSecurityContext()
 					.getToken().getOtherClaims();
-			if (otherClaims.containsKey(KeycloakUtils.ATT_USER_ID)
-					&& id.equals(Long.valueOf(otherClaims.get(KeycloakUtils.ATT_USER_ID).toString()))) {
+			if (otherClaims.containsKey(KeycloakUtils.USER_ID_TOKEN_ATT)
+					&& id.equals(Long.valueOf(otherClaims.get(KeycloakUtils.USER_ID_TOKEN_ATT).toString()))) {
 				ShanoirUsersException.logAndThrow(LOG, "Forbidden to delete connected user.");
 			}
 		}
@@ -117,13 +131,22 @@ public class UserServiceImpl implements UserService {
 			LOG.error("User with id " + userId + " not found");
 			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
 		}
-		if (!user.isAccountRequestDemand()) {
-			LOG.error("User with id " + userId + " has no account request");
+		if (!user.isAccountRequestDemand() && !user.isExtensionRequestDemand()) {
+			LOG.error("User with id " + userId + " has no request (account or extension)");
 			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
 		}
-		// Remove user
-		userRepository.delete(userId);
-		keycloakClient.deleteUser(user.getKeycloakId());
+		if (user.isAccountRequestDemand()) {
+			// Remove user
+			userRepository.delete(userId);
+			keycloakClient.deleteUser(user.getKeycloakId());
+		} else {
+			// Deny extension request
+			user.setExtensionRequestInfo(null);
+			user.setExtensionRequestDemand(false);
+			updateUserOnAllSystems(user, null);
+			// Send email
+			emailService.notifyUserExtensionRequestDenied(user);
+		}
 	}
 
 	@Override
@@ -152,11 +175,25 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public void requestExtension(Long userId, ExtensionRequestInfo requestInfo) throws ShanoirUsersException {
+		final User user = userRepository.findOne(userId);
+		if (user == null) {
+			LOG.error("User with id " + userId + " not found");
+			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
+		}
+		user.setExtensionRequestDemand(Boolean.TRUE);
+		user.setExtensionRequestInfo(requestInfo);
+		try {
+			userRepository.save(user);
+		} catch (DataIntegrityViolationException dive) {
+			ShanoirUsersException.logAndThrow(LOG, "Error on request extension: " + dive.getMessage());
+		}
+	}
+
+	@Override
 	public User save(final User user) throws ShanoirUsersException {
 		// Password generation
 		final String newPassword = PasswordUtils.generatePassword();
-		// Save hashed password
-		user.setPassword(PasswordUtils.getHash(newPassword));
 		User savedUser = null;
 		try {
 			if (user.getAccountRequestInfo() != null) {
@@ -166,14 +203,17 @@ public class UserServiceImpl implements UserService {
 				// Set role 'guest'
 				user.setRole(roleRepository.findByName("ROLE_GUEST")
 						.orElseThrow(() -> new ShanoirUsersException("Error while getting role 'ROLE_GUEST'")));
+				user.setExpirationDate(new DateTime().plusYears(1).toDate());
 			}
 			savedUser = userRepository.save(user);
-			// Send email to administrators
-			emailService.notifyAdminAccountRequest(savedUser);
+			if (user.getAccountRequestInfo() != null) {
+				// Send email to administrators
+				emailService.notifyAdminAccountRequest(savedUser);
+			}
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirUsersException.logAndThrow(LOG, "Error while creating user: " + dive.getMessage());
 		}
-		String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
+		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
 		if (keycloakUserId != null) {
 			// Save keycloak id
 			savedUser.setKeycloakId(keycloakUserId);
@@ -197,37 +237,20 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void updateFromShanoirOld(final User user) throws ShanoirUsersException {
-		if (user.getId() == null) {
-			if (user.isAccountRequestDemand()) {
-				// User account request
-				// Set role 'guest'
-				user.setRole(roleRepository.findByName("guestRole")
-						.orElseThrow(() -> new ShanoirUsersException("Error while getting role 'guestRole'")));
-				try {
-					if (user.getAccountRequestInfo() != null) {
-						// Save account request info
-						accountRequestInfoRepository.save(user.getAccountRequestInfo());
-					}
-					// Save user
-					userRepository.save(user);
-				} catch (Exception e) {
-					ShanoirUsersException.logAndThrow(LOG,
-							"Error while creating user from Shanoir Old: " + e.getMessage());
-				}
-			} else {
-				throw new IllegalArgumentException("User id cannot be null if not an account request");
-			}
+		final User userDb = userRepository.findByUsername(user.getUsername()).orElseThrow(
+				() -> new ShanoirUsersException("User with username " + user.getUsername() + " not found"));
+		if (user.isExtensionRequestDemand()) {
+			// Extension request
+			userDb.setExtensionRequestDemand(true);
+			userDb.setExtensionRequestInfo(user.getExtensionRequestInfo());
 		} else {
-			final User userDb = userRepository.findOne(user.getId());
-			if (userDb != null) {
-				updateUserValues(userDb, user);
-				try {
-					userRepository.save(userDb);
-				} catch (Exception e) {
-					ShanoirUsersException.logAndThrow(LOG,
-							"Error while updating user from Shanoir Old: " + e.getMessage());
-				}
-			}
+			// User update
+			updateUserValues(userDb, user);
+		}
+		try {
+			userRepository.save(userDb);
+		} catch (Exception e) {
+			ShanoirUsersException.logAndThrow(LOG, "Error while updating user from Shanoir Old: " + e.getMessage());
 		}
 	}
 
@@ -281,7 +304,6 @@ public class UserServiceImpl implements UserService {
 		shanoirOldUser.setFirstName(user.getFirstName());
 		shanoirOldUser.setLastLoginOn(user.getLastLogin());
 		shanoirOldUser.setLastName(user.getLastName());
-		shanoirOldUser.setPasswordHash(user.getPassword());
 		shanoirOldUser.setRole(user.getRole());
 		shanoirOldUser.setSecondExpirationNotificationSent(user.isSecondExpirationNotificationSent());
 		shanoirOldUser.setUsername(user.getUsername());
@@ -314,7 +336,9 @@ public class UserServiceImpl implements UserService {
 	 * @throws ShanoirUsersException
 	 */
 	private User updateUserOnAllSystems(final User userDb, final User user) throws ShanoirUsersException {
-		updateUserValues(userDb, user);
+		if (user != null) {
+			updateUserValues(userDb, user);
+		}
 		try {
 			userRepository.save(userDb);
 		} catch (Exception e) {
@@ -340,7 +364,6 @@ public class UserServiceImpl implements UserService {
 		userDb.setExpirationDate(user.getExpirationDate());
 		userDb.setFirstName(user.getFirstName());
 		userDb.setLastName(user.getLastName());
-		// TODO: password modification
 		userDb.setRole(user.getRole());
 		userDb.setUsername(user.getUsername());
 		return userDb;

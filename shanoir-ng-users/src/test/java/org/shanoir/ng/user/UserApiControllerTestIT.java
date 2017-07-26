@@ -2,6 +2,8 @@ package org.shanoir.ng.user;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Date;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.role.Role;
@@ -31,6 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 
 	private static final String REQUEST_PATH = "/user";
+	private static final String REQUEST_PATH_EXTENSION = REQUEST_PATH + "/extension";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
@@ -77,6 +80,24 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 	}
 
 	@Test
+	public void requestExtensionProtected() {
+		final HttpEntity<ExtensionRequestInfo> entity = new HttpEntity<>(createExtensionRequestInfo());
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_EXTENSION, HttpMethod.PUT, entity,
+				String.class);
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+	}
+
+	@Test
+	public void requestExtensionWithLogin() {
+		final HttpEntity<ExtensionRequestInfo> entity = new HttpEntity<>(createExtensionRequestInfo(), getHeadersWithToken(true));
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_EXTENSION, HttpMethod.PUT, entity,
+				String.class);
+		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+	}
+
+	@Test
 	public void saveNewUserProtected() {
 		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new User(), String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
@@ -87,7 +108,7 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 		final User user = createUser();
 		user.setEmail("test@te.st");
 		user.setUsername("test");
-		final HttpEntity<User> entity = new HttpEntity<User>(user, getHeadersWithToken(true));
+		final HttpEntity<User> entity = new HttpEntity<>(user, getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity, String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -103,7 +124,7 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 
 	@Test
 	public void updateNewUserProtected() {
-		final HttpEntity<User> entity = new HttpEntity<User>(createUser());
+		final HttpEntity<User> entity = new HttpEntity<>(createUser());
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
@@ -117,6 +138,18 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
 		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+	}
+
+	/*
+	 * Create an extension request for tests.
+	 * 
+	 * @return an extension request.
+	 */
+	private ExtensionRequestInfo createExtensionRequestInfo() {
+		final ExtensionRequestInfo requestInfo = new ExtensionRequestInfo();
+		requestInfo.setExtensionDate(new Date());
+		requestInfo.setExtensionMotivation("motivation");
+		return requestInfo;
 	}
 
 	/*

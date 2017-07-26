@@ -1,31 +1,29 @@
 package org.shanoir.ng.study;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.subject.SubjectStudy;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @Entity
@@ -39,7 +37,24 @@ public class Study extends HalEntity {
 	 */
 	private static final long serialVersionUID = 2182323766659913794L;
 
-	/** Name. */
+	/** Is clinical. */
+	@NotNull
+	private boolean clinical;
+
+	/** Coordinator. */
+	// TODO: replace by investigator
+	private Long coordinatorId;
+
+	/** Is with downloadable by default. */
+	private boolean downloadableByDefault;
+
+	/** End date. */
+	private Date endDate;
+
+	/** The is mono center. */
+	@NotNull
+	private boolean monoCenter;
+
 	@NotBlank
 	@Column(unique = true)
 	@Unique
@@ -49,44 +64,118 @@ public class Study extends HalEntity {
 	/** Start date. */
 	private Date startDate;
 
-	/** End date. */
-	private Date endDate;
+	/** Associated study card lists. */
+	@ElementCollection
+	@CollectionTable(name = "study_study_card")
+	@Column(name = "study_card_id")
+	private List<Long> studyCardIds;
 
-	/** Is clinical. */
 	@NotNull
-	private boolean clinical;
+	private Integer studyStatus;
+
+	/** Relations between the subjects and the studies. */
+	@JsonIgnore
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<SubjectStudy> subjectStudyList;
+
+	/** Relations between the investigators, the centers and the studies. */
+	@NotEmpty
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<StudyCenter> studyCenterList;
+
+	private Integer studyType;
+	
+	/** Users associated to the research study. */
+	@OneToMany(mappedBy = "studyId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<StudyUser> studyUsers;
+
+	/** Is visible by default. */
+	private boolean visibleByDefault;
 
 	/** Is with examination. */
 	private boolean withExamination;
 
-	/** Is visible by default. */
-	private boolean isVisibleByDefault;
+	/**
+	 * Init HATEOAS links
+	 */
+	@PostLoad
+	public void initLinks() {
+		this.addLink(Links.REL_SELF, "study/" + getId());
+	}
 
-	/** Is with downloadable by default. */
-	private boolean isDownloadableByDefault;
+	/**
+	 * @return the clinical
+	 */
+	public boolean isClinical() {
+		return clinical;
+	}
 
-	/** Users associated to the research study. */
-//	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//	@JoinColumn(name = "study")
-//	private List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
+	/**
+	 * @param clinical
+	 *            the clinical to set
+	 */
+	public void setClinical(boolean clinical) {
+		this.clinical = clinical;
+	}
 
-	@NotNull
-	//TODO : Fix annotation ATO : @Column commented for this field
-	//@Column(nullable = false, insertable = false, updatable = false)
-	@Enumerated(EnumType.STRING)
-	private StudyStatus studyStatus;
+	/**
+	 * @return the coordinatorId
+	 */
+	public Long getCoordinatorId() {
+		return coordinatorId;
+	}
 
-	/** Relations between the subjects and the studies. */
+	/**
+	 * @param coordinatorId
+	 *            the coordinatorId to set
+	 */
+	public void setCoordinatorId(Long coordinatorId) {
+		this.coordinatorId = coordinatorId;
+	}
 
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
-	private List<SubjectStudy> subjectStudyList = new ArrayList<SubjectStudy>(0);
+	/**
+	 * @return the downloadableByDefault
+	 */
+	public boolean isDownloadableByDefault() {
+		return downloadableByDefault;
+	}
 
-	@Override
-	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-	public Long getId() {
-		return super.getId();
+	/**
+	 * @param downloadableByDefault
+	 *            the downloadableByDefault to set
+	 */
+	public void setDownloadableByDefault(boolean downloadableByDefault) {
+		this.downloadableByDefault = downloadableByDefault;
+	}
+
+	/**
+	 * @return the endDate
+	 */
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	/**
+	 * @param endDate
+	 *            the endDate to set
+	 */
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	/**
+	 * @return the monoCenter
+	 */
+	public boolean isMonoCenter() {
+		return monoCenter;
+	}
+
+	/**
+	 * @param monoCenter
+	 *            the monoCenter to set
+	 */
+	public void setMonoCenter(boolean monoCenter) {
+		this.monoCenter = monoCenter;
 	}
 
 	/**
@@ -120,33 +209,115 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @return the endDate
+	 * @return the studyCardIds
 	 */
-	public Date getEndDate() {
-		return endDate;
+	public List<Long> getStudyCardIds() {
+		return studyCardIds;
 	}
 
 	/**
-	 * @param endDate
-	 *            the endDate to set
+	 * @param studyCardIds
+	 *            the studyCardIds to set
 	 */
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
+	public void setStudyCardIds(List<Long> studyCardIds) {
+		this.studyCardIds = studyCardIds;
 	}
 
 	/**
-	 * @return the clinical
+	 * @return the studyStatus
 	 */
-	public boolean isClinical() {
-		return clinical;
+	public StudyStatus getStudyStatus() {
+		return StudyStatus.getStatus(studyStatus);
 	}
 
 	/**
-	 * @param clinical
-	 *            the clinical to set
+	 * @param studyStatus
+	 *            the studyStatus to set
 	 */
-	public void setClinical(boolean clinical) {
-		this.clinical = clinical;
+	public void setStudyStatus(StudyStatus studyStatus) {
+		if (studyStatus == null) {
+			this.studyStatus = null;
+		} else {
+			this.studyStatus = studyStatus.getId();
+		}
+	}
+
+	/**
+	 * @return the subjectStudyList
+	 */
+	public List<SubjectStudy> getSubjectStudyList() {
+		return subjectStudyList;
+	}
+
+	/**
+	 * @param subjectStudyList
+	 *            the subjectStudyList to set
+	 */
+	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
+		this.subjectStudyList = subjectStudyList;
+	}
+
+	/**
+	 * @return the studyCenterList
+	 */
+	public List<StudyCenter> getStudyCenterList() {
+		return studyCenterList;
+	}
+
+	/**
+	 * @param studyCenterList the studyCenterList to set
+	 */
+	public void setStudyCenterList(List<StudyCenter> studyCenterList) {
+		this.studyCenterList = studyCenterList;
+	}
+
+	/**
+	 * @return the studyType
+	 */
+	public StudyType getStudyType() {
+		return StudyType.getType(studyType);
+	}
+	
+	/**
+	 * @param studyType
+	 *            the studyType to set
+	 */
+	public void setStudyType(StudyType studyType) {
+		if (studyType == null) {
+			this.studyType = null;
+		} else {
+			this.studyType = studyType.getId();
+		}
+	}
+	
+	/**
+	 * @return the studyUsers
+	 */
+	public List<StudyUser> getStudyUsers() {
+		return studyUsers;
+	}
+
+	/**
+	 * @param studyUsers
+	 *            the studyUsers to set
+	 */
+	public void setStudyUsers(List<StudyUser> studyUsers) {
+		this.studyUsers = studyUsers;
+	}
+
+	/**
+	 * @return the visibleByDefault
+	 */
+	public boolean isVisibleByDefault() {
+		return visibleByDefault;
+	}
+
+	/**
+	 * @param visibleByDefault
+	 *            the visibleByDefault to set
+	 */
+	public void setVisibleByDefault(boolean visibleByDefault) {
+		this.visibleByDefault = visibleByDefault;
 	}
 
 	/**
@@ -163,153 +334,5 @@ public class Study extends HalEntity {
 	public void setWithExamination(boolean withExamination) {
 		this.withExamination = withExamination;
 	}
-
-	/**
-	 * @return the isVisibleByDefault
-	 */
-	public boolean isVisibleByDefault() {
-		return isVisibleByDefault;
-	}
-
-	/**
-	 * @param isVisibleByDefault
-	 *            the isVisibleByDefault to set
-	 */
-	public void setVisibleByDefault(boolean isVisibleByDefault) {
-		this.isVisibleByDefault = isVisibleByDefault;
-	}
-
-	/**
-	 * @return the isDownloadableByDefault
-	 */
-	public boolean isDownloadableByDefault() {
-		return isDownloadableByDefault;
-	}
-
-	/**
-	 * @param isDownloadableByDefault
-	 *            the isDownloadableByDefault to set
-	 */
-	public void setDownloadableByDefault(boolean isDownloadableByDefault) {
-		this.isDownloadableByDefault = isDownloadableByDefault;
-	}
-
-	/**
-	 * @return the studyStatus
-	 */
-	public StudyStatus getStudyStatus() {
-		return studyStatus;
-	}
-
-	/**
-	 * @param studyStatus
-	 *            the studyStatus to set
-	 */
-	public void setStudyStatus(StudyStatus studyStatus) {
-		this.studyStatus = studyStatus;
-	}
-
-	/**
-	 * Return the relStudyUserCollection as a list.
-	 *
-	 * @return the rel study user collection
-	 */
-//	public List<RelStudyUser> getRelStudyUserList() {
-//		return relStudyUserList;
-//	}
-//
-//	public void setRelStudyUserList(List<RelStudyUser> relStudyUserList) {
-//		this.relStudyUserList = relStudyUserList;
-//	}
-
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "study/" + getId());
-	}
-
-	/*
-	 * public static long getSerialversionuid() { return serialVersionUID; }
-	 *
-	 *
-	 * /** Associated experimental groups of subjects.
-	 */
-	/*
-	 * @AuditJoinTable
-	 *
-	 * @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = {
-	 * CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE })
-	 *
-	 * @JoinColumn(name = "STUDY_ID")
-	 *
-	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
-	 * List<ExperimentalGroupOfSubjects> experimentalGroupOfSubjectsList = new
-	 * ArrayList<ExperimentalGroupOfSubjects>(0);
-	 */
-	/** Relations between the investigators, the centers and the studies. */
-	/*
-	 * @NotEmpty
-	 *
-	 * @OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade =
-	 * CascadeType.ALL)
-	 *
-	 * @JoinColumn(name = "STUDY_ID") private List<RelStudyCenter>
-	 * relStudyCenterList = new ArrayList<RelStudyCenter>(0);
-	 */
-
-	/** Dataset list. */
-	/*
-	 * @OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
-	 *
-	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
-	 * List<RelStudyDataset> relStudyDatasetList = new
-	 * ArrayList<RelStudyDataset>(0);
-	 */
-	/** Users associated to the research study. */
-	/*
-	 * @OneToMany(cascade = CascadeType.ALL, mappedBy = "study", fetch =
-	 * FetchType.EAGER)
-	 *
-	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
-	 * List<RelStudyUser> relStudyUserList = new ArrayList<RelStudyUser>(0);
-	 */
-
-	/** Relations between the subjects and the studies. */
-	/*
-	 * @AuditJoinTable
-	 *
-	 * @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade =
-	 * CascadeType.ALL)
-	 *
-	 * @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-	 * org.hibernate.annotations.CascadeType.DELETE_ORPHAN }) private
-	 * List<RelSubjectStudy> relSubjectStudyList = new
-	 * ArrayList<RelSubjectStudy>(0);
-	 */
-	/** Associated study card lists. */
-
-	/*
-	 * @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = {
-	 * CascadeType.MERGE, CascadeType.PERSIST })
-	 *
-	 * @JoinColumn(name = "STUDY_ID") private List<StudyCard> studyCardList =
-	 * new ArrayList<StudyCard>(0);
-	 */
-
-	/** List of protocol files directly attached to the study. */
-	/*
-	 * @CollectionOfElements
-	 *
-	 * @JoinTable(name = "PROTOCOL_FILE_PATH", joinColumns = { @JoinColumn(name
-	 * = "STUDY_ID", nullable = true) })
-	 *
-	 * @Column(name = "PATH") private List<String> protocolFilePathList = new
-	 * ArrayList<String>();
-	 */
 
 }

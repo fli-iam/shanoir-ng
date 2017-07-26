@@ -1,12 +1,20 @@
 -- Populates database for test
 
 INSERT INTO study
-	(id,  name, start_date, end_date, clinical, with_examination, is_visible_by_default, is_downloadable_by_default, study_status)
+	(id,  name, start_date, end_date, clinical, with_examination, visible_by_default, downloadable_by_default, study_status, mono_center, study_type)
 VALUES 
-	(1,'shanoirStudy1', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 'IN_PROGRESS'),
-	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0, 'IN_PROGRESS'),
-	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 'IN_PROGRESS');
-	
+	(1,'shanoirStudy1', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 1, 1),
+	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0, 1, 1, 1),
+	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 0, 1);
+
+INSERT INTO study_user
+	(receive_anonymization_report, receive_new_import_report, study_id, study_user_type, user_id)
+VALUES
+	(0, 1, 1, 1, 1),
+	(0, 1, 3, 1, 1),
+	(0, 0, 1, 3, 2),
+	(0, 1, 2, 1, 1);
+
 insert into `center`(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`) values (1,'France','CHU Rennes','','','','Rennes','');
 insert into `center`(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`) values (2,'France','CHU Reims','','','','Reims','');
 
@@ -20,9 +28,9 @@ VALUES
 INSERT INTO manufacturer_model
 	(id, dataset_modality_type, manufacturer_id, name, magnetic_field)
 VALUES 
-	(1, 'MR_DATASET', 2, 'DISCOVERY MR750', 3),
-	(2, 'PET_DATASET', 2, 'DISCOVERY MR750w', null),
-	(3, 'MR_DATASET', 3, 'Ingenia', 1.5);
+	(1, 1, 2, 'DISCOVERY MR750', 3),
+	(2, 5, 2, 'DISCOVERY MR750w', null),
+	(3, 1, 3, 'Ingenia', 1.5);
 
 INSERT INTO acquisition_equipment
 	(id, center_id, manufacturer_model_id, serial_number)

@@ -11,6 +11,7 @@ export class TableComponent {
     @Input() items: Object[];
     @Input() customActionDefs: any[];
     @Input() rowClickAction: Object;
+    @Input() selectionAllowed: boolean = false;
     private itemsSave: Object[];
     private itemsLoaded: boolean = false;
     private maxResultsField: number;

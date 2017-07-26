@@ -1,17 +1,16 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  version: "0.0.1"
+  version: 0.0.1
   title: Shanoir NG Users Microservice
   description: Microservice API for Shanoir NG user managment
 produces:
   - application/json
-  
 paths:
   /accountrequest:
     post:
       operationId: saveNewAccountRequest
       description: Saves a new user from account request
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: user
@@ -19,12 +18,12 @@ paths:
           description: user to create from account request
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: '#/definitions/User'
       responses:
         '200':
           description: created user from account request
           schema:
-            $ref: "#/definitions/User"
+            $ref: '#/definitions/User'
         '401':
           description: unauthorized
         '403':
@@ -32,16 +31,16 @@ paths:
         '422':
           description: bad parameters
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
   /login:
     post:
       operationId: login
       description: Updates login date for an user
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: username
@@ -60,12 +59,12 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
   /user:
     post:
       operationId: saveNewUser
       description: Saves a new user
-      consumes: 
+      consumes:
         - application/json
       parameters:
         - name: user
@@ -73,12 +72,12 @@ paths:
           description: user to create
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: '#/definitions/User'
       responses:
         '200':
           description: created user
           schema:
-            $ref: "#/definitions/User"
+            $ref: '#/definitions/User'
         '401':
           description: unauthorized
         '403':
@@ -86,22 +85,22 @@ paths:
         '422':
           description: bad parameters
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-  /user/{userId}:
+            $ref: '#/definitions/ErrorModel'
+  '/user/{userId}':
     get:
       operationId: findUserById
-      description: If exists, returns the user corresponding to the given id
+      description: 'If exists, returns the user corresponding to the given id'
       parameters:
-        - $ref: "#/parameters/userId"
+        - $ref: '#/parameters/userId'
       responses:
         '200':
-          description: found user 
+          description: found user
           schema:
-            $ref: "#/definitions/User"
+            $ref: '#/definitions/User'
         '401':
           description: unauthorized
         '403':
@@ -111,20 +110,20 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
     put:
       operationId: updateUser
       description: Updates a user
-      consumes: 
+      consumes:
         - application/json
       parameters:
-        - $ref: "#/parameters/userId"
+        - $ref: '#/parameters/userId'
         - name: user
           in: body
           description: user to update
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: '#/definitions/User'
       responses:
         '204':
           description: user updated
@@ -135,16 +134,16 @@ paths:
         '422':
           description: bad parameters
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
     delete:
       operationId: deleteUser
       description: Deletes a user
       parameters:
-        - $ref: "#/parameters/userId"
+        - $ref: '#/parameters/userId'
       responses:
         '204':
           description: user deleted
@@ -158,20 +157,20 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /user/{userId}/confirmaccountrequest:
+  '/user/{userId}/confirmaccountrequest':
     put:
       operationId: confirmAccountRequest
       description: Confirms an account request
-      consumes: 
+      consumes:
         - application/json
       parameters:
-        - $ref: "#/parameters/userId"
+        - $ref: '#/parameters/userId'
         - name: user
           in: body
           description: user to update
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: '#/definitions/User'
       responses:
         '204':
           description: user confirmed
@@ -184,13 +183,13 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
-  /user/{userId}/denyaccountrequest:
+            $ref: '#/definitions/ErrorModel'
+  '/user/{userId}/denyaccountrequest':
     delete:
       operationId: denyAccountRequest
       description: Denies an account request
       parameters:
-        - $ref: "#/parameters/userId"
+        - $ref: '#/parameters/userId'
       responses:
         '204':
           description: user deleted
@@ -203,18 +202,18 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
   /user/all:
     get:
       operationId: findUsers
       description: Returns all the users
       responses:
         '200':
-          description: found users 
+          description: found users
           schema:
             type: array
             items:
-              $ref: "#/definitions/User"
+              $ref: '#/definitions/User'
         '204':
           description: no user found
         '401':
@@ -224,7 +223,33 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
+  /user/extension:
+    put:
+      operationId: requestExtension
+      description: Requests a date extension for current user
+      consumes:
+        - application/json
+      parameters:
+        - name: requestInfo
+          in: body
+          description: request info
+          required: true
+          schema:
+            $ref: '#/definitions/ExtensionRequestInfo'
+      responses:
+        '204':
+          description: request ok
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no user found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /role/all:
     get:
       operationId: findRoles
@@ -235,7 +260,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/Role"
+              $ref: '#/definitions/Role'
         '204':
           description: no role found
         '401':
@@ -245,7 +270,7 @@ paths:
         '500':
           description: unexpected error
           schema:
-            $ref: "#/definitions/ErrorModel"
+            $ref: '#/definitions/ErrorModel'
 parameters:
   userId:
     name: userId
@@ -254,7 +279,6 @@ parameters:
     required: true
     type: integer
     format: int64
-
 definitions:
   User:
     type: object
@@ -276,7 +300,7 @@ definitions:
       accountRequestDemand:
         type: boolean
       accountRequestInfo:
-        $ref: "#/definitions/AccountRequestInfo"
+        $ref: '#/definitions/AccountRequestInfo'
       canAccessToDicomAssociation:
         type: boolean
       creationDate:
@@ -298,7 +322,7 @@ definitions:
         type: string
         format: password
       role:
-        $ref: "#/definitions/Role"
+        $ref: '#/definitions/Role'
       teamName:
         type: string
       username:
@@ -328,6 +352,17 @@ definitions:
       study:
         type: string
       work:
+        type: string
+  ExtensionRequestInfo:
+    type: object
+    required:
+      - extensionDate
+      - extensionMotivation
+    properties:
+      extensionDate:
+        type: string
+        format: date
+      extensionMotivation:
         type: string
   Role:
     type: object

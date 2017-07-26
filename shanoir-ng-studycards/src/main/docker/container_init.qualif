@@ -1,0 +1,21 @@
+#!/bin/bash
+
+echo "Initialize MariaDB command"
+/opt/mysql/init/mariadb_init.sh mysqld
+
+echo "Create supervisor log directory"
+mkdir -p /vol/log/supervisor
+
+echo "Create microservice log directory"
+mkdir -p /vol/log/ms
+chown shanoir /vol/log/ms
+
+service mysql start
+echo "Populate database - create tables"
+mysql -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE < /dk/shanoirng_studycards_tables.sql
+
+echo "Populate database - insert rows"
+python /dk/studycardsMigration.py
+
+echo "Stop mysql process"
+mysqladmin -u root -p$MYSQL_ROOT_PASSWORD shutdown

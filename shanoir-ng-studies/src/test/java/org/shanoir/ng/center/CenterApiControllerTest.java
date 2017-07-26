@@ -13,7 +13,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.center.Center;
 import org.shanoir.ng.center.CenterApiController;
 import org.shanoir.ng.center.CenterService;
-import org.shanoir.ng.shared.exception.ShanoirStudyException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -49,11 +49,18 @@ public class CenterApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
+	private CenterMapper centerMapperMock;
+
+	@MockBean
 	private CenterService centerServiceMock;
 
 	@Before
-	public void setup() throws ShanoirStudyException {
+	public void setup() throws ShanoirStudiesException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+
+		given(centerMapperMock.centersToCenterDTOs(Mockito.anyListOf(Center.class)))
+				.willReturn(Arrays.asList(new CenterDTO()));
+		given(centerMapperMock.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
 
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(new Center()));

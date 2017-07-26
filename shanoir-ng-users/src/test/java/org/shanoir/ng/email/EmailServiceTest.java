@@ -83,6 +83,22 @@ public class EmailServiceTest {
 				"Your account request has been granted");
 	}
 
+	@Test
+	public void notifyUserExtensionRequestAcceptedTest() throws Exception {
+		emailService.notifyUserExtensionRequestAccepted(ModelsUtil.createUser());
+
+		assertReceivedMessageContains("Granted: Your Shanoir account has been extended",
+				"Your account extension request has been granted");
+	}
+
+	@Test
+	public void notifyUserExtensionRequestDeniedTest() throws Exception {
+		emailService.notifyUserExtensionRequestDenied(ModelsUtil.createUser());
+
+		assertReceivedMessageContains("DENIED: Your Shanoir account extension request has been denied",
+				"has been denied");
+	}
+
 	private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)
 			throws IOException, MessagingException {
 		final MimeMessage[] receivedMessages = smtpServer.getReceivedMessages();

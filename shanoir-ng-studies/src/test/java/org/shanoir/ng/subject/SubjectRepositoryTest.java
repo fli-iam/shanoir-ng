@@ -57,7 +57,7 @@ public class SubjectRepositoryTest {
 			subjectIt.next();
 			nbSubject++;
 		}
-		assertThat(nbSubject).isEqualTo(2);
+		assertThat(nbSubject).isEqualTo(4);
 	}
 	
 	@Test
