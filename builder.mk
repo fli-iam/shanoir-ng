@@ -16,7 +16,9 @@ keycloak:
 	(cd shanoir-ng-keycloak-init && mvn package)
 	(cd shanoir-ng-keycloak/dockers/keycloak/ && docker build -t shanoir-ng/keycloak .)
 
-	# prepare the package for the other containers
+users: keycloak-package
+keycloak-package:
+	# prepare the package for the shanoir-ng-users package
 	(cd shanoir-ng-users/ && mvn install -Pinit-keycloak)
 	(cd shanoir-ng-keycloak && mvn package)
 
@@ -24,7 +26,7 @@ keycloak:
 base-ms-image:
 	docker build -t shanoir-ng/base-ms shanoir-ng-template/shanoir-ng-base-ms
 
-# shanoir-ng-users
+# microservices
 users studies studycards: %: base-ms-image
 	# https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-4%29-Docker-shanoir-ng-users
 	(cd 'shanoir-ng-$@/' && mvn clean package docker:build -DskipTests -Pqualif)
