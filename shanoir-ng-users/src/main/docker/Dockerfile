@@ -1,4 +1,5 @@
-FROM shanoir-ng/debianjava8mariadbpython:latest
+FROM shanoir-ng/base-ms
+
 
 COPY shanoir-ng-users-0.0.1-SNAPSHOT.jar /opt/shanoir-ng/shanoir-ng-users.jar
 
