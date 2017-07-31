@@ -41,3 +41,9 @@ ENV MS=""
 ENV PROFILE=""
 
 CMD ["run-supervisor"]
+
+
+# add shanoir-aba.irisa.fr self-signed CA for debugging purpose (TODO: remove)
+COPY shanoir-aba /usr/local/share/ca-certificates/
+RUN  update-ca-certificates
+
