@@ -1,0 +1,95 @@
+#!/usr/bin/python3
+
+import argparse
+import contextlib
+import os
+import re
+import subprocess
+import tempfile
+import zipfile
+
+BACKUP_SUFFIX=".override-orig"
+
+def override(path, substitutions):
+    backup_path = path + BACKUP_SUFFIX
+
+    # make a backup (if not present)
+    if not os.path.exists(backup_path):
+        os.rename(path, backup_path)
+
+    with open(backup_path) as fp:
+        txt = fp.read()
+
+    for k, v in substitutions:
+        txt = txt.replace(k, v)
+
+    with open(path, "w") as fp:
+        fp.write(txt)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="""
+        This command operates string substitutions over a list of files. Each
+        file is updated in-place, however a backup is created on the first run
+        (with the extension '%s'). Then on subsequent runs, this backup is
+        restored before the substitutions are performed. The intended purpose
+        is to generate configuration files dynamically from a template, but
+        without the burden of giving a different name to the template. It is
+        especially useful inside a docker container, where the configuration
+        files provided in the image may need to be tuned at runtime to reflect
+        the actual configuration of the container.
+    """ % BACKUP_SUFFIX)
+
+    def substitution(txt):
+        mo = re.match("([^=]+)=(.*)\Z", txt)
+        if not mo:
+            raise ValueError()
+        return mo.groups()
+
+    parser.add_argument("-s", "--substitute", metavar="OLD=NEW", action="append",
+            default=[],
+            type=substitution, help="replace all occurence of 'OLD' with 'NEW'")
+
+    parser.add_argument("-e", "--env", metavar="OLD", action="append",
+            help="""replace all occurences of 'OLD' with the value of the
+            environement varable OLD""")
+    parser.add_argument("-z", "--zip", metavar="ZIPFILE",
+            help="work inside the archive ZIPFILE")
+    parser.add_argument("files", metavar="FILE", nargs="+",
+            help="list of files to be overriden")
+
+    args = parser.parse_args()
+    for key in args.env:
+        try:
+            args.substitute.append((key, os.environ[key]))
+        except KeyError:
+            raise KeyError("Unknown environment variable %r" % key)
+
+    if args.zip:
+        # zip file
+        with tempfile.TemporaryDirectory() as tmp:
+
+            # unzip the requested files and do the substitutions
+            with zipfile.ZipFile(args.zip) as zip:
+                for path in args.files:
+                    zip.extract(path, tmp)
+
+                    # extract the backup file too (if present)
+                    with contextlib.suppress(KeyError):
+                        zip.extract(path + BACKUP_SUFFIX, tmp)
+
+                    override(os.path.join(tmp, path), args.substitute)
+                
+            # update the zip archive
+            cmd = ["zip", "-u", os.path.realpath(args.zip), "--"]
+            for path in args.files:
+                cmd += [path, path + BACKUP_SUFFIX]
+            subprocess.check_call(cmd, cwd=tmp)
+    else:
+        # ordinary files
+
+        # do the substitutions
+        for path in args.files:
+            override(path, args.substitute)
+
+main()

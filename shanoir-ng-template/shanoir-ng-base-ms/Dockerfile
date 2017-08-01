@@ -25,11 +25,12 @@ COPY supervisord.conf /etc/supervisor/supervisord.conf
 ADD dk /dk
 
 RUN apt-get update && apt-get install patch
+RUN apt-get install -qqy --no-install-recommends python3 zip
 COPY patches /tmp/patches
 RUN set -e ; for p in /tmp/patches/*.diff ; do patch -F0 -p0 <"$p" ; done
 
 COPY supervisor /etc/supervisor/template.d/
-COPY init-* run-* wait-* /usr/local/sbin/
+COPY init-* run-* wait-* override /usr/local/sbin/
 
 # MS: microservice name (eg: shanoir-ng-users)
 # 	Shall be set in the child image. The name of the mysql database is
