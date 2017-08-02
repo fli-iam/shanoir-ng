@@ -160,7 +160,7 @@ spring:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
   rabbitmq:
-    host: aba-ng-rabbitmq
+    host: ENV-ng-rabbitmq
 server:
   administrator.email: shanoir-dev-admin@lists.gforge.inria.fr
   email-off: false
