@@ -19,7 +19,8 @@ COPY patches /tmp/patches
 RUN set -e ; for p in /tmp/patches/*.diff ; do patch -F0 -p0 <"$p" ; done
 
 COPY supervisor /etc/supervisor/template.d/
-COPY init-* run-* wait-* /usr/local/sbin/
+# install commands
+COPY commands/* /usr/local/sbin/
 
 # MS: microservice name (eg: shanoir-ng-users)
 # 	Shall be set in the child image. The name of the mysql database is
