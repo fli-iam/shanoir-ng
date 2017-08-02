@@ -1,0 +1,7 @@
+#!/bin/sh
+
+override -e ENV /etc/nginx/nginx.conf
+
+mkdir -p /vol/log
+
+exec nginx -g 'daemon off;'
