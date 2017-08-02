@@ -22,8 +22,12 @@ keycloak-package:
 	(cd shanoir-ng-users/ && mvn install -Pinit-keycloak)
 	(cd shanoir-ng-keycloak && mvn package)
 
+# base image
+base-image:
+	docker build -t shanoir-ng/base shanoir-ng-template/shanoir-ng-base
+
 # base image for the microservices
-base-ms-image:
+base-ms-image: base-image
 	docker build -t shanoir-ng/base-ms shanoir-ng-template/shanoir-ng-base-ms
 
 # microservices
