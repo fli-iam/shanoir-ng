@@ -1,7 +1,7 @@
 #!/bin/bash
 
-KEYCLOAK_USER="admin"
-KEYCLOAK_PASSWORD="admin"
+export KEYCLOAK_USER="admin"
+export KEYCLOAK_PASSWORD="admin"
 
 set -e
 
