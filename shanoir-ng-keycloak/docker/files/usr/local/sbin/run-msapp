@@ -19,6 +19,14 @@ echo "Applying profile '$PROFILE'"
 # runtime config
 override -e SHANOIR_HOSTNAME /opt/keycloak/themes/shanoir-theme/login/theme.properties
 
+# cache/log/tmp directories
+for dir in /vol/cache/keycloak /vol/log/keycloak /tmp/keycloak
+do
+	mkdir -p "$dir"
+	chown shanoir: "$dir"
+done
+
+
 wait-mysql
 
 

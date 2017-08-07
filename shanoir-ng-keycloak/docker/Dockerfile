@@ -11,6 +11,14 @@ RUN cd /opt/ &&	curl -sSf -o tmp.zip	\
 	http://downloads.jboss.org/keycloak/"$KEYCLOAK_VERSION"/keycloak-"$KEYCLOAK_VERSION".zip	&&\
 	unzip -q tmp.zip && mv keycloak-"$KEYCLOAK_VERSION" keycloak
 
+# links to the data & log dirs
+RUN	cd /opt/keycloak/standalone	&&\
+	chown -R shanoir: .		&&\
+	rm -rf data log tmp		&&\
+	ln -s /vol/cache/keycloak data	&&\
+	ln -s /vol/log/keycloak   log	&&\
+	ln -s /tmp/keycloak       tmp
+
 # download and unpack the mariadb connector
 #
 # Its configuration is provided by:
