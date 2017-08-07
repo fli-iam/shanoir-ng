@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+# Enables signals getting passed from startup script to JVM
+# ensuring clean shutdown when container is stopped.
+export LAUNCH_JBOSS_IN_BACKGROUND=1
+
+export JBOSS_HOME=/opt/keycloak
+
+#if [ $KEYCLOAK_USER ] && [ $KEYCLOAK_PASSWORD ]; then
+#    /opt/jboss/keycloak-demo/keycloak/bin/add-user-keycloak.sh -u $KEYCLOAK_USER -p $KEYCLOAK_PASSWORD >/dev/null
+#fi
+
+wait-mysql
+
+exec /opt/keycloak/bin/standalone.sh 	\
+	-b 0.0.0.0 -bmanagement 0.0.0.0
+#	-Dkeycloak.import=/opt/jboss/keycloak-demo/keycloak/testrealm.json
+

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+TIMEOUT=300
+
+if ! timeout "$TIMEOUT" sh -c \
+	'(tail -f --retry /opt/keycloak/standalone/log/server.log 2>&1 &) | grep -m1 " started in "'
+then
+	echo "$0: timeout (keycloak not ready after $TIMEOUT seconds)" >&2
+	exit 1
+fi
+
+

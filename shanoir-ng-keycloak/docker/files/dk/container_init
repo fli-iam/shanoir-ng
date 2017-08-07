@@ -1,0 +1,68 @@
+#!/bin/bash
+
+KEYCLOAK_USER="admin"
+KEYCLOAK_PASSWORD="admin"
+
+set -e
+
+cd /opt/keycloak/bin
+
+echo "Initialise the mysql database"
+init-mysql </dev/null
+
+echo "Create the '$KEYCLOAK_USER' user with password '$KEYCLOAK_PASSWORD'"
+./add-user-keycloak.sh --user "$KEYCLOAK_USER" --password "$KEYCLOAK_PASSWORD"
+
+
+echo "Start server"
+run-supervisor&
+pid=$!
+
+# wait until the jboss server is ready
+wait-keycloak
+
+echo "Get an authentication token from the server"
+./kcadm.sh config credentials --server http://localhost:8080/auth \
+	--realm master --user "$KEYCLOAK_USER" --password "$KEYCLOAK_PASSWORD"
+
+echo "Create realm 'shanoir-ng'"
+./kcadm.sh create realms -s realm=shanoir-ng -s enabled=true
+
+
+# FIXME: this should be done overriden at runtime anyway
+if [ "$ENV" = "shanoir" ] ; then
+	override -s 'https://SHANOIR_HOSTNAME=http://localhost:8081' /opt/cfg/clients/shanoir-old.json
+fi
+
+for client in /opt/cfg/clients/*
+do
+	echo "Create client '`basename "$client" .json`'"
+	./kcadm.sh create clients -r shanoir-ng -f "$client"
+done
+
+echo "Initialize Keycloak configuration"
+#FIXME: todo
+#java -jar /dk/shanoir-ng-keycloak-init.jar
+
+echo "Kill the server"
+kill "$pid"
+wait "$pid"
+
+cat <<EOF
+
+Keycloak initialisation completed
+
+#####################################################################
+##                                                                 ##
+##  WARNING: the admin password is set to 'admin'                  ##
+##                                                                 ##
+##           you should change it immediately                      ##
+##                                                                 ##
+#####################################################################
+
+EOF
+
+# FIXME: to be done at runtime
+#echo "Configure Shanoir theme"
+#cp /opt/keycloak/themes/shanoir-theme/login/theme-$DOCKER_PROFILE.properties /opt/keycloak/themes/shanoir-theme/login/theme.properties
+
