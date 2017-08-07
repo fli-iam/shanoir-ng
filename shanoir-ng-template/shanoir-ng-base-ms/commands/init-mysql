@@ -7,7 +7,7 @@ die() {
 
 # sanity checks on MS
 [ -n "$MS" ] || die die "env var MS must provide the name of the microservice (eg: shanoir-ng-users)"
-echo "X$MS" | grep '^X[a-z_][a-z0-9_-]*$' || die "malformatted MS value: '$MS'"
+echo "X$MS" | grep -q '^X[a-z_][a-z0-9_-]*$' || die "malformatted MS value: '$MS'"
 
 # ensure the db is not already initialised
 [ ! -e "/vol/rw/mysql" ] || die "error: db is already initialised"
