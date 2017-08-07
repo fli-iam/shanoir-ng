@@ -21,7 +21,8 @@ override -e SHANOIR_HOSTNAME /opt/keycloak/themes/shanoir-theme/login/theme.prop
 
 wait-mysql
 
-exec /opt/keycloak/bin/standalone.sh 	\
-	-b 0.0.0.0 -bmanagement 0.0.0.0
-#	-Dkeycloak.import=/opt/jboss/keycloak-demo/keycloak/testrealm.json
 
+exec su - shanoir -c "/opt/keycloak/bin/standalone.sh  -b 0.0.0.0 -bmanagement 0.0.0.0
+# TODO: remove ?
+#	-Dkeycloak.import=/opt/jboss/keycloak-demo/keycloak/testrealm.json
+"
