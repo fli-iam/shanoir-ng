@@ -62,7 +62,3 @@ Keycloak initialisation completed
 
 EOF
 
-# FIXME: to be done at runtime
-#echo "Configure Shanoir theme"
-#cp /opt/keycloak/themes/shanoir-theme/login/theme-$DOCKER_PROFILE.properties /opt/keycloak/themes/shanoir-theme/login/theme.properties
-
