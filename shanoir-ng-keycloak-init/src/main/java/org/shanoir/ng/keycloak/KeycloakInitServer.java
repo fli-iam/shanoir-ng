@@ -44,7 +44,8 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		BasicConfigurator.configure();
 
 		loadParams();
-		updateFrontClient();
+		// TODO: remove
+		// updateFrontClient();
 		createAuthenticationFlow();
 		updateRealm();
 		updateRequiredAction();
@@ -53,6 +54,8 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	/*
 	 * Update front client: set URLs from environment variables
 	 */
+	/* FIXME: url config of client shanoir-ng-front to be done at runtime
+	 
 	private static void updateFrontClient() {
 		LOG.info("Update front client");
 
@@ -70,6 +73,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 			}
 		}
 	}
+	*/
 
 	/*
 	 * Create authentication flow
@@ -123,7 +127,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 			}
 		}
 
-		// Create new execution config
+		// Create new execution config (to prevent access from expired accounts)
 		LOG.info("Create new execution config");
 		final Map<String, String> config = new HashMap<>();
 		config.put("scriptCode",
@@ -153,6 +157,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		realm.setPasswordPolicy("hashIterations and length and specialChars and digits and upperCase and lowerCase");
 		realm.setResetPasswordAllowed(Boolean.TRUE);
 		// SMTP server
+		/* FIXME: to be done at runtime
 		Map<String, String> config = new HashMap<>();
 		config.put("from", getSmtpFrom());
 		config.put("fromDisplayName", getSmtpFromDisplayName());
@@ -160,6 +165,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		config.put("port", getSmtpPort());
 		realm.setSmtpServer(config);
 		getKeycloak().realm(getKeycloakRealm()).update(realm);
+		*/
 	}
 
 	/*
@@ -169,6 +175,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		final List<RequiredActionProviderRepresentation> requiredActions = getKeycloak().realm(getKeycloakRealm())
 				.flows().getRequiredActions();
 		for (RequiredActionProviderRepresentation action : requiredActions) {
+			//FIXME: what is the purpose ? (there is no action named "REQUIRED_ACTION_NAME")
 			if (REQUIRED_ACTION_NAME.equals(action.getAlias())) {
 				action.setEnabled(true);
 				action.setDefaultAction(true);

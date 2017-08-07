@@ -20,11 +20,27 @@ RUN	mkdir -p   /opt/keycloak/modules/system/layers/base/org/mariadb/main	&&\
 	curl -sSf -o /opt/keycloak/modules/system/layers/base/org/mariadb/main/mariadb-java-client.jar	\
 	https://downloads.mariadb.com/Connectors/java/connector-java-"$MARIADB_CONNECTOR_VERSION"/mariadb-java-client-"$MARIADB_CONNECTOR_VERSION".jar
 
-#apply patches
+# apply patches
 COPY patches /tmp/patches
 RUN set -e ; for p in /tmp/patches/*.diff ; do patch -F0 -p0 <"$p" ; done
 
 COPY files/. /
+
+# install shanoir-ng-keycloak-*.jar (they are located outside the files/
+# subdirectory to ensure the build fails if they are absent)
+#
+COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/providers/
+COPY shanoir-ng-keycloak-init.jar /opt/cfg/shanoir-ng-keycloak-init.jar
+
+ENV	SMTP_HOST="localhost"	\
+	SMTP_PORT="25"
+
+EXPOSE 8080
+
+
+#TODO: remove? 
+#
+#RUN chmod -R 777 /opt/jboss/keycloak/themes/shanoir-theme
 #
 #RUN curl -fsSL https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | tar xzf - -C /usr/share \
 #  && mv /usr/share/apache-maven-$MAVEN_VERSION /usr/share/maven \
@@ -32,32 +48,7 @@ COPY files/. /
 #
 #ENV MAVEN_HOME /usr/share/maven
 #
-#USER jboss
-#
 #RUN cd /opt/jboss && curl -s http://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/keycloak-demo-$KEYCLOAK_VERSION.zip -o tmp.zip && unzip tmp.zip -d . && mv /opt/jboss/keycloak-demo-$KEYCLOAK_VERSION /opt/jboss/keycloak-demo
 #
 #RUN mvn package -f /opt/jboss/keycloak-demo/examples/preconfigured-demo/pom.xml && rm -rf ~/.m2/repository
 #RUN cd /opt/jboss/keycloak-demo/examples/preconfigured-demo && find -name *.war | grep -v ear | xargs -I {} cp {} /opt/jboss/keycloak-demo/keycloak/standalone/deployments/ && cp /opt/jboss/keycloak-demo/examples/preconfigured-demo/testrealm.json /opt/jboss/keycloak-demo/keycloak/
-
-
-#COPY container_init /dk/container_init
-#RUN chmod +x /dk/container_init
-#
-#ADD scripts /dk/scripts_init
-#
-#RUN chmod -R 777 /opt/jboss/keycloak/themes/shanoir-theme
-#
-#COPY docker-entrypoint.sh ./docker-entrypoint.sh
-
-
-# custom action provider that notifies the ng-users container upon successful login
-#TODO: enable
-#COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/providers/
-
-#COPY shanoir-ng-keycloak-init.jar /dk/shanoir-ng-keycloak-init.jar
-
-ENV	SMTP_HOST="qualif-smtpsink"	\
-	SMTP_PORT="25"
-
-
-EXPOSE 8080

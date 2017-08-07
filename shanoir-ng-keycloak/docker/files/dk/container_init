@@ -41,8 +41,7 @@ do
 done
 
 echo "Initialize Keycloak configuration"
-#FIXME: todo
-#java -jar /dk/shanoir-ng-keycloak-init.jar
+java -jar /opt/cfg/shanoir-ng-keycloak-init.jar
 
 echo "Kill the server"
 kill "$pid"

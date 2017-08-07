@@ -120,7 +120,7 @@
 						<configuration>
 							<target>
 								<copy file="target/${project.build.finalName}.jar"
-									tofile="${basedir}/../shanoir-ng-keycloak/dockers/keycloak/${project.artifactId}.jar" />
+									tofile="${basedir}/../shanoir-ng-keycloak/docker/${project.artifactId}.jar" />
 							</target>
 						</configuration>
 						<goals>
