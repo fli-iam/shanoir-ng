@@ -22,7 +22,7 @@
         "saml.force.post.binding": "true",
         "saml.multivalued.roles": "false",
         "saml.encrypt": "false",
-        "saml_assertion_consumer_url_post": "SHANOIR_SERVER_URL/Shanoir/saml",
+        "saml_assertion_consumer_url_post": "http://localhost/Shanoir/saml",
         "saml.server.signature": "true",
         "saml_idp_initiated_sso_url_name": "shanoir-old",
         "saml.server.signature.keyinfo.ext": "false",

@@ -165,9 +165,9 @@ server:
   administrator.email: shanoir-dev-admin@lists.gforge.inria.fr
   email-off: false
 front.server:
-  address: https://SHANOIR_HOSTNAME/shanoir-ng
-  url: https://SHANOIR_HOSTNAME
+  address: SHANOIR_SERVER_URL/shanoir-ng
+  url: SHANOIR_SERVER_URL
 #keycloak
 keycloak:
-  auth-server-url: https://SHANOIR_HOSTNAME/auth
+  auth-server-url: SHANOIR_SERVER_URL/auth
   
