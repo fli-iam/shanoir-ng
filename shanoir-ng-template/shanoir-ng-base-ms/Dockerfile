@@ -25,10 +25,6 @@ COPY files/. /
 # The microservice shall be installed as /opt/shanoir-ng/shanoir-ng-msapp.jar
 ENV MS=""
 
-# PROFILE: configuration profile (eg: prod, qualif, dev)
-#	Shall be set by the sysadmin
-ENV PROFILE=""
-
 EXPOSE 9900
 CMD ["run-supervisor"]
 

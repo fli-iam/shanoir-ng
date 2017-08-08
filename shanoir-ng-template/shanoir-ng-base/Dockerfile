@@ -16,3 +16,32 @@ RUN	apt-get -qq update	&&\
 
 # static files
 COPY files/. /
+
+# Environment varialbes common for all containers.
+# The default values are meant for development. 
+#
+# DOCKER_PREFIX: prefix used in the container names,
+#	eg:	"prod"	 for prod-shanoir, prod-ng-users, ...
+#	eg:	"qualif" for qualif-shanoir, qualif-ng-users, ...
+#
+# PROFILE: runtime configuration profile
+#	(dev, prod or qualif)
+#
+# SHANOIR_SERVER_URL: base url of the shanoir service
+#	(without a trailing slash)
+#
+# SHANOIR_ADMIN_NAME <SHANOIR_ADMIN_EMAIL>
+#	sender identity for outgoing mail
+#
+# SMTP_HOST, SMTP_PORT:	local SMTP relay for outgoing mail
+#
+#
+ENV	DOCKER_PREFIX="shanoir"			\
+	PROFILE="dev"				\
+	SHANOIR_SERVER_URL="http://localhost"	\
+	SHANOIR_ADMIN_NAME="Shanoir admin"	\
+	SHANOIR_ADMIN_EMAIL="shanoir@localhost"	\
+	SMTP_HOST="localhost"			\
+	SMTP_PORT="25"				\
+
+

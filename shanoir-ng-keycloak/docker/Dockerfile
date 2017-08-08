@@ -42,12 +42,6 @@ COPY files/. /
 COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/providers/
 COPY shanoir-ng-keycloak-init.jar /opt/cfg/shanoir-ng-keycloak-init.jar
 
-ENV	SMTP_HOST="localhost"	\
-	SMTP_PORT="25"		\
-	SHANOIR_ADMIN_EMAIL="shanoir@localhost"	\
-	SHANOIR_ADMIN_NAME="Shanoir admin"	\
-	SHANOIR_SERVER_URL="https://localhost"
-
 EXPOSE 8080
 
 
