@@ -33,6 +33,7 @@ COPY patches /tmp/patches
 RUN set -e ; for p in /tmp/patches/*.diff ; do patch -F0 -p0 <"$p" ; done
 
 RUN apt-get install --no-install-recommends -qqy  python3 python3-pymysql
+# static files
 COPY files/. /
 
 # install shanoir-ng-keycloak-*.jar (they are located outside the files/

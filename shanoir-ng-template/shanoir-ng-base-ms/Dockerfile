@@ -7,19 +7,16 @@ FROM shanoir-ng/base
 RUN	groupadd -g 500 -r shanoir && useradd -r -u 500 -g shanoir shanoir &&\
 	groupadd -g 501 -r mysql   && useradd -r -u 501 -g mysql   mysql
 
-# install packages (supervisor + java8 + mariadb)
+# install packages (supervisor + java8 + root CAs + mariadb)
 RUN	apt-get update  -qqy	&&\
 	DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends supervisor openjdk-8-jdk-headless openjdk-8-jre-headless ca-certificates-java mariadb-server
 
-#apply patches
+# apply patches
 COPY patches /tmp/patches
 RUN set -e ; for p in /tmp/patches/*.diff ; do patch -F0 -p0 <"$p" ; done
 
-# supervisor configuration
-COPY supervisor/. /etc/supervisor/
-
-# install commands
-COPY commands/* /usr/local/sbin/
+# static files
+COPY files/. /
 
 # MS: microservice name (eg: shanoir-ng-users)
 # 	Shall be set in the child image. The name of the mysql database is
