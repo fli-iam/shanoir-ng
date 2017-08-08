@@ -54,6 +54,7 @@ def main():
             type=substitution, help="replace all occurence of 'OLD' with 'NEW'")
 
     parser.add_argument("-e", "--env", metavar="OLD", action="append",
+            default=[],
             help="""replace all occurences of 'OLD' with the value of the
             environement varable OLD""")
     parser.add_argument("-z", "--zip", metavar="ZIPFILE",
