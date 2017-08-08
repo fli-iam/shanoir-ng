@@ -175,16 +175,16 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 			if (REQUIRED_ACTION_NAME.equals(action.getName())) {
 				LOG.info("Register required action");
 				getKeycloak().realm(getKeycloakRealm()).flows().registerRequiredAction(action);
-				
-				LOG.info("Enable required action");
-				final RequiredActionProviderRepresentation requiredAction = getKeycloak().realm(getKeycloakRealm()).flows()
-						.getRequiredAction(REQUIRED_ACTION_NAME);
-				requiredAction.setEnabled(true);
-				requiredAction.setDefaultAction(true);
-				getKeycloak().realm(getKeycloakRealm()).flows().updateRequiredAction(REQUIRED_ACTION_NAME, requiredAction);
 				break;
 			}
 		}
+		
+		LOG.info("Enable required action");
+		final RequiredActionProviderRepresentation requiredAction = getKeycloak().realm(getKeycloakRealm()).flows()
+				.getRequiredAction(REQUIRED_ACTION_NAME);
+		requiredAction.setEnabled(true);
+		requiredAction.setDefaultAction(true);
+		getKeycloak().realm(getKeycloakRealm()).flows().updateRequiredAction(REQUIRED_ACTION_NAME, requiredAction);
 	}
 
 }
