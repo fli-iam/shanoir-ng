@@ -60,7 +60,7 @@ class HashProxy:
 
 
 logging.basicConfig(level=logging.INFO)
-log=logging.getLogger("keycloak-runtime-config")
+log=logging.getLogger("configure-keycloak")
 
 # connect to the database
 conn = pymysql.connect(database="keycloak", charset="utf8")
