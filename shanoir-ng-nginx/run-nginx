@@ -1,6 +1,6 @@
 #!/bin/sh
 
-override -e ENV /etc/nginx/nginx.conf
+override -e DOCKER_PREFIX /etc/nginx/nginx.conf
 
 mkdir -p /vol/log
 
