@@ -40,7 +40,7 @@ $(MICROSERVICES): %: base-ms-image
 #
 # https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-6%29-Docker-Nginx-with-staticsa
 #nginx: keycloak users studies studycards
-nginx: keycloak users
+nginx: base-ms-image $(MICROSERVICES)
 	npm set registry https://registry.npmjs.org
 
 	(cd shanoir-ng-front && mvn package -Pqualif)
