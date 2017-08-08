@@ -18,6 +18,7 @@ import org.keycloak.representations.idm.AuthenticatorConfigRepresentation;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.RequiredActionProviderRepresentation;
+import org.keycloak.representations.idm.RequiredActionProviderSimpleRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -167,15 +168,20 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	 */
 	private static void updateRequiredAction() {
 		LOG.info("Update required action");
-		
-		final List<RequiredActionProviderRepresentation> requiredActions = getKeycloak().realm(getKeycloakRealm())
-				.flows().getRequiredActions();
-		for (RequiredActionProviderRepresentation action : requiredActions) {
-			if (REQUIRED_ACTION_NAME.equals(action.getAlias())) {
-				LOG.info("Required action found. Enable it.");
-				action.setEnabled(true);
-				action.setDefaultAction(true);
-				getKeycloak().realm(getKeycloakRealm()).flows().updateRequiredAction(REQUIRED_ACTION_NAME, action);
+
+		final List<RequiredActionProviderSimpleRepresentation> unregisteredRequiredActions = getKeycloak()
+				.realm(getKeycloakRealm()).flows().getUnregisteredRequiredActions();
+		for (RequiredActionProviderSimpleRepresentation action : unregisteredRequiredActions) {
+			if (REQUIRED_ACTION_NAME.equals(action.getName())) {
+				LOG.info("Register required action");
+				getKeycloak().realm(getKeycloakRealm()).flows().registerRequiredAction(action);
+				
+				LOG.info("Enable required action");
+				final RequiredActionProviderRepresentation requiredAction = getKeycloak().realm(getKeycloakRealm()).flows()
+						.getRequiredAction(REQUIRED_ACTION_NAME);
+				requiredAction.setEnabled(true);
+				requiredAction.setDefaultAction(true);
+				getKeycloak().realm(getKeycloakRealm()).flows().updateRequiredAction(REQUIRED_ACTION_NAME, requiredAction);
 				break;
 			}
 		}
