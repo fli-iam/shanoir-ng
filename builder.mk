@@ -13,6 +13,7 @@ keycloak-mysql:
 	(cd shanoir-ng-keycloak/dockers/mysql && docker build -t shanoir-ng/keycloak-mysql .)
 
 keycloak:
+	(cd shanoir-ng-keycloak-auth && mvn package)
 	(cd shanoir-ng-keycloak-init && mvn package)
 	(cd shanoir-ng-keycloak/dockers/keycloak/ && docker build -t shanoir-ng/keycloak .)
 
