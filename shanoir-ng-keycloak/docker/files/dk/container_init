@@ -29,11 +29,6 @@ echo "Create realm 'shanoir-ng'"
 ./kcadm.sh create realms -s realm=shanoir-ng -s enabled=true
 
 
-# FIXME: this should be done overriden at runtime anyway
-if [ "$ENV" = "shanoir" ] ; then
-	override -s 'SHANOIR_SERVER_URL=http://localhost:8081' /opt/cfg/clients/shanoir-old.json
-fi
-
 for client in /opt/cfg/clients/*
 do
 	echo "Create client '`basename "$client" .json`'"
