@@ -33,12 +33,10 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	private static final Logger LOG = LoggerFactory.getLogger(KeycloakInitServer.class);
 
 	private static final String BROWSER_FLOW = "browser";
-	private static final String FRONT_CLIENT_ID = "shanoir-ng-front";
 	private static final String NEW_BROWSER_FLOW = "Browser script";
 	private static final String NEW_EXECUTION_CONFIG_NAME = "CheckExpirationDateConfig";
 	private static final String REQUIRED_ACTION_NAME = "Record Login Date Action";
 	private static final String SHANOIR_REALM_DISPLAY_NAME = "Shanoir";
-	private static final String SHANOIR_SERVER_URL_ENV = "SHANOIR_SERVER_URL";
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
