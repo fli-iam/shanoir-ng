@@ -15,6 +15,7 @@
 
 import logging
 import os
+import subprocess
 import sys
 
 import pymysql
@@ -82,6 +83,7 @@ smtp["port"] =    str(int(os.environ["SMTP_PORT"]))
 smtp["from"] =            os.environ["SHANOIR_ADMIN_EMAIL"]
 smtp["fromDisplayName"] = os.environ["SHANOIR_ADMIN_NAME"]
 
+
 ##########################
 # Frontend configuration
 
@@ -98,6 +100,12 @@ ScalarProxy("REDIRECT_URIS", "CLIENT_ID", client_id).set(os.environ["SHANOIR_SER
 client_id = get_client_id("shanoir-old")
 cattr=HashProxy("CLIENT_ATTRIBUTES", "CLIENT_ID", client_id)
 cattr["saml_assertion_consumer_url_post"] = os.environ["SHANOIR_SERVER_URL"] + "/Shanoir/saml"
+
+
+##########################
+# Static files configuration
+
+subprocess.check_call(["override", "-e", "SHANOIR_SERVER_URL", "/opt/keycloak/themes/shanoir-theme/login/theme.properties"])
 
 
 ################################
