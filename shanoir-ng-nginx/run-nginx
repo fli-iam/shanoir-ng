@@ -1,6 +1,8 @@
 #!/bin/sh
 
-override -e DOCKER_PREFIX -e SHANOIR_SERVER_URL /etc/nginx/nginx.conf /etc/nginx/html/index.html /etc/nginx/html/app.*.js
+# runtime config
+configure-hosts
+override -e SHANOIR_SERVER_URL /etc/nginx/nginx.conf /etc/nginx/html/index.html /etc/nginx/html/app.*.js
 
 mkdir -p /vol/log
 

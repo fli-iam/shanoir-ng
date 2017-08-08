@@ -5,7 +5,9 @@ wait-mysql
 mkdir -p	/vol/log/ms
 chown shanoir:	/vol/log/ms
 
-override -e SHANOIR_SERVER_URL -e DOCKER_PREFIX -z /opt/shanoir-ng/shanoir-ng-msapp.jar BOOT-INF/classes/application.yml
+# runtime config
+configure-hosts
+override -e SHANOIR_SERVER_URL -z /opt/shanoir-ng/shanoir-ng-msapp.jar BOOT-INF/classes/application.yml
 
 exec su - shanoir -c "exec java -Dspring.profiles.active='$PROFILE' -jar /opt/shanoir-ng/shanoir-ng-msapp.jar"
 
