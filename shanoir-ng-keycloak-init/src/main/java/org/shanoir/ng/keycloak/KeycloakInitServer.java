@@ -46,10 +46,9 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 
 		loadParams();
 		updateFrontClient();
-		registerRequiredAction();
 		createAuthenticationFlow();
 		updateRealm();
-		enableRequiredAction();
+		updateRequiredAction();
 	}
 
 	/*
@@ -69,23 +68,6 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 				clientRepresentation.setWebOrigins(Arrays.asList(shanoirServerUrl));
 				final ClientResource clientResource = clientsResource.get(clientRepresentation.getId());
 				clientResource.update(clientRepresentation);
-			}
-		}
-	}
-
-	/*
-	 * Register required action
-	 */
-	private static void registerRequiredAction() {
-		LOG.info("Register required action");
-
-		final List<RequiredActionProviderSimpleRepresentation> unregisteredRequiredActions = getKeycloak()
-				.realm(getKeycloakRealm()).flows().getUnregisteredRequiredActions();
-		for (RequiredActionProviderSimpleRepresentation action : unregisteredRequiredActions) {
-			if (REQUIRED_ACTION_NAME.equals(action.getName())) {
-				LOG.info("Register required action");
-				getKeycloak().realm(getKeycloakRealm()).flows().registerRequiredAction(action);
-				break;
 			}
 		}
 	}
@@ -182,16 +164,32 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	}
 
 	/*
-	 * Enable required action
+	 * Update required action
 	 */
-	private static void enableRequiredAction() {
-		LOG.info("Enable required action");
+	private static void updateRequiredAction() {
+		LOG.info("Update required action");
 
-		final RequiredActionProviderRepresentation requiredAction = getKeycloak().realm(getKeycloakRealm()).flows()
-				.getRequiredAction(REQUIRED_ACTION_NAME);
-		requiredAction.setEnabled(true);
-		requiredAction.setDefaultAction(true);
-		getKeycloak().realm(getKeycloakRealm()).flows().updateRequiredAction(REQUIRED_ACTION_NAME, requiredAction);
+		final List<RequiredActionProviderSimpleRepresentation> unregisteredRequiredActions = getKeycloak()
+				.realm(getKeycloakRealm()).flows().getUnregisteredRequiredActions();
+		for (RequiredActionProviderSimpleRepresentation action : unregisteredRequiredActions) {
+			if (REQUIRED_ACTION_NAME.equals(action.getName())) {
+				LOG.info("Register required action");
+				getKeycloak().realm(getKeycloakRealm()).flows().registerRequiredAction(action);
+				break;
+			}
+		}
+
+		final List<RequiredActionProviderRepresentation> requiredActions = getKeycloak().realm(getKeycloakRealm())
+				.flows().getRequiredActions();
+		for (RequiredActionProviderRepresentation action : requiredActions) {
+			if (REQUIRED_ACTION_NAME.equals(action.getAlias())) {
+				LOG.info("Enable required action");
+				action.setEnabled(true);
+				action.setDefaultAction(true);
+				getKeycloak().realm(getKeycloakRealm()).flows().updateRequiredAction(REQUIRED_ACTION_NAME, action);
+				break;
+			}
+		}
 	}
 
 }
