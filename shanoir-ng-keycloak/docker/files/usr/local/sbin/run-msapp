@@ -17,7 +17,7 @@ echo "Applying profile '$PROFILE'"
 (cd /opt/keycloak/themes/shanoir-theme/login/ && cp "theme-$PROFILE.properties" "theme.properties")
 
 # runtime config
-override -e SHANOIR_HOSTNAME /opt/keycloak/themes/shanoir-theme/login/theme.properties
+override -e SHANOIR_SERVER_URL /opt/keycloak/themes/shanoir-theme/login/theme.properties
 keycloak-runtime-config
 
 # cache/log/tmp directories

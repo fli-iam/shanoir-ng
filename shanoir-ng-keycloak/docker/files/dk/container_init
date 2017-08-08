@@ -31,7 +31,7 @@ echo "Create realm 'shanoir-ng'"
 
 # FIXME: this should be done overriden at runtime anyway
 if [ "$ENV" = "shanoir" ] ; then
-	override -s 'https://SHANOIR_HOSTNAME=http://localhost:8081' /opt/cfg/clients/shanoir-old.json
+	override -s 'SHANOIR_SERVER_URL=http://localhost:8081' /opt/cfg/clients/shanoir-old.json
 fi
 
 for client in /opt/cfg/clients/*
