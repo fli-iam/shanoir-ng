@@ -18,6 +18,7 @@ echo "Applying profile '$PROFILE'"
 
 # runtime config
 override -e SHANOIR_HOSTNAME /opt/keycloak/themes/shanoir-theme/login/theme.properties
+keycloak-runtime-config
 
 # cache/log/tmp directories
 for dir in /vol/cache/keycloak /vol/log/keycloak /tmp/keycloak

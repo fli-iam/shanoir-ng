@@ -44,36 +44,10 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		BasicConfigurator.configure();
 
 		loadParams();
-		// TODO: remove
-		// updateFrontClient();
 		createAuthenticationFlow();
 		updateRealm();
 		updateRequiredAction();
 	}
-
-	/*
-	 * Update front client: set URLs from environment variables
-	 */
-	/* FIXME: url config of client shanoir-ng-front to be done at runtime
-	 
-	private static void updateFrontClient() {
-		LOG.info("Update front client");
-
-		final String shanoirServerUrl = System.getenv(SHANOIR_SERVER_URL_ENV);
-
-		if (shanoirServerUrl != null && !shanoirServerUrl.contains("localhost")) {
-			final ClientsResource clientsResource = getKeycloak().realm(getKeycloakRealm()).clients();
-			final List<ClientRepresentation> clientRepresentations = clientsResource.findByClientId(FRONT_CLIENT_ID);
-			if (clientRepresentations != null && !clientRepresentations.isEmpty()) {
-				final ClientRepresentation clientRepresentation = clientRepresentations.get(0);
-				clientRepresentation.setRedirectUris(Arrays.asList(shanoirServerUrl + "/*"));
-				clientRepresentation.setWebOrigins(Arrays.asList(shanoirServerUrl));
-				final ClientResource clientResource = clientsResource.get(clientRepresentation.getId());
-				clientResource.update(clientRepresentation);
-			}
-		}
-	}
-	*/
 
 	/*
 	 * Create authentication flow
@@ -156,16 +130,6 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		realm.setLoginTheme("shanoir-theme");
 		realm.setPasswordPolicy("hashIterations and length and specialChars and digits and upperCase and lowerCase");
 		realm.setResetPasswordAllowed(Boolean.TRUE);
-		// SMTP server
-		/* FIXME: to be done at runtime
-		Map<String, String> config = new HashMap<>();
-		config.put("from", getSmtpFrom());
-		config.put("fromDisplayName", getSmtpFromDisplayName());
-		config.put("host", getSmtpHost());
-		config.put("port", getSmtpPort());
-		realm.setSmtpServer(config);
-		getKeycloak().realm(getKeycloakRealm()).update(realm);
-		*/
 	}
 
 	/*

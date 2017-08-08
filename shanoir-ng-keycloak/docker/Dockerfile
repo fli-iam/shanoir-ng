@@ -32,6 +32,7 @@ RUN	mkdir -p   /opt/keycloak/modules/system/layers/base/org/mariadb/main	&&\
 COPY patches /tmp/patches
 RUN set -e ; for p in /tmp/patches/*.diff ; do patch -F0 -p0 <"$p" ; done
 
+RUN apt-get install --no-install-recommends -qqy  python3 python3-pymysql
 COPY files/. /
 
 # install shanoir-ng-keycloak-*.jar (they are located outside the files/
@@ -41,7 +42,10 @@ COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/providers/
 COPY shanoir-ng-keycloak-init.jar /opt/cfg/shanoir-ng-keycloak-init.jar
 
 ENV	SMTP_HOST="localhost"	\
-	SMTP_PORT="25"
+	SMTP_PORT="25"		\
+	SHANOIR_ADMIN_EMAIL="shanoir@localhost"	\
+	SHANOIR_ADMIN_NAME="Shanoir admin"	\
+	SHANOIR_SERVER_URL="https://localhost"
 
 EXPOSE 8080
 
