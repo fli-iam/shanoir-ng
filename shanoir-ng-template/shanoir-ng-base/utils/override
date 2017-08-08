@@ -8,7 +8,10 @@ import subprocess
 import tempfile
 import zipfile
 
-BACKUP_SUFFIX=".override-orig"
+BACKUP_SUFFIX = ".override-orig"
+
+# force using utf-8 codec and be agnostic to invalid characters
+CODEC_OPTIONS = dict(encoding="utf-8", errors="surrogateescape")
 
 def override(path, substitutions):
     backup_path = path + BACKUP_SUFFIX
@@ -17,13 +20,13 @@ def override(path, substitutions):
     if not os.path.exists(backup_path):
         os.rename(path, backup_path)
 
-    with open(backup_path) as fp:
+    with open(backup_path, **CODEC_OPTIONS) as fp:
         txt = fp.read()
 
     for k, v in substitutions:
         txt = txt.replace(k, v)
 
-    with open(path, "w") as fp:
+    with open(path, "w", **CODEC_OPTIONS) as fp:
         fp.write(txt)
 
 
