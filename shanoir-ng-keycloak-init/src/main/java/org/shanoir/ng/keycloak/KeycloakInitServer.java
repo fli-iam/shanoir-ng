@@ -182,7 +182,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		final List<RequiredActionProviderRepresentation> requiredActions = getKeycloak().realm(getKeycloakRealm())
 				.flows().getRequiredActions();
 		for (RequiredActionProviderRepresentation action : requiredActions) {
-			if (REQUIRED_ACTION_NAME.equals(action.getAlias())) {
+			if (REQUIRED_ACTION_NAME.equals(action.getName())) {
 				LOG.info("Enable required action");
 				action.setEnabled(true);
 				action.setDefaultAction(true);
