@@ -1,7 +1,5 @@
 FROM shanoir-ng/base-ms
 
-RUN apt-get install -qqy --no-install-recommends python-pymysql
-
 # static files
 COPY files/. /
 

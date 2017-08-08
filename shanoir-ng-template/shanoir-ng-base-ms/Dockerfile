@@ -7,9 +7,12 @@ FROM shanoir-ng/base
 RUN	groupadd -g 500 -r shanoir && useradd -r -u 500 -g shanoir shanoir &&\
 	groupadd -g 501 -r mysql   && useradd -r -u 501 -g mysql   mysql
 
-# install packages (supervisor + java8 + root CAs + mariadb)
+# install packages (supervisor + mysql + java)
 RUN	apt-get update  -qqy	&&\
-	DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends supervisor openjdk-8-jdk-headless openjdk-8-jre-headless ca-certificates-java mariadb-server
+	DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends	\
+		supervisor								\
+		mariadb-server python-pymysql python3-pymysql				\
+		openjdk-8-jdk-headless openjdk-8-jre-headless ca-certificates-java
 
 # apply patches
 COPY patches /tmp/patches

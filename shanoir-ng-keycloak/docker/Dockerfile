@@ -4,8 +4,6 @@ ENV	MS="keycloak"	\
 	KEYCLOAK_VERSION="3.1.0.Final"	\
 	MARIADB_CONNECTOR_VERSION="2.1.0"
 
-RUN apt-get --no-install-recommends -qqy install curl unzip
-
 # download and unpack keycloak
 RUN cd /opt/ &&	curl -sSf -o tmp.zip	\
 	http://downloads.jboss.org/keycloak/"$KEYCLOAK_VERSION"/keycloak-"$KEYCLOAK_VERSION".zip	&&\
@@ -32,7 +30,6 @@ RUN	mkdir -p   /opt/keycloak/modules/system/layers/base/org/mariadb/main	&&\
 COPY patches /tmp/patches
 RUN set -e ; for p in /tmp/patches/*.diff ; do patch -F0 -p0 <"$p" ; done
 
-RUN apt-get install --no-install-recommends -qqy  python3 python3-pymysql
 # static files
 COPY files/. /
 
