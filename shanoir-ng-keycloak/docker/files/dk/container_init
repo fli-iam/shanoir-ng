@@ -15,7 +15,7 @@ echo "Create the '$KEYCLOAK_USER' user with password '$KEYCLOAK_PASSWORD'"
 
 
 echo "Start server"
-run-supervisor&
+DISABLE_RUNTIME_CONFIG=1 run-supervisor&
 pid=$!
 
 # wait until the jboss server is ready

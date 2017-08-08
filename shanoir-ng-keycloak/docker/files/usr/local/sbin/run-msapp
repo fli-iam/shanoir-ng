@@ -17,12 +17,15 @@ echo "Applying profile '$PROFILE'"
 (cd /opt/keycloak/themes/shanoir-theme/login/ && cp "theme-$PROFILE.properties" "theme.properties")
 
 # runtime config
-# - shanoir theme
-override -e SHANOIR_SERVER_URL -e DOCKER_PREFIX /opt/keycloak/themes/shanoir-theme/login/theme.properties
-# - shanoir-ng-keycloak-auth
-override -e SHANOIR_SERVER_URL -e DOCKER_PREFIX -z /opt/jboss/keycloak/providers/shanoir-ng-keycloak-auth.jar application.properties
-# - keycloak database
-keycloak-runtime-config
+if [ -z "$DISABLE_RUNTIME_CONFIG" ]
+then
+	# - shanoir theme
+	override -e SHANOIR_SERVER_URL -e DOCKER_PREFIX /opt/keycloak/themes/shanoir-theme/login/theme.properties
+	# - shanoir-ng-keycloak-auth
+	override -e SHANOIR_SERVER_URL -e DOCKER_PREFIX -z /opt/jboss/keycloak/providers/shanoir-ng-keycloak-auth.jar application.properties
+	# - keycloak database
+	keycloak-runtime-config
+fi
 
 # cache/log/tmp directories
 for dir in /vol/cache/keycloak /vol/log/keycloak /tmp/keycloak
