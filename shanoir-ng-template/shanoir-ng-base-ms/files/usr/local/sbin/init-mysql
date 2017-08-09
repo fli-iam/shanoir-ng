@@ -10,13 +10,13 @@ die() {
 echo "X$MS" | grep -q '^X[a-z_][a-z0-9_-]*$' || die "malformatted MS value: '$MS'"
 
 # ensure the db is not already initialised
-[ ! -e "/vol/rw/mysql" ] || die "error: db is already initialised"
+[ ! -e "/vol/rw/mysql/mysql" ] || die "error: db is already initialised"
 
 
 # abort script on any error
 set -e -x
 
-mkdir -p /vol/rw
+mkdir -p /vol/rw/mysql
 
 # initialise the db in /vol/rw/mysql
 mysql_install_db >/dev/null </dev/null

@@ -2,7 +2,7 @@
 +++ etc/mysql/mariadb.conf.d/50-server.cnf
 @@ -22,1 +22,1 @@
 -datadir		= /var/lib/mysql
-+datadir		= /vol/rw
++datadir		= /vol/rw/mysql
 @@ -62,1 +62,1 @@
 -log_error = /var/log/mysql/error.log
 +log_error = /vol/log/mysql/error.log
