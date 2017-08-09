@@ -36,7 +36,7 @@ COPY files/. /
 # install shanoir-ng-keycloak-*.jar (they are located outside the files/
 # subdirectory to ensure the build fails if they are absent)
 #
-COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/providers/
+COPY shanoir-ng-keycloak-auth.jar /opt/keycloak/providers/
 COPY shanoir-ng-keycloak-init.jar /opt/cfg/shanoir-ng-keycloak-init.jar
 
 EXPOSE 8080
