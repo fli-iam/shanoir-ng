@@ -33,11 +33,15 @@ RUN set -e ; for p in /tmp/patches/*.diff ; do patch -F0 -p0 <"$p" ; done
 # static files
 COPY files/. /
 
+# generate the master realm config
+RUN set -e ; init-mysql ; run-mysql & pid=$! ;			\
+	I_AM_BUILDING_THE_DOCKERFILE=1 run-msapp --image-init ;	\
+	kill -9 $pid || true ; wait ; rm -rf /tmp/* /vol
+
 # install shanoir-ng-keycloak-*.jar (they are located outside the files/
 # subdirectory to ensure the build fails if they are absent)
 #
 COPY shanoir-ng-keycloak-auth.jar /opt/keycloak/providers/
-COPY shanoir-ng-keycloak-init.jar /opt/cfg/shanoir-ng-keycloak-init.jar
 
 EXPOSE 8080
 
