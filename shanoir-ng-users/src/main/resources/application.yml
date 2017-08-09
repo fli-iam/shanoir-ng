@@ -67,12 +67,14 @@ keycloak:
       - name: role secured api
       - patterns:
         - /role/*
-kc.requests:
-  realm: master
-  client.id: admin-cli
-  admin:
-    login: admin
-    password: admin
+kc:
+  host.name: shanoir-ng-keycloak
+  requests:
+    realm: master
+    client.id: admin-cli
+    admin:
+      login: admin
+      password: admin
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-users.log
@@ -170,4 +172,5 @@ front.server:
 #keycloak
 keycloak:
   auth-server-url: SHANOIR_SERVER_URL/auth
+kc.host.name: shanoir-ng-keycloak
   

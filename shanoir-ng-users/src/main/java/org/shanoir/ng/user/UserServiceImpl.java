@@ -281,7 +281,7 @@ public class UserServiceImpl implements UserService {
 			LOG.error("Cannot send user " + userId + " delete to Shanoir Old on queue : "
 					+ RabbitMqConfiguration.queueOut().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send user " + userId + " userId because of an error while serializing user.", e);
+			LOG.error("Cannot send user " + userId + " because of an error while serializing user.", e);
 		}
 	}
 

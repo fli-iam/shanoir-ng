@@ -11,10 +11,8 @@ MICROSERVICES = users #studies studycards
 #
 # https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-3%29-Docker-Keycloak
 keycloak: base-ms-image
+	(cd shanoir-ng-keycloak-auth    && mvn package)
 	(cd shanoir-ng-keycloak-init    && mvn package)
-	(cd shanoir-ng-keycloak-auth	&& mvn package)
-	cp shanoir-ng-keycloak-auth/target/shanoir-ng-keycloak-auth-0.0.1-SNAPSHOT.jar	\
-	   shanoir-ng-keycloak/docker/shanoir-ng-keycloak-auth.jar 
 	(cd shanoir-ng-keycloak/docker/ && docker build -t shanoir-ng/keycloak .)
 
 users: keycloak-package
