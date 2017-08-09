@@ -26,7 +26,15 @@ echo "Get an authentication token from the server"
 	--realm master --user "$KEYCLOAK_USER" --password "$KEYCLOAK_PASSWORD"
 
 echo "Create realm 'shanoir-ng'"
-./kcadm.sh create realms -s realm=shanoir-ng -s enabled=true
+./kcadm.sh create realms -s realm=shanoir-ng	\
+	-s enabled=true				\
+	-s displayName=Shanoir			\
+	-s loginTheme=shanoir-theme		\
+	-s resetPasswordAllowed=true		\
+	-s passwordPolicy="hashIterations and length and specialChars and digits and upperCase and lowerCase"	\
+
+#	-s browserFlow="Browser script"
+
 
 
 for client in /opt/cfg/clients/*
