@@ -33,7 +33,7 @@ users studies studycards: %: base-ms-image
 # shanoir-ng-nginx
 #
 # https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-6%29-Docker-Nginx-with-statics
-nginx: keycloak users studies studycards
+nginx:
 	npm set registry https://registry.npmjs.org
 
 	(cd shanoir-ng-front && mvn package -Pqualif)
