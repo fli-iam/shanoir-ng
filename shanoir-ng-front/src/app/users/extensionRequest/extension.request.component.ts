@@ -17,7 +17,7 @@ import { UserService } from '../shared/user.service';
 
 export class ExtensionRequestComponent implements OnInit {
     @Output() closing = new EventEmitter();
-    extensionRequestInfo: ExtensionRequestInfo = new ExtensionRequestInfo();
+    public extensionRequestInfo: ExtensionRequestInfo = new ExtensionRequestInfo();
     extensionRequestForm: FormGroup;
     isDateValid: boolean = true;
     userId: number;
@@ -101,7 +101,7 @@ export class ExtensionRequestComponent implements OnInit {
         'extensionMotivation': ''
     };
 
-    private myDatePickerOptions: IMyOptions = {
+    public myDatePickerOptions: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
         height: '20px',
         width: '160px'

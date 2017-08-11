@@ -20,7 +20,7 @@ import { Component, ViewChild, ElementRef, Renderer } from '@angular/core';
 
 export class ClickTipComponent {
 
-    private opened: boolean = false;
+    public opened: boolean = false;
     private static documentListenerInit = false;
     private static openedTips: Set<ClickTipComponent>; // every opened menu in the document (upgrade idea : named groups of menu)
     @ViewChild('container') container: ElementRef;

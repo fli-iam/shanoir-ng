@@ -27,11 +27,11 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     @Input() modeFromCenterList: "view" | "edit" | "create";
     @ViewChild('manufModelModal') manufModelModal: ModalComponent;
     private acqEquip: AcquisitionEquipment = new AcquisitionEquipment();
-    private acqEquipDetailForm: FormGroup;
+    public acqEquipDetailForm: FormGroup;
     private acqEquipId: number;
-    private mode: "view" | "edit" | "create";
-    private isModelNumberUnique: Boolean = true;
-    private canModify: Boolean = false;
+    public mode: "view" | "edit" | "create";
+    public isModelNumberUnique: Boolean = true;
+    public canModify: Boolean = false;
     private manufModels: ManufacturerModel[];
     private centers: Center[];
     private datasetModalityTypeEnumValue: String;

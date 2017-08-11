@@ -2,22 +2,22 @@
 
 <form>
     <div class="step-block active" [class.active]="true">
-        <div class="header command-zone" (click)="tab_modality_open = !tab_modality_open">1. Choose modality<span *ngIf="modality" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step" [@slideDown]="tab_modality_open" *ngIf="tab_modality_open"> 
+        <div class="header command-zone" (click)="tabModalityOpen = !tabModalityOpen">1. Choose modality<span *ngIf="modality" class="check-mark">&#x2713;</span></div>
+        <fieldset class="step" [@slideDown]="tabModalityOpen" *ngIf="tabModalityOpen"> 
             <p>In this step you are invited to choose the modality of the dataset(s) you want to import into the system.</p>
             <div>
                 <span>
-                    <input type="radio" [(ngModel)]="modality" value="MRI" name="modality" (change)="tab_modality_open = false">MRI
+                    <input type="radio" [(ngModel)]="modality" value="MRI" name="modality" (change)="tabModalityOpen = false">MRI
                     <span class="spacer"></span>
-                    <input type="radio" [(ngModel)]="modality" value="PET" name="modality" (change)="tab_modality_open = false">PET
+                    <input type="radio" [(ngModel)]="modality" value="PET" name="modality" (change)="tabModalityOpen = false">PET
                 </span>
             </div>
         </fieldset>
     </div>
 
     <div class="step-block" [class.active]="modality">
-        <div class="header command-zone" (click)="tab_upload_open = !tab_upload_open">2. Select DICOM archive<span *ngIf="archive" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step dicom" [@slideDown]="tab_upload_open && modality" *ngIf="tab_upload_open && modality">
+        <div class="header command-zone" (click)="tabUploadOpen = !tabUploadOpen">2. Select DICOM archive<span *ngIf="archive" class="check-mark">&#x2713;</span></div>
+        <fieldset class="step dicom" [@slideDown]="tabUploadOpen && modality" *ngIf="tabUploadOpen && modality">
             <p>
                 Please select a DICOM zip archive to import.<br/>
                 <strong class="warning">&#9888; Important notice:</strong> this archive must contain a DICOMDIR file at its root!
@@ -28,8 +28,8 @@
     </div>
 
     <div class="step-block" [class.active]="archive">
-        <div class="header command-zone" (click)="tab_series_open = !tab_series_open">3. Select series<span *ngIf="true" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step" [@slideDown]="tab_series_open && archive" *ngIf="tab_series_open && archive"> 
+        <div class="header command-zone" (click)="tabSeriesOpen = !tabSeriesOpen">3. Select series<span *ngIf="true" class="check-mark">&#x2713;</span></div>
+        <fieldset class="step" [@slideDown]="tabSeriesOpen && archive" *ngIf="tabSeriesOpen && archive"> 
             <p>Please select only the series useful for your study.</p>
             <div class="middle-content">
                 <div class="tree">

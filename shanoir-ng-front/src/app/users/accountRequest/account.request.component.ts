@@ -9,9 +9,9 @@ const GUEST_ROLE_ID: number = 2;
 })
 
 export class AccountRequestComponent {
-    private shanoirLogoUrl: string;
-    private requestSent: boolean = false;
-    private errorOnRequest: boolean = false;
+    public shanoirLogoUrl: string;
+    public requestSent: boolean = false;
+    public errorOnRequest: boolean = false;
 
     constructor() {
         this.shanoirLogoUrl = 'assets/images/logo.shanoir.white.png';
