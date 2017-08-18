@@ -1,4 +1,4 @@
-package org.shanoir.ng.Import;
+package org.shanoir.ng.importer;
 
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;

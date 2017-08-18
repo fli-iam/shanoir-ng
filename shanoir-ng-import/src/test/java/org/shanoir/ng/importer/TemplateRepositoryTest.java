@@ -1,4 +1,4 @@
-package org.shanoir.ng.Import;
+package org.shanoir.ng.importer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -10,8 +10,8 @@ import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.Import.Template;
-import org.shanoir.ng.Import.TemplateRepository;
+import org.shanoir.ng.importer.Template;
+import org.shanoir.ng.importer.TemplateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

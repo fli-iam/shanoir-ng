@@ -21,7 +21,7 @@
 		<spring-active-profile></spring-active-profile>
 		<keycloak.version>2.5.1.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
-		<dcm4che.version>2.0.29</dcm4che.version>
+		<dcm4che.version>3.3.8</dcm4che.version>
 		<docker.image.name>shanoir-ng/template</docker.image.name>
 		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
 	</properties>
@@ -64,6 +64,13 @@
 			<artifactId>keycloak-admin-client</artifactId>
 			<version>${keycloak.version}</version>
 		</dependency>
+
+		<!-- nice for keycloak independent local development
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        -->
 
 		<!-- Resteasy -->
 		<dependency>
@@ -128,22 +135,16 @@
 		</dependency>
 		<dependency>
 		    <groupId>org.springframework.security</groupId>
-		    <artifactId>spring-security-test</artifactId>
+			<artifactId>spring-security-test</artifactId>
 		</dependency>
 		
 		<!--  DCM4CHE dependencies  -->
-		<!-- dependency DCM4CHE core -->
 		<dependency>
-			<groupId>dcm4che</groupId>
-			<artifactId>dcm4che-core</artifactId>
-			<version>${dcm4che.version}</version>
+		    <groupId>org.dcm4che</groupId>
+		    <artifactId>dcm4che-core</artifactId>
+		    <version>${dcm4che.version}</version>
 		</dependency>
-		<!-- dependency DCM4CHE net used by DCM4CHE tool echo -->
-		<dependency>
-			<groupId>dcm4che</groupId>
-			<artifactId>dcm4che-net</artifactId>
-			<version>${dcm4che.version}</version>
-		</dependency>
+		
 	</dependencies>
 
 	<build>

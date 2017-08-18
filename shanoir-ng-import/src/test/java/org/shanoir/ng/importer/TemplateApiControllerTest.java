@@ -1,4 +1,4 @@
-package org.shanoir.ng.Import;
+package org.shanoir.ng.importer;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -10,9 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.Import.Template;
-import org.shanoir.ng.Import.TemplateApiController;
-import org.shanoir.ng.Import.TemplateService;
+import org.shanoir.ng.importer.Template;
+import org.shanoir.ng.importer.ImporterApiController;
+import org.shanoir.ng.importer.TemplateService;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ import com.google.gson.GsonBuilder;
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = TemplateApiController.class)
+@WebMvcTest(controllers = ImporterApiController.class)
 @AutoConfigureMockMvc(secure = false)
 public class TemplateApiControllerTest {
 
@@ -62,38 +62,9 @@ public class TemplateApiControllerTest {
 	}
 
 	@Test
-	@WithMockUser(authorities = { "adminRole" })
-	public void deleteTemplateTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
-	}
-
-	@Test
-	public void findTemplateByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
-
-	@Test
-	public void findTemplatesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_ALL).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
-
-	@Test
 	@WithMockUser
-	public void saveNewTemplateTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createTemplate())))
-				.andExpect(status().isOk());
-	}
-
-	@Test
-	@WithMockUser
-	public void updateTemplateTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createTemplate())))
-				.andExpect(status().isNoContent());
+	public void updateFileTest() throws Exception {
+		
 	}
 
 }

@@ -1,4 +1,4 @@
-package org.shanoir.ng.Import;
+package org.shanoir.ng.importer;
 
 import java.util.List;
 import java.util.Optional;
