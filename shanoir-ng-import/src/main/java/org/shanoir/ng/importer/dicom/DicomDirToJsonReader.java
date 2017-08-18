@@ -98,7 +98,7 @@ public class DicomDirToJsonReader {
 		ObjectNode instance = mapper.createObjectNode();
 		String[] instancePathArray = instanceRecord.getStrings(Tag.ReferencedFileID);
 		if (instancePathArray != null) {
-			String instancePath = File.separator;
+			String instancePath = dicomDirReader.getFile().getParentFile().getAbsolutePath() + File.separator;
 			for (int count = 0; count < instancePathArray.length; count++) {
 				instancePath += instancePathArray[count];
 				if (count != (instancePathArray.length - 1)) {
