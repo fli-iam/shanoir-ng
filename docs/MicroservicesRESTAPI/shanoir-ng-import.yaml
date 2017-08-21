@@ -1,0 +1,79 @@
+swagger: '2.0'
+info:
+  title: Shanoir NG Import Microservice
+  description: Microservice API for Shanoir NG import
+  version: 0.0.1
+basePath: /importer
+produces:
+  - application/json
+paths:
+  
+  /upload/:
+    post:
+      tags:
+        - Upload files
+      summary: Upload files
+      description: Upload files
+      operationId: uploadFiles
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: files
+          description: Files to upload
+          required: true
+          type: file
+      responses:
+        "200":
+          description: success returns file path
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+
+  /upload_dicom/:
+    post:
+      tags:
+        - Upload one DICOM .zip file
+      summary: Upload one DICOM .zip file
+      description: Upload DICOM .zip file
+      operationId: uploadDicomZipFile
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - in: formData
+          name: dicomZipFile
+          description: DICOM .zip file to upload
+          required: true
+          type: file
+      responses:
+        "200":
+          description: success returns file path
+        "400":
+          description: Invalid input / Bad Request
+        "409":
+          description: Already exists - conflict
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'      
+            
+definitions:
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string

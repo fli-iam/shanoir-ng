@@ -1,4 +1,4 @@
-package org.shanoir.ng.Import;
+package org.shanoir.ng.importer;
 
 
 import java.io.File;
@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.Import.anonymization.AnonymizationServiceImpl;
+import org.shanoir.ng.importer.anonymization.AnonymizationServiceImpl;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
 
 

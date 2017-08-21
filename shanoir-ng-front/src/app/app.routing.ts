@@ -65,7 +65,7 @@ const appRoutes: Routes = [
     path: 'import',
     component: ImportComponent
   }, {
-    path: 'detailCenter',
+    path: 'centerDetail',
     component: CenterDetailComponent,
     canActivate: [AuthNotGuestGuard]
   }

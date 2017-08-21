@@ -19,12 +19,7 @@ import { Component } from '@angular/core';
       </div>
     </div>
   </div>
-  `,
-  styles: [`
-    .modal {
-      background: var(--color-overlay);
-    }
-  `]
+  `
 })
 export class ModalComponent {
 

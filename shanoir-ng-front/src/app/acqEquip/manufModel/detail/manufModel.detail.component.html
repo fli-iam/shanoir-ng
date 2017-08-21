@@ -16,16 +16,23 @@
 				<ol>
                     <li class="required">
                         <label i18n="ManufModel detail|Modality type label" class="required-label">Modality type</label> 
-                        <select id="datasetModalityType" required formControlName="datasetModalityType" [(ngModel)]="manufModel.datasetModalityType" (change)="onSelect($event.target.value)">
-                            <option *ngFor="let datasetModalityType of datasetModalityTypes" [value]="datasetModalityType.key">{{datasetModalityType.value}}</option>
-							
-						</select>
+                        <span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								{{datasetModalityTypeEnumValue}}
+							</ng-template>
+							<ng-template ngSwitchDefault> 
+								<select id="datasetModalityType" required formControlName="datasetModalityType" [(ngModel)]="manufModel.datasetModalityType" (change)="onSelect($event.target.value)">
+									<option *ngFor="let datasetModalityType of datasetModalityTypes" [value]="datasetModalityType.key">{{datasetModalityType.value}}</option>
+								</select>
+								<label *ngIf="formErrors.datasetModalityType.includes('required')" class="form-validation-alert" i18n="ManufModel detail|ModalityRequiredError label">Modality type is required!</label>
+							</ng-template>
+						</span>
                     </li>
 					<li class="required">
 						<label i18n="ManufModel detail|Manufacturer label" class="required-label">Manufacturer</label> 
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
-								{{manufModel.manuf}}
+								{{manufModel.manufacturer?.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault> 
 								<select id="name" required formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer">
@@ -35,7 +42,6 @@
 									<img src="/assets/images/icons/add-1.png"/>
 									new manufacturer
 								</button>
-                                <!--<a i18n="ManufModel detail|Create new manuf label" [routerLink] = "['/manufDetail']" [queryParams]="{mode: 'create'}">Create new manufacturer</a>-->
 							</ng-template>
 						</span>
 					</li>

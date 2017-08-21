@@ -1,21 +1,16 @@
-package org.shanoir.ng.Import;
+package org.shanoir.ng.importer;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Template service implementation.
@@ -70,7 +65,6 @@ public class TemplateServiceImpl implements TemplateService {
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirImportException.logAndThrow(LOG, "Error while creating template: " + dive.getMessage());
 		}
-		updateShanoirOld(savedTemplate);
 		return savedTemplate;
 	}
 
@@ -83,7 +77,6 @@ public class TemplateServiceImpl implements TemplateService {
 		} catch (Exception e) {
 			ShanoirImportException.logAndThrow(LOG, "Error while updating template: " + e.getMessage());
 		}
-		updateShanoirOld(templateDb);
 		return templateDb;
 	}
 
@@ -105,28 +98,28 @@ public class TemplateServiceImpl implements TemplateService {
 		}
 	}
 
-	/*
-	 * Update Shanoir Old.
-	 * 
-	 * @param template template.
-	 * 
-	 * @return false if it fails, true if it succeed.
-	 */
-	private boolean updateShanoirOld(final Template template) {
-		try {
-			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(),
-					new ObjectMapper().writeValueAsString(template));
-			return true;
-		} catch (AmqpException e) {
-			LOG.error("Cannot send template " + template.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.queueOut().getName(), e);
-		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send template " + template.getId() + " save/update because of an error while serializing template.",
-					e);
-		}
-		return false;
-	}
+//	/*
+//	 * Update Shanoir Old.
+//	 * 
+//	 * @param template template.
+//	 * 
+//	 * @return false if it fails, true if it succeed.
+//	 */
+//	private boolean updateShanoirOld(final Template template) {
+//		try {
+//			LOG.info("Send update to Shanoir Old");
+//			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(),
+//					new ObjectMapper().writeValueAsString(template));
+//			return true;
+//		} catch (AmqpException e) {
+//			LOG.error("Cannot send template " + template.getId() + " save/update to Shanoir Old on queue : "
+//					+ RabbitMqConfiguration.queueOut().getName(), e);
+//		} catch (JsonProcessingException e) {
+//			LOG.error("Cannot send template " + template.getId() + " save/update because of an error while serializing template.",
+//					e);
+//		}
+//		return false;
+//	}
 
 	/*
 	 * Update some values of template to save them in database.

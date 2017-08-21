@@ -47,7 +47,6 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
         if (this.modeFromCenterList) {this.mode = this.modeFromCenterList;}
         this.getManufModels();
         this.getCenters();
-        this.getAcquisitionEquipment();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
@@ -86,6 +85,7 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
             .getManufacturerModels()
             .then(manufModels => {
                 this.manufModels = manufModels;
+                this.getAcquisitionEquipment();
             })
             .catch((error) => {
                 // TODO: display error
@@ -98,6 +98,7 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
             .getCenters()
             .then(centers => {
                 this.centers = centers;
+                this.getAcquisitionEquipment();
         })
         .catch((error) => {
             // TODO: display error
@@ -190,7 +191,7 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
         });
     }
 
-    closePopin () {
+    closePopin() {
         this.manufModelModal.hide();
         this.getManufModels();
     }

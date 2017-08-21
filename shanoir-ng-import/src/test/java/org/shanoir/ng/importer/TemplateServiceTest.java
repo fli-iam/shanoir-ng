@@ -1,4 +1,4 @@
-package org.shanoir.ng.Import;
+package org.shanoir.ng.importer;
 
 import static org.mockito.BDDMockito.given;
 
@@ -13,9 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.Import.Template;
-import org.shanoir.ng.Import.TemplateRepository;
-import org.shanoir.ng.Import.TemplateServiceImpl;
+import org.shanoir.ng.importer.Template;
+import org.shanoir.ng.importer.TemplateRepository;
+import org.shanoir.ng.importer.TemplateServiceImpl;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

@@ -6,7 +6,7 @@ server:
       enabled: false
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/shanoir_ng_template?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://localhost:3306/shanoir_ng_import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: shanoir
     password: shanoir
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
@@ -31,18 +31,22 @@ spring:
           import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
   jooq:
     sql-dialect: Mysql
+  http:
+    multipart:
+      maxFileSize: 500Mb
+      maxRequestSize: 500Mb
   rabbitmq:
     host: shanoir-ng-rabbitmq
   session:
     store-type: none
+front.server.url: http://shanoir-ng-nginx
 #keycloak
 keycloak:
   cors: true
   realm: shanoir-ng
-  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhU1+KuWBHsHp7UMITO4p6G4PfYdSgubXX7PCcX/TNPa9aGDwgVtEjyOVYA3rnvGvGTXit2PaAztExWq4FA7YOIATQuKydNY+uWJKRoBhM7dm1ioyQ+l63lB3vRjSsEL6b9y3U/URTVUn4DJAUBgiK0CGgGR0ihEi/IJFm8L9EKHxE/Cm99x65NzFe7EFZy4mbruLKr1w9XKmY9/1ISz559E1VO4JK4fY5NKAcHK/auaA6XzxlYGcK7M7oZsl1GTeCMBAiOM7rusta4MhcBO+BOPHv5WxhbehheHkTEPB5BYDRuBenP58TS4125qliGmCG8Zfb4JP/D9eaDzaHYoRYwIDAQAB
   auth-server-url: http://localhost/auth
   ssl-required: external
-  resource: shanoir-ng-template
+  resource: shanoir-ng-import
   securityConstraints[0]:
     securityCollections[0]:
       name: spring secured api
@@ -55,10 +59,14 @@ keycloak:
         - /*
 # logging configuration
 logging:
-  file: /vol/log/ms/shanoir-ng-template.log
+  file: /vol/log/ms/shanoir-ng-import.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
+shanoir:
+  import:
+    upload:
+      folder: /tmp
 
 ---
 
@@ -68,7 +76,7 @@ logging:
 spring:
   profiles: dev
   datasource:
-    url: jdbc:mysql://localhost:3306/shanoir_ng_template?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://localhost:3306/shanoir_ng_import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: root
     password: 
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
@@ -79,23 +87,29 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
-    # Show or not log for each sql query
-    show-sql: true
+      # Show or not log for each sql query
+      show-sql: true
   jooq:
     sql-dialect: Mysql
   rabbitmq:
     host: localhost
 server:
-    port: 9902
+    port: 9903
+front.server.url: http://localhost:8080
 #keycloak
 keycloak:
-  credentials.secret: 3b130530-4e0f-4101-bf56-1a92df705318
+  auth-server-url: http://localhost/auth
+  credentials.secret: 3ab5a06a-9031-47d7-bfc8-ce8cc3027034
 # logging configuration
 logging:
-  file: c:\\Temp\\shanoir-ng\\shanoir-ng-template.log
+  file: c:\\Temp\\shanoir-ng\\shanoir-ng-import.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
+shanoir:
+  import:
+    upload:
+      folder: c:\\Temp\\shanoir-ng\\import\\
 
 ---
 
@@ -105,7 +119,7 @@ logging:
 spring:
   profiles: test
   datasource:
-    url: jdbc:h2:mem:SHANOIR_NG_TEMPLATE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:SHANOIR_NG_IMPORT;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password: 
     driver-class-name: org.h2.Driver

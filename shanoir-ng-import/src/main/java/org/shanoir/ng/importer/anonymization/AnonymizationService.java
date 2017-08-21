@@ -1,4 +1,4 @@
-package org.shanoir.ng.Import.anonymization;
+package org.shanoir.ng.importer.anonymization;
 
 import java.io.File;
 import java.util.ArrayList;
