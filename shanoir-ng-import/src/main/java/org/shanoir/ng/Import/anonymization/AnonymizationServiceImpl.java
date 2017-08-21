@@ -1,342 +1,284 @@
 package org.shanoir.ng.Import.anonymization;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
+import java.io.FileInputStream;
 
-import org.dcm4che2.data.DicomElement;
-import org.dcm4che2.data.DicomObject;
-import org.dcm4che2.data.Tag;
-import org.dcm4che2.data.VR;
-import org.dcm4che2.io.DicomInputStream;
-import org.dcm4che2.io.DicomOutputStream;
-import org.shanoir.ng.Import.Serie;
-import org.shanoir.ng.Import.dto.ImportSubjectDTO;
-import org.shanoir.ng.utils.ShanoirExec;
-import org.shanoir.ng.utils.Utils;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.VR;
+import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.io.DicomOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Anonymization serviceImpl.
+ * 
+ * @author ifakhfakh
+ * 
+ */
 
 @Service
-public class AnonymizationServiceImpl implements AnonymizationServcie{
+public class AnonymizationServiceImpl implements AnonymizationService {
 
 	/**
 	 * Logger
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(AnonymizationServiceImpl.class);
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
-	
-	
-	//private static final String ANONYMIZATION_FILE_PATH = "anonymizationOld.properties";
-	private static final String ANONYMIZATION_FILE_PATH = "anonymization.properties";
-	
+	private static final String ANONYMIZATION_FILE_PATH = "anonymization.xlsx";
+	private static final String xTagsColumn = "0xTag";
+	private final String privateTags = "0xggggeeee";
+	private final String curveDataTags = "0x50xxxxxx";
+	private final String overlayCommentsTags = "0x60xx4000";
+	private final String overlayDataTags = "0x60xx3000";
+
+
 	@Override
-	public void anonymize(List<Serie> serieList, int startCount, String folderPath, ImportSubjectDTO subject) {
-		final int totalAmount = calculateTotalAmount(serieList);
+	public void anonymize(ArrayList<File> dicomFilesPaths, String profile) {
+
+		final int totalAmount = dicomFilesPaths.size();
 		LOG.debug("anonymize : totalAmount=" + totalAmount);
 		int current = 0;
-	
-			for (final Serie serie : serieList) {
-				LOG.debug("anonymize : serie " + serie.getId() + " selected = " + serie.isSelected());
-				if (serie.isSelected()) {
-					// iterate over all images and non-image objects of the serie
-					final List<String> allObjectList = new ArrayList<String>();
-					allObjectList.addAll(serie.getImagesPathList());
-					allObjectList.addAll(serie.getNonImagesPathList());
-					for (final String path : allObjectList) {
-						final String imagePath = convertFilePath(folderPath + path);
 
-						// Perform the anonymization
-						performAnonymization(imagePath, subject);
+		for (int i = 0; i< dicomFilesPaths.size(); ++i) {
+			final File filePath = dicomFilesPaths.get(i);
 
-						current++;
-						final int currentPercent = startCount + (int) (current * (100 - startCount) / totalAmount);
-						LOG.debug("anonymize : anonymization current percent= " + currentPercent + " %");
+			// Perform the anonymization
+			performAnonymization(filePath, profile);
 
-					}
-				}
-			}
-		
-		
-	}
-	
-	/**
-	 * Calculate the total amount of images in the given serie list.
-	 *
-	 * @param serieList
-	 *            the serie list
-	 *
-	 * @return the int
-	 */
-	private int calculateTotalAmount(final List<Serie> serieList) {
-		int amount = 0;
-		for (final Serie serie : serieList) {
-			amount += serie.getImagesPathList().size();
-			amount += serie.getNonImagesPathList().size();
+			current++;
+			final int currentPercent = (int) (current * 100  / totalAmount);
+			LOG.debug("anonymize : anonymization current percent= " + currentPercent + " %");
+
 		}
-		return amount;
 	}
-	
+
+
 	/**
-	 * Replace the file separators to make it work under windows or unix system.
-	 *
-	 * @param firstImagePath
-	 *            the first image path
-	 *
-	 * @return the string
-	 */
-	private String convertFilePath(final String firstImagePath) {
-		return firstImagePath.replaceAll("\\\\", "/");
-	}
-	
-	
-	/**
-	 * Perform the anonymization for the given image and given subject.
-	 *
+	 * Perform the anonymization for an image according to choosed profile
+	 * 
 	 * @param imagePath
 	 *            the image path
-	 * @param subject
-	 *            the subject
+	 * @param profile
+	 *            anonymization profile
 	 */
-	private void performAnonymization(final String imagePath, final ImportSubjectDTO subject) {
-		DicomObject dcmObj;
-		DicomInputStream din = null;
+	public void performAnonymization(final File imagePath, String profile) {
 
-		try {	
-			din = new DicomInputStream(new File(imagePath));
-			dcmObj = din.readDicomObject();
-			din.close();
-			final String sourceTransferSyntaxUID = dcmObj.getString(Tag.TransferSyntaxUID);
-			if (sourceTransferSyntaxUID != null && sourceTransferSyntaxUID.startsWith("1.2.840.10008.1.2.4")) {
-				// uncompress dicom image
-				ShanoirExec.dcmdjpeg(Utils.getDcmdjpegPath(), imagePath, imagePath);
-				din = new DicomInputStream(new File(imagePath));
-				dcmObj = din.readDicomObject();
-				din.close();
+		Map<String, String> anonymizationMAP = readAnonymizationFile(profile);
+
+		try {
+			DicomInputStream din = new DicomInputStream(imagePath);
+
+			// read metadata
+			Attributes metaInformationAttributes = din.readFileMetaInformation();
+			for (int tagInt : metaInformationAttributes.tags()) {
+				String tagString = String.format("0x%08x", Integer.valueOf(tagInt));
+				if (anonymizationMAP.containsKey(tagString)) {
+					final String basicProfile = anonymizationMAP.get(tagString);
+					anonymizeTag(tagInt, basicProfile, metaInformationAttributes);
+				}
+
 			}
 
-			for (final int tag : getAnonymizationTags().keySet()) {
-				
-				final String value = getFinalValueForTag(subject, tag);
-				
-				anonymizeTagAccordingToVR(dcmObj, tag , value);
-												
-				DicomElement el = dcmObj.get(tag);
+			// read the other tags
+			Attributes datasetAttributes = din.readDataset(-1, -1);
+			for (int tagInt : datasetAttributes.tags()) {
+				String tagString = String.format("0x%08X", Integer.valueOf(tagInt));
+				String gggg = tagString.substring(2, 6);
+				Integer intgggg = Integer.decode("0x" + gggg);
+				if (intgggg % 2 == 1) {
+					final String basicProfile = anonymizationMAP.get(privateTags);
+					anonymizeTag(tagInt, basicProfile, datasetAttributes);
+				} else if (anonymizationMAP.containsKey(tagString)) {
+					final String basicProfile = anonymizationMAP.get(tagString);
+					anonymizeTag(tagInt, basicProfile, datasetAttributes);
+				} else {
+					if ((0x50000000 <= tagInt) && (tagInt <= 0x50FFFFFF)) {
+						final String basicProfile = anonymizationMAP.get(curveDataTags);
+						anonymizeTag(tagInt, basicProfile, datasetAttributes);
+					} else if ((0x60004000 <= tagInt) && (tagInt <= 0x60FF4000)) {
+						final String basicProfile = anonymizationMAP.get(overlayCommentsTags);
+						anonymizeTag(tagInt, basicProfile, datasetAttributes);
+					} else if ((0x60003000 <= tagInt) && (tagInt <= 0x60FF3000)) {
+						final String basicProfile = anonymizationMAP.get(overlayDataTags);
+						anonymizeTag(tagInt, basicProfile, datasetAttributes);
+					}
+
+				}
 			}
 
-			// set the Patient ID equal to the subject common name
-			if (subject != null) {
-				final String commonName = subject.getName();
-				dcmObj.putString(Tag.PatientID, null, commonName);
-			}
-
-			// change the study description if needed
-			/*final IDicomImporter dicomImporter = (IDicomImporter) Component.getInstance("dicomImporter");
-			if (dicomImporter.getSelectedSeries() != null && !dicomImporter.getSelectedSeries().isEmpty()
-					&& dicomImporter.getSelectedSeries().get(0).getParent() != null) {
-				final String studyDescription = ((org.shanoir.dicom.model.Study) dicomImporter.getSelectedSeries().get(
-						0).getParent()).getStudyDescriptionOverwrite();
-				dcmObj.putString(Tag.StudyDescription, null, studyDescription);
-			}*/
-
-			final DicomOutputStream dos = new DicomOutputStream(new File(imagePath));
-			dos.writeDicomFile(dcmObj);
+			final DicomOutputStream dos = new DicomOutputStream(imagePath);
+			dos.writeDataset(metaInformationAttributes, datasetAttributes);
 			dos.close();
 		} catch (final IOException exc) {
 			LOG.error("performAnonymization : ", exc);
 			exc.printStackTrace();
 		}
+
 	}
 
-	
 	/**
-	 * Get the dicom tags that must be anonymized for the config properties
-	 * file.
-	 *
-	 * @return the anonymization tags
+	 * Read the excel document containing the list of tags to anonymize 
+	 * 
+	 * @param profile
+	 * @return
 	 */
-	private  HashMap<Integer, String> getAnonymizationTags() {
+	public Map<String, String> readAnonymizationFile(final String profile) {
+		Map<String, String> anonymizationMAP = new HashMap<String, String>();
+		Integer xtagColumn = null;
+		Integer profileColumn = null;
 
-		/** The anonymization tags. */
-		HashMap<Integer, String> anonymizationTags;	
-		
-		anonymizationTags = new HashMap<Integer, String>();
-			final HashMap<String, String> tags = getAnonymizationProperties();
-			LOG.debug("getAnonymizationTags : tags=" + tags);
-			for (final String key : tags.keySet()) {
-				final Integer tagIntValue = Integer.decode(key);
-				LOG.debug("getAnonymizationTags : tagIntValue=" + tagIntValue);
-				anonymizationTags.put(tagIntValue, tags.get(key));
-			}
-			return anonymizationTags;
-		}
-	
-	
-	/**
-	 * return a HashMap<String, String> of all the properties which name starts
-	 * with the given String.
-	 *
-	 * @param startsWith
-	 *            the starts with
-	 *
-	 * @return the properties start with
-	 */
-	private HashMap<String, String> getAnonymizationProperties() {
-		LOG.debug("getAnonymizationProperties : Begin" );
-		/** anonymization file. */
-		Properties props = null;
-		props = loadFromResource(ANONYMIZATION_FILE_PATH);
-	
-		final HashMap<String, String> hashMapProps = new HashMap<String, String>();
-		for (final Enumeration enumeration = props.keys(); enumeration.hasMoreElements();) {
-			final String key = (String) enumeration.nextElement();
-			if (key != null) {
-				hashMapProps.put(key, props.getProperty(key));
-			}
-		}
-		LOG.debug("getAnonymizationProperties : return hashMapProps=" + hashMapProps);
-		LOG.debug("getAnonymizationProperties : End");
-		return hashMapProps;
-	}
-	
-	/**
-	 * Load from resource.
-	 *
-	 * @param resource
-	 *            resource
-	 *
-	 * @return the properties
-	 */
-	private static Properties loadFromResource(final String resource) {
-		/** configuration file. */
-		 Properties props = null;
-		
-		props = new Properties();
-		final InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
+		try {
+			ClassLoader classLoader = getClass().getClassLoader();
+			File myFile = new File(classLoader.getResource(ANONYMIZATION_FILE_PATH).getFile());
+			FileInputStream fis = new FileInputStream(myFile);
 
-		if (stream != null) {
-			try {
-				LOG.debug("loadFromResource : reading properties from: " + resource);
+			// Finds the workbook instance for XLSX file
+			XSSFWorkbook myWorkBook = new XSSFWorkbook(fis);
 
-				try {
-					props.load(stream);
-				} catch (final IOException ioe) {
-					LOG.error("loadFromResource : could not read " + resource, ioe);
-					props = null;
+			// Return first sheet from the XLSX workbook
+			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
+
+			// Get iterator to all the rows in current sheet
+			Iterator<Row> rowIterator = mySheet.iterator();
+
+			// Traversing over each row of XLSX file
+			while (rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				int rowNumber = row.getRowNum();
+				if (rowNumber == 0) {
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while (cellIterator.hasNext() && (xtagColumn == null || profileColumn == null)) {
+
+						Cell cell = cellIterator.next();
+
+						if (cell.getStringCellValue().equals(xTagsColumn)) {
+							xtagColumn = cell.getColumnIndex();
+							LOG.debug("Tags column : " + xtagColumn);
+						} else if (cell.getStringCellValue().equals(profile)) {
+							profileColumn = cell.getColumnIndex();
+						}
+
+					}
+
 				}
-			} finally {
-				try {
-					stream.close();
-				} catch (final IOException ex) {
-					props = null;
-				} // swallow
-			}
-		} else {
-			LOG.debug("loadFromResource : not found: " + resource);
-			props = null;
-		}
-
-		return props;
-	}
-	
-	
-	/**
-	 * Return the final value for the given tag.
-	 *
-	 * @param subject
-	 *            the subject
-	 * @param tag
-	 *            the tag
-	 *
-	 * @return the final value for tag
-	 */
-	private String getFinalValueForTag(final ImportSubjectDTO subject, final int tag) {
-		String result = "";
-		if (subject != null) {
-			// patient name : return subject name or subject identifier
-			if (tag == Tag.PatientName) {
-				if (subject.getName() != null) {
-					return subject.getName();
+				if (xtagColumn != null && profileColumn != null) {
+					Cell xtagCell = row.getCell(xtagColumn);
+					String tagString = xtagCell.getStringCellValue();
+					if (tagString != null && tagString.length() != 0 && !tagString.equals("0xTag")) {
+						Cell basicProfileCell = row.getCell(profileColumn);
+						LOG.debug("The basic profile of tag " + tagString + " = "
+								+ basicProfileCell.getStringCellValue());
+						anonymizationMAP.put(tagString, basicProfileCell.getStringCellValue());
+					}
 				} else {
-					result = subject.getIdentifier();
+					LOG.error("Unable to read anonymization tags or/and anonymization profile ");
 				}
 			}
-			// patient birth date : return the 01/01 of the same year
-			else if (tag == Tag.PatientBirthDate && subject.getBirthDate() != null) {
-				final GregorianCalendar birthDate = new GregorianCalendar();
-				birthDate.setTime(subject.getBirthDate());
-				// set day and month to 01/01
-				birthDate.set(Calendar.MONTH, Calendar.JANUARY);
-				birthDate.set(Calendar.DAY_OF_MONTH, 1);
-				birthDate.set(Calendar.HOUR, 1);
-				result = convertDicomDateToString(birthDate.getTime());
-			}
-			// else : return value from the configuration file
-			else {
-				result = getAnonymizationTags().get(tag);
+		} catch (IOException e) {
+			LOG.error("Unable to read anonymization file: " + e.getMessage());
+		}
+
+		return anonymizationMAP;
+	}
+
+	/**
+	 * Tag Anonymization
+	 * 
+	 * @param tagInt : the tag to anonymize
+	 * @param basicProfile : the tag's basic profile
+	 * @param attributes : the list of dicom attributes to modify
+	 */
+	private void anonymizeTag(Integer tagInt, String basicProfile, Attributes attributes) {
+		String value = getFinalValueForTag(tagInt, basicProfile);
+		if (value == null) {
+			attributes.remove(tagInt);
+		} else {
+			anonymizeTagAccordingToVR(attributes, tagInt, value);
+		}
+
+	}
+
+	/**
+	 * Get the anonymized value of the tag
+	 * 
+	 * @param tag  : the tag to anonymize
+	 * @param basicProfie : the tag's basic profile
+	 * @return
+	 */
+	private String getFinalValueForTag(final int tag, final String basicProfie) {
+		String result = "";
+
+		if (basicProfie != null) {
+			if (basicProfie.equals("X") || basicProfie.equals("X/Z") || basicProfie.equals("X/D")
+					|| basicProfie.equals("X/Z/D") || basicProfie.equals("X/Z/U*")) {
+				result = null;
+			} else if (basicProfie.equals("Z") || basicProfie.equals("Z/D")) {
+				result = "";
+			} else if (basicProfie.equals("D")) {
+				SecureRandom random = new SecureRandom();
+				result = new BigInteger(130, random).toString(32);
+			} else if (basicProfie.equals("U")) {
+				result = "";
 			}
 		}
+
 		return result;
 	}
-	
-	private String convertDicomDateToString(final Date date) {
-		final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-		return formatter.format(date);
-	}
-	
-	private void anonymizeTagAccordingToVR(DicomObject dcmObj, int tag , String value)
-	{
-		VR vr = dcmObj.vrOf(tag);
+
+	/**
+	 * anonymize Tag According To its VR
+	 * 
+	 * @param attributes : the list of dicom attributes to modify
+	 * @param tag : the tag to anonymize
+	 * @param value : the new value of the tag after anonymization
+	 */
+	private void anonymizeTagAccordingToVR(Attributes attributes, int tag, String value) {
+		VR vr = attributes.getVR(tag);
+
 		// VR.AT = Attribute Tag
 		// VR.SL = Signed Long || VR.UL = Unsigned Long
-		if (vr.equals(VR.SL) || vr.equals(VR.UL)
-				|| vr.equals(VR.AT)) {
-			Integer i_value = Integer.decode(value);
-			dcmObj.putInt(tag, vr, i_value);
-		}
-
 		// VR.SS = Signed Short || VR.US = Unsigned Short
-		if (vr.equals(VR.SS) || vr.equals(VR.US)) {
-			short[] i_value = new short[1];
-			dcmObj.putShorts(tag, vr, i_value);
+		if (vr.equals(VR.SL) || vr.equals(VR.UL) || vr.equals(VR.AT) || vr.equals(VR.SS) || vr.equals(VR.US)) {
+			Integer i_value = Integer.decode(value);
+			attributes.setInt(tag, vr, i_value);
 		}
 
 		// VR.FD = Floating Point Double
 		else if (vr.equals(VR.FD)) {
 			Double d_value = Double.valueOf(value);
-			dcmObj.putDouble(tag, vr, d_value);
+			attributes.setDouble(tag, vr, d_value);
 		}
 
 		// VR.FL = Floating Point Single
 		else if (vr.equals(VR.FL)) {
 			Float f_value = Float.valueOf(value);
-			dcmObj.putFloat(tag, vr, f_value);
+			attributes.setFloat(tag, vr, f_value);
 		}
 
 		// VR.OB = Other Byte String
 		else if (vr.equals(VR.OB)) {
 			byte[] b = new byte[1];
-			dcmObj.putBytes(tag, vr, b);
+			attributes.setBytes(tag, vr, b);
 		}
 
 		// VR.SQ = Sequence of Items || VR.UN = Unknown
 		else if (vr.equals(VR.SQ) || vr.equals(VR.UN)) {
-			dcmObj.putSequence(tag);
+			// attributes.setSequence(tag);
+			attributes.setNull(tag, vr);
 		}
 
 		// Unlimited string:
@@ -357,20 +299,15 @@ public class AnonymizationServiceImpl implements AnonymizationServcie{
 		// VR.TM = Time
 		// VR.UI = Unique Identifier (UID)
 		// VR.UT = Unlimited Text
-		else if (vr.equals(VR.AE) || vr.equals(VR.AS)
-				|| vr.equals(VR.CS) || vr.equals(VR.DA)
-				|| vr.equals(VR.DS) || vr.equals(VR.DT)
-				|| vr.equals(VR.IS) || vr.equals(VR.LO)
-				|| vr.equals(VR.LT) || vr.equals(VR.OW)
-				|| vr.equals(VR.PN) || vr.equals(VR.SH)
-				|| vr.equals(VR.ST) || vr.equals(VR.TM)
-				|| vr.equals(VR.UI) || vr.equals(VR.UT)
-				|| vr.equals(VR.OF)) {
-			dcmObj.putString(tag, vr, value);
+		else if (vr.equals(VR.AE) || vr.equals(VR.AS) || vr.equals(VR.CS) || vr.equals(VR.DA) || vr.equals(VR.DS)
+				|| vr.equals(VR.DT) || vr.equals(VR.IS) || vr.equals(VR.LO) || vr.equals(VR.LT) || vr.equals(VR.OW)
+				|| vr.equals(VR.PN) || vr.equals(VR.SH) || vr.equals(VR.ST) || vr.equals(VR.TM) || vr.equals(VR.UI)
+				|| vr.equals(VR.UT) || vr.equals(VR.OF)) {
+			attributes.setString(tag, vr, value);
 		}
 
 		else {
-			dcmObj.putString(tag, vr, value);
+			attributes.setString(tag, vr, value);
 		}
 
 		// N.B.: Doesn't exist in the library:
@@ -378,6 +315,5 @@ public class AnonymizationServiceImpl implements AnonymizationServcie{
 		// Resource Locator (URI/URL)
 		// VR.OD = Other Double String
 	}
-	
 
 }

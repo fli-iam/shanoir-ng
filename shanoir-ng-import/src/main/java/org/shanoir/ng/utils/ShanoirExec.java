@@ -1,6 +1,5 @@
 package org.shanoir.ng.utils;
 
-import org.shanoir.ng.Import.Serie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
