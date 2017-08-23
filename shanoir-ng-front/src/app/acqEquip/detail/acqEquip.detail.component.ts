@@ -87,7 +87,6 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
             .getManufacturerModels()
             .then(manufModels => {
                 this.manufModels = manufModels;
-                this.getAcquisitionEquipment();
             })
             .catch((error) => {
                 // TODO: display error
@@ -97,7 +96,7 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
 
     getCenters(): void {
         this.centerService
-            .getCenters()
+            .getCentersNames()
             .then(centers => {
                 this.centers = centers;
                 this.getAcquisitionEquipment();

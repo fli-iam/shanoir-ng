@@ -41,6 +41,7 @@ public class CenterApiControllerTest {
 
 	private static final String REQUEST_PATH = "/center";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH_FOR_ALL_NAMES = REQUEST_PATH + "/allnames";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	private Gson gson;
@@ -65,6 +66,7 @@ public class CenterApiControllerTest {
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(new Center()));
 		given(centerServiceMock.findById(1L)).willReturn(new Center());
+		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new CenterNameDTO()));
 		given(centerServiceMock.save(Mockito.mock(Center.class))).willReturn(new Center());
 	}
 
@@ -84,6 +86,12 @@ public class CenterApiControllerTest {
 	@Test
 	public void findCentersTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_ALL).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void findCentersNamesTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_ALL_NAMES).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 

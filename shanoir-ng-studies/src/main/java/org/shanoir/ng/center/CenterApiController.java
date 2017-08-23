@@ -76,6 +76,15 @@ public class CenterApiController implements CenterApi {
 	}
 
 	@Override
+	public ResponseEntity<List<CenterNameDTO>> findCentersNames() {
+		final List<CenterNameDTO> centers = centerService.findIdsAndNames();
+		if (centers.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(centers, HttpStatus.OK);
+	}
+
+	@Override
 	public ResponseEntity<CenterDTO> saveNewCenter(
 			@ApiParam(value = "the center to create", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {

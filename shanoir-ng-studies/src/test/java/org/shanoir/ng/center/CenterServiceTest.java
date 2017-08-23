@@ -50,6 +50,7 @@ public class CenterServiceTest {
 		given(centerMapper.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
 		
 		given(centerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCenter()));
+		given(centerRepository.findIdsAndNames()).willReturn(Arrays.asList(new CenterNameDTO()));
 		given(centerRepository.findOne(CENTER_ID)).willReturn(ModelsUtil.createCenter());
 		given(centerRepository.save(Mockito.any(Center.class))).willReturn(ModelsUtil.createCenter());
 	}
@@ -98,6 +99,15 @@ public class CenterServiceTest {
 		Assert.assertTrue(ModelsUtil.CENTER_NAME.equals(center.getName()));
 
 		Mockito.verify(centerRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+	}
+
+	@Test
+	public void findIdsAndNamesTest() {
+		final List<CenterNameDTO> centers = centerService.findIdsAndNames();
+		Assert.assertNotNull(centers);
+		Assert.assertTrue(centers.size() == 1);
+
+		Mockito.verify(centerRepository, Mockito.times(1)).findIdsAndNames();
 	}
 
 	@Test

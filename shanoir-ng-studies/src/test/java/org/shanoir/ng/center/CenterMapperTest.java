@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * Center service test.
+ * Center mapper test.
  * 
  * @author msimon
  * 
