@@ -32,7 +32,7 @@ public class CenterRepositoryImpl implements CenterRepositoryCustom {
 	@Override
 	public List<CenterNameDTO> findIdsAndNames() {
 		return em.createNativeQuery(
-				"SELECT id, name FROM Center", "centerNameResult")
+				"SELECT id, name FROM center", "centerNameResult")
 				.getResultList();
 	}
 
