@@ -142,6 +142,7 @@ spring:
       ddl-auto: validate
   rabbitmq:
     host: qualif-ng-rabbitmq
+front.server.url: https://shanoir-qualif.irisa.fr
 #keycloak
 keycloak:
   auth-server-url: https://shanoir-qualif.irisa.fr/auth
