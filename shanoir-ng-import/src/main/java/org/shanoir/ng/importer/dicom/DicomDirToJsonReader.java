@@ -156,7 +156,7 @@ public class DicomDirToJsonReader {
 	
 	private ObjectNode createSerieObjectNode(Attributes serieRecord) {
 		ObjectNode serie = mapper.createObjectNode();
-		serie.put("selected", "false");
+		serie.put("selected", false);
 		serie.put("seriesInstanceUID", serieRecord.getString(Tag.SeriesInstanceUID));
 		serie.put("modality", serieRecord.getString(Tag.Modality));
 		serie.put("protocolName", serieRecord.getString(Tag.ProtocolName));

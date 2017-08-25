@@ -140,9 +140,9 @@ public class DicomFileAnalyzer {
 		if (serie.path("isCompressed").isMissingNode()) {
 			String transferSyntaxUID = datasetAttributes.getString(Tag.TransferSyntaxUID);
 			if (transferSyntaxUID != null && transferSyntaxUID.startsWith("1.2.840.10008.1.2.4")) {
-				((ObjectNode) serie).put("isCompressed", "true");
+				((ObjectNode) serie).put("isCompressed", true);
 			} else {
-				((ObjectNode) serie).put("isCompressed", "false");
+				((ObjectNode) serie).put("isCompressed", false);
 			}
 		}
 	}
