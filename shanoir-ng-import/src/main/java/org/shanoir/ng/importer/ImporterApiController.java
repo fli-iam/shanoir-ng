@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.security.SecureRandom;
 
 import org.shanoir.ng.importer.dicom.DicomDirToJsonReader;
+import org.shanoir.ng.importer.dicom.DicomFileAnalyzer;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.Utils;
@@ -18,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.swagger.annotations.ApiParam;
 
@@ -112,15 +115,22 @@ public class ImporterApiController implements ImporterApi {
 			Utils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
 			
 			File dicomDirFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + DICOMDIR);
-			String dicomDirJson = null;
+			DicomDirToJsonReader dicomDirToJsonReader = null;
+			JsonNode dicomDirJsonNode = null;
 			if(dicomDirFile.exists()) {
-				DicomDirToJsonReader dicomDir = new DicomDirToJsonReader(dicomDirFile);
-				dicomDirJson = dicomDir.readDicomDirToJson();
+				dicomDirToJsonReader = new DicomDirToJsonReader(dicomDirFile);
+				dicomDirJsonNode = dicomDirToJsonReader.readDicomDirToJsonNode();
 			}
-			LOG.info(dicomDirJson);
-			return new ResponseEntity<String>(dicomDirJson, HttpStatus.OK);
+			
+			DicomFileAnalyzer dicomFileAnalyzer = new DicomFileAnalyzer(dicomDirJsonNode);
+			dicomFileAnalyzer.analyzeDicomFiles();
+			
+			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dicomDirJsonNode);
+//			LOG.info(dicomDirJsonString);
+			return new ResponseEntity<String>(dicomDirJsonString, HttpStatus.OK);
 			
 		} catch (IOException e) {
+			LOG.error(e.getMessage());
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
 		}

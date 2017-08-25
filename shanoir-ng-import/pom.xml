@@ -22,6 +22,7 @@
 		<keycloak.version>2.5.1.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<dcm4che.version>3.3.8</dcm4che.version>
+		<dcm4che-dcmr.version>dcm4chee-arc-light-5.10.5</dcm4che-dcmr.version>
 		<docker.image.name>shanoir-ng/template</docker.image.name>
 		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
 	</properties>
@@ -139,6 +140,11 @@
 			<groupId>org.dcm4che</groupId>
 			<artifactId>dcm4che-core</artifactId>
 			<version>${dcm4che.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.dcm4che</groupId>
+		    <artifactId>dcm4che-dcmr</artifactId>
+		    <version>${dcm4che-dcmr.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

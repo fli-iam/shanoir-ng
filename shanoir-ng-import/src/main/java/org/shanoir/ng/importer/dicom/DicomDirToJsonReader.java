@@ -3,8 +3,10 @@ package org.shanoir.ng.importer.dicom;
 import java.io.File;
 import java.io.IOException;
 
+
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.dcm4che3.dcmr.AcquisitionModality;
 import org.dcm4che3.media.DicomDirReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * This class uses mainly the dcm4che3 DicomDirReader to read in a DICOMDIR.
  * It creates a Json tree on using Jackson JsonNode that corresponds to the
  * content of the DICOMDIR in the DICOM specific tree order: patient - study
- * - serie - instance(image and non-images).
+ * - serie - instance(image and non-images). Series with modalities outside
+ * of medical imaging are ignored and an attribute "selected" is added to each
+ * serie for later usage in import process.
+ * 
  * @author mkain
  *
  */
@@ -39,7 +44,7 @@ public class DicomDirToJsonReader {
 	 * as a Json string.
 	 * @return String - Json of DICOM tree hierarchy
 	 */
-	public String readDicomDirToJson() {
+	public JsonNode readDicomDirToJsonNode() {
 		JsonNode dicomDirJsonTree = mapper.createObjectNode();
 		try {
 			// patient level
@@ -58,16 +63,7 @@ public class DicomDirToJsonReader {
 					ArrayNode series = mapper.createArrayNode();
 					Attributes serieRecord = dicomDirReader.findSeriesRecord(studyRecord);
 					while(serieRecord != null) {
-						ObjectNode serie = createSerieObjectNode(serieRecord);
-						series.add(serie);
-						// instance level: could be image or non-image (to filter later)
-						ArrayNode instances = mapper.createArrayNode();
-						Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, true);
-						while(instanceRecord != null) {
-							handleInstanceRecord(instances, instanceRecord);
-							instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, true);
-						}
-						((ObjectNode) serie).set("instances", instances);
+						handleSerieRecord(series, serieRecord);
 						serieRecord = dicomDirReader.findNextSeriesRecord(serieRecord);
 					}
 					((ObjectNode) study).set("series", series);					
@@ -77,11 +73,39 @@ public class DicomDirToJsonReader {
 				patientRecord = dicomDirReader.findNextPatientRecord(patientRecord);
 			}
 			((ObjectNode) dicomDirJsonTree).set("patients", patients);
-			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dicomDirJsonTree);
+			return dicomDirJsonTree;
 		} catch (IOException e) {
 			LOG.error("Error while reading first root record of DICOM file: " + e.getMessage());
 		}
 		return null;
+	}
+
+	/**
+	 * @param series
+	 * @param serieRecord
+	 * @throws IOException
+	 */
+	private void handleSerieRecord(ArrayNode series, Attributes serieRecord) throws IOException {
+		String modality = serieRecord.getString(Tag.Modality);
+		// Use dcm4che3 class here: ignore everything outside medical imaging
+		if (AcquisitionModality.codeOf(modality) != null) {
+			ObjectNode serie = createSerieObjectNode(serieRecord);
+			series.add(serie);
+			// instance level: could be image or non-image (to filter later)
+			ArrayNode instances = mapper.createArrayNode();
+			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, true);
+			while(instanceRecord != null) {
+				handleInstanceRecord(instances, instanceRecord);
+				instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, true);
+			}
+			((ObjectNode) serie).set("instances", instances);
+		} else {
+			LOG.info("Serie found with non medical imaging modality and therefore ignored.");
+		}
+	}
+
+	public ObjectMapper getMapper() {
+		return mapper;
 	}
 
 	/**
@@ -105,7 +129,8 @@ public class DicomDirToJsonReader {
 					instancePath += File.separator;
 				}
 			}
-			instance.put("instanceFilePath", instancePath);
+			String instanceNumber = instanceRecord.getString(Tag.InstanceNumber);
+			instance.put(instanceNumber, instancePath);
 			instances.add(instance);
 		} else {
 			LOG.warn("Error in DICOMDIR: instanceRecord with empty Tag.ReferencedFileID");
@@ -130,7 +155,8 @@ public class DicomDirToJsonReader {
 	}
 	
 	private ObjectNode createSerieObjectNode(Attributes serieRecord) {
-		ObjectNode serie = mapper.createObjectNode();		
+		ObjectNode serie = mapper.createObjectNode();
+		serie.put("selected", "false");
 		serie.put("seriesInstanceUID", serieRecord.getString(Tag.SeriesInstanceUID));
 		serie.put("modality", serieRecord.getString(Tag.Modality));
 		serie.put("protocolName", serieRecord.getString(Tag.ProtocolName));
