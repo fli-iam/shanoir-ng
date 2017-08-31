@@ -63,10 +63,23 @@ logging:
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
+# Shanoir configurations
 shanoir:
   import:
     upload:
       folder: /tmp
+  conversion:
+    dcm2nii:
+      converters:
+        path:
+          linux: /opt/nifti-converters/
+          windows: 
+        default: dcm2nii
+        clidcm:
+          path:
+            linux: /opt/clidcm/libx64/clidcm
+            windows: C:/Dev/workspace/Shanoir_Dev/external/clidcm/bin/windows/clidcm.exe
+            lib: /opt/clidcm/libx64/
 
 ---
 
