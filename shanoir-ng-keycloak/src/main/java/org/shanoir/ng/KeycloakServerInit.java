@@ -107,6 +107,7 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 			context.getBean(KeycloakServerInit.class).start();
 		} catch (Exception e) {
 			LOG.error("Error while initializing Keycloak server", e);
+			System.exit(1);
 		} finally {
 			if (context != null) {
 				context.close();
