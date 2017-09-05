@@ -116,7 +116,9 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	}
 
 	private void start() {
-		createRoles();
+
+/* already created by shanoir-ng-realm.json
+  		createRoles(); 		 */
 		createUsers();
 	}
 
