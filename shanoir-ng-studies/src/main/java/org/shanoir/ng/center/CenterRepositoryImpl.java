@@ -28,4 +28,12 @@ public class CenterRepositoryImpl implements CenterRepositoryCustom {
 				.getResultList();
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<CenterNameDTO> findIdsAndNames() {
+		return em.createNativeQuery(
+				"SELECT id, name FROM center", "centerNameResult")
+				.getResultList();
+	}
+
 }

@@ -33,6 +33,7 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 	
 	private static final String REQUEST_PATH = "/center";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH_FOR_ALL_NAMES = REQUEST_PATH + "/allnames";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	@Autowired
@@ -74,6 +75,31 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 		final HttpEntity<Center> entity = new HttpEntity<Center>(null, getHeadersWithToken(false));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
+				String.class);
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+
+	@Test
+	public void findCentersNamesProtected() {
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL_NAMES, String.class);
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+	}
+
+	@Test
+	public void findCentersNamesWithLogin() throws ClientProtocolException, IOException {
+		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL_NAMES, HttpMethod.GET, entity,
+				String.class);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
+	
+	@Test
+	public void findCentersNamesWithBadRole() {
+		// test with guest role
+		final HttpEntity<Center> entity = new HttpEntity<Center>(null, getHeadersWithToken(false));
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL_NAMES, HttpMethod.GET, entity,
 				String.class);
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}

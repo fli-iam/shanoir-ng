@@ -13,33 +13,33 @@ import { slideDown } from '../shared/animations/animations';
 export class ImportComponent {
 
     /* Form inputs */
-    private modality: "IMR" | "PET";
-    private subjectMode: "single" | "group" = "single";
-    private subject;
-    private archive;
+    public modality: "IMR" | "PET";
+    public subjectMode: "single" | "group" = "single";
+    public subject: any;
+    public archive: string;
 
     /* Display variables */
     private step: number = 1;
     private detailedSerie: Object;
     private thumbnailOn: boolean = false;
     private page: number = 1;
-    private dsAcqOpened: boolean = false;
-    private createUser: boolean = false;
+    public dsAcqOpened: boolean = false;
+    public createUser: boolean = false;
 
-    private pacsProgress: number = 0;
-    private pacsStatus: string;
-    private anonymProgress: number = 0;
-    private anonymStatus: string;
-    private niftiProgress: number = 0;
-    private niftiStatus: string;
-    private studyCardProgress: number = 0;
-    private studyCardStatus: string;
+    public pacsProgress: number = 0;
+    public pacsStatus: string;
+    public anonymProgress: number = 0;
+    public anonymStatus: string;
+    public niftiProgress: number = 0;
+    public niftiStatus: string;
+    public studyCardProgress: number = 0;
+    public studyCardStatus: string;
 
     private uploadProgress: number = 0;
 
-    private tab_modality_open: boolean = true;
-    private tab_upload_open: boolean = true;
-    private tab_series_open: boolean = true;
+    public tabModalityOpen: boolean = true;
+    public tabUploadOpen: boolean = true;
+    public tabSeriesOpen: boolean = true;
 
 
     /* Test data */
@@ -114,7 +114,7 @@ export class ImportComponent {
                 this.uploadProgress = 1;
                 subscription1.unsubscribe();
                 this.archive = "file uploaded";
-                this.tab_upload_open = false;
+                this.tabUploadOpen = false;
             }
         });
     }

@@ -36,9 +36,9 @@ export class DropdownMenuComponent {
 
     public opened: boolean = true;
     public parent: any;
-    private hasChildren: boolean = true;
-    private overflow: boolean = false;
-    private init: boolean = false;
+    public hasChildren: boolean = true;
+    public overflow: boolean = false;
+    public init: boolean = false;
 
     private static documentListenerInit = false;
     private static openedMenus: Set<DropdownMenuComponent>; // every opened menu in the document (upgrade idea : named groups of menu)

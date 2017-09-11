@@ -21,4 +21,11 @@ public interface CenterRepositoryCustom {
 	 */
 	List<Center> findBy(String fieldName, Object value);
 
+	/**
+	 * Find id and name for all centers.
+	 * 
+	 * @return list of centers.
+	 */
+	List<CenterNameDTO> findIdsAndNames();
+
 }

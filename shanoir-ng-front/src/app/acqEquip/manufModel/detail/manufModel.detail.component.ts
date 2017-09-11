@@ -20,31 +20,31 @@ import { ModalComponent } from '../../../shared/utils/modal.component';
 })
 
 export class ManufacturerModelDetailComponent implements OnInit {
-    
+
     private manufModel: ManufacturerModel = new ManufacturerModel();
-    private manufModelDetailForm: FormGroup;
+    public manufModelDetailForm: FormGroup;
     private manufModelId: number;
-    private mode: "view" | "edit" | "create";
+    public mode: "view" | "edit" | "create";
     @Input() modeFromAcqEquip: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     @ViewChild('manufModal') manufModal: ModalComponent;
     private isNameUnique: Boolean = true;
-    private canModify: Boolean = false;
-    private datasetModalityTypes: Enum[] = []; 
-    private isMR: Boolean = false;
+    public canModify: Boolean = false;
+    private datasetModalityTypes: Enum[] = [];
+    public isMR: Boolean = false;
     private manufs: Manufacturer[];
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
-    private datasetModalityTypeEnumValue: String;
+    private datasetModalityTypeEnumValue: string;
 
-    constructor (private route: ActivatedRoute, private router: Router,
-        private manufModelService: ManufacturerModelService, private manufService: ManufacturerService,   
-        private fb: FormBuilder, private location: Location, 
+    constructor(private route: ActivatedRoute, private router: Router,
+        private manufModelService: ManufacturerModelService, private manufService: ManufacturerService,
+        private fb: FormBuilder, private location: Location,
         private keycloakService: KeycloakService) {
 
     }
 
     ngOnInit(): void {
-        if (this.modeFromAcqEquip) {this.mode = this.modeFromAcqEquip;}
+        if (this.modeFromAcqEquip) { this.mode = this.modeFromAcqEquip; }
         this.getEnum();
         this.getManufs();
         this.getManufacturerModel();
@@ -56,7 +56,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
 
     getEnum(): void {
         var types = Object.keys(DatasetModalityType);
-        for (var i = 0; i < types.length; i = i+2) {
+        for (var i = 0; i < types.length; i = i + 2) {
             var enum2: Enum = new Enum();
             enum2.key = types[i];
             enum2.value = DatasetModalityType[types[i]];
@@ -65,16 +65,16 @@ export class ManufacturerModelDetailComponent implements OnInit {
     }
 
     getManufs(): void {
-    this.manufService
-        .getManufacturers()
-        .then(manufs => {
-            this.manufs = manufs;
-            this.getManufacturerModel();
-        })
-        .catch((error) => {
-            // TODO: display error
-            console.log("error getting manufacturer list!");
-        });
+        this.manufService
+            .getManufacturers()
+            .then(manufs => {
+                this.manufs = manufs;
+                this.getManufacturerModel();
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting manufacturer list!");
+            });
     }
 
     getManufacturerModel(): void {
@@ -91,7 +91,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
                     // view or edit mode
                     this.manufModelId = manufModelId;
                     return this.manufModelService.getManufacturerModel(manufModelId);
-                } else { 
+                } else {
                     // create mode
                     return Observable.of<ManufacturerModel>();
                 }
@@ -104,7 +104,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
                 this.datasetModalityTypeEnumValue = DatasetModalityType[this.manufModel.datasetModalityType];
                 this.checkDatasetModalityType(this.datasetModalityTypeEnumValue);
             });
-    }   
+    }
 
     buildForm(): void {
         let magneticFieldFC: FormControl;
@@ -139,12 +139,12 @@ export class ManufacturerModelDetailComponent implements OnInit {
         }
     }
 
-    onSelect(datasetModalityType) {
+    onSelect(datasetModalityType: string) {
         this.checkDatasetModalityType(datasetModalityType);
-         this.buildForm();
+        this.buildForm();
     }
 
-    checkDatasetModalityType(datasetModalityType) {
+    checkDatasetModalityType(datasetModalityType: string) {
         if (datasetModalityType.indexOf("MR") != -1) {
             this.isMR = true;
         } else {
@@ -168,7 +168,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
     }
 
     edit(): void {
-        this.router.navigate(['/manufModelDetail'], { queryParams: {id: this.manufModelId, mode: "edit"}});
+        this.router.navigate(['/manufModelDetail'], { queryParams: { id: this.manufModelId, mode: "edit" } });
     }
 
     create(): void {
@@ -177,13 +177,13 @@ export class ManufacturerModelDetailComponent implements OnInit {
             this.manufModel.magneticField = null;
         }
         this.manufModelService.create(this.manufModel)
-        .subscribe((manufModel) => {
-            this.back();
-        }, (err: String) => {
-            if (err.indexOf("name should be unique") != -1) {
-                this.isNameUnique = false;
-            }
-        });
+            .subscribe((manufModel) => {
+                this.back();
+            }, (err: String) => {
+                if (err.indexOf("name should be unique") != -1) {
+                    this.isNameUnique = false;
+                }
+            });
     }
 
     update(): void {
@@ -192,13 +192,13 @@ export class ManufacturerModelDetailComponent implements OnInit {
             this.manufModel.magneticField = null;
         }
         this.manufModelService.update(this.manufModelId, this.manufModel)
-        .subscribe((manufModel) => {
-            this.back();
-        }, (err: String) => {
-            if (err.indexOf("name should be unique") != -1) {
-                this.isNameUnique = false;
-            }
-        });
+            .subscribe((manufModel) => {
+                this.back();
+            }, (err: String) => {
+                if (err.indexOf("name should be unique") != -1) {
+                    this.isNameUnique = false;
+                }
+            });
     }
 
     getManufById(id: number): Manufacturer {
@@ -210,7 +210,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
         return null;
     }
 
-    closePopin () {
+    closePopin() {
         this.manufModal.hide();
         this.getManufs();
     }

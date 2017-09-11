@@ -27,11 +27,11 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     @Input() modeFromCenterList: "view" | "edit" | "create";
     @ViewChild('manufModelModal') manufModelModal: ModalComponent;
     private acqEquip: AcquisitionEquipment = new AcquisitionEquipment();
-    private acqEquipDetailForm: FormGroup;
+    public acqEquipDetailForm: FormGroup;
     private acqEquipId: number;
-    private mode: "view" | "edit" | "create";
-    private isModelNumberUnique: Boolean = true;
-    private canModify: Boolean = false;
+    public mode: "view" | "edit" | "create";
+    public isModelNumberUnique: Boolean = true;
+    public canModify: Boolean = false;
     private manufModels: ManufacturerModel[];
     private centers: Center[];
     private datasetModalityTypeEnumValue: String;
@@ -87,7 +87,6 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
             .getManufacturerModels()
             .then(manufModels => {
                 this.manufModels = manufModels;
-                this.getAcquisitionEquipment();
             })
             .catch((error) => {
                 // TODO: display error
@@ -97,7 +96,7 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
 
     getCenters(): void {
         this.centerService
-            .getCenters()
+            .getCentersNames()
             .then(centers => {
                 this.centers = centers;
                 this.getAcquisitionEquipment();

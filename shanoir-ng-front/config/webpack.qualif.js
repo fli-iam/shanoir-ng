@@ -2,8 +2,10 @@ const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const CompressionWebpackPlugin = require("compression-webpack-plugin");
 const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
+const AotPlugin = require('@ngtools/webpack').AotPlugin;
 
 /**
  * Webpack Constants
@@ -34,7 +36,7 @@ module.exports = webpackMerge(commonConfig, {
         rules: [
             {
                 test: /\.ts$/,
-                loaders: ['awesome-typescript-loader', 'angular2-template-loader']
+                loaders: ['@ngtools/webpack']
             },
             /**
              * File loader for supporting images, for example, in CSS files.
@@ -47,17 +49,25 @@ module.exports = webpackMerge(commonConfig, {
     },
 
     plugins: [
+        new AotPlugin({
+            tsConfigPath: './tsconfig-aot.json',
+            entryModule: helpers.root('src/app/app.module#AppModule')
+        }),
+
         new HtmlWebpackPlugin({
             filename: 'index.html',
-            template: 'src/index-qualif.html'
+            template: 'src/index-qualif.html',
+            inject: true  
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
 
         new webpack.optimize.UglifyJsPlugin({ // https://github.com/angular/angular/issues/10618
-            mangle: {
-                keep_fnames: true
-            }
+            "compress": { "warnings": false },
+            "sourceMap": false,
+            "comments": false,
+            "mangle": true,
+            "minimize": true
         }),
 
         new ExtractTextPlugin('[name].[hash].css'),
@@ -66,6 +76,17 @@ module.exports = webpackMerge(commonConfig, {
             htmlLoader: {
                 minimize: false // workaround for ng2
             }
+        }),
+
+        // GZIP the files
+        new CompressionWebpackPlugin({
+            asset: "[path].gz[query]",
+            algorithm: "gzip",
+            test: new RegExp(
+                "\\.(" + ["js", "css"].join("|") +")$"
+            ),
+            threshold: 10240,
+            minRatio: 0.8
         }),
 
         /**

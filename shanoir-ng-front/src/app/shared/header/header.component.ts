@@ -14,8 +14,7 @@ export class HeaderComponent {
     username: string = "";
 
     constructor(private keycloakService: KeycloakService) {
-        this.shanoirLogoUrl = 'assets/images/logo.shanoir.white.png';
-        this.userLogoUrl = 'assets/images/icons/medical/skull-1.png';
+        this.shanoirLogoUrl = 'assets/images/logo.shanoir.white.small.png';
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
         }

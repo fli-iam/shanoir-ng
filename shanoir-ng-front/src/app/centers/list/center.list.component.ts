@@ -19,11 +19,11 @@ export class CenterListComponent {
     public columnDefs: any[];
     public customActionDefs: any[];
     public rowClickAction: Object;
-    private deletionInternalError: boolean = false;
-    private isLinkedWithEqpts: boolean = false;
-    private isLinkedWithStudies: boolean = false;
+    public deletionInternalError: boolean = false;
+    public isLinkedWithEqpts: boolean = false;
+    public isLinkedWithStudies: boolean = false;
     public loading: boolean = false;
-    private createAcqEquip = false;
+    public createAcqEquip = false;
     public visible = false;
     private visibleAnimate = false;
 

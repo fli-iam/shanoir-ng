@@ -49,6 +49,13 @@ public interface CenterService extends UniqueCheckableService<Center> {
 	Center findById(Long id);
 
 	/**
+	 * Find id and name for all centers.
+	 * 
+	 * @return list of centers.
+	 */
+	List<CenterNameDTO> findIdsAndNames();
+
+	/**
 	 * Save a center.
 	 *
 	 * @param center

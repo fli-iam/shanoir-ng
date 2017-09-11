@@ -83,6 +83,11 @@ public class CenterServiceImpl implements CenterService {
 	}
 
 	@Override
+	public List<CenterNameDTO> findIdsAndNames() {
+		return centerRepository.findIdsAndNames();
+	}
+
+	@Override
 	public Center save(final Center center) throws ShanoirStudiesException {
 		Center savedCenter = null;
 		try {

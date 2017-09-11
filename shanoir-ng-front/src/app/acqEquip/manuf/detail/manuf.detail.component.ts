@@ -16,13 +16,13 @@ import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
 export class ManufacturerDetailComponent implements OnInit {
     
     private manuf: Manufacturer = new Manufacturer();
-    private manufDetailForm: FormGroup;
+    public manufDetailForm: FormGroup;
     private manufId: number;
-    private mode: "view" | "edit" | "create";
+    public mode: "view" | "edit" | "create";
     @Input() modeFromManufModel: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
-    private canModify: Boolean = false;
+    public canModify: Boolean = false;
 
     constructor (private route: ActivatedRoute, private router: Router,
         private manufService: ManufacturerService,   private fb: FormBuilder,

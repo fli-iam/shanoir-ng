@@ -124,6 +124,27 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  /center/allnames:
+    get:
+      operationId: findCentersNames
+      description: Returns id and name for all the centers
+      responses:
+        '200':
+          description: found centers
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CenterNameDTO'
+        '204':
+          description: no center found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
 parameters:
   centerId:
     name: centerId
@@ -185,6 +206,14 @@ definitions:
       street:
         type: string
       website:
+        type: string
+  CenterNameDTO:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
         type: string
   StudyCenter:
     type: object
