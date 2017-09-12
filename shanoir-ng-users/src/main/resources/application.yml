@@ -163,8 +163,13 @@ spring:
       ddl-auto: validate
   rabbitmq:
     host: shanoir-ng-rabbitmq
+  mail:
+    host: SMTP_HOST
+    port: 25
+    properties:
+      mail.smtp.from: do-not-reply@inria.fr
 server:
-  administrator.email: shanoir-dev-admin@lists.gforge.inria.fr
+  administrator.email: SHANOIR_ADMIN_EMAIL
   email-off: false
 front.server:
   address: SHANOIR_SERVER_URL/shanoir-ng

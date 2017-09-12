@@ -7,7 +7,13 @@ chown shanoir:	/vol/log/ms
 
 # runtime config
 configure-hosts
-override -e SHANOIR_SERVER_URL -z /opt/shanoir-ng/shanoir-ng-msapp.jar BOOT-INF/classes/application.yml
+override 			\
+	-e SHANOIR_SERVER_URL	\
+	-e SHANOIR_ADMIN_EMAIL	\
+	-e SHANOIR_ADMIN_NAME	\
+	-e SMTP_HOST		\
+	-e SMTP_PORT		\
+	-z /opt/shanoir-ng/shanoir-ng-msapp.jar BOOT-INF/classes/application.yml
 
 exec su - shanoir -c "exec java -Dspring.profiles.active='$PROFILE' -jar /opt/shanoir-ng/shanoir-ng-msapp.jar"
 
