@@ -13,6 +13,8 @@ override 			\
 	-e SHANOIR_ADMIN_NAME	\
 	-e SMTP_HOST		\
 	-e SMTP_PORT		\
+	-e KEYCLOAK_USER	\
+	-e KEYCLOAK_PASSWORD	\
 	-z /opt/shanoir-ng/shanoir-ng-msapp.jar BOOT-INF/classes/application.yml
 
 exec su - shanoir -c "exec java -Dspring.profiles.active='$PROFILE' -jar /opt/shanoir-ng/shanoir-ng-msapp.jar"
