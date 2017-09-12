@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # source the default script if present (ala /etc/default/)
 default="/vol/ro/default/msapp.sh"
 [ -f "$default" ] && . "$default"
