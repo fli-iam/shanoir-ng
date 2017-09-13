@@ -28,6 +28,8 @@ spring:
     port: 25
     properties:
       mail.smtp.from: do-not-reply@inria.fr
+  rabbitmq:
+    host: shanoir-ng-rabbitmq
 #keycloak
 keycloak:
   realm: shanoir-ng
