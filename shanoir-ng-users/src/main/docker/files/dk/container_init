@@ -28,6 +28,9 @@ esac
 # abort on error
 set -e
 
+configure-hosts
+
+
 echo "Initialize MariaDB and populate it"
 init-mysql < /dk/data/shanoirng_users.sql
 
@@ -65,6 +68,11 @@ EOF
 chmod 0600 "$default"
 
 echo "Initialize Keycloak database"
+override                       \
+       -e SHANOIR_SERVER_URL   \
+       -e SMTP_HOST            \
+       -e SMTP_PORT            \
+       -z                 /opt/shanoir-ng/shanoir-ng-keycloak.jar BOOT-INF/classes/application.yml
 # FIXME: perhaps this should be run as user 'shanoir'
 java -jar /opt/shanoir-ng/shanoir-ng-keycloak.jar $kc_args
 
