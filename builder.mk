@@ -35,12 +35,7 @@ $(MICROSERVICES): %: base-ms-image
 
 # shanoir-ng-nginx
 # https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-6%29-Docker-Nginx-with-statics
-# 
-# FIXME: the dependencies were removed to decrease build time, however this can
-# lead to inconsistent builds
-# 	-> should a separate target to rebuild the front only (eg: nginx-only)
-nginx: base-ms-image
-#nginx: base-ms-image $(MICROSERVICES)
+nginx: base-image
 	npm set registry https://registry.npmjs.org
 
 	(cd shanoir-ng-front && mvn package -Pqualif)
