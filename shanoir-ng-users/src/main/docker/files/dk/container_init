@@ -5,6 +5,13 @@ die() {
 	exit 1
 }
 
+[ $# -eq 1 ] || die "usage: $0 PASSWORD
+	PASSWORD is the password of the 'ng-users' user in the master realm of
+	the keycloak server"
+
+export KEYCLOAK_USER="ng-users"
+export KEYCLOAK_PASSWORD="$1"
+
 case "$PROFILE" in
 	'')
 		die "env var PROFILE is empty (should contain either prod, qualif or dev)"
@@ -42,6 +49,20 @@ if [ "$PROFILE" != dev ] ; then
 	echo "Populate database - import users from shanoir old"
 	/dk/data/usersMigration.py
 fi
+
+# save the credential in the container config (/vol/ro/)
+default="/vol/ro/default/msapp.sh"
+echo "Save keycloak credential of $KEYCLOAK_USER in $default"
+mkdir -p "`dirname "$default"`"
+cat >"$default" <<EOF
+#
+# credential for the keycloak server
+#  -> used for managing users in then shanoir-ng realm
+#
+export KEYCLOAK_USER='$KEYCLOAK_USER'
+export KEYCLOAK_PASSWORD='$KEYCLOAK_PASSWORD'
+EOF
+chmod 0600 "$default"
 
 echo "Initialize Keycloak database"
 # FIXME: perhaps this should be run as user 'shanoir'

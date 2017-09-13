@@ -20,42 +20,40 @@ my_pid=$!
 echo "Initialise the keycloak db"
 run-msapp --init
 
+sleep 1	 # race condition (with /vol/rw/lock)
+
+echo "Run keycloak"
+run-msapp&
+kc_pid=$!
+# wait until the jboss server is ready
+wait-keycloak
+
+echo "Get an authentication token from the server"
+./kcadm.sh config credentials --server http://localhost:8080/auth \
+	--realm master --user "$KEYCLOAK_USER" --password "$KEYCLOAK_PASSWORD"
+
+
+echo "Create user 'ng-users' in the master realm"
+# generate a password
+ngusers_password="`head -c 24 /dev/urandom | base64`"
+# create user
+./kcadm.sh create users -r master -s username=ng-users -s enabled=true
+# grant permission to manage the users of shanoir-ng-realm
+./kcadm.sh add-roles -r master --uusername ng-users --cclientid shanoir-ng-realm	\
+	--rolename view-realm --rolename view-users --rolename manage-users
+# set the password
+./kcadm.sh set-password -r master --username ng-users <<EOF
+$ngusers_password
+EOF
+
+echo "Stop keycloak"
+kill $kc_pid
+wait $kc_pid || true
+
 echo "Stop mysqld"
 kill $my_pid
 
 wait
-
-## wait until the jboss server is ready
-#wait-keycloak
-#
-#echo "Get an authentication token from the server"
-#./kcadm.sh config credentials --server http://localhost:8080/auth \
-#	--realm master --user "$KEYCLOAK_USER" --password "$KEYCLOAK_PASSWORD"
-#
-#echo "Create realm 'shanoir-ng'"
-#./kcadm.sh create realms -s realm=shanoir-ng	\
-#	-s enabled=true				\
-#	-s displayName=Shanoir			\
-#	-s loginTheme=shanoir-theme		\
-#	-s resetPasswordAllowed=true		\
-#	-s passwordPolicy="hashIterations and length and specialChars and digits and upperCase and lowerCase"	\
-#
-##	-s browserFlow="Browser script"
-#
-#
-#
-#for client in /opt/cfg/clients/*
-#do
-#	echo "Create client '`basename "$client" .json`'"
-#	./kcadm.sh create clients -r shanoir-ng -f "$client"
-#done
-#
-#echo "Initialize Keycloak configuration"
-#java -jar /opt/cfg/shanoir-ng-keycloak-init.jar
-#
-#echo "Kill the server"
-#kill "$pid"
-#wait "$pid"
 
 cat <<EOF
 
@@ -64,8 +62,15 @@ Keycloak initialisation completed
 #####################################################################
 ##                                                                 ##
 ##  WARNING: the admin password is set to 'admin'                  ##
+##           you should change it as soon as possible!             ##
 ##                                                                 ##
-##           you should change it immediately                      ##
+##                                                                 ##
+##  credential for shanoir-ng-users:                               ##
+##    - username:  ng-users                                        ##
+##    - password:  $ngusers_password                ##
+##                                                                 ##
+##  now you should initialise shanoir-ng-users with this password  ##
+##    -> /dk/container_init $ngusers_password       ##
 ##                                                                 ##
 #####################################################################
 
