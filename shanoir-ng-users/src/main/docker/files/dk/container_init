@@ -73,8 +73,7 @@ override                       \
        -e SMTP_HOST            \
        -e SMTP_PORT            \
        -z                 /opt/shanoir-ng/shanoir-ng-keycloak.jar BOOT-INF/classes/application.yml
-# FIXME: perhaps this should be run as user 'shanoir'
-java -jar /opt/shanoir-ng/shanoir-ng-keycloak.jar $kc_args
+su shanoir -c "java -jar /opt/shanoir-ng/shanoir-ng-keycloak.jar $kc_args"
 
 echo "Stop mysql process"
 kill $pid
