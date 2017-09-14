@@ -5,7 +5,7 @@ import os
 import pymysql
 
 sourceConn = pymysql.connect(host="mysql", user="shanoir", password="shanoir", database="shanoirdb", charset="utf8")
-targetConn = pymysql.connect(host="localhost",user=os.environ['MYSQL_USER'],password=os.environ['MYSQL_PASSWORD'], database=os.environ['MYSQL_DATABASE'], charset="utf8")
+targetConn = pymysql.connect(host="localhost",user="shanoir", password="shanoir", database="shanoir_ng_template", charset="utf8")
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
