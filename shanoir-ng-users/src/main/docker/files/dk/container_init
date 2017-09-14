@@ -32,7 +32,7 @@ configure-hosts
 
 
 echo "Initialize MariaDB and populate it"
-init-mysql < /dk/data/shanoirng_users.sql
+init-mysql < /dev/null
 
 echo "Create supervisor log directory"
 mkdir -p /vol/log/supervisor
@@ -42,10 +42,12 @@ run-mysql </dev/null &
 pid=$!
 wait-mysql --timeout=5
 
-if [ "$PROFILE" != dev ] ; then
-	# name of the mysql table
-	tbl="`echo "$MS" | sed s/-/_/g`"
-
+# name of the mysql table
+tbl="`echo "$MS" | sed s/-/_/g`"
+if [ "$PROFILE" = dev ] ; then
+	echo "Populate database"
+	mysql -u root "$tbl" < /dk/data/shanoirng_users.sql
+else
 	echo "Populate database - create tables"
 	mysql -u root "$tbl" < /dk/data/shanoirng_users_tables.sql
 
