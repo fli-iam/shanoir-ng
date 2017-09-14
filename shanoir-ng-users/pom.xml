@@ -279,7 +279,6 @@
 			<id>qualif</id>
 			<properties>
 				<spring.active.profile>qualif</spring.active.profile>
-				<supervisor.file.name>ms.users.sv.qualif.conf</supervisor.file.name>
 				<maven.test.skip>true</maven.test.skip>
 			</properties>
 		</profile>

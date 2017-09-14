@@ -4,8 +4,8 @@
 
 # designed to build all images from scratch
 
-#TODO: enable studies & studycards
-MICROSERVICES = users #studies studycards
+#TODO: enable studycards
+MICROSERVICES = users studies # studycards
 
 # keycloak images
 #
