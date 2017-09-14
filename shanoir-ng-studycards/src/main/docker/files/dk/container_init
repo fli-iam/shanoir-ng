@@ -1,0 +1,43 @@
+#!/bin/sh
+
+die() {
+	echo "error: $*" >&2
+	exit 1
+}
+
+[ -n "$PROFILE" ] || die "env var PROFILE is empty (should contain either prod, qualif or dev)"
+
+
+# abort on error
+set -e
+
+configure-hosts
+
+
+echo "Initialize MariaDB and populate it"
+init-mysql < /dev/null
+
+echo "Create supervisor log directory"
+mkdir -p /vol/log/supervisor
+
+echo "Start the mysql server"
+run-mysql </dev/null &
+pid=$!
+wait-mysql --timeout=5
+
+# name of the mysql table
+tbl="`echo "$MS" | sed s/-/_/g`"
+if [ "$PROFILE" = dev ] ; then
+	echo "Populate database"
+	mysql -u root "$tbl" < /opt/cfg/shanoirng_studycards.sql
+else
+	echo "Populate database - create tables"
+	mysql -u root "$tbl" < /opt/cfg/shanoirng_studycards_tables.sql
+
+	echo "Populate database - import users from shanoir old"
+	/opt/cfg/studycardsMigration.py
+fi
+
+echo "Stop mysql process"
+kill $pid
+wait
