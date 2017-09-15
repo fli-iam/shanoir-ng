@@ -37,6 +37,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	private static final String FRONT_CLIENT_ID = "shanoir-ng-front";
 	private static final String NEW_BROWSER_FLOW = "Browser script";
 	private static final String NEW_EXECUTION_CONFIG_NAME = "CheckExpirationDateConfig";
+	private static final String REQUIRED_ACTION_ID = "record-login-date-action";
 	private static final String REQUIRED_ACTION_NAME = "Record Login Date Action";
 	private static final String SHANOIR_REALM_DISPLAY_NAME = "Shanoir";
 	private static final String SHANOIR_SERVER_URL_ENV = "SHANOIR_SERVER_URL";
@@ -190,7 +191,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 				LOG.info("Enable required action");
 				action.setEnabled(true);
 				action.setDefaultAction(true);
-				getKeycloak().realm(getKeycloakRealm()).flows().updateRequiredAction(REQUIRED_ACTION_NAME, action);
+				getKeycloak().realm(getKeycloakRealm()).flows().updateRequiredAction(REQUIRED_ACTION_ID, action);
 				break;
 			}
 		}
