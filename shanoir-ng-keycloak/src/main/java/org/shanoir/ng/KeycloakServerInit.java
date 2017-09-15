@@ -60,8 +60,8 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	@Value("${kc.requests.realm}")
 	private String keycloakRequestsRealm;
 
-	@Value("${kc.requests.temporary.password}")
-	private boolean keycloakTemporaryPassword;
+	@Value("${kc.requests.debug.use.dummy.password}")
+	private boolean keycloakUseDummyPassword;
 
 	@Autowired
 	private RoleRepository roleRepository;
@@ -142,12 +142,12 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 			// Reset user password
 			final CredentialRepresentation credential = new CredentialRepresentation();
 			credential.setType(CredentialRepresentation.PASSWORD);
-			if (keycloakTemporaryPassword) {
-				credential.setValue(PasswordUtils.generatePassword());
-			} else {
+			if (keycloakUseDummyPassword) {
 				credential.setValue("&a1A&a1A");
+			} else {
+				credential.setValue(PasswordUtils.generatePassword());
 			}
-			credential.setTemporary(keycloakTemporaryPassword);
+			credential.setTemporary(keycloakUseDummyPassword);
 			userResource.resetPassword(credential);
 
 			// Add realm role

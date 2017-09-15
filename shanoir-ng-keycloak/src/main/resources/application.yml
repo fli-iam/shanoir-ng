@@ -35,7 +35,8 @@ keycloak:
 kc.requests:
   client.id: admin-cli
   realm: master
-  temporary.password: false
+  # DANGEROUS, DO NOT USE IN PRODUCTION. Used to set same password to all users on database initialization.
+  debug.use.dummy.password: false
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-keycloak-init.log
@@ -66,6 +67,7 @@ spring:
 #keycloak
 keycloak:
   auth-server-url: http://localhost/auth
+kc.requests.debug.use.dummy.password: true
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-keycloak-init.log
@@ -89,8 +91,5 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
-#keycloak
-kc.requests:
-  temporary.password: true
 server:
   email-off: false

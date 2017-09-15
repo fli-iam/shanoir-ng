@@ -167,7 +167,7 @@ server:
   administrator.email: shanoir-dev-admin@lists.gforge.inria.fr
   email-off: false
 front.server:
-  address: https://shanoir-qualif.irisa.fr/shanoir-ng
+  address: https://shanoir-qualif.irisa.fr/
   url: https://shanoir-qualif.irisa.fr
 #keycloak
 keycloak:

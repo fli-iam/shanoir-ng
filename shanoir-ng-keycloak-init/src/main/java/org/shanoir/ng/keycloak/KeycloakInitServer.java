@@ -44,11 +44,15 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		loadParams();
-		updateFrontClient();
-		createAuthenticationFlow();
-		updateRealm();
-		updateRequiredAction();
+		try {
+			loadParams();
+			updateFrontClient();
+			createAuthenticationFlow();
+			updateRealm();
+			updateRequiredAction();
+		} catch (KeycloakInitException e) {
+			LOG.error("Keycloak server initialization failed.", e);
+		}
 	}
 
 	/*
@@ -75,7 +79,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	/*
 	 * Create authentication flow
 	 */
-	private static void createAuthenticationFlow() {
+	private static void createAuthenticationFlow() throws KeycloakInitException {
 		LOG.info("Create authentication flow");
 
 		final AuthenticationManagementResource authenticationManagement = getKeycloak().realm(getKeycloakRealm())
@@ -87,7 +91,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		data.put("newName", NEW_BROWSER_FLOW);
 		Response response = authenticationManagement.copy(BROWSER_FLOW, data);
 		if (response.getStatus() != 201) {
-			LOG.error("Error on flow copy");
+			throw new KeycloakInitException("Error on flow copy");
 		}
 
 		// Get flow id
@@ -109,7 +113,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		authenticationExecution.setRequirement("REQUIRED");
 		response = getKeycloak().realm(getKeycloakRealm()).flows().addExecution(authenticationExecution);
 		if (response.getStatus() != 201) {
-			LOG.error("Error on execution creation");
+			throw new KeycloakInitException("Error on execution creation");
 		}
 
 		// Get execution id
@@ -137,7 +141,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		response = getKeycloak().realm(getKeycloakRealm()).flows().newExecutionConfig(executionInfo.getId(),
 				authenticatorConfig);
 		if (response.getStatus() != 201) {
-			LOG.error("Error on execution config creation");
+			throw new KeycloakInitException("Error on execution config creation");
 		}
 	}
 
