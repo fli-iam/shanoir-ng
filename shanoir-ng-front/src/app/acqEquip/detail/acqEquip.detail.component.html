@@ -99,6 +99,6 @@
 
 <app-modal #manufModelModal>
     <div class="app-modal-body">
-      <manufModelDetail [modeFromAcqEquip]="'create'" (closing)="closePopin()"></manufModelDetail>
+      <manufModelDetail [modeFromAcqEquip]="'create'" (closing)="closePopin($event)"></manufModelDetail>
     </div>
 </app-modal>
