@@ -63,10 +63,33 @@ logging:
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
+# Shanoir configurations
 shanoir:
   import:
     upload:
       folder: /tmp
+    # In a dicom file. Format "tag==value;" If it is not needed to separate image files into separated folders for a dicom serie.
+    series:
+      separate:
+        datasets: SeriesDescription==*ASL*;SeriesDescription==*asl*;ProtocolName==*ASL*;SeriesDescription==*VIBE*DYN*;SeriesDescription==*MoCoSeries*;SeriesDescription==*DIFF*;SeriesDescription==*Diff*;SeriesDescription==*diff*;SeriesDescription==*DTI*;SeriesDescription==*DWI*;SeriesDescription==*PERF*;SeriesDescription==*Perf*;SeriesDescription==*perf*;SeriesDescription==*BOLD*;SeriesDescription==*Bold*;SeriesDescription==*bold*;SeriesDescription==*intermediate t-Map*;ProtocolName==*DYN*;ProtocolName==*Dyn*;ProtocolName==*dyn*;SeriesDescription==*QSM*;SeriesDescription==*qsm*;SeriesDescription==*RELAXO*;SeriesDescription==*Relaxo*;
+  conversion:
+    dcm2nii:
+      converters:
+        path:
+          linux: /opt/nifti-converters/
+          windows: 
+        default: dcm2nii
+        # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then use clidcm instead of dcmnii to convert from dicom to nifti
+        convertwithclidcm: SeriesDescription==*Diff*;SeriesDescription==*DIFF*;SeriesDescription==*diff*;SeriesDescription==*DTI*;SeriesDescription==*DWI*;SeriesDescription==*PERF*;SeriesDescription==*Perf*;SeriesDescription==*perf*; 
+        # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then output niftii file will be reconstructed as 4D volumes
+        convertas4d: SeriesDescription==*ASL*;SeriesDescription==*asl*;ProtocolName==*ASL*;SeriesDescription==*VIBE*DYN*;SeriesDescription==*MoCoSeries*;SeriesDescription==*DIFF*;SeriesDescription==*Diff*;SeriesDescription==*diff*;SeriesDescription==*DTI*;SeriesDescription==*DWI*;SeriesDescription==*PERF*;SeriesDescription==*Perf*;SeriesDescription==*perf*;SeriesDescription==*BOLD*;SeriesDescription==*Bold*;SeriesDescription==*bold*;SeriesDescription==*intermediate t-Map*;ProtocolName==*DYN*;ProtocolName==*Dyn*;ProtocolName==*dyn*; 
+        clidcm:
+          path:
+            linux: /opt/clidcm/libx64/clidcm
+            windows: C:/Dev/workspace/Shanoir_Dev/external/clidcm/bin/windows/clidcm.exe
+            lib: /opt/clidcm/libx64/
+# If in the serie, the dicom value equals the "value" for the "tag", then the serie will be considered as spectroscopy
+# isSpectroscopy=SeriesDescription==*CSI*
 
 ---
 

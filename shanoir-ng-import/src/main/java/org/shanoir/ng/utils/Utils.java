@@ -161,4 +161,16 @@ public class Utils {
         bos.close();
     }
 	
+	/**
+	 * Replace the file separators to make it work under windows or unix system.
+	 *
+	 * @param firstImagePath
+	 *            the first image path
+	 *
+	 * @return the string
+	 */
+	public static String convertFilePath(final String firstImagePath) {
+		return firstImagePath.replaceAll("\\\\", "/");
+	}
+	
 }

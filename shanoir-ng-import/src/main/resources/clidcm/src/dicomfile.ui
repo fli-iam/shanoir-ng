@@ -1,0 +1,327 @@
+<ui version="4.0" >
+ <class>DcmWidget</class>
+ <widget class="QDialog" name="DcmWidget" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>607</width>
+    <height>451</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Dialog</string>
+  </property>
+  <layout class="QGridLayout" >
+   <property name="margin" >
+    <number>8</number>
+   </property>
+   <property name="spacing" >
+    <number>6</number>
+   </property>
+   <item row="1" column="0" >
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="rawdump" >
+       <property name="text" >
+        <string>RAW Dump</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>131</width>
+         <height>31</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="okButton" >
+       <property name="text" >
+        <string>OK</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="0" >
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QTreeWidget" name="listWidget" />
+     </item>
+     <item>
+      <widget class="Line" name="line" >
+       <property name="orientation" >
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" >
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QGraphicsView" name="graphicsView" />
+       </item>
+       <item>
+        <layout class="QHBoxLayout" >
+         <property name="margin" >
+          <number>0</number>
+         </property>
+         <property name="spacing" >
+          <number>6</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="prev" >
+           <property name="text" >
+            <string>Prev</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>21</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="convertAll" >
+           <property name="text" >
+            <string>Convert All</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="toImlib" >
+           <property name="text" >
+            <string>Conversion</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>21</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="next" >
+           <property name="text" >
+            <string>Next</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+  <widget class="QWidget" name="widget" >
+   <property name="geometry" >
+    <rect>
+     <x>9</x>
+     <y>9</y>
+     <width>588</width>
+     <height>385</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="qtdcm" />
+ </resources>
+ <connections>
+  <connection>
+   <sender>okButton</sender>
+   <signal>clicked()</signal>
+   <receiver>DcmWidget</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>595</x>
+     <y>428</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>151</x>
+     <y>265</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>prev</sender>
+   <signal>clicked()</signal>
+   <receiver>DcmWidget</receiver>
+   <slot>previousImage()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>362</x>
+     <y>390</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>302</x>
+     <y>220</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>next</sender>
+   <signal>clicked()</signal>
+   <receiver>DcmWidget</receiver>
+   <slot>nextImage()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>554</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>302</x>
+     <y>220</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>listWidget</sender>
+   <signal>currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)</signal>
+   <receiver>DcmWidget</receiver>
+   <slot>itemChanged(QTreeWidgetItem*,QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>136</x>
+     <y>201</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>302</x>
+     <y>220</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toImlib</sender>
+   <signal>clicked()</signal>
+   <receiver>DcmWidget</receiver>
+   <slot>ToImlib()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>433</x>
+     <y>378</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>302</x>
+     <y>220</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>listWidget</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>DcmWidget</receiver>
+   <slot>exportAs(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>135</x>
+     <y>201</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>302</x>
+     <y>220</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>convertAll</sender>
+   <signal>clicked()</signal>
+   <receiver>DcmWidget</receiver>
+   <slot>ExportAll()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>649</x>
+     <y>445</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>475</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rawdump</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>DcmWidget</receiver>
+   <slot>RawChange(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>263</x>
+     <y>425</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>303</x>
+     <y>225</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
