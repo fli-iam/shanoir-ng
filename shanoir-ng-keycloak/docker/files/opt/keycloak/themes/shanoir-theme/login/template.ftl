@@ -15,7 +15,7 @@
             <meta name="${meta?split('==')[0]}" content="${meta?split('==')[1]}"/>
         </#list>
     </#if>
-    <title><#nested "title"></title>
+    <title>[${properties.instance}] Shanoir</title>
     <link rel="icon" href="${url.resourcesPath}/img/favicon.ico" />
     <#if properties.styles?has_content>
         <#list properties.styles?split(' ') as style>
@@ -37,7 +37,7 @@
 <body class="${properties.kcBodyClass!}">
 
 	<div class="logo">
-		<#if realm.displayName == "Shanoir">
+		<#if realm.name == "shanoir-ng">
 			<img src="${properties.assets!}/images/logo.shanoir.white.png"/>
 		</#if>
 	</div>

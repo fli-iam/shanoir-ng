@@ -1,6 +1,6 @@
 {
   "realm" : "shanoir-ng",
-  "displayName" : "Shanoir",
+  "displayName" : "Shanoir SHANOIR_INSTANCE",
   "enabled" : true,
   "resetPasswordAllowed" : true,
   "passwordPolicy" : "hashIterations and length and specialChars and digits and upperCase and lowerCase",

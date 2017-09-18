@@ -211,7 +211,7 @@ apply_runtime_config()
 	# select the adequate theme
 	echo "Applying profile '$PROFILE'"
 	(	cd /opt/keycloak/themes/shanoir-theme/login/
-		override -e SHANOIR_SERVER_URL "theme-$PROFILE.properties"
+		override -e SHANOIR_SERVER_URL -e SHANOIR_INSTANCE "theme-$PROFILE.properties"
 		cp "theme-$PROFILE.properties" "theme.properties"
 	)
 
@@ -220,6 +220,7 @@ apply_runtime_config()
 		-e SHANOIR_ADMIN_EMAIL	\
 		-e SHANOIR_ADMIN_NAME	\
 		-e SHANOIR_SERVER_URL	\
+		-e SHANOIR_INSTANCE	\
 		-e SMTP_HOST		\
 		-e SMTP_PORT		\
 		"$CONFIG_DIR/shanoir-ng-realm.json"

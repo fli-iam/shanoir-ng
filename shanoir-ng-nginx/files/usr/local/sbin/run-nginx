@@ -2,7 +2,7 @@
 
 # runtime config
 configure-hosts
-override -e SHANOIR_SERVER_URL /etc/nginx/nginx.conf /etc/nginx/html/index.html /etc/nginx/html/app.*.js
+override -e SHANOIR_SERVER_URL -e SHANOIR_INSTANCE /etc/nginx/nginx.conf /etc/nginx/html/index.html /etc/nginx/html/app.*.js
 
 mkdir -p /vol/log
 

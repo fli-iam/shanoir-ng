@@ -6,7 +6,7 @@
 		<div class="login-main"> 
 			<#if realm.password>
 				<form id="kc-form-login" action="${url.loginAction}" method="post">
-					<div class="header command-zone">Connect to Shanoir</div>
+					<div class="header command-zone">Connect to Shanoir ${properties.instance}</div>
 					<fieldset>
 						<ol>
 							<li>

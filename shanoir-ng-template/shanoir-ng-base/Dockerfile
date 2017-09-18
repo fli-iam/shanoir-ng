@@ -30,6 +30,9 @@ COPY files/. /
 # SHANOIR_SERVER_URL: base url of the shanoir service
 #	(without a trailing slash)
 #
+# SHANOIR_INSTANCE: name of this shanoir instance (eg: Neurinfo, Ofsep, Qualif
+# 	Neurinfo, ...) as displayed to the user
+#	
 # SHANOIR_ADMIN_NAME <SHANOIR_ADMIN_EMAIL>
 #	sender identity for outgoing mail
 #
@@ -39,6 +42,7 @@ COPY files/. /
 ENV	DOCKER_PREFIX="shanoir"			\
 	PROFILE="dev"				\
 	SHANOIR_SERVER_URL="http://localhost"	\
+	SHANOIR_INSTANCE="DEV"			\
 	SHANOIR_ADMIN_NAME="Shanoir admin"	\
 	SHANOIR_ADMIN_EMAIL="shanoir@localhost"	\
 	SMTP_HOST="localhost"			\
