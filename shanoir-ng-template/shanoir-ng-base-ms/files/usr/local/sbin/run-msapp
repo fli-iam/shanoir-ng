@@ -11,6 +11,11 @@ wait-mysql
 mkdir -p	/vol/log/ms
 chown shanoir:	/vol/log/ms
 
+# initialise keycloak vars (used by ng-users only) with dummy values if unset
+# (so that other containers do not have errors if they are unset)
+export KEYCLOAK_USER="${KEYCLOAK_USER-unknown}"
+export KEYCLOAK_PASSWORD="${KEYCLOAK_PASSWORD-unknown}"
+
 # runtime config
 configure-hosts
 override 			\
