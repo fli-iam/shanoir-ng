@@ -82,11 +82,19 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
             });
     }
 
-    getManufModels(): void {
+    getManufModels(manufModelId?: number): void {
         this.manufModelService
             .getManufacturerModels()
             .then(manufModels => {
                 this.manufModels = manufModels;
+                if (manufModelId) {
+                    for (let manufModel of this.manufModels) {
+                        if (manufModelId == manufModel.id) {
+                            this.acqEquip.manufacturerModel = manufModel;
+                            break;
+                        }
+                    }
+                }
             })
             .catch((error) => {
                 // TODO: display error
@@ -192,8 +200,10 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
             });
     }
 
-    closePopin() {
+    closePopin(manufModelId?: number) {
         this.manufModelModal.hide();
-        this.getManufModels();
+        if (manufModelId) {
+            this.getManufModels(manufModelId);
+        }
     }
 }

@@ -172,7 +172,7 @@ server:
   administrator.email: SHANOIR_ADMIN_EMAIL
   email-off: false
 front.server:
-  address: SHANOIR_SERVER_URL/shanoir-ng
+  address: SHANOIR_SERVER_URL/
   url: SHANOIR_SERVER_URL
 #keycloak
 keycloak:

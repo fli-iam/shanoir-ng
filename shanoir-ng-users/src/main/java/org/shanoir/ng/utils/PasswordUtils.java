@@ -2,7 +2,7 @@ package org.shanoir.ng.utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Random;
+import java.security.SecureRandom;
 
 import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
@@ -92,7 +92,7 @@ public final class PasswordUtils {
 	 * @return password
 	 */
 	public static String generatePassword() {
-		final Random rnd = new Random();
+		final SecureRandom rnd = new SecureRandom();
 		final char[] pwd = new char[PASSWORD_MIN_LENGTH];
 		
 		// 1 lower case letter
@@ -164,7 +164,7 @@ public final class PasswordUtils {
 	 * 
 	 * @return password index.
 	 */
-	private static int getNextIndex(final Random rnd, final char[] pwd) {
+	private static int getNextIndex(final SecureRandom rnd, final char[] pwd) {
 		int index = rnd.nextInt(PASSWORD_MIN_LENGTH);
 		while (pwd[index = rnd.nextInt(PASSWORD_MIN_LENGTH)] != 0) {
 		}

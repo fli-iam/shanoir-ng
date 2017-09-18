@@ -36,22 +36,27 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	private static final String BROWSER_FLOW = "browser";
 	private static final String NEW_BROWSER_FLOW = "Browser script";
 	private static final String NEW_EXECUTION_CONFIG_NAME = "CheckExpirationDateConfig";
+	private static final String REQUIRED_ACTION_ID = "record-login-date-action";
 	private static final String REQUIRED_ACTION_NAME = "Record Login Date Action";
 	private static final String SHANOIR_REALM_DISPLAY_NAME = "Shanoir";
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		loadParams();
-		createAuthenticationFlow();
-		updateRealm();
-		updateRequiredAction();
+		try {
+			loadParams();
+			createAuthenticationFlow();
+			updateRealm();
+			updateRequiredAction();
+		} catch (KeycloakInitException e) {
+			LOG.error("Keycloak server initialization failed.", e);
+		}
 	}
 
 	/*
 	 * Create authentication flow
 	 */
-	private static void createAuthenticationFlow() {
+	private static void createAuthenticationFlow() throws KeycloakInitException {
 		LOG.info("Create authentication flow");
 
 		final AuthenticationManagementResource authenticationManagement = getKeycloak().realm(getKeycloakRealm())
@@ -63,7 +68,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		data.put("newName", NEW_BROWSER_FLOW);
 		Response response = authenticationManagement.copy(BROWSER_FLOW, data);
 		if (response.getStatus() != 201) {
-			LOG.error("Error on flow copy");
+			throw new KeycloakInitException("Error on flow copy");
 		}
 
 		// Get flow id
@@ -85,7 +90,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		authenticationExecution.setRequirement("REQUIRED");
 		response = getKeycloak().realm(getKeycloakRealm()).flows().addExecution(authenticationExecution);
 		if (response.getStatus() != 201) {
-			LOG.error("Error on execution creation");
+			throw new KeycloakInitException("Error on execution creation");
 		}
 
 		// Get execution id
@@ -113,7 +118,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		response = getKeycloak().realm(getKeycloakRealm()).flows().newExecutionConfig(executionInfo.getId(),
 				authenticatorConfig);
 		if (response.getStatus() != 201) {
-			LOG.error("Error on execution config creation");
+			throw new KeycloakInitException("Error on execution config creation");
 		}
 	}
 
@@ -154,7 +159,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 				LOG.info("Enable required action");
 				action.setEnabled(true);
 				action.setDefaultAction(true);
-				getKeycloak().realm(getKeycloakRealm()).flows().updateRequiredAction(REQUIRED_ACTION_NAME, action);
+				getKeycloak().realm(getKeycloakRealm()).flows().updateRequiredAction(REQUIRED_ACTION_ID, action);
 				break;
 			}
 		}

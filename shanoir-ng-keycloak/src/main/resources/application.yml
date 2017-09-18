@@ -37,7 +37,8 @@ keycloak:
 kc.requests:
   client.id: admin-cli
   realm: master
-  temporary.password: false
+  # DANGEROUS, DO NOT ENABLE IN PRODUCTION. Used to set same password to all users on database initialization.
+  debug.use.dummy.password: false
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-keycloak-init.log
@@ -68,6 +69,7 @@ spring:
 #keycloak
 keycloak:
   auth-server-url: http://localhost/auth
+kc.requests.debug.use.dummy.password: true
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-keycloak-init.log
@@ -99,7 +101,5 @@ spring:
 #keycloak
 keycloak:
   auth-server-url: SHANOIR_SERVER_URL/auth
-kc.requests:
-  temporary.password: true
 server:
   email-off: false

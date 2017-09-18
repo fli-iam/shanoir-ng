@@ -22,11 +22,11 @@ export class AcquisitionEquipmentListComponent {
     public loading: boolean = false;
     private createAcqEquip = false;
 
-    constructor(private acqEquipService: AcquisitionEquipmentService, private confirmDialogService: ConfirmDialogService, 
+    constructor(private acqEquipService: AcquisitionEquipmentService, private confirmDialogService: ConfirmDialogService,
         private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
         this.getAcquisitionEquipments();
         this.createColumnDefs();
-    }   
+    }
 
     // Grid data
     getAcquisitionEquipments(): void {
@@ -37,10 +37,10 @@ export class AcquisitionEquipmentListComponent {
             }
             this.loading = false;
         })
-        .catch((error) => {
-            // TODO: display error
-            this.acqEquips = [];
-        });
+            .catch((error) => {
+                // TODO: display error
+                this.acqEquips = [];
+            });
     }
 
     // Grid columns definition
@@ -51,42 +51,50 @@ export class AcquisitionEquipmentListComponent {
             }
             return null;
         };
-       
+
         this.columnDefs = [
-            {headerName: "Manufacturer", field: "manufacturerModel.manufacturer.name" },
-            {headerName: "Manufacturer model name", field: "manufacturerModel.name" },
-            {headerName: "Serial number", field: "serialNumber"},
-            {headerName: "Center", field: "center.name" }
+            { headerName: "Manufacturer", field: "manufacturerModel.manufacturer.name" },
+            { headerName: "Manufacturer model name", field: "manufacturerModel.name" },
+            { headerName: "Serial number", field: "serialNumber" },
+            { headerName: "Center", field: "center.name" }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({headerName: "", type: "button", img: "assets/images/icons/garbage-1.png", action: this.openDeleteAcquisitionEquipmentConfirmDialog},
-            {headerName: "", type: "button", img: "assets/images/icons/edit.png", target : "/acqEquipDetail", getParams: function(item: any): Object {
-                return {id: item.id, mode: "edit"};
-            }});
+            this.columnDefs.push(
+                {
+                    headerName: "", type: "button", img: "assets/images/icons/edit.png", target: "/acqEquipDetail", getParams: function (item: any): Object {
+                        return { id: item.id, mode: "edit" };
+                    }
+                });
         }
         if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({headerName: "", type: "button", img: "assets/images/icons/view-1.png", target : "/acqEquipDetail", getParams: function(item: any): Object {
-                return {id: item.id, mode: "view"};
-            }});
+            this.columnDefs.push({
+                headerName: "", type: "button", img: "assets/images/icons/view-1.png", target: "/acqEquipDetail", getParams: function (item: any): Object {
+                    return { id: item.id, mode: "view" };
+                }
+            });
         }
 
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.customActionDefs.push({title: "new acq. equip.", img: "assets/images/icons/add-1.png", target: "/acqEquipDetail", getParams: function(item: any): Object {
-                    return {mode: "create"};
-            }});
+            this.customActionDefs.push({
+                title: "new acq. equip.", img: "assets/images/icons/add-1.png", target: "/acqEquipDetail", getParams: function (item: any): Object {
+                    return { mode: "create" };
+                }
+            });
         }
         if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {target : "/acqEquipDetail", getParams: function(item: any): Object {
-                    return {id: item.id, mode: "view"};
-            }};
+            this.rowClickAction = {
+                target: "/acqEquipDetail", getParams: function (item: any): Object {
+                    return { id: item.id, mode: "view" };
+                }
+            };
         }
     }
 
     openDeleteAcquisitionEquipmentConfirmDialog = (item: AcquisitionEquipment) => {
-         this.confirmDialogService
+        this.confirmDialogService
             .confirm('Delete acqEquip', 'Are you sure you want to delete the following entity?',
-                this.viewContainerRef)
+            this.viewContainerRef)
             .subscribe(res => {
                 if (res) {
                     this.deleteAcquisitionEquipment(item.id);

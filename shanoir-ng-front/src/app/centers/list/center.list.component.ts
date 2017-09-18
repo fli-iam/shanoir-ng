@@ -63,7 +63,7 @@ export class CenterListComponent {
             { headerName: "Country", field: "country" }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({ headerName: "", type: "button", img: "assets/images/icons/garbage-1.png", action: this.openDeleteCenterConfirmDialog },
+            this.columnDefs.push(
                 {
                     headerName: "", type: "button", img: "assets/images/icons/edit.png", target: "/centerDetail", getParams: function (item: any): Object {
                         return { id: item.id, mode: "edit" };

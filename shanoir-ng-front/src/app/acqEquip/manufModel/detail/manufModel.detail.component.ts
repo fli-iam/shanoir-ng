@@ -64,12 +64,19 @@ export class ManufacturerModelDetailComponent implements OnInit {
         }
     }
 
-    getManufs(): void {
+    getManufs(manufId?: number): void {
         this.manufService
             .getManufacturers()
             .then(manufs => {
                 this.manufs = manufs;
-                this.getManufacturerModel();
+                if (manufId) {
+                    for (let manuf of this.manufs) {
+                        if (manufId == manuf.id) {
+                            this.manufModel.manufacturer = manuf;
+                            break;
+                        }
+                    }
+                }
             })
             .catch((error) => {
                 // TODO: display error
@@ -109,9 +116,9 @@ export class ManufacturerModelDetailComponent implements OnInit {
     buildForm(): void {
         let magneticFieldFC: FormControl;
         if (this.isMR) {
-            magneticFieldFC = new FormControl('this.manufModel.magneticField', Validators.required);
+            magneticFieldFC = new FormControl(this.manufModel.magneticField, Validators.required);
         } else {
-            magneticFieldFC = new FormControl('this.manufModel.magneticField');
+            magneticFieldFC = new FormControl(this.manufModel.magneticField);
         }
         this.manufModelDetailForm = this.fb.group({
             'name': [this.manufModel.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
@@ -159,9 +166,11 @@ export class ManufacturerModelDetailComponent implements OnInit {
         'magneticField': ''
     };
 
-    back(): void {
+    back(manufModelId?: number): void {
         if (this.closing.observers.length > 0) {
-            this.closing.emit(null);
+            this.manufModel = new ManufacturerModel();
+            this.isMR = false;
+            this.closing.emit(manufModelId);
         } else {
             this.location.back();
         }
@@ -178,7 +187,7 @@ export class ManufacturerModelDetailComponent implements OnInit {
         }
         this.manufModelService.create(this.manufModel)
             .subscribe((manufModel) => {
-                this.back();
+                this.back(manufModel.id);
             }, (err: String) => {
                 if (err.indexOf("name should be unique") != -1) {
                     this.isNameUnique = false;
@@ -210,8 +219,10 @@ export class ManufacturerModelDetailComponent implements OnInit {
         return null;
     }
 
-    closePopin() {
+    closePopin(manufId?: number) {
         this.manufModal.hide();
-        this.getManufs();
+        if (manufId) {
+            this.getManufs(manufId);
+        }
     }
 }
