@@ -1,0 +1,9 @@
+#!/bin/sh
+
+DIRS="/vol/log/mysql /var/run/mysqld"
+
+set -e
+mkdir -p     -- $DIRS
+chown mysql: -- $DIRS
+
+exec mysqld

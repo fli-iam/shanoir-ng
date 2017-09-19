@@ -1,0 +1,59 @@
+#!/usr/bin/python
+#
+# poll a socket until it is ready to accept connection
+
+import argparse
+import re
+import socket
+import sys
+import time
+
+def die(msg, *k):
+    sys.stderr.write("error: %s\n" % (msg % k))
+    sys.exit(1)
+
+def address(val):
+    if val.startswith("/"):
+        # UNIX socket
+        return val
+    else:
+        # TCP socket
+        host, port = val.split(":")
+        return host, int(port)
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-p", "--period", type=float, default=1.0,
+        help="delay between each connection attempt (default=1s)")
+parser.add_argument("-t", "--timeout", type=int, default=60,
+        help="global timeout (default=60s)")
+parser.add_argument("target", metavar="HOST:PORT|/SOCKET/PATH", type=address,
+        help="address of the target socket")
+
+args=parser.parse_args()
+
+if args.period < 0:
+    die("period must not be negative")
+if args.timeout <= 0:
+    die("timeout must be positive")
+
+limit = time.time() + args.timeout
+
+def connect(target, timeout):
+    family = socket.AF_UNIX if isinstance(target, str) else socket.AF_INET
+    sock = socket.socket(family)
+    sock.settimeout(timeout)
+    sock.connect(target)
+    return sock
+
+while True:
+    t0 = time.time()
+
+    try:
+        connect(args.target, args.period)
+        sys.exit(0)
+    except socket.error as e:
+        if t0 > limit or not args.period:
+            die("unable to connect to %s (%s)", args.target, e)
+        delay = t0 + args.period - time.time()
+        if delay > 0:
+            time.sleep(delay)

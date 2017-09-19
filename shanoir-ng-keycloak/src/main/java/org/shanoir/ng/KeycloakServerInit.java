@@ -107,6 +107,7 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 			context.getBean(KeycloakServerInit.class).start();
 		} catch (Exception e) {
 			LOG.error("Error while initializing Keycloak server", e);
+			System.exit(1);
 		} finally {
 			if (context != null) {
 				context.close();
@@ -115,7 +116,9 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	}
 
 	private void start() {
-		createRoles();
+
+/* already created by shanoir-ng-realm.json
+  		createRoles(); 		 */
 		createUsers();
 	}
 
@@ -143,11 +146,14 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 			final CredentialRepresentation credential = new CredentialRepresentation();
 			credential.setType(CredentialRepresentation.PASSWORD);
 			if (keycloakUseDummyPassword) {
+				// debug setup: use a fixed password for everybody
 				credential.setValue("&a1A&a1A");
+				credential.setTemporary(false);
 			} else {
+				// normal setup: generate a random password and force the user to change it
 				credential.setValue(PasswordUtils.generatePassword());
+				credential.setTemporary(true);
 			}
-			credential.setTemporary(keycloakUseDummyPassword);
 			userResource.resetPassword(credential);
 
 			// Add realm role

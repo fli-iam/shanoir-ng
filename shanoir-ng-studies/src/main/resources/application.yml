@@ -140,9 +140,7 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
-  rabbitmq:
-    host: qualif-ng-rabbitmq
-front.server.url: https://shanoir-qualif.irisa.fr
+front.server.url: SHANOIR_SERVER_URL
 #keycloak
 keycloak:
-  auth-server-url: https://shanoir-qualif.irisa.fr/auth
+  auth-server-url: SHANOIR_SERVER_URL/auth

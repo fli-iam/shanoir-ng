@@ -1,21 +1,11 @@
-FROM shanoir-ng/debianjava8mariadbpython:latest
+FROM shanoir-ng/base-ms
 
-COPY shanoir-ng-studies-0.0.1-SNAPSHOT.jar /opt/shanoir-ng/shanoir-ng-studies.jar
+# static files
+COPY files/. /
 
-COPY my.cnf /etc/mysql/conf.d/shanoir-ng-studies.cnf
-COPY ms.studies.sv.conf /etc/supervisor/conf.d/ms.studies.sv.conf
+# this file is generated dynamically. We copy it separately from files/ because
+# if not present, we do not want the error to be silently ignored
+COPY shanoir-ng-studies-0.0.1-SNAPSHOT.jar /opt/shanoir-ng/shanoir-ng-msapp.jar
 
-COPY docker-entrypoint.sh /opt/mysql/init/mariadb_init.sh
-RUN chmod +x /opt/mysql/init/mariadb_init.sh
-
-COPY container_init /dk/container_init
-RUN chmod +x /dk/container_init
-
-COPY shanoirng_studies.sql /dk/shanoirng_studies.sql
-COPY shanoirng_studies_tables.sql /dk/shanoirng_studies_tables.sql
-
-COPY studiesMigration.py /dk/studiesMigration.py
-RUN chmod +x /dk/studiesMigration.py
-
-EXPOSE 9900
-CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+# microservice name
+ENV MS="shanoir-ng-studies"

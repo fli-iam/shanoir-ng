@@ -28,6 +28,8 @@ spring:
     port: 25
     properties:
       mail.smtp.from: do-not-reply@inria.fr
+  rabbitmq:
+    host: shanoir-ng-rabbitmq
 #keycloak
 keycloak:
   realm: shanoir-ng
@@ -35,7 +37,7 @@ keycloak:
 kc.requests:
   client.id: admin-cli
   realm: master
-  # DANGEROUS, DO NOT USE IN PRODUCTION. Used to set same password to all users on database initialization.
+  # DANGEROUS, DO NOT ENABLE IN PRODUCTION. Used to set same password to all users on database initialization.
   debug.use.dummy.password: false
 # logging configuration
 logging:
@@ -91,5 +93,13 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
+  mail:
+    host: SMTP_HOST
+    port: SMTP_PORT
+    properties:
+      mail.smtp.from: do-not-reply@inria.fr
+#keycloak
+keycloak:
+  auth-server-url: SHANOIR_SERVER_URL/auth
 server:
   email-off: false

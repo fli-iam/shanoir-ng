@@ -1,0 +1,11 @@
+--- common.css
++++ common.css
+@@ -15,4 +15,4 @@
+-    --color-a: #5f0f4e;
+-    --color-b: #675682;
+-    --color-b-light: #E0DDE6;
+-    --color-b-light2: #76678E;
++    --color-a: #b00000;
++    --color-b: #992e2e;
++    --color-b-light: #edd0d0;
++    --color-b-light2: #ad5d5d;

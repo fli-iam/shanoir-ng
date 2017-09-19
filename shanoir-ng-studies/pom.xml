@@ -23,8 +23,6 @@
 		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
 		<spring.active.profile></spring.active.profile>
 		<docker.image.name>shanoir-ng/studies</docker.image.name>
-		<supervisor.file.name>ms.studies.sv.dev.conf</supervisor.file.name>
-		<container_init.file.name>container_init.dev</container_init.file.name>
 	</properties>
 
 	<dependencies>
@@ -221,14 +219,6 @@
 				<executions>
 					<execution>
 						<phase>package</phase>
-						<configuration>
-							<target>
-								<copy file="src/main/docker/${supervisor.file.name}"
-									tofile="src/main/docker/ms.studies.sv.conf" overwrite="true" />
-								<copy file="src/main/docker/${container_init.file.name}"
-									tofile="src/main/docker/container_init" overwrite="true" />
-							</target>
-						</configuration>
 						<goals>
 							<goal>run</goal>
 						</goals>
@@ -292,8 +282,6 @@
 			<id>qualif</id>
 			<properties>
 				<spring.active.profile>qualif</spring.active.profile>
-				<supervisor.file.name>ms.studies.sv.qualif.conf</supervisor.file.name>
-				<container_init.file.name>container_init.qualif</container_init.file.name>
 				<maven.test.skip>true</maven.test.skip>
 			</properties>
 		</profile>

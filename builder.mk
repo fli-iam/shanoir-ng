@@ -4,40 +4,41 @@
 
 # designed to build all images from scratch
 
+MICROSERVICES = users studies studycards
 
 # keycloak images
 #
 # https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-3%29-Docker-Keycloak
+keycloak: base-ms-image
+	(cd shanoir-ng-keycloak-auth    && mvn package)
+	(cd shanoir-ng-keycloak/docker/ && docker build -t shanoir-ng/keycloak .)
 
-keycloak-mysql:
-	(cd shanoir-ng-keycloak/dockers/mysql && docker build -t shanoir-ng/keycloak-mysql .)
-
-keycloak:
-	(cd shanoir-ng-keycloak-auth && mvn package)
-	(cd shanoir-ng-keycloak-init && mvn package)
-	(cd shanoir-ng-keycloak/dockers/keycloak/ && docker build -t shanoir-ng/keycloak .)
-
-	# prepare the package for the other containers
+users: keycloak-package
+keycloak-package:
+	# prepare the package for the shanoir-ng-users package
 	(cd shanoir-ng-users/ && mvn install -Pinit-keycloak)
 	(cd shanoir-ng-keycloak && mvn package)
 
-# base image for the microservices
-base-ms-image:
-	docker build -t shanoir-ng/debianjava8mariadbpython:latest shanoir-ng-template/DockerWithJdk8AndMariaDbAndPython
+# base image
+base-image:
+	docker build -t shanoir-ng/base shanoir-ng-template/shanoir-ng-base
 
-# shanoir-ng-users
-users studies studycards: %: base-ms-image
+# base image for the microservices
+base-ms-image: base-image
+	docker build -t shanoir-ng/base-ms shanoir-ng-template/shanoir-ng-base-ms
+
+# microservices
+$(MICROSERVICES): %: base-ms-image
 	# https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-4%29-Docker-shanoir-ng-users
 	(cd 'shanoir-ng-$@/' && mvn clean package docker:build -DskipTests -Pqualif)
 
 # shanoir-ng-nginx
-#
 # https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-6%29-Docker-Nginx-with-statics
-nginx:
+nginx: base-image
 	npm set registry https://registry.npmjs.org
 
 	(cd shanoir-ng-front && mvn package -Pqualif)
 	(cd shanoir-ng-nginx && docker build -t shanoir-ng/nginx:latest .)
 
 # all images for shanoir NG
-all: keycloak users studies studycards nginx
+all: keycloak $(MICROSERVICES) nginx

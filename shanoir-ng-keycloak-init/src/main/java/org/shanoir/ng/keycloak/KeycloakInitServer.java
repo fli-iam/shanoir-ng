@@ -34,46 +34,22 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 	private static final Logger LOG = LoggerFactory.getLogger(KeycloakInitServer.class);
 
 	private static final String BROWSER_FLOW = "browser";
-	private static final String FRONT_CLIENT_ID = "shanoir-ng-front";
 	private static final String NEW_BROWSER_FLOW = "Browser script";
 	private static final String NEW_EXECUTION_CONFIG_NAME = "CheckExpirationDateConfig";
 	private static final String REQUIRED_ACTION_ID = "record-login-date-action";
 	private static final String REQUIRED_ACTION_NAME = "Record Login Date Action";
 	private static final String SHANOIR_REALM_DISPLAY_NAME = "Shanoir";
-	private static final String SHANOIR_SERVER_URL_ENV = "SHANOIR_SERVER_URL";
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
 		try {
 			loadParams();
-			updateFrontClient();
 			createAuthenticationFlow();
 			updateRealm();
 			updateRequiredAction();
 		} catch (KeycloakInitException e) {
 			LOG.error("Keycloak server initialization failed.", e);
-		}
-	}
-
-	/*
-	 * Update front client: set URLs from environment variables
-	 */
-	private static void updateFrontClient() {
-		LOG.info("Update front client");
-
-		final String shanoirServerUrl = System.getenv(SHANOIR_SERVER_URL_ENV);
-
-		if (shanoirServerUrl != null && !shanoirServerUrl.contains("localhost")) {
-			final ClientsResource clientsResource = getKeycloak().realm(getKeycloakRealm()).clients();
-			final List<ClientRepresentation> clientRepresentations = clientsResource.findByClientId(FRONT_CLIENT_ID);
-			if (clientRepresentations != null && !clientRepresentations.isEmpty()) {
-				final ClientRepresentation clientRepresentation = clientRepresentations.get(0);
-				clientRepresentation.setRedirectUris(Arrays.asList(shanoirServerUrl + "/*"));
-				clientRepresentation.setWebOrigins(Arrays.asList(shanoirServerUrl));
-				final ClientResource clientResource = clientsResource.get(clientRepresentation.getId());
-				clientResource.update(clientRepresentation);
-			}
 		}
 	}
 
@@ -129,7 +105,7 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 			}
 		}
 
-		// Create new execution config
+		// Create new execution config (to prevent access from expired accounts)
 		LOG.info("Create new execution config");
 		final Map<String, String> config = new HashMap<>();
 		config.put("scriptCode",
@@ -158,14 +134,6 @@ public class KeycloakInitServer extends AbstractKeycloakInit {
 		realm.setLoginTheme("shanoir-theme");
 		realm.setPasswordPolicy("hashIterations and length and specialChars and digits and upperCase and lowerCase");
 		realm.setResetPasswordAllowed(Boolean.TRUE);
-		// SMTP server
-		Map<String, String> config = new HashMap<>();
-		config.put("from", getSmtpFrom());
-		config.put("fromDisplayName", getSmtpFromDisplayName());
-		config.put("host", getSmtpHost());
-		config.put("port", getSmtpPort());
-		realm.setSmtpServer(config);
-		getKeycloak().realm(getKeycloakRealm()).update(realm);
 	}
 
 	/*

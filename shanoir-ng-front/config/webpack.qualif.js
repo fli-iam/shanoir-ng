@@ -11,13 +11,13 @@ const AotPlugin = require('@ngtools/webpack').AotPlugin;
  * Webpack Constants
  */
 const ENV = process.env.ENV = process.env.NODE_ENV = 'production';
-const BACKEND_API_ROOT_URL = 'https://shanoir-qualif.irisa.fr/shanoir-ng';
+const BACKEND_API_ROOT_URL = 'SHANOIR_SERVER_URL/shanoir-ng';
 const METADATA = webpackMerge(commonConfig.metadata, {
     host: 'localhost',
     BACKEND_API_USERS_MS_URL: BACKEND_API_ROOT_URL + '/users',
     BACKEND_API_STUDIES_MS_URL: BACKEND_API_ROOT_URL + '/studies',
-    KEYCLOAK_BASE_URL: 'https://shanoir-qualif.irisa.fr/auth',
-    LOGOUT_REDIRECT_URL: 'https://shanoir-qualif.irisa.fr/shanoir-ng/index.html',
+    KEYCLOAK_BASE_URL: 'SHANOIR_SERVER_URL/auth',
+    LOGOUT_REDIRECT_URL: 'SHANOIR_SERVER_URL/shanoir-ng/index.html',
     port: 8080,
     ENV: ENV,
 });
