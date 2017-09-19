@@ -23,6 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
+import com.icegreen.greenmail.util.ServerSetupTest;
 
 /**
  * User detail service test.
@@ -42,7 +43,7 @@ public class EmailServiceTest {
 
 	@Before
 	public void setup() {
-		smtpServer = new GreenMail(new ServerSetup(25, null, "smtp"));
+		smtpServer = new GreenMail(ServerSetupTest.SMTP);
 		smtpServer.start();
 	}
 

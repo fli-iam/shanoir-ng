@@ -145,6 +145,7 @@ spring:
       ddl-auto: create
   mail:
     host: localhost
+    port: 3025
 server:
   email-off: false
 
