@@ -1,6 +1,6 @@
 FROM shanoir-ng/base
 
-RUN apt-get --no-install-recommends -qqy install nginx-light
+RUN apt-get --no-install-recommends -qqy install nginx-full
 
 # static files
 COPY files/. /
