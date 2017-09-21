@@ -8,10 +8,7 @@ import java.util.Map;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.shanoir.ng.role.Role;
-import org.shanoir.ng.role.RoleRepository;
 import org.shanoir.ng.user.User;
 import org.shanoir.ng.user.UserRepository;
 import org.shanoir.ng.utils.KeycloakUtils;
@@ -64,9 +61,6 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	private boolean keycloakUseDummyPassword;
 
 	@Autowired
-	private RoleRepository roleRepository;
-
-	@Autowired
 	private UserRepository userRepository;
 
 	private Keycloak keycloak;
@@ -116,19 +110,8 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	}
 
 	private void start() {
-
-/* already created by shanoir-ng-realm.json
-  		createRoles(); 		 */
+		// Roles already created by shanoir-ng-realm.json
 		createUsers();
-	}
-
-	private void createRoles() {
-		LOG.info("Create roles");
-
-		final Iterable<Role> roles = roleRepository.findAll();
-		for (final Role role : roles) {
-			getKeycloak().realm(keycloakRealm).roles().create(getRoleRepresentation(role));
-		}
 	}
 
 	private void createUsers() {
@@ -160,21 +143,6 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 			userResource.roles().realmLevel().add(Arrays.asList(
 					getKeycloak().realm(keycloakRealm).roles().get(user.getRole().getName()).toRepresentation()));
 		}
-	}
-
-	/*
-	 * Parse user to keycloak user representation.
-	 * 
-	 * @param user user.
-	 * 
-	 * @return keycloak user representation.
-	 */
-	private RoleRepresentation getRoleRepresentation(final Role role) {
-		final RoleRepresentation roleRepresentation = new RoleRepresentation();
-		roleRepresentation.setClientRole(true);
-		roleRepresentation.setName(role.getName());
-
-		return roleRepresentation;
 	}
 
 	/*
