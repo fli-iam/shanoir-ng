@@ -3,6 +3,7 @@
 # initialisation script to make generic shanoir-* aliases in /etc/hosts from
 # the existing hosts whose name starts with "${DOCKER_PREFIX}-"
 #
+import collections
 import logging
 import os
 import re
@@ -41,22 +42,23 @@ def error(msg, *k):
 def parse_etc_hosts():
     """return a dict {HOST: IPADDESS}"""
 
-    hosts = {}
+    hosts = collections.defaultdict(set)
     with open(ETC_HOSTS) as fp:
         for line in fp:
             mo = re.match("\s*(\d+\.\d+\.\d+\.\d+)\s+([^#]+)", line)
             if mo:
                 ip = mo.group(1)
                 for host in mo.group(2).split():
-                    old_ip = hosts.get(host)
-                    if old_ip is None:
-                        hosts[host] = ip
-                    else:
-                        # duplicated entry
-                        if hosts[host] != ip:
-                            error("host %r has multiple IP addresses: %s vs. %s",
-                                host, old_ip, ip)
-    return hosts
+                    hosts[host].add(ip)
+    
+    result = {}
+    for host, ips in hosts.items():
+        assert ips
+        ips = sorted(ips)
+        if len(ips) > 1:
+            log.warning("host %r has multiple IP addresses: %r --> will use %r", host, ips, ips[0])
+        result[host] = ips[0]
+    return result
 
 def patch_etc_hosts(hosts, prefix):
     old = prefix + "-"

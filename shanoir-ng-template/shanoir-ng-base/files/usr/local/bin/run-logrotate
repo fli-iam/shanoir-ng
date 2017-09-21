@@ -1,0 +1,63 @@
+#!/bin/sh
+
+set -e
+
+STATEFILE="/vol/log/.logrotate.status"
+CONFIG_DIRS="/vol/ro/logrotate.d /opt/logrotate.d"
+
+
+# make a temporary directory
+tmp=
+cleanup() {
+	[ -z "$tmp" ] || rm -rf -- "$tmp"
+}
+trap cleanup EXIT
+tmp="`mktemp -d`"
+
+tmp_conf="$tmp/logrotate.conf"
+tmp_d="$tmp/logrotate.d"
+
+mkdir -- "$tmp_d"
+
+cat >"$tmp_conf" <<EOF
+# see "man logrotate" for details
+# rotate log files weekly
+weekly
+
+# keep 4 weeks worth of backlogs
+rotate 4
+
+# create new (empty) log files after rotating old ones
+create
+
+# uncomment this if you want your log files compressed
+#compress
+
+# packages drop log rotation information into this directory
+include $tmp_d
+EOF
+
+
+# list all files in $CONFIG_DIRS
+(
+	for cfgdir in $CONFIG_DIRS
+	do
+		[ ! -d "$cfgdir" ] || ls -- "$cfgdir"
+	done
+) | sort | uniq | while read name
+# for each file, use the first one found (in the order of CONFIG_DIRS)
+do
+	for cfgdir in $CONFIG_DIRS
+	do
+		candidate="$cfgdir/$name"
+		if [ -f "$candidate" ] ; then
+			cp "$candidate" "$tmp_d"/
+			break
+		fi
+	done
+done
+
+# run logrotate
+logrotate "$tmp_conf" -s "$STATEFILE"
+
+exit 0

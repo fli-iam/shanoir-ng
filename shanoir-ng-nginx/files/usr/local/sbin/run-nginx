@@ -4,7 +4,7 @@ set -e
 
 # runtime config
 configure-hosts
-override -e SHANOIR_SERVER_URL -e SHANOIR_INSTANCE	\
+override -e SHANOIR_SERVER_URL -e SHANOIR_INSTANCE -e DOCKER_PREFIX	\
 	/etc/nginx/nginx.conf			\
 	/etc/nginx/html/index.html		\
 	/etc/nginx/html/app.*.js		\
