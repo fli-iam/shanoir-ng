@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.importer.anonymization.AnonymizationServiceImpl;
+import org.shanoir.ng.importer.anonymization.SendToPacs;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
 
 
@@ -25,15 +26,33 @@ public class AnonymizationServiceTest {
 	@InjectMocks
 	private AnonymizationServiceImpl anonymizationService;
 	
-	private static final String FOLDER_PATH = "C:/Users/...";
-	private static final String IMAGE_PATH = "/IMAGES/IM000001";
-	private static final String PROFILE = "Basic Profile";
+	@InjectMocks
+	private SendToPacs sendToPacs;
 
 	
 	
+	private static final String DICOM_IMAGE_Folder_PATH = "C:/Users/ifakhfak/Documents/sampleToAnonymize/IMAGES";
+	private static final String Folder_TO_SEND_PATH = "C:/Users/ifakhfak/Documents/sampleToAnonymize";
+	private static final String PROFILE = "Basic Profile";
 	
+	
+	/**
+	 * Test of readAnonymizationFile function that reads the xml file specifying the anonymization profile
+	 * @throws ShanoirImportException
+	 */
 	@Test
-	public void anonymizeTest() throws ShanoirImportException {
+	public void readAnonymizationFileTest() throws ShanoirImportException 
+	{	
+		anonymizationService.readAnonymizationFile(PROFILE);
+	}
+	
+	/**
+	 * Test of the anonymization process
+	 * @throws ShanoirImportException
+	 */
+	@Test
+	public void anonymizationTest() throws ShanoirImportException 
+	{
 		ArrayList<File> dicomImages = createImageArray();
 		long chrono = java.lang.System.currentTimeMillis() ; 
 		anonymizationService.anonymize(dicomImages, PROFILE);
@@ -42,28 +61,32 @@ public class AnonymizationServiceTest {
 		System.out.println("Spended time to anonymize file = " + temps + " ms") ; 
 	}
 	
-	@Test
-	public void readAnonymizationFileTest() throws ShanoirImportException {
-		
-		anonymizationService.readAnonymizationFile(PROFILE);
 
-	}
-	
-	@Test
-	public void performAnonymizationTest() throws ShanoirImportException {
-		
-		File imagePath = new File(FOLDER_PATH + IMAGE_PATH);
-		anonymizationService.performAnonymization(imagePath, PROFILE);
+	private ArrayList<File> createImageArray() 
+	{
+		ArrayList<File> array =  new ArrayList<File>();			
+		File folder = new File(DICOM_IMAGE_Folder_PATH);
+		File[] listOfFiles = folder.listFiles();
 
-	}
-
-	private ArrayList<File> createImageArray() {
-		ArrayList<File> array =  new ArrayList<File>();
-		array.add(new File(FOLDER_PATH + IMAGE_PATH));
+		for (File file : listOfFiles) {
+		    if (file.isFile()) {
+		    	array.add(file);
+		    }
+		}
 		return array;
 	}
 
-
+	/**
+	 * Test of the function that sends DICOMs to Pacs
+	 * To be used to verify that the anonymised files could be stored in DCM4CHEE PACS
+	 * Please uncomment this function after anonymising DICOMS to send them to PACS
+	 * @throws ShanoirImportException
+	 */
+	/*@Test
+	public void sendToPACSTest() throws ShanoirImportException 
+	{
+		sendToPacs.processSendToPacs(Folder_TO_SEND_PATH); 
+	}*/
 
 
 }

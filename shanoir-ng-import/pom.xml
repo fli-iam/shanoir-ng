@@ -148,6 +148,11 @@
 		    <version>${dcm4che-dcmr.version}</version>
 		</dependency>
 		<dependency>
+    <groupId>org.dcm4che.tool</groupId>
+    	<artifactId>dcm4che-tool-storescu</artifactId>
+    	<version>${dcm4che-dcmr.version}</version>
+	</dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.5.0</version>
