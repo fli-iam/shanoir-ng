@@ -33,7 +33,7 @@ public class AnonymizationServiceTest {
 	
 	private static final String DICOM_IMAGE_Folder_PATH = "C:/Users/ifakhfak/Documents/sampleToAnonymize/IMAGES";
 	private static final String Folder_TO_SEND_PATH = "C:/Users/ifakhfak/Documents/sampleToAnonymize";
-	private static final String PROFILE = "Basic Profile";
+	private static final String PROFILE = "MR Profile";
 	
 	
 	/**

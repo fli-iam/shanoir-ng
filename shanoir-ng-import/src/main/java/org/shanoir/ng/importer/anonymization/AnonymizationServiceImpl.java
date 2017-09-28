@@ -100,7 +100,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 					final String basicProfile = anonymizationMAP.get(tagString);
 					anonymizeTag(tagInt, basicProfile, metaInformationAttributes);
 				}
-
 			}
 
 			// read the other tags
@@ -124,7 +123,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 					} else if (tagInt == Tag.PatientID) {
 						anonymizePatientId(tagInt, datasetAttributes);
 					} else if (tagInt == Tag.PatientBirthDate) {
-						anonymizeBDd(tagInt, datasetAttributes);
+						anonymizeBD(tagInt, datasetAttributes);
+					}
+					else if (tagInt ==Tag.ContrastBolusAgent) {
+						anonymizeContrastBolusAgent(tagInt, datasetAttributes);
 					}
 					/*
 					 * else if(tagInt == Tag.StudyID) {
@@ -319,12 +321,28 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	}
 
-	private void anonymizeBDd(int tagInt, Attributes attributes) {
+	private void anonymizeBD(int tagInt, Attributes attributes) {
 		String value = "20170101";
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
 
 	}
+	private void anonymizeContrastBolusAgent(int tagInt, Attributes attributes) {
+		String value ;
+		String contrastAgent = attributes.getString(tagInt);
+		if(contrastAgent == null || contrastAgent == "")
+		{
+			value = "";
+		}
+		else
+		{
+			SecureRandom random = new SecureRandom();
+			value = new BigInteger(130, random).toString(32);
+		}
+		
+		anonymizeTagAccordingToVR(attributes, tagInt, value);
 
+	}
+	
 	/*private void anonymizeStudyId(int tagInt, Attributes attributes) {
 
 		String value;
@@ -362,10 +380,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		String result = "";
 
 		if (basicProfie != null) {
-			if (basicProfie.equals("X") || basicProfie.equals("X/Z") || basicProfie.equals("X/D")
-					|| basicProfie.equals("X/Z/D") || basicProfie.equals("X/Z/U*")) {
+			if (basicProfie.equals("X")) {
 				result = null;
-			} else if (basicProfie.equals("Z") || basicProfie.equals("Z/D")) {
+			} else if (basicProfie.equals("Z")) {
 				result = "";
 			} else if (basicProfie.equals("D")) {
 				SecureRandom random = new SecureRandom();
