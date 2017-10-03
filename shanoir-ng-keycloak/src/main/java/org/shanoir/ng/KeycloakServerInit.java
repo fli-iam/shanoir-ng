@@ -9,6 +9,7 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.user.User;
 import org.shanoir.ng.user.UserRepository;
 import org.shanoir.ng.utils.KeycloakUtils;
@@ -62,6 +63,9 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private EmailService emailService;
 
 	private Keycloak keycloak;
 
@@ -128,16 +132,19 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 			// Reset user password
 			final CredentialRepresentation credential = new CredentialRepresentation();
 			credential.setType(CredentialRepresentation.PASSWORD);
+			String newPassword = PasswordUtils.generatePassword();
 			if (keycloakUseDummyPassword) {
 				// debug setup: use a fixed password for everybody
-				credential.setValue("&a1A&a1A");
+				newPassword = "&a1A&a1A";
 				credential.setTemporary(false);
 			} else {
 				// normal setup: generate a random password and force the user to change it
-				credential.setValue(PasswordUtils.generatePassword());
 				credential.setTemporary(true);
 			}
+			credential.setValue(newPassword);
 			userResource.resetPassword(credential);
+			
+			emailService.notifyUserResetPassword(user, newPassword);
 
 			// Add realm role
 			userResource.roles().realmLevel().add(Arrays.asList(

@@ -134,7 +134,7 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyUserExtensionRequestAccepted(User user) {
+	public void notifyUserExtensionRequestAccepted(final User user) {
 		if (emailOff) {
 			return;
 		}
@@ -160,7 +160,7 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyUserExtensionRequestDenied(User user) {
+	public void notifyUserExtensionRequestDenied(final User user) {
 		if (emailOff) {
 			return;
 		}
@@ -176,6 +176,31 @@ public class EmailServiceImpl implements EmailService {
 			variables.put("serverAddress", shanoirServerAddress);
 			variables.put("expirationDate", shortDateFormatEN.format(user.getExpirationDate()));
 			final String content = build("notifyUserExtensionRequestDenied", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
+	}
+	
+	@Override
+	public void notifyUserResetPassword(final User user, final String password) {
+		if (emailOff) {
+			return;
+		}
+
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(user.getEmail());
+			messageHelper.setSubject("[Shanoir] Réinitialisation du mot de passe");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("firstname", user.getFirstName());
+			variables.put("lastname", user.getLastName());
+			variables.put("newPassword", password);
+			final String content = build("notifyUserResetPassword", variables);
 			messageHelper.setText(content, true);
 		};
 		try {

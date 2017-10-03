@@ -34,6 +34,8 @@ import com.icegreen.greenmail.util.ServerSetupTest;
 @ActiveProfiles("test")
 public class EmailServiceTest {
 
+	private static final String NEW_PASSWORD = "testPwd";
+	
 	@Autowired
 	private EmailServiceImpl emailService;
 	
@@ -96,6 +98,14 @@ public class EmailServiceTest {
 
 		assertReceivedMessageContains("DENIED: Your Shanoir account extension request has been denied",
 				"has been denied");
+	}
+
+	@Test
+	public void notifyUserResetPasswordTest() throws Exception {
+		emailService.notifyUserResetPassword(ModelsUtil.createUser(), NEW_PASSWORD);
+
+		assertReceivedMessageContains("[Shanoir] Réinitialisation du mot de passe",
+				NEW_PASSWORD);
 	}
 
 	private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)

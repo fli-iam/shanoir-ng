@@ -108,7 +108,7 @@ spring:
   rabbitmq:
     host: localhost
 server:
-    port: 9901
+  port: 9901
 front.server:
   address: http://localhost:8080/shanoir-ng/
   url: http://localhost:8080

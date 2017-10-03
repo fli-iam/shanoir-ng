@@ -52,4 +52,14 @@ public interface EmailService {
 	 */
 	void notifyUserExtensionRequestDenied(User user);
 
+	/**
+	 * Send an email on user password reset.
+	 * 
+	 * @param user
+	 *            user.
+	 * @param password
+	 *            new password.
+	 */
+	void notifyUserResetPassword(User user, String password);
+
 }

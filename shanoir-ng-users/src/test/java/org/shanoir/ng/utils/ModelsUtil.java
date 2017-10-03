@@ -26,8 +26,8 @@ public final class ModelsUtil {
 	
 	// User data
 	public static final String USER_EMAIL = "toto@to.to";
-	public static final String USER_FIRSTNAME = "toto";
-	public static final String USER_LASTNAME = "toto";
+	public static final String USER_FIRSTNAME = "Toto";
+	public static final String USER_LASTNAME = "Toto";
 	
 	// Login/password
 	public static final String NEW_USER_LOGIN = "user";
