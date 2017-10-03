@@ -1,8 +1,10 @@
 -- Populates database for test
 
-INSERT INTO template 
+
+
+INSERT INTO Examination
+	(id, note, investigator_external)
 VALUES 
-	(1,'Data1'),
-	(2,'Data2'),
-	(3,'Data3'),
-	(4,'Data4');
+	(1,'examination1', false),
+	(2,'examination2', false),
+	(3,'examination3', false);

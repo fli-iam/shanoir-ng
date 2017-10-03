@@ -12,6 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.importer.Template;
 import org.shanoir.ng.importer.TemplateRepository;
+import org.shanoir.ng.importer.examination.Examination;
+import org.shanoir.ng.importer.examination.ExaminationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,21 +25,21 @@ import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapp
 import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 
 /**
- * Tests for repository 'template'.
+ * Tests for repository 'examination'.
  * 
- * @author msimon
+ * @author ifakhfakh
  *
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @ActiveProfiles("test")
-public class TemplateRepositoryTest {
+public class ExaminationRepositoryTest {
 
 	private static final String TEMPLATE_TEST_1_DATA = "Data1";
 	private static final Long TEMPLATE_TEST_1_ID = 1L;
 	
 	@Autowired
-	private TemplateRepository repository;
+	private ExaminationRepository repository;
 	
 	/*
 	 * Mocks used to avoid unsatisfied dependency exceptions.
@@ -51,36 +53,36 @@ public class TemplateRepositoryTest {
 	
 	@Test
 	public void findAllTest() throws Exception {
-		Iterable<Template> templatesDb = repository.findAll();
-		assertThat(templatesDb).isNotNull();
+		Iterable<Examination> examinationDb = repository.findAll();
+		assertThat(examinationDb).isNotNull();
 		int nbTemplates = 0;
-		Iterator<Template> templatesIt = templatesDb.iterator();
-		while (templatesIt.hasNext()) {
-			templatesIt.next();
+		Iterator<Examination> examinationsIt = examinationDb.iterator();
+		while (examinationsIt.hasNext()) {
+			examinationsIt.next();
 			nbTemplates++;
 		}
-		assertThat(nbTemplates).isEqualTo(4);
+		assertThat(nbTemplates).isEqualTo(3);
 	}
 	
-	@Test
+	/*@Test
 	public void findByTest() throws Exception {
-		List<Template> templatesDb = repository.findBy("data", TEMPLATE_TEST_1_DATA);
-		assertNotNull(templatesDb);
-		assertThat(templatesDb.size()).isEqualTo(1);
-		assertThat(templatesDb.get(0).getId()).isEqualTo(TEMPLATE_TEST_1_ID);
-	}
+		List<Examination> examinationDb = repository.findBy("data", TEMPLATE_TEST_1_DATA);
+		assertNotNull(examinationDb);
+		assertThat(examinationDb.size()).isEqualTo(1);
+		assertThat(examinationDb.get(0).getId()).isEqualTo(TEMPLATE_TEST_1_ID);
+	}*/
 	
-	@Test
+	/*@Test
 	public void findByDataTest() throws Exception {
 		Optional<Template> templateDb = repository.findByData(TEMPLATE_TEST_1_DATA);
 		assertTrue(templateDb.isPresent());
 		assertThat(templateDb.get().getId()).isEqualTo(TEMPLATE_TEST_1_ID);
-	}
+	}*/
 	
-	@Test
+	/*@Test
 	public void findOneTest() throws Exception {
-		Template templateDb = repository.findOne(TEMPLATE_TEST_1_ID);
-		assertThat(templateDb.getData()).isEqualTo(TEMPLATE_TEST_1_DATA);
-	}
+		Examination examinationDb = repository.findOne(TEMPLATE_TEST_1_ID);
+		assertThat(examinationDb.getData()).isEqualTo(TEMPLATE_TEST_1_DATA);
+	}*/
 	
 }
