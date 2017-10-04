@@ -57,10 +57,6 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void notifyAccountWillExpire(User user) {
-		if (emailOff) {
-			return;
-		}
-
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);
@@ -213,10 +209,6 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void notifyUserResetPassword(final User user, final String password) {
-		if (emailOff) {
-			return;
-		}
-
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);
