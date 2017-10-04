@@ -53,6 +53,13 @@ public class EmailServiceTest {
 	}
 
 	@Test
+	public void notifyAccountWillExpireTest() throws Exception {
+		emailService.notifyAccountWillExpire(ModelsUtil.createUser());
+
+		assertReceivedMessageContains("Shanoir Account Expiration", "will expire on");
+	}
+
+	@Test
 	public void notifyAdminAccountRequestTest() throws Exception {
 		final User user = ModelsUtil.createUser(null);
 		final AccountRequestInfo info = new AccountRequestInfo();

@@ -105,6 +105,8 @@ spring:
     show-sql: true
   jooq:
     sql-dialect: Mysql
+  mail:
+    host: localhost
   rabbitmq:
     host: localhost
 server:

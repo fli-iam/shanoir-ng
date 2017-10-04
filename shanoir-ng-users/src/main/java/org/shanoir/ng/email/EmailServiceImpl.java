@@ -52,8 +52,34 @@ public class EmailServiceImpl implements EmailService {
 	@Value("${front.server.address}")
 	private String shanoirServerAddress;
 
-	private static final DateFormat shortDateFormatEN = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-			DateFormat.SHORT, new Locale("EN", "en"));
+	private static final DateFormat shortDateFormatEN = DateFormat.getDateInstance(DateFormat.SHORT,
+			new Locale("EN", "en"));
+
+	@Override
+	public void notifyAccountWillExpire(User user) {
+		if (emailOff) {
+			return;
+		}
+
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(user.getEmail());
+			messageHelper.setSubject("Shanoir Account Expiration");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("firstname", user.getFirstName());
+			variables.put("lastname", user.getLastName());
+			variables.put("serverAddress", shanoirServerAddress);
+			variables.put("expirationDate", shortDateFormatEN.format(user.getExpirationDate()));
+			final String content = build("notifyAccountWillExpire", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
+	}
 
 	@Override
 	public void notifyAdminAccountRequest(final User user) {
@@ -184,7 +210,7 @@ public class EmailServiceImpl implements EmailService {
 			LOG.error("Error while sending email to new user " + user.getEmail(), e);
 		}
 	}
-	
+
 	@Override
 	public void notifyUserResetPassword(final User user, final String password) {
 		if (emailOff) {

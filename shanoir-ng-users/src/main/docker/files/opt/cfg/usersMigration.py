@@ -58,7 +58,7 @@ for row in sourceCursor.fetchall():
 
 query = """INSERT INTO users
     (id, can_access_to_dicom_association, creation_date, email, first_name, last_login, last_name, username, role_id,
-    expiration_date, is_first_expiration_notification_sent, is_second_expiration_notification_sent, account_request_demand)
+    expiration_date, first_expiration_notification_sent, second_expiration_notification_sent, account_request_demand)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
 targetCursor.executemany(query, users)

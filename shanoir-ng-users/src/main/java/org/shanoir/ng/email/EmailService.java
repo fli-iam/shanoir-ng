@@ -11,6 +11,14 @@ import org.shanoir.ng.user.User;
 public interface EmailService {
 
 	/**
+	 * Send an email to user if account will expire soon.
+	 * 
+	 * @param user
+	 *            user.
+	 */
+	void notifyAccountWillExpire(User user);
+
+	/**
 	 * Send an email to administrators to indicate an account request.
 	 * 
 	 * @param user

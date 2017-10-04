@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -96,6 +97,24 @@ public class UserRepositoryTest {
 	public void findOneTest() throws Exception {
 		User userDb = repository.findOne(USER_TEST_1_ID);
 		assertThat(userDb.getUsername()).isEqualTo(USER_TEST_1_USERNAME);
+	}
+	
+	@Test
+	public void findByExpirationDateLessThanAndFirstExpirationNotificationSentTest() throws Exception {
+		// 01/01/2017
+		final Date date = new Date(1483228800000L);
+		List<User> usersDb = repository.findByExpirationDateLessThanAndFirstExpirationNotificationSent(date, true);
+		assertThat(usersDb.size()).isEqualTo(1);
+		assertThat(usersDb.get(0).getId()).isEqualTo(4L);
+	}
+	
+	@Test
+	public void findByExpirationDateLessThanAndNotFirstExpirationNotificationSentTest() throws Exception {
+		// 01/06/2017
+		final Date date = new Date(1496275200000L);
+		List<User> usersDb = repository.findByExpirationDateLessThanAndFirstExpirationNotificationSent(date, false);
+		assertThat(usersDb.size()).isEqualTo(1);
+		assertThat(usersDb.get(0).getId()).isEqualTo(5L);
 	}
 	
 }
