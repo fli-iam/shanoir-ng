@@ -2,7 +2,6 @@
 server:
   administrator.email: shanoir-dev-test@lists.gforge.inria.fr
   display-name: Shanoir
-  email-off: true
   port: 9900
   error:
     whitelabel:
@@ -148,8 +147,6 @@ spring:
   mail:
     host: localhost
     port: 3025
-server:
-  email-off: false
 
 ---
 
@@ -173,7 +170,6 @@ spring:
       mail.smtp.from: do-not-reply@inria.fr
 server:
   administrator.email: SHANOIR_ADMIN_EMAIL
-  email-off: false
 front.server:
   address: SHANOIR_SERVER_URL/
   url: SHANOIR_SERVER_URL
@@ -188,5 +184,3 @@ kc:
     admin:
       login:    KEYCLOAK_USER
       password: KEYCLOAK_PASSWORD
-  
-  

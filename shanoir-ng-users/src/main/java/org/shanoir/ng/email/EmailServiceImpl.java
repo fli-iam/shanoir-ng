@@ -43,9 +43,6 @@ public class EmailServiceImpl implements EmailService {
 	@Autowired
 	private UserRepository userRepository;
 
-	@Value("${server.email-off}")
-	private boolean emailOff;
-
 	@Value("${server.administrator.email}")
 	private String administratorEmail;
 
@@ -79,10 +76,6 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void notifyAdminAccountRequest(final User user) {
-		if (emailOff) {
-			return;
-		}
-
 		// Get admins emails
 		final List<String> adminEmails = userRepository.findAdminEmails();
 
@@ -106,10 +99,6 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void notifyNewUser(final User user, final String password) {
-		if (emailOff) {
-			return;
-		}
-
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);
@@ -132,10 +121,6 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void notifyUserAccountRequestAccepted(final User user) {
-		if (emailOff) {
-			return;
-		}
-
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);
@@ -157,10 +142,6 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void notifyUserExtensionRequestAccepted(final User user) {
-		if (emailOff) {
-			return;
-		}
-
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);
@@ -183,10 +164,6 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void notifyUserExtensionRequestDenied(final User user) {
-		if (emailOff) {
-			return;
-		}
-
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);

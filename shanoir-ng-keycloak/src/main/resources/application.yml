@@ -1,6 +1,5 @@
 # server configuration
 server:
-  email-off: true
   port: 9999
 spring:
   datasource:
@@ -101,5 +100,3 @@ spring:
 #keycloak
 keycloak:
   auth-server-url: SHANOIR_SERVER_URL/auth
-server:
-  email-off: false
