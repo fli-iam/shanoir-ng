@@ -15,10 +15,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableSwagger2
 @EnableScheduling
-public class ShanoirStudiesApplication {
+public class ShanoirUsersApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ShanoirStudiesApplication.class, args);
+		SpringApplication.run(ShanoirUsersApplication.class, args);
 	}
 
 }
