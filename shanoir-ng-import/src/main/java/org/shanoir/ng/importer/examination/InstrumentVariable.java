@@ -41,14 +41,9 @@ public class InstrumentVariable extends HalEntity {
 	private Instrument instrument;
 	
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "domain", nullable = false, updatable = true)
-	private Domain domain;
+	private Long domain;
 	
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "quality", nullable = false, updatable = true)
-	private Quality quality;
+	private Long quality;
 	
 	
 	@OneToMany(mappedBy = "instrumentVariable", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -118,19 +113,23 @@ public class InstrumentVariable extends HalEntity {
 		this.instrument = instrument;
 	}
 
-	public Domain getDomain() {
+
+
+	public Long getDomain() {
 		return domain;
 	}
 
-	public void setDomain(Domain domain) {
+	public void setDomain(Long domain) {
 		this.domain = domain;
 	}
 
-	public Quality getQuality() {
+
+
+	public Long getQuality() {
 		return quality;
 	}
 
-	public void setQuality(Quality quality) {
+	public void setQuality(Long quality) {
 		this.quality = quality;
 	}
 
