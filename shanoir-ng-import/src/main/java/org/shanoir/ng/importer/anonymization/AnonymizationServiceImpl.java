@@ -2,7 +2,6 @@ package org.shanoir.ng.importer.anonymization;
 
 import java.io.File;
 import java.io.FileInputStream;
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -10,8 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -124,8 +121,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 						anonymizePatientId(tagInt, datasetAttributes);
 					} else if (tagInt == Tag.PatientBirthDate) {
 						anonymizeBD(tagInt, datasetAttributes);
-					}
-					else if (tagInt ==Tag.ContrastBolusAgent) {
+					} else if (tagInt == Tag.ContrastBolusAgent) {
 						anonymizeContrastBolusAgent(tagInt, datasetAttributes);
 					}
 					/*
@@ -147,7 +143,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 						final String basicProfile = anonymizationMAP.get(overlayDataTags);
 						anonymizeTag(tagInt, basicProfile, datasetAttributes);
 					}
-
 				}
 			}
 
@@ -326,46 +321,37 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
 
 	}
+
 	private void anonymizeContrastBolusAgent(int tagInt, Attributes attributes) {
-		String value ;
+		String value;
 		String contrastAgent = attributes.getString(tagInt);
-		if(contrastAgent == null || contrastAgent == "")
-		{
+		if (contrastAgent == null || contrastAgent == "") {
 			value = "";
-		}
-		else
-		{
+		} else {
 			SecureRandom random = new SecureRandom();
 			value = new BigInteger(130, random).toString(32);
 		}
-		
+
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
 
 	}
-	
-	/*private void anonymizeStudyId(int tagInt, Attributes attributes) {
 
-		String value;
-		if (studyIds != null && studyIds.size() != 0 && studyIds.get(attributes.getString(tagInt)) != null) {
-			value = studyIds.get(attributes.getString(tagInt));
-		}
-
-		else {
-			char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-			StringBuilder sb = new StringBuilder();
-			Random random = new Random();
-			for (int i = 0; i < 10; i++) {
-				char c = chars[random.nextInt(chars.length)];
-				sb.append(c);
-			}
-			String output = sb.toString();
-			System.out.println(output);
-
-			value = output.toString();
-			studyIds.put(attributes.getString(tagInt), value);
-		}
-		anonymizeTagAccordingToVR(attributes, tagInt, value);
-	}*/
+	/*
+	 * private void anonymizeStudyId(int tagInt, Attributes attributes) {
+	 * 
+	 * String value; if (studyIds != null && studyIds.size() != 0 &&
+	 * studyIds.get(attributes.getString(tagInt)) != null) { value =
+	 * studyIds.get(attributes.getString(tagInt)); }
+	 * 
+	 * else { char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+	 * StringBuilder sb = new StringBuilder(); Random random = new Random(); for
+	 * (int i = 0; i < 10; i++) { char c = chars[random.nextInt(chars.length)];
+	 * sb.append(c); } String output = sb.toString();
+	 * System.out.println(output);
+	 * 
+	 * value = output.toString(); studyIds.put(attributes.getString(tagInt),
+	 * value); } anonymizeTagAccordingToVR(attributes, tagInt, value); }
+	 */
 
 	/**
 	 * Get the anonymized value of the tag
