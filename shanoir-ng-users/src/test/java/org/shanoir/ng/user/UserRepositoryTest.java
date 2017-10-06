@@ -100,21 +100,21 @@ public class UserRepositoryTest {
 	}
 	
 	@Test
-	public void findByExpirationDateLessThanAndFirstExpirationNotificationSentTest() throws Exception {
-		// 01/01/2017
-		final Date date = new Date(1483228800000L);
-		List<User> usersDb = repository.findByExpirationDateLessThanAndFirstExpirationNotificationSent(date, true);
+	public void findByExpirationDateLessThanAndFirstExpirationNotificationSentFalseTest() throws Exception {
+		// 15/06/2017
+		final Date date = new Date(1497484800000L);
+		List<User> usersDb = repository.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(date);
 		assertThat(usersDb.size()).isEqualTo(1);
-		assertThat(usersDb.get(0).getId()).isEqualTo(4L);
+		assertThat(usersDb.get(0).getId()).isEqualTo(5L);
 	}
 	
 	@Test
-	public void findByExpirationDateLessThanAndNotFirstExpirationNotificationSentTest() throws Exception {
-		// 01/06/2017
-		final Date date = new Date(1496275200000L);
-		List<User> usersDb = repository.findByExpirationDateLessThanAndFirstExpirationNotificationSent(date, false);
+	public void findByExpirationDateLessThanAndSecondExpirationNotificationSentFalseTest() throws Exception {
+		// 01/01/2017
+		final Date date = new Date(1483228800000L);
+		List<User> usersDb = repository.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(date);
 		assertThat(usersDb.size()).isEqualTo(1);
-		assertThat(usersDb.get(0).getId()).isEqualTo(5L);
+		assertThat(usersDb.get(0).getId()).isEqualTo(4L);
 	}
 	
 }

@@ -79,6 +79,22 @@ public interface UserService extends UniqueCheckableService<User> {
 	Optional<User> findByUsername(String username);
 
 	/**
+	 * Find users who have account that will soon expire and have not received
+	 * first notification.
+	 * 
+	 * @return list of users.
+	 */
+	List<User> getUsersToReceiveFirstExpirationNotification();
+
+	/**
+	 * Find users who have account that will soon expire and have not received
+	 * second notification.
+	 * 
+	 * @return list of users.
+	 */
+	List<User> getUsersToReceiveSecondExpirationNotification();
+
+	/**
 	 * Request a date extension for an user.
 	 * 
 	 * @param userId
@@ -108,6 +124,16 @@ public interface UserService extends UniqueCheckableService<User> {
 	 * @throws ShanoirUsersException
 	 */
 	User update(User user) throws ShanoirUsersException;
+
+	/**
+	 * Update expiration notification for an user.
+	 * 
+	 * @param user
+	 *            user to update.
+	 * @param firstNotification
+	 *            is it first notification?
+	 */
+	void updateExpirationNotification(User user, boolean firstNotification);
 
 	/**
 	 * Update a user from the old Shanoir

@@ -43,15 +43,23 @@ public interface UserRepository extends CrudRepository<User, Long>, UserReposito
 	Optional<User> findByUsername(String username);
 
 	/**
-	 * Find users who have account that will soon expire.
+	 * Find users who have account that will soon expire and have not received
+	 * first notification.
 	 * 
 	 * @param expirationDate
 	 *            expiration date to check.
-	 * @param firstExpirationNotificationSent
-	 *            first notification sent?
 	 * @return list of users.
 	 */
-	List<User> findByExpirationDateLessThanAndFirstExpirationNotificationSent(Date expirationDate,
-			boolean firstExpirationNotificationSent);
+	List<User> findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Date expirationDate);
+
+	/**
+	 * Find users who have account that will soon expire and have not received
+	 * second notification.
+	 * 
+	 * @param expirationDate
+	 *            expiration date to check.
+	 * @return list of users.
+	 */
+	List<User> findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Date expirationDate);
 
 }
