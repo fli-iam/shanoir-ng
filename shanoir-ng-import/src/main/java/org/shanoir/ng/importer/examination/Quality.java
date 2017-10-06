@@ -1,47 +1,151 @@
 package org.shanoir.ng.importer.examination;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-
-import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.hateoas.Links;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 /**
  * Quality.
  * 
  * @author ifakhfakh
  *
  */
-@Entity
-@Table(name = "quality")
-@JsonPropertyOrder({ "_links", "id", "name"})
-public class Quality extends HalEntity {
 
+
+public enum Quality {
+
+
+	/***
+	 *  ambulation performance with bilateral assistance.
+	 */
+	AMBULATION_PERFORMANCE_WITH_BILATERAL_ASSISTANCE(1),
 	
-	private String name;
+	/**
+	 * ambulation performance with unilateral assistance.
+	 */
+	AMBULATION_PERFORMANCE_WITH_UNILATERAL_ASSISTANCE(2),
+	
+	/***
+	 *  ambulation performance without assistance.
+	 */
+	AMBULATION_PERFORMANCE_WITHOUT_ASSISTANCE(3),
+	
+	/***
+	 *  bowel-bladder-functions performance.
+	 */
+	BOWEL_BLADDER_FUNCTIONS_PERFORMANCE(4),
+	
+	/***
+	 *  brainstem-functions performance.
+	 */
+	BRAINSTEM_FUNCTIONS_PERFORMANCE(5),
+	
+	/***
+	 *  calculation performance.
+	 */
+	CALCULATION_PERFORMANCE(6),
+	
+	/***
+	 *  cerebellar-functions performance.
+	 */
+	CEREBELLAR_FUNCTIONS_PERFORMANCE(7),
+	
+	/***
+	 *  cerebral-functions performance.
+	 */
+	CEREBRAL_FUNCTIONS_PERFORMANCE(8),
+	
+	/***
+	 *  constructive-realization performance.
+	 */
+	CONSTRUCTIVE_REALIZATION_PERFORMANCE(9),
+	
+	/***
+	 *  disability-status.
+	 */
+	DISABILITY_STATUS(10),
+	
+	/***
+	 *  episodic-memory performance.
+	 */
+	EPISODIC_MEMORY_PERFORMANCE(11),
+	
+	/***
+	 *  global-cognitive-performance.
+	 */
+	GLOBAL_COGNITIVE_PERFORMANCE(12),
+	
+	/***
+	 *  language performance.
+	 */
+	LANGUAGE_PERFORMANCE(13),
+	
+	/***
+	 *  optic-functions performance.
+	 */
+	OPTIC_FUNCTIONS_PERFORMANCE(14),
+	
+	/***
+	 *  pyramidal-functions performance.
+	 */
+	PYRAMIDAL_FUNCTIONS_PERFORMANCE(15),
+	
+	/***
+	 *  sensory-functions performance.
+	 */
+	SENSORY_FUNCTIONS_PERFORMANCE(16),
+	
+	/***
+	 *  spatial-orientation-orientation-performance.
+	 */
+	SPATIAL_ORIENTATION_ORIENTATION_PERFORMANCE(17),
+	
+	/***
+	 *  temporal-orientation-orientation-performance.
+	 */
+	TEMPORAL_ORIENTATION_ORIENTATION_PERFORMANCE(18),
+	
+	/***
+	 *  temporo-spatial-orientation-performance.
+	 */
+	TEMPORO_SPATIAL_ORIENTATION_PERFORMANCE(19);
+	
+
+	private int id;
+	
 
 	/**
-	 * Init HATEOAS links
+	 * Constructor.
+	 * 
+	 * @param id
+	 *            id
 	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "examination/" + getId());
+	private Quality(final int id) {
+		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	/**
+	 * Get a quality by its id.
+	 * 
+	 * @param id
+	 *            quality id.
+	 * @return quality.
+	 */
+	public static Quality getQuality(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (Quality quality : Quality.values()) {
+			if (id.equals(quality.getId())) {
+				return quality;
+			}
+		}
+		throw new IllegalArgumentException("No matching quality for id " + id);
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
 	}
-
-
 
 }
+
+

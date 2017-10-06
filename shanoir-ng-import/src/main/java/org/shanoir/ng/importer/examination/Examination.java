@@ -1,10 +1,12 @@
 package org.shanoir.ng.importer.examination;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -26,15 +28,23 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Entity
 @Table(name = "examination")
-@JsonPropertyOrder({ "_links", "id", "data" })
+@JsonPropertyOrder({ "_links", "id", "centerId", "comment", "examinationDate", "extraDataFilePathList", "investigatorExternal", "investigatorCenterId", 
+	"note", "subjectWeight", "timepoint", "weightUnitOfMeasure", "datasetAcquisitionList", "subjectId", "studyId", "investigatorId", "instrumentBasedAssessmentList"})
 public class Examination extends HalEntity {
 	
-	
+
+	private Long centerId;
 	private String comment;
 	private Date examinationDate;
 	
-	//private List<String> extraDataFilePathList;
+	@ElementCollection
+	@CollectionTable(name = "extra_data_file_pathlist_table")
+	@Column(name = "extra_data_file_pathlist")
+	private List<String> extraDataFilePathList;
+	
 	private boolean investigatorExternal = false;
+	
+	private Long investigatorCenterId;
 	private String note;
 	private Double subjectWeight;
 	
@@ -43,15 +53,20 @@ public class Examination extends HalEntity {
 	@JoinColumn(name = "timepoint",nullable = true, updatable = true)
 	private Timepoint timepoint;
 	
-	@ManyToOne
-	@JoinColumn(name = "weightUnitOfMeasure",updatable = true, nullable = true)
-	private UnitOfMeasure weightUnitOfMeasure;
+	private Integer weightUnitOfMeasure;
 
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = CascadeType.ALL)
 	private List<DatasetAcquisition> datasetAcquisitionList;
 	
+	private Long subjectId;
 	
+	private Long studyId;
+	
+	private Long investigatorId;
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = { CascadeType.ALL })
+	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
 
 
 	/**
@@ -82,15 +97,6 @@ public class Examination extends HalEntity {
 		this.examinationDate = examinationDate;
 	}
 
-
-	/*public List<String> getExtraDataFilePathList() {
-		return extraDataFilePathList;
-	}
-
-
-	public void setExtraDataFilePathList(List<String> extraDataFilePathList) {
-		this.extraDataFilePathList = extraDataFilePathList;
-	}*/
 
 
 	public boolean isInvestigatorExternal() {
@@ -133,14 +139,98 @@ public class Examination extends HalEntity {
 	}
 
 
-	public UnitOfMeasure getWeightUnitOfMeasure() {
+	public Integer getWeightUnitOfMeasure() {
 		return weightUnitOfMeasure;
 	}
 
 
-	public void setWeightUnitOfMeasure(UnitOfMeasure weightUnitOfMeasure) {
+	public void setWeightUnitOfMeasure(Integer weightUnitOfMeasure) {
 		this.weightUnitOfMeasure = weightUnitOfMeasure;
 	}
+
+
+
+	public List<String> getExtraDataFilePathList() {
+		return extraDataFilePathList;
+	}
+
+
+	public void setExtraDataFilePathList(List<String> extraDataFilePathList) {
+		this.extraDataFilePathList = extraDataFilePathList;
+	}
+
+
+
+	public List<DatasetAcquisition> getDatasetAcquisitionList() {
+		return datasetAcquisitionList;
+	}
+
+
+	public void setDatasetAcquisitionList(List<DatasetAcquisition> datasetAcquisitionList) {
+		this.datasetAcquisitionList = datasetAcquisitionList;
+	}
+
+
+	public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
+		return instrumentBasedAssessmentList;
+	}
+
+
+	public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
+		this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
+	}
+
+
+	public Long getCenterId() {
+		return centerId;
+	}
+
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
+	}
+
+
+	public Long getInvestigatorCenterId() {
+		return investigatorCenterId;
+	}
+
+
+	public void setInvestigatorCenterId(Long investigatorCenterId) {
+		this.investigatorCenterId = investigatorCenterId;
+	}
+
+
+	public Long getSubjectId() {
+		return subjectId;
+	}
+
+
+	public void setSubjectId(Long subjectId) {
+		this.subjectId = subjectId;
+	}
+
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+
+
+	public Long getInvestigatorId() {
+		return investigatorId;
+	}
+
+
+	public void setInvestigatorId(Long investigatorId) {
+		this.investigatorId = investigatorId;
+	}
+	
+	
 
     
 

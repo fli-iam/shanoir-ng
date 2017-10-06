@@ -1,59 +1,71 @@
 package org.shanoir.ng.importer.examination;
 
-import javax.persistence.Entity;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-
-import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.hateoas.Links;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
- * UnitOfMeasure.
+ * Units Of Measure.
  * 
  * @author ifakhfakh
  *
  */
-@Entity
-@Table(name = "unit_of_measure")
-@JsonPropertyOrder({ "_links", "id", "name","ucum"})
-public class UnitOfMeasure extends HalEntity {
 
-	private String name;
-	private boolean ucum;
+
+public enum UnitOfMeasure {
+
+
+	MS(1),
+	PERCENT(2),
+	DEGREES (3),
+	G (4),
+	GY (5),
+	HZ_PX (6),
+	KG (7),
+	M (8),
+	MG(9),
+	MG_ML(10),
+	MHZ (11),
+	ML (12),
+	MM (13),
+	PX(14);
 	
+
+	private int id;
 	
 
 	/**
-	 * Init HATEOAS links
+	 * Constructor.
+	 * 
+	 * @param id
+	 *            id
 	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "examination/" + getId());
+	private UnitOfMeasure(final int id) {
+		this.id = id;
 	}
 
-
-	public String getName() {
-		return name;
+	/**
+	 * Get a unit Of measure by its id.
+	 * 
+	 * @param id
+	 *            unit Of measure id.
+	 * @return unit Of measure.
+	 */
+	public static UnitOfMeasure getUnitOfMeasure(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (UnitOfMeasure measure : UnitOfMeasure.values()) {
+			if (id.equals(measure.getId())) {
+				return measure;
+			}
+		}
+		throw new IllegalArgumentException("No matching unit Of measure for id " + id);
 	}
 
-
-	public void setName(String name) {
-		this.name = name;
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
 	}
-
-
-	public boolean isUcum() {
-		return ucum;
-	}
-
-
-	public void setUcum(boolean ucum) {
-		this.ucum = ucum;
-	}
-
-
-	
 
 }
+

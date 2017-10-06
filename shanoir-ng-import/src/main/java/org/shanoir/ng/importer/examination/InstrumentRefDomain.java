@@ -28,9 +28,8 @@ public class InstrumentRefDomain extends HalEntity {
 	@JoinColumn(name = "instrument")
 	private Instrument instrument;
 	
-	@ManyToOne
-	@JoinColumn(name = "domain")
-	private Domain domain;
+
+	private Long domain;
 
 	/**
 	 * Init HATEOAS links
@@ -48,16 +47,12 @@ public class InstrumentRefDomain extends HalEntity {
 		this.instrument = instrument;
 	}
 
-	public Domain getDomain() {
+	public Long getDomain() {
 		return domain;
 	}
 
-	public void setDomain(Domain domain) {
+	public void setDomain(Long domain) {
 		this.domain = domain;
 	}
-
-
-	
-
 
 }

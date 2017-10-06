@@ -17,13 +17,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Entity
 @Table(name = "time_point")
-@JsonPropertyOrder({ "_links", "id", "name","days","comment","rank" })
+@JsonPropertyOrder({ "_links", "id", "name","days","comment","rank","studyId" })
 public class Timepoint extends HalEntity {
 
 	private String name;
 	private Long days;
 	private String comment;
 	private Long rank;
+	private Long studyId;
 	
 
 	/**
@@ -72,6 +73,16 @@ public class Timepoint extends HalEntity {
 
 	public void setRank(Long rank) {
 		this.rank = rank;
+	}
+
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
 	

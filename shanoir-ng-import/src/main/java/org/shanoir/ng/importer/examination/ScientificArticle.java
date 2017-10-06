@@ -1,9 +1,6 @@
 package org.shanoir.ng.importer.examination;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
@@ -20,15 +17,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Entity
 @Table(name = "scientific_article")
-@JsonPropertyOrder({ "_links", "id", "scientificArticle","scientificArticleType" })
+@JsonPropertyOrder({ "_links", "id", "scientificArticleReference","scientificArticleType" })
 public class ScientificArticle extends HalEntity {
 
 	
-	private String scientificArticle;
+	private String scientificArticleReference;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "scientificArticleType",updatable = true, nullable = false)
-	private ScientificArticleType scientificArticleType;
+	private Long scientificArticleType;
 
 	
 
@@ -42,26 +37,28 @@ public class ScientificArticle extends HalEntity {
 
 
 
-	public String getScientificArticle() {
-		return scientificArticle;
+	public String getScientificArticleReference() {
+		return scientificArticleReference;
+	}
+
+
+	public void setScientificArticleReference(String scientificArticleReference) {
+		this.scientificArticleReference = scientificArticleReference;
 	}
 
 
 
-	public void setScientificArticle(String scientificArticle) {
-		this.scientificArticle = scientificArticle;
-	}
-
-
-
-	public ScientificArticleType getScientificArticleType() {
+	public Long getScientificArticleType() {
 		return scientificArticleType;
 	}
 
 
 
-	public void setScientificArticleType(ScientificArticleType scientificArticleType) {
+	public void setScientificArticleType(Long scientificArticleType) {
 		this.scientificArticleType = scientificArticleType;
 	}
+
+
+
 
 }

@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Entity
 @Table(name = "instrument_based_assessment")
-@JsonPropertyOrder({ "_links", "id" })
+@JsonPropertyOrder({ "_links", "id" , "examination", "instrument", "variableAssessmentList"})
 public class InstrumentBasedAssessment extends HalEntity {
 
 	@ManyToOne

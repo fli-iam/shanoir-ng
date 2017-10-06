@@ -1,16 +1,5 @@
 package org.shanoir.ng.importer.examination;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-
-import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.hateoas.Links;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * PassationMode.
@@ -18,30 +7,58 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author ifakhfakh
  *
  */
-@Entity
-@Table(name = "passation_mode")
-@JsonPropertyOrder({ "_links", "id", "name"})
-public class PassationMode extends HalEntity {
 
+
+public enum PassationMode {
+
+	/***
+	 *  Questionnaire.
+	 */
+	QUESTIONNAIRE(1),
 	
-	private String name;
+	/**
+	 * Test-instrument.
+	 */
+	TEST_INSTRUMENT(2);
+		
+
+	private int id;
+	
 
 	/**
-	 * Init HATEOAS links
+	 * Constructor.
+	 * 
+	 * @param id
+	 *            id
 	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "examination/" + getId());
+	private PassationMode(final int id) {
+		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	/**
+	 * Get a passation mode by its id.
+	 * 
+	 * @param id
+	 *            passation mode id.
+	 * @return passation mode.
+	 */
+	public static PassationMode getPassationMode(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (PassationMode passationMode : PassationMode.values()) {
+			if (id.equals(passationMode.getId())) {
+				return passationMode;
+			}
+		}
+		throw new IllegalArgumentException("No matching passation mode for id " + id);
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
 	}
-
-
 
 }

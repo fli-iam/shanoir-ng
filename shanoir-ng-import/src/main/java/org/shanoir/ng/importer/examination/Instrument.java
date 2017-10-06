@@ -52,13 +52,9 @@ public class Instrument extends HalEntity {
 	@JoinColumn(name = "parentInstrument")
 	private Instrument parentInstrument;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "instrumentType",updatable = true, nullable = false)
-	private InstrumentType instrumentType;
+	private Long instrumentType;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "passationMode",updatable = true, nullable = false)
-	private PassationMode passationMode;
+	private Long passationMode;
 	
 
 	@OneToMany(mappedBy = "instrument", cascade = CascadeType.ALL)
@@ -119,25 +115,26 @@ public class Instrument extends HalEntity {
 	public void setParentInstrument(Instrument parentInstrument) {
 		this.parentInstrument = parentInstrument;
 	}
-	public InstrumentType getInstrumentType() {
-		return instrumentType;
-	}
-	public void setInstrumentType(InstrumentType instrumentType) {
-		this.instrumentType = instrumentType;
-	}
-	public PassationMode getPassationMode() {
-		return passationMode;
-	}
-	public void setPassationMode(PassationMode passationMode) {
-		this.passationMode = passationMode;
-	}
+
 	public List<InstrumentRefDomain> getInstrumentRefDomainList() {
 		return instrumentRefDomainList;
 	}
 	public void setInstrumentRefDomainList(List<InstrumentRefDomain> instrumentRefDomainList) {
 		this.instrumentRefDomainList = instrumentRefDomainList;
 	}
+	public Long getInstrumentType() {
+		return instrumentType;
+	}
+	public void setInstrumentType(Long instrumentType) {
+		this.instrumentType = instrumentType;
+	}
+	public Long getPassationMode() {
+		return passationMode;
+	}
+	public void setPassationMode(Long passationMode) {
+		this.passationMode = passationMode;
+	}
 
-
+	
 	
 }

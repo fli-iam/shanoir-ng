@@ -1,16 +1,5 @@
 package org.shanoir.ng.importer.examination;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-
-import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.hateoas.Links;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * InstrumentType.
@@ -18,30 +7,77 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author ifakhfakh
  *
  */
-@Entity
-@Table(name = "instrument_type")
-@JsonPropertyOrder({ "_links", "id", "name"})
-public class InstrumentType extends HalEntity {
 
+public enum InstrumentType {
+
+	/***
+	 *  Behavioural instrument.
+	 */
+	BEHAVIOURAL_INSTRUMENT(1),
 	
-	private String name;
+	/**
+	 * Experimental psychology instrument.
+	 */
+	EXPERIMENTAL_PSYCHOLOGY_INSTRUMENT(2),
+	
+	/**
+	 * Neuroclinical instrument.
+	 */
+	NEUROCLINICAL_INSTRUMENT(3),
+	
+	/**
+	 * Neuropsychological instrument.
+	 */
+	NEUROPSYCHOLOGICAL_INSTRUMENT(4),
+	
+	/**
+	 * Psychological instrument.
+	 */
+	PSYCHOLOGICAL_INSTRUMENT(5),
+	
+	/**
+	 * Psychophysical instrument.
+	 */
+	PSYCHOPHYSICAL_INSTRUMENT(6);
+	
+
+	private int id;
+	
 
 	/**
-	 * Init HATEOAS links
+	 * Constructor.
+	 * 
+	 * @param id
+	 *            id
 	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "examination/" + getId());
+	private InstrumentType(final int id) {
+		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	/**
+	 * Get an instrument type by its id.
+	 * 
+	 * @param id
+	 *            instrument type id.
+	 * @return instrument type.
+	 */
+	public static InstrumentType getInstrumentType(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (InstrumentType instrumentType : InstrumentType.values()) {
+			if (id.equals(instrumentType.getId())) {
+				return instrumentType;
+			}
+		}
+		throw new IllegalArgumentException("No matching instrument type for id " + id);
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
 	}
-
-
 
 }

@@ -18,30 +18,59 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author ifakhfakh
  *
  */
-@Entity
-@Table(name = "scientific_article")
-@JsonPropertyOrder({ "_links", "id", "name"})
-public class ScientificArticleType extends HalEntity {
 
+
+public enum ScientificArticleType {
+
+	/***
+	 *  instrument_definition_article.
+	 */
+	INSTRUMENT_DEFINITION_ARTICLE(1),
 	
-	private String name;
+	/**
+	 * score_standardisation_article.
+	 */
+	SCORE_STANDARDISATION_ARTICLE(2);
+		
+
+	private int id;
+	
 
 	/**
-	 * Init HATEOAS links
+	 * Constructor.
+	 * 
+	 * @param id
+	 *            id
 	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "examination/" + getId());
+	private ScientificArticleType(final int id) {
+		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	/**
+	 * Get a scientific article type by its id.
+	 * 
+	 * @param id
+	 *            scientific article type id.
+	 * @return scientific article type.
+	 */
+	public static ScientificArticleType getScientificArticleType(final Integer id) {
+		if (id == null) {
+			return null;
+		}
+		for (ScientificArticleType scientificArticleType : ScientificArticleType.values()) {
+			if (id.equals(scientificArticleType.getId())) {
+				return scientificArticleType;
+			}
+		}
+		throw new IllegalArgumentException("No matching scientific article type for id " + id);
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	/** 
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
 	}
-
-
 
 }
+
