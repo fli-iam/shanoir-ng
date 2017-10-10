@@ -1,11 +1,12 @@
 # server configuration
 server:
   administrator.email: shanoir-dev-test@lists.gforge.inria.fr
+  context-path: /shanoir-ng
   display-name: Shanoir
-  port: 9900
   error:
     whitelabel:
       enabled: false
+  port: 9900
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
