@@ -1,7 +1,6 @@
 # server configuration
 server:
   administrator.email: shanoir-dev-test@lists.gforge.inria.fr
-  context-path: /shanoir-ng
   display-name: Shanoir
   error:
     whitelabel:
