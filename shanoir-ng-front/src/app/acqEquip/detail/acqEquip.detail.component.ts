@@ -36,7 +36,8 @@ export class AcquisitionEquipmentDetailComponent implements OnInit {
     private centers: Center[];
     private datasetModalityTypeEnumValue: String;
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
-
+    private infoIconPath: string = ImagesUrlUtil.INFO_ICON_PATH;
+    
     constructor(private route: ActivatedRoute, private router: Router,
         private acqEquipService: AcquisitionEquipmentService, private fb: FormBuilder,
         private manufService: ManufacturerService, private manufModelService: ManufacturerModelService,

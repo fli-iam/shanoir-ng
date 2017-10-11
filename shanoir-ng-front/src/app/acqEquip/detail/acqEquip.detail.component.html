@@ -67,7 +67,10 @@
 						</span>
 					</li>
 					<li>
-						<label i18n="AcqEquip detail|Serial number label">Serial Number</label>
+						<label i18n="AcqEquip detail|Serial number label">
+							Serial Number
+							<img [src]="infoIconPath" i18n-title title="Value of DICOM Device Serial Number tag (0018,1000). Used to verify data imported from this equipment."/>
+						</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								{{acqEquip.serialNumber}}
