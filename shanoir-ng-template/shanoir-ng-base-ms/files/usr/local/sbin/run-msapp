@@ -28,5 +28,5 @@ override 			\
 	-e KEYCLOAK_PASSWORD	\
 	-z /opt/shanoir-ng/shanoir-ng-msapp.jar BOOT-INF/classes/application.yml
 
-exec su - shanoir -c "exec java -Dspring.profiles.active='$PROFILE' -jar /opt/shanoir-ng/shanoir-ng-msapp.jar"
+exec su shanoir -c "exec java -Dspring.profiles.active='$PROFILE' -jar /opt/shanoir-ng/shanoir-ng-msapp.jar"
 
