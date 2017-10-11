@@ -150,8 +150,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			dos.writeDataset(metaInformationAttributes, datasetAttributes);
 			dos.close();
 		} catch (final IOException exc) {
-			LOG.error("performAnonymization : ", exc);
-			exc.printStackTrace();
+			LOG.error("performAnonymization : error while anonimizing file " + dicomFile.toString() + " : ", exc);
 		}
 
 	}
@@ -215,7 +214,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				}
 			}
 		} catch (IOException e) {
-			LOG.error("Unable to read anonymization file: " + e.getMessage());
+			LOG.error("Unable to read anonymization file: " + e);
 		}
 
 		return anonymizationMAP;
