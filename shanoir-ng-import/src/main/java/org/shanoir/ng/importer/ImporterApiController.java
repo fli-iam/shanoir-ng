@@ -12,7 +12,6 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,9 +47,6 @@ public class ImporterApiController implements ImporterApi {
 	@Value("${shanoir.import.upload.folder}")
     private String uploadFolder;
 	
-	@Autowired
-	private TemplateService templateService;
-
     public ResponseEntity<Void> uploadFiles(@ApiParam(value = "file detail") @RequestPart("files") MultipartFile[] files) throws RestServiceException {
     		if(files.length == 0) throw new RestServiceException(
     				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
