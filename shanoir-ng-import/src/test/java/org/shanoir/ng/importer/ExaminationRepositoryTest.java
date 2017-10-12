@@ -1,17 +1,11 @@
 package org.shanoir.ng.importer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.importer.Template;
-import org.shanoir.ng.importer.TemplateRepository;
 import org.shanoir.ng.importer.examination.Examination;
 import org.shanoir.ng.importer.examination.ExaminationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
