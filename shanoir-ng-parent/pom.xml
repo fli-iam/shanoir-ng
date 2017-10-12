@@ -22,6 +22,7 @@
 		<module>../shanoir-ng-users</module>
 		<module>../shanoir-ng-studies</module>
 		<module>../shanoir-ng-studycards</module>
+		<module>../shanoir-ng-import</module>
 		<module>../shanoir-ng-front</module>
 	</modules>
 
