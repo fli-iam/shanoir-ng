@@ -173,6 +173,18 @@ public class UserServiceImpl implements UserService {
 	public Optional<User> findByUsername(final String username) {
 		return userRepository.findByUsername(username);
 	}
+	
+	@Override
+	public List<User> getUsersToReceiveFirstExpirationNotification() {
+		final DateTime expirationDateTime = new DateTime().withMillisOfDay(0).plusMonths(1);
+		return userRepository.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(expirationDateTime.toDate());
+	}
+
+	@Override
+	public List<User> getUsersToReceiveSecondExpirationNotification() {
+		final DateTime expirationDateTime = new DateTime().withMillisOfDay(0).plusWeeks(1);
+		return userRepository.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(expirationDateTime.toDate());
+	}
 
 	@Override
 	public void requestExtension(Long userId, ExtensionRequestInfo requestInfo) throws ShanoirUsersException {
@@ -234,6 +246,17 @@ public class UserServiceImpl implements UserService {
 		}
 		return updateUserOnAllSystems(userDb, user);
 	}
+	
+	@Override
+	public void updateExpirationNotification(final User user, final boolean firstNotification) {
+		if (firstNotification) {
+			user.setFirstExpirationNotificationSent(true);
+		} else {
+			user.setSecondExpirationNotificationSent(true);
+		}
+		userRepository.save(user);
+		updateShanoirOld(user);
+	}
 
 	@Override
 	public void updateFromShanoirOld(final User user) throws ShanoirUsersException {
@@ -281,7 +304,7 @@ public class UserServiceImpl implements UserService {
 			LOG.error("Cannot send user " + userId + " delete to Shanoir Old on queue : "
 					+ RabbitMqConfiguration.queueOut().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send user " + userId + " userId because of an error while serializing user.", e);
+			LOG.error("Cannot send user " + userId + " because of an error while serializing user.", e);
 		}
 	}
 

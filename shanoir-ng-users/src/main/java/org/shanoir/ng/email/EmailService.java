@@ -11,6 +11,14 @@ import org.shanoir.ng.user.User;
 public interface EmailService {
 
 	/**
+	 * Send an email to user if account will expire soon.
+	 * 
+	 * @param user
+	 *            user.
+	 */
+	void notifyAccountWillExpire(User user);
+
+	/**
 	 * Send an email to administrators to indicate an account request.
 	 * 
 	 * @param user
@@ -51,5 +59,15 @@ public interface EmailService {
 	 *            user.
 	 */
 	void notifyUserExtensionRequestDenied(User user);
+
+	/**
+	 * Send an email on user password reset.
+	 * 
+	 * @param user
+	 *            user.
+	 * @param password
+	 *            new password.
+	 */
+	void notifyUserResetPassword(User user, String password);
 
 }

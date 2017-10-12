@@ -1,5 +1,7 @@
 package org.shanoir.ng.acquisitionequipment;
 
+import org.shanoir.ng.manufacturermodel.ManufacturerModelDTO;
+
 /**
  * DTO for acquisition equipments.
  * 
@@ -12,9 +14,7 @@ public class SimpleAcquisitionEquipmentDTO {
 
 	private Long id;
 
-	private String manufacturerModelName;
-
-	private String manufacturerName;
+	private ManufacturerModelDTO manufacturerModel;
 
 	private String serialNumber;
 
@@ -55,33 +55,17 @@ public class SimpleAcquisitionEquipmentDTO {
 	}
 
 	/**
-	 * @return the manufacturerModelName
+	 * @return the manufacturerModel
 	 */
-	public String getManufacturerModelName() {
-		return manufacturerModelName;
+	public ManufacturerModelDTO getManufacturerModel() {
+		return manufacturerModel;
 	}
 
 	/**
-	 * @param manufacturerModelName
-	 *            the manufacturerModelName to set
+	 * @param manufacturerModel the manufacturerModel to set
 	 */
-	public void setManufacturerModelName(String manufacturerModelName) {
-		this.manufacturerModelName = manufacturerModelName;
-	}
-
-	/**
-	 * @return the manufacturerName
-	 */
-	public String getManufacturerName() {
-		return manufacturerName;
-	}
-
-	/**
-	 * @param manufacturerName
-	 *            the manufacturerName to set
-	 */
-	public void setManufacturerName(String manufacturerName) {
-		this.manufacturerName = manufacturerName;
+	public void setManufacturerModel(ManufacturerModelDTO manufacturerModel) {
+		this.manufacturerModel = manufacturerModel;
 	}
 
 	/**

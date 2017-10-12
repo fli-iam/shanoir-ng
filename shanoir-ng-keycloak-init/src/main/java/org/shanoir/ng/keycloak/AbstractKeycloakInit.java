@@ -89,7 +89,7 @@ public abstract class AbstractKeycloakInit {
 		return smtpPort;
 	}
 
-	protected static void loadParams() {
+	protected static void loadParams() throws KeycloakInitException {
 		LOG.info("Load parameters");
 
 		keycloakRequestsAdminLogin = System.getenv(KEYCLOAK_USER_ENV);
@@ -116,7 +116,7 @@ public abstract class AbstractKeycloakInit {
 			smtpFromDisplayName = prop.getProperty("smtp.from.display.name");
 
 		} catch (IOException e) {
-			LOG.error("Error while getting properties", e);
+			throw new KeycloakInitException("Error while getting properties", e);
 		} finally {
 			if (input != null) {
 				try {

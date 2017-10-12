@@ -43,24 +43,39 @@ public class EmailServiceImpl implements EmailService {
 	@Autowired
 	private UserRepository userRepository;
 
-	@Value("${server.email-off}")
-	private boolean emailOff;
-
 	@Value("${server.administrator.email}")
 	private String administratorEmail;
 
 	@Value("${front.server.address}")
 	private String shanoirServerAddress;
 
-	private static final DateFormat shortDateFormatEN = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-			DateFormat.SHORT, new Locale("EN", "en"));
+	private static final DateFormat shortDateFormatEN = DateFormat.getDateInstance(DateFormat.SHORT,
+			new Locale("EN", "en"));
+
+	@Override
+	public void notifyAccountWillExpire(User user) {
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(user.getEmail());
+			messageHelper.setSubject("Shanoir Account Expiration");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("firstname", user.getFirstName());
+			variables.put("lastname", user.getLastName());
+			variables.put("serverAddress", shanoirServerAddress);
+			variables.put("expirationDate", shortDateFormatEN.format(user.getExpirationDate()));
+			final String content = build("notifyAccountWillExpire", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
+	}
 
 	@Override
 	public void notifyAdminAccountRequest(final User user) {
-		if (emailOff) {
-			return;
-		}
-
 		// Get admins emails
 		final List<String> adminEmails = userRepository.findAdminEmails();
 
@@ -84,10 +99,6 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void notifyNewUser(final User user, final String password) {
-		if (emailOff) {
-			return;
-		}
-
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);
@@ -110,10 +121,6 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void notifyUserAccountRequestAccepted(final User user) {
-		if (emailOff) {
-			return;
-		}
-
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);
@@ -134,11 +141,7 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyUserExtensionRequestAccepted(User user) {
-		if (emailOff) {
-			return;
-		}
-
+	public void notifyUserExtensionRequestAccepted(final User user) {
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);
@@ -160,11 +163,7 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyUserExtensionRequestDenied(User user) {
-		if (emailOff) {
-			return;
-		}
-
+	public void notifyUserExtensionRequestDenied(final User user) {
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);
@@ -176,6 +175,27 @@ public class EmailServiceImpl implements EmailService {
 			variables.put("serverAddress", shanoirServerAddress);
 			variables.put("expirationDate", shortDateFormatEN.format(user.getExpirationDate()));
 			final String content = build("notifyUserExtensionRequestDenied", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
+	}
+
+	@Override
+	public void notifyUserResetPassword(final User user, final String password) {
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(user.getEmail());
+			messageHelper.setSubject("[Shanoir] Réinitialisation du mot de passe");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("firstname", user.getFirstName());
+			variables.put("lastname", user.getLastName());
+			variables.put("newPassword", password);
+			final String content = build("notifyUserResetPassword", variables);
 			messageHelper.setText(content, true);
 		};
 		try {

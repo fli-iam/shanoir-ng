@@ -63,12 +63,10 @@ public class User extends HalEntity implements UserDetails {
 
 	private boolean extensionRequestDemand;
 	
+	private boolean firstExpirationNotificationSent;
+	
 	@NotBlank
 	private String firstName;
-
-	private boolean isFirstExpirationNotificationSent;
-
-	private boolean isSecondExpirationNotificationSent;
 
 	private String keycloakId;
 
@@ -82,6 +80,8 @@ public class User extends HalEntity implements UserDetails {
 	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
 	private Role role;
 	
+	private boolean secondExpirationNotificationSent;
+
 	@NotBlank
 	@Column(unique = true)
 	@Unique
@@ -217,6 +217,21 @@ public class User extends HalEntity implements UserDetails {
 	}
 	
 	/**
+	 * @return the firstExpirationNotificationSent
+	 */
+	public boolean isFirstExpirationNotificationSent() {
+		return firstExpirationNotificationSent;
+	}
+
+	/**
+	 * @param firstExpirationNotificationSent
+	 *            the firstExpirationNotificationSent to set
+	 */
+	public void setFirstExpirationNotificationSent(final boolean firstExpirationNotificationSent) {
+		this.firstExpirationNotificationSent = firstExpirationNotificationSent;
+	}
+
+	/**
 	 * @return the firstName
 	 */
 	public String getFirstName() {
@@ -229,36 +244,6 @@ public class User extends HalEntity implements UserDetails {
 	 */
 	public void setFirstName(final String firstName) {
 		this.firstName = firstName;
-	}
-
-	/**
-	 * @return the isFirstExpirationNotificationSent
-	 */
-	public boolean isFirstExpirationNotificationSent() {
-		return isFirstExpirationNotificationSent;
-	}
-
-	/**
-	 * @param isFirstExpirationNotificationSent
-	 *            the isFirstExpirationNotificationSent to set
-	 */
-	public void setFirstExpirationNotificationSent(final boolean isFirstExpirationNotificationSent) {
-		this.isFirstExpirationNotificationSent = isFirstExpirationNotificationSent;
-	}
-
-	/**
-	 * @return the isSecondExpirationNotificationSent
-	 */
-	public boolean isSecondExpirationNotificationSent() {
-		return isSecondExpirationNotificationSent;
-	}
-
-	/**
-	 * @param isSecondExpirationNotificationSent
-	 *            the isSecondExpirationNotificationSent to set
-	 */
-	public void setSecondExpirationNotificationSent(final boolean isSecondExpirationNotificationSent) {
-		this.isSecondExpirationNotificationSent = isSecondExpirationNotificationSent;
 	}
 
 	/**
@@ -320,6 +305,21 @@ public class User extends HalEntity implements UserDetails {
 	 */
 	public void setRole(final Role role) {
 		this.role = role;
+	}
+
+	/**
+	 * @return the secondExpirationNotificationSent
+	 */
+	public boolean isSecondExpirationNotificationSent() {
+		return secondExpirationNotificationSent;
+	}
+
+	/**
+	 * @param secondExpirationNotificationSent
+	 *            the secondExpirationNotificationSent to set
+	 */
+	public void setSecondExpirationNotificationSent(final boolean secondExpirationNotificationSent) {
+		this.secondExpirationNotificationSent = secondExpirationNotificationSent;
 	}
 
 	/**

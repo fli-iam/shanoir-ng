@@ -2,6 +2,7 @@ package org.shanoir.ng.manufacturermodel;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,30 +24,30 @@ public interface ManufacturerApi {
 
 	@ApiOperation(value = "", notes = "If exists, returns the manufacturer corresponding to the given id", response = Manufacturer.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found manufacturer", response = Manufacturer.class),
-			@ApiResponse(code = 204, message = "no manufacturer found", response = Manufacturer.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Manufacturer.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Manufacturer.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Manufacturer.class) })
+			@ApiResponse(code = 204, message = "no manufacturer found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/{manufacturerId}", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<Manufacturer> findManufacturerById(
 			@ApiParam(value = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId);
 
 	@ApiOperation(value = "", notes = "Returns all the manufacturers", response = Manufacturer.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found manufacturers", response = Manufacturer.class),
-			@ApiResponse(code = 204, message = "no manufacturer found", response = Manufacturer.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Manufacturer.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Manufacturer.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Manufacturer.class) })
+			@ApiResponse(code = 204, message = "no manufacturer found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<List<Manufacturer>> findManufacturers();
 
 	@ApiOperation(value = "", notes = "Saves a new manufacturer", response = Manufacturer.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created manufacturer", response = Manufacturer.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Manufacturer.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Manufacturer.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Manufacturer.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Manufacturer.class) })
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
@@ -60,7 +61,7 @@ public interface ManufacturerApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 404, message = "manufacturer not found", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/{manufacturerId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")

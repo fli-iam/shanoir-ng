@@ -83,7 +83,6 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form .required-label:after{ content:" *"; }
   form .form-validation-alert { color: var(--color-error); }
   form .right-col label { text-align: right; display: block; }
-  form .right-col a { margin: 0 0 0 10px; } 
   form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--greyer); height: 18px; }
     form .right-col button:active { background-color: var(--color-b-light); }
     form .right-col button:disabled { color: var(--grey); } 
@@ -125,6 +124,9 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
 .main-content{ padding: 0 20px 10px 20px; position: relative; z-index: 1; }
 .max-content { width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
 .command-zone { background-color: var(--light-grey); }
+
+.error-message label { color: var(--color-error); }
+.error-message li { color: var(--color-error); }
 
 .shanoir-table table { border-collapse: collapse; }
   .shanoir-table table td, .shanoir-table table th { border: 1px solid gray; }

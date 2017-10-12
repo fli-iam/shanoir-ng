@@ -36,9 +36,11 @@ import { HomeComponent }   from './home/home.component';
 import { KeycloakHttp } from "./shared/keycloak/keycloak.http";
 import { KeycloakService } from "./shared/keycloak/keycloak.service";
 import { ImportComponent }   from './import/import.component';
+import { ListComponent } from "./shared/utils/list.component";
 import { LoadingBarComponent }   from './shared/loadingBar/loadingBar.component';
 import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
 import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
+import { ManufacturerModelPipe } from './acqEquip/shared/manufModel.pipe';
 import { ManufacturerModelService } from './acqEquip/shared/manufModel.service';
 import { ManufacturerService } from './acqEquip/shared/manuf.service';
 import { MenuItemComponent }   from './shared/dropdown-menu/menu-item/menu-item.component';
@@ -77,25 +79,27 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         Autosize,
         CenterDetailComponent,
         CenterListComponent,
+        ClickTipComponent,
         ConfirmDialogComponent,
+        ConsoleComponent,
         DropdownMenuComponent,
         EditUserComponent,
         ExtensionRequestComponent,
         HeaderComponent,
         HomeComponent,
+        ImportComponent,
+        ListComponent,
+        LoadingBarComponent,
+        ManufacturerDetailComponent,
+        ManufacturerModelDetailComponent,
+        ManufacturerModelPipe,
+        ModalComponent,
         MenuItemComponent,
         NavbarComponent,
         StudyTreeComponent,
         TableComponent,
         TreeNodeComponent,
-        UserListComponent,
-        ImportComponent,
-        ClickTipComponent,
-        ConsoleComponent,
-        LoadingBarComponent,
-        ManufacturerDetailComponent,
-        ManufacturerModelDetailComponent,
-        ModalComponent
+        UserListComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -107,12 +111,12 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         AuthNotGuestGuard,
         CenterService,
         ConfirmDialogService,
-        KeycloakService,
-        RoleService,
-        UserService,
         HandleErrorService,
+        KeycloakService,
         ManufacturerModelService,
         ManufacturerService,
+        RoleService,
+        UserService,
         {
             provide: Http,
             useFactory: httpFactory,

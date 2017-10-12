@@ -23,11 +23,11 @@ export class ConsoleComponent {
     private okSymbol: string = "[DONE]";
     private errSymbol: string = "[ERROR]"
 
-    private getMax(extraSymbol): number {
+    private getMax(extraSymbol: string): number {
         return (this.width - this.label.length - extraSymbol.length);
     }
 
-    private getCurrentNbSymbols(extraSymbol): number {
+    private getCurrentNbSymbols(extraSymbol: string): number {
         return this.getMax(extraSymbol) * this.getProgress();
     }
 

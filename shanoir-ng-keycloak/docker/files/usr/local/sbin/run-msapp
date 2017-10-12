@@ -1,0 +1,292 @@
+#!/bin/sh
+
+# TODO make the config
+
+
+# Migration parameters
+
+DATABASE="keycloak"
+	
+BASE_DIR="/vol/rw/keycloak"
+EXPORT_DIR="$BASE_DIR/export"
+FINGERPRINT="$BASE_DIR/current"
+
+TMP_EXPORT_DIR="$BASE_DIR/tmp"
+TMP_IMPORT_DIR="/tmp/import"
+
+TMP_FINGERPRINT=/tmp/next
+
+CONFIG_DIR="/opt/cfg"
+
+LOCK_FILE="/vol/rw/lock"
+
+die()
+{
+	echo "error: $@" >&2
+	exit 1
+}
+
+pid=
+kill_subprocess()
+{
+	if [ -n "$pid" ] ; then
+		echo "waiting for child pid to terminate"
+		kill -- "$pid" 2>/dev/null || true
+		wait -- "$pid" || true
+		pid=
+	fi
+}
+
+exec_keycloak()
+{
+	LAUNCH_JBOSS_IN_BACKGROUND=1 JBOSS_HOME=/opt/keycloak  exec su - shanoir -c	\
+		"/opt/keycloak/bin/standalone.sh  -b 0.0.0.0 -bmanagement 0.0.0.0 $*"
+}
+
+is_db_empty()
+{
+	if out="`echo SHOW TABLES | mysql --skip-column-names "$DATABASE" 2>&1`" ; then
+		# db exists
+		# -> return true if empty
+		[ -z "$out" ]
+	else
+		# mysql error
+		# -> return true if db does not exist (error 1049)
+		# -> die on other errors
+		if ! grep -q "^ERROR 1049 " <<EOF
+$out
+EOF
+		then
+			cat >&2 <<EOF
+$out
+EOF
+			die "mysql connection error (database $DATABASE)"
+		fi
+	fi
+}
+
+db_export()
+{
+	# ensure the db is there
+	! is_db_empty || die "db_export: mysql db is empty"
+
+	[ ! -e "$EXPORT_DIR" ] || die "db_export: export dir $EXPORT_DIR already present"
+
+	# create the tmp export dir
+	rm -rf		-- "$TMP_EXPORT_DIR"
+	mkdir  		-- "$TMP_EXPORT_DIR"
+	chown shanoir:	-- "$TMP_EXPORT_DIR"
+
+	# launch the export
+	exec_keycloak							\
+		-Dkeycloak.migration.action=export			\
+		-Dkeycloak.migration.provider=dir			\
+		-Dkeycloak.migration.usersExportStrategy=SAME_FILE	\
+		-Dkeycloak.migration.dir=\'$TMP_EXPORT_DIR\'		&
+	pid=$!
+
+	wait-keycloak -m "org.keycloak.services.* Export finished successfully"
+	kill_subprocess
+
+	# *atomically* create the export dir
+	[ ! -e "$EXPORT_DIR" ] || die "export dir present"
+	sync
+	mv -- "$TMP_EXPORT_DIR" "$EXPORT_DIR"
+	sync
+}
+
+db_import()
+{
+	# create the import dir
+	rm -rf -- "$TMP_IMPORT_DIR"
+	mkdir  -- "$TMP_IMPORT_DIR"
+
+	# apply the config from the docker image
+	ln -s "$CONFIG_DIR"/*-realm.json "$TMP_IMPORT_DIR/"
+
+	if [ "$1" = --init ] ; then
+		# container initialisation case
+		echo "Will create the $DATABASE database from scratch"
+
+		# ensure that the db does not exist
+		is_db_empty || die "db_import: mysql db is not empty"
+
+		# ensure there is no export dir
+		[ ! -d "$EXPORT_DIR" ] || die "export dir $EXPORT_DIR is already present"
+	else
+		# usual config update
+
+		# ensure the export dir is there (VERY IMPORTANT, othewise we
+		# would loose the user db)
+		[ -d "$EXPORT_DIR" ] || die "export dir $EXPORT_DIR not present"
+
+		# merge the users from 
+		ln -s "$EXPORT_DIR"/*-users-[0-9]*.json "$TMP_IMPORT_DIR/"
+	fi
+
+	ls -l "$TMP_IMPORT_DIR"
+
+	# recreate the database
+	mysql <<EOF
+DROP DATABASE IF EXISTS $DATABASE;
+CREATE DATABASE $DATABASE;
+EOF
+
+	# launch the import
+	exec_keycloak							\
+		-Dkeycloak.migration.action=import			\
+		-Dkeycloak.migration.provider=dir			\
+		-Dkeycloak.migration.dir=\'$TMP_IMPORT_DIR\'		\
+		-Dkeycloak.migration.strategy=OVERWRITE_EXISTING	&
+	pid=$!
+
+	# wait until the import is finished
+	#
+	# NOTE: we have to match both strings: "import successful" *and* "jboss
+	#	started in .." because when --init is useg, the admin user is created
+	#	*after* the import
+	#
+	wait-keycloak -m "Import finished successfully"	&
+	pid_import_ok=$!
+	wait-keycloak
+	wait "$pid_import_ok"
+
+	# stop keycloak
+	kill_subprocess
+
+	# write the new fingerprint
+	cp -- "$TMP_FINGERPRINT" "$FINGERPRINT"
+
+	# *atomically* remove the export directory
+	if [ -e "$EXPORT_DIR" ] ; then
+		rm -rf -- "$TMP_EXPORT_DIR"
+		sync
+		mv -- "$EXPORT_DIR" "$TMP_EXPORT_DIR"
+		sync
+	fi
+
+	# cleanup
+	rm -rf -- "$TMP_IMPORT_DIR" "$TMP_EXPORT_DIR"
+}
+
+
+migrate_keycloak()
+{
+	mkdir -p -- "$BASE_DIR"
+
+	# make a fingerprint of the wantet keycloak config
+	sha1sum "$CONFIG_DIR"/*.json >"$TMP_FINGERPRINT"
+
+
+	if [ "$1" = "--init" ] ; then
+		db_import --init
+	else
+		if [ -d "$EXPORT_DIR" ] ; then
+			echo "Resuming keycloak DB import"
+			db_import
+			[ ! -d "$EXPORT_DIR" ] || die "Import failed (export dir $EXPORT_DIR is still present)"
+		fi
+
+		if cmp --quiet "$FINGERPRINT" "$TMP_FINGERPRINT"
+		then
+			echo "Keycloak configuration is up-to-date"
+			echo
+			cat "$FINGERPRINT" | sed 's/^/	/'
+		else
+			echo "Keycloak configuration was updated! Will apply the new config:"
+			echo
+			diff -u100 --new-file "$FINGERPRINT" "$TMP_FINGERPRINT" | sed 's/^/	/'
+			echo
+
+			db_export
+			db_import
+		fi
+	fi
+}
+
+apply_runtime_config()
+{
+	configure-hosts
+
+	# select the adequate theme
+	echo "Applying profile '$PROFILE'"
+	(	cd /opt/keycloak/themes/shanoir-theme/login/
+		override -e SHANOIR_SERVER_URL -e SHANOIR_INSTANCE "theme-$PROFILE.properties"
+		cp "theme-$PROFILE.properties" "theme.properties"
+	)
+
+	# configure the shanoir-ng realm
+	override			\
+		-e SHANOIR_ADMIN_EMAIL	\
+		-e SHANOIR_ADMIN_NAME	\
+		-e SHANOIR_SERVER_URL	\
+		-e SHANOIR_INSTANCE	\
+		-e SMTP_HOST		\
+		-e SMTP_PORT		\
+		"$CONFIG_DIR/shanoir-ng-realm.json"
+}
+
+set -x
+set -e
+
+# acquire the lock to prevent multiple concurrent instances
+mkdir -p -- "`dirname "$LOCK_FILE"`"
+exec 6>"$LOCK_FILE"
+flock -n 6 || die "unable to acquire lock on $LOCK_FILE (there must be a running instance of keycloak)"
+
+
+ARG="$1"
+
+trap kill_subprocess EXIT
+
+# make directories
+for dir in /vol/cache/keycloak /vol/log/keycloak /tmp/keycloak
+do
+	mkdir -p "$dir"
+	chown shanoir: "$dir"
+done
+
+wait-mysql
+
+case "$ARG" in
+	--image-init)
+		# not to be used in production
+		[ -n "$I_AM_BUILDING_THE_DOCKERFILE" ] || die "$ARG is for the Dockerfile only (must not be used in a container with real data)"
+		migrate_keycloak --init
+
+		# export the master realm
+
+		exec_keycloak							\
+			-Dkeycloak.migration.action=export			\
+			-Dkeycloak.migration.provider=singleFile		\
+			-Dkeycloak.migration.realmName=master			\
+			-Dkeycloak.migration.usersExportStrategy=SKIP		\
+			-Dkeycloak.migration.file=/tmp/master-realm.json &
+		pid=$!
+		wait-keycloak -m "org.keycloak.services.* Export finished successfully"
+		kill_subprocess
+		cp /tmp/master-realm.json "$CONFIG_DIR/"
+		;;
+
+	--init)
+		apply_runtime_config
+		migrate_keycloak --init
+		;;
+
+	--export)
+		exec_keycloak							\
+			-Dkeycloak.migration.action=export			\
+			-Dkeycloak.migration.provider=dir			\
+			-Dkeycloak.migration.usersExportStrategy=SAME_FILE	\
+			-Dkeycloak.migration.dir=\'$2\'				&
+		pid=$!
+
+		wait-keycloak -m "org.keycloak.services.* Export finished successfully"
+		kill_subprocess
+		;;
+	*)
+		apply_runtime_config
+		migrate_keycloak
+		exec_keycloak $*
+		;;
+esac

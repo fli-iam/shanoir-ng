@@ -1,9 +1,13 @@
 package org.shanoir.ng.center;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.shared.error.FieldError;
+import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -42,7 +46,25 @@ public class CenterServiceImpl implements CenterService {
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirStudiesException {
+		final Center center = centerRepository.findOne(id);
+		if (center == null) {
+			LOG.error("Center with id " + id + " not found");
+			throw new ShanoirStudiesException(ErrorModelCode.CENTER_NOT_FOUND);
+		}
+		final List<FieldError> errors = new ArrayList<FieldError>();
+		if (!center.getAcquisitionEquipments().isEmpty()) {
+			errors.add(new FieldError("unauthorized", "Center linked to entities", "acquisitionEquipments"));
+		}
+		if (!center.getStudyCenterList().isEmpty()) {
+			errors.add(new FieldError("unauthorized", "Center linked to entities", "studies"));
+		}
+		if (!errors.isEmpty()) {
+			final FieldErrorMap errorMap = new FieldErrorMap();
+			errorMap.put("delete", errors);
+			throw new ShanoirStudiesException(errorMap);
+		}
 		centerRepository.delete(id);
+		deleteCenterOnShanoirOld(id);
 	}
 
 	@Override
@@ -58,6 +80,11 @@ public class CenterServiceImpl implements CenterService {
 	@Override
 	public Center findById(final Long id) {
 		return centerRepository.findOne(id);
+	}
+
+	@Override
+	public List<CenterNameDTO> findIdsAndNames() {
+		return centerRepository.findIdsAndNames();
 	}
 
 	@Override
@@ -99,6 +126,24 @@ public class CenterServiceImpl implements CenterService {
 							"Error while updating center from Shanoir Old: " + e.getMessage());
 				}
 			}
+		}
+	}
+
+	/*
+	 * Send a message to Shanoir old to delete a center.
+	 * 
+	 * @param centerId center id.
+	 */
+	private void deleteCenterOnShanoirOld(final Long centerId) {
+		try {
+			LOG.info("Send update to Shanoir Old");
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteCenterQueueOut().getName(),
+					new ObjectMapper().writeValueAsString(centerId));
+		} catch (AmqpException e) {
+			LOG.error("Cannot send center " + centerId + " delete to Shanoir Old on queue : "
+					+ RabbitMqConfiguration.deleteCenterQueueOut().getName(), e);
+		} catch (JsonProcessingException e) {
+			LOG.error("Cannot send center " + centerId + " because of an error while serializing center.", e);
 		}
 	}
 

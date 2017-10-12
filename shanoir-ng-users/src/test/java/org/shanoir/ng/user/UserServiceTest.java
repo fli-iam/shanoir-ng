@@ -47,7 +47,7 @@ public class UserServiceTest {
 
 	@Mock
 	private EmailService emailService;
-	
+
 	@Mock
 	private KeycloakClient keycloakClient;
 
@@ -56,10 +56,10 @@ public class UserServiceTest {
 
 	@Mock
 	private RoleRepository roleRepository;
-	
+
 	@Mock
 	private UserRepository userRepository;
-	
+
 	@InjectMocks
 	private UserServiceImpl userService;
 
@@ -68,6 +68,12 @@ public class UserServiceTest {
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
 		given(userRepository.findOne(USER_ID)).willReturn(ModelsUtil.createUser());
+		given(userRepository
+				.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(Date.class)))
+						.willReturn(Arrays.asList(ModelsUtil.createUser()));
+		given(userRepository
+				.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Mockito.any(Date.class)))
+						.willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository.save(Mockito.any(User.class))).willReturn(ModelsUtil.createUser());
 		given(roleRepository.findByName(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createGuestRole()));
 	}
@@ -142,8 +148,9 @@ public class UserServiceTest {
 	public void deleteByIdTest() throws ShanoirUsersException {
 		UserContext userContext = new UserContext();
 		userContext.setId(2L);
-		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(userContext, null));
-		
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(userContext, null));
+
 		userService.deleteById(USER_ID);
 
 		Mockito.verify(userRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -153,8 +160,9 @@ public class UserServiceTest {
 	public void deleteByIdByUserWithSameIdTest() throws ShanoirUsersException {
 		UserContext userContext = new UserContext();
 		userContext.setId(1L);
-		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(userContext, null));
-		
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(userContext, null));
+
 		userService.deleteById(USER_ID);
 
 		Mockito.verify(userRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -179,12 +187,34 @@ public class UserServiceTest {
 	}
 
 	@Test
+	public void getUsersToReceiveFirstExpirationNotificationTest() {
+		final List<User> users = userService.getUsersToReceiveFirstExpirationNotification();
+		Assert.assertNotNull(users);
+		Assert.assertTrue(users.size() == 1);
+		Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(users.get(0).getFirstName()));
+
+		Mockito.verify(userRepository, Mockito.times(1))
+				.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(Date.class));
+	}
+
+	@Test
+	public void getUsersToReceiveSecondExpirationNotificationTest() {
+		final List<User> users = userService.getUsersToReceiveSecondExpirationNotification();
+		Assert.assertNotNull(users);
+		Assert.assertTrue(users.size() == 1);
+		Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(users.get(0).getFirstName()));
+
+		Mockito.verify(userRepository, Mockito.times(1))
+				.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Mockito.any(Date.class));
+	}
+
+	@Test
 	public void requestExtensionTest() throws ShanoirUsersException {
 		ExtensionRequestInfo requestInfo = new ExtensionRequestInfo();
 		requestInfo.setExtensionDate(new Date());
 		requestInfo.setExtensionMotivation("motivation");
 		userService.requestExtension(USER_ID, requestInfo);
-		
+
 		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
 	}
 
@@ -219,6 +249,20 @@ public class UserServiceTest {
 		final User updatedUser = userService.update(createUser());
 		Assert.assertNotNull(updatedUser);
 		Assert.assertTrue(UPDATED_USER_FIRSTNAME.equals(updatedUser.getFirstName()));
+
+		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+	}
+
+	@Test
+	public void updateExpirationNotificationTrue() throws ShanoirUsersException {
+		userService.updateExpirationNotification(createUser(), true);
+
+		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+	}
+
+	@Test
+	public void updateExpirationNotificationFalse() throws ShanoirUsersException {
+		userService.updateExpirationNotification(createUser(), false);
 
 		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
 	}

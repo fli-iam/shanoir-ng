@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.accountrequest.AccountRequestInfo;
-import org.shanoir.ng.email.EmailServiceImpl;
 import org.shanoir.ng.user.User;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.icegreen.greenmail.util.GreenMail;
-import com.icegreen.greenmail.util.ServerSetup;
+import com.icegreen.greenmail.util.ServerSetupTest;
 
 /**
  * User detail service test.
@@ -35,6 +34,8 @@ import com.icegreen.greenmail.util.ServerSetup;
 @ActiveProfiles("test")
 public class EmailServiceTest {
 
+	private static final String NEW_PASSWORD = "testPwd";
+	
 	@Autowired
 	private EmailServiceImpl emailService;
 	
@@ -42,13 +43,20 @@ public class EmailServiceTest {
 
 	@Before
 	public void setup() {
-		smtpServer = new GreenMail(new ServerSetup(25, null, "smtp"));
+		smtpServer = new GreenMail(ServerSetupTest.SMTP);
 		smtpServer.start();
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		smtpServer.stop();
+	}
+
+	@Test
+	public void notifyAccountWillExpireTest() throws Exception {
+		emailService.notifyAccountWillExpire(ModelsUtil.createUser());
+
+		assertReceivedMessageContains("Shanoir Account Expiration", "will expire on");
 	}
 
 	@Test
@@ -97,6 +105,14 @@ public class EmailServiceTest {
 
 		assertReceivedMessageContains("DENIED: Your Shanoir account extension request has been denied",
 				"has been denied");
+	}
+
+	@Test
+	public void notifyUserResetPasswordTest() throws Exception {
+		emailService.notifyUserResetPassword(ModelsUtil.createUser(), NEW_PASSWORD);
+
+		assertReceivedMessageContains("[Shanoir] Réinitialisation du mot de passe",
+				NEW_PASSWORD);
 	}
 
 	private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)

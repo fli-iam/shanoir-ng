@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.shanoir.ng.center.CenterMapper;
+import org.shanoir.ng.manufacturermodel.ManufacturerModelMapper;
 
 /**
  * Mapper for acquisition equipments.
@@ -13,7 +14,7 @@ import org.shanoir.ng.center.CenterMapper;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = CenterMapper.class)
+@Mapper(componentModel = "spring", uses = {CenterMapper.class, ManufacturerModelMapper.class})
 public interface AcquisitionEquipmentMapper {
 
 	/**
@@ -52,9 +53,7 @@ public interface AcquisitionEquipmentMapper {
 	 *            acquisition equipment to map.
 	 * @return acquisition equipment DTO.
 	 */
-	@Mappings({ @Mapping(source = "center.name", target = "centerName"),
-			@Mapping(source = "manufacturerModel.name", target = "manufacturerModelName"),
-			@Mapping(source = "manufacturerModel.manufacturer.name", target = "manufacturerName") })
+	@Mappings({ @Mapping(source = "center.name", target = "centerName")})
 	SimpleAcquisitionEquipmentDTO acquisitionEquipmentToSimpleAcquisitionEquipmentDTO(
 			AcquisitionEquipment acquisitionEquipment);
 

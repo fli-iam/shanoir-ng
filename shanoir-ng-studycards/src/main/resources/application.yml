@@ -43,15 +43,15 @@ keycloak:
   auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-studyCards
-  securityConstraints[0]:
-    securityCollections[0]:
-      name: studycards secured api
-      authRoles:
-        - ROLE_ADMIN
-        - ROLE_EXPERT
-        - ROLE_GUEST
-        - ROLE_USER
-      patterns:
+  securityConstraints:
+    - authRoles: 
+      - ROLE_ADMIN
+      - ROLE_EXPERT
+      - ROLE_GUEST
+      - ROLE_USER
+    - securityCollections:
+      - name: studycards secured api
+      - patterns:
         - /*
 # logging configuration
 logging:
@@ -133,7 +133,7 @@ spring:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
   rabbitmq:
-    host: qualif-ng-rabbitmq
+    host: shanoir-ng-rabbitmq
 #keycloak
 keycloak:
-  auth-server-url: https://shanoir-qualif.irisa.fr/auth
+  auth-server-url: SHANOIR_SERVER_URL/auth

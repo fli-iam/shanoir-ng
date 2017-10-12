@@ -45,6 +45,11 @@ public class AcquisitionEquipmentServiceTest {
 		given(acquisitionEquipmentRepository.save(Mockito.any(AcquisitionEquipment.class))).willReturn(ModelsUtil.createAcquisitionEquipment());
 	}
 
+	@Test(expected=ShanoirStudiesException.class)
+	public void deleteByBadIdTest() throws ShanoirStudiesException {
+		acquisitionEquipmentService.deleteById(2L);
+	}
+	
 	@Test
 	public void deleteByIdTest() throws ShanoirStudiesException {
 		acquisitionEquipmentService.deleteById(ACQ_EQPT_ID);

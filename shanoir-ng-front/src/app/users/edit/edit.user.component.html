@@ -54,7 +54,7 @@
 									<my-date-picker id="expirationDate" [options]="myDatePickerOptions" formControlName="expirationDate" [(ngModel)]="expirationDate" 
 										(dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
 									</my-date-picker>
-									<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: yyyy-mm-dd</label>
+									<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: dd/mm/yyyy</label>
 								</span>
 							</li>
 							<li *ngIf="!requestAccountMode" class="required">
@@ -66,7 +66,7 @@
 									<label *ngIf="formErrors.role.includes('required')" class="form-validation-alert" i18n="Edit user|RoleRequiredError label">Role is required!</label>
 								</span>
 							</li>
-							<li>
+							<li *ngIf="!requestAccountMode">
 								<label i18n="Edit user|CanAccessToDicomAssociation label">Can import from Neurinfo-PACS</label>
 								<span class="right-col">
 									<input type="radio" formControlName="canAccessToDicomAssociation" [(ngModel)]="user.canAccessToDicomAssociation" [value]="true" i18n="Edit user|canAccessToDicomAssociation label" [checked]="user.canAccessToDicomAssociation == true"/>Yes

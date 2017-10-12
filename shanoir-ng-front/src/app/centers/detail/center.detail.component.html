@@ -1,6 +1,6 @@
 <div class="content-component">
     <form [formGroup]="centerDetailForm" class="max-content" novalidate>
-		<div class="layout">
+		<div class="layout left">
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
 					<div class="header command-zone" i18n="View center|Title">Details on center</div>
@@ -109,6 +109,11 @@
 						<button type="submit" i18n="Edit center|CreateButton label" (click)="create()" class="Button" [disabled]="!centerDetailForm.valid">Create</button>
 					</ng-template>
 				</span>
+			</div>
+		</div>
+		<div class="right" *ngIf="mode=='view'">
+			<div *ngIf="center.acquisitionEquipments?.length > 0">
+				<list title="Acquisition Equipments List" [tab_open]='true' [list]='center.acquisitionEquipments'></list>
 			</div>
 		</div>
     </form>

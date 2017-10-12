@@ -20,12 +20,22 @@ export class CenterService {
         });
     }
 
+    getCentersNames(): Promise<Center[]> {
+        return this.http.get(AppUtils.BACKEND_API_CENTER_ALL_NAMES_URL)
+            .toPromise()
+            .then(response => response.json() as Center[])
+            .catch((error) => {
+                console.error('Error while getting centers', error);
+                return Promise.reject(error.message || error);
+        });
+    }
+
     delete(id: number): Promise<Response> {
         return this.http.delete(AppUtils.BACKEND_API_CENTER_URL + '/' + id)
             .toPromise()
             .catch((error) => {
                 console.error('Error delete center', error);
-                return Promise.reject(error.message || error);
+                return Promise.reject(error);
         });
     }
 

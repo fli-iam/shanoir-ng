@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Response, Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
+import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 
 import { ExtensionRequestInfo } from '../extensionRequest/extension.request.info.model';
 import { User } from './user.model';
@@ -68,7 +69,7 @@ export class UserService {
             .catch(this.handleErrorService.handleError);
     }
 
-    requestExtension(extensionRequestInfo: ExtensionRequestInfo): Promise<Response> {
+    requestExtension(extensionRequestInfo: ExtensionRequestInfo): Promise<Response | ErrorObservable> {
         return this.http.put(AppUtils.BACKEND_API_USER_EXTENSION_REQUEST_URL, JSON.stringify(extensionRequestInfo))
             .toPromise()
             .catch(this.handleErrorService.handleError);

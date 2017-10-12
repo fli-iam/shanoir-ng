@@ -3,7 +3,7 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
-import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
+import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
@@ -27,7 +27,7 @@ export class EditUserComponent implements OnInit {
     isDateValid: boolean = true;
     creationMode: boolean;
     userId: number;
-    selectedDateNormal: string = '';
+    selectedDateNormal: IMyDate;
     accountRequestInfo: AccountRequestInfo;
     private accountRequestInfoValid: boolean = false;
 
@@ -224,14 +224,14 @@ export class EditUserComponent implements OnInit {
     };
 
     private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'yyyy-mm-dd',
+        dateFormat: 'dd/mm/yyyy',
         height: '20px',
         width: '160px'
     };
 
     onDateChanged(event: IMyDateModel) {
         if (event.formatted !== '') {
-            this.selectedDateNormal = event.formatted;
+            this.selectedDateNormal = event.date;
         }
     }
 
@@ -249,8 +249,9 @@ export class EditUserComponent implements OnInit {
     }
 
     setDateFromDatePicker(): void {
-        if (this.selectedDateNormal && !isNaN(new Date(this.selectedDateNormal).getTime())) {
-            this.user.expirationDate = new Date(this.selectedDateNormal);
+        if (this.selectedDateNormal) {
+            this.user.expirationDate = new Date(this.selectedDateNormal.year, this.selectedDateNormal.month - 1, 
+                this.selectedDateNormal.day);
         } else {
             this.user.expirationDate = null;
         }
@@ -258,8 +259,9 @@ export class EditUserComponent implements OnInit {
 
     getDateToDatePicker(user: User): void {
         if (user && user.expirationDate && !isNaN(new Date(user.expirationDate).getTime())) {
-            let date: string = new Date(user.expirationDate).toISOString().split('T')[0];
-            this.selectedDateNormal = date;
+            let expirationDate:Date = new Date(user.expirationDate);
+            this.selectedDateNormal = {year: expirationDate.getFullYear(), month: expirationDate.getMonth() + 1, 
+                day: expirationDate.getDate()};;
         }
     }
 

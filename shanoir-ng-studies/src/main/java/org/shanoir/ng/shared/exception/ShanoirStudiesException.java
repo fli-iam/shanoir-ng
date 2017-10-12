@@ -1,5 +1,6 @@
 package org.shanoir.ng.shared.exception;
 
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.slf4j.Logger;
 
 public class ShanoirStudiesException extends Exception {
@@ -10,6 +11,8 @@ public class ShanoirStudiesException extends Exception {
 	private static final long serialVersionUID = -3427894964632186339L;
 
 	private int errorCode;
+
+	private FieldErrorMap errorMap;
 
 	/**
 	 * Constructor.
@@ -35,6 +38,17 @@ public class ShanoirStudiesException extends Exception {
 	/**
 	 * Constructor.
 	 * 
+	 * @param errorMap
+	 *            error map.
+	 */
+	public ShanoirStudiesException(final FieldErrorMap errorMap) {
+		super();
+		this.errorMap = errorMap;
+	}
+
+	/**
+	 * Constructor.
+	 * 
 	 * @param message
 	 *            message.
 	 * @param errorCode
@@ -50,6 +64,13 @@ public class ShanoirStudiesException extends Exception {
 	 */
 	public int getErrorCode() {
 		return errorCode;
+	}
+
+	/**
+	 * @return the errorMap
+	 */
+	public FieldErrorMap getErrorMap() {
+		return errorMap;
 	}
 
 	/**

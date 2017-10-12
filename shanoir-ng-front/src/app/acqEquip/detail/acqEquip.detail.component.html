@@ -33,10 +33,10 @@
 							</ng-template>
 							<ng-template ngSwitchDefault> 
 								<select id="manufModel" required formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel">
-									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel.name}}</option>
+									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</option>
 								</select>
 								<button i18n="AcqEquip detail|Create new model label" (click)="manufModelModal.show()">
-									<img src="/assets/images/icons/add-1.png"/>
+									<img [src]="addIconPath"/>
 									new manufacturer model
 								</button>
 								<label *ngIf="formErrors.manufacturerModel.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|ManufModelRequiredError label">Manufacturer model is required!</label>
@@ -67,7 +67,10 @@
 						</span>
 					</li>
 					<li>
-						<label i18n="AcqEquip detail|Serial number label">Serial Number</label>
+						<label i18n="AcqEquip detail|Serial number label">
+							Serial Number
+							<img [src]="infoIconPath" i18n-title title="Value of DICOM Device Serial Number tag (0018,1000). Used to verify data imported from this equipment."/>
+						</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								{{acqEquip.serialNumber}}

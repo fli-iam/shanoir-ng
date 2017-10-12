@@ -41,7 +41,7 @@ export class ManufacturerModelService {
 
     create(manufModel: ManufacturerModel): Observable<ManufacturerModel> {
         return this.http.post(AppUtils.BACKEND_API_MANUF_MODEL_URL, JSON.stringify(manufModel))
-            .map(this.handleErrorService.extractData)
+            .map(response => response.json() as ManufacturerModel)
             .catch(this.handleErrorService.handleError);
     }
 

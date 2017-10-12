@@ -1,0 +1,10 @@
+## install java-8 from the backports
+#Package: openjdk-8-* ca-certificates-java
+#Pin: release a=stretch-backports
+#Pin-Priority: 500
+
+# ignore all backports packages
+Package: *
+Pin: release a=stretch-backports
+Pin-Priority: 1
+

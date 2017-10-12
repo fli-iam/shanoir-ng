@@ -2,20 +2,22 @@ const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const CompressionWebpackPlugin = require("compression-webpack-plugin");
 const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
+const AotPlugin = require('@ngtools/webpack').AotPlugin;
 
 /**
  * Webpack Constants
  */
 const ENV = process.env.ENV = process.env.NODE_ENV = 'production';
-const BACKEND_API_ROOT_URL = 'https://shanoir-qualif.irisa.fr/shanoir-ng';
+const BACKEND_API_ROOT_URL = 'SHANOIR_SERVER_URL/shanoir-ng';
 const METADATA = webpackMerge(commonConfig.metadata, {
     host: 'localhost',
     BACKEND_API_USERS_MS_URL: BACKEND_API_ROOT_URL + '/users',
     BACKEND_API_STUDIES_MS_URL: BACKEND_API_ROOT_URL + '/studies',
-    KEYCLOAK_BASE_URL: 'https://shanoir-qualif.irisa.fr/auth',
-    LOGOUT_REDIRECT_URL: 'https://shanoir-qualif.irisa.fr/shanoir-ng/index.html',
+    KEYCLOAK_BASE_URL: 'SHANOIR_SERVER_URL/auth',
+    LOGOUT_REDIRECT_URL: 'SHANOIR_SERVER_URL/shanoir-ng/index.html',
     port: 8080,
     ENV: ENV,
 });
@@ -34,23 +36,38 @@ module.exports = webpackMerge(commonConfig, {
         rules: [
             {
                 test: /\.ts$/,
-                loaders: ['awesome-typescript-loader', 'angular2-template-loader']
-            }
+                loaders: ['@ngtools/webpack']
+            },
+            /**
+             * File loader for supporting images, for example, in CSS files.
+             */
+            {
+                test: /\.(jpg|png|gif)$/,
+                loader: 'file-loader'
+           }
         ]
     },
 
     plugins: [
+        new AotPlugin({
+            tsConfigPath: './tsconfig-aot.json',
+            entryModule: helpers.root('src/app/app.module#AppModule')
+        }),
+
         new HtmlWebpackPlugin({
             filename: 'index.html',
-            template: 'src/index-qualif.html'
+            template: 'src/index-qualif.html',
+            inject: true  
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
 
         new webpack.optimize.UglifyJsPlugin({ // https://github.com/angular/angular/issues/10618
-            mangle: {
-                keep_fnames: true
-            }
+            "compress": { "warnings": false },
+            "sourceMap": false,
+            "comments": false,
+            "mangle": true,
+            "minimize": true
         }),
 
         new ExtractTextPlugin('[name].[hash].css'),
@@ -59,6 +76,17 @@ module.exports = webpackMerge(commonConfig, {
             htmlLoader: {
                 minimize: false // workaround for ng2
             }
+        }),
+
+        // GZIP the files
+        new CompressionWebpackPlugin({
+            asset: "[path].gz[query]",
+            algorithm: "gzip",
+            test: new RegExp(
+                "\\.(" + ["js", "css"].join("|") +")$"
+            ),
+            threshold: 10240,
+            minRatio: 0.8
         }),
 
         /**

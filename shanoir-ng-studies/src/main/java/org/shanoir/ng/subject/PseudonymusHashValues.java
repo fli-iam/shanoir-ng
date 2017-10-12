@@ -5,15 +5,12 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.hateoas.Links;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

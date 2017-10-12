@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -e
+
+# source the default script if present (ala /etc/default/)
+default="/vol/ro/default/msapp.sh"
+[ -f "$default" ] && . "$default"
+
+wait-mysql
+
+mkdir -p	/vol/log/ms
+chown shanoir:	/vol/log/ms
+
+# initialise keycloak vars (used by ng-users only) with dummy values if unset
+# (so that other containers do not have errors if they are unset)
+export KEYCLOAK_USER="${KEYCLOAK_USER-unknown}"
+export KEYCLOAK_PASSWORD="${KEYCLOAK_PASSWORD-unknown}"
+
+# runtime config
+configure-hosts
+override 			\
+	-e SHANOIR_SERVER_URL	\
+	-e SHANOIR_ADMIN_EMAIL	\
+	-e SHANOIR_ADMIN_NAME	\
+	-e SMTP_HOST		\
+	-e SMTP_PORT		\
+	-e KEYCLOAK_USER	\
+	-e KEYCLOAK_PASSWORD	\
+	-z /opt/shanoir-ng/shanoir-ng-msapp.jar BOOT-INF/classes/application.yml
+
+exec su shanoir -c "exec java -Dspring.profiles.active='$PROFILE' -jar /opt/shanoir-ng/shanoir-ng-msapp.jar"
+

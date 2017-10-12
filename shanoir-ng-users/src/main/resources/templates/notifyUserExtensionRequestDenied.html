@@ -4,9 +4,8 @@
 <body>
     <p>Dear <span th:text="${firstname}"></span> <span th:text="${lastname}"></span>,</p>
     <p>Your account extension request on <a th:href="${serverAddress}">Shanoir</a> has been denied.</p>
-    <p>Your expiration date is still:</p>
-    <p><b><span th:text="${expirationDate}"></span></b></p>
-    <p>Regards,</p>
-    <p>Shanoir administrator</p>
+    <p>Your expiration date is still: <b><span th:text="${expirationDate}"></span></b></p>
+    <p>Regards,<br/>
+    Shanoir administrator</p>
 </body>
 </html>

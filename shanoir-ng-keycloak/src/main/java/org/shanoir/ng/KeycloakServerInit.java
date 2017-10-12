@@ -8,10 +8,8 @@ import java.util.Map;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.shanoir.ng.role.Role;
-import org.shanoir.ng.role.RoleRepository;
+import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.user.User;
 import org.shanoir.ng.user.UserRepository;
 import org.shanoir.ng.utils.KeycloakUtils;
@@ -60,14 +58,14 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	@Value("${kc.requests.realm}")
 	private String keycloakRequestsRealm;
 
-	@Value("${kc.requests.temporary.password}")
-	private boolean keycloakTemporaryPassword;
-
-	@Autowired
-	private RoleRepository roleRepository;
+	@Value("${kc.requests.debug.use.dummy.password}")
+	private boolean keycloakUseDummyPassword;
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private EmailService emailService;
 
 	private Keycloak keycloak;
 
@@ -107,6 +105,7 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 			context.getBean(KeycloakServerInit.class).start();
 		} catch (Exception e) {
 			LOG.error("Error while initializing Keycloak server", e);
+			System.exit(1);
 		} finally {
 			if (context != null) {
 				context.close();
@@ -115,17 +114,8 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 	}
 
 	private void start() {
-		createRoles();
+		// Roles already created by shanoir-ng-realm.json
 		createUsers();
-	}
-
-	private void createRoles() {
-		LOG.info("Create roles");
-
-		final Iterable<Role> roles = roleRepository.findAll();
-		for (final Role role : roles) {
-			getKeycloak().realm(keycloakRealm).roles().create(getRoleRepresentation(role));
-		}
 	}
 
 	private void createUsers() {
@@ -142,33 +132,24 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 			// Reset user password
 			final CredentialRepresentation credential = new CredentialRepresentation();
 			credential.setType(CredentialRepresentation.PASSWORD);
-			if (keycloakTemporaryPassword) {
-				credential.setValue(PasswordUtils.generatePassword());
+			String newPassword = PasswordUtils.generatePassword();
+			if (keycloakUseDummyPassword) {
+				// debug setup: use a fixed password for everybody
+				newPassword = "&a1A&a1A";
+				credential.setTemporary(false);
 			} else {
-				credential.setValue("&a1A&a1A");
+				// normal setup: generate a random password and force the user to change it
+				credential.setTemporary(true);
 			}
-			credential.setTemporary(keycloakTemporaryPassword);
+			credential.setValue(newPassword);
 			userResource.resetPassword(credential);
+			
+			emailService.notifyUserResetPassword(user, newPassword);
 
 			// Add realm role
 			userResource.roles().realmLevel().add(Arrays.asList(
 					getKeycloak().realm(keycloakRealm).roles().get(user.getRole().getName()).toRepresentation()));
 		}
-	}
-
-	/*
-	 * Parse user to keycloak user representation.
-	 * 
-	 * @param user user.
-	 * 
-	 * @return keycloak user representation.
-	 */
-	private RoleRepresentation getRoleRepresentation(final Role role) {
-		final RoleRepresentation roleRepresentation = new RoleRepresentation();
-		roleRepresentation.setClientRole(true);
-		roleRepresentation.setName(role.getName());
-
-		return roleRepresentation;
 	}
 
 	/*

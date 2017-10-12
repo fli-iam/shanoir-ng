@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# container upgrade script
+#
+# The output must be empty when no upgrade is needed.
+#
+
+set -e
+
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get -qq update
+apt-get -qqy --no-install-recommends upgrade -u
+

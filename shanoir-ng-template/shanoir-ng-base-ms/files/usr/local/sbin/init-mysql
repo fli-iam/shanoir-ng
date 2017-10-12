@@ -1,0 +1,44 @@
+#!/bin/sh
+
+die() {
+	echo "error: $*" >&2
+	exit 1
+}
+
+# sanity checks on MS
+[ -n "$MS" ] || die die "env var MS must provide the name of the microservice (eg: shanoir-ng-users)"
+echo "X$MS" | grep -q '^X[a-z_][a-z0-9_-]*$' || die "malformatted MS value: '$MS'"
+
+# ensure the db is not already initialised
+[ ! -e "/vol/rw/mysql/mysql" ] || die "error: db is already initialised"
+
+
+# abort script on any error
+set -e -x
+
+mkdir -p /vol/rw/mysql
+
+# initialise the db in /vol/rw/mysql
+mysql_install_db >/dev/null </dev/null
+
+# start the mysql server
+run-mysql </dev/null &
+pid=$!
+wait-mysql --timeout=5
+
+# name of the table to be created
+tbl="`echo "$MS" | sed s/-/_/g`"
+
+# grant permission and create the db
+mysql -u root <<EOF
+GRANT ALL ON $tbl.*	TO shanoir@'localhost' IDENTIFIED BY 'shanoir';
+CREATE DATABASE $tbl;
+EOF
+
+# initialise the db (with SQL script provided from stdin)
+mysql -ushanoir -pshanoir -- "$tbl"
+
+# kill the server
+kill -- "$pid"
+wait
+

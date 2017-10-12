@@ -4,7 +4,6 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.shanoir.ng.user.User;
-import org.springframework.util.StringUtils;
 
 /**
  * Validate if motivation exists with extension request.

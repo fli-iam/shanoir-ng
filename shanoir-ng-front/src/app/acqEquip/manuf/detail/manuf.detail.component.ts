@@ -16,13 +16,13 @@ import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
 export class ManufacturerDetailComponent implements OnInit {
     
     private manuf: Manufacturer = new Manufacturer();
-    private manufDetailForm: FormGroup;
+    public manufDetailForm: FormGroup;
     private manufId: number;
-    private mode: "view" | "edit" | "create";
+    public mode: "view" | "edit" | "create";
     @Input() modeFromManufModel: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
-    private canModify: Boolean = false;
+    public canModify: Boolean = false;
 
     constructor (private route: ActivatedRoute, private router: Router,
         private manufService: ManufacturerService,   private fb: FormBuilder,
@@ -91,9 +91,10 @@ export class ManufacturerDetailComponent implements OnInit {
         'name': ''
     };
 
-    back(): void {
+    back(manufId?: number): void {
         if (this.closing.observers.length > 0) {
-            this.closing.emit(null);
+            this.manuf = new Manufacturer();
+            this.closing.emit(manufId);
         } else {
             this.location.back();
         }
@@ -107,7 +108,7 @@ export class ManufacturerDetailComponent implements OnInit {
         this.manuf = this.manufDetailForm.value;
         this.manufService.create(this.manuf)
         .subscribe((manuf) => {
-            this.back();
+            this.back(manuf.id);
         }, (err: String) => {
             if (err.indexOf("name should be unique") != -1) {
                 this.isNameUnique = false;

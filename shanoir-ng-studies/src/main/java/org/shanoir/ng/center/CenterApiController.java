@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
@@ -36,13 +37,20 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<Void> deleteCenter(
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
+			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
+			throws RestServiceException {
 		if (centerService.findById(centerId) == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		try {
 			centerService.deleteById(centerId);
 		} catch (ShanoirStudiesException e) {
+			if (ErrorModelCode.CENTER_NOT_FOUND.equals(e.getErrorCode())) {
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			} else if (e.getErrorMap() != null) {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Forbidden",
+						new ErrorDetails(e.getErrorMap())));
+			}
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -65,6 +73,15 @@ public class CenterApiController implements CenterApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(centerMapper.centersToCenterDTOs(centers), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<CenterNameDTO>> findCentersNames() {
+		final List<CenterNameDTO> centers = centerService.findIdsAndNames();
+		if (centers.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(centers, HttpStatus.OK);
 	}
 
 	@Override

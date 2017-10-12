@@ -1,0 +1,10 @@
+.layout { min-width: 410px; }
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+    -webkit-margin-start: 2px;
+}

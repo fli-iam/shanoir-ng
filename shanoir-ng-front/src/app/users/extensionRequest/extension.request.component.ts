@@ -17,7 +17,7 @@ import { UserService } from '../shared/user.service';
 
 export class ExtensionRequestComponent implements OnInit {
     @Output() closing = new EventEmitter();
-    extensionRequestInfo: ExtensionRequestInfo = new ExtensionRequestInfo();
+    public extensionRequestInfo: ExtensionRequestInfo = new ExtensionRequestInfo();
     extensionRequestForm: FormGroup;
     isDateValid: boolean = true;
     userId: number;
@@ -101,8 +101,8 @@ export class ExtensionRequestComponent implements OnInit {
         'extensionMotivation': ''
     };
 
-    private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'yyyy-mm-dd',
+    public myDatePickerOptions: IMyOptions = {
+        dateFormat: 'dd/mm/yyyy',
         height: '20px',
         width: '160px'
     };
@@ -127,8 +127,12 @@ export class ExtensionRequestComponent implements OnInit {
     }
 
     setDateFromDatePicker(): void {
-        if (this.selectedDateNormal && !isNaN(new Date(this.selectedDateNormal).getTime())) {
-            this.extensionRequestInfo.extensionDate = new Date(this.selectedDateNormal);
+        if (this.selectedDateNormal) {
+            var from = this.selectedDateNormal.valueOf().split("/");
+            var f0 = from[0]; 
+            var f1 = +from[1] - 1; 
+            var f2 = from[2];
+            this.extensionRequestInfo.extensionDate = new Date(+f2, f1, +f0);
         } else {
             this.extensionRequestInfo.extensionDate = null;
         }
@@ -136,7 +140,7 @@ export class ExtensionRequestComponent implements OnInit {
 
     getDateToDatePicker(extensionRequestInfo: ExtensionRequestInfo): void {
         if (extensionRequestInfo && extensionRequestInfo.extensionDate && !isNaN(new Date(extensionRequestInfo.extensionDate).getTime())) {
-            let date: string = new Date(extensionRequestInfo.extensionDate).toISOString().split('T')[0];
+            let date: string = new Date(extensionRequestInfo.extensionDate).toLocaleDateString();
             this.selectedDateNormal = date;
         }
     }

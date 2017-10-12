@@ -1,5 +1,6 @@
 package org.shanoir.ng.user;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ public interface UserRepository extends CrudRepository<User, Long>, UserReposito
 	 */
 	@Query("select email from User u where u.role.name='ROLE_ADMIN'")
 	List<String> findAdminEmails();
-	
+
 	/**
 	 * Find user by its username
 	 *
@@ -40,5 +41,25 @@ public interface UserRepository extends CrudRepository<User, Long>, UserReposito
 	 * @return a user or null
 	 */
 	Optional<User> findByUsername(String username);
+
+	/**
+	 * Find users who have account that will soon expire and have not received
+	 * first notification.
+	 * 
+	 * @param expirationDate
+	 *            expiration date to check.
+	 * @return list of users.
+	 */
+	List<User> findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Date expirationDate);
+
+	/**
+	 * Find users who have account that will soon expire and have not received
+	 * second notification.
+	 * 
+	 * @param expirationDate
+	 *            expiration date to check.
+	 * @return list of users.
+	 */
+	List<User> findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Date expirationDate);
 
 }

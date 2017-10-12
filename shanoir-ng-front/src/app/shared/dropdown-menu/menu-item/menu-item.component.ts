@@ -37,8 +37,8 @@ export class MenuItemComponent {
     public siblings: QueryList<MenuItemComponent>;
     public parent: any;
     public hasChildren: boolean = true;
-    private overflow: boolean = false;
-    private init: boolean = false;
+    public overflow: boolean = false;
+    public init: boolean = false;
 
     public closeAll: () => void;
 
@@ -83,9 +83,9 @@ export class MenuItemComponent {
         }
     }
 
-    private closeOpenedAmong(menus, callback: () => void = () => {}) {
+    private closeOpenedAmong(menus: QueryList<MenuItemComponent>, callback: () => void = () => {}) {
         let toBeClosed: MenuItemComponent[] = [];
-        menus.forEach((menu, index) => {
+        menus.forEach((menu: MenuItemComponent, index: number) => {
             if (index!= 0 && menu.hasChildren && menu.opened) {
                 toBeClosed.push(menu);
             }
