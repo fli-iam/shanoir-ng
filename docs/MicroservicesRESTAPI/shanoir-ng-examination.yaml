@@ -1,0 +1,458 @@
+swagger: '2.0'
+info:
+  version: 0.0.1
+  title: Shanoir NG examination Microservice
+  description: Microservice API for Shanoir NG examination managment
+produces:
+  - application/json
+paths:
+  /examination:
+    post:
+      operationId: saveNewExamination
+      description: Saves a new examination
+      consumes:
+        - application/json
+      parameters:
+        - name: examination
+          in: body
+          description: examination to create
+          required: true
+          schema:
+            $ref: '#/definitions/Examination'
+      responses:
+        '200':
+          description: created examination
+          schema:
+            $ref: '#/definitions/Examination'
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/examination/{examinationId}':
+    get:
+      operationId: findExaminationById
+      description: 'If exists, returns the examination corresponding to the given id'
+      parameters:
+        - $ref: '#/parameters/examinationId'
+      responses:
+        '200':
+          description: found examination
+          schema:
+            $ref: '#/definitions/Examination'
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no examination found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      operationId: updateExamination
+      description: Updates an examination
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/examinationId'
+        - name: examination
+          in: body
+          description: examination to update
+          required: true
+          schema:
+            $ref: '#/definitions/Examination'
+      responses:
+        '204':
+          description: examination updated
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      operationId: deleteExamination
+      description: Deletes an examination
+      parameters:
+        - $ref: '#/parameters/examinationId'
+      responses:
+        '204':
+          description: examination deleted
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no examination found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /examination/all:
+    get:
+      operationId: findExaminations
+      description: Returns all the examinations
+      responses:
+        '200':
+          description: found examinations
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Examination'
+        '204':
+          description: no examination found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+parameters:
+  examinationId:
+    name: examinationId
+    in: path
+    description: id of the examination
+    required: true
+    type: integer
+    format: int64
+definitions:
+  Examination:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      centerId:
+        type: integer
+        format: int64
+      comment:
+        type: string
+      examinationDate:
+        type: string
+        format: date
+      extraDataFilePathList:
+        type: array
+        items:
+          type: string
+      investigatorExternal:
+        type: boolean
+      investigatorCenterId:
+        type: integer
+        format: int64
+      note:
+        type: string
+      subjectWeight:
+        type: number
+        format: double
+      timepoint:
+        $ref: '#/definitions/Timepoint'
+      weightUnitOfMeasure:
+        type: string
+        enum:
+          - MS
+          - PERCENT
+          - DEGREES
+          - G
+          - GY
+          - HZ_PX
+          - KG
+          - M
+          - MG
+          - MG_ML
+          - MHZ
+          - ML
+          - MM
+          - PX
+      datasetAcquisitionList:
+        type: array
+        items:
+          $ref: '#/definitions/DatasetAcquisition'
+      subjectId:
+        type: integer
+        format: int64
+      studyId:
+        type: integer
+        format: int64
+      investigatorId:
+        type: integer
+        format: int64
+      instrumentBasedAssessmentList:
+        type: array
+        items:
+          $ref: '#/definitions/InstrumentBasedAssessment'
+  Timepoint:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      days:
+        type: integer
+        format: int64
+      comment:
+        type: string
+      rank:
+        type: integer
+        format: int64
+      studyId:
+        type: integer
+        format: int64
+  DatasetAcquisition:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      AquisitionEquipmentId:
+        type: integer
+        format: int64
+      rank:
+        type: integer
+        format: int32
+      softwareRelease:
+        type: string
+      sortingIndex:
+        type: integer
+        format: int32
+      examination:
+        $ref: '#/definitions/Examination'
+  InstrumentBasedAssessment:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      examination:
+        $ref: '#/definitions/Examination'
+      instrument:
+        $ref: '#/definitions/Instrument'
+      variableAssessmentList:
+        type: array
+        items:
+          $ref: '#/definitions/VariableAssessment'
+  Instrument:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      acronym:
+        type: string
+      isMonoDomain:
+        type: boolean
+      childInstrumentList:
+        type: array
+        items:
+          $ref: '#/definitions/Instrument'
+      instrumentBasedAssessmentList:
+        type: array
+        items:
+          $ref: '#/definitions/InstrumentBasedAssessment'
+      instrumentDefinitionArticle:
+        $ref: '#/definitions/ScientificArticle'
+      instrumentVariableList:
+        type: array
+        items:
+          $ref: '#/definitions/InstrumentVariable'
+      parentInstrument:
+        $ref: '#/definitions/Instrument'
+      instrumentType:
+        type: string
+        enum:
+          - BEHAVIOURAL_INSTRUMENT
+          - EXPERIMENTAL_PSYCHOLOGY_INSTRUMENT
+          - NEUROCLINICAL_INSTRUMENT
+          - NEUROPSYCHOLOGICAL_INSTRUMENT
+          - PSYCHOLOGICAL_INSTRUMENT
+          - PSYCHOPHYSICAL_INSTRUMENT
+      passationMode:
+        type: string
+        enum:
+          - QUESTIONNAIRE
+          - TEST_INSTRUMENT
+      instrumentRefDomainList:
+        type: array
+        items:
+          $ref: '#/definitions/InstrumentRefDomain'
+  VariableAssessment:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      instrumentBasedAssessment:
+        $ref: '#/definitions/InstrumentBasedAssessment'
+      instrumentVariable:
+        $ref: '#/definitions/InstrumentVariable'
+      scoreList:
+        type: array
+        items:
+          $ref: '#/definitions/Score'
+  ScientificArticle:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      scientificArticleReference:
+        type: string
+      scientificArticleType:
+        type: string
+        enum:
+          - INSTRUMENT_DEFINITION_ARTICLE
+          - SCORE_STANDARDISATION_ARTICLE
+  InstrumentVariable:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      main:
+        type: boolean
+      standardized:
+        type: boolean
+      ageDependent:
+        type: boolean
+      sexDependent:
+        type: boolean
+      culturalSkillDependent:
+        type: boolean
+      instrument:
+        $ref: '#/definitions/Instrument'
+      domain:
+        type: string
+        enum:
+          - AMBULATION
+          - BOWEL_BLADDER_FUNCTIONS
+          - BRAINSTEM_FUNCTIONS
+          - CALCULATION
+          - CEREBELLAR_FUNCTIONS
+          - CEREBRAL_FUNCTIONS
+          - CONSTRUCTIVE_REALIZATION
+          - EPISODIC_MEMORY
+          - EXECUTIVE_FUNCTIONS
+          - GLOBAL_COGNITIVE_EFFICIENCY
+          - LANGUAGE
+          - NEUROLOGICAL_FUNCTIONS
+          - OPTIC_FUNCTIONS
+          - PYRAMIDAL_FUNCTIONS
+          - SENSORY_FUNCTIONS
+          - TEMPORO_SPATIAL_ORIENTATION
+      quality:
+        type: string
+        enum:
+          - AMBULATION_PERFORMANCE_WITH_BILATERAL_ASSISTANCE
+          - AMBULATION_PERFORMANCE_WITH_UNILATERAL_ASSISTANCE
+          - AMBULATION_PERFORMANCE_WITHOUT_ASSISTANCE
+          - BOWEL_BLADDER_FUNCTIONS_PERFORMANCE
+          - BRAINSTEM_FUNCTIONS_PERFORMANCE
+          - CALCULATION_PERFORMANCE
+          - CEREBELLAR_FUNCTIONS_PERFORMANCE
+          - CEREBRAL_FUNCTIONS_PERFORMANCE
+          - CONSTRUCTIVE_REALIZATION_PERFORMANCE
+          - DISABILITY_STATUS
+          - EPISODIC_MEMORY_PERFORMANCE
+          - GLOBAL_COGNITIVE_PERFORMANCE
+          - LANGUAGE_PERFORMANCE
+          - OPTIC_FUNCTIONS_PERFORMANCE
+          - PYRAMIDAL_FUNCTIONS_PERFORMANCE
+          - SENSORY_FUNCTIONS_PERFORMANCE
+          - SPATIAL_ORIENTATION_ORIENTATION_PERFORMANCE
+          - TEMPORAL_ORIENTATION_ORIENTATION_PERFORMANCE
+          - TEMPORO_SPATIAL_ORIENTATION_PERFORMANCE
+      variableAssessmentList:
+        type: array
+        items:
+          $ref: '#/definitions/VariableAssessment'
+  InstrumentRefDomain:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      instrument:
+        $ref: '#/definitions/Instrument'
+      domain:
+        type: string
+        enum:
+          - AMBULATION
+          - BOWEL_BLADDER_FUNCTIONS
+          - BRAINSTEM_FUNCTIONS
+          - CALCULATION
+          - CEREBELLAR_FUNCTIONS
+          - CEREBRAL_FUNCTIONS
+          - CONSTRUCTIVE_REALIZATION
+          - EPISODIC_MEMORY
+          - EXECUTIVE_FUNCTIONS
+          - GLOBAL_COGNITIVE_EFFICIENCY
+          - LANGUAGE
+          - NEUROLOGICAL_FUNCTIONS
+          - OPTIC_FUNCTIONS
+          - PYRAMIDAL_FUNCTIONS
+          - SENSORY_FUNCTIONS
+          - TEMPORO_SPATIAL_ORIENTATION
+  Score:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      isSelected:
+        type: boolean
+      variableAssessment:
+        $ref: '#/definitions/VariableAssessment'
+  ErrorModel:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      details:
+        type: object
+      message:
+        type: string
