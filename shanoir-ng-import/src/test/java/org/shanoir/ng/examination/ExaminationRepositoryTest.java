@@ -1,8 +1,10 @@
 package org.shanoir.ng.examination;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,8 +31,8 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 @ActiveProfiles("test")
 public class ExaminationRepositoryTest {
 
-	private static final String TEMPLATE_TEST_1_DATA = "Data1";
-	private static final Long TEMPLATE_TEST_1_ID = 1L;
+	private static final String EXAMINATION_TEST_1_NOTE = "examination1";
+	private static final Long EXAMINATION_TEST_1_ID = 1L;
 	
 	@Autowired
 	private ExaminationRepository repository;
@@ -58,13 +60,13 @@ public class ExaminationRepositoryTest {
 		assertThat(nbTemplates).isEqualTo(3);
 	}
 	
-	/*@Test
+	@Test
 	public void findByTest() throws Exception {
-		List<Examination> examinationDb = repository.findBy("data", TEMPLATE_TEST_1_DATA);
+		List<Examination> examinationDb = repository.findBy("note", EXAMINATION_TEST_1_NOTE);
 		assertNotNull(examinationDb);
 		assertThat(examinationDb.size()).isEqualTo(1);
-		assertThat(examinationDb.get(0).getId()).isEqualTo(TEMPLATE_TEST_1_ID);
-	}*/
+		assertThat(examinationDb.get(0).getId()).isEqualTo(EXAMINATION_TEST_1_ID);
+	}
 	
 	/*@Test
 	public void findByDataTest() throws Exception {
@@ -73,10 +75,10 @@ public class ExaminationRepositoryTest {
 		assertThat(templateDb.get().getId()).isEqualTo(TEMPLATE_TEST_1_ID);
 	}*/
 	
-	/*@Test
+	@Test
 	public void findOneTest() throws Exception {
-		Examination examinationDb = repository.findOne(TEMPLATE_TEST_1_ID);
-		assertThat(examinationDb.getData()).isEqualTo(TEMPLATE_TEST_1_DATA);
-	}*/
+		Examination examinationDb = repository.findOne(EXAMINATION_TEST_1_ID);
+		assertThat(examinationDb.getNote()).isEqualTo(EXAMINATION_TEST_1_NOTE);
+	}
 	
 }

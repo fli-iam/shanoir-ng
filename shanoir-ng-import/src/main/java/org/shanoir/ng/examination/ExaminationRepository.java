@@ -12,12 +12,12 @@ import org.springframework.data.repository.CrudRepository;
 public interface ExaminationRepository extends CrudRepository<Examination, Long>, ExaminationRepositoryCustom {
 
 	/**
-	 * Find template by data.
+	 * Find examination by data.
 	 *
 	 * @param data
 	 *            data.
-	 * @return a template.
+	 * @return an examination.
 	 */
-	//Optional<Examination> findByData(String data);
+//	Optional<Examination> findByData(String data);
 
 }
