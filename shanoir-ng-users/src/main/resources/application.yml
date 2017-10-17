@@ -50,6 +50,11 @@ keycloak:
   auth-server-url: http://shanoir-ng-nginx/auth
   cors: true
   realm: shanoir-ng
+
+  realmKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAl3ydNkdhOQkZ6DV9vF5EdGaNb2nbuMzy2zJiVdSvBTKDegj1HyzqFuy2lRbbpSNO2R9fJpkmvknlC8XyRObg+OdYrXWeevqfXMv21sFN3Yx5cen28xpCCLXAvxS9SdR3BkqyLkaxkpY5HKvklajJEMuN1xiIJdlfrMGGdClzguCX2L5ITgBDU8BZh1UGgCeoFpQPhiJfuxJ9THp58DxPVNUVJwSEancAajWKZF+pnEYnpw81QfzdvhZkwxftnPqNWErOEf9JY2ptGZFIY2PesmZ8RI3u4Kq0gwVl7Kn64qBoN07SPHCWZ8n758hRe/1SLqBMvcfoDRs9IlGZDGOteQIDAQAB
+  auth-server-url: http://localhost/auth
+  ssl-required: external
+
   resource: shanoir-ng-users
   ssl-required: external
   securityConstraints:
@@ -91,7 +96,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/shanoir_ng_users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: root
-    password: 
+    password: WelcomeShanoir1
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
     initialize: false
@@ -115,9 +120,13 @@ front.server:
   url: http://localhost:8080
 #keycloak
 keycloak:
-  auth-server-url: http://localhost/auth
-  credentials:
-    secret: 3b130530-4e0f-4101-bf56-1a92df705318
+
+  credentials.secret: 27cee53d-3c37-42d6-947d-0889667e6608
+  auth-server-url: http://localhost:8080/auth
+  #credentials.secret: 3b130530-4e0f-4101-bf56-1a92df705318
+#kc.requests:
+  #auth-server-url: http://localhost/auth
+
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-users.log
