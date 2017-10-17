@@ -7,16 +7,16 @@ configure-hosts
 override -e SHANOIR_SERVER_URL -e SHANOIR_INSTANCE -e DOCKER_PREFIX	\
 	/etc/nginx/nginx.conf			\
 	/etc/nginx/html/index.html		\
-	/etc/nginx/html/app.*.js		\
-	/etc/nginx/html/app.*.css		\
+	/etc/nginx/html/app*.js		\
+	/etc/nginx/html/app*.css		\
 	/etc/nginx/html/assets/css/common.css
 # delete the gzipped versions (since the originals are modified)
-rm -f /etc/nginx/html/app.*.js.gz /etc/nginx/html/app.*.css.gz
+rm -f /etc/nginx/html/app*.js.gz /etc/nginx/html/app*.css.gz
 
 # patch the theme if we are in dev/qualif environment
 case "$PROFILE" in
 	dev|qualif|"")
-		for fich in  /etc/nginx/html/assets/css/common.css /etc/nginx/html/app.*.css
+		for fich in  /etc/nginx/html/assets/css/common.css /etc/nginx/html/app*.css
 		do
 			patch "$fich" /etc/nginx/qualif-theme.diff
 		done
