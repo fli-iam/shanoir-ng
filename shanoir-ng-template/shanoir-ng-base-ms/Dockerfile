@@ -16,7 +16,7 @@ RUN	apt-get update  -qqy	&&\
 
 # apply patches
 COPY patches /tmp/patches
-RUN set -e ; for p in /tmp/patches/*.diff ; do patch -F0 -p0 <"$p" ; done
+RUN set -e ; for p in /tmp/patches/*.diff ; do patch -F0 -p0 <"$p" ; done ; rm /tmp/patches/*.diff
 
 # static files
 COPY files/. /
