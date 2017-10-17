@@ -4,7 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
@@ -35,7 +34,6 @@ public class StudyCard extends HalEntity {
 	private Long acquisitionEquipmentId;
 
 	/** The center of the study card. */
-	@NotNull
 	private Long centerId;
 
 	/** A studycard might be disabled */
@@ -48,11 +46,9 @@ public class StudyCard extends HalEntity {
 	private String name;
 
 	/** The nifti converter of the study card. */
-	@NotNull
 	private Long niftiConverterId;
 
 	/** The study for which is defined the study card. */
-	@NotNull
 	private Long studyId;
 
 	/**
