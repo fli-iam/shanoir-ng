@@ -19,7 +19,7 @@ set -e -x
 mkdir -p /vol/rw/mysql
 
 # initialise the db in /vol/rw/mysql
-mysql_install_db >/dev/null </dev/null
+mysql_install_db --user=mysql >/dev/null </dev/null
 
 # start the mysql server
 run-mysql </dev/null &
