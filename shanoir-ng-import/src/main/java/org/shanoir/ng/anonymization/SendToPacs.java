@@ -5,6 +5,13 @@ import java.io.IOException;
 import org.dcm4che3.net.ApplicationEntity;
 import org.dcm4che3.tool.storescu.StoreSCU;
 
+/**
+ * TEMPORARY CLASS.
+ * Used to test anonymization process.
+ * 
+ * @author msimon
+ *
+ */
 public class SendToPacs {
 	
 	public void processSendToPacs(final String folderPath) {
