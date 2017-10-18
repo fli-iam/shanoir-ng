@@ -7,14 +7,14 @@
                 <table class="layout">
                     <tr>
                         <td>
-                            <div class="header command-zone" i18n="Request account|Title">Request an account</div>
+                            <div class="header command-zone" i18n="Account request|Title@@accountRequestTitle">Request an account</div>
                         </td>
                     </tr>
                     <tr>
                         <td>
                             <fieldset>
-                                <label *ngIf="!errorOnRequest" i18n="Account request|RequestSent label">An email has been sent to the administrator who will validate your request.<br/>You will receive an email once your account activated.</label>
-                                <label *ngIf="errorOnRequest" i18n="Account request|ErrorOnRequest label">An error occurs.<br/>Please try again later.</label>
+                                <label *ngIf="!errorOnRequest" i18n="Account request|Request sent@@accountRequestRequestSent">An email has been sent to the administrator who will validate your request.<br/>You will receive an email once your account activated.</label>
+                                <label *ngIf="errorOnRequest" i18n="Account request|Error on request@@accountRequestErrorOnRequest">An error occurs.<br/>Please try again later.</label>
                             </fieldset>
                         </td>
                     </tr>
@@ -22,7 +22,7 @@
                     <tr>
                         <td>
                             <div class="footer command-zone">
-                                <button i18n="Account request|OkButton label" class="Button" (click)="getOut()">OK</button>
+                                <button i18n="Account request|Ok button label@@okButton" class="Button" (click)="getOut()">OK</button>
                             </div>
                         </td>
                     </tr>
