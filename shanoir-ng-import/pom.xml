@@ -21,8 +21,7 @@
 		<spring-active-profile></spring-active-profile>
 		<keycloak.version>2.5.1.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
-		<dcm4che.version>3.3.8</dcm4che.version>
-		<dcm4che-dcmr.version>dcm4chee-arc-light-5.10.5</dcm4che-dcmr.version>
+		<dcm4che.version>5.10.6</dcm4che.version>
 		<docker.image.name>shanoir-ng/template</docker.image.name>
 		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
 	</properties>
@@ -140,16 +139,28 @@
 			<groupId>org.dcm4che</groupId>
 			<artifactId>dcm4che-core</artifactId>
 			<version>${dcm4che.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.dcm4che</groupId>
 			<artifactId>dcm4che-dcmr</artifactId>
-			<version>${dcm4che-dcmr.version}</version>
+			<version>${dcm4che.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.dcm4che.tool</groupId>
 			<artifactId>dcm4che-tool-storescu</artifactId>
-			<version>${dcm4che-dcmr.version}</version>
+			<version>${dcm4che.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
