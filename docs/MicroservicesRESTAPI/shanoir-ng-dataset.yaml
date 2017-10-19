@@ -1,0 +1,484 @@
+swagger: '2.0'
+info:
+  version: 2.0.0
+  title: Shanoir NG Dataset Microservice
+  description: Microservice API for Shanoir NG dataset managment
+produces:
+  - application/json
+paths:
+  /dataset:
+    post:
+      operationId: saveNewDataset
+      description: Saves a new dataset
+      consumes:
+        - application/json
+      parameters:
+        - name: dataset
+          in: body
+          description: dataset to create
+          required: true
+          schema:
+            $ref: '#/definitions/Dataset'
+      responses:
+        '200':
+          description: created study
+          schema:
+            $ref: '#/definitions/Dataset'
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/dataset/{datasetId}':
+    get:
+      operationId: findDatasetById
+      description: 'If exists, returns the dataset corresponding to the given id'
+      parameters:
+        - $ref: '#/parameters/datasetId'
+      responses:
+        '200':
+          description: found dataset
+          schema:
+            $ref: '#/definitions/Dataset'
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no study found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      operationId: updateDataset
+      description: Updates a dataset
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/datasetId'
+        - name: study
+          in: body
+          description: study to update
+          required: true
+          schema:
+            $ref: '#/definitions/Dataset'
+      responses:
+        '204':
+          description: dataset updated
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      operationId: deleteDataset
+      description: Deletes a dataset
+      parameters:
+        - $ref: '#/parameters/datasetId'
+      responses:
+        '204':
+          description: dataset deleted
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no dataset found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /dataset/all:
+    get:
+      operationId: findDatasets
+      description: Returns all the datasets
+      responses:
+        '200':
+          description: found datasets
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Dataset'
+        '204':
+          description: no dataset found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+parameters:
+  datasetId:
+    name: datasetId
+    in: path
+    description: id of the dataset
+    required: true
+    type: integer
+    format: int64
+definitions:
+  Dataset:
+    type: object
+    required:
+      - id
+      - cardinalityOfRelatedSubjects
+    properties:
+      id:
+        type: integer
+        format: int64
+      cardinalityOfRelatedSubjects:
+        type: string
+        enum:
+          - Single-Subject Dataset
+          - Multiple-Subjects Dataset
+      comment:
+        type: string
+      creationDate:
+        type: string
+        format: date
+      datasetExpressions:
+        type: array
+        items:
+          $ref: '#/definitions/DatasetExpression'
+      datasetModalityType:
+        type: string
+        enum:
+          - MR Dataset
+          - MEG Dataset
+          - CT Dataset
+          - SPECT Dataset
+          - PET Dataset
+          - EEG Dataset
+      datasetProcessing:
+        $ref: '#/definitions/DatasetProcessing'
+      exploredEntity:
+        type: string
+        enum:
+          - Anatomical Dataset
+          - Functional Dataset
+          - Hemodynamic Dataset
+          - Metabolic Dataset
+          - Calibration
+      groupOfSubjectsId:
+        type: integer
+        format: int64
+      name:
+        type: string
+      processedDatasetType:
+        type: string
+        enum:
+          - ReconstructedDataset
+          - NonReconstructedDataset
+      referencedDatasetForSuperimposition:
+        $ref: '#/definitions/Dataset'
+      referencedDatasetForSuperimpositionChildrenList:
+        type: array
+        items:
+          $ref: '#/definitions/Dataset'
+      studyId:
+        type: integer
+        format: int64
+      subjectId:
+        type: integer
+        format: int64
+  DatasetExpression:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      comingFromDatasetExpressions:
+        type: array
+        items:
+          $ref: '#/definitions/DatasetExpression'
+      dataset:
+        $ref: '#/definitions/Dataset'
+      datasetExpressionFormat:
+        type: string
+        enum:
+          - Analyze
+          - Nifti-single-file
+          - Nifti-two-files
+          - GIS
+          - INRIMAGE
+          - DICOM
+          - MR IMAGE STORAGE SOP CLASS
+          - CT IMAGE STORAGE SOP CLASS
+          - PET IMAGE STORAGE SOP CLASS
+          - ENHANCED MR IMAGE STORAGE SOP CLASS
+          - MR SPECTROSCOPY IMAGE STORAGE SOP CLASS
+          - ENHANCED CT IMAGE STORAGE SOP CLASS
+          - ENHANCED PET IMAGE STORAGE SOP CLASS
+          - SEGMENTATION STORAGE SOP CLASS
+          - DEFORMABLE SPATIAL REGISTRATION STORAGE SOP CLASS
+          - SPATIAL REGISTRATION STORAGE SOP CLASS
+          - SIEMENS SPECTROSCOPY
+          - PHILIPS SPECTROSCOPY
+      datasetFiles:
+        type: array
+        items:
+          $ref: '#/definitions/DatasetFile'
+      datasetProcessingType:
+        type: string
+        enum:
+          - Segmentation
+          - Boundary surface Based segmentation
+          - Region based segmentation
+          - Boundary surface and region based segmentation
+          - Brain segmentation
+          - Tissues segmentation
+          - Subcortical segmentation
+          - Lesion segmentation
+          - Reconstruction
+          - Registration
+          - Normalization
+          - Registration with distorsion correction
+          - Affine registration
+          - Non-affine registration
+          - Rigid registration
+          - Affine non-rigid registration
+          - Mono modality rigid registration
+          - Multi modality rigid registration
+          - Mono modality affine non-rigid registration
+          - Multi modality affine non-rigid registration
+          - Mono modality non-affine registration
+          - Multi modality non-affine registration
+          - Resampling
+          - Cropping
+          - Re-orientation
+          - Intensity modification
+          - Dataset arithmetical operation
+          - Datasets addition
+          - Datasets substraction
+          - Datasets multiplication
+          - Datasets division
+          - Datasets logical operation
+          - Datasets blending
+          - Mesh generation
+          - Structured mesh generation
+          - Unstructured mesh generation
+          - Filtering
+          - Thresholding
+          - Convolution
+          - Smoothing
+          - High-pass filtering
+          - Low-pass filtering
+          - Mathematical mprphology filtering
+          - Erosion
+          - Dilation
+          - Opening
+          - Closing
+          - Thinning
+          - Thickening
+          - Skeletonizing
+          - Distance transform processing
+          - Dataset transformation
+          - Fourier transformation
+          - Wavelet transformation
+          - Restoration
+          - Denoising
+          - Bias-correction
+          - Distorsion-correction
+          - Statistical processing
+          - Mean calculation
+          - Standard deviation calculation
+          - Coefficient of variation calculation
+          - Calibration model estimation
+          - Calibration model application
+          - Quantitative parameter estimation
+          - Quantitative T1 estimation
+          - Quantitative T2 estimation
+          - Quantitative T2 star estimation
+          - Absolute proton density estimation
+          - Fractional anisotropy estimation
+          - Relative anisotropy estimation
+          - Diffusion tensor calculation
+          - Mean diffusivity calculation
+          - Voxel displacement map calculation
+          - Field map estimation
+          - Regional cerebral blood flow estimation
+          - Regional cerebral blood volume estimation
+          - Regional mean transit time calculation
+          - Absolute metabolite concentration estimation
+          - Metabolite concentration ratio estimation
+          - Blood oxygen level dependent signal changes estimation
+          - Format conversion
+      expressionCreationDate:
+        type: string
+        format: date
+      frameCount:
+        type: integer
+      multiFrame:
+        type: boolean
+      originalDatasetExpression:
+        $ref: '#/definitions/DatasetExpression'
+      niftiConverterId:
+        type: integer
+        format: int64
+      niftiConverterVersion:
+        type: string
+      originalNiftiConversion:
+        type: boolean
+  DatasetFile:
+    type: object
+    required:
+      - id
+      - path
+    properties:
+      id:
+        type: integer
+        format: int64
+      datasetExpression:
+        $ref: '#/definitions/DatasetExpression'
+      path:
+        type: string
+  DatasetProcessing:
+    type: object
+    required:
+      - id
+      - studyId
+    properties:
+      id:
+        type: integer
+        format: int64
+      comment:
+        type: string
+      datasetProcessingType:
+        type: string
+        enum:
+          - Segmentation
+          - Boundary surface Based segmentation
+          - Region based segmentation
+          - Boundary surface and region based segmentation
+          - Brain segmentation
+          - Tissues segmentation
+          - Subcortical segmentation
+          - Lesion segmentation
+          - Reconstruction
+          - Registration
+          - Normalization
+          - Registration with distorsion correction
+          - Affine registration
+          - Non-affine registration
+          - Rigid registration
+          - Affine non-rigid registration
+          - Mono modality rigid registration
+          - Multi modality rigid registration
+          - Mono modality affine non-rigid registration
+          - Multi modality affine non-rigid registration
+          - Mono modality non-affine registration
+          - Multi modality non-affine registration
+          - Resampling
+          - Cropping
+          - Re-orientation
+          - Intensity modification
+          - Dataset arithmetical operation
+          - Datasets addition
+          - Datasets substraction
+          - Datasets multiplication
+          - Datasets division
+          - Datasets logical operation
+          - Datasets blending
+          - Mesh generation
+          - Structured mesh generation
+          - Unstructured mesh generation
+          - Filtering
+          - Thresholding
+          - Convolution
+          - Smoothing
+          - High-pass filtering
+          - Low-pass filtering
+          - Mathematical mprphology filtering
+          - Erosion
+          - Dilation
+          - Opening
+          - Closing
+          - Thinning
+          - Thickening
+          - Skeletonizing
+          - Distance transform processing
+          - Dataset transformation
+          - Fourier transformation
+          - Wavelet transformation
+          - Restoration
+          - Denoising
+          - Bias-correction
+          - Distorsion-correction
+          - Statistical processing
+          - Mean calculation
+          - Standard deviation calculation
+          - Coefficient of variation calculation
+          - Calibration model estimation
+          - Calibration model application
+          - Quantitative parameter estimation
+          - Quantitative T1 estimation
+          - Quantitative T2 estimation
+          - Quantitative T2 star estimation
+          - Absolute proton density estimation
+          - Fractional anisotropy estimation
+          - Relative anisotropy estimation
+          - Diffusion tensor calculation
+          - Mean diffusivity calculation
+          - Voxel displacement map calculation
+          - Field map estimation
+          - Regional cerebral blood flow estimation
+          - Regional cerebral blood volume estimation
+          - Regional mean transit time calculation
+          - Absolute metabolite concentration estimation
+          - Metabolite concentration ratio estimation
+          - Blood oxygen level dependent signal changes estimation
+          - Format conversion
+      inputOfDatasetProcessings:
+        type: array
+        items:
+          $ref: '#/definitions/InputOfDatasetProcessing'
+      outputDatasets:
+        type: array
+        items:
+          $ref: '#/definitions/Dataset'
+      processingDate:
+        type: string
+        format: date
+      studyId:
+        type: integer
+        format: int64
+  InputOfDatasetProcessing:
+    type: object
+    required:
+      - datasetId
+      - datasetProcessingId
+    properties:
+      datasetId:
+        type: integer
+        format: int64
+      datasetProcessingId:
+        type: integer
+        format: int64
+  ErrorModel:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      details:
+        type: object
+      message:
+        type: string
