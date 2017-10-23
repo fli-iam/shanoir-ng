@@ -16,7 +16,7 @@ export class NavbarComponent {
     private colorASave: string;
     private colorBSave: string;
     public mode: "default" | "pink" | "xtremPink" = "default";
-    public dev: boolean = false;
+    public dev: boolean = process.env.ENV;
 
     constructor(private keycloakService: KeycloakService) {
 
