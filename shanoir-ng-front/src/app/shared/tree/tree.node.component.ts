@@ -18,8 +18,10 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
         <span *ngIf="hasChildren && isOpen" (click)="close()" class="arrow">&#x25BE;</span>
         <span *ngIf="hasChildren && !isOpen" (click)="open()" class="arrow">&#9656;</span>
         <span *ngIf="pictoUrl"><img class="picto" src="{{pictoUrl}}"/></span>
-        <input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" class="clickable"/>
-        <span class="label" [class.clickable]="labelClick.observers.length > 0" (click)="labelClick.emit(nodeParams)">{{label}}</span>
+        <input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" (change)="nodeSelected.emit(nodeParams)" class="clickable"/>
+        <input #editableLabel *ngIf="editable" type="text" [(ngModel)]="label"/>
+        <tool-tip *ngIf="tooltip">{{tooltip}}</tool-tip>
+        <span *ngIf="!editable" class="label" [class.clickable]="labelClick.observers.length > 0" (click)="labelClick.emit(nodeParams)">{{label}}</span>
         <span *ngIf="buttonPicto" class="clickable"><img class="picto" src="{{buttonPicto}}" (click)="buttonClick.emit(nodeParams)"/></span>
         <div #childrentWrapper *ngIf="!loaded || (loaded && isOpen)" [class.hidden]="!loaded" class="content">
             <ng-content></ng-content>
@@ -37,6 +39,8 @@ export class TreeNodeComponent implements ControlValueAccessor {
     @Input() hasBox: boolean;
     @Input() buttonPicto: string;
     @Input() nodeParams: any;
+    @Input() editable: boolean = false;
+    @Input() tooltip: string;
     @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes: QueryList<any>; 
     @ContentChildren(forwardRef(() => DropdownMenuComponent)) menus: QueryList<any>; 
     public isOpen: boolean = false;
@@ -46,6 +50,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
     @ViewChild('box') boxElt:ElementRef;
     @Output() buttonClick = new EventEmitter();
     @Output() labelClick = new EventEmitter();
+    @Output() nodeSelected = new EventEmitter();
     private onTouchedCallback: () => void = noop;
     private onChangeCallback: (_: any) => void = noop;
     

@@ -24,7 +24,7 @@ export class KeycloakHttp extends Http {
         options.headers.set('Authorization', 'Bearer ' + KeycloakService.auth.authz.token);
     }
 
-    private configureRequest(f: Function, url: string | Request, options: RequestOptionsArgs, body?: any): Observable<Response> {
+    private configureRequest(f: Function, url: string | Request, options: RequestOptionsArgs, body?: any, noContentType?: boolean): Observable<Response> {
         let tokenPromise: Promise<string> = this._keycloakService.getToken();
         let tokenObservable: Observable<string> = Observable.fromPromise(tokenPromise);
         let tokenUpdateObservable: Observable<any> = Observable.create((observer: any) => {
@@ -32,7 +32,9 @@ export class KeycloakHttp extends Http {
                 let headers = new Headers();
                 options = new RequestOptions({ headers: headers });
             }
-            options.headers.append('Content-Type', 'application/json');
+            if (!noContentType) {
+                options.headers.append('Content-Type', 'application/json');
+            }
 
             this.setToken(options);
             observer.next();
@@ -86,6 +88,8 @@ export class KeycloakHttp extends Http {
     post(url: string, body: any, options?: RequestOptionsArgs): Observable<Response> {
         if (AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL === url) {
             return super.post(url, body, options);
+        } else if (body instanceof FormData) {
+            return this.configureRequest(super.post, url, options, body, true);
         } else {
             return this.configureRequest(super.post, url, options, body);
         }
