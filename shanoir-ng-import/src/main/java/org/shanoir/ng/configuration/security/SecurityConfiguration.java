@@ -4,9 +4,11 @@ import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
+import org.shanoir.ng.importer.dicom.ImageViewerServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +38,9 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 
 	@Value("${front.server.url}")
 	private String frontServerUrl;
+	
+	@Value("${shanoir.import.upload.folder}")
+	private String uploadFolder;
 	
 	/**
 	 * Registers the KeycloakAuthenticationProvider with the authentication
@@ -81,6 +86,15 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 		final FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
 		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
 		return bean;
+	}
+	
+	@Bean
+	public ServletRegistrationBean exampleServletBean() {
+	    ServletRegistrationBean bean = new ServletRegistrationBean(
+	      new ImageViewerServlet(), "/viewer/ImageViewerServlet/*");
+	    bean.setLoadOnStartup(1);
+	    bean.addInitParameter("uploadFolder", uploadFolder);
+	    return bean;
 	}
 
 }

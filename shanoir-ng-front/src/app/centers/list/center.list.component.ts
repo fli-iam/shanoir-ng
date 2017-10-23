@@ -50,13 +50,6 @@ export class CenterListComponent {
 
     // Grid columns definition
     private createColumnDefs() {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
-
         this.columnDefs = [
             { headerName: "Name", field: "name" },
             { headerName: "Town", field: "city" },

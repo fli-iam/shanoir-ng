@@ -25,3 +25,9 @@ export const BACKEND_API_MANUF_MODEL_ALL_URL: string = BACKEND_API_MANUF_MODEL_U
 // Manufacturer http api
 export const BACKEND_API_MANUF_URL:string = BACKEND_API_STUDIES_MS_URL + '/manufacturer';
 export const BACKEND_API_MANUF_ALL_URL: string = BACKEND_API_MANUF_URL + '/all';
+
+// Import http api
+const BACKEND_API_IMPORT_MS_URL: string = process.env.BACKEND_API_IMPORT_MS_URL; 
+export const BACKEND_API_UPLOAD_DICOM_URL:string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_dicom/';
+export const BACKEND_API_UPLOAD_DICOM_SELECT_SERIES_URL:string = BACKEND_API_IMPORT_MS_URL + '/importer/select_series/';
+export const BACKEND_API_IMAGE_VIEWER_URL:string = BACKEND_API_IMPORT_MS_URL + '/viewer/ImageViewerServlet/';

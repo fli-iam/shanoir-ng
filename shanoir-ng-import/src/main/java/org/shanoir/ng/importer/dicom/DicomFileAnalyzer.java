@@ -3,6 +3,7 @@ package org.shanoir.ng.importer.dicom;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -10,11 +11,13 @@ import org.dcm4che3.data.UID;
 import org.dcm4che3.io.DicomInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * This class walks through the JsonNode tree and reads all instances.
@@ -26,17 +29,15 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  * @author mkain
  *
  */
+@Service
 public class DicomFileAnalyzer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DicomFileAnalyzer.class);
+	
+	@Value("${shanoir.import.upload.folder}")
+	private String uploadFolder;
 
 	private ObjectMapper mapper = new ObjectMapper();
-	
-	private JsonNode dicomDirJson;
-	
-	public DicomFileAnalyzer(JsonNode dicomDirJson) {
-		this.dicomDirJson = dicomDirJson;
-	}
 	
 	/**
 	 * This method walks through the JsonNode tree and accesses to files
@@ -45,7 +46,7 @@ public class DicomFileAnalyzer {
 	 * that is why 4 loops have to be used to walk through the tree.
 	 * @throws FileNotFoundException 
 	 */
-	public void analyzeDicomFiles() throws FileNotFoundException {
+	public void analyzeDicomFiles(JsonNode dicomDirJson) throws FileNotFoundException {
 		// patient level
 		JsonNode patients = dicomDirJson.path("patients");
 		if (patients.isArray()) {
@@ -84,19 +85,17 @@ public class DicomFileAnalyzer {
 									((ObjectNode) serie).remove("instances");
 								}
 							}
-							
 						}
-						
 					}
 				}
-
 			}
 		}
 	}
 
 	private void processDicomFile(File dicomFile, JsonNode serie, JsonNode instances, JsonNode instance, int index, ArrayNode nonImages, ArrayNode images) {
+		DicomInputStream dIS = null;
 		try {
-			DicomInputStream dIS = new DicomInputStream(dicomFile);
+			dIS = new DicomInputStream(dicomFile);
 			Attributes datasetAttributes = dIS.readDataset(-1, -1);
 
 			String indexString = new Integer(index).toString();
@@ -117,9 +116,11 @@ public class DicomFileAnalyzer {
 					nonImages.add(nonImage);
 				// images at the second
 				} else {
-					ObjectNode image = mapper.createObjectNode();
-					image.put(indexString, instanceFilePath);
-					images.add(image);
+					//ObjectNode image = mapper.createObjectNode();
+					//image.put(indexString, instanceFilePath);
+					String pattern = Pattern.quote(uploadFolder);
+					String instanceSuffixPath = instanceFilePath.split(pattern)[1];
+					images.add(instanceSuffixPath);
 				}
 			}
 			checkIsMultiFrame(serie, datasetAttributes, sopClassUID);
@@ -128,7 +129,15 @@ public class DicomFileAnalyzer {
 			addSeriesEquipment(serie, datasetAttributes);
 			addSeriesIsCompressed(serie, datasetAttributes);
 		} catch (IOException e) {
-			LOG.error(e.getMessage());
+			LOG.error("Error during DICOM file process", e);
+		} finally {
+			if (dIS != null) {
+				try {
+					dIS.close();
+				} catch (IOException e) {
+					LOG.error("Error while closing DICOM input stream", e);
+				}
+			}
 		}
 	}
 
