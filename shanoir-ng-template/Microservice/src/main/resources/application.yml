@@ -125,7 +125,7 @@ spring:
 # DO NOT CHANGE #
 #################
 spring:
-  profiles: qualif
+  profiles: qualif,prod
   datasource:
     initialize: false
   jpa:
