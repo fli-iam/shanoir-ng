@@ -3,20 +3,20 @@
         <ul class="menu-list">
 
             <dropdown-menu label="Manage data" *ngIf="!isUserGuest()">
-                <menu-item *ngIf="development" label="Research study" i18n-label="Manage data menu|Research study@@navbarResearchStudy" link="" icon="assets/images/icons/folder-12.png"></menu-item>
-                <menu-item *ngIf="development" label="Subject" i18n-label="Manage data menu|Subject@@navbarSubject" link="" icon="assets/images/icons/user.png"></menu-item>
-                <menu-item *ngIf="development" label="Examination" i18n-label="Manage data menu|Examination@@navbarExamination" link="" icon="assets/images/icons/medical/stethoscope.png"></menu-item>
-                <menu-item *ngIf="development" label="Dataset acquisition" i18n-label="Manage data menu|Dataset acquisition@@navbarDatasetAcquisition" link="" icon="assets/images/icons/medical/x-ray-1.png"></menu-item>
-                <menu-item *ngIf="development" label="Dataset" i18n-label="Manage data menu|Dataset@@navbarDataset" link="" icon="assets/images/icons/medical/brain.png"></menu-item>
+                <menu-item *ngIf="dev" label="Research study" i18n-label="Manage data menu|Research study@@navbarResearchStudy" link="" icon="assets/images/icons/folder-12.png"></menu-item>
+                <menu-item *ngIf="dev" label="Subject" i18n-label="Manage data menu|Subject@@navbarSubject" link="" icon="assets/images/icons/user.png"></menu-item>
+                <menu-item *ngIf="dev" label="Examination" i18n-label="Manage data menu|Examination@@navbarExamination" link="" icon="assets/images/icons/medical/stethoscope.png"></menu-item>
+                <menu-item *ngIf="dev" label="Dataset acquisition" i18n-label="Manage data menu|Dataset acquisition@@navbarDatasetAcquisition" link="" icon="assets/images/icons/medical/x-ray-1.png"></menu-item>
+                <menu-item *ngIf="dev" label="Dataset" i18n-label="Manage data menu|Dataset@@navbarDataset" link="" icon="assets/images/icons/medical/brain.png"></menu-item>
                 <menu-item label="Center" i18n-label="Manage data menu|Center@@navbarCenter" link="centerlist" icon="assets/images/icons/medical/hospital.png"></menu-item>   
-                <menu-item *ngIf="development" label="Investigator" i18n-label="Manage data menu|Investigator@@navbarInvestigator" link="" icon="assets/images/icons/medical/nurse.png"></menu-item>
+                <menu-item *ngIf="dev" label="Investigator" i18n-label="Manage data menu|Investigator@@navbarInvestigator" link="" icon="assets/images/icons/medical/nurse.png"></menu-item>
                 <menu-item label="Acquisition equipment" i18n-label="Manage data menu|Acquisition equipment@@navbarAcquisitionEquipment" link="acqEquipList" icon="assets/images/icons/medical/cardiogram-1.png"></menu-item>
-                <menu-item *ngIf="development" label="Coil" i18n-label="Manage data menu|Coil@@navbarCoil" link="" icon="assets/images/icons/wifi.png"></menu-item>
-                <menu-item *ngIf="development" label="Experimental group of subjects" i18n-label="Manage data menu|Experimental group of subjects@@navbarExperimentalGroupOfSubjects" icon="assets/images/icons/users.png"></menu-item>
-                <menu-item *ngIf="development" label="Score" i18n-label="Manage data menu|Score@@navbarScore" link="" icon="assets/images/icons/podium.png"></menu-item>
+                <menu-item *ngIf="dev" label="Coil" i18n-label="Manage data menu|Coil@@navbarCoil" link="" icon="assets/images/icons/wifi.png"></menu-item>
+                <menu-item *ngIf="dev" label="Experimental group of subjects" i18n-label="Manage data menu|Experimental group of subjects@@navbarExperimentalGroupOfSubjects" icon="assets/images/icons/users.png"></menu-item>
+                <menu-item *ngIf="dev" label="Score" i18n-label="Manage data menu|Score@@navbarScore" link="" icon="assets/images/icons/podium.png"></menu-item>
             </dropdown-menu>
 
-            <dropdown-menu *ngIf="development" label="Import data">
+            <dropdown-menu *ngIf="dev" label="Import data">
                 <menu-item label="From DICOM CD/DVD" i18n-label="Import data menu|From DICOM CD/DVD@@navbarFromDICOMCDDVD" link="import" icon="assets/images/icons/compact-disc.png"></menu-item>
                 <menu-item label="From Neurinfo PACS" i18n-label="Import data menu|From Neurinfo PACS@@navbarFromNeurinfoPACS" link="" icon="assets/images/neurinfo-icon.13x16.png"></menu-item>
                 <menu-item label="From ShanoirUploader" i18n-label="Import data menu|From ShanoirUploader@@navbarFromShanoirUploader" link="" icon="assets/images/logo.shanoirUp_transp.16x16.png"></menu-item>
@@ -26,9 +26,9 @@
 
             <dropdown-menu label="Administration" *ngIf="isUserAdmin()">
                 <menu-item label="Manage users" i18n-label="Administration menu|Manage users@@navbarManageUsers" link="userlist" icon="assets/images/icons/users-1.png"></menu-item>
-                <li *ngIf="development" class="horizontal-bar"><hr/></li>
-                <menu-item *ngIf="development" label="Tree test page" link="treeTest" icon="assets/images/icons/share-1.png"></menu-item>
-                <menu-item *ngIf="development" label="Preferences" i18n-label="Administration menu|Manage user preferences@@navbarUserPreferences" icon="assets/images/icons/controls-7.png">
+                <li *ngIf="dev" class="horizontal-bar"><hr/></li>
+                <menu-item *ngIf="dev" label="Tree test page" link="treeTest" icon="assets/images/icons/share-1.png"></menu-item>
+                <menu-item *ngIf="dev" label="Preferences" i18n-label="Administration menu|Manage user preferences@@navbarUserPreferences" icon="assets/images/icons/controls-7.png">
                     <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="this.mode == 'pink'" icon="assets/images/icons/user-5.png"></menu-item>
                     <menu-item label="Extreme pink mode" (click)="toggleXtremPink()" [boolVar]="this.mode == 'xtremPink'" icon="assets/images/icons/user-5.png"></menu-item>
                 </menu-item>
