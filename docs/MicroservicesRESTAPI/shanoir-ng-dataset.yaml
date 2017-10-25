@@ -21,7 +21,7 @@ paths:
             $ref: '#/definitions/Dataset'
       responses:
         '200':
-          description: created study
+          description: created dataset
           schema:
             $ref: '#/definitions/Dataset'
         '401':
@@ -52,7 +52,7 @@ paths:
         '403':
           description: forbidden
         '404':
-          description: no study found
+          description: no dataset found
         '500':
           description: unexpected error
           schema:
@@ -64,9 +64,9 @@ paths:
         - application/json
       parameters:
         - $ref: '#/parameters/datasetId'
-        - name: study
+        - name: dataset
           in: body
-          description: study to update
+          description: dataset to update
           required: true
           schema:
             $ref: '#/definitions/Dataset'
@@ -99,27 +99,6 @@ paths:
           description: forbidden
         '404':
           description: no dataset found
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-  /dataset/all:
-    get:
-      operationId: findDatasets
-      description: Returns all the datasets
-      responses:
-        '200':
-          description: found datasets
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Dataset'
-        '204':
-          description: no dataset found
-        '401':
-          description: unauthorized
-        '403':
-          description: forbidden
         '500':
           description: unexpected error
           schema:
