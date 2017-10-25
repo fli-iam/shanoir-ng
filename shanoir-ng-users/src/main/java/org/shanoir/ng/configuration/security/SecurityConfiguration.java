@@ -59,7 +59,7 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 	protected void configure(HttpSecurity http) throws Exception {
 		super.configure(http);
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().csrf().disable()
-				.authorizeRequests().anyRequest().permitAll();
+				.authorizeRequests().antMatchers("/user/*", "/role/*").authenticated().anyRequest().permitAll();
 	}
 
 	@Bean
