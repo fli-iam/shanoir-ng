@@ -20,6 +20,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "_links", "id", "data" })
 public class Template extends HalEntity {
 
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -8375729017588675579L;
+
 	private String data;
 
 	/**

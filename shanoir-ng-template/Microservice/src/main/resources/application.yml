@@ -42,6 +42,7 @@ keycloak:
   realm: shanoir-ng
   auth-server-url: http://localhost/auth
   ssl-required: external
+  resource: shanoir-ng-templates
   securityConstraints:
     - authRoles: 
       - ROLE_ADMIN
