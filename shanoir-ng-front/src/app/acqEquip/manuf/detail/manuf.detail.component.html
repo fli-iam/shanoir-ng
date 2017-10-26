@@ -3,28 +3,28 @@
 		<div class="layout">
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
-					<div class="header command-zone" i18n="View manuf|Title">Details on manufacturer</div>
+					<div class="header command-zone" i18n="View manuf|Title@@manufDetailViewTitle">Details on manufacturer</div>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'"> 
-					<div class="header command-zone" i18n="Edit manuf|Title">Edit manufacturer</div>
+					<div class="header command-zone" i18n="Edit manuf|Title@@manufDetailEditTitle">Edit manufacturer</div>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'create'"> 
-					<div class="header command-zone" i18n="Create manuf|Title">Create manufacturer</div>
+					<div class="header command-zone" i18n="Create manuf|Title@@manufDetailCreateTitle">Create manufacturer</div>
 				</ng-template>
 			</span>
 			<fieldset>
 				<ol>
 					<li>
-						<label i18n="Manuf detail|Name label" class="required-label">Manufacturer name</label> 
+						<label i18n="Manuf detail|Name label@@manufDetailName" class="required-label">Manufacturer name</label> 
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								{{manuf.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault> 
 								<input type="text" id="name" formControlName="name" [(ngModel)]="manuf.name"/>
-								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Manuf detail|NameRequiredError label">Name is required!</label>
-								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Manuf detail|NameLengthError label">Name length must be between 2 and 200!</label>
-								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Manuf detail|NameUniqueError label">Name should be unique!</label>
+								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Manuf detail|Name required error@@manufDetailNameRequiredError">Name is required!</label>
+								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Manuf detail|Name length error@@manufDetailNameLengthError">Name length must be between 2 and 200!</label>
+								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Manuf detail|Name unique error@@manufDetailNameUniqueError">Name should be unique!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -32,15 +32,15 @@
 			</fieldset>
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
-					<button i18n="Manuf detail|BackButton label" class="Button" (click)="back()">Back</button>	
+					<button i18n="Manuf detail|Back button label@@backButton" class="Button" (click)="back()">Back</button>	
 					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
-						<button type="submit" i18n="Manuf detail|EditButton label" (click)="edit()" class="Button">Edit</button>
+						<button type="submit" i18n="Manuf detail|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
-						<button type="submit" i18n="Manuf detail|UpdateButton label" (click)="update()" class="Button" [disabled]="!manufDetailForm.valid">Update</button>
+						<button type="submit" i18n="Manuf detail|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!manufDetailForm.valid">Update</button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
-						<button type="submit" i18n="Manuf detail|CreateButton label" (click)="create()" class="Button" [disabled]="!manufDetailForm.valid">Create</button>
+						<button type="submit" i18n="Manuf detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!manufDetailForm.valid">Create</button>
 					</ng-template>
 				</span>
 			</div>

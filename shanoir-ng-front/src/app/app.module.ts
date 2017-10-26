@@ -22,7 +22,6 @@ import { AuthNotGuestGuard }   from './shared/roles/auth.not.guest.guard';
 import { CenterDetailComponent } from './centers/detail/center.detail.component';
 import { CenterListComponent }   from './centers/list/center.list.component';
 import { CenterService } from './centers/shared/center.service';
-import { ClickTipComponent }   from './shared/clickTip/clickTip.component';
 import { ConfirmDialogComponent } from "./shared/utils/confirm.dialog.component";
 import { ConfirmDialogService } from "./shared/utils/confirm.dialog.service";
 import { ConsoleComponent }   from './shared/console/console.line.component';
@@ -37,6 +36,7 @@ import { KeycloakHttp } from "./shared/keycloak/keycloak.http";
 import { KeycloakService } from "./shared/keycloak/keycloak.service";
 import { ImportComponent }   from './import/import.component';
 import { ListComponent } from "./shared/utils/list.component";
+import { ImportService } from './import/import.service';
 import { LoadingBarComponent }   from './shared/loadingBar/loadingBar.component';
 import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
 import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
@@ -48,12 +48,13 @@ import { NavbarComponent }   from './shared/navbar/navbar.component';
 import { RoleService } from './roles/role.service';
 import { StudyTreeComponent }   from './studies/tree/study.tree.component';
 import { TableComponent} from "./shared/table/table.component";
+import { ToolTipComponent }   from './shared/toolTip/toolTip.component';
 import { TreeNodeComponent }   from './shared/tree/tree.node.component';
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
 
-import '../assets/css/modal.css';
 import '../assets/css/common.css';
+import '../assets/css/modal.css';
 
 export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
   return new KeycloakHttp(backend, defaultOptions, keycloakService);
@@ -79,7 +80,6 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         Autosize,
         CenterDetailComponent,
         CenterListComponent,
-        ClickTipComponent,
         ConfirmDialogComponent,
         ConsoleComponent,
         DropdownMenuComponent,
@@ -99,6 +99,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         StudyTreeComponent,
         TableComponent,
         TreeNodeComponent,
+        ToolTipComponent,
         UserListComponent
     ],
     entryComponents: [
@@ -111,6 +112,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         AuthNotGuestGuard,
         CenterService,
         ConfirmDialogService,
+        ImportService,
         HandleErrorService,
         KeycloakService,
         ManufacturerModelService,

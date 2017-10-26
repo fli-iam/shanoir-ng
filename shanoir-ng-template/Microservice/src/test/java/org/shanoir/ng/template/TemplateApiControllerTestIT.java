@@ -76,7 +76,7 @@ public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 
 	@Test
 	public void saveNewTemplateWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Template> entity = new HttpEntity<Template>(ModelsUtil.createTemplate(), getHeadersWithToken(true));
+		final HttpEntity<Template> entity = new HttpEntity<>(ModelsUtil.createTemplate(), getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 				String.class);
@@ -94,7 +94,7 @@ public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 
 	@Test
 	public void updateNewTemplateWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Template> entity = new HttpEntity<Template>(ModelsUtil.createTemplate(), getHeadersWithToken(true));
+		final HttpEntity<Template> entity = new HttpEntity<>(ModelsUtil.createTemplate(), getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);

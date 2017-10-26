@@ -1,91 +1,157 @@
 <h1>Import from DICOM</h1>
+<form >
+    
+    <app-modal #papayaModal>
+        <div class="app-modal-body">
+            <div id="papaya" style="width:800px; height:600px;">
+                <div class="papaya" data-params="params"></div> 
+            </div>
+        </div>
+    </app-modal>
 
-<form>
     <div class="step-block active" [class.active]="true">
-        <div class="header command-zone" (click)="tabModalityOpen = !tabModalityOpen">1. Choose modality<span *ngIf="modality" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step" [@slideDown]="tabModalityOpen" *ngIf="tabModalityOpen"> 
+        <div class="header command-zone" (click)="tab_modality_open = !tab_modality_open">1. Choose modality<span *ngIf="modality" class="check-mark">&#x2713;</span></div>
+        <fieldset class="step" [@slideDown]="tab_modality_open" *ngIf="tab_modality_open"> 
             <p>In this step you are invited to choose the modality of the dataset(s) you want to import into the system.</p>
             <div>
                 <span>
-                    <input type="radio" [(ngModel)]="modality" value="MRI" name="modality" (change)="tabModalityOpen = false">MRI
+                    <input type="radio" [(ngModel)]="modality" value="MRI" name="modality" (change)="tab_modality_open = false">MRI
                     <span class="spacer"></span>
-                    <input type="radio" [(ngModel)]="modality" value="PET" name="modality" (change)="tabModalityOpen = false">PET
+                    <input type="radio" [(ngModel)]="modality" value="PET" name="modality" (change)="tab_modality_open = false">PET
                 </span>
             </div>
         </fieldset>
     </div>
 
     <div class="step-block" [class.active]="modality">
-        <div class="header command-zone" (click)="tabUploadOpen = !tabUploadOpen">2. Select DICOM archive<span *ngIf="archive" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step dicom" [@slideDown]="tabUploadOpen && modality" *ngIf="tabUploadOpen && modality">
+        <div class="header command-zone" (click)="tab_upload_open = !tab_upload_open">2. Select DICOM archive<span *ngIf="archive" class="check-mark">&#x2713;</span></div>
+        <fieldset class="step dicom" [@slideDown]="tab_upload_open && modality" *ngIf="tab_upload_open && modality">
             <p>
                 Please select a DICOM zip archive to import.<br/>
                 <strong class="warning">&#9888; Important notice:</strong> this archive must contain a DICOMDIR file at its root!
             </p>
-            <input type="file" (change)="uploadArchive($event)" placeholder="Upload file..."/> 
-            <progress-bar *ngIf="uploadProgress > 0 && uploadProgress < 1" [progress]="uploadProgress"></progress-bar>
+            <!-- <file-upload #fu (change)="fu.prepareUploadRequest()" [url]="uploadUrl" [multiple]="false" [auto]="true"></file-upload> -->
+            <input type="file" (change)="uploadArchive($event)" placeholder="Upload file..."/>
+            <!-- <label *ngIf="formErrors.fu.includes('fu')" class="form-validation-alert" i18n="Import|ExtensionError label">A DICOM zip archive is required!</label> -->
+            <!--<input type="file" [disabled]="uploadProgress === 1" (change)="uploadArchive($event)" placeholder="Upload file..."/> -->
+            <!-- <progress-bar *ngIf="uploadProgress > 0 && uploadProgress < 1" [progress]="uploadProgress"></progress-bar> -->
         </fieldset>
     </div>
 
     <div class="step-block" [class.active]="archive">
-        <div class="header command-zone" (click)="tabSeriesOpen = !tabSeriesOpen">3. Select series<span *ngIf="true" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step" [@slideDown]="tabSeriesOpen && archive" *ngIf="tabSeriesOpen && archive"> 
+        <div class="header command-zone" (click)="tab_series_open = !tab_series_open">3. Select series<span *ngIf="true" class="check-mark">&#x2713;</span></div>
+        <fieldset class="step" [@slideDown]="tab_series_open && archive" *ngIf="tab_series_open && archive"> 
             <p>Please select only the series useful for your study.</p>
             <div class="middle-content">
                 <div class="tree">
-                    <node label="DIR OL" pictoUrl="/assets/images/icons/user.png" deploy=true>
-                        <node label="RECHERCHE WIP NEURO" pictoUrl="/assets/images/icons/medical/x-ray-2.png" hasBox="true">
-                            <node
-                                *ngFor="let dataset of datasets" 
-                                [label]="dataset.name" 
-                                pictoUrl="/assets/images/icons/medical/brain.png" 
-                                hasBox="true" 
-                                [(ngModel)]="dataset.selected" 
-                                buttonPicto="/assets/images/icons/search.png"
-                                (buttonClick)="showThumbnail($event)"
-                                [nodeParams]="dataset"
-                                (labelClick)="showDetails($event)"
-                                [class.selected]="detailedSerie == dataset"
-                                [ngModelOptions]="{standalone: true}">
+                    <node 
+                        *ngFor="let patient of patients" 
+                        [label]="patient.patientName" 
+                        pictoUrl="/assets/images/icons/user.png" 
+                        (labelClick)="showPatientDetails($event)"
+                        [nodeParams]="patient"
+                        [class.selected]="detailedPatient == patient"
+                        deploy=true>
+                            <node 
+                                *ngFor="let study of patient.studies" 
+                                [label]="study.studyDescription"
+                                [editable]="true"
+                                [nodeParams]="study"
+                                (nodeSelected)="selectNode($event)"
+                                tooltip="You can change the study description here. The value will then be overwritten in the dicom files."
+                                pictoUrl="/assets/images/icons/medical/x-ray-2.png" 
+                                hasBox="true">
+                                    <node 
+                                        *ngFor="let serie of study.series" 
+                                        [label]="serie.seriesDescription" 
+                                        pictoUrl="/assets/images/icons/medical/brain.png" 
+                                        buttonPicto="/assets/images/icons/search.png"
+                                        (buttonClick)="initPapaya(serie);papayaModal.show();"
+                                        hasBox="true" 
+                                        [(ngModel)]="serie.selected" 
+                                        [nodeParams]="serie"
+                                        (nodeSelected)="selectNode($event)"
+                                        (labelClick)="showSerieDetails($event)"
+                                        [class.selected]="detailedSerie == serie"
+                                        [ngModelOptions]="{standalone: true}">
+                                    </node>
                             </node>
-                        </node>
                     </node>
+                </div>
 
+                <div class="preview" *ngIf="detailedPatient">
+                    <div class="title"><h3>Patient</h3></div>
+                    <div class="preview-data">
+                        <tr class="item">
+                            <td class="label">Id</td>
+                            <td class="value">{{detailedPatient?.patientID}}</td>
+                        </tr>
+                        <tr class="item">
+                            <td class="label">Sex</td>
+                            <td class="value">{{detailedPatient?.patientSex}}</td>
+                        </tr>
+                        <tr class="item">
+                            <td class="label">Name</td>
+                            <td class="value">{{detailedPatient?.patientName}}</td>
+                        </tr>
+                        <tr class="item">
+                            <td class="label">Birth date</td>
+                            <td class="value">{{detailedPatient?.patientBirthDate}}</td>
+                        </tr>
+                    </div>
                 </div>
 
                 <div class="preview" *ngIf="detailedSerie">
                     <div class="title"><h3>Serie</h3></div>
                     <div class="preview-data">
-                        <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.id}}</div></div>
-                        <div class="item"><div class="label">name</div><div class="value">{{detailedSerie?.name}}</div></div>
-                        <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.name}}</div></div>
-                        <div class="item"><div class="label">id</div><div class="value">{{detailedSerie?.name}}</div></div>
-                    </div>
-                    
-                    <div class="thumbnail" *ngIf="thumbnailOn">
-                        <div class="title info"><h3>Thumbnail</h3></div>
-                        <img src="http://www.two-views.com/images/mri-head-side.jpg" />
-                        <div class="paging info">
-                            <button (click)="page = page - 1">&#9664;</button>
-                            <span class="page">{{page}}</span>
-                            <button (click)="page = page + 1">&#9654;</button>
-                        </div>
+                        <tr class="item">
+                            <td class="label">Id</td>
+                            <td class="value">{{detailedSerie?.seriesInstanceUID}}</td>
+                        </tr>
+                        <tr class="item">
+                            <td class="label">Protocol</td>
+                            <td class="value">{{detailedSerie?.protocolName}}</td>
+                        </tr>
+                        <tr class="item">
+                            <td class="label">Description</td>
+                            <td class="value">{{detailedSerie?.seriesDescription}}</td>
+                        </tr>
+                        <tr class="item">
+                            <td class="label">Series date</td>
+                            <td class="value">{{detailedSerie?.seriesDate}}</td>
+                        </tr>
+                        <tr class="item">
+                            <td class="label">Series number</td>
+                            <td class="value">{{detailedSerie?.seriesNumber}}</td>
+                        </tr>
+                        <tr class="item">
+                            <td class="label">Number of images</td>
+                            <td class="value">{{detailedSerie?.imagesNumber}}</td>
+                        </tr>
+                        <tr class="item">
+                            <td class="label">Modality</td>
+                            <td class="value">{{detailedSerie?.modality}}</td>
+                        </tr>
+                        <tr class="item">
+                            <td class="label">Number of non-image objects</td>
+                            <td class="value">{{detailedSerie?.nonImagesNumber}}</td>
+                        </tr>
                     </div>
                 </div>
             </div>
             <div class="commands">
-                <button>A button</button><button>Another button</button>
+                 <button i18n="Import|NextButton label" [disabled]="!isDicomSerieSelected()" (click)="selectDicomSeries()">Next</button>
             </div>
         </fieldset>
     </div>
 
-    <div class="step-block" [class.active]="true">
+    <div class="step-block" [class.active]="serieSelected">
         <div class="header command-zone">4. Set the clinical context</div>
         <fieldset class="step responsive">
             <ol>
                 <legend>
                     Research study
-                    <click-tip>A research study is the global study context. Examples: Children dyshpasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</click-tip>
+                    <tool-tip>A research study is the global study context. Examples: Children dyshpasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
                 </legend>
                 <li class="required">
                     <label class="required-label">Select an existing research study</label> 
@@ -117,7 +183,7 @@
             <ol>
                 <legend>
                     Subject
-                    <click-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</click-tip>
+                    <tool-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</tool-tip>
                 </legend>
                 <li>
                     <span>
@@ -185,7 +251,7 @@
             <ol>
                 <legend>
                     Examination
-                    <click-tip>A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent entity: MR Dataset acquisition.</click-tip>
+                    <tool-tip>A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent entity: MR Dataset acquisition.</tool-tip>
                 </legend>
                 <li class="required">
                     <label class="required-label">Select an examination</label> 
@@ -209,7 +275,7 @@
             <p><strong class="warning">&#9888;</strong> Data is now about to be anonymized. That means that some fields will be removed from the dataset. If for any reason you want to keep some information about the dataset before its anonymization, you can download a XML file that contains the complete information from the dataset. </p>
             <table class="anonymization-table">
                 <thead>
-                    <tr>
+                    <tr class="item">
                         <th></th>
                         <th>Signification</th>
                         <th>Initial value</th>

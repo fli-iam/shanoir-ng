@@ -1,20 +1,20 @@
 <div class="CenterListComponent">
     <div class="title">
-        <h2 i18n="Manage centers|Title">Manage centers</h2>
+        <h2 i18n="Manage centers|Title@@centerListTitle">Manage centers</h2>
         <!-- hr/ -->
     </div>
 
     <div *ngIf="deletionInternalError" class="error-message">
-        <label class="error-message" i18n="Manage centers|DeletionError label">An error occured. This center cannot be deleted. Please contact an administrator.</label>
+        <label class="error-message" i18n="Manage centers|Deletion error@@centerListDeletionError">An error occured. This center cannot be deleted. Please contact an administrator.</label>
     </div>
     <div *ngIf="isLinkedWithEqpts || isLinkedWithStudies" class="error-message">
-        <label class="error-message" i18n="Manage centers|DeletionError label">This center cannot be deleted. It is associated with:</label>
+        <label class="error-message" i18n="Manage centers|Deletion error due to link@@centerListLinkDeletionError">This center cannot be deleted. It is associated with:</label>
         <ul>
             <li *ngIf="isLinkedWithEqpts">
-                <label i18n="Manage centers|LinkedWithEqptsError label">acquisition equipment(s)</label>
+                <label i18n="Manage centers|Linked with eqpts error@@centerListLinkedWithEqptsError">acquisition equipment(s)</label>
             </li>
             <li *ngIf="isLinkedWithStudies">
-                <label i18n="Manage centers|LinkedWithStudiesError label">study(ies)</label>
+                <label i18n="Manage centers|Linked with studies error@@centerListLinkedWithStudiesError">study(ies)</label>
             </li>
         </ul>
     </div>
