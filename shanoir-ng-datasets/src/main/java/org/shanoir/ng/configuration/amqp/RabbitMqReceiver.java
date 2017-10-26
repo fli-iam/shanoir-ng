@@ -21,7 +21,7 @@ public class RabbitMqReceiver {
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMqReceiver.class);
 
 	@Autowired
-	private DatasetService templateService;
+	private DatasetService datasetService;
 
 	private CountDownLatch latch = new CountDownLatch(1);
 
@@ -38,7 +38,7 @@ public class RabbitMqReceiver {
 		final Dataset template = oGson.fromJson(message, Dataset.class);
 
 		try {
-			templateService.updateFromShanoirOld(template);
+			datasetService.updateFromShanoirOld(template);
 			latch.countDown();
 		} catch (ShanoirDatasetException e) {
 			// Exception.
