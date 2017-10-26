@@ -55,7 +55,10 @@ public class AnonymizationServiceTest {
 	{
 		ArrayList<File> dicomImages = createImageArray();
 		long chrono = java.lang.System.currentTimeMillis() ; 
-		anonymizationService.anonymize(dicomImages, PROFILE);
+		//anonymizationService.anonymize(dicomImages, PROFILE);
+		//anonymizationService.anonymize(dicomImages, PROFILE, true, "firstName", "lastName", "ID12");
+		anonymizationService.anonymize(dicomImages, PROFILE, false, "", "", "");
+		
 		long chrono2 = java.lang.System.currentTimeMillis() ; 
 		long temps = chrono2 - chrono ; 
 		System.out.println("Spended time to anonymize file = " + temps + " ms") ; 

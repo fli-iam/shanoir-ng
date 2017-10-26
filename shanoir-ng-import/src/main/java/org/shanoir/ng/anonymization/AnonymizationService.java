@@ -22,6 +22,9 @@ public interface AnonymizationService {
 	 *            the anonymization profile
 	 */
 
-	void anonymize(ArrayList<File> dicomFiles, String profile);
+	//void anonymize(ArrayList<File> dicomFiles, String profile);
+
+	void anonymize(ArrayList<File> dicomFiles, String profile, boolean isShanoirAnonymization, String patientFirstName,
+			String patientLastName, String patientID);
 
 }
