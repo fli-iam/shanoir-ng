@@ -16,17 +16,23 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMqConfiguration {
 
-	private static final String TEMPLATE_QUEUE_NAME_IN = "template_queue";
-	private static final String TEMPLATE_QUEUE_NAME_OUT = "template_queue_from_ng";
+	private static final String DATASET_QUEUE_NAME_OUT = "dataset_queue_from_ng";
+	private static final String EXAMINATION_QUEUE_NAME_IN = "examination_queue";
+	private static final String EXAMINATION_QUEUE_NAME_OUT = "examination_queue_from_ng";
 
     @Bean
-    public static Queue queueIn() {
-        return new Queue(TEMPLATE_QUEUE_NAME_IN, true);
+    public static Queue datasetQueueOut() {
+    	return new Queue(DATASET_QUEUE_NAME_OUT, true);
     }
 
     @Bean
-    public static Queue queueOut() {
-    	return new Queue(TEMPLATE_QUEUE_NAME_OUT, true);
+    public static Queue examinationQueueIn() {
+        return new Queue(EXAMINATION_QUEUE_NAME_IN, true);
+    }
+
+    @Bean
+    public static Queue examinationQueueOut() {
+    	return new Queue(EXAMINATION_QUEUE_NAME_OUT, true);
     }
 
     @Bean
@@ -34,7 +40,7 @@ public class RabbitMqConfiguration {
             MessageListenerAdapter listenerAdapter) {
     	final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(TEMPLATE_QUEUE_NAME_IN);
+        container.setQueueNames(EXAMINATION_QUEUE_NAME_IN);
         container.setMessageListener(listenerAdapter);
         return container;
     }

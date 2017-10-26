@@ -8,73 +8,81 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
 
-import org.hibernate.annotations.Cascade;
-import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.hateoas.Links;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.shanoir.ng.score.Score;
+import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
- * VariableAssessment.
+ * Variable assessment.
  * 
  * @author ifakhfakh
  *
  */
 @Entity
-@Table(name = "variable_assessment")
-@JsonPropertyOrder({ "_links", "id", "instrumentBasedAssessment", "instrumentVariable", "scoreList"})
-public class VariableAssessment extends HalEntity {
-
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "instrumentBasedAssessment", nullable = false, updatable = true)
-	private InstrumentBasedAssessment instrumentBasedAssessment;
-	
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "instrumentVariable", nullable = false, updatable = true)	
-	private InstrumentVariable instrumentVariable;
-	
-
-	@OneToMany(mappedBy = "variableAssessment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
-	private List<Score> scoreList ;
+public class VariableAssessment extends AbstractGenericItem {
 
 	/**
-	 * Init HATEOAS links
+	 * UID
 	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "examination/" + getId());
-	}
+	private static final long serialVersionUID = 8323867968700523066L;
 
+	/** Instrument Based Assessment. */
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "instrument_based_assessment_id", nullable = false, updatable = true)
+	private InstrumentBasedAssessment instrumentBasedAssessment;
+
+	/** The variable. */
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "instrument_variable_id", nullable = false, updatable = true)
+	private InstrumentVariable instrumentVariable;
+
+	/** The score list. */
+	@OneToMany(mappedBy = "variableAssessment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Score> scoreList;
+
+	/**
+	 * @return the instrumentBasedAssessment
+	 */
 	public InstrumentBasedAssessment getInstrumentBasedAssessment() {
 		return instrumentBasedAssessment;
 	}
 
+	/**
+	 * @param instrumentBasedAssessment
+	 *            the instrumentBasedAssessment to set
+	 */
 	public void setInstrumentBasedAssessment(InstrumentBasedAssessment instrumentBasedAssessment) {
 		this.instrumentBasedAssessment = instrumentBasedAssessment;
 	}
 
+	/**
+	 * @return the instrumentVariable
+	 */
 	public InstrumentVariable getInstrumentVariable() {
 		return instrumentVariable;
 	}
 
+	/**
+	 * @param instrumentVariable
+	 *            the instrumentVariable to set
+	 */
 	public void setInstrumentVariable(InstrumentVariable instrumentVariable) {
 		this.instrumentVariable = instrumentVariable;
 	}
 
+	/**
+	 * @return the scoreList
+	 */
 	public List<Score> getScoreList() {
 		return scoreList;
 	}
 
+	/**
+	 * @param scoreList
+	 *            the scoreList to set
+	 */
 	public void setScoreList(List<Score> scoreList) {
 		this.scoreList = scoreList;
 	}
-
-
-	
-
 
 }

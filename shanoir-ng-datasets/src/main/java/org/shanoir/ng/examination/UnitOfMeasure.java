@@ -1,35 +1,42 @@
 package org.shanoir.ng.examination;
 
-
 /**
- * Units Of Measure.
+ * Units of measure.
  * 
  * @author ifakhfakh
  *
  */
-
-
 public enum UnitOfMeasure {
 
-
 	MS(1),
+
 	PERCENT(2),
-	DEGREES (3),
-	G (4),
-	GY (5),
-	HZ_PX (6),
-	KG (7),
-	M (8),
+
+	DEGREES(3),
+
+	G(4),
+
+	GY(5),
+
+	HZ_PX(6),
+
+	KG(7),
+
+	M(8),
+
 	MG(9),
+
 	MG_ML(10),
-	MHZ (11),
-	ML (12),
-	MM (13),
+
+	MHZ(11),
+
+	ML(12),
+
+	MM(13),
+
 	PX(14);
-	
 
 	private int id;
-	
 
 	/**
 	 * Constructor.
@@ -48,7 +55,7 @@ public enum UnitOfMeasure {
 	 *            unit Of measure id.
 	 * @return unit Of measure.
 	 */
-	public static UnitOfMeasure getUnitOfMeasure(final Integer id) {
+	public static UnitOfMeasure getUnit(final Integer id) {
 		if (id == null) {
 			return null;
 		}
@@ -68,4 +75,3 @@ public enum UnitOfMeasure {
 	}
 
 }
-

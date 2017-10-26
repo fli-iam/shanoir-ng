@@ -30,7 +30,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
 public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
-	
+
 	private static final String REQUEST_PATH = "/examination";
 	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
@@ -41,7 +41,7 @@ public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void findExaminationByIdProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void findExaminationsProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
@@ -70,13 +70,15 @@ public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
 
 	@Test
 	public void saveNewExaminationProtected() {
-		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Examination(), String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Examination(),
+				String.class);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
 	public void saveNewExaminationWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination(), getHeadersWithToken(true));
+		final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination(),
+				getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 				String.class);
@@ -86,15 +88,16 @@ public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void updateNewExaminationProtected() {
 		final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination());
-		
+
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
 	public void updateNewExaminationWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination(), getHeadersWithToken(true));
+		final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination(),
+				getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);

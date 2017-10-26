@@ -1,29 +1,24 @@
 package org.shanoir.ng.examination;
 
-
 /**
- * PassationMode.
+ * Passation mode.
  * 
  * @author ifakhfakh
  *
  */
-
-
 public enum PassationMode {
 
 	/***
-	 *  Questionnaire.
+	 * Questionnaire.
 	 */
 	QUESTIONNAIRE(1),
-	
+
 	/**
 	 * Test-instrument.
 	 */
 	TEST_INSTRUMENT(2);
-		
 
 	private int id;
-	
 
 	/**
 	 * Constructor.
@@ -42,7 +37,7 @@ public enum PassationMode {
 	 *            passation mode id.
 	 * @return passation mode.
 	 */
-	public static PassationMode getPassationMode(final Integer id) {
+	public static PassationMode getMode(final Integer id) {
 		if (id == null) {
 			return null;
 		}

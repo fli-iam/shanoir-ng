@@ -8,7 +8,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirExaminationException;
+import org.shanoir.ng.shared.exception.ShanoirDatasetException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class ExaminationApiController implements ExaminationApi {
 		}
 		try {
 			examinationService.deleteById(examinationId);
-		} catch (ShanoirExaminationException e) {
+		} catch (ShanoirDatasetException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 		}
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
@@ -56,7 +56,8 @@ public class ExaminationApiController implements ExaminationApi {
 	}
 
 	@Override
-	public ResponseEntity<List<Examination>> findExamination() {
+	public ResponseEntity<List<Examination>> findExaminations() {
+		// TODO: filter by user!!!
 		final List<Examination> examinations = examinationService.findAll();
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<List<Examination>>(HttpStatus.NO_CONTENT);
@@ -90,7 +91,7 @@ public class ExaminationApiController implements ExaminationApi {
 		try {
 			final Examination createdExamination = examinationService.save(examination);
 			return new ResponseEntity<Examination>(createdExamination, HttpStatus.OK);
-		} catch (ShanoirExaminationException e) {
+		} catch (ShanoirDatasetException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -117,10 +118,10 @@ public class ExaminationApiController implements ExaminationApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
 		}
 
-		/* Update template in db. */
+		/* Update examination in db. */
 		try {
 			examinationService.update(examination);
-		} catch (ShanoirExaminationException e) {
+		} catch (ShanoirDatasetException e) {
 			LOG.error("Error while trying to update examination " + examinationId + " : ", e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -138,7 +139,8 @@ public class ExaminationApiController implements ExaminationApi {
 	 */
 	private FieldErrorMap getUpdateRightsErrors(final Examination examination) {
 		final Examination previousStateExamination = examinationService.findById(examination.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<Examination>().validate(previousStateExamination, examination);
+		final FieldErrorMap accessErrors = new EditableOnlyByValidator<Examination>().validate(previousStateExamination,
+				examination);
 		return accessErrors;
 	}
 

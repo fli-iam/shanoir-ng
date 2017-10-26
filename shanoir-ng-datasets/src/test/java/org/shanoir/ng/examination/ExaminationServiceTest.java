@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirExaminationException;
+import org.shanoir.ng.shared.exception.ShanoirDatasetException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -46,9 +46,9 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirExaminationException {
+	public void deleteByIdTest() throws ShanoirDatasetException {
 		examinationService.deleteById(EXAMINATION_ID);
-		
+
 		Mockito.verify(examinationRepository, Mockito.times(1)).delete(Mockito.anyLong());
 	}
 
@@ -65,20 +65,20 @@ public class ExaminationServiceTest {
 	public void findByIdTest() {
 		final Examination examination = examinationService.findById(EXAMINATION_ID);
 		Assert.assertNotNull(examination);
-		Assert.assertTrue(ModelsUtil.NOTE.equals(examination.getNote()));
+		Assert.assertTrue(ModelsUtil.EXAMINATION_NOTE.equals(examination.getNote()));
 
 		Mockito.verify(examinationRepository, Mockito.times(1)).findOne(Mockito.anyLong());
 	}
 
 	@Test
-	public void saveTest() throws ShanoirExaminationException {
+	public void saveTest() throws ShanoirDatasetException {
 		examinationService.save(createExamination());
 
 		Mockito.verify(examinationRepository, Mockito.times(1)).save(Mockito.any(Examination.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirExaminationException {
+	public void updateTest() throws ShanoirDatasetException {
 		final Examination updatedExamination = examinationService.update(createExamination());
 		Assert.assertNotNull(updatedExamination);
 		Assert.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
@@ -87,7 +87,7 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
-	public void updateFromShanoirOldTest() throws ShanoirExaminationException {
+	public void updateFromShanoirOldTest() throws ShanoirDatasetException {
 		examinationService.updateFromShanoirOld(createExamination());
 
 		Mockito.verify(examinationRepository, Mockito.times(1)).findOne(Mockito.anyLong());

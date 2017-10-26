@@ -6,109 +6,104 @@ package org.shanoir.ng.examination;
  * @author ifakhfakh
  *
  */
-
-
 public enum Quality {
 
-
 	/***
-	 *  ambulation performance with bilateral assistance.
+	 * ambulation performance with bilateral assistance.
 	 */
 	AMBULATION_PERFORMANCE_WITH_BILATERAL_ASSISTANCE(1),
-	
+
 	/**
 	 * ambulation performance with unilateral assistance.
 	 */
 	AMBULATION_PERFORMANCE_WITH_UNILATERAL_ASSISTANCE(2),
-	
+
 	/***
-	 *  ambulation performance without assistance.
+	 * ambulation performance without assistance.
 	 */
 	AMBULATION_PERFORMANCE_WITHOUT_ASSISTANCE(3),
-	
+
 	/***
-	 *  bowel-bladder-functions performance.
+	 * bowel-bladder-functions performance.
 	 */
 	BOWEL_BLADDER_FUNCTIONS_PERFORMANCE(4),
-	
+
 	/***
-	 *  brainstem-functions performance.
+	 * brainstem-functions performance.
 	 */
 	BRAINSTEM_FUNCTIONS_PERFORMANCE(5),
-	
+
 	/***
-	 *  calculation performance.
+	 * calculation performance.
 	 */
 	CALCULATION_PERFORMANCE(6),
-	
+
 	/***
-	 *  cerebellar-functions performance.
+	 * cerebellar-functions performance.
 	 */
 	CEREBELLAR_FUNCTIONS_PERFORMANCE(7),
-	
+
 	/***
-	 *  cerebral-functions performance.
+	 * cerebral-functions performance.
 	 */
 	CEREBRAL_FUNCTIONS_PERFORMANCE(8),
-	
+
 	/***
-	 *  constructive-realization performance.
+	 * constructive-realization performance.
 	 */
 	CONSTRUCTIVE_REALIZATION_PERFORMANCE(9),
-	
+
 	/***
-	 *  disability-status.
+	 * disability-status.
 	 */
 	DISABILITY_STATUS(10),
-	
+
 	/***
-	 *  episodic-memory performance.
+	 * episodic-memory performance.
 	 */
 	EPISODIC_MEMORY_PERFORMANCE(11),
-	
+
 	/***
-	 *  global-cognitive-performance.
+	 * global-cognitive-performance.
 	 */
 	GLOBAL_COGNITIVE_PERFORMANCE(12),
-	
+
 	/***
-	 *  language performance.
+	 * language performance.
 	 */
 	LANGUAGE_PERFORMANCE(13),
-	
+
 	/***
-	 *  optic-functions performance.
+	 * optic-functions performance.
 	 */
 	OPTIC_FUNCTIONS_PERFORMANCE(14),
-	
+
 	/***
-	 *  pyramidal-functions performance.
+	 * pyramidal-functions performance.
 	 */
 	PYRAMIDAL_FUNCTIONS_PERFORMANCE(15),
-	
+
 	/***
-	 *  sensory-functions performance.
+	 * sensory-functions performance.
 	 */
 	SENSORY_FUNCTIONS_PERFORMANCE(16),
-	
+
 	/***
-	 *  spatial-orientation-orientation-performance.
+	 * spatial-orientation-orientation-performance.
 	 */
 	SPATIAL_ORIENTATION_ORIENTATION_PERFORMANCE(17),
-	
+
 	/***
-	 *  temporal-orientation-orientation-performance.
+	 * temporal-orientation-orientation-performance.
 	 */
 	TEMPORAL_ORIENTATION_ORIENTATION_PERFORMANCE(18),
-	
+
 	/***
-	 *  temporo-spatial-orientation-performance.
+	 * temporo-spatial-orientation-performance.
 	 */
 	TEMPORO_SPATIAL_ORIENTATION_PERFORMANCE(19);
-	
 
 	private int id;
-	
 
 	/**
 	 * Constructor.
@@ -147,5 +142,3 @@ public enum Quality {
 	}
 
 }
-
-

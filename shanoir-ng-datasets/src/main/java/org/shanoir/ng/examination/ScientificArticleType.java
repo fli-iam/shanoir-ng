@@ -1,40 +1,24 @@
 package org.shanoir.ng.examination;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-
-import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.hateoas.Links;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 /**
- * ScientificArticle.
+ * Scientific article type.
  * 
  * @author ifakhfakh
  *
  */
-
-
 public enum ScientificArticleType {
 
 	/***
-	 *  instrument_definition_article.
+	 * instrument_definition_article.
 	 */
 	INSTRUMENT_DEFINITION_ARTICLE(1),
-	
+
 	/**
 	 * score_standardisation_article.
 	 */
 	SCORE_STANDARDISATION_ARTICLE(2);
-		
 
 	private int id;
-	
 
 	/**
 	 * Constructor.
@@ -53,7 +37,7 @@ public enum ScientificArticleType {
 	 *            scientific article type id.
 	 * @return scientific article type.
 	 */
-	public static ScientificArticleType getScientificArticleType(final Integer id) {
+	public static ScientificArticleType getType(final Integer id) {
 		if (id == null) {
 			return null;
 		}
@@ -65,7 +49,7 @@ public enum ScientificArticleType {
 		throw new IllegalArgumentException("No matching scientific article type for id " + id);
 	}
 
-	/** 
+	/**
 	 * @return the id
 	 */
 	public int getId() {
@@ -73,4 +57,3 @@ public enum ScientificArticleType {
 	}
 
 }
-

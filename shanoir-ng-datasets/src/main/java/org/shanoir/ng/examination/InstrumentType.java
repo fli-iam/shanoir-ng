@@ -1,48 +1,44 @@
 package org.shanoir.ng.examination;
 
-
 /**
- * InstrumentType.
+ * Instrument type.
  * 
  * @author ifakhfakh
  *
  */
-
 public enum InstrumentType {
 
 	/***
-	 *  Behavioural instrument.
+	 * Behavioural instrument.
 	 */
 	BEHAVIOURAL_INSTRUMENT(1),
-	
+
 	/**
 	 * Experimental psychology instrument.
 	 */
 	EXPERIMENTAL_PSYCHOLOGY_INSTRUMENT(2),
-	
+
 	/**
 	 * Neuroclinical instrument.
 	 */
 	NEUROCLINICAL_INSTRUMENT(3),
-	
+
 	/**
 	 * Neuropsychological instrument.
 	 */
 	NEUROPSYCHOLOGICAL_INSTRUMENT(4),
-	
+
 	/**
 	 * Psychological instrument.
 	 */
 	PSYCHOLOGICAL_INSTRUMENT(5),
-	
+
 	/**
 	 * Psychophysical instrument.
 	 */
 	PSYCHOPHYSICAL_INSTRUMENT(6);
-	
 
 	private int id;
-	
 
 	/**
 	 * Constructor.
@@ -61,7 +57,7 @@ public enum InstrumentType {
 	 *            instrument type id.
 	 * @return instrument type.
 	 */
-	public static InstrumentType getInstrumentType(final Integer id) {
+	public static InstrumentType getType(final Integer id) {
 		if (id == null) {
 			return null;
 		}

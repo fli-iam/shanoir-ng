@@ -1,13 +1,12 @@
-package org.shanoir.ng.examination;
+package org.shanoir.ng.score;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PostLoad;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 
+import org.shanoir.ng.examination.VariableAssessment;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
@@ -20,16 +19,16 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  *
  */
 @Entity
-@Table(name = "score")
-@JsonPropertyOrder({ "_links", "id", "isSelected", "variableAssessment"})
+@JsonPropertyOrder({ "_links", "id", "variableAssessment" })
 public class Score extends HalEntity {
 
-	
-	@Transient
-	private boolean isSelected = false;
-	
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = 5995692961509079060L;
+
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "variableAssessment", nullable = false, updatable = true)
+	@JoinColumn(name = "variable_assessment_id", nullable = false, updatable = true)
 	private VariableAssessment variableAssessment;
 
 	/**
@@ -37,15 +36,7 @@ public class Score extends HalEntity {
 	 */
 	@PostLoad
 	public void initLinks() {
-		this.addLink(Links.REL_SELF, "examination/" + getId());
-	}
-
-	public boolean isSelected() {
-		return isSelected;
-	}
-
-	public void setSelected(boolean isSelected) {
-		this.isSelected = isSelected;
+		this.addLink(Links.REL_SELF, "score/" + getId());
 	}
 
 	public VariableAssessment getVariableAssessment() {
@@ -55,9 +46,5 @@ public class Score extends HalEntity {
 	public void setVariableAssessment(VariableAssessment variableAssessment) {
 		this.variableAssessment = variableAssessment;
 	}
-
-
-
-
 
 }

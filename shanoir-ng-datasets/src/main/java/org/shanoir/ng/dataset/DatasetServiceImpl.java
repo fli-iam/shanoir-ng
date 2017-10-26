@@ -103,12 +103,12 @@ public class DatasetServiceImpl implements DatasetService {
 	private boolean updateShanoirOld(final Dataset dataset) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.datasetQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(dataset));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send dataset " + dataset.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.queueOut().getName(), e);
+					+ RabbitMqConfiguration.datasetQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send dataset " + dataset.getId() + " save/update because of an error while serializing dataset.",
 					e);

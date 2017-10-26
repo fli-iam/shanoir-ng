@@ -5,10 +5,13 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.dataset.Dataset;
+import org.shanoir.ng.examination.Examination;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
@@ -34,10 +37,9 @@ public class DatasetAcquisition extends AbstractGenericItem {
 	private List<Dataset> datasetList;
 
 	/** Related Examination. */
-//	@ManyToOne
-//	@JoinColumn(name = "examination_id")
-	// private Examination examination;
-	private Long examinationId;
+	@ManyToOne
+	@JoinColumn(name = "examination_id")
+	private Examination examination;
 
 	/** Rank of the session in the examination protocol. */
 	private Integer rank;
@@ -79,18 +81,18 @@ public class DatasetAcquisition extends AbstractGenericItem {
 	}
 
 	/**
-	 * @return the examinationId
+	 * @return the examination
 	 */
-	public Long getExaminationId() {
-		return examinationId;
+	public Examination getExamination() {
+		return examination;
 	}
 
 	/**
-	 * @param examinationId
-	 *            the examinationId to set
+	 * @param examination
+	 *            the examination to set
 	 */
-	public void setExaminationId(Long examinationId) {
-		this.examinationId = examinationId;
+	public void setExamination(Examination examination) {
+		this.examination = examination;
 	}
 
 	/**

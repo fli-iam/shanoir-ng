@@ -33,10 +33,10 @@ public class ExaminationRepositoryTest {
 
 	private static final String EXAMINATION_TEST_1_NOTE = "examination1";
 	private static final Long EXAMINATION_TEST_1_ID = 1L;
-	
+
 	@Autowired
 	private ExaminationRepository repository;
-	
+
 	/*
 	 * Mocks used to avoid unsatisfied dependency exceptions.
 	 */
@@ -46,7 +46,7 @@ public class ExaminationRepositoryTest {
 	private DocumentationPluginsBootstrapper documentationPluginsBootstrapper;
 	@MockBean
 	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
-	
+
 	@Test
 	public void findAllTest() throws Exception {
 		Iterable<Examination> examinationDb = repository.findAll();
@@ -59,7 +59,7 @@ public class ExaminationRepositoryTest {
 		}
 		assertThat(nbTemplates).isEqualTo(3);
 	}
-	
+
 	@Test
 	public void findByTest() throws Exception {
 		List<Examination> examinationDb = repository.findBy("note", EXAMINATION_TEST_1_NOTE);
@@ -67,18 +67,18 @@ public class ExaminationRepositoryTest {
 		assertThat(examinationDb.size()).isEqualTo(1);
 		assertThat(examinationDb.get(0).getId()).isEqualTo(EXAMINATION_TEST_1_ID);
 	}
-	
-	/*@Test
-	public void findByDataTest() throws Exception {
-		Optional<Template> templateDb = repository.findByData(TEMPLATE_TEST_1_DATA);
-		assertTrue(templateDb.isPresent());
-		assertThat(templateDb.get().getId()).isEqualTo(TEMPLATE_TEST_1_ID);
-	}*/
-	
+
+	/*
+	 * @Test public void findByDataTest() throws Exception { Optional<Template>
+	 * templateDb = repository.findByData(TEMPLATE_TEST_1_DATA);
+	 * assertTrue(templateDb.isPresent());
+	 * assertThat(templateDb.get().getId()).isEqualTo(TEMPLATE_TEST_1_ID); }
+	 */
+
 	@Test
 	public void findOneTest() throws Exception {
 		Examination examinationDb = repository.findOne(EXAMINATION_TEST_1_ID);
 		assertThat(examinationDb.getNote()).isEqualTo(EXAMINATION_TEST_1_NOTE);
 	}
-	
+
 }

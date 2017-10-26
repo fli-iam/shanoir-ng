@@ -1,98 +1,94 @@
 package org.shanoir.ng.examination;
 
-
 /**
  * Domain.
  * 
  * @author ifakhfakh
  *
  */
-
 public enum Domain {
 
 	/***
-	 *  ambulation.
+	 * ambulation.
 	 */
 	AMBULATION(1),
-	
+
 	/**
 	 * bowel-bladder-functions.
 	 */
 	BOWEL_BLADDER_FUNCTIONS(2),
-	
+
 	/***
-	 *  brainstem-functions.
+	 * brainstem-functions.
 	 */
 	BRAINSTEM_FUNCTIONS(3),
-	
+
 	/***
-	 *  calculation.
+	 * calculation.
 	 */
 	CALCULATION(4),
-	
+
 	/***
-	 *  cerebellar-functions.
+	 * cerebellar-functions.
 	 */
 	CEREBELLAR_FUNCTIONS(5),
-	
+
 	/***
-	 *  cerebral-functions.
+	 * cerebral-functions.
 	 */
 	CEREBRAL_FUNCTIONS(6),
-	
+
 	/***
-	 *  constructive-realization.
+	 * constructive-realization.
 	 */
 	CONSTRUCTIVE_REALIZATION(7),
-	
+
 	/***
-	 *  episodic-memory.
+	 * episodic-memory.
 	 */
 	EPISODIC_MEMORY(8),
-	
+
 	/***
-	 *  executive functions.
+	 * executive functions.
 	 */
 	EXECUTIVE_FUNCTIONS(9),
-	
+
 	/***
-	 *  global-cognitive-efficiency.
+	 * global-cognitive-efficiency.
 	 */
 	GLOBAL_COGNITIVE_EFFICIENCY(10),
-	
+
 	/***
-	 *  language.
+	 * language.
 	 */
 	LANGUAGE(11),
-	
+
 	/***
-	 *  neurological-functions.
+	 * neurological-functions.
 	 */
 	NEUROLOGICAL_FUNCTIONS(12),
-	
+
 	/***
-	 *  optic-functions.
+	 * optic-functions.
 	 */
 	OPTIC_FUNCTIONS(13),
-	
+
 	/***
-	 *  pyramidal-functions.
+	 * pyramidal-functions.
 	 */
 	PYRAMIDAL_FUNCTIONS(14),
-	
+
 	/***
-	 *  sensory-functions.
+	 * sensory-functions.
 	 */
 	SENSORY_FUNCTIONS(15),
-	
+
 	/***
-	 *  temporo-spatial-orientation.
+	 * temporo-spatial-orientation.
 	 */
 	TEMPORO_SPATIAL_ORIENTATION(16);
-		
 
 	private int id;
-	
 
 	/**
 	 * Constructor.
@@ -131,4 +127,3 @@ public enum Domain {
 	}
 
 }
-

@@ -1,10 +1,9 @@
 package org.shanoir.ng.examination;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.exception.ShanoirExaminationException;
+import org.shanoir.ng.shared.exception.ShanoirDatasetException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private ExaminationRepository examinationRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirExaminationException {
+	public void deleteById(final Long id) throws ShanoirDatasetException {
 		examinationRepository.delete(id);
 	}
 
@@ -52,43 +51,38 @@ public class ExaminationServiceImpl implements ExaminationService {
 		return examinationRepository.findBy(fieldName, value);
 	}
 
-	/*@Override
-	public Optional<Examination> findByData(final String data) {
-		return examinationRepository.findByData(data);
-	}*/
-
 	@Override
 	public Examination findById(final Long id) {
 		return examinationRepository.findOne(id);
 	}
 
 	@Override
-	public Examination save(final Examination examination) throws ShanoirExaminationException {
+	public Examination save(final Examination examination) throws ShanoirDatasetException {
 		Examination savedExamination = null;
 		try {
 			savedExamination = examinationRepository.save(examination);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirExaminationException.logAndThrow(LOG, "Error while creating examination: " + dive.getMessage());
+			ShanoirDatasetException.logAndThrow(LOG, "Error while creating examination: " + dive.getMessage());
 		}
 		updateShanoirOld(savedExamination);
 		return savedExamination;
 	}
 
 	@Override
-	public Examination update(final Examination examination) throws ShanoirExaminationException {
+	public Examination update(final Examination examination) throws ShanoirDatasetException {
 		final Examination examinationDb = examinationRepository.findOne(examination.getId());
 		updateExaminationValues(examinationDb, examination);
 		try {
 			examinationRepository.save(examinationDb);
 		} catch (Exception e) {
-			ShanoirExaminationException.logAndThrow(LOG, "Error while updating examination: " + e.getMessage());
+			ShanoirDatasetException.logAndThrow(LOG, "Error while updating examination: " + e.getMessage());
 		}
 		updateShanoirOld(examinationDb);
 		return examinationDb;
 	}
 
 	@Override
-	public void updateFromShanoirOld(final Examination examination) throws ShanoirExaminationException {
+	public void updateFromShanoirOld(final Examination examination) throws ShanoirDatasetException {
 		if (examination.getId() == null) {
 			throw new IllegalArgumentException("Examination id cannot be null");
 		} else {
@@ -97,7 +91,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 				try {
 					examinationRepository.save(examinationDb);
 				} catch (Exception e) {
-					ShanoirExaminationException.logAndThrow(LOG,
+					ShanoirDatasetException.logAndThrow(LOG,
 							"Error while updating examination from Shanoir Old: " + e.getMessage());
 				}
 			}
@@ -114,15 +108,15 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private boolean updateShanoirOld(final Examination examination) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.examinationQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(examination));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send examination " + examination.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.queueOut().getName(), e);
+					+ RabbitMqConfiguration.examinationQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send examination " + examination.getId() + " save/update because of an error while serializing examination.",
-					e);
+			LOG.error("Cannot send examination " + examination.getId()
+					+ " save/update because of an error while serializing examination.", e);
 		}
 		return false;
 	}
@@ -137,23 +131,24 @@ public class ExaminationServiceImpl implements ExaminationService {
 	 * @return database examination with new values.
 	 */
 	private Examination updateExaminationValues(final Examination examinationDb, final Examination examination) {
-		
-	   	 examinationDb.setCenterId(examination.getCenterId());		 
-		 examinationDb.setComment(examination.getComment());
-		 examinationDb.setExaminationDate(examination.getExaminationDate());
-		 examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
-		 examinationDb.setInvestigatorExternal(examination.isInvestigatorExternal());
-		 examinationDb.setInvestigatorCenterId(examination.getInvestigatorCenterId());
-		 examinationDb.setNote(examination.getNote());
-		 examinationDb.setSubjectWeight(examination.getSubjectWeight());
-		 examinationDb.setTimepoint(examination.getTimepoint());
-		 examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
-		 examinationDb.setDatasetAcquisitionList(examination.getDatasetAcquisitionList());
-		 examinationDb.setSubjectId(examination.getSubjectId());
-		 examinationDb.setStudyId(examination.getStudyId());
-		 examinationDb.setInvestigatorId(examination.getInvestigatorId());
-		 examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
-	 
+
+		examinationDb.setCenterId(examination.getCenterId());
+		examinationDb.setComment(examination.getComment());
+		examinationDb.setDatasetAcquisitionList(examination.getDatasetAcquisitionList());
+		examinationDb.setExperimentalGroupOfSubjectsId(examination.getExperimentalGroupOfSubjectsId());
+		examinationDb.setExaminationDate(examination.getExaminationDate());
+		examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
+		examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
+		examinationDb.setInvestigatorExternal(examination.isInvestigatorExternal());
+		examinationDb.setInvestigatorCenterId(examination.getInvestigatorCenterId());
+		examinationDb.setInvestigatorId(examination.getInvestigatorId());
+		examinationDb.setNote(examination.getNote());
+		examinationDb.setStudyId(examination.getStudyId());
+		examinationDb.setSubjectId(examination.getSubjectId());
+		examinationDb.setSubjectWeight(examination.getSubjectWeight());
+		examinationDb.setTimepoint(examination.getTimepoint());
+		examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
+
 		return examinationDb;
 	}
 
