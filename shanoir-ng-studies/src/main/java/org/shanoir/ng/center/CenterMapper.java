@@ -33,21 +33,21 @@ public interface CenterMapper {
 	CenterDTO centerToCenterDTO(Center center);
 
 	/**
-	 * Map list of @Center to list of @SimpleCenterDTO.
+	 * Map list of @Center to list of @CenterNameDTO.
 	 * 
 	 * @param centers
 	 *            list of centers.
 	 * @return list of centers DTO.
 	 */
-	List<SimpleCenterDTO> centersToSimpleCenterDTOs(List<Center> centers);
+	List<CenterNameDTO> centersToCenterNameDTOs(List<Center> centers);
 
 	/**
-	 * Map a @Center to a @SimpleCenterDTO.
+	 * Map a @Center to a @CenterNameDTO.
 	 * 
 	 * @param center
 	 *            center to map.
 	 * @return center DTO.
 	 */
-	SimpleCenterDTO centerToSimpleCenterDTO(Center center);
+	CenterNameDTO centerToCenterNameDTO(Center center);
 
 }

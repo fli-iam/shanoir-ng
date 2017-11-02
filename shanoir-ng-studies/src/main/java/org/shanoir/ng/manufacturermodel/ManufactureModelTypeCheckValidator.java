@@ -1,12 +1,10 @@
-package org.shanoir.ng.shared.validation;
+package org.shanoir.ng.manufacturermodel;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.shanoir.ng.manufacturermodel.ManufacturerModel;
-
 /**
- * Validate if manufacturer model is correct depending on its type.
+ * Validates if a manufacturer model is correct depending on its type.
  * 
  * @author msimon
  *
@@ -31,6 +29,8 @@ public class ManufactureModelTypeCheckValidator
 				return false;
 			}
 		default:
+			// No magnetic field for other models
+			manufacturerModel.setMagneticField(null);
 			return true;
 		}
 	}

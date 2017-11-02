@@ -137,8 +137,7 @@ public class CenterServiceTest {
 	private Center createCenter() {
 		final Center center = new Center();
 		center.setId(CENTER_ID);
-		center.setName
-		(UPDATED_CENTER_NAME);
+		center.setName(UPDATED_CENTER_NAME);
 		return center;
 	}
 

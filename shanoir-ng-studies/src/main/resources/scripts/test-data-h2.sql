@@ -39,6 +39,13 @@ VALUES
 	(2, 2, 1, '234567891'),
 	(3, 1, 2, '345678912');
 	
+INSERT INTO coil
+	(id, center_id, coil_type, manufacturer_model_id, name, number_of_channels, serial_number)
+VALUES 
+	(1, 1, 2, 2, 'coil 1', 8, '123456789'),
+	(2, 1, 1, 2, 'coil 2', 16, 123456789),
+	(3, 2, 1, 2, 'coil 3', 4, '234567891');
+
 INSERT INTO subject
 	(id, name, identifier, birth_date )
 VALUES

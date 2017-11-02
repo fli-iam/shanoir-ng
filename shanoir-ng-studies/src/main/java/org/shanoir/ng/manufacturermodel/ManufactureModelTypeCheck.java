@@ -1,4 +1,4 @@
-package org.shanoir.ng.shared.validation;
+package org.shanoir.ng.manufacturermodel;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

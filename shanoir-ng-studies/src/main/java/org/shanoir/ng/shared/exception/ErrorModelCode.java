@@ -30,4 +30,7 @@ public final class ErrorModelCode {
 	/** No manufacturer found */
 	public static final Integer MANUFACTURER_NOT_FOUND = 271;
 	
+	/** No coil found */
+	public static final Integer COIL_NOT_FOUND = 281;
+	
 }
