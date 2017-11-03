@@ -22,6 +22,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class PseudonymusHashValues  extends HalEntity implements Serializable {
 	
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = 3108595543203629662L;
+
 	/** Subject. */
 	@OneToOne
 	@JsonIgnore

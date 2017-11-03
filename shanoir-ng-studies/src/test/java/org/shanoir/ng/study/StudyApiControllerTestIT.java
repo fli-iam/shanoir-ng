@@ -8,6 +8,7 @@ import java.util.Arrays;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.center.Center;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 
 	private static final String REQUEST_PATH = "/study";
-	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	@Autowired
@@ -42,7 +42,7 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void findStudyByIdProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
@@ -55,16 +55,16 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 	}
 
 	@Test
-	public void findStudysProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+	public void findStudiesProtected() {
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
 	public void findStudiesWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(false));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
@@ -72,14 +72,14 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void saveNewStudyProtected() {
 		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Study(), String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
 	public void saveNewStudyWithLogin() throws ClientProtocolException, IOException {
 
 		final Study study = createStudy();
-		study.setName("test");
+		study.setName("test2");
 		final HttpEntity<Study> entity = new HttpEntity<Study>(study, getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
@@ -92,7 +92,7 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 		// Delete study
 		final ResponseEntity<String> responseDelete = restTemplate.exchange(REQUEST_PATH + "/" + studyId,
 				HttpMethod.DELETE, entity, String.class);
-		assertEquals(HttpStatus.OK, responseDelete.getStatusCode());
+		assertEquals(HttpStatus.NO_CONTENT, responseDelete.getStatusCode());
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
@@ -110,7 +110,7 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 	}
 
 	private Study createStudy() {
@@ -119,8 +119,9 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 		study.setName("test");
 		study.setStudyStatus(StudyStatus.FINISHED);
 		final StudyCenter studyCenter = new StudyCenter();
-		studyCenter.setCenter(ModelsUtil.createCenter());
-		studyCenter.setStudy(study);
+		final Center center = new Center();
+		center.setId(1L);
+		studyCenter.setCenter(center);
 		study.setStudyCenterList(Arrays.asList(studyCenter));
 		return study;
 	}

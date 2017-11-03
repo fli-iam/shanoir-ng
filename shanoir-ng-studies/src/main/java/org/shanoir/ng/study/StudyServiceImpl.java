@@ -78,13 +78,18 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
+	public List<Study> findBy(final String fieldName, final Object value) {
+		return studyRepository.findBy(fieldName, value);
+	}
+
+	@Override
 	public Study findById(final Long id) {
 		return studyRepository.findOne(id);
 	}
 
 	@Override
 	public List<Study> findStudiesByUserId(final Long userId) {
-		return studyRepository.findByStudyUsers_UserId(userId);
+		return studyRepository.findByStudyUserList_UserId(userId);
 	}
 
 	@Override

@@ -1,8 +1,6 @@
 package org.shanoir.ng.subject;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
@@ -12,15 +10,20 @@ import org.shanoir.ng.study.Study;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * Relation between the subjects and the studies.
+ * 
+ * @author msimon
+ *
+ */
 @Entity
-@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
+@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class SubjectStudy extends AbstractGenericItem {
 
 	/**
 	 * UID
 	 */
 	private static final long serialVersionUID = 734032331139342460L;
-
 
 	/** true if the subject is physically involved in the study. */
 	private boolean physicallyInvolved;
@@ -35,19 +38,12 @@ public class SubjectStudy extends AbstractGenericItem {
 
 	/** Subject. */
 	@ManyToOne
-	@JoinColumn(name = "subject",updatable = true, insertable = true)
+	@JoinColumn(name = "subject", updatable = true, insertable = true)
 	@JsonIgnore
 	private Subject subject;
 
 	/** Identifier of the subject inside the study. */
 	private String subjectStudyIdentifier;
-
-	@Override
-	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-	public Long getId() {
-		return super.getId();
-	}
 
 	public boolean isPhysicallyInvolved() {
 		return physicallyInvolved;
@@ -93,13 +89,4 @@ public class SubjectStudy extends AbstractGenericItem {
 		this.subjectStudyIdentifier = subjectStudyIdentifier;
 	}
 
-	@Override
-	public String toString(){
-		return 	"[ID : " + this.getId() + ", "
-						+ "physicallyInvolved : " + this.isPhysicallyInvolved() + ", "
-				//		+ "subjectType : " + this.getSubjectType().getName() + ", "
-			//			+ "study.id : " + this.getStudy().getId() + ", "
-						+ "subjectStudyIdentifier : " + this.getSubjectStudyIdentifier() + "]";
-
-	}
 }

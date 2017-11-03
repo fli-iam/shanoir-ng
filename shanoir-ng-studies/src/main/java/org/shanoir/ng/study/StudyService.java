@@ -3,6 +3,7 @@ package org.shanoir.ng.study;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
 import org.shanoir.ng.study.dto.StudyStudyCardDTO;
 
@@ -12,7 +13,7 @@ import org.shanoir.ng.study.dto.StudyStudyCardDTO;
  * @author msimon
  *
  */
-public interface StudyService {
+public interface StudyService extends UniqueCheckableService<Study> {
 
 	/**
 	 * Delete a Study

@@ -94,7 +94,7 @@ public class CenterApiController implements CenterApi {
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(center);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constrainte
+		// Check unique constraint
 		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(center);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
@@ -129,7 +129,7 @@ public class CenterApiController implements CenterApi {
 		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(center);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constrainte
+		// Check unique constraint
 		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(center);
 		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
@@ -175,11 +175,11 @@ public class CenterApiController implements CenterApi {
 	}
 
 	/*
-	 * Get unique constraint errors
+	 * Get unique constraint errors.
 	 *
-	 * @param center
+	 * @param center center.
 	 * 
-	 * @return an error map
+	 * @return an error map.
 	 */
 	private FieldErrorMap getUniqueConstraintErrors(final Center center) {
 		final UniqueValidator<Center> uniqueValidator = new UniqueValidator<Center>(centerService);
