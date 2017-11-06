@@ -14,6 +14,9 @@ export const BACKEND_API_CENTER_URL:string = BACKEND_API_STUDIES_MS_URL + '/cent
 export const BACKEND_API_CENTER_ALL_URL: string = BACKEND_API_CENTER_URL + '/all';
 export const BACKEND_API_CENTER_ALL_NAMES_URL: string = BACKEND_API_CENTER_URL + '/allnames';
 
+// Studies http api
+export const BACKEND_API_STUDY_URL:string = BACKEND_API_STUDIES_MS_URL + '/study';
+
 // Acquisition equipment http api
 export const BACKEND_API_ACQ_EQUIP_URL:string = BACKEND_API_STUDIES_MS_URL + '/acquisitionequipment';
 export const BACKEND_API_ACQ_EQUIP_ALL_URL: string = BACKEND_API_ACQ_EQUIP_URL + '/all';
