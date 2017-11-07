@@ -172,13 +172,6 @@ parameters:
     required: true
     type: integer
     format: int64
-  userId:
-    name: userId
-    in: path
-    description: id of the user
-    required: true
-    type: integer
-    format: int64
 definitions:
   Study:
     type: object

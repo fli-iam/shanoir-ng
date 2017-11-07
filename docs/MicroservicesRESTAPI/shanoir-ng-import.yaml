@@ -7,7 +7,6 @@ basePath: /importer
 produces:
   - application/json
 paths:
-  
   /upload/:
     post:
       tags:
@@ -26,17 +25,16 @@ paths:
           required: true
           type: file
       responses:
-        "200":
+        '200':
           description: success returns file path
-        "400":
+        '400':
           description: Invalid input / Bad Request
-        "409":
+        '409':
           description: Already exists - conflict
         default:
           description: Unexpected Error
-          schema: 
+          schema:
             $ref: '#/definitions/Error'
-
   /upload_dicom/:
     post:
       tags:
@@ -55,18 +53,97 @@ paths:
           required: true
           type: file
       responses:
-        "200":
+        '200':
           description: success returns file path
-        "400":
+        '400':
           description: Invalid input / Bad Request
-        "409":
+        '409':
           description: Already exists - conflict
         default:
           description: Unexpected Error
-          schema: 
-            $ref: '#/definitions/Error'      
-            
+          schema:
+            $ref: '#/definitions/Error'
+  /select_series/:
+    post:
+      tags:
+        - Select series
+      summary: Select series
+      description: Select series
+      operationId: selectSeries
+      consumes:
+        - application/json
+      parameters:
+        - name: selectedSeries
+          in: body
+          description: selected series
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Serie'
+      responses:
+        '200':
+          description: series selected
+        '400':
+          description: Invalid input / Bad Request
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
+  Serie:
+    type: object
+    properties:
+      selected:
+        type: boolean
+      seriesInstanceUID:
+        type: string
+      modality:
+        type: string
+      protocolName:
+        type: string
+      seriesDescription:
+        type: string
+      seriesDate:
+        type: string
+        format: date
+      seriesNumber:
+        type: integer
+        format: int32
+      numberOfSeriesRelatedInstances:
+        type: integer
+        format: int32
+      sopClassUID:
+        type: string
+      equipment:
+        type: object
+        items:
+          $ref: '#/definitions/EquipmentDicom'
+      isCompressed:
+        type: boolean
+      nonImages:
+        type: array
+        items:
+          type: object
+      nonImagesNumber:
+        type: integer
+        format: int32
+      images:
+        type: array
+        items:
+          type: string
+      imagesNumber:
+        type: integer
+        format: int32
+  EquipmentDicom:
+    type: object
+    properties:
+      manufacturer:
+        type: string
+      manufacturerModelName:
+        type: string
+      deviceSerialNumber:
+        type: string
   Error:
     type: object
     properties:

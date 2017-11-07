@@ -60,7 +60,7 @@ public class StudyRepositoryTest {
 
 	@Test
 	public void findByStudyUsers_UserIdTest() {
-		final List<Study> studyList = (List<Study>) studyRepository.findByStudyUserList_UserId(USER_ID);
+		final List<Study> studyList = (List<Study>) studyRepository.findByStudyUserList_UserIdOrderByNameAsc(USER_ID);
 		assertNotNull(studyList);
 		assertEquals(3, studyList.size());
 	}

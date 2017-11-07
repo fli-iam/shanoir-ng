@@ -1,7 +1,11 @@
 package org.shanoir.ng.importer;
 
+import java.util.Collection;
+
+import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -43,4 +47,15 @@ public interface ImporterApi {
         method = RequestMethod.POST)
     ResponseEntity<String> uploadDicomZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException;
     
+    @ApiOperation(value = "Select series", notes = "Select series", response = Void.class, tags={ "Select series", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "series selected", response = Void.class),
+        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+    @RequestMapping(value = "/select_series/",
+        produces = { "application/json" }, 
+        consumes = { "application/json" },
+        method = RequestMethod.POST)
+    ResponseEntity<Void> selectSeries(@ApiParam(value = "selected series" ,required=true ) @RequestBody Collection<Serie> selectedSeries)
+    		throws RestServiceException;
 }

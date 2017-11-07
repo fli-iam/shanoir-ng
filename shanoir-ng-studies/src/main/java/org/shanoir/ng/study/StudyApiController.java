@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class StudyApiController implements StudyApi {
 
 	@Autowired
-	private StudyMapper studyMapper;
-
-	@Autowired
 	private StudyService studyService;
+	
+	@Autowired
+	private StudyMapper studyMapper;
 
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
@@ -40,6 +40,15 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<List<StudyDTO>> findStudies() {
+		final List<Study> studies = studyService.findAll();
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<StudyDTO>> findStudiesByUserId() {
 		List<Study> studies;
 		try {
 			if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {

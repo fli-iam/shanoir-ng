@@ -89,7 +89,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public List<Study> findStudiesByUserId(final Long userId) {
-		return studyRepository.findByStudyUserList_UserId(userId);
+		return studyRepository.findByStudyUserList_UserIdOrderByNameAsc(userId);
 	}
 
 	@Override
