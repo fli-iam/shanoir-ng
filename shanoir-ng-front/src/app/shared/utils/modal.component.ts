@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-modal',
   template: `
   <div (click)="onContainerClicked($event)" class="modal fade" tabindex="-1" [ngClass]="{'in': visibleAnimate}"
        [ngStyle]="{'display': visible ? 'block' : 'none', 'opacity': visibleAnimate ? 1 : 0}">
-    <div class="modal-dialog">
+    <div id={{modalDialogId}} class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <ng-content select=".app-modal-header"></ng-content>
@@ -23,6 +23,7 @@ import { Component } from '@angular/core';
 })
 export class ModalComponent {
 
+  @Input() modalDialogId: string;
   public visible = false;
   public visibleAnimate = false;
 

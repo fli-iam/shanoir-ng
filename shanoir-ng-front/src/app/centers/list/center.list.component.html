@@ -21,21 +21,9 @@
     <shanoir-table [items]="centers" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
 
     <!-- create acq. equip. popin -->
-    <div *ngIf="createAcqEquip">
-        <div (click)="onContainerClicked($event)" class="modal fade" tabindex="-1" [ngClass]="{'in': visibleAnimate}" [ngStyle]="{'display': visible ? 'block' : 'none', 'opacity': visibleAnimate ? 1 : 0}">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <ng-content select=".app-modal-header"></ng-content>
-                    </div>
-                    <div class="modal-body-centerList">
-                        <acqEquipDetail [modeFromCenterList]="'create'" (closing)="closePopin($event)"></acqEquipDetail>
-                    </div>
-                    <div class="modal-footer">
-                        <ng-content select=".app-modal-footer"></ng-content>
-                    </div>
-                </div>
-            </div>
+    <app-modal modalDialogId="acqEqptModal" #acqEqptModal>
+        <div class="app-modal-body">
+            <acqEquipDetail [modeFromCenterList]="'create'" (closing)="closePopin($event)"></acqEquipDetail>
         </div>
-    </div>
+    </app-modal>
 </div>

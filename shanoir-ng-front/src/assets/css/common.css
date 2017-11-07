@@ -121,7 +121,7 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form my-date-picker .mydp .sunday { color: var(--color-b) !important; }
 
 
-.main-content:not(.modal .modal-dialog) { padding: 0 20px 10px 20px; position: relative; z-index: 1; }
+.main-content { padding: 0 20px 10px 20px; position: relative; }
 .max-content { width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
 .command-zone { background-color: var(--light-grey); }
 
