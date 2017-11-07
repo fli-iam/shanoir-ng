@@ -5,13 +5,13 @@ import { ConfirmDialogComponent } from "../../shared/utils/confirm.dialog.compon
 import { ConfirmDialogService } from "../../shared/utils/confirm.dialog.service";
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { StudyStatus } from '../shared/enum/studyStatus';
+import { StudyStatus } from '../shared/study-status.enum';
 import { TableComponent } from "../../shared/table/table.component";
 
 @Component({
     selector: 'study-list',
-    templateUrl: 'study.list.component.html',
-    styleUrls: ['study.list.component.css']
+    templateUrl: 'study-list.component.html',
+    styleUrls: ['study-list.component.css']
 })
 
 export class StudyListComponent {

@@ -1,5 +1,5 @@
-import { StudyStatus } from "./enum/StudyStatus";
-import { StudyType } from "./enum/StudyType";
+import { StudyStatus } from "./study-status.enum";
+import { StudyType } from "./study-type.enum";
 
 export class Study {
 	clinical: boolean;
