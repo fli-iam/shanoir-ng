@@ -28,6 +28,31 @@ export class StudyService {
             .catch((error) => {
                 console.error('Error while getting studies by user id', error);
                 return Promise.reject(error.message || error);
+            });
+        }
+
+    create(study: Study): Observable<Study> {
+        return this.http.post(AppUtils.BACKEND_API_STUDY_URL, JSON.stringify(study))
+            .map(this.handleErrorService.extractData)
+            .catch(this.handleErrorService.handleError);
+    }
+
+    delete(id: number): Promise<Response> {
+        return this.http.delete(AppUtils.BACKEND_API_STUDY_URL + '/' + id)
+            .toPromise()
+            .catch((error) => {
+                console.error('Error delete study', error);
+                return Promise.reject(error);
+        });
+    }
+
+    getStudies(): Promise<Study[]> {
+        return this.http.get(AppUtils.BACKEND_API_STUDY_URL)
+            .toPromise()
+            .then(response => response.json() as Study[])
+            .catch((error) => {
+                console.error('Error while getting studies', error);
+                return Promise.reject(error.message || error);
         });
     }
 
@@ -39,5 +64,20 @@ export class StudyService {
                 console.error('Error while getting subjects by study id', error);
                 return Promise.reject(error.message || error);
         });
+    }
+    getStudy (id: number): Promise<Study> {
+        return this.http.get(AppUtils.BACKEND_API_STUDY_URL + '/' + id)
+            .toPromise()
+            .then(res => res.json() as Study)
+            .catch((error) => {
+                console.error('Error while getting study', error);
+                return Promise.reject(error.message || error);
+        });
+    }
+
+    update(id: number, study: Study): Observable<Study> {
+        return this.http.put(AppUtils.BACKEND_API_STUDY_URL + '/' + id, JSON.stringify(study))
+            .map(response => response.json() as Study)
+            .catch(this.handleErrorService.handleError);
     }
 }

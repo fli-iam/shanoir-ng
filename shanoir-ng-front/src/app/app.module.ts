@@ -46,7 +46,8 @@ import { ManufacturerService } from './acqEquip/shared/manuf.service';
 import { MenuItemComponent }   from './shared/dropdown-menu/menu-item/menu-item.component';
 import { NavbarComponent }   from './shared/navbar/navbar.component';
 import { RoleService } from './roles/role.service';
-import { StudyService }   from './studies/shared/study.service';
+import { StudyListComponent }   from './studies/list/study-list.component';
+import { StudyService } from './studies/shared/study.service';
 import { StudyTreeComponent }   from './studies/tree/study.tree.component';
 import { TableComponent} from "./shared/table/table.component";
 import { ToolTipComponent }   from './shared/toolTip/toolTip.component';
@@ -97,6 +98,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         ModalComponent,
         MenuItemComponent,
         NavbarComponent,
+        StudyListComponent,
         StudyTreeComponent,
         TableComponent,
         TreeNodeComponent,

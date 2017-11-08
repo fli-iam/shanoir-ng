@@ -7,6 +7,26 @@ produces:
   - application/json
 paths:
   /study:
+    get:
+      operationId: findStudies
+      description: 'If exists, returns the studies that the user is allowed to see'
+      responses:
+        '200':
+          description: found studies
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Study'
+        '204':
+          description: no study found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
     post:
       operationId: saveNewStudy
       description: Saves a new study
@@ -93,46 +113,6 @@ paths:
       responses:
         '204':
           description: study deleted
-        '401':
-          description: unauthorized
-        '403':
-          description: forbidden
-        '404':
-          description: no study found
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-  /study/all:
-    get:
-      operationId: findStudies
-      description: Returns all the studies
-      responses:
-        '200':
-          description: found studies
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Study'
-        '204':
-          description: no study found
-        '401':
-          description: unauthorized
-        '403':
-          description: forbidden
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-  /study/list:
-    get:
-      operationId: findStudiesByUserId
-      description: 'If exists, returns the studies that the user is allowed to see'
-      responses:
-        '200':
-          description: found studies
-          schema:
-            $ref: '#/definitions/Study'
         '401':
           description: unauthorized
         '403':
