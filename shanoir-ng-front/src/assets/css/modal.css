@@ -106,7 +106,7 @@
 }
 @media (min-width: 768px) {
   .modal-dialog {
-    width: fit-content;
+    width: 600px;
     margin: 30px auto;
   }
   .modal-content {
@@ -121,4 +121,18 @@
   .modal-lg {
     width: 900px;
   }
+}
+
+/* Resize modal depending on content (.modal .modal-dialog) */
+#acqEqptModal {
+  width: 624px;
+}
+#manufModal {
+  width: 447px;
+}
+#manufModelModal {
+  width: 586px;
+}
+#papayaModal {
+  width: 800px;
 }

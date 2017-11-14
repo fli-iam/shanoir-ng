@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.exception.ShanoirSubjectException;
+import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,10 +49,16 @@ public class SubjectApiControllerTest {
 	@MockBean
 	private SubjectService subjectServiceMock;
 
+	@MockBean
+	private SubjectMapper subjectMapperMock;
+
 	@Before
 	public void setup() throws ShanoirSubjectException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
+		given(subjectMapperMock.subjectsToSubjectDTOs(Mockito.anyListOf(Subject.class)))
+		.willReturn(Arrays.asList(new SubjectDTO()));
+		
 		doNothing().when(subjectServiceMock).deleteById(1L);
 		given(subjectServiceMock.findAll()).willReturn(Arrays.asList(new Subject()));
 		given(subjectServiceMock.findById(1L)).willReturn(new Subject());

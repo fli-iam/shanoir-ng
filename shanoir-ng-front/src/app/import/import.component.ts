@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Observable } from 'rxjs/Rx';
 
@@ -8,6 +8,10 @@ import { slideDown } from '../shared/animations/animations';
 import { PatientsDicom, PatientDicom, SerieDicom } from "./dicom.data.model";
 import { ModalComponent } from '../shared/utils/modal.component';
 import * as AppUtils from '../utils/app.utils';
+import { Study } from '../studies/shared/study.model';
+import { StudyService } from '../studies/shared/study.service';
+import { StudyCard } from '../studies/shared/studycard.model';
+import { Subject } from '../subjects/shared/subject.model';
 declare var papaya: any;
 
 @Component({
@@ -17,9 +21,8 @@ declare var papaya: any;
     animations: [slideDown]
 })
 
-export class ImportComponent{
+export class ImportComponent implements OnInit {
     @ViewChild('papayaModal') papayaModal: ModalComponent;
-    private importForm: FormGroup;
     private patients: PatientDicom[];
     private patientDicom: PatientDicom;
     
@@ -28,7 +31,7 @@ export class ImportComponent{
     private subjectMode: "single" | "group" = "single";
     private subject;
     private archive;
-    private serieSelected: boolean = false;
+    private selectedSeries: SerieDicom[] = [];
     
     /* Display variables */
     private step: number = 1;
@@ -52,17 +55,31 @@ export class ImportComponent{
     private tab_upload_open: boolean = true;
     private tab_series_open: boolean = true;
     
-    private subjects = [
-        { id: 1, name: "ABVH3548" },
-        { id: 2, name: "ABVH3548" },
-        { id: 3, name: "ABVH6874" },
-        { id: 4, name: "ABVH3548" },
-        { id: 5, name: "ABVH9874" },
-        { id: 6, name: "ABVH3548" }
-    ];
+    public importForm: FormGroup;
+    private studies: Study[];
+    private study: Study;
+    private studycards: StudyCard[];
+    private subjects: Subject[];    
     
-    
-    constructor(private fb: FormBuilder, private importService: ImportService) {
+    constructor(private fb: FormBuilder, private importService: ImportService,
+        private studyService: StudyService) {
+    }
+
+    ngOnInit(): void {
+        this.findStudiesWithStudyCardsByUserId();
+        this.buildForm();
+    }
+
+    findStudiesWithStudyCardsByUserId(): void {
+        this.studyService
+            .findStudiesWithStudyCardsByUserId()
+            .then(studies => {
+                this.studies = studies;
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting study list by user!");
+            });
     }
     
     closeEditSubject(subject: any) {
@@ -76,35 +93,36 @@ export class ImportComponent{
         this.createUser = false;
     }
     
-    // buildForm(): void {
-        //     this.importForm = this.fb.group({
-            //         // 'fu': [this.importForm.fu, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]]
-            //     });
+    buildForm(): void {
+        this.importForm = this.fb.group({
+            // 'study': [this.study, Validators.required]
+            // 'fu': [this.importForm.fu, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]]
+        });
+    
+        this.importForm.valueChanges
+            .subscribe(data => this.onValueChanged(data));
+        this.onValueChanged(); // (re)set validation messages now
+    }
+        
+    onValueChanged(data?: any) {
+        if (!this.importForm) { return; }
+        const form = this.importForm;
+        for (const field in this.formErrors) {
+                // clear previous error message (if any)
+                this.formErrors[field] = '';
+            const control = form.get(field);
+            if (control && control.dirty && !control.valid) {
+                for (const key in control.errors) {
+                        this.formErrors[field] += key;
+                }
+            }
+        }
+    }
+    
+    formErrors = {
+        // 'study': '',
+    };
             
-            //     this.importForm.valueChanges
-            //         .subscribe(data => this.onValueChanged(data));
-            //     this.onValueChanged(); // (re)set validation messages now
-            // }
-            
-            // onValueChanged(data?: any) {
-                //     if (!this.importForm) { return; }
-                //     const form = this.importForm;
-                //     for (const field in this.formErrors) {
-                    //         // clear previous error message (if any)
-                    //         this.formErrors[field] = '';
-    //         const control = form.get(field);
-    //         if (control && control.dirty && !control.valid) {
-        //             for (const key in control.errors) {
-            //                 this.formErrors[field] += key;
-            //             }
-            //         }
-            //     }
-            // }
-            
-            // formErrors = {
-                //     'fu': '',
-                // };
-                
     initPapaya(serie: SerieDicom) {
         var params = [];
         let imagesList: string[] = [];
@@ -157,15 +175,29 @@ export class ImportComponent{
     }
 
     selectNode(nodeParams: any) {
-        console.log(nodeParams);
-    }
-
-    isDicomSerieSelected(): void {
-        console.log();
+        console.log("nodeParams: ", nodeParams);
+        if (nodeParams.seriesInstanceUID) {
+            this.selectedSeries.push(nodeParams);
+        } else if (nodeParams.studyInstanceUID) {
+            this.selectedSeries.push(nodeParams.series);
+        }
+        console.log("final selected series: ", this.selectedSeries);
     }
 
     selectDicomSeries(): void {
+        this.importService.selectSeries(this.selectedSeries);
+    }
 
+    onSelectStudy(study: Study) {
+        this.studycards = study.studyCards;
+        this.studyService
+            .findSubjectsByStudyId(study.id)
+            .then(subjects => this.subjects = subjects)
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting subject list by study id!");
+            });
+        this.buildForm();
     }
 
     startProgressTest() {

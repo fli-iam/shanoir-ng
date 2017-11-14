@@ -1,12 +1,13 @@
-import { Component, ViewContainerRef } from '@angular/core';
+import { Component, ViewChild, ViewContainerRef } from '@angular/core';
 import { MdDialog, MdDialogConfig, MdDialogRef } from '@angular/material';
 
-import { ConfirmDialogComponent } from "../../shared/utils/confirm.dialog.component";
-import { ConfirmDialogService } from "../../shared/utils/confirm.dialog.service";
-import { TableComponent } from "../../shared/table/table.component";
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
+import { ConfirmDialogComponent } from "../../shared/utils/confirm.dialog.component";
+import { ConfirmDialogService } from "../../shared/utils/confirm.dialog.service";
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { ModalComponent } from '../../shared/utils/modal.component';
+import { TableComponent } from "../../shared/table/table.component";
 
 @Component({
     selector: 'center-list',
@@ -15,18 +16,19 @@ import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 })
 
 export class CenterListComponent {
+    @ViewChild('acqEqptModal') acqEqptModal: ModalComponent;
     public centers: Center[];
+    public createAcqEquip = false;
     public columnDefs: any[];
     public customActionDefs: any[];
-    public rowClickAction: Object;
     public deletionInternalError: boolean = false;
     public isLinkedWithEqpts: boolean = false;
     public isLinkedWithStudies: boolean = false;
     public loading: boolean = false;
-    public createAcqEquip = false;
+    public rowClickAction: Object;
     public visible = false;
     private visibleAnimate = false;
-
+    
     constructor(private centerService: CenterService, private confirmDialogService: ConfirmDialogService,
         private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
         this.getCenters();
@@ -136,13 +138,11 @@ export class CenterListComponent {
     }
 
     openCreateAcqEquip = () => {
-        this.createAcqEquip = true;
-        this.show();
+        this.acqEqptModal.show();
     }
 
     closePopin() {
-        this.createAcqEquip = false;
-        this.hide();
+        this.acqEqptModal.hide();
     }
 
     public show(): void {

@@ -60,8 +60,6 @@ public class SubjectServiceImpl implements SubjectService {
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
 
-	private Object rel;
-	
 	@Autowired
 	private RestTemplate restTemplate;
 	

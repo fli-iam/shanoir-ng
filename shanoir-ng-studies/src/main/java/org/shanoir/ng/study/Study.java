@@ -11,12 +11,12 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
@@ -26,10 +26,15 @@ import org.shanoir.ng.subject.SubjectStudy;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+/**
+ * Study.
+ * 
+ * @author msimon
+ *
+ */
 @Entity
-@Table(name = "study")
 @JsonPropertyOrder({ "_links", "id", "name" })
-@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
+@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class Study extends HalEntity {
 
 	/**
@@ -51,6 +56,16 @@ public class Study extends HalEntity {
 	/** End date. */
 	private Date endDate;
 
+	/** List of the examinations related to this study. */
+	@ElementCollection
+	@CollectionTable(name = "study_examination")
+	@Column(name = "examination_id")
+	private List<Long> examinationIds;
+
+	/** Associated experimental groups of subjects. */
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
+	private List<ExperimentalGroupOfSubjects> experimentalGroupOfSubjectsList;
+
 	/** The is mono center. */
 	@NotNull
 	private boolean monoCenter;
@@ -60,6 +75,12 @@ public class Study extends HalEntity {
 	@Unique
 	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
 	private String name;
+
+	/** List of protocol files directly attached to the study. */
+	@ElementCollection
+	@CollectionTable(name = "protocole_file_path")
+	@Column(name = "path")
+	private List<String> protocolFilePathList;
 
 	/** Start date. */
 	private Date startDate;
@@ -73,21 +94,21 @@ public class Study extends HalEntity {
 	@NotNull
 	private Integer studyStatus;
 
-	/** Relations between the subjects and the studies. */
-	@JsonIgnore
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private List<SubjectStudy> subjectStudyList;
-
 	/** Relations between the investigators, the centers and the studies. */
 	@NotEmpty
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<StudyCenter> studyCenterList;
 
 	private Integer studyType;
-	
+
 	/** Users associated to the research study. */
 	@OneToMany(mappedBy = "studyId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private List<StudyUser> studyUsers;
+	private List<StudyUser> studyUserList;
+
+	/** Relations between the subjects and the studies. */
+	@JsonIgnore
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<SubjectStudy> subjectStudyList;
 
 	/** Is visible by default. */
 	private boolean visibleByDefault;
@@ -164,6 +185,36 @@ public class Study extends HalEntity {
 	}
 
 	/**
+	 * @return the examinationIds
+	 */
+	public List<Long> getExaminationIds() {
+		return examinationIds;
+	}
+
+	/**
+	 * @param examinationIds
+	 *            the examinationIds to set
+	 */
+	public void setExaminationIds(List<Long> examinationIds) {
+		this.examinationIds = examinationIds;
+	}
+
+	/**
+	 * @return the experimentalGroupOfSubjectsList
+	 */
+	public List<ExperimentalGroupOfSubjects> getExperimentalGroupOfSubjectsList() {
+		return experimentalGroupOfSubjectsList;
+	}
+
+	/**
+	 * @param experimentalGroupOfSubjectsList
+	 *            the experimentalGroupOfSubjectsList to set
+	 */
+	public void setExperimentalGroupOfSubjectsList(List<ExperimentalGroupOfSubjects> experimentalGroupOfSubjectsList) {
+		this.experimentalGroupOfSubjectsList = experimentalGroupOfSubjectsList;
+	}
+
+	/**
 	 * @return the monoCenter
 	 */
 	public boolean isMonoCenter() {
@@ -191,6 +242,21 @@ public class Study extends HalEntity {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the protocolFilePathList
+	 */
+	public List<String> getProtocolFilePathList() {
+		return protocolFilePathList;
+	}
+
+	/**
+	 * @param protocolFilePathList
+	 *            the protocolFilePathList to set
+	 */
+	public void setProtocolFilePathList(List<String> protocolFilePathList) {
+		this.protocolFilePathList = protocolFilePathList;
 	}
 
 	/**
@@ -265,7 +331,8 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @param studyCenterList the studyCenterList to set
+	 * @param studyCenterList
+	 *            the studyCenterList to set
 	 */
 	public void setStudyCenterList(List<StudyCenter> studyCenterList) {
 		this.studyCenterList = studyCenterList;
@@ -277,7 +344,7 @@ public class Study extends HalEntity {
 	public StudyType getStudyType() {
 		return StudyType.getType(studyType);
 	}
-	
+
 	/**
 	 * @param studyType
 	 *            the studyType to set
@@ -289,20 +356,20 @@ public class Study extends HalEntity {
 			this.studyType = studyType.getId();
 		}
 	}
-	
+
 	/**
-	 * @return the studyUsers
+	 * @return the studyUserList
 	 */
-	public List<StudyUser> getStudyUsers() {
-		return studyUsers;
+	public List<StudyUser> getStudyUserList() {
+		return studyUserList;
 	}
 
 	/**
-	 * @param studyUsers
-	 *            the studyUsers to set
+	 * @param studyUserList
+	 *            the studyUserList to set
 	 */
-	public void setStudyUsers(List<StudyUser> studyUsers) {
-		this.studyUsers = studyUsers;
+	public void setStudyUserList(List<StudyUser> studyUserList) {
+		this.studyUserList = studyUserList;
 	}
 
 	/**

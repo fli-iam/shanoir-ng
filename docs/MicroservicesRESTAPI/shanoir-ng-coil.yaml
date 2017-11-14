@@ -1,0 +1,206 @@
+swagger: '2.0'
+info:
+  version: 0.0.1
+  title: Shanoir NG Coils Microservice
+  description: Microservice API for Shanoir NG coil managment
+produces:
+  - application/json
+paths:
+  /coil:
+    get:
+      operationId: findCoils
+      description: Returns all the coils
+      responses:
+        '200':
+          description: found coils
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CoilDTO'
+        '204':
+          description: no coil found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      operationId: saveNewCoil
+      description: Saves a new coil
+      consumes:
+        - application/json
+      parameters:
+        - name: coil
+          in: body
+          description: coil to create
+          required: true
+          schema:
+            $ref: '#/definitions/Coil'
+      responses:
+        '200':
+          description: created coil
+          schema:
+            $ref: '#/definitions/CoilDTO'
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/coil/{coilId}':
+    get:
+      operationId: findCoilById
+      description: 'If exists, returns the coil corresponding to the given id'
+      parameters:
+        - $ref: '#/parameters/coilId'
+      responses:
+        '200':
+          description: found coil
+          schema:
+            $ref: '#/definitions/CoilDTO'
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no coil found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      operationId: updateCoil
+      description: Updates a coil
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/coilId'
+        - name: coil
+          in: body
+          description: coil to update
+          required: true
+          schema:
+            $ref: '#/definitions/Coil'
+      responses:
+        '204':
+          description: coil updated
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    delete:
+      operationId: deleteCoil
+      description: Deletes a coil
+      parameters:
+        - $ref: '#/parameters/coilId'
+      responses:
+        '204':
+          description: coil deleted
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no coil found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+parameters:
+  coilId:
+    name: coilId
+    in: path
+    description: id of the coil
+    required: true
+    type: integer
+    format: int64
+definitions:
+  Center:
+    type: object
+  CenterNameDTO:
+    type: object
+  Coil:
+    type: object
+    required:
+      - id
+      - center
+      - name
+    properties:
+      id:
+        type: integer
+        format: int64
+      center:
+        $ref: '#/definitions/Center'
+      coilType:
+        type: string
+        enum:
+          - BODY
+          - HEAD
+          - SURFACE
+          - MULTICOIL
+          - EXTREMITY
+      manufacturerMrModel:
+        $ref: '#/definitions/ManufacturerModel'
+      name:
+        type: string
+      numberOfChannels:
+        type: integer
+        format: int64
+      serialNumber:
+        type: string
+  CoilDTO:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      center:
+        $ref: '#/definitions/CenterNameDTO'
+      coilType:
+        type: string
+        enum:
+          - BODY
+          - HEAD
+          - SURFACE
+          - MULTICOIL
+          - EXTREMITY
+      manufacturerMrModel:
+        $ref: '#/definitions/ManufacturerModelDTO'
+      name:
+        type: string
+      numberOfChannels:
+        type: integer
+        format: int64
+      serialNumber:
+        type: string
+  ManufacturerModel:
+    type: object
+  ManufacturerModelDTO:
+    type: object
+  ErrorModel:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      details:
+        type: object
+      message:
+        type: string

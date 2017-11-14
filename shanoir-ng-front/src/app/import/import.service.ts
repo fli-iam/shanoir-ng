@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Http, Response } from "@angular/http";
 
-import { PatientsDicom } from './dicom.data.model';
+import { PatientsDicom, SerieDicom } from './dicom.data.model';
 import * as AppUtils from '../utils/app.utils';
 
 @Injectable()
@@ -21,8 +21,9 @@ export class ImportService {
         });
     }
 
-    selectSeries(selectedPatients: PatientsDicom): void {
-        this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_SELECT_SERIES_URL, selectedPatients)
+    selectSeries(selectedSeries: SerieDicom[]): void {
+        this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_SELECT_SERIES_URL, JSON.stringify(selectedSeries))
+            .toPromise()
             .catch((error) => {
                 console.error('Error while sending select series in json fromat', error);
                 return Promise.reject(error.message || error);

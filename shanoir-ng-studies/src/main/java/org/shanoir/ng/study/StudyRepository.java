@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface StudyRepository extends CrudRepository<Study, Long> {
+public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepositoryCustom {
 
 	/**
 	 * Get all studies
@@ -22,5 +22,5 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 *            user id.
 	 * @return list of studies.
 	 */
-	List<Study> findByStudyUsers_UserId(Long userId);
+	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);
 }

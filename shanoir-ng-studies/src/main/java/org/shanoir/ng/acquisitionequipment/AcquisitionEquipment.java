@@ -34,6 +34,7 @@ public class AcquisitionEquipment extends HalEntity {
 
 	@ManyToOne
 	@NotNull
+	@JoinColumn(name = "center_id")
 	private Center center;
 
 	@ManyToOne

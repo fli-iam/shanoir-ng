@@ -1,9 +1,0 @@
-.top { height: 150px; }
-    .logo { float: left; width: 150px; height: 100%; margin-right: 20px; display: flex; }
-        .logo img { max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; margin: auto; }
-    .resume { float: left; width: calc(100% - 170px); height: 100%; }
-        .resume h1 { height: 26px; margin: 0; }
-        .resume .resume-content { height: auto; }
-        .resume-content.overflow-hidden { height: 124px !important; overflow: hidden;  }
-        .elipsis {  }
-    .more { cursor: pointer; text-align: right; }

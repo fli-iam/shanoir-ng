@@ -26,13 +26,21 @@ public class StudyCenter extends AbstractGenericItem {
 
 	/** The study. */
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "studyId")
+	@JoinColumn(name = "study_id")
 	private Study study;
 
 	/** Center. */
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "centerId")
+	@JoinColumn(name = "center_id")
 	private Center center;
+
+	/** Investigator. */
+//	@ManyToOne
+//	@JoinColumn(name = "investigator_id")
+//	private Investigator investigator;
+
+	/** Investigator function in the study */
+//	private InvestigatorFunction investigatorFunction;
 
 	/**
 	 * @return the study

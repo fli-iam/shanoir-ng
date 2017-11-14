@@ -2,12 +2,13 @@ package org.shanoir.ng.manufacturermodel;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.PostLoad;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.Length;
 import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.validation.ManufactureModelTypeCheck;
+import org.shanoir.ng.shared.hateoas.Links;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -40,6 +41,14 @@ public class ManufacturerModel extends HalEntity {
 	@NotNull
 	@Length(min = 2, max = 200)
 	private String name;
+
+	/**
+	 * Init HATEOAS links
+	 */
+	@PostLoad
+	public void initLinks() {
+		this.addLink(Links.REL_SELF, "manufacturermodel/" + getId());
+	}
 
 	/**
 	 * @return the datasetModalityType

@@ -31,7 +31,7 @@ export class SerieDicom {
     isCompressed: boolean;
     nonImages: any[];
     nonImagesNumber: number;
-    images: ImageDicom[];
+    images: string[];
     imagesNumber: number;
 }
 
@@ -39,9 +39,4 @@ export class EquipmentDicom {
     manufacturer: string;
     manufacturerModelName: string;
     deviceSerialNumber: string;
-}
-
-export class ImageDicom {
-    imageId: number;
-    imageFilePath: string;
 }

@@ -1,6 +1,7 @@
 package org.shanoir.ng.utils;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
@@ -20,6 +21,23 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public final class KeycloakUtil {
 
 	private static final String USER_ID_TOKEN_ATT = "userId";
+
+	/**
+	 * Get current user roles from Keycloak token.
+	 * 
+	 * @return user roles.
+	 * @throws ShanoirStudiesException
+	 */
+	public static Set<String> getTokenRoles() throws ShanoirStudiesException {
+		final KeycloakSecurityContext context = getKeycloakSecurityContext();
+
+		final AccessToken accessToken = context.getToken();
+		if (accessToken == null) {
+			throw new ShanoirStudiesException("Token not found");
+		}
+		
+		return accessToken.getRealmAccess().getRoles();
+	}
 
 	/**
 	 * Get current user id from Keycloak token.

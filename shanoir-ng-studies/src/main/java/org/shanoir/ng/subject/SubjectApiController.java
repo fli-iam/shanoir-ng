@@ -9,6 +9,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirSubjectException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
+import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,9 @@ public class SubjectApiController implements SubjectApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectApiController.class);
 
+	@Autowired
+	private SubjectMapper subjectMapper;
+	
 	@Autowired
 	private SubjectService subjectService;
 
@@ -197,14 +201,14 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<List<Subject>> findSubjectsByStudyId(
+	public ResponseEntity<List<SubjectDTO>> findSubjectsByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 
 		final List<Subject> subjects = subjectService.findAllSubjectsOfStudy(studyId);
 		if (subjects.isEmpty()) {
-			return new ResponseEntity<List<Subject>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<List<SubjectDTO>>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<List<Subject>>(subjects, HttpStatus.OK);
+		return new ResponseEntity<List<SubjectDTO>>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 
 	}
 

@@ -1,7 +1,6 @@
 <h1>Import from DICOM</h1>
-<form >
-    
-    <app-modal #papayaModal>
+<form class="max-content" novalidate>
+    <app-modal modalDialogId="papayaModal" #papayaModal>
         <div class="app-modal-body">
             <div id="papaya" style="width:800px; height:600px;">
                 <div class="papaya" data-params="params"></div> 
@@ -140,12 +139,12 @@
                 </div>
             </div>
             <div class="commands">
-                 <button i18n="Import|NextButton label" [disabled]="!isDicomSerieSelected()" (click)="selectDicomSeries()">Next</button>
+                 <button i18n="Import|NextButton label" [disabled]="!selectedSeries?.length > 0" (click)="selectDicomSeries()">Next</button>
             </div>
         </fieldset>
     </div>
 
-    <div class="step-block" [class.active]="serieSelected">
+    <div class="step-block" [class.active]="true">
         <div class="header command-zone">4. Set the clinical context</div>
         <fieldset class="step responsive">
             <ol>
@@ -156,9 +155,8 @@
                 <li class="required">
                     <label class="required-label">Select an existing research study</label> 
                     <span class="right-col">
-                        <select>
-                            <option>MS Challenge</option>
-                            <option>PET Challenge</option>
+                        <select name="study" required [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)">
+                            <option *ngFor="let study of studies" [ngValue]="study">{{study.name}}</option>
                         </select>
                         <button disabled>details</button>
                     </span>
@@ -166,12 +164,11 @@
                 <li class="required">
                     <label class="required-label">Select an existing study card</label> 
                     <span class="right-col">
-                        <select>
-                            <option>MS Challenge Testing Rennes (SIEMENS - Verio 3.0T (MR) 40296 - CHU Rennes)</option>
-                            <option>MS Challenge Testing Bordeaux (GE Medical Systems - DISCOVERY MR750w 3.0T (MR) 00000000M4166994 - CHU Bordeaux)</option>
+                        <select name="studycard" required [(ngModel)]="studycard">
+                            <option *ngFor="let studycard of studycards" [ngValue]="studycard">{{studycard.name}}</option>
                         </select>
-                        <button>details</button>
-                        <button>edit</button>
+                        <button disabled>details</button>
+                        <button disabled>edit</button>
                     </span>
                 </li>
                 <li class="required">
@@ -195,9 +192,8 @@
                 <li class="required" *ngIf="subjectMode == 'single'">
                     <label class="required-label">Select a subject</label> 
                     <span class="right-col">
-                        <select [(ngModel)]="subject" name="subject">
-                            <option [ngValue]="" disabled selected></option>
-                            <option *ngFor="let subject of subjects" [ngValue]="subject.id" [selected]="subject.selected">{{subject.name}}</option>
+                        <select name="subject" required [(ngModel)]="subject">
+                            <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
                         </select>
                         <button (click)="createUser = true" [disabled]="subject == ''">details</button>
                         <button (click)="createUser = true"><img src="/assets/images/icons/add-1.png" />create a subject</button>
@@ -212,14 +208,14 @@
                             <option value="2">STCD4789????????????</option>
                         </select>
                         <button disabled>details</button>
-                        <button><img src="/assets/images/icons/add-1.png" />create a group of subjects</button>
+                        <button disabled><img src="/assets/images/icons/add-1.png" />create a group of subjects</button>
                     </span>
                 </li>
                 <ng-template [ngIf]="subjectMode == 'single' && subject != undefined && subject != null && subject != ''">
                     <li class="">
                         <label class="">Common name</label> 
                         <span class="right-col">
-                            <input type="text"/>
+                            <input type="text" [(ngModel)]="subject.name"/>
                         </span>
                     </li>
                     <li class=""> 

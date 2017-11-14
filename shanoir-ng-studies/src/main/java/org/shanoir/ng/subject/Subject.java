@@ -14,7 +14,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
@@ -42,8 +41,7 @@ public class Subject extends HalEntity {
 	/** Relations between the subjects and the studies. */
 
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY)
-	@Cascade({ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-	private List<SubjectStudy> subjectStudyList = new ArrayList<SubjectStudy>(0);
+	private List<SubjectStudy> subjectStudyList;
 
 	private String identifier;
 
@@ -63,8 +61,6 @@ public class Subject extends HalEntity {
 
 	/** Personal Comments on this subject. */
 	@OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
-	// @Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-	// org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
 	private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<UserPersonalCommentSubject>(0);
 
 	/**

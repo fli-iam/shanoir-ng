@@ -1,49 +1,28 @@
 package org.shanoir.ng.subject;
 
-import org.mapstruct.DecoratedWith;
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectStudyDTO;
 
-@Mapper(componentModel= "spring",uses={})
-@DecoratedWith(SubjectDecorator.class)
+@Mapper(componentModel= "spring")
 public interface SubjectMapper {
 
-  //  SubjectMapper INSTANCE = Mappers.getMapper(SubjectMapper.class);
+    Subject subjectDTOToSubject(SubjectDTO subjectDTO);
 
-   // @Mapping(source = "subject", target = "subjectDTO")
-   // @Mappings({
-   @Mappings({
-   @Mapping(target = "subjectStudyList",ignore=true),
-   @Mapping(target = "imagedObjectCategory",ignore=true),
-   @Mapping(target="identifier", source="subjectIdentifier")})
-   Subject subjectDTOToSubject(SubjectDTO subjectDTO);
-    //
-    // //@InheritInverseConfiguration
-    // @Mappings({
-    // @Mapping(source = "refSex.labelName", target = "sex"),
-    // @Mapping(target = "subjectStudyList",ignore=true)})
-    // SubjectDTO subjectToSubjectDTO(Subject subject);
+    SubjectDTO subjectToSubjectDTO(Subject subject);
+   
+    List<SubjectDTO> subjectsToSubjectDTOs(List<Subject> subjects);
 
-    //
-    // @Mappings({
-    // @Mapping(source = "studyId", target = "study.id")})
-    @Mappings({
-    @Mapping(target = "subjectType",ignore=true)})
-    SubjectStudy subjectStudyDTOToSubjectStudy(SubjectStudyDTO subjectStudyDTO);
-
-    // @Mappings({
-    // @Mapping(source = "study.id", target = "studyId"),
-    // @Mapping(source="refSubjectType.labelName", target= "subjectType")})
-    // SubjectStudyDTO SubjectStudyTosubjectStudyDTO(SubjectStudy subjectStudy);
-    //
-
-//    List<RelSubjectStudy> subjectStudyDTOListToRelSubjectStudyList(List<SubjectStudyDTO> subjectStudyDTO);
-//
-//    List<SubjectStudyDTO> relSubjectStudyListToSubjectStudyDTOList(List<RelSubjectStudy> subjectStudyList);
-//
-//
+	@Mappings({
+	@Mapping(target = "subjectType",ignore=true)})
+	SubjectStudy subjectStudyDTOToSubjectStudy(SubjectStudyDTO subjectStudyDTO);
+	
+	SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy);
+	
+	List<SubjectStudyDTO> subjectStudyToSubjectStudyDTO(List<SubjectStudy> subjectStudy);
 
 }

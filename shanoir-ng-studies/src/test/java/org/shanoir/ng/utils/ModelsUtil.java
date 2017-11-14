@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import org.shanoir.ng.acquisitionequipment.AcquisitionEquipment;
 import org.shanoir.ng.center.Center;
+import org.shanoir.ng.coil.Coil;
+import org.shanoir.ng.coil.CoilType;
 import org.shanoir.ng.manufacturermodel.DatasetModalityType;
 import org.shanoir.ng.manufacturermodel.Manufacturer;
 import org.shanoir.ng.manufacturermodel.ManufacturerModel;
@@ -23,6 +25,9 @@ public final class ModelsUtil {
 
 	// Center data
 	public static final String CENTER_NAME = "center";
+
+	// Coil data
+	public static final String COIL_NAME = "coil";
 
 	// Manufacturer data
 	public static final String MANUFACTURER_NAME = "manufacturer";
@@ -47,6 +52,20 @@ public final class ModelsUtil {
 		center.setName(CENTER_NAME);
 		center.setStudyCenterList(new ArrayList<>());
 		return center;
+	}
+
+	/**
+	 * Create a coil.
+	 * 
+	 * @return coil.
+	 */
+	public static Coil createCoil() {
+		final Coil coil = new Coil();
+		coil.setCenter(createCenter());
+		coil.setCoilType(CoilType.BODY);
+		coil.setManufacturerModel(createManufacturerModel());
+		coil.setName(COIL_NAME);
+		return coil;
 	}
 
 	/**

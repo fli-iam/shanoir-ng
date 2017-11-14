@@ -4,9 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
+import java.util.Collection;
+
+import javax.validation.Valid;
 
 import org.shanoir.ng.importer.dicom.DicomDirToJsonReader;
 import org.shanoir.ng.importer.dicom.DicomFileAnalyzer;
+import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.Utils;
@@ -17,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -62,6 +67,19 @@ public class ImporterApiController implements ImporterApi {
 		} catch (IOException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+		}
+    }
+    
+    @Override
+    public ResponseEntity<Void> selectSeries(@ApiParam(value = "selected series" ,required=true )  @Valid @RequestBody final Collection<Serie> selectedSeries) 
+    		throws RestServiceException {
+    	try {
+    		// TODO: upload selected series to PACS?
+    		System.out.println("selected series: " + selectedSeries.toString());
+    		return new ResponseEntity<Void>(HttpStatus.OK);
+    	} catch (Exception e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving selected series.", null));
 		}
     }
 

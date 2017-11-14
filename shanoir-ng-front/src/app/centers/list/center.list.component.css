@@ -4,11 +4,3 @@
 .CenterListComponent { float: left; overflow: auto; }
 .title { margin-bottom: 15px; }
 
-.modal-body-centerList {
-  position: relative;
-  padding: 5px;
-}
-
-.modal {
-    background: var(--color-overlay);
-}
