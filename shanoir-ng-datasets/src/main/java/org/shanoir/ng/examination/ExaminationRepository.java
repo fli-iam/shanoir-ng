@@ -1,5 +1,7 @@
 package org.shanoir.ng.examination;
 
+import java.util.List;
+
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -8,5 +10,12 @@ import org.springframework.data.repository.CrudRepository;
  * @author ifakhfakh
  */
 public interface ExaminationRepository extends CrudRepository<Examination, Long>, ExaminationRepositoryCustom {
+
+	/**
+	 * @param subjectId
+	 * @return
+	 * @author yyao
+	 */
+	List<Examination> findBySubjectId(Long subjectId);
 
 }

@@ -50,6 +50,11 @@ public class ExaminationServiceImpl implements ExaminationService {
 	public List<Examination> findBy(final String fieldName, final Object value) {
 		return examinationRepository.findBy(fieldName, value);
 	}
+	
+	@Override
+	public List<Examination> findBySubjectId(final Long subjectId) {
+		return examinationRepository.findBySubjectId(subjectId);
+	}
 
 	@Override
 	public Examination findById(final Long id) {

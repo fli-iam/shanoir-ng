@@ -55,6 +55,18 @@ public interface ExaminationApi {
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<Examination>> findExaminations();
 
+    @ApiOperation(value = "", notes = "Returns the list of examinations by subject id", response = Examination.class, responseContainer = "List", tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "found examinations", response = Examination.class, responseContainer = "List"),
+        @ApiResponse(code = 204, message = "no examination found", response = Void.class),
+        @ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+        @ApiResponse(code = 403, message = "forbidden", response = Void.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @RequestMapping(value = "/list/{subjectId}",
+        produces = { "application/json" }, 
+        method = RequestMethod.GET)
+    ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@ApiParam(value = "id of the subject",required=true ) @PathVariable("subjectId") Long subjectId);
+	
 	@ApiOperation(value = "", notes = "Saves a new examination", response = Examination.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created examination", response = Examination.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),

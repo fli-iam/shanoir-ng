@@ -93,6 +93,9 @@ public class Examination extends HalEntity {
 	private Long studyId;
 
 	/** Subject. Can be null only if experimentalGroupOfSubjects is not null. */
+//	@OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = CascadeType.ALL)
+//	@ManyToOne(fetch = FetchType.LAZY)
+//	@JoinColumn(name = "SUBJECT_ID", referencedColumnName = "SUBJECT_ID", updatable = true)
 	private Long subjectId;
 
 	/**

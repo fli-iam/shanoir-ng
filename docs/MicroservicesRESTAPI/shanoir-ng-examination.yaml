@@ -124,11 +124,41 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  /examination/list/{subjectId}:
+    get:
+      operationId: findExaminationsBySubjectId
+      description: Returns the list of examinations by subject id
+      parameters:
+        - $ref: '#/parameters/subjectId'
+      responses:
+        '200':
+          description: found examinations
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Examination'
+        '204':
+          description: no examination found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
 parameters:
   examinationId:
     name: examinationId
     in: path
     description: id of the examination
+    required: true
+    type: integer
+    format: int64
+  subjectId:
+    name: subjectId
+    in: path
+    description: id of the subject
     required: true
     type: integer
     format: int64
