@@ -11,7 +11,7 @@ export class CenterService {
     constructor(private http: Http, private handleErrorService: HandleErrorService) { }
 
     getCenters(): Promise<Center[]> {
-        return this.http.get(AppUtils.BACKEND_API_CENTER_ALL_URL)
+        return this.http.get(AppUtils.BACKEND_API_CENTER_URL)
             .toPromise()
             .then(response => response.json() as Center[])
             .catch((error) => {
@@ -21,7 +21,7 @@ export class CenterService {
     }
 
     getCentersNames(): Promise<Center[]> {
-        return this.http.get(AppUtils.BACKEND_API_CENTER_ALL_NAMES_URL)
+        return this.http.get(AppUtils.BACKEND_API_CENTER_NAMES_URL)
             .toPromise()
             .then(response => response.json() as Center[])
             .catch((error) => {

@@ -6,7 +6,27 @@ info:
 produces:
   - application/json
 paths:
-  /acquisitionequipment:
+  /acquisitionequipments:
+    get:
+      operationId: findAcquisitionEquipments
+      description: Returns all the acquisition equipments
+      responses:
+        '200':
+          description: found acquisition equipments
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/AcquisitionEquipmentDTO'
+        '204':
+          description: no acquisition equipment found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
     post:
       operationId: saveNewAcquisitionEquipment
       description: Saves a new acquisition equipment
@@ -36,7 +56,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  '/acquisitionequipment/{acquisitionEquipmentId}':
+  '/acquisitionequipments/{acquisitionEquipmentId}':
     get:
       operationId: findAcquisitionEquipmentById
       description: >-
@@ -97,27 +117,6 @@ paths:
       responses:
         '200':
           description: acquisition equipment deleted
-        '204':
-          description: no acquisition equipment found
-        '401':
-          description: unauthorized
-        '403':
-          description: forbidden
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-  /acquisitionequipment/all:
-    get:
-      operationId: findAcquisitionEquipments
-      description: Returns all the acquisition equipments
-      responses:
-        '200':
-          description: found acquisition equipments
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/AcquisitionEquipmentDTO'
         '204':
           description: no acquisition equipment found
         '401':

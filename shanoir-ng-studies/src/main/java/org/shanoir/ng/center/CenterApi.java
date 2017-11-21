@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiResponses;
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-11-18T15:36:13.002Z")
 
 @Api(value = "center", description = "the center API")
-@RequestMapping("/center")
+@RequestMapping("/centers")
 public interface CenterApi {
 
 	@ApiOperation(value = "", notes = "Deletes a center", response = Void.class, tags = {})
@@ -53,7 +53,7 @@ public interface CenterApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<CenterDTO>> findCenters();
 
@@ -64,7 +64,7 @@ public interface CenterApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/allnames", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<CenterNameDTO>> findCentersNames();
 
 	@ApiOperation(value = "", notes = "Saves a new center", response = CenterDTO.class, tags = {})

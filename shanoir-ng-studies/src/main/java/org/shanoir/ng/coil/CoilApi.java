@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @Api(value = "coil", description = "the coil API")
-@RequestMapping("/coil")
+@RequestMapping("/coils")
 public interface CoilApi {
 
 	@ApiOperation(value = "", notes = "Deletes a coil", response = Void.class, tags = {})

@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiResponses;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-04-03T09:59:20.168Z")
 
 @Api(value = "acquisitionequipment", description = "the acquisitionequipment API")
-@RequestMapping("/acquisitionequipment")
+@RequestMapping("/acquisitionequipments")
 public interface AcquisitionEquipmentApi {
 
 	@ApiOperation(value = "", notes = "Deletes an acquisition equipment", response = Void.class, tags = {})
@@ -53,7 +53,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = AcquisitionEquipment.class),
 			@ApiResponse(code = 403, message = "forbidden", response = AcquisitionEquipment.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = AcquisitionEquipment.class) })
-	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments();
 
 	@ApiOperation(value = "", notes = "Saves a new acquisition equipment", response = AcquisitionEquipment.class, tags = {})
