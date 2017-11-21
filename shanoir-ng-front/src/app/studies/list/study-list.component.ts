@@ -88,7 +88,7 @@ export class StudyListComponent {
         ];
         this.rowClickAction = {
             target: "/studyDetail", getParams: function (item: any): Object {
-                return { id: item.id };
+                return { id: item.id, mode: "view" };
             }
         };
     }

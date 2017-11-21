@@ -9,10 +9,10 @@ import { TreeNodeComponent } from '../../shared/tree/tree.node.component';
 
 export class StudyTreeComponent {
 
-    public patients: Object;
+    public subjects: Object;
 
     constructor() {
-       this.patients = [
+       this.subjects = [
            {
                 name: "01016SACH",
                 examinations: [

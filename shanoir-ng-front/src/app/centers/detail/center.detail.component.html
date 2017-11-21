@@ -1,4 +1,4 @@
-<div class="content-component">
+<div class="content-component detail">
 	<form [formGroup]="centerDetailForm" class="max-content" novalidate>
 		<div class="layout left">
 			<span class="right-col" [ngSwitch]="mode">
@@ -112,7 +112,7 @@
 				</span>
 			</div>
 		</div>
-		<div class="right" *ngIf="mode=='view'">
+		<div class="layout right" *ngIf="mode=='view'">
 			<div *ngIf="center.acquisitionEquipments?.length > 0">
 				<list title="Acquisition Equipments List" [tab_open]='true' [list]='center.acquisitionEquipments'></list>
 			</div>

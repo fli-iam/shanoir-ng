@@ -15,7 +15,6 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessToken.Access;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
-import org.shanoir.ng.user.UserContext;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

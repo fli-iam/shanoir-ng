@@ -8,7 +8,7 @@ export class Study {
     endDate: Date;
     examinationIds: number[];
     id: number;
-    monoCenter;
+    monoCenter: boolean;
     name: string;
     protocolFilePathList: string[];
     startDate: Date;
