@@ -43,7 +43,7 @@ import com.google.gson.GsonBuilder;
 @AutoConfigureMockMvc(secure = false)
 public class StudyApiControllerTest {
 
-	private static final String REQUEST_PATH = "/study";
+	private static final String REQUEST_PATH = "/studies";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	private Gson gson;

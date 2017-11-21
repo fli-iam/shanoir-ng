@@ -36,8 +36,7 @@ import com.google.gson.GsonBuilder;
 @AutoConfigureMockMvc(secure = false)
 public class UserApiControllerTest {
 
-	private static final String REQUEST_PATH = "/user";
-	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH = "/users";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	private Gson gson;
@@ -89,7 +88,7 @@ public class UserApiControllerTest {
 
 	@Test
 	public void findUsersTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_ALL).accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 

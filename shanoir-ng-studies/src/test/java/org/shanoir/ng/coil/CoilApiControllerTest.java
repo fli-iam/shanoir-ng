@@ -36,7 +36,7 @@ import com.google.gson.GsonBuilder;
 @AutoConfigureMockMvc(secure = false)
 public class CoilApiControllerTest {
 
-	private static final String REQUEST_PATH = "/coil";
+	private static final String REQUEST_PATH = "/coils";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	private Gson gson;

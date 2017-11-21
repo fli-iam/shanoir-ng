@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiResponses;
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-11-18T15:36:13.002Z")
 
 @Api(value = "template", description = "the template API")
-@RequestMapping("/template")
+@RequestMapping("/templates")
 public interface TemplateApi {
 
 	@ApiOperation(value = "", notes = "Deletes a template", response = Void.class, tags = {})
@@ -50,7 +50,7 @@ public interface TemplateApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Template.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Template.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Template.class) })
-	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<Template>> findTemplates();
 
 	@ApiOperation(value = "", notes = "Saves a new template", response = Template.class, tags = {})

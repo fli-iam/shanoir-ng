@@ -27,15 +27,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("dev")
 public class RoleApiControllerTestIT extends KeycloakControllerTestIT {
 
-	private static final String REQUEST_PATH = "/role";
-	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH = "/roles";
 	
     @Autowired
     private TestRestTemplate restTemplate;
 
 	@Test
 	public void findRolesProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
@@ -43,7 +42,7 @@ public class RoleApiControllerTestIT extends KeycloakControllerTestIT {
 	public void findRolesWithLogin() {
 		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken(true));
 		
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity, String.class);
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
@@ -51,7 +50,7 @@ public class RoleApiControllerTestIT extends KeycloakControllerTestIT {
 	public void findRolesWithBadRole() {
 		HttpEntity<String> entity = new HttpEntity<String>(null, getHeadersWithToken(false));
 		
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity, String.class);
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity, String.class);
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
 	

@@ -39,8 +39,7 @@ import com.google.gson.GsonBuilder;
 @AutoConfigureMockMvc(secure = false)
 public class TemplateApiControllerTest {
 
-	private static final String REQUEST_PATH = "/template";
-	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH = "/templates";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	private Gson gson;
@@ -76,7 +75,7 @@ public class TemplateApiControllerTest {
 
 	@Test
 	public void findTemplatesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_ALL).accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
