@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @Api(value = "examination", description = "the examination API")
-@RequestMapping("/examination")
+@RequestMapping("/examinations")
 public interface ExaminationApi {
 
 	@ApiOperation(value = "", notes = "Deletes an examination", response = Void.class, tags = {})
@@ -52,7 +52,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<Examination>> findExaminations();
 
     @ApiOperation(value = "", notes = "Returns the list of examinations by subject id", response = Examination.class, responseContainer = "List", tags={  })
@@ -62,7 +62,7 @@ public interface ExaminationApi {
         @ApiResponse(code = 401, message = "unauthorized", response = Void.class),
         @ApiResponse(code = 403, message = "forbidden", response = Void.class),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @RequestMapping(value = "/list/{subjectId}",
+    @RequestMapping(value = "/subjects/{subjectId}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@ApiParam(value = "id of the subject",required=true ) @PathVariable("subjectId") Long subjectId);

@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @Api(value = "dataset", description = "the dataset API")
-@RequestMapping("/dataset")
+@RequestMapping("/datasets")
 public interface DatasetApi {
 
 	@ApiOperation(value = "", notes = "Deletes a dataset", response = Void.class, tags = {})
