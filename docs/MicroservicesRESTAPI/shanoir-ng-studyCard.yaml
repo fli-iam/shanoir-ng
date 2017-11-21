@@ -6,7 +6,27 @@ info:
 produces:
   - application/json
 paths:
-  /studycard:
+  /studycards:
+    get:
+      operationId: findStudyCards
+      description: Returns all the study Cards
+      responses:
+        '200':
+          description: found study cards
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/StudyCard'
+        '204':
+          description: no study card found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
     post:
       operationId: saveNewStudyCard
       description: Saves a new study card
@@ -36,7 +56,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  '/studycard/{studyCardId}':
+  '/studycards/{studyCardId}':
     get:
       operationId: findStudyCardById
       description: 'If exists, returns the study card corresponding to the given id'
@@ -103,28 +123,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /studycard/all:
-    get:
-      operationId: findStudyCards
-      description: Returns all the study Cards
-      responses:
-        '200':
-          description: found study cards
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/StudyCard'
-        '204':
-          description: no study card found
-        '401':
-          description: unauthorized
-        '403':
-          description: forbidden
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-  /studycard/search:
+  /studycards/search:
     post:
       operationId: searchStudyCards
       description: 'If exists, returns searched study cards'
@@ -152,7 +151,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  '/studycard/centerid/{studyCardId}':
+  '/studycards/centerid/{studyCardId}':
     get:
       operationId: searchCenterId
       description: 'If exists, returns center id'

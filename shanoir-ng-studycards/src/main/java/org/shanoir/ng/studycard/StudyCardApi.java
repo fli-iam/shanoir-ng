@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiResponses;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-29T08:41:16.372Z")
 
-@Api(value = "studyCard", description = "the studyCard API")
+@Api(value = "studyCards", description = "the studyCard API")
 @RequestMapping("/studycard")
 public interface StudyCardApi {
 
@@ -49,7 +49,7 @@ public interface StudyCardApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = StudyCard.class),
 			@ApiResponse(code = 403, message = "forbidden", response = StudyCard.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = StudyCard.class) })
-	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<StudyCard>> findStudyCards();
 
 	@ApiOperation(value = "", notes = "Saves a new study card", response = StudyCard.class, tags = {})
