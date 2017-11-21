@@ -19,8 +19,8 @@ import io.swagger.annotations.ApiResponses;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-29T08:41:16.372Z")
 
-@Api(value = "studyCards", description = "the studyCard API")
-@RequestMapping("/studycard")
+@Api(value = "studycards", description = "the studyCard API")
+@RequestMapping("/studycards")
 public interface StudyCardApi {
 
 	@ApiOperation(value = "", notes = "Deletes a study card", response = Void.class, tags = {})

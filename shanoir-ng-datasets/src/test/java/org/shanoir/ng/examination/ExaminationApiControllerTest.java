@@ -45,6 +45,9 @@ public class ExaminationApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
+	private ExaminationMapper examinationMapperMock;
+
+	@MockBean
 	private ExaminationService examinationServiceMock;
 
 	@Before
