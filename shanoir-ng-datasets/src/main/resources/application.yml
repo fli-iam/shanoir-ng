@@ -53,6 +53,9 @@ keycloak:
       - name: spring secured api
       - patterns:
         - /*
+# microservices url
+ms.url:
+  shanoir-ng-study: http://localhost:9902 #http://shanoir-ng-study/
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-dataset.log
@@ -70,7 +73,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/shanoir_ng_datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: root
-    password: 
+    password: WelcomeShanoir1
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
     data: classpath:/scripts/import.sql
@@ -88,12 +91,14 @@ spring:
     host: localhost
 server:
     port: 9906
-front.server.url: http://localhost:8080
+front.server:
+  address: http://localhost:8081/shanoir-ng/
+  url: http://localhost:8081
 #keycloak
 keycloak:
-  auth-server-url: http://localhost/auth
+  auth-server-url: http://localhost:8080/auth
   credentials:
-    secret: 3e35c819-aa43-4fd6-a8dc-9dbe75834e40
+    secret: bc6174bb-0ee8-4877-be5f-628c70e6ba8e
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-dataset.log

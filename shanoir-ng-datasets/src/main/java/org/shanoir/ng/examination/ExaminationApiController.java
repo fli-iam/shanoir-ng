@@ -36,7 +36,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<Void> deleteExamination(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) {
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) throws ShanoirDatasetException {
 		if (examinationService.findById(examinationId) == null) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
@@ -49,32 +49,37 @@ public class ExaminationApiController implements ExaminationApi {
 	}
 
 	@Override
-	public ResponseEntity<Examination> findExaminationById(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) {
-		final Examination examination = examinationService.findById(examinationId);
+	public ResponseEntity<ExaminationDTO> findExaminationById(
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) throws ShanoirDatasetException {
+		final ExaminationDTO examination = examinationService.findById(examinationId);
 		if (examination == null) {
-			return new ResponseEntity<Examination>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<ExaminationDTO>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Examination>(examination, HttpStatus.OK);
+		return new ResponseEntity<ExaminationDTO>(examination, HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<List<Examination>> findExaminations() {
+	public ResponseEntity<List<ExaminationDTO>> findExaminations() {
 		// TODO: filter by user!!!
-		final List<Examination> examinations = examinationService.findAll();
-		if (examinations.isEmpty()) {
-			return new ResponseEntity<List<Examination>>(HttpStatus.NO_CONTENT);
+		List<ExaminationDTO> examinations;
+		try {
+			examinations = examinationService.findAll();
+		} catch (ShanoirDatasetException e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<List<Examination>>(examinations, HttpStatus.OK);
+		if (examinations.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(examinations, HttpStatus.OK);
 	}
 	
 	@Override
     public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@ApiParam(value = "id of the subject",required=true ) @PathVariable("subjectId") Long subjectId) {
     	final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
 		if (examinations.isEmpty()) {
-			return new ResponseEntity<List<ExaminationDTO>>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<List<ExaminationDTO>>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
     }
 
 	@Override
@@ -150,10 +155,11 @@ public class ExaminationApiController implements ExaminationApi {
 	 * @return an error map.
 	 */
 	private FieldErrorMap getUpdateRightsErrors(final Examination examination) {
-		final Examination previousStateExamination = examinationService.findById(examination.getId());
+		/*final Examination previousStateExamination = examinationService.findById(examination.getId());
 		final FieldErrorMap accessErrors = new EditableOnlyByValidator<Examination>().validate(previousStateExamination,
 				examination);
-		return accessErrors;
+		return accessErrors;*/
+		return null;
 	}
 
 	/*

@@ -2,6 +2,8 @@ package org.shanoir.ng.study;
 
 import java.util.List;
 
+import org.shanoir.ng.center.CenterNameDTO;
+
 /**
  * Custom repository for studies.
  * 
@@ -20,5 +22,12 @@ public interface StudyRepositoryCustom {
 	 * @return list of studies.
 	 */
 	List<Study> findBy(String fieldName, Object value);
+	
+	/**
+	 * Find id and name for all studies.
+	 * 
+	 * @return list of studies.
+	 */
+	List<StudyNameDTO> findIdsAndNames();
 
 }

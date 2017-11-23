@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  *
  */
 @Entity
-@JsonPropertyOrder({ "_links", "id" })
+@JsonPropertyOrder({ "_links", "id", "examinationDate", "centerId", "subjectId", "studyId" })
 public class Examination extends HalEntity {
 
 	/**

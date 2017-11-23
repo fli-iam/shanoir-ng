@@ -166,7 +166,7 @@ export class TableComponent {
             } else {
                 if (col["type"] == null || col["type"] == "sting") {
                     // Sort insensitive
-                    cell1 = cell1.toLowerCase();
+                   // cell1 = cell1.toLowerCase();
                 }
             }
             if (cell2 == null) {
@@ -174,7 +174,7 @@ export class TableComponent {
             } else {
                 if (col["type"] == null || col["type"] == "string") {
                     // Sort insensitive
-                    cell2 = cell2.toLowerCase();
+                   // cell2 = cell2.toLowerCase();
                 }
             }
             

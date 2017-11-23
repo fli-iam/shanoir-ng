@@ -15,9 +15,11 @@ const METADATA = webpackMerge(commonConfig.metadata, {
     BACKEND_API_USERS_MS_URL: 'http://localhost:9901',
     BACKEND_API_STUDIES_MS_URL: 'http://localhost:9902',
     BACKEND_API_IMPORT_MS_URL: 'http://localhost:9903',
-    KEYCLOAK_BASE_URL: 'http://localhost/auth',
-    LOGOUT_REDIRECT_URL: 'http://localhost:8080/shanoir-ng/index.html',
-    port: 8080,
+    BACKEND_API_DATASET_MS_URL: 'http://localhost:9906',
+    KEYCLOAK_BASE_URL: 'http://localhost:8080/auth',
+    LOGOUT_REDIRECT_URL: 'http://localhost:8081/shanoir-ng/index.html',
+    port: 8081,
+
     ENV: ENV,
 });
 
@@ -43,7 +45,7 @@ module.exports = webpackMerge(commonConfig, {
     },
 
     plugins: [
-        new OpenBrowserPlugin({ url: 'http://localhost:8080/shanoir-ng' }),
+        new OpenBrowserPlugin({ url: 'http://localhost:8081/shanoir-ng' }),
 
         new HtmlWebpackPlugin({
             filename: 'index.html',
@@ -66,6 +68,7 @@ module.exports = webpackMerge(commonConfig, {
             'BACKEND_API_USERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_USERS_MS_URL),
             'BACKEND_API_STUDIES_MS_URL': JSON.stringify(METADATA.BACKEND_API_STUDIES_MS_URL),
             'BACKEND_API_IMPORT_MS_URL': JSON.stringify(METADATA.BACKEND_API_IMPORT_MS_URL),
+            'BACKEND_API_DATASET_MS_URL': JSON.stringify(METADATA.BACKEND_API_DATASET_MS_URL),
             'KEYCLOAK_BASE_URL': JSON.stringify(METADATA.KEYCLOAK_BASE_URL),
             'LOGOUT_REDIRECT_URL': JSON.stringify(METADATA.LOGOUT_REDIRECT_URL),
             'process.env': {
@@ -74,6 +77,7 @@ module.exports = webpackMerge(commonConfig, {
                 'BACKEND_API_USERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_USERS_MS_URL),
                 'BACKEND_API_STUDIES_MS_URL': JSON.stringify(METADATA.BACKEND_API_STUDIES_MS_URL),
                 'BACKEND_API_IMPORT_MS_URL': JSON.stringify(METADATA.BACKEND_API_IMPORT_MS_URL),
+                'BACKEND_API_DATASET_MS_URL': JSON.stringify(METADATA.BACKEND_API_DATASET_MS_URL),
                 'LOGOUT_REDIRECT_URL': JSON.stringify(METADATA.LOGOUT_REDIRECT_URL),
                 'KEYCLOAK_BASE_URL': JSON.stringify(METADATA.KEYCLOAK_BASE_URL),
             }

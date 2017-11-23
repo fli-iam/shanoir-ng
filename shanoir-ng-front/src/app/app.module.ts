@@ -55,9 +55,14 @@ import { ToolTipComponent }   from './shared/toolTip/toolTip.component';
 import { TreeNodeComponent }   from './shared/tree/tree.node.component';
 import { UserListComponent }   from './users/list/user.list.component';
 import { UserService } from './users/shared/user.service';
+import { ExaminationListComponent } from './examinations/list/examination.list.component';
+import { ExaminationDetailComponent } from './examinations/detail/examination.detail.component';
+import { ExaminationService } from './examinations/shared/examination.service';
 
 import '../assets/css/common.css';
 import '../assets/css/modal.css';
+
+
 
 export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
   return new KeycloakHttp(backend, defaultOptions, keycloakService);
@@ -105,7 +110,9 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         TableComponent,
         TreeNodeComponent,
         ToolTipComponent,
-        UserListComponent
+        UserListComponent,
+        ExaminationListComponent,
+        ExaminationDetailComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -125,6 +132,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         RoleService,
         StudyService,
         UserService,
+        ExaminationService,
         {
             provide: Http,
             useFactory: httpFactory,

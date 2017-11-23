@@ -56,6 +56,16 @@ export class StudyService {
         });
     }
 
+    getStudiesNames(): Promise<Study[]> {
+        return this.http.get(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
+            .toPromise()
+            .then(response => response.json() as Study[])
+            .catch((error) => {
+                console.error('Error while getting studies', error);
+                return Promise.reject(error.message || error);
+        });
+    }
+
     findSubjectsByStudyId(studyId: number): Promise<Subject[]> {
         return this.http.get(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
             .toPromise()

@@ -15,12 +15,17 @@ export const BACKEND_API_CENTER_NAMES_URL: string = BACKEND_API_CENTER_URL + '/n
 // Studies http api
 export const BACKEND_API_STUDY_URL:string = BACKEND_API_STUDIES_MS_URL + '/studies';
 export const BACKEND_API_STUDY_WITH_CARDS_BY_USER_URL: string = BACKEND_API_STUDY_URL + '/listwithcards';
+export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '/allnames';
 
 // Subjects http api
 export const BACKEND_API_SUBJECT_URL:string = BACKEND_API_STUDIES_MS_URL + '/subject';
 
 // Acquisition equipment http api
 export const BACKEND_API_ACQ_EQUIP_URL:string = BACKEND_API_STUDIES_MS_URL + '/acquisitionequipments';
+
+// Examination http api
+const BACKEND_API_DATASET_MS_URL: string = process.env.BACKEND_API_DATASET_MS_URL;
+export const BACKEND_API_EXAMINATION_URL:string = BACKEND_API_DATASET_MS_URL + '/examinations';
 
 // Manufacturer model http api
 export const BACKEND_API_MANUF_MODEL_URL:string = BACKEND_API_STUDIES_MS_URL + '/manufacturermodels';

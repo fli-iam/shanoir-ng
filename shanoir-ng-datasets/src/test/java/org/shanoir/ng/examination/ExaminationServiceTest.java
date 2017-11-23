@@ -53,8 +53,8 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
-	public void findAllTest() {
-		final List<Examination> examination = examinationService.findAll();
+	public void findAllTest() throws ShanoirDatasetException {
+		final List<ExaminationDTO> examination = examinationService.findAll();
 		Assert.assertNotNull(examination);
 		Assert.assertTrue(examination.size() == 1);
 
@@ -62,8 +62,8 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
-	public void findByIdTest() {
-		final Examination examination = examinationService.findById(EXAMINATION_ID);
+	public void findByIdTest() throws ShanoirDatasetException {
+		final ExaminationDTO examination = examinationService.findById(EXAMINATION_ID);
 		Assert.assertNotNull(examination);
 		Assert.assertTrue(ModelsUtil.EXAMINATION_NOTE.equals(examination.getNote()));
 

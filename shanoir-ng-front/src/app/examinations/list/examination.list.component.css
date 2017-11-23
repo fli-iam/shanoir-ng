@@ -1,0 +1,5 @@
+/***********************/
+/* examination list component */
+/***********************/
+.ExaminationListComponent { float: left; overflow: auto; }
+.title { margin-bottom: 15px; }

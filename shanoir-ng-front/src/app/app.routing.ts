@@ -18,6 +18,8 @@ import { StudyDetailComponent } from './studies/detail/study-detail.component';
 import { StudyListComponent } from './studies/list/study-list.component';
 import { StudyTreeComponent } from './studies/tree/study.tree.component';
 import { UserListComponent } from './users/list/user.list.component';
+import { ExaminationListComponent } from './examinations/list/examination.list.component';
+import { ExaminationDetailComponent } from './examinations/detail/examination.detail.component';
 
 const appRoutes: Routes = [
   {
@@ -72,6 +74,14 @@ const appRoutes: Routes = [
     component: StudyListComponent,
     canActivate: [AuthNotGuestGuard]
   }, {
+    path: 'examinationList',
+    component: ExaminationListComponent,
+    canActivate: [AuthNotGuestGuard]
+  },{
+    path: 'examinationDetail',
+    component: ExaminationDetailComponent,
+    canActivate: [AuthNotGuestGuard]
+  },{
     path: 'treeTest',
     component: StudyTreeComponent,
   }, {

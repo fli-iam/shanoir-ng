@@ -6,16 +6,20 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
+import javax.persistence.ConstructorResult;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
+import javax.persistence.SqlResultSetMapping;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.shanoir.ng.center.CenterNameDTO;
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
@@ -35,6 +39,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
+@SqlResultSetMapping(name="studyNameResult", classes = {
+	    @ConstructorResult(targetClass = StudyNameDTO.class, 
+	    columns = {@ColumnResult(name="id", type = Long.class), @ColumnResult(name="name")})
+	})
 public class Study extends HalEntity {
 
 	/**
@@ -95,6 +103,7 @@ public class Study extends HalEntity {
 	private Integer studyStatus;
 
 	/** Relations between the investigators, the centers and the studies. */
+	@JsonIgnore
 	@NotEmpty
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<StudyCenter> studyCenterList;

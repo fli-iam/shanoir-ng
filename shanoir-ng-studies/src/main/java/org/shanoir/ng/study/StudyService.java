@@ -2,6 +2,7 @@ package org.shanoir.ng.study;
 
 import java.util.List;
 
+import org.shanoir.ng.center.CenterNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
@@ -102,5 +103,12 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @throws ShanoirStudiesException
 	 */
 	void updateFromShanoirOld(Study study) throws ShanoirStudiesException;
+	
+	/**
+	 * Find id and name for all studies.
+	 * 
+	 * @return list of centers.
+	 */
+	List<StudyNameDTO> findIdsAndNames();
 
 }

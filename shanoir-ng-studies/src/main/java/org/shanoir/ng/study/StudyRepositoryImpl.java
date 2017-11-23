@@ -27,5 +27,14 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 				.setParameter("value", value)
 				.getResultList();
 	}
+	
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<StudyNameDTO> findIdsAndNames() {
+		return em.createNativeQuery(
+				"SELECT id, name FROM study", "studyNameResult")
+				.getResultList();
+	}
 
 }

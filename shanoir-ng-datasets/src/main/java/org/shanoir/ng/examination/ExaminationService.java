@@ -1,7 +1,6 @@
 package org.shanoir.ng.examination;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.shanoir.ng.shared.exception.ShanoirDatasetException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
@@ -28,7 +27,7 @@ public interface ExaminationService extends UniqueCheckableService<Examination> 
 	 * 
 	 * @return a list of examinations.
 	 */
-	List<Examination> findAll();
+	List<ExaminationDTO> findAll() throws ShanoirDatasetException;
 
 	/**
 	 * Find examination by its id.
@@ -36,8 +35,9 @@ public interface ExaminationService extends UniqueCheckableService<Examination> 
 	 * @param id
 	 *            examination id.
 	 * @return an examination or null.
+	 * @throws ShanoirDatasetException 
 	 */
-	Examination findById(Long id);
+	ExaminationDTO findById(Long id) throws ShanoirDatasetException;
 
 	/**
 	 * Save an examination.
