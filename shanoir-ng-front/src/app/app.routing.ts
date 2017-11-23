@@ -14,6 +14,7 @@ import { HomeComponent } from './home/home.component';
 import { ImportComponent } from './import/import.component';
 import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
 import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
+import { StudyDetailComponent } from './studies/detail/study-detail.component';
 import { StudyListComponent } from './studies/list/study-list.component';
 import { StudyTreeComponent } from './studies/tree/study.tree.component';
 import { UserListComponent } from './users/list/user.list.component';
@@ -61,6 +62,10 @@ const appRoutes: Routes = [
   }, {
     path: 'manufModelDetail',
     component: ManufacturerModelDetailComponent,
+    canActivate: [AuthNotGuestGuard]
+  }, {
+    path: 'studyDetail',
+    component: StudyDetailComponent,
     canActivate: [AuthNotGuestGuard]
   }, {
     path: 'studylist',

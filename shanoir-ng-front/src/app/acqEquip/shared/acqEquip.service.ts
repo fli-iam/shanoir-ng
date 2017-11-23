@@ -11,7 +11,7 @@ export class AcquisitionEquipmentService {
     constructor(private http: Http, private handleErrorService: HandleErrorService) { }
 
     getAcquisitionEquipments(): Promise<AcquisitionEquipment[]> {
-        return this.http.get(AppUtils.BACKEND_API_ACQ_EQUIP_ALL_URL)
+        return this.http.get(AppUtils.BACKEND_API_ACQ_EQUIP_URL)
             .toPromise()
             .then(response => response.json() as AcquisitionEquipment[])
             .catch((error) => {

@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @Api(value = "manufacturer", description = "the manufacturer API")
-@RequestMapping("/manufacturer")
+@RequestMapping("/manufacturers")
 public interface ManufacturerApi {
 
 	@ApiOperation(value = "", notes = "If exists, returns the manufacturer corresponding to the given id", response = Manufacturer.class, tags = {})
@@ -38,7 +38,7 @@ public interface ManufacturerApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<List<Manufacturer>> findManufacturers();
 

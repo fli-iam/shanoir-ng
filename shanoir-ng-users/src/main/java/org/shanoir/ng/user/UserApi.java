@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiResponses;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-07T15:52:25.736Z")
 
 @Api(value = "user", description = "the user API")
-@RequestMapping("/user")
+@RequestMapping("/users")
 public interface UserApi {
 
 	@ApiOperation(value = "", notes = "Confirms an account request", response = Void.class, tags = {})
@@ -78,7 +78,7 @@ public interface UserApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = User.class),
 			@ApiResponse(code = 403, message = "forbidden", response = User.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
-	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<List<User>> findUsers();
 

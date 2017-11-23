@@ -6,7 +6,27 @@ info:
 produces:
   - application/json
 paths:
-  /examination:
+  /examinations:
+    get:
+      operationId: findExaminations
+      description: Returns all the examinations
+      responses:
+        '200':
+          description: found examinations
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Examination'
+        '204':
+          description: no examination found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
     post:
       operationId: saveNewExamination
       description: Saves a new examination
@@ -36,7 +56,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  '/examination/{examinationId}':
+  '/examinations/{examinationId}':
     get:
       operationId: findExaminationById
       description: 'If exists, returns the examination corresponding to the given id'
@@ -103,10 +123,12 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /examination/all:
+  '/examinations/subjects/{subjectId}':
     get:
-      operationId: findExaminations
-      description: Returns all the examinations
+      operationId: findExaminationsBySubjectId
+      description: Returns the list of examinations by subject id
+      parameters:
+        - $ref: '#/parameters/subjectId'
       responses:
         '200':
           description: found examinations
@@ -129,6 +151,13 @@ parameters:
     name: examinationId
     in: path
     description: id of the examination
+    required: true
+    type: integer
+    format: int64
+  subjectId:
+    name: subjectId
+    in: path
+    description: id of the subject
     required: true
     type: integer
     format: int64

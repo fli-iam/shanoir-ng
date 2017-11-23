@@ -11,7 +11,7 @@ export class ManufacturerService {
     constructor(private http: Http, private handleErrorService: HandleErrorService) { }
 
     getManufacturers(): Promise<Manufacturer[]> {
-        return this.http.get(AppUtils.BACKEND_API_MANUF_ALL_URL)
+        return this.http.get(AppUtils.BACKEND_API_MANUF_URL)
             .toPromise()
             .then(response => response.json() as Manufacturer[])
             .catch((error) => {

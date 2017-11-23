@@ -31,9 +31,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("dev")
 public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 	
-	private static final String REQUEST_PATH = "/center";
-	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
-	private static final String REQUEST_PATH_FOR_ALL_NAMES = REQUEST_PATH + "/allnames";
+	private static final String REQUEST_PATH = "/centers";
+	private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	@Autowired
@@ -56,7 +55,7 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 
 	@Test
 	public void findCentersProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
@@ -64,7 +63,7 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 	public void findCentersWithLogin() throws ClientProtocolException, IOException {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
@@ -74,14 +73,14 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 		// test with guest role
 		final HttpEntity<Center> entity = new HttpEntity<Center>(null, getHeadersWithToken(false));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
 				String.class);
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
 
 	@Test
 	public void findCentersNamesProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL_NAMES, String.class);
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_NAMES, String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
@@ -89,7 +88,7 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 	public void findCentersNamesWithLogin() throws ClientProtocolException, IOException {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL_NAMES, HttpMethod.GET, entity,
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_NAMES, HttpMethod.GET, entity,
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
@@ -99,7 +98,7 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 		// test with guest role
 		final HttpEntity<Center> entity = new HttpEntity<Center>(null, getHeadersWithToken(false));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL_NAMES, HttpMethod.GET, entity,
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_NAMES, HttpMethod.GET, entity,
 				String.class);
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}

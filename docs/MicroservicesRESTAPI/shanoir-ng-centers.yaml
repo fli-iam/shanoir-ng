@@ -1,24 +1,24 @@
 swagger: '2.0'
 info:
   version: 0.0.1
-  title: Shanoir NG Coils Microservice
-  description: Microservice API for Shanoir NG coil managment
+  title: Shanoir NG Centers Microservice
+  description: Microservice API for Shanoir NG center managment
 produces:
   - application/json
 paths:
-  /coil:
+  /centers:
     get:
-      operationId: findCoils
-      description: Returns all the coils
+      operationId: findCenters
+      description: Returns all the centers
       responses:
         '200':
-          description: found coils
+          description: found centers
           schema:
             type: array
             items:
-              $ref: '#/definitions/CoilDTO'
+              $ref: '#/definitions/CenterDTO'
         '204':
-          description: no coil found
+          description: no center found
         '401':
           description: unauthorized
         '403':
@@ -28,22 +28,22 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
     post:
-      operationId: saveNewCoil
-      description: Saves a new coil
+      operationId: saveNewCenter
+      description: Saves a new center
       consumes:
         - application/json
       parameters:
-        - name: coil
+        - name: center
           in: body
-          description: coil to create
+          description: center to create
           required: true
           schema:
-            $ref: '#/definitions/Coil'
+            $ref: '#/definitions/Center'
       responses:
         '200':
-          description: created coil
+          description: created center
           schema:
-            $ref: '#/definitions/CoilDTO'
+            $ref: '#/definitions/CenterDTO'
         '401':
           description: unauthorized
         '403':
@@ -56,43 +56,43 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  '/coil/{coilId}':
+  '/centers/{centerId}':
     get:
-      operationId: findCoilById
-      description: 'If exists, returns the coil corresponding to the given id'
+      operationId: findCenterById
+      description: 'If exists, returns the center corresponding to the given id'
       parameters:
-        - $ref: '#/parameters/coilId'
+        - $ref: '#/parameters/centerId'
       responses:
         '200':
-          description: found coil
+          description: found center
           schema:
-            $ref: '#/definitions/CoilDTO'
+            $ref: '#/definitions/CenterDTO'
         '401':
           description: unauthorized
         '403':
           description: forbidden
         '404':
-          description: no coil found
+          description: no center found
         '500':
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
     put:
-      operationId: updateCoil
-      description: Updates a coil
+      operationId: updateCenter
+      description: Updates a center
       consumes:
         - application/json
       parameters:
-        - $ref: '#/parameters/coilId'
-        - name: coil
+        - $ref: '#/parameters/centerId'
+        - name: center
           in: body
-          description: coil to update
+          description: center to update
           required: true
           schema:
-            $ref: '#/definitions/Coil'
+            $ref: '#/definitions/Center'
       responses:
         '204':
-          description: coil updated
+          description: center updated
         '401':
           description: unauthorized
         '403':
@@ -106,93 +106,115 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
     delete:
-      operationId: deleteCoil
-      description: Deletes a coil
+      operationId: deleteCenter
+      description: Deletes a center
       parameters:
-        - $ref: '#/parameters/coilId'
+        - $ref: '#/parameters/centerId'
       responses:
         '204':
-          description: coil deleted
+          description: center deleted
         '401':
           description: unauthorized
         '403':
           description: forbidden
         '404':
-          description: no coil found
+          description: no center found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /centers/names:
+    get:
+      operationId: findCentersNames
+      description: Returns id and name for all the centers
+      responses:
+        '200':
+          description: found centers
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CenterNameDTO'
+        '204':
+          description: no center found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
         '500':
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
 parameters:
-  coilId:
-    name: coilId
+  centerId:
+    name: centerId
     in: path
-    description: id of the coil
+    description: id of the center
     required: true
     type: integer
     format: int64
 definitions:
+  AcquisitionEquipment:
+    type: object
   Center:
-    type: object
-  CenterNameDTO:
-    type: object
-  Coil:
     type: object
     required:
       - id
-      - center
       - name
     properties:
       id:
         type: integer
         format: int64
-      center:
-        $ref: '#/definitions/Center'
-      coilType:
+      acquisitionEquipmentList:
+        type: array
+        items:
+          $ref: '#/definitions/AcquisitionEquipment'
+      city:
         type: string
-        enum:
-          - BODY
-          - HEAD
-          - SURFACE
-          - MULTICOIL
-          - EXTREMITY
-      manufacturerMrModel:
-        $ref: '#/definitions/ManufacturerModel'
+      country:
+        type: string
       name:
         type: string
-      numberOfChannels:
-        type: integer
-        format: int64
-      serialNumber:
+      phoneNumber:
         type: string
-  CoilDTO:
+      postalCode:
+        type: string
+      street:
+        type: string
+      studyCenterList:
+        type: array
+        items:
+          $ref: '#/definitions/StudyCenter'
+      website:
+        type: string
+  CenterDTO:
     type: object
     properties:
       id:
         type: integer
         format: int64
-      center:
-        $ref: '#/definitions/CenterNameDTO'
-      coilType:
+      city:
         type: string
-        enum:
-          - BODY
-          - HEAD
-          - SURFACE
-          - MULTICOIL
-          - EXTREMITY
-      manufacturerMrModel:
-        $ref: '#/definitions/ManufacturerModelDTO'
+      country:
+        type: string
       name:
         type: string
-      numberOfChannels:
+      phoneNumber:
+        type: string
+      postalCode:
+        type: string
+      street:
+        type: string
+      website:
+        type: string
+  CenterNameDTO:
+    type: object
+    properties:
+      id:
         type: integer
         format: int64
-      serialNumber:
+      name:
         type: string
-  ManufacturerModel:
-    type: object
-  ManufacturerModelDTO:
+  StudyCenter:
     type: object
   ErrorModel:
     type: object

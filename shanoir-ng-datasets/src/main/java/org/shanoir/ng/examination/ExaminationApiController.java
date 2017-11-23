@@ -29,6 +29,9 @@ public class ExaminationApiController implements ExaminationApi {
 	private static final Logger LOG = LoggerFactory.getLogger(ExaminationApiController.class);
 
 	@Autowired
+	private ExaminationMapper examinationMapper;
+	
+	@Autowired
 	private ExaminationService examinationService;
 
 	@Override
@@ -64,6 +67,15 @@ public class ExaminationApiController implements ExaminationApi {
 		}
 		return new ResponseEntity<List<Examination>>(examinations, HttpStatus.OK);
 	}
+	
+	@Override
+    public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@ApiParam(value = "id of the subject",required=true ) @PathVariable("subjectId") Long subjectId) {
+    	final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
+		if (examinations.isEmpty()) {
+			return new ResponseEntity<List<ExaminationDTO>>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<List<ExaminationDTO>>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+    }
 
 	@Override
 	public ResponseEntity<Examination> saveNewExamination(

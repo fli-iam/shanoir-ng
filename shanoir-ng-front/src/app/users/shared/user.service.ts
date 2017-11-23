@@ -55,7 +55,7 @@ export class UserService {
     }
 
     getUsers(): Promise<User[]> {
-        return this.http.get(AppUtils.BACKEND_API_USER_ALL_URL)
+        return this.http.get(AppUtils.BACKEND_API_USER_URL)
             .toPromise()
             .then(response => response.json() as User[])
             .catch((error) => {

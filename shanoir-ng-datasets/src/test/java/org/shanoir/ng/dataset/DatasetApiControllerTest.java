@@ -34,7 +34,7 @@ import com.google.gson.GsonBuilder;
 @AutoConfigureMockMvc(secure = false)
 public class DatasetApiControllerTest {
 
-	private static final String REQUEST_PATH = "/dataset";
+	private static final String REQUEST_PATH = "/datasets";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	private Gson gson;

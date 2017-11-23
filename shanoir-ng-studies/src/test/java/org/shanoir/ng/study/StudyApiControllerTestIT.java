@@ -33,7 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("dev")
 public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 
-	private static final String REQUEST_PATH = "/study";
+	private static final String REQUEST_PATH = "/studies";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	@Autowired

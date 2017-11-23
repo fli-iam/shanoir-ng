@@ -40,15 +40,6 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<List<StudyDTO>> findStudies() {
-		final List<Study> studies = studyService.findAll();
-		if (studies.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
-	}
-
-	@Override
-	public ResponseEntity<List<StudyDTO>> findStudiesByUserId() {
 		List<Study> studies;
 		try {
 			if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {

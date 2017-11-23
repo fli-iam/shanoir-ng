@@ -58,10 +58,9 @@ public class Center extends HalEntity {
 	@EditableOnlyBy(roles = { "ROLE_ADMIN", "ROLE_EXPERT" })
 	private String name;
 
-	@Pattern(regexp = "[\\d]*")
+	@Pattern(regexp = "[\\+]?[\\d]*")
 	private String phoneNumber;
 
-	@Pattern(regexp = "[\\d]*")
 	private String postalCode;
 
 	private String street;

@@ -15,16 +15,17 @@ import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 })
 
 export class CenterDetailComponent implements OnInit {
-    
+
     private center: Center = new Center();
     public centerDetailForm: FormGroup;
     private centerId: number;
     public mode: "view" | "edit" | "create";
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
+    private phoneNumberPatternError = false;
 
-    constructor (private route: ActivatedRoute, private router: Router,
-        private centerService: CenterService,   private fb: FormBuilder,
+    constructor(private route: ActivatedRoute, private router: Router,
+        private centerService: CenterService, private fb: FormBuilder,
         private location: Location, private keycloakService: KeycloakService) {
 
     }
@@ -49,7 +50,7 @@ export class CenterDetailComponent implements OnInit {
                     // view or edit mode
                     this.centerId = centerId;
                     return this.centerService.getCenter(centerId);
-                } else { 
+                } else {
                     // create mode
                     return Observable.of<Center>();
                 }
@@ -57,7 +58,7 @@ export class CenterDetailComponent implements OnInit {
             .subscribe((center: Center) => {
                 this.center = center;
             });
-    }   
+    }
 
     buildForm(): void {
         this.centerDetailForm = this.fb.group({
@@ -98,31 +99,44 @@ export class CenterDetailComponent implements OnInit {
     }
 
     edit(): void {
-        this.router.navigate(['/centerDetail'], { queryParams: {id: this.centerId, mode: "edit"}});
+        this.router.navigate(['/centerDetail'], { queryParams: { id: this.centerId, mode: "edit" } });
     }
 
     create(): void {
         this.center = this.centerDetailForm.value;
         this.centerService.create(this.center)
-        .subscribe((center) => {
-            this.back();
-        }, (err: String) => {
-            if (err.indexOf("name should be unique") != -1) {
-                this.isNameUnique = false;
-            }
-        });
+            .subscribe((center) => {
+                this.back();
+            }, (err: string) => {
+                this.manageRequestErrors(err);
+            });
     }
 
     update(): void {
         this.center = this.centerDetailForm.value;
         this.centerService.update(this.centerId, this.center)
-        .subscribe((center) => {
-            this.back();
-        }, (err: String) => {
-            if (err.indexOf("name should be unique") != -1) {
-                this.isNameUnique = false;
-            }
-        });
+            .subscribe((center) => {
+                this.back();
+            }, (err: string) => {
+                this.manageRequestErrors(err);
+            });
+    }
+
+    private manageRequestErrors(err: string): void {
+        if (err.indexOf("name should be unique") != -1) {
+            this.isNameUnique = false;
+        }
+        if (err.indexOf("phoneNumber should be Pattern") != -1) {
+            this.phoneNumberPatternError = true;
+        }
+    }
+
+    resetNameErrorMsg(): void {
+        this.isNameUnique = true;
+    }
+
+    resetPhoneNumberErrorMsg(): void {
+        this.phoneNumberPatternError = false;
     }
 
 }

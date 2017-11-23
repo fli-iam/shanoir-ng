@@ -1,6 +1,6 @@
-<ng-template ngFor let-patient [ngForOf]="patients">
-    <node [label]="patient.name" pictoUrl="assets/images/icons/user.png">
-        <ng-template ngFor let-exam [ngForOf]="patient.examinations">
+<ng-template ngFor let-subject [ngForOf]="subjects">
+    <node [label]="subject.name" pictoUrl="assets/images/icons/user.png">
+        <ng-template ngFor let-exam [ngForOf]="subject.examinations">
             <node [label]="exam.name + ' [' + exam.date + ']'" pictoUrl="assets/images/icons/list.png">
                 <node *ngFor="let acq of exam.acquisitions" [label]="acq.name" pictoUrl="assets/images/icons/medical/x-ray-2.png">
                     <node *ngFor="let dataset of acq.datasets" [label]="dataset.name" pictoUrl="assets/images/icons/medical/brain.png">

@@ -28,7 +28,7 @@ public class SubjectStudy extends AbstractGenericItem {
 	/** true if the subject is physically involved in the study. */
 	private boolean physicallyInvolved;
 
-	/** Subject yype. */
+	/** Subject type. */
 	private Integer subjectType;
 
 	/** Study. */

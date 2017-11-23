@@ -6,7 +6,7 @@ info:
 produces:
   - application/json
 paths:
-  /dataset:
+  /datasets:
     post:
       operationId: saveNewDataset
       description: Saves a new dataset
@@ -36,7 +36,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  '/dataset/{datasetId}':
+  '/datasets/{datasetId}':
     get:
       operationId: findDatasetById
       description: 'If exists, returns the dataset corresponding to the given id'

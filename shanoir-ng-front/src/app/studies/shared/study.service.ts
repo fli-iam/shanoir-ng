@@ -12,7 +12,7 @@ export class StudyService {
     constructor(private http: Http, private handleErrorService: HandleErrorService) { }
 
     findStudiesByUserId(): Promise<Study[]> {
-        return this.http.get(AppUtils.BACKEND_API_STUDY_ALL_BY_USER_URL)
+        return this.http.get(AppUtils.BACKEND_API_STUDY_URL)
             .toPromise()
             .then(response => response.json() as Study[])
             .catch((error) => {

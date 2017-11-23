@@ -17,6 +17,8 @@ public class StudyDTO {
 
 	private Date endDate;
 
+	private List<Long> examinationIds;
+
 	// private List<ExperimentalGroupOfSubjects>
 	// experimentalGroupOfSubjectsList;
 
@@ -38,7 +40,7 @@ public class StudyDTO {
 
 	private StudyType studyType;
 
-	// private List<StudyUser> studyUserList;
+	private List<String> subjectNames;
 
 	// private List<SubjectStudy> subjectStudyList;
 
@@ -95,6 +97,21 @@ public class StudyDTO {
 	 */
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
+	}
+
+	/**
+	 * @return the examinationIds
+	 */
+	public List<Long> getExaminationIds() {
+		return examinationIds;
+	}
+
+	/**
+	 * @param examinationIds
+	 *            the examinationIds to set
+	 */
+	public void setExaminationIds(List<Long> examinationIds) {
+		this.examinationIds = examinationIds;
 	}
 
 	/**
@@ -218,6 +235,21 @@ public class StudyDTO {
 	}
 
 	/**
+	 * @return the subjectNames
+	 */
+	public List<String> getSubjectNames() {
+		return subjectNames;
+	}
+
+	/**
+	 * @param subjectNames
+	 *            the subjectNames to set
+	 */
+	public void setSubjectNames(List<String> subjectNames) {
+		this.subjectNames = subjectNames;
+	}
+
+	/**
 	 * @return the visibleByDefault
 	 */
 	public boolean isVisibleByDefault() {
@@ -246,4 +278,5 @@ public class StudyDTO {
 	public void setWithExamination(boolean withExamination) {
 		this.withExamination = withExamination;
 	}
+
 }

@@ -31,8 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("dev")
 public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 	
-	private static final String REQUEST_PATH = "/template";
-	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH = "/templates";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	@Autowired
@@ -55,7 +54,7 @@ public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 
 	@Test
 	public void findTemplatesProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
@@ -63,7 +62,7 @@ public class TemplateApiControllerTestIT extends KeycloakControllerTestIT {
 	public void findTemplatesWithLogin() throws ClientProtocolException, IOException {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}

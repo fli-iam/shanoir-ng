@@ -2,7 +2,10 @@ package org.shanoir.ng.study;
 
 import java.util.List;
 
+import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
 /**
  * Mapper for studies.
@@ -11,6 +14,7 @@ import org.mapstruct.Mapper;
  *
  */
 @Mapper(componentModel = "spring")
+@DecoratedWith(StudyDecorator.class)
 public interface StudyMapper {
 
 	/**
@@ -29,6 +33,7 @@ public interface StudyMapper {
 	 *            study to map.
 	 * @return study DTO.
 	 */
+	@Mappings({ @Mapping(target = "subjectNames", ignore = true) })
 	StudyDTO studyToStudyDTO(Study study);
 
 }

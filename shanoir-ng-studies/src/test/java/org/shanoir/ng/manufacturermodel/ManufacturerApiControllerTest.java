@@ -35,8 +35,7 @@ import com.google.gson.GsonBuilder;
 @AutoConfigureMockMvc(secure = false)
 public class ManufacturerApiControllerTest {
 
-	private static final String REQUEST_PATH = "/manufacturer";
-	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH = "/manufacturers";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	private Gson gson;
@@ -65,7 +64,7 @@ public class ManufacturerApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void findManufacturersTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_ALL).accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 

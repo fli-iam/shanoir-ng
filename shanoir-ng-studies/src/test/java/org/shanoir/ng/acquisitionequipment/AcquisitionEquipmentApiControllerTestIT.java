@@ -33,8 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("dev")
 public class AcquisitionEquipmentApiControllerTestIT extends KeycloakControllerTestIT {
 	
-	private static final String REQUEST_PATH = "/acquisitionequipment";
-	private static final String REQUEST_PATH_FOR_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH = "/acquisitionequipments";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	@Autowired
@@ -57,7 +56,7 @@ public class AcquisitionEquipmentApiControllerTestIT extends KeycloakControllerT
 
 	@Test
 	public void findAcquisitionEquipmentsProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_ALL, String.class);
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
 		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
@@ -65,7 +64,7 @@ public class AcquisitionEquipmentApiControllerTestIT extends KeycloakControllerT
 	public void findAcquisitionEquipmentsWithLogin() throws ClientProtocolException, IOException {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_ALL, HttpMethod.GET, entity,
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}

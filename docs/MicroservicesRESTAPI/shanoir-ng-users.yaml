@@ -60,7 +60,27 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /user:
+  /users:
+    get:
+      operationId: findUsers
+      description: Returns all the users
+      responses:
+        '200':
+          description: found users
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        '204':
+          description: no user found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
     post:
       operationId: saveNewUser
       description: Saves a new user
@@ -90,7 +110,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  '/user/{userId}':
+  '/users/{userId}':
     get:
       operationId: findUserById
       description: 'If exists, returns the user corresponding to the given id'
@@ -157,7 +177,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  '/user/{userId}/confirmaccountrequest':
+  '/users/{userId}/confirmaccountrequest':
     put:
       operationId: confirmAccountRequest
       description: Confirms an account request
@@ -184,7 +204,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  '/user/{userId}/denyaccountrequest':
+  '/users/{userId}/denyaccountrequest':
     delete:
       operationId: denyAccountRequest
       description: Denies an account request
@@ -203,28 +223,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /user/all:
-    get:
-      operationId: findUsers
-      description: Returns all the users
-      responses:
-        '200':
-          description: found users
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/User'
-        '204':
-          description: no user found
-        '401':
-          description: unauthorized
-        '403':
-          description: forbidden
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-  /user/extension:
+  /users/extension:
     put:
       operationId: requestExtension
       description: Requests a date extension for current user
@@ -250,7 +249,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /role/all:
+  /roles:
     get:
       operationId: findRoles
       description: Returns all the roles

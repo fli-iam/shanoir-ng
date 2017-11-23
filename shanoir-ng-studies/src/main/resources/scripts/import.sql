@@ -510,6 +510,15 @@ VALUES
 	(287, 68, 133),
 	(288, 15, 134);
 
+INSERT INTO study_examination
+	(examination_id, study_id)
+VALUES
+	(1, 1),
+	(2, 1),
+	(2, 2),
+	(3, 3),
+	(4, 3);
+
 INSERT INTO pseudonymus_hash_values
  (id, birth_name_hash1, birth_name_hash2, birth_name_hash3, last_name_hash1, last_name_hash2, last_name_hash3, first_name_hash1, first_name_hash2, first_name_hash3, birth_date_hash)
 VALUES

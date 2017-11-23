@@ -1,6 +1,7 @@
 package org.shanoir.ng.examination;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.shared.exception.ShanoirDatasetException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
@@ -66,5 +67,12 @@ public interface ExaminationService extends UniqueCheckableService<Examination> 
 	 * @throws ShanoirDatasetException
 	 */
 	void updateFromShanoirOld(Examination examination) throws ShanoirDatasetException;
+
+	/**
+	 * @param subjectId
+	 * @return
+	 * @author yyao
+	 */
+	List<Examination> findBySubjectId(Long subjectId);
 
 }

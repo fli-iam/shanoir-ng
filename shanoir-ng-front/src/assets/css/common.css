@@ -134,4 +134,7 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
 .overlay { position: fixed; height: 100%; width: 100%; background-color: var(--color-overlay); z-index: 100000; top: 0; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; }
     .overlay .content { align-self: center; }
 
+.detail .left { float: left; }
+.detail .right { float: right; -webkit-margin-start: 2px; }
+
 md-dialog-container { position: fixed; top: 0; background-color: var(--color-overlay); width: 100%; z-index: 10000; max-width: 100% !important; box-shadow: none !important; display: flex !important; justify-content: center !important; }

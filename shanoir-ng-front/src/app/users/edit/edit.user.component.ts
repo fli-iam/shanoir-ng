@@ -244,7 +244,7 @@ export class EditUserComponent implements OnInit {
             }
         } else {
             this.isDateValid = true;
-            this.selectedDateNormal = null;
+            setTimeout(() => this.selectedDateNormal = null);
         }
     }
 
