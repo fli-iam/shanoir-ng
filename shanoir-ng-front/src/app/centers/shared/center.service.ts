@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { Center } from './center.model';
 import * as AppUtils from '../../utils/app.utils';
 import { HandleErrorService } from '../../shared/utils/handle.error.service';
+import { IdNameObject } from '../../examinations/shared/id-name-object.model';
 
 @Injectable()
 export class CenterService {
@@ -24,6 +25,16 @@ export class CenterService {
         return this.http.get(AppUtils.BACKEND_API_CENTER_NAMES_URL)
             .toPromise()
             .then(response => response.json() as Center[])
+            .catch((error) => {
+                console.error('Error while getting centers', error);
+                return Promise.reject(error.message || error);
+        });
+    }
+
+    getCentersNamesForExamination(): Promise<IdNameObject[]> {
+        return this.http.get(AppUtils.BACKEND_API_CENTER_NAMES_URL)
+            .toPromise()
+            .then(response => response.json() as IdNameObject[])
             .catch((error) => {
                 console.error('Error while getting centers', error);
                 return Promise.reject(error.message || error);

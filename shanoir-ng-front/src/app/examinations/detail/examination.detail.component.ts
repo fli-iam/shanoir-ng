@@ -11,8 +11,10 @@ import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
+import { IdNameObject } from '../shared/id-name-object.model';
 
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
+
 
 @Component({
     selector: 'examinationDetail',
@@ -28,9 +30,9 @@ export class ExaminationDetailComponent implements OnInit {
     public mode: "view" | "edit" | "create";
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
-    private centers: Center[];
-    private studies: Study[];
-    private subjects: Object[];
+    private centers: IdNameObject[];
+    private studies: IdNameObject[];
+    private subjects: IdNameObject[];
     private examinationExecutives: Object[];
     isDateValid: boolean = true;
     selectedDateNormal: IMyDate;
@@ -44,13 +46,19 @@ export class ExaminationDetailComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.getExamination();
+        this.initExamination();
         this.getCenters();
         this.getStudies();
+        this.getExamination();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
         }
+    }
+
+    initExamination(): void {
+        this.examination.study = new IdNameObject();
+        this.examination.center = new IdNameObject();
     }
 
     getExamination(): void {
@@ -72,12 +80,13 @@ export class ExaminationDetailComponent implements OnInit {
             })
             .subscribe((examination: Examination) => {
                 this.examination = examination;
+                this.getDateToDatePicker(this.examination);
             });
     }
 
     getCenters(): void {
         this.centerService
-            .getCentersNames()
+            .getCentersNamesForExamination()
             .then(centers => {
                 this.centers = centers;
             })
@@ -102,10 +111,10 @@ export class ExaminationDetailComponent implements OnInit {
     buildForm(): void {
         this.examinationDetailForm = this.fb.group({
             'Id': [this.examination.id],
-            'Research study': [this.examination.study],
-            'Examination executive': [this.examination.examinationExecutive],
-            'Center': [this.examination.center],
-            'Subject': [this.examination.subject],
+            'study': [this.examination.study, Validators.required],
+            // 'Examination executive': [this.examination.examinationExecutive],
+            'center': [this.examination.center, Validators.required],
+            // 'Subject': [this.examination.subject],
             'Examination date': [this.examination.examinationDate],
             'Comment': [this.examination.comment],
             'Note': [this.examination.note],
@@ -176,7 +185,6 @@ export class ExaminationDetailComponent implements OnInit {
     }
 
     formErrors = {
-        'name': '',
         'center': '',
         'study': ''
     };
