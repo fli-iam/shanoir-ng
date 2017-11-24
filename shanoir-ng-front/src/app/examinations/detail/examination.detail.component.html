@@ -21,7 +21,7 @@
 								{{examination.id}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="id" formControlName="Id" [(ngModel)]="examination.id" readonly/>
+								<input type="text" id="id" formControlName="id" [(ngModel)]="examination.id" readonly/>
 							</ng-template>
 						</span>
 					</li>
@@ -29,13 +29,13 @@
 						<label i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.study?.name}}
+								{{examination.studyName}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="study" required formControlName="study" [(ngModel)]="examination.study.id">
+								<select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
 									<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
 								</select>
-								<label *ngIf="formErrors.study.includes('required')" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
+								<label *ngIf="formErrors.studyId.includes('required')" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -57,14 +57,14 @@
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/centerDetail']" [queryParams]="{mode: 'view', id: examination.center?.id}">
-									{{examination.center?.name}}
+									{{examination.centerName}}
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="center" required formControlName="center" [(ngModel)]="examination.center.id">
+								<select id="centerId" required formControlName="centerId" [(ngModel)]="examination.centerId">
 									<option *ngFor="let center of centers" [ngValue]="center.id">{{center.name}}</option>
 								</select>
-								<label *ngIf="formErrors.center.includes('required')" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
+								<label *ngIf="formErrors.centerId.includes('required')" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -85,10 +85,10 @@
 						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.examinationDate | date:'yyyy-MM-dd HH:mm:ss Z'}}
+								{{examination.examinationDate | date: 'dd/MM/yyyy'}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<my-date-picker id="examinationDate" [options]="myDatePickerOptions" formControlName="Examination date" [(ngModel)]="examination.examinationDate"
+								<my-date-picker id="examinationDate" [options]="myDatePickerOptions" formControlName="examinationDate" [(ngModel)]="examinationDate"
 								 (dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
 								</my-date-picker>
 								<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit examination|Date valid error@@editExaminationDateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
@@ -102,7 +102,7 @@
 								{{examination.comment}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="comment" formControlName="Comment" [(ngModel)]="examination.comment" />
+								<input type="text" id="comment" formControlName="comment" [(ngModel)]="examination.comment" />
 							</ng-template>
 						</span>
 					</li>
@@ -113,7 +113,7 @@
 								{{examination.note}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="note" formControlName="Note" [(ngModel)]="examination.note" />
+								<input type="text" id="note" formControlName="note" [(ngModel)]="examination.note" />
 							</ng-template>
 						</span>
 					</li>
@@ -124,7 +124,7 @@
 								{{examination.subjectWeight}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="subjectWeight" formControlName="Subject weight" [(ngModel)]="examination.subjectWeight" />
+								<input type="text" id="subjectWeight" formControlName="subjectWeight" [(ngModel)]="examination.subjectWeight" />
 							</ng-template>
 
 							<!-- <ng-template ngSwitchDefault>

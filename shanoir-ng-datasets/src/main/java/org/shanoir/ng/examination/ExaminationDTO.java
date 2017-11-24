@@ -12,25 +12,28 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
  *
  */
 public class ExaminationDTO {
-	
+
 	private Long id;
-	
+
 	private IdNameDTO subject;
-	
+
 	private Date examinationDate;
-	
-	private IdNameDTO study;
-	
-	private IdNameDTO center;
-	
+
+	private Long studyId;
+
+	private String studyName;
+
+	private Long centerId;
+
+	private String centerName;
+
 	private String comment;
-	
+
 	private String note;
-	
+
 	private Double subjectWeight;
-	
+
 	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
-	
 
 	public Long getId() {
 		return id;
@@ -39,7 +42,6 @@ public class ExaminationDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
-
 
 	public Date getExaminationDate() {
 		return examinationDate;
@@ -57,38 +59,71 @@ public class ExaminationDTO {
 	}
 
 	/**
-	 * @param subject the subject to set
+	 * @param subject
+	 *            the subject to set
 	 */
 	public void setSubject(IdNameDTO subject) {
 		this.subject = subject;
 	}
 
 	/**
-	 * @return the study
+	 * @return the studyId
 	 */
-	public IdNameDTO getStudy() {
-		return study;
+	public Long getStudyId() {
+		return studyId;
 	}
 
 	/**
-	 * @param study the study to set
+	 * @param studyId
+	 *            the studyId to set
 	 */
-	public void setStudy(IdNameDTO study) {
-		this.study = study;
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
 	/**
-	 * @return the center
+	 * @return the studyName
 	 */
-	public IdNameDTO getCenter() {
-		return center;
+	public String getStudyName() {
+		return studyName;
 	}
 
 	/**
-	 * @param center the center to set
+	 * @param studyName
+	 *            the studyName to set
 	 */
-	public void setCenter(IdNameDTO center) {
-		this.center = center;
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
+	}
+
+	/**
+	 * @return the centerId
+	 */
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	/**
+	 * @param centerId
+	 *            the centerId to set
+	 */
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
+	}
+
+	/**
+	 * @return the centerName
+	 */
+	public String getCenterName() {
+		return centerName;
+	}
+
+	/**
+	 * @param centerName
+	 *            the centerName to set
+	 */
+	public void setCenterName(String centerName) {
+		this.centerName = centerName;
 	}
 
 	/**
@@ -99,7 +134,8 @@ public class ExaminationDTO {
 	}
 
 	/**
-	 * @param comment the comment to set
+	 * @param comment
+	 *            the comment to set
 	 */
 	public void setComment(String comment) {
 		this.comment = comment;
@@ -113,7 +149,8 @@ public class ExaminationDTO {
 	}
 
 	/**
-	 * @param note the note to set
+	 * @param note
+	 *            the note to set
 	 */
 	public void setNote(String note) {
 		this.note = note;
@@ -127,7 +164,8 @@ public class ExaminationDTO {
 	}
 
 	/**
-	 * @param subjectWeight the subjectWeight to set
+	 * @param subjectWeight
+	 *            the subjectWeight to set
 	 */
 	public void setSubjectWeight(Double subjectWeight) {
 		this.subjectWeight = subjectWeight;
@@ -141,12 +179,11 @@ public class ExaminationDTO {
 	}
 
 	/**
-	 * @param instrumentBasedAssessmentList the instrumentBasedAssessmentList to set
+	 * @param instrumentBasedAssessmentList
+	 *            the instrumentBasedAssessmentList to set
 	 */
 	public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
 		this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
 	}
-	
-	
 
 }

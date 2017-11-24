@@ -56,13 +56,15 @@ export class ExaminationListComponent {
 
         this.columnDefs = [
             { headerName: "Examination id", field: "id" },
-            { headerName: "Subject", field: "subject.name" },
+            { headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {
+                return (params.data.subject) ? params.data.subject.name : "" ;
+            }},
             {headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.examinationDate);
             }},
-            { headerName: "Research study", field: "study.name" },
+            { headerName: "Research study", field: "studyName" },
             { headerName: "Examination executive", field: "" },
-            { headerName: "Center", field: "center.name" }
+            { headerName: "Center", field: "centerName" }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push(

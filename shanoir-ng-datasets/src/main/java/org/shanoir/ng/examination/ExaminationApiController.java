@@ -123,13 +123,13 @@ public class ExaminationApiController implements ExaminationApi {
 		examination.setId(examinationId);
 
 		// A basic examination can only update certain fields, check that
-		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(examination);
+//		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(examination);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
 		// Check unique constrainte
 		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(examination);
 		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		final FieldErrorMap errors = new FieldErrorMap(hibernateErrors, uniqueErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));

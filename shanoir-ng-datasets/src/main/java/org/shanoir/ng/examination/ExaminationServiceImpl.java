@@ -83,6 +83,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 			// Request to study MS to get subject Name
 			ResponseEntity<IdNameDTO> subjectResponse = null;
 			String subjectURL = microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.SUBJECT + "/" + examination.getSubjectId();
+			if (examination.getSubjectId()!=null)
+			{
 			try {
 				subjectResponse = restTemplate.exchange(
 						subjectURL,
@@ -101,7 +103,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 				throw new ShanoirDatasetException(ErrorModelCode.SUBJECT_NOT_FOUND);
 			}
 			examinationToFront.setSubject(subject);
-			
+			}
 			// Request to study MS to get study Name
 			
 			ResponseEntity<IdNameDTO> studyResponse = null;
@@ -123,7 +125,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 			} else {
 				throw new ShanoirDatasetException(ErrorModelCode.STUDY_NOT_FOUND);
 			}
-			examinationToFront.setStudy(study);
+			examinationToFront.setStudyId(examination.getStudyId());
+			examinationToFront.setStudyName(study.getName());
 			
 			
 			// Request to study MS to get center Name
@@ -147,7 +150,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 			} else {
 				throw new ShanoirDatasetException(ErrorModelCode.CENTER_NOT_FOUND);
 			}
-			examinationToFront.setCenter(center);
+			examinationToFront.setCenterId(examination.getCenterId());
+			examinationToFront.setCenterName(center.getName());
 			
 			// Add the examination result to the list of examinations to send to front
 			examinationsToFrontList.add(examinationToFront);
@@ -210,7 +214,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 					IdNameDTO study = new IdNameDTO();
 					study.setId(studyId);
 					study.setName(names.getStudyName());
-					examinationToFront.setStudy(study);
+					examinationToFront.setStudyId(examination.getStudyId());
+					examinationToFront.setStudyName(study.getName());
 					
 					IdNameDTO subject = new IdNameDTO();
 					subject.setId(subjectId);
@@ -220,7 +225,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 					IdNameDTO center = new IdNameDTO();
 					center.setId(centerId);
 					center.setName(names.getCenterName());
-					examinationToFront.setCenter(center);
+					examinationToFront.setCenterId(examination.getCenterId());
+					examinationToFront.setCenterName(center.getName());
 										
 		return examinationToFront;
 	}
@@ -237,7 +243,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		return savedExamination;
 	}
 
-	/*@Override
+	@Override
 	public Examination update(final Examination examination) throws ShanoirDatasetException {
 		final Examination examinationDb = examinationRepository.findOne(examination.getId());
 		updateExaminationValues(examinationDb, examination);
@@ -248,7 +254,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		}
 		updateShanoirOld(examinationDb);
 		return examinationDb;
-	}*/
+	}
 
 	@Override
 	public void updateFromShanoirOld(final Examination examination) throws ShanoirDatasetException {
@@ -290,11 +296,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 		return false;
 	}
 
-	@Override
-	public Examination update(Examination examination) throws ShanoirDatasetException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	/*
 	 * Update some values of examination to save them in database.
@@ -305,26 +306,26 @@ public class ExaminationServiceImpl implements ExaminationService {
 	 * 
 	 * @return database examination with new values.
 	 */
-/*	private Examination updateExaminationValues(final Examination examinationDb, final Examination examination) {
+	private Examination updateExaminationValues(final Examination examinationDb, final Examination examination) {
 
 		examinationDb.setCenterId(examination.getCenterId());
 		examinationDb.setComment(examination.getComment());
-		examinationDb.setDatasetAcquisitionList(examination.getDatasetAcquisitionList());
-		examinationDb.setExperimentalGroupOfSubjectsId(examination.getExperimentalGroupOfSubjectsId());
+//		examinationDb.setDatasetAcquisitionList(examination.getDatasetAcquisitionList());
+//		examinationDb.setExperimentalGroupOfSubjectsId(examination.getExperimentalGroupOfSubjectsId());
 		examinationDb.setExaminationDate(examination.getExaminationDate());
-		examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
-		examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
-		examinationDb.setInvestigatorExternal(examination.isInvestigatorExternal());
-		examinationDb.setInvestigatorCenterId(examination.getInvestigatorCenterId());
-		examinationDb.setInvestigatorId(examination.getInvestigatorId());
+//		examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
+//		examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
+//		examinationDb.setInvestigatorExternal(examination.isInvestigatorExternal());
+//		examinationDb.setInvestigatorCenterId(examination.getInvestigatorCenterId());
+//		examinationDb.setInvestigatorId(examination.getInvestigatorId());
 		examinationDb.setNote(examination.getNote());
 		examinationDb.setStudyId(examination.getStudyId());
-		examinationDb.setSubjectId(examination.getSubjectId());
+//		examinationDb.setSubjectId(examination.getSubjectId());
 		examinationDb.setSubjectWeight(examination.getSubjectWeight());
-		examinationDb.setTimepoint(examination.getTimepoint());
-		examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
+//		examinationDb.setTimepoint(examination.getTimepoint());
+//		examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
 
 		return examinationDb;
-	}*/
+	}
 
 }

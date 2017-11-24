@@ -46,7 +46,6 @@ export class ExaminationDetailComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.initExamination();
         this.getCenters();
         this.getStudies();
         this.getExamination();
@@ -54,11 +53,6 @@ export class ExaminationDetailComponent implements OnInit {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
         }
-    }
-
-    initExamination(): void {
-        this.examination.study = new IdNameObject();
-        this.examination.center = new IdNameObject();
     }
 
     getExamination(): void {
@@ -110,15 +104,15 @@ export class ExaminationDetailComponent implements OnInit {
 
     buildForm(): void {
         this.examinationDetailForm = this.fb.group({
-            'Id': [this.examination.id],
-            'study': [this.examination.study, Validators.required],
+            'id': [this.examination.id],
+            'studyId': [this.examination.studyId, Validators.required],
             // 'Examination executive': [this.examination.examinationExecutive],
-            'center': [this.examination.center, Validators.required],
+            'centerId': [this.examination.centerId, Validators.required],
             // 'Subject': [this.examination.subject],
-            'Examination date': [this.examination.examinationDate],
-            'Comment': [this.examination.comment],
-            'Note': [this.examination.note],
-            'Subject weight': [this.examination.subjectWeight]
+            'examinationDate': [this.examination.examinationDate],
+            'comment': [this.examination.comment],
+            'note': [this.examination.note],
+            'subjectWeight': [this.examination.subjectWeight]
         });
         this.examinationDetailForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
@@ -185,8 +179,8 @@ export class ExaminationDetailComponent implements OnInit {
     }
 
     formErrors = {
-        'center': '',
-        'study': ''
+        'centerId': '',
+        'studyId': ''
     };
 
     back(): void {
@@ -197,27 +191,32 @@ export class ExaminationDetailComponent implements OnInit {
         this.router.navigate(['/examinationDetail'], { queryParams: { id: this.examinationId, mode: "edit" } });
     }
 
-    create(): void {
+    submit(): void {
         this.examination = this.examinationDetailForm.value;
+        this.setDateFromDatePicker();        
+    }
+
+    create(): void {
+        this.submit();
         this.examinationService.create(this.examination)
             .subscribe((examination) => {
                 this.back();
             }, (err: String) => {
-                if (err.indexOf("name should be unique") != -1) {
+               /* if (err.indexOf("name should be unique") != -1) {
                     this.isNameUnique = false;
-                }
+                }*/
             });
     }
 
     update(): void {
-        this.examination = this.examinationDetailForm.value;
+        this.submit();
         this.examinationService.update(this.examinationId, this.examination)
             .subscribe((examination) => {
                 this.back();
             }, (err: String) => {
-                if (err.indexOf("name should be unique") != -1) {
+               /* if (err.indexOf("name should be unique") != -1) {
                     this.isNameUnique = false;
-                }
+                }*/
             });
     }
 

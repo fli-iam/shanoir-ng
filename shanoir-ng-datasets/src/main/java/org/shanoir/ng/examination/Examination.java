@@ -81,7 +81,7 @@ public class Examination extends HalEntity {
 	private boolean investigatorExternal;
 
 	/** Investigator. */
-	@NotNull
+//	@NotNull
 	private Long investigatorId;
 
 	/** Notes about this examination. */

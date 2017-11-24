@@ -7,8 +7,10 @@ export class Examination {
     examinationDate: Date;
     examinationExecutive: IdNameObject;
     subject: IdNameObject;
-    study: IdNameObject;
-    center: IdNameObject;
+    studyId: number;
+    studyName: string;
+    centerId: number;
+    centerName: string;
     comment: String;
     note: String;
     subjectWeight: number;
