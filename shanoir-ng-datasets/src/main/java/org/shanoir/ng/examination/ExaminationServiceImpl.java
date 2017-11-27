@@ -43,10 +43,10 @@ public class ExaminationServiceImpl implements ExaminationService {
 	 * Logger
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(ExaminationServiceImpl.class);
-	
+
 	@Autowired
 	private MicroserviceRequestsService microservicesRequestsService;
-	
+
 	@Autowired
 	private RestTemplate restTemplate;
 
@@ -62,62 +62,62 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public List<ExaminationDTO> findAll() throws ShanoirDatasetException{
-		
-		List<Examination> examinations = Utils.toList(examinationRepository.findAll()); 
+	public List<ExaminationDTO> findAll() throws ShanoirDatasetException {
+
+		List<Examination> examinations = Utils.toList(examinationRepository.findAll());
 		if (CollectionUtils.isEmpty(examinations)) {
 			return new ArrayList<>();
 		}
 
 		final List<ExaminationDTO> examinationsToFrontList = new ArrayList<ExaminationDTO>();
-		
+
 		for (final Examination examination : examinations) {
-			
+
 			final ExaminationDTO examinationToFront = new ExaminationDTO();
-			
+
 			examinationToFront.setId(examination.getId());
 			examinationToFront.setExaminationDate(examination.getExaminationDate());
-			
+
 			final HttpEntity<Long> entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
-			
+
 			// Request to study MS to get subject Name
 			ResponseEntity<IdNameDTO> subjectResponse = null;
-			String subjectURL = microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.SUBJECT + "/" + examination.getSubjectId();
-			if (examination.getSubjectId()!=null)
-			{
-			try {
-				subjectResponse = restTemplate.exchange(
-						subjectURL,
-						HttpMethod.GET, entity, new ParameterizedTypeReference<IdNameDTO>() {
-						});
-			} catch (RestClientException e) {
-				LOG.error("Error on study microservice request", e);
-				throw new ShanoirDatasetException("Error while getting subject name", ErrorModelCode.SUBJECT_NOT_FOUND);
-			}
-			
-			IdNameDTO subject = null;
-			if (HttpStatus.OK.equals(subjectResponse.getStatusCode())
-					|| HttpStatus.NO_CONTENT.equals(subjectResponse.getStatusCode())) {
-				subject = subjectResponse.getBody();
-			} else {
-				throw new ShanoirDatasetException(ErrorModelCode.SUBJECT_NOT_FOUND);
-			}
-			examinationToFront.setSubject(subject);
+			String subjectURL = microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.SUBJECT + "/"
+					+ examination.getSubjectId();
+			if (examination.getSubjectId() != null) {
+				try {
+					subjectResponse = restTemplate.exchange(subjectURL, HttpMethod.GET, entity,
+							new ParameterizedTypeReference<IdNameDTO>() {
+							});
+				} catch (RestClientException e) {
+					LOG.error("Error on study microservice request", e);
+					throw new ShanoirDatasetException("Error while getting subject name",
+							ErrorModelCode.SUBJECT_NOT_FOUND);
+				}
+
+				IdNameDTO subject = null;
+				if (HttpStatus.OK.equals(subjectResponse.getStatusCode())
+						|| HttpStatus.NO_CONTENT.equals(subjectResponse.getStatusCode())) {
+					subject = subjectResponse.getBody();
+				} else {
+					throw new ShanoirDatasetException(ErrorModelCode.SUBJECT_NOT_FOUND);
+				}
+				examinationToFront.setSubject(subject);
 			}
 			// Request to study MS to get study Name
-			
+
 			ResponseEntity<IdNameDTO> studyResponse = null;
-			String studyURL = microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.STUDY + "/" + examination.getStudyId();
+			String studyURL = microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.STUDY + "/"
+					+ examination.getStudyId();
 			try {
-				studyResponse = restTemplate.exchange(
-						studyURL,
-						HttpMethod.GET, entity, new ParameterizedTypeReference<IdNameDTO>() {
+				studyResponse = restTemplate.exchange(studyURL, HttpMethod.GET, entity,
+						new ParameterizedTypeReference<IdNameDTO>() {
 						});
 			} catch (RestClientException e) {
 				LOG.error("Error on study microservice request", e);
 				throw new ShanoirDatasetException("Error while getting study name", ErrorModelCode.STUDY_NOT_FOUND);
 			}
-			
+
 			IdNameDTO study = null;
 			if (HttpStatus.OK.equals(studyResponse.getStatusCode())
 					|| HttpStatus.NO_CONTENT.equals(studyResponse.getStatusCode())) {
@@ -127,22 +127,21 @@ public class ExaminationServiceImpl implements ExaminationService {
 			}
 			examinationToFront.setStudyId(examination.getStudyId());
 			examinationToFront.setStudyName(study.getName());
-			
-			
+
 			// Request to study MS to get center Name
-			
+
 			ResponseEntity<IdNameDTO> centerResponse = null;
-			String centerURL = microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.CENTER + "/" + examination.getCenterId();
+			String centerURL = microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.CENTER + "/"
+					+ examination.getCenterId();
 			try {
-				centerResponse = restTemplate.exchange(
-						centerURL,
-						HttpMethod.GET, entity, new ParameterizedTypeReference<IdNameDTO>() {
+				centerResponse = restTemplate.exchange(centerURL, HttpMethod.GET, entity,
+						new ParameterizedTypeReference<IdNameDTO>() {
 						});
 			} catch (RestClientException e) {
 				LOG.error("Error on study microservice request", e);
 				throw new ShanoirDatasetException("Error while getting center name", ErrorModelCode.CENTER_NOT_FOUND);
 			}
-			
+
 			IdNameDTO center = null;
 			if (HttpStatus.OK.equals(centerResponse.getStatusCode())
 					|| HttpStatus.NO_CONTENT.equals(centerResponse.getStatusCode())) {
@@ -152,28 +151,29 @@ public class ExaminationServiceImpl implements ExaminationService {
 			}
 			examinationToFront.setCenterId(examination.getCenterId());
 			examinationToFront.setCenterName(center.getName());
-			
-			// Add the examination result to the list of examinations to send to front
+
+			// Add the examination result to the list of examinations to send to
+			// front
 			examinationsToFrontList.add(examinationToFront);
-			
+
 		}
-		
+
 		return examinationsToFrontList;
-		
+
 	}
 
 	@Override
 	public List<Examination> findBy(final String fieldName, final Object value) {
 		return examinationRepository.findBy(fieldName, value);
 	}
-	
+
 	@Override
 	public List<Examination> findBySubjectId(final Long subjectId) {
 		return examinationRepository.findBySubjectId(subjectId);
 	}
 
 	@Override
-	public ExaminationDTO findById(final Long id) throws ShanoirDatasetException{
+	public ExaminationDTO findById(final Long id) throws ShanoirDatasetException {
 		Examination examination = examinationRepository.findOne(id);
 		ExaminationDTO examinationToFront = new ExaminationDTO();
 		examinationToFront.setId(examination.getId());
@@ -182,52 +182,59 @@ public class ExaminationServiceImpl implements ExaminationService {
 		examinationToFront.setNote(examination.getNote());
 		examinationToFront.setSubjectWeight(examination.getSubjectWeight());
 		examinationToFront.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
-		
+
 		final HttpEntity<Long> entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
-		
+
 		Long studyId = examination.getStudyId();
 		Long subjectId = examination.getSubjectId();
 		Long centerId = examination.getCenterId();
-		
+
 		// Request to study MS to get study name, subject name and center name
-					ResponseEntity<StudySubjectCenterNamesDTO> namesResponse = null;
-					String studySerciceURL = microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.STUDY_MS + "/" + studyId
-					+ "/" + subjectId + "/" + centerId;
-					try {
-						namesResponse = restTemplate.exchange(
-								studySerciceURL,
-								HttpMethod.GET, entity, new ParameterizedTypeReference<StudySubjectCenterNamesDTO>() {
-								});
-					} catch (RestClientException e) {
-						LOG.error("Error on study microservice request", e);
-						throw new ShanoirDatasetException("Error while getting studyName, subjectName, centerName : ", ErrorModelCode.BAD_REQUEST);
-					}
-					
-					StudySubjectCenterNamesDTO names = null;
-					if (HttpStatus.OK.equals(namesResponse.getStatusCode())
-							|| HttpStatus.NO_CONTENT.equals(namesResponse.getStatusCode())) {
-						names = namesResponse.getBody();
-					} else {
-						throw new ShanoirDatasetException(ErrorModelCode.BAD_REQUEST);
-					}
-					
-					IdNameDTO study = new IdNameDTO();
-					study.setId(studyId);
-					study.setName(names.getStudyName());
-					examinationToFront.setStudyId(examination.getStudyId());
-					examinationToFront.setStudyName(study.getName());
-					
-					IdNameDTO subject = new IdNameDTO();
-					subject.setId(subjectId);
-					subject.setName(names.getSubjectName());
-					examinationToFront.setSubject(subject);
-					
-					IdNameDTO center = new IdNameDTO();
-					center.setId(centerId);
-					center.setName(names.getCenterName());
-					examinationToFront.setCenterId(examination.getCenterId());
-					examinationToFront.setCenterName(center.getName());
-										
+		ResponseEntity<StudySubjectCenterNamesDTO> namesResponse = null;
+		String studySerciceURL;
+		if (subjectId != null) {
+			studySerciceURL = microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.STUDY_MS + "/"
+					+ studyId + "/" + subjectId + "/" + centerId;
+		} else {
+			studySerciceURL = microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.STUDY_MS + "/"
+					+ studyId + "/" + 0 + "/" + centerId;
+		}
+		try {
+			namesResponse = restTemplate.exchange(studySerciceURL, HttpMethod.GET, entity,
+					new ParameterizedTypeReference<StudySubjectCenterNamesDTO>() {
+					});
+		} catch (RestClientException e) {
+			LOG.error("Error on study microservice request", e);
+			throw new ShanoirDatasetException("Error while getting studyName, subjectName, centerName : ",
+					ErrorModelCode.BAD_REQUEST);
+		}
+
+		StudySubjectCenterNamesDTO names = null;
+		if (HttpStatus.OK.equals(namesResponse.getStatusCode())
+				|| HttpStatus.NO_CONTENT.equals(namesResponse.getStatusCode())) {
+			names = namesResponse.getBody();
+		} else {
+			throw new ShanoirDatasetException(ErrorModelCode.BAD_REQUEST);
+		}
+
+		IdNameDTO study = new IdNameDTO();
+		study.setId(studyId);
+		study.setName(names.getStudyName());
+		examinationToFront.setStudyId(examination.getStudyId());
+		examinationToFront.setStudyName(study.getName());
+
+		IdNameDTO subject = new IdNameDTO();
+		subject.setId(subjectId);
+		subject.setName(names.getSubjectName());
+		examinationToFront.setSubject(subject);
+		
+
+		IdNameDTO center = new IdNameDTO();
+		center.setId(centerId);
+		center.setName(names.getCenterName());
+		examinationToFront.setCenterId(examination.getCenterId());
+		examinationToFront.setCenterName(center.getName());
+
 		return examinationToFront;
 	}
 
@@ -296,7 +303,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 		return false;
 	}
 
-
 	/*
 	 * Update some values of examination to save them in database.
 	 * 
@@ -310,20 +316,20 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 		examinationDb.setCenterId(examination.getCenterId());
 		examinationDb.setComment(examination.getComment());
-//		examinationDb.setDatasetAcquisitionList(examination.getDatasetAcquisitionList());
-//		examinationDb.setExperimentalGroupOfSubjectsId(examination.getExperimentalGroupOfSubjectsId());
+		// examinationDb.setDatasetAcquisitionList(examination.getDatasetAcquisitionList());
+		// examinationDb.setExperimentalGroupOfSubjectsId(examination.getExperimentalGroupOfSubjectsId());
 		examinationDb.setExaminationDate(examination.getExaminationDate());
-//		examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
-//		examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
-//		examinationDb.setInvestigatorExternal(examination.isInvestigatorExternal());
-//		examinationDb.setInvestigatorCenterId(examination.getInvestigatorCenterId());
-//		examinationDb.setInvestigatorId(examination.getInvestigatorId());
+		// examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
+		// examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
+		// examinationDb.setInvestigatorExternal(examination.isInvestigatorExternal());
+		// examinationDb.setInvestigatorCenterId(examination.getInvestigatorCenterId());
+		// examinationDb.setInvestigatorId(examination.getInvestigatorId());
 		examinationDb.setNote(examination.getNote());
 		examinationDb.setStudyId(examination.getStudyId());
-//		examinationDb.setSubjectId(examination.getSubjectId());
+		// examinationDb.setSubjectId(examination.getSubjectId());
 		examinationDb.setSubjectWeight(examination.getSubjectWeight());
-//		examinationDb.setTimepoint(examination.getTimepoint());
-//		examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
+		// examinationDb.setTimepoint(examination.getTimepoint());
+		// examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
 
 		return examinationDb;
 	}
