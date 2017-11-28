@@ -51,14 +51,16 @@ public class ImporterApiController implements ImporterApi {
 	private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
 	@Value("${shanoir.import.upload.folder}")
-    private String uploadFolder;
-	
+	private String uploadFolder;
+
 	@Autowired
 	private DicomFileAnalyzer dicomFileAnalyzer;
 
-    public ResponseEntity<Void> uploadFiles(@ApiParam(value = "file detail") @RequestPart("files") MultipartFile[] files) throws RestServiceException {
-    		if(files.length == 0) throw new RestServiceException(
-    				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+	public ResponseEntity<Void> uploadFiles(
+			@ApiParam(value = "file detail") @RequestPart("files") MultipartFile[] files) throws RestServiceException {
+		if (files.length == 0)
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
 		try {
 			for (int i = 0; i < files.length; i++) {
 				saveTempFile(files[i]);
@@ -68,33 +70,35 @@ public class ImporterApiController implements ImporterApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
 		}
-    }
-    
-    @Override
-    public ResponseEntity<Void> selectSeries(@ApiParam(value = "selected series" ,required=true )  @Valid @RequestBody final Collection<Serie> selectedSeries) 
-    		throws RestServiceException {
-    	try {
-    		// TODO: upload selected series to PACS?
-    		System.out.println("selected series: " + selectedSeries.toString());
-    		return new ResponseEntity<Void>(HttpStatus.OK);
-    	} catch (Exception e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving selected series.", null));
-		}
-    }
+	}
 
-    /**
-     * This method takes a multipart file and stores it in a configured
-     * upload folder with a random name and the suffix .upload
-     * @param file
-     * @throws IOException
-     */
+	@Override
+	public ResponseEntity<Void> selectSeries(
+			@ApiParam(value = "selected series", required = true) @Valid @RequestBody final Collection<Serie> selectedSeries)
+			throws RestServiceException {
+		try {
+			// TODO: upload selected series to PACS?
+			LOG.debug("selected series: " + selectedSeries.toString());
+			return new ResponseEntity<Void>(HttpStatus.OK);
+		} catch (Exception e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"Error while saving selected series.", null));
+		}
+	}
+
+	/**
+	 * This method takes a multipart file and stores it in a configured upload
+	 * folder with a random name and the suffix .upload
+	 * 
+	 * @param file
+	 * @throws IOException
+	 */
 	private File saveTempFile(MultipartFile file) throws IOException {
 		long n = random.nextLong();
 		if (n == Long.MIN_VALUE) {
-		    n = 0;      // corner case
+			n = 0; // corner case
 		} else {
-		    n = Math.abs(n);
+			n = Math.abs(n);
 		}
 		File uploadFile = new File(uploadFolder, Long.toString(n) + UPLOAD_FILE_SUFFIX);
 		byte[] bytes = file.getBytes();
@@ -105,84 +109,70 @@ public class ImporterApiController implements ImporterApi {
 	/**
 	 * @todo refactor and clean-up here
 	 */
-    public ResponseEntity<String> uploadDicomZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException {
-		if(dicomZipFile == null) throw new RestServiceException(
-				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
-		if(!isZipFile(dicomZipFile)) throw new RestServiceException(
-				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Wrong content type of file upload, .zip required.", null));
+	public ResponseEntity<String> uploadDicomZipFile(
+			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
+			throws RestServiceException {
+		if (dicomZipFile == null)
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+		if (!isZipFile(dicomZipFile))
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"Wrong content type of file upload, .zip required.", null));
 
 		try {
 			File tempFile = saveTempFile(dicomZipFile);
-			if(!Utils.checkZipContainsFile(DICOMDIR, tempFile)) throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "DICOMDIR is missing in .zip file.", null));
-			
+			if (!Utils.checkZipContainsFile(DICOMDIR, tempFile))
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+						"DICOMDIR is missing in .zip file.", null));
+
 			String fileName = tempFile.getName();
 			int pos = fileName.lastIndexOf(FILE_POINT);
 			if (pos > 0) {
-			    fileName = fileName.substring(0, pos);
+				fileName = fileName.substring(0, pos);
 			}
-			
+
 			File unzipFolderFile = new File(tempFile.getParentFile().getAbsolutePath() + File.separator + fileName);
-			if(!unzipFolderFile.exists()) {
+			if (!unzipFolderFile.exists()) {
 				unzipFolderFile.mkdirs();
 			} else {
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while unzipping file: folder already exists.", null));
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+						"Error while unzipping file: folder already exists.", null));
 			}
-			
+
 			Utils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
-			
+
 			File dicomDirFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + DICOMDIR);
 			DicomDirToJsonReader dicomDirToJsonReader = null;
 			JsonNode dicomDirJsonNode = null;
-			if(dicomDirFile.exists()) {
+			if (dicomDirFile.exists()) {
 				dicomDirToJsonReader = new DicomDirToJsonReader(dicomDirFile);
 				dicomDirJsonNode = dicomDirToJsonReader.readDicomDirToJsonNode();
 			}
-			
+
 			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode);
-			
-			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(dicomDirJsonNode);
-//			LOG.info(dicomDirJsonString);
+
+			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
+					.writeValueAsString(dicomDirJsonNode);
+			// LOG.info(dicomDirJsonString);
 			return new ResponseEntity<String>(dicomDirJsonString, HttpStatus.OK);
-			
+
 		} catch (IOException e) {
 			LOG.error(e.getMessage());
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
 		}
-    }
+	}
 
-    /**
-     * Check if sent file is of type .zip.
-     * @param file
-     */
+	/**
+	 * Check if sent file is of type .zip.
+	 * 
+	 * @param file
+	 */
 	private boolean isZipFile(MultipartFile file) {
-		if(file.getContentType().equals(APPLICATION_ZIP)
-				|| file.getContentType().equals(APPLICATION_OCTET_STREAM)
+		if (file.getContentType().equals(APPLICATION_ZIP) || file.getContentType().equals(APPLICATION_OCTET_STREAM)
 				|| file.getOriginalFilename().endsWith(ZIP)) {
 			return true;
 		}
 		return false;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

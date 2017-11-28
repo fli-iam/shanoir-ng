@@ -21,21 +21,18 @@ public class RabbitMqRPCClient {
 	@Autowired
 	private RabbitTemplate template;
 
-	// @Autowired
-	// private DirectExchange exchange;
-
-
 	public void send(String message) {
-		System.out.println(" [x] Send subject to sh_old with content (" + message + ")");
-		byte[] response = (byte[]) template.convertSendAndReceive(RabbitMqConfiguration.subjectRPCQueueOut().getName(), message);
+		LOG.debug("[x] Send subject to sh_old with content (" + message + ")");
+		byte[] response = (byte[]) template.convertSendAndReceive(RabbitMqConfiguration.subjectRPCQueueOut().getName(),
+				message);
 		String msg = null;
-		try{
-			msg = new String(response,"UTF-8");
-		}catch(IOException ioe){
-			System.out.println(" IO EXCEPTION " + ioe );
+		try {
+			msg = new String(response, "UTF-8");
+		} catch (IOException ioe) {
+			LOG.error(" IO EXCEPTION " + ioe);
 		}
-		System.out.println(" [x] Received '" + msg + "'");
-		System.out.println(" [.] Got '" + response + "'");
+		LOG.debug(" [x] Received '" + msg + "'");
+		LOG.debug(" [.] Got '" + response + "'");
 	}
 
 }

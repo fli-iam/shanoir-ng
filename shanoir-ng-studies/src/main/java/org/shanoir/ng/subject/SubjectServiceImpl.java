@@ -193,7 +193,6 @@ public class SubjectServiceImpl implements SubjectService {
 	public boolean updateShanoirOld(final Subject subject) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			System.out.println("Send update to Shanoir Old :" + new ObjectMapper().writeValueAsString(subject));
 			rabbitTemplate.convertAndSend(RabbitMqConfiguration.subjectQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(subject));
 			return true;

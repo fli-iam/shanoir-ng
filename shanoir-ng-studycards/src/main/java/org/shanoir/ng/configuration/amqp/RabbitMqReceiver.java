@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
 
-/**ShanoirStudyCardException
+/**
+ * Rabbit MQ receiver.
+ * 
  * @author msimon
  *
  */
@@ -31,7 +33,6 @@ public class RabbitMqReceiver {
 	 */
 	public void receiveStudyCardMessage(final String message) {
 		LOG.debug(" [x] Received '" + message + "'");
-		System.out.println(" [x] Received '" + message + "'");
 		final Gson oGson = new Gson();
 		final StudyCard studyCard = oGson.fromJson(message, StudyCard.class);
 
@@ -39,12 +40,10 @@ public class RabbitMqReceiver {
 			studyCardService.updateFromShanoirOld(studyCard);
 			latch.countDown();
 		} catch (ShanoirStudyCardsException e) {
-			// Exception.
+			LOG.error("Error on update", e);
 			// TODO: how to manage these exceptions to avoid messages loop
 		}
 	}
-
-
 
 	/**
 	 * Receive message.
@@ -55,7 +54,6 @@ public class RabbitMqReceiver {
 	public void receiveStudyCardDeleteMessage(final String message) {
 		LOG.info("NEW MESSAGE");
 		LOG.debug(" [x] Received StudyCard Delete'" + message + "'");
-		System.out.println(" [x] Received '" + message + "'");
 
 		final Gson oGson = new Gson();
 		final StudyCard studyCard = oGson.fromJson(message, StudyCard.class);
@@ -64,7 +62,7 @@ public class RabbitMqReceiver {
 			studyCardService.deleteFromShanoirOld(studyCard);
 			latch.countDown();
 		} catch (ShanoirStudyCardsException e) {
-			// Exception.
+			LOG.error("Error on deletion", e);
 			// TODO: how to manage these exceptions to avoid messages loop
 		}
 	}

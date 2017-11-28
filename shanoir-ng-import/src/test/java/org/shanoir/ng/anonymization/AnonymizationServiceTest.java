@@ -9,6 +9,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -20,6 +22,8 @@ import org.springframework.core.io.Resource;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class AnonymizationServiceTest {
+
+	private static final Logger LOG = LoggerFactory.getLogger(AnonymizationServiceTest.class);
 
 	@InjectMocks
 	private AnonymizationServiceImpl anonymizationService;
@@ -56,8 +60,7 @@ public class AnonymizationServiceTest {
 		
 		long chrono2 = java.lang.System.currentTimeMillis() ; 
 		long temps = chrono2 - chrono ; 
-		System.out.println("Spended time to anonymize file = " + temps + " ms") ; 
-
+		LOG.debug("Spended time to anonymize file = " + temps + " ms") ; 
 	}
 
 	private ArrayList<File> createImageArray() throws IOException {

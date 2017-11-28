@@ -95,7 +95,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 		} catch (Exception e) {
 			ShanoirStudyCardsException.logAndThrow(LOG, "Error while updating Study Card: " + e.getMessage());
 		}
-		final StudyStudyCardDTO studyCardDTO = new StudyStudyCardDTO(studyCard.getId(), studyCard.getStudyId(), oldStudyId);
+		final StudyStudyCardDTO studyCardDTO = new StudyStudyCardDTO(studyCard.getId(), studyCard.getStudyId(),
+				oldStudyId);
 		updateMsStudies(studyCardDTO);
 		return studyCardDb;
 	}
@@ -104,7 +105,6 @@ public class StudyCardServiceImpl implements StudyCardService {
 	public void updateFromShanoirOld(final StudyCard studyCard) throws ShanoirStudyCardsException {
 		if (studyCard.getId() == null) {
 			LOG.info("Insert new Study Card with name " + studyCard.getName() + " from shanoir-old");
-			System.out.println("Insert new Study Card with name " + studyCard.getName() + " from shanoir-old");
 			try {
 				studyCardRepository.save(studyCard);
 			} catch (Exception e) {
@@ -117,8 +117,6 @@ public class StudyCardServiceImpl implements StudyCardService {
 				try {
 					LOG.info("Update existing Study card with name " + studyCard.getName() + " (id: "
 							+ studyCard.getId() + ") from shanoir-old");
-					System.out.println("Update existing Study card with name " + studyCard.getName() + " (id: "
-							+ studyCard.getId() + ") from shanoir-old");
 					studyCardRepository.save(studyCard);
 				} catch (Exception e) {
 					ShanoirStudyCardsException.logAndThrow(LOG,
@@ -127,8 +125,6 @@ public class StudyCardServiceImpl implements StudyCardService {
 			} else {
 				LOG.warn("Import new study card with name " + studyCard.getName() + "  (id: " + studyCard.getId()
 						+ ") from shanoir-old");
-				System.out.println("Import new study card with name " + studyCard.getName() + "  (id: "
-						+ studyCard.getId() + ") from shanoir-old");
 				studyCardRepository.save(studyCard);
 			}
 		}
@@ -138,8 +134,6 @@ public class StudyCardServiceImpl implements StudyCardService {
 	public void deleteFromShanoirOld(final StudyCard studyCard) throws ShanoirStudyCardsException {
 		if (studyCard.getId() != null) {
 			LOG.warn("Delete study Card with name " + studyCard.getName() + " (id: " + studyCard.getId()
-					+ ") from shanoir-old");
-			System.out.println("Delete study Card with name " + studyCard.getName() + " (id: " + studyCard.getId()
 					+ ") from shanoir-old");
 			try {
 				studyCardRepository.delete(studyCard);
@@ -194,8 +188,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
-	public Long searchCenterId(Long studyCardId) {		
-		StudyCard studyCard=studyCardRepository.findOne(studyCardId);
+	public Long searchCenterId(Long studyCardId) {
+		StudyCard studyCard = studyCardRepository.findOne(studyCardId);
 		return studyCard.getCenterId();
 	}
 
