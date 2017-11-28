@@ -16,9 +16,9 @@ const METADATA = webpackMerge(commonConfig.metadata, {
     BACKEND_API_STUDIES_MS_URL: 'http://localhost:9902',
     BACKEND_API_IMPORT_MS_URL: 'http://localhost:9903',
     BACKEND_API_DATASET_MS_URL: 'http://localhost:9906',
-    KEYCLOAK_BASE_URL: 'http://localhost:8080/auth',
-    LOGOUT_REDIRECT_URL: 'http://localhost:8081/shanoir-ng/index.html',
-    port: 8081,
+    KEYCLOAK_BASE_URL: 'http://localhost/auth',
+    LOGOUT_REDIRECT_URL: 'http://localhost:8080/shanoir-ng/index.html',
+    port: 8080,
 
     ENV: ENV,
 });
@@ -45,7 +45,7 @@ module.exports = webpackMerge(commonConfig, {
     },
 
     plugins: [
-        new OpenBrowserPlugin({ url: 'http://localhost:8081/shanoir-ng' }),
+        new OpenBrowserPlugin({ url: 'http://localhost:8080/shanoir-ng' }),
 
         new HtmlWebpackPlugin({
             filename: 'index.html',
