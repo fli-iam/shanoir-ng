@@ -8,6 +8,7 @@ import java.util.Collection;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.importer.dcm2nii.NIfTIConverter;
 import org.shanoir.ng.importer.dicom.DicomDirToJsonReader;
 import org.shanoir.ng.importer.dicom.DicomFileAnalyzer;
 import org.shanoir.ng.importer.dto.Serie;
@@ -151,9 +152,12 @@ public class ImporterApiController implements ImporterApi {
 
 			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode);
 
+			NIfTIConverter niftiConverter = new NIfTIConverter(dicomDirJsonNode, unzipFolderFile);
+			niftiConverter.prepareConversion();
+
 			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(dicomDirJsonNode);
-			// LOG.info(dicomDirJsonString);
+			LOG.info(dicomDirJsonString);
 			return new ResponseEntity<String>(dicomDirJsonString, HttpStatus.OK);
 
 		} catch (IOException e) {
