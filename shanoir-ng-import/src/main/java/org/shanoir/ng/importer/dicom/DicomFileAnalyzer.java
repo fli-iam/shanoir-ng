@@ -128,6 +128,7 @@ public class DicomFileAnalyzer {
 			checkSeriesDate(serie, datasetAttributes);
 			addSeriesEquipment(serie, datasetAttributes);
 			addSeriesIsCompressed(serie, datasetAttributes);
+			addSeriesSeparateDatasetsInfo(serie, datasetAttributes);
 		} catch (IOException e) {
 			LOG.error("Error during DICOM file process", e);
 		} finally {
@@ -141,6 +142,35 @@ public class DicomFileAnalyzer {
 		}
 	}
 
+	/**
+	 * @param serie
+	 * @param datasetAttributes
+	 */
+	private void addSeriesSeparateDatasetsInfo(JsonNode serie, Attributes datasetAttributes) {
+		if (serie.path("acquisitionNumber").isMissingNode()) {
+			String acquisitionNumber = datasetAttributes.getString(Tag.AcquisitionNumber);
+			if (acquisitionNumber != null && !acquisitionNumber.isEmpty()) {
+				((ObjectNode) serie).put("acquisitionNumber", acquisitionNumber);
+			}
+		}
+		if (serie.path("echoNumbers").isMissingNode()) {
+			ObjectNode echoNumbers = mapper.createObjectNode();
+			String[] echoNumbersArray = datasetAttributes.getStrings(Tag.EchoNumbers);
+			for (int i = 0; i < echoNumbersArray.length; i++) {
+				echoNumbers.put("echoNumber", echoNumbersArray[i]);		
+			}
+			((ObjectNode) serie).set("echoNumbers", echoNumbers);
+		}
+		if (serie.path("imageOrientationPatient").isMissingNode()) {
+			ObjectNode imageOrientationPatient = mapper.createObjectNode();
+			String[] imageOrientationPatientArray = datasetAttributes.getStrings(Tag.ImageOrientationPatient);
+			for (int i = 0; i < imageOrientationPatientArray.length; i++) {
+				imageOrientationPatient.put("imageOrientationPatient", imageOrientationPatientArray[i]);		
+			}
+			((ObjectNode) serie).set("imageOrientationPatient", imageOrientationPatient);
+		}
+	}
+	
 	/**
 	 * @param serie
 	 * @param datasetAttributes
@@ -210,7 +240,7 @@ public class DicomFileAnalyzer {
 	 * @param sopClassUID
 	 */
 	private void checkIsMultiFrame(JsonNode serie, Attributes datasetAttributes, String sopClassUID) {
-		if (serie.path("isMultiFrame").isNull()) {
+		if (serie.path("isMultiFrame").isMissingNode()) {
 			if (UID.EnhancedMRImageStorage.equals(sopClassUID)) {
 				((ObjectNode) serie).put("isMultiFrame", "true");
 				String frameCount = new Integer(getFrameCount(datasetAttributes)).toString();
