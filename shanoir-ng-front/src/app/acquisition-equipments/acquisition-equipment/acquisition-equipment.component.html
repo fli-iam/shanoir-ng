@@ -1,0 +1,107 @@
+<div class="content-component">
+	<form [formGroup]="acqEquipForm" class="max-content" novalidate>
+		<div class="layout">
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'"> 
+					<div class="header command-zone" i18n="View acqEquip|Title@@acqEqptDetailViewTitle">Details on acquisition equipment</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'"> 
+					<div class="header command-zone" i18n="Edit acqEquip|Title@@acqEqptDetailEditTitle">Edit acquisition equipment</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'"> 
+					<div class="header command-zone" i18n="Create acqEquip|Title@@acqEqptDetailCreateTitle">Create acquisition equipment</div>
+				</ng-template>
+			</span>
+			<fieldset>
+				<ol>
+					<label *ngIf="isModelNumberUnique==false" class="form-validation-alert" i18n="Edit acqEquip|Model number unique error@@acqEqptDetailModelNumberUniqueError">This equipment (same manufacturer model and same serial number) already exists!</label>
+					<li *ngIf="mode=='view'">
+						<label i18n="AcqEquip detail|Manufacturer label@@acqEqptDetailManuf">Manufacturer</label>
+						<span class="right-col">
+							<a [routerLink]="['/manufacturer']" [queryParams]="{mode: 'view', id: acqEquip.manufacturerModel?.manufacturer?.id}">
+								{{acqEquip.manufacturerModel?.manufacturer?.name}}
+							</a>
+						</span>
+					</li>
+					<li class="required">
+						<label i18n="AcqEquip detail|Manufacturer model label@@acqEqptDetailManufModel" class="required-label">Manufacturer model</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								<a [routerLink]="['/manufacturer-model']" [queryParams]="{mode: 'view', id: acqEquip.manufacturerModel?.id}">
+									{{acqEquip.manufacturerModel?.name}}
+								</a>
+							</ng-template>
+							<ng-template ngSwitchDefault> 
+								<select id="manufModel" required formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel">
+									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</option>
+								</select>
+								<button i18n="AcqEquip detail|Create new model label@@acqEqptDetailNewManufModel" (click)="manufModelModal.show()">
+									<img [src]="addIconPath"/>
+									new manufacturer model
+								</button>
+								<label *ngIf="formErrors.manufacturerModel.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li *ngIf="mode=='view'">
+						<label i18n="AcqEquip detail|Model modality label@@acqEqptDetailModality">Model modality</label>
+						<span class="right-col">
+							{{datasetModalityTypeEnumValue}}
+						</span>
+					</li>
+					<li class="required">
+						<label i18n="AcqEquip detail|Center label@@acqEqptDetailCenter" class="required-label">Center</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: acqEquip.center?.id}">
+									{{acqEquip.center?.name}}
+								</a>
+							</ng-template>
+							<ng-template ngSwitchDefault> 
+								<select id="center" required formControlName="center" [(ngModel)]="acqEquip.center">
+									<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
+								</select>
+								<label *ngIf="formErrors.center.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
+								<a [routerLink] = "['/center']" [queryParams]="{mode: 'view', id: acqEquip.center?.id}">details</a>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="AcqEquip detail|Serial number label@@acqEqptDetailSerialNumber">
+							Serial Number
+							<img [src]="infoIconPath" i18n-title="AcqEquip detail|Serial number tooltip@@acqEqptDetailSerialNumberTooltip" title="Value of DICOM Device Serial Number tag (0018,1000). Used to verify data imported from this equipment."/>
+						</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
+								{{acqEquip.serialNumber}}
+							</ng-template>
+							<ng-template ngSwitchDefault> 
+								<input type="text" id="serialNumber" formControlName="serialNumber" [(ngModel)]="acqEquip.serialNumber"/>
+							</ng-template>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+			<div class="footer command-zone">
+				<span [ngSwitch]="mode">
+					<button i18n="View acqEquip|Back button label@@backButton" class="Button" (click)="back()">Back</button>	
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
+						<button type="submit" i18n="View acqEquip|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
+						<button type="submit" i18n="Edit acqEquip|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!acqEquipForm.valid">Update</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
+						<button type="submit" i18n="Create acqEquip|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!acqEquipForm.valid">Create</button>
+					</ng-template>
+				</span>
+			</div>
+		</div>
+	</form>
+</div>
+
+<app-modal modalDialogId="manufModelModal" #manufModelModal>
+    <div class="app-modal-body">
+      <manufacturer-model-detail [modeFromAcqEquip]="'create'" (closing)="closePopin($event)"></manufacturer-model-detail>
+    </div>
+</app-modal>

@@ -3,10 +3,10 @@ import { Response, Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 
-import { ExtensionRequestInfo } from '../extensionRequest/extension.request.info.model';
+import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
 import { User } from './user.model';
 import * as AppUtils from '../../utils/app.utils';
-import { HandleErrorService } from '../../shared/utils/handle.error.service';
+import { HandleErrorService } from '../../shared/utils/handle-error.service';
 
 @Injectable()
 export class UserService {

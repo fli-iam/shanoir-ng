@@ -1,5 +1,5 @@
-import { AccountRequestInfo } from '../accountRequestInfo/account.request.info.model';
-import { ExtensionRequestInfo } from '../extensionRequest/extension.request.info.model';
+import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
+import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
 import { Role } from '../../roles/role.model';
 
 export class User {

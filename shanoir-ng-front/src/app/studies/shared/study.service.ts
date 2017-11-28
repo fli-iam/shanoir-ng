@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { Study } from './study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import * as AppUtils from '../../utils/app.utils';
-import { HandleErrorService } from '../../shared/utils/handle.error.service';
+import { HandleErrorService } from '../../shared/utils/handle-error.service';
 import { IdNameObject } from '../../examinations/shared/id-name-object.model';
 
 @Injectable()

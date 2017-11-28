@@ -1,25 +1,25 @@
 import { ModuleWithProviders } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { AccountRequestComponent } from './users/accountRequest/account.request.component';
-import { AcquisitionEquipmentDetailComponent } from './acqEquip/detail/acqEquip.detail.component';
-import { AcquisitionEquipmentListComponent } from './acqEquip/list/acqEquip.list.component';
-import { AuthAdminGuard } from './shared/roles/auth.admin.guard';
-import { AuthNotGuestGuard } from './shared/roles/auth.not.guest.guard';
-import { CenterDetailComponent } from './centers/detail/center.detail.component';
-import { CenterListComponent } from './centers/list/center.list.component';
-import { EditUserComponent } from './users/edit/edit.user.component';
-import { ExtensionRequestComponent } from './users/extensionRequest/extension.request.component';
+import { AccountRequestComponent } from './users/account-request/account-request.component';
+import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
+import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
+import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
+import { AuthNotGuestGuard } from './shared/roles/auth-not-guest-guard';
+import { CenterComponent } from './centers/center/center.component';
+import { CenterListComponent } from './centers/center-list/center-list.component';
+import { ExaminationComponent } from './examinations/examination/examination.component';
+import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
+import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { HomeComponent } from './home/home.component';
 import { ImportComponent } from './import/import.component';
-import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
-import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
-import { StudyDetailComponent } from './studies/detail/study-detail.component';
-import { StudyListComponent } from './studies/list/study-list.component';
-import { StudyTreeComponent } from './studies/tree/study.tree.component';
-import { UserListComponent } from './users/list/user.list.component';
-import { ExaminationListComponent } from './examinations/list/examination.list.component';
-import { ExaminationDetailComponent } from './examinations/detail/examination.detail.component';
+import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
+import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
+import { StudyComponent } from './studies/study/study.component';
+import { StudyListComponent } from './studies/study-list/study-list.component';
+import { StudyTreeComponent } from './studies/tree/study-tree.component';
+import { UserComponent } from './users/user/user.component';
+import { UserListComponent } from './users/user-list/user-list.component';
 
 const appRoutes: Routes = [
   {
@@ -27,29 +27,29 @@ const appRoutes: Routes = [
     redirectTo: '/home',
     pathMatch: 'full'
   }, {
-    path: 'accountRequest',
+    path: 'account-request',
     component: AccountRequestComponent,
   }, {
-    path: 'acqEquipDetail',
-    component: AcquisitionEquipmentDetailComponent,
+    path: 'acquisition-equipment',
+    component: AcquisitionEquipmentComponent,
     canActivate: [AuthNotGuestGuard]
   }, {
-    path: 'acqEquipList',
+    path: 'acquisition-equipment-list',
     component: AcquisitionEquipmentListComponent,
     canActivate: [AuthNotGuestGuard]
   }, {
-    path: 'centerDetail',
-    component: CenterDetailComponent,
+    path: 'center',
+    component: CenterComponent,
     canActivate: [AuthNotGuestGuard]
   }, {
-    path: 'centerlist',
+    path: 'center-list',
     component: CenterListComponent,
     canActivate: [AuthNotGuestGuard]
   }, {
-    path: 'editUser',
-    component: EditUserComponent
+    path: 'user',
+    component: UserComponent
   }, {
-    path: 'extensionrequest',
+    path: 'extension-request',
     component: ExtensionRequestComponent,
   }, {
     path: 'home',
@@ -58,34 +58,34 @@ const appRoutes: Routes = [
     path: 'import',
     component: ImportComponent
   }, {
-    path: 'manufDetail',
-    component: ManufacturerDetailComponent,
+    path: 'manufacturer',
+    component: ManufacturerComponent,
     canActivate: [AuthNotGuestGuard]
   }, {
-    path: 'manufModelDetail',
-    component: ManufacturerModelDetailComponent,
+    path: 'manufacturer-model',
+    component: ManufacturerModelComponent,
     canActivate: [AuthNotGuestGuard]
   }, {
-    path: 'studyDetail',
-    component: StudyDetailComponent,
+    path: 'study',
+    component: StudyComponent,
     canActivate: [AuthNotGuestGuard]
   }, {
-    path: 'studylist',
+    path: 'study-list',
     component: StudyListComponent,
     canActivate: [AuthNotGuestGuard]
   }, {
-    path: 'examinationList',
+    path: 'examination-list',
     component: ExaminationListComponent,
     canActivate: [AuthNotGuestGuard]
   },{
-    path: 'examinationDetail',
-    component: ExaminationDetailComponent,
+    path: 'examination',
+    component: ExaminationComponent,
     canActivate: [AuthNotGuestGuard]
   },{
-    path: 'treeTest',
+    path: 'tree-test',
     component: StudyTreeComponent,
   }, {
-    path: 'userlist',
+    path: 'user-list',
     component: UserListComponent,
     canActivate: [AuthAdminGuard]
   }

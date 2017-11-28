@@ -1,8 +1,0 @@
-:host() { position: relative; padding: 0 4px; cursor: default; margin: 2px 0 0 12px; display: block; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
-.arrow { cursor: pointer; left: -11px; top: -1px; position: absolute; }
-.picto { height: 14px; vertical-align: middle; }
-input[type="checkbox"] { vertical-align: middle; }
-input[type="text"] { color: var(--very-dark-grey); }
-tool-tip { color: var(--dark-grey); }
-.content { display: inline; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
-.clickable { cursor: pointer; }

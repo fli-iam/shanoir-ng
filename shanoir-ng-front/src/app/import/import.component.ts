@@ -3,14 +3,14 @@ import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms'
 import { Observable } from 'rxjs/Rx';
 
 import { ImportService } from './import.service';
-import { TreeNodeComponent } from '../shared/tree/tree.node.component';
+import { TreeNodeComponent } from '../shared/components/tree/tree.node.component';
 import { slideDown } from '../shared/animations/animations';
-import { PatientsDicom, PatientDicom, SerieDicom } from "./dicom.data.model";
-import { ModalComponent } from '../shared/utils/modal.component';
+import { PatientsDicom, PatientDicom, SerieDicom } from "./dicom-data.model";
+import { ModalComponent } from '../shared/components/modal/modal.component';
 import * as AppUtils from '../utils/app.utils';
 import { Study } from '../studies/shared/study.model';
 import { StudyService } from '../studies/shared/study.service';
-import { StudyCard } from '../studies/shared/studycard.model';
+import { StudyCard } from '../studies/shared/study-card.model';
 import { Subject } from '../subjects/shared/subject.model';
 declare var papaya: any;
 

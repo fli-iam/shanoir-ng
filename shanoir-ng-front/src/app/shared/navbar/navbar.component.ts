@@ -1,6 +1,6 @@
 import { Component, ViewChildren, QueryList } from '@angular/core';
 
-import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
+import { DropdownMenuComponent } from '../components/dropdown-menu/dropdown-menu.component'
 import { KeycloakService } from "../keycloak/keycloak.service";
 
 @Component({

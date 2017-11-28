@@ -10,54 +10,54 @@ import { MyDatePickerModule } from 'mydatepicker';
 
 import { routing } from './app.routing';
 
-import { AccountEventsService } from './users/account/account.events.service';
-import { AccountRequestComponent} from "./users/accountRequest/account.request.component";
-import { AccountRequestInfoComponent} from "./users/accountRequestInfo/account.request.info.component";
-import { AcquisitionEquipmentDetailComponent } from "./acqEquip/detail/acqEquip.detail.component";
-import { AcquisitionEquipmentListComponent } from "./acqEquip/list/acqEquip.list.component";
-import { AcquisitionEquipmentService } from "./acqEquip/shared/acqEquip.service";
+import { AccountEventsService } from './users/account/account-events.service';
+import { AccountRequestComponent} from "./users/account-request/account-request.component";
+import { AccountRequestInfoComponent} from "./users/account-request-info/account-request-info.component";
+import { AcquisitionEquipmentComponent } from "./acquisition-equipments/acquisition-equipment/acquisition-equipment.component";
+import { AcquisitionEquipmentListComponent } from "./acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component";
+import { AcquisitionEquipmentService } from "./acquisition-equipments/shared/acquisition-equipment.service";
 import { AppComponent }   from './app.component';
-import { AuthAdminGuard }   from './shared/roles/auth.admin.guard';
-import { AuthNotGuestGuard }   from './shared/roles/auth.not.guest.guard';
-import { CenterDetailComponent } from './centers/detail/center.detail.component';
-import { CenterListComponent }   from './centers/list/center.list.component';
+import { AuthAdminGuard }   from './shared/roles/auth-admin-guard';
+import { AuthNotGuestGuard }   from './shared/roles/auth-not-guest-guard';
+import { CenterComponent } from './centers/center/center.component';
+import { CenterListComponent }   from './centers/center-list/center-list.component';
 import { CenterService } from './centers/shared/center.service';
-import { ConfirmDialogComponent } from "./shared/utils/confirm.dialog.component";
-import { ConfirmDialogService } from "./shared/utils/confirm.dialog.service";
+import { ConfirmDialogComponent } from "./shared/components/confirm-dialog/confirm-dialog.component";
+import { ConfirmDialogService } from "./shared/components/confirm-dialog/confirm-dialog.service";
 import { ConsoleComponent }   from './shared/console/console.line.component';
-import { ModalComponent } from "./shared/utils/modal.component";
-import { DropdownMenuComponent }   from './shared/dropdown-menu/dropdown-menu.component';
-import { EditUserComponent }   from './users/edit/edit.user.component';
-import { ExtensionRequestComponent } from './users/extensionRequest/extension.request.component';
-import { HandleErrorService } from './shared/utils/handle.error.service';
+import { ModalComponent } from "./shared/components/modal/modal.component";
+import { DropdownMenuComponent }   from './shared/components/dropdown-menu/dropdown-menu.component';
+import { ExaminationComponent } from './examinations/examination/examination.component';
+import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
+import { ExaminationService } from './examinations/shared/examination.service';
+import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
+import { HandleErrorService } from './shared/utils/handle-error.service';
 import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
 import { KeycloakHttp } from "./shared/keycloak/keycloak.http";
 import { KeycloakService } from "./shared/keycloak/keycloak.service";
 import { ImportComponent }   from './import/import.component';
-import { ListComponent } from "./shared/utils/list.component";
+import { ListComponent } from "./shared/components/list/list.component";
 import { ImportService } from './import/import.service';
-import { LoadingBarComponent }   from './shared/loadingBar/loadingBar.component';
-import { ManufacturerDetailComponent } from './acqEquip/manuf/detail/manuf.detail.component';
-import { ManufacturerModelDetailComponent } from './acqEquip/manufModel/detail/manufModel.detail.component';
-import { ManufacturerModelPipe } from './acqEquip/shared/manufModel.pipe';
-import { ManufacturerModelService } from './acqEquip/shared/manufModel.service';
-import { ManufacturerService } from './acqEquip/shared/manuf.service';
-import { MenuItemComponent }   from './shared/dropdown-menu/menu-item/menu-item.component';
+import { LoadingBarComponent }   from './shared/components/loading-bar/loading-bar.component';
+import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
+import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
+import { ManufacturerModelPipe } from './acquisition-equipments/shared/manufacturer-model.pipe';
+import { ManufacturerModelService } from './acquisition-equipments/shared/manufacturer-model.service';
+import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
+import { MenuItemComponent }   from './shared/components/dropdown-menu/menu-item/menu-item.component';
 import { NavbarComponent }   from './shared/navbar/navbar.component';
 import { RoleService } from './roles/role.service';
-import { StudyDetailComponent }   from './studies/detail/study-detail.component';
-import { StudyListComponent }   from './studies/list/study-list.component';
+import { StudyComponent }   from './studies/study/study.component';
+import { StudyListComponent }   from './studies/study-list/study-list.component';
 import { StudyService } from './studies/shared/study.service';
-import { StudyTreeComponent }   from './studies/tree/study.tree.component';
-import { TableComponent} from "./shared/table/table.component";
-import { ToolTipComponent }   from './shared/toolTip/toolTip.component';
-import { TreeNodeComponent }   from './shared/tree/tree.node.component';
-import { UserListComponent }   from './users/list/user.list.component';
+import { StudyTreeComponent }   from './studies/tree/study-tree.component';
+import { TableComponent} from "./shared/components/table/table.component";
+import { ToolTipComponent }   from './shared/components/toolTip/toolTip.component';
+import { TreeNodeComponent }   from './shared/components/tree/tree.node.component';
+import { UserComponent }   from './users/user/user.component';
+import { UserListComponent }   from './users/user-list/user-list.component';
 import { UserService } from './users/shared/user.service';
-import { ExaminationListComponent } from './examinations/list/examination.list.component';
-import { ExaminationDetailComponent } from './examinations/detail/examination.detail.component';
-import { ExaminationService } from './examinations/shared/examination.service';
 
 import '../assets/css/common.css';
 import '../assets/css/modal.css';
@@ -82,37 +82,37 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
     declarations: [
         AccountRequestComponent,
         AccountRequestInfoComponent,
-        AcquisitionEquipmentDetailComponent,
+        AcquisitionEquipmentComponent,
         AcquisitionEquipmentListComponent,
         AppComponent,
         Autosize,
-        CenterDetailComponent,
+        CenterComponent,
         CenterListComponent,
         ConfirmDialogComponent,
         ConsoleComponent,
         DropdownMenuComponent,
-        EditUserComponent,
+        UserComponent,
+        ExaminationListComponent,
+        ExaminationComponent,
         ExtensionRequestComponent,
         HeaderComponent,
         HomeComponent,
         ImportComponent,
         ListComponent,
         LoadingBarComponent,
-        ManufacturerDetailComponent,
-        ManufacturerModelDetailComponent,
+        ManufacturerComponent,
+        ManufacturerModelComponent,
         ManufacturerModelPipe,
         ModalComponent,
         MenuItemComponent,
         NavbarComponent,
-        StudyDetailComponent,
+        StudyComponent,
         StudyListComponent,
         StudyTreeComponent,
         TableComponent,
         TreeNodeComponent,
         ToolTipComponent,
-        UserListComponent,
-        ExaminationListComponent,
-        ExaminationDetailComponent
+        UserListComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -124,15 +124,15 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         AuthNotGuestGuard,
         CenterService,
         ConfirmDialogService,
-        ImportService,
+        ExaminationService,
         HandleErrorService,
+        ImportService,
         KeycloakService,
         ManufacturerModelService,
         ManufacturerService,
         RoleService,
         StudyService,
         UserService,
-        ExaminationService,
         {
             provide: Http,
             useFactory: httpFactory,

@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Http, Response } from "@angular/http";
 
-import { PatientsDicom, SerieDicom } from './dicom.data.model';
+import { PatientsDicom, SerieDicom } from './dicom-data.model';
 import * as AppUtils from '../utils/app.utils';
 
 @Injectable()

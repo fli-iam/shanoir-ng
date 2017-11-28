@@ -1,4 +1,4 @@
-import { StudyCard } from "./studycard.model";
+import { StudyCard } from "./study-card.model";
 import { StudyStatus } from "./study-status.enum";
 import { StudyType } from "./study-type.enum";
 

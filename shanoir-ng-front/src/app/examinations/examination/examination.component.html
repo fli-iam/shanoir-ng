@@ -1,0 +1,162 @@
+<div class="content-component">
+	<form [formGroup]="examinationForm" class="max-content" novalidate>
+		<div class="layout left">
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">
+					<div class="header command-zone" i18n="View examination|Title@@examinationDetailViewTitle">Details on examination</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'">
+					<div class="header command-zone" i18n="Edit examination|Title@@examinationDetailEditTitle">Edit examination</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'">
+					<div class="header command-zone" i18n="Create examination|Title@@examinationDetailCreateTitle">Create examination</div>
+				</ng-template>
+			</span>
+			<fieldset>
+				<ol>
+					<li *ngIf="mode != 'create'">
+						<label i18n="Examination detail|Id label@@examinationDetailId" class="required-label">Id</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{examination.id}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" id="id" formControlName="id" [(ngModel)]="examination.id" readonly/>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{examination.studyName}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
+									<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
+								</select>
+								<label *ngIf="formErrors.studyId.includes('required')" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					 <li>
+						<label i18n="Examination detail|Examination executive label@@examinationDetailExaminationExecutive">Examination executive</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{examination.examinationExecutive?.name}}
+							</ng-template>
+							<!--<ng-template ngSwitchDefault>
+								<select id="examinationExecutive" required formControlName="Examination executive" [(ngModel)]="examination.examinationExecutive">
+									<option *ngFor="let examinationExecutive of examinationExecutives" [ngValue]="subject">{{examinationExecutive.name}}</option>
+								</select>
+							</ng-template>-->
+						</span>
+					</li> 
+					<li>
+						<label i18n="Examination detail|Center label@@examinationDetailCenter" class="required-label">Center</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: examination.centerId}">
+									{{examination.centerName}}
+								</a>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="centerId" required formControlName="centerId" [(ngModel)]="examination.centerId">
+									<option *ngFor="let center of centers" [ngValue]="center.id">{{center.name}}</option>
+								</select>
+								<label *ngIf="formErrors.centerId.includes('required')" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{examination.subject?.name}}
+							</ng-template>
+						<!-- 	<ng-template ngSwitchDefault>
+								<select id="subject" required formControlName="Subject" [(ngModel)]="examination.subject">
+									<option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
+								</select>
+							</ng-template> -->
+						</span>
+					</li>
+					<li>
+						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{examination.examinationDate | date: 'dd/MM/yyyy'}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<my-date-picker id="examinationDate" [options]="myDatePickerOptions" formControlName="examinationDate" [(ngModel)]="examinationDate"
+								 (dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
+								</my-date-picker>
+								<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit examination|Date valid error@@editExaminationDateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Examination detail|Comment label@@examinationDetailComment">Comment</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{examination.comment}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" id="comment" formControlName="comment" [(ngModel)]="examination.comment" />
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Examination detail|Note label@@examinationDetailNote">Note</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{examination.note}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" id="note" formControlName="note" [(ngModel)]="examination.note" />
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Examination detail|Subject weight label@@examinationDetailSubjectWeight">Subject weight</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{examination.subjectWeight}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" id="subjectWeight" formControlName="subjectWeight" [(ngModel)]="examination.subjectWeight" />
+							</ng-template>
+
+							<!-- <ng-template ngSwitchDefault>
+								<select id="measureUnit" required>
+									<option value="kg">kg</option>
+									<option value="g">g</option>
+								</select>
+							</ng-template> -->
+
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+			<div class="footer command-zone">
+				<span [ngSwitch]="mode">
+					<button i18n="View examination|Back button label@@backButton" class="Button" (click)="back()">Back</button>
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
+						<button type="submit" i18n="View examination|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
+						<button type="submit" i18n="Edit examination|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!examinationForm.valid">Update</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
+						<button type="submit" i18n="Edit examination|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!examinationForm.valid">Create</button>
+					</ng-template>
+				</span>
+			</div>
+		</div>
+		<!--<div class="right" *ngIf="mode=='view'">
+			<div *ngIf="center.acquisitionEquipments?.length > 0">
+				<list title="Acquisition Equipments List" [tab_open]='true' [list]='center.acquisitionEquipments'></list>
+			</div>
+		</div>-->
+	</form>
+</div>
