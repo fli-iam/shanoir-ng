@@ -78,6 +78,12 @@ def wait_to_be_visible(xpath):
     return True
 
 
+def clear_input(xpath):
+    WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, xpath)))
+    driver.find_element_by_xpath(xpath).clear()
+    return driver.find_element_by_xpath(xpath).get_attribute("value") == ""
+
+
 def get_innertext(xpath):
     # TODO: doesn't work in firefox
     return driver.find_element_by_xpath(xpath).get_attribute("innerText")
@@ -89,8 +95,10 @@ def count_elements(xpath):
 
 def check_for_text_in_elements(text, xpath):
     for i in driver.find_elements_by_xpath(xpath):
+        print i.get_attribute("innerText")
         if text in i.get_attribute("innerText"):
             return True
+    return False
 
 
 def check_if_shanoir_table_has_rows():
@@ -125,7 +133,6 @@ def manage_users():
 
     button_userlist_xpath = "//span[contains(.,'Manage users')]"
     wait_to_be_clickable_and_click(button_userlist_xpath)
-
     assert check_if_shanoir_table_has_rows()
 
 
@@ -135,7 +142,15 @@ def manage_centers():
 
     button_center_xpath = "//span[contains(.,'Center')]"
     wait_to_be_clickable_and_click(button_center_xpath)
+    assert check_if_shanoir_table_has_rows()
 
+
+def manage_acq_eq():
+    button_manage_data_xpath = "//span[contains(.,'Manage data')]"
+    wait_to_be_clickable_and_click(button_manage_data_xpath)
+
+    button_acq_eq_xpath = "//menu-item[@label='Acquisition equipment']"
+    wait_to_be_clickable_and_click(button_acq_eq_xpath)
     assert check_if_shanoir_table_has_rows()
 
 
@@ -152,6 +167,7 @@ def search(search_string, select_option):
     wait_and_send_keys(input_search_xpath, search_string)
 
     option_role_xpath = "//span[@class='text-search']//option[contains(.,'"+select_option+"')]"
+    time.sleep(1)
     wait_to_be_clickable_and_click(option_role_xpath)
 
     time.sleep(1)
@@ -172,7 +188,7 @@ def add_user():
     first_name = "test1"
     last_name = "test2"
     email = "testusername"+str(random_int)+"@shanoir.fr"
-    expiration_date = "20170505"
+    expiration_date = "01/01/2025"
 
     wait_to_be_present_and_click("//span[contains(.,'new user')]")
 
@@ -185,15 +201,9 @@ def add_user():
     # Fill in the fields
     wait_to_be_visible(option_role_xpath)
 
-    # Bug - separate names and emails and send multiple times
-    driver.find_element_by_xpath(first_name_xpath).send_keys(first_name[:2])
-    driver.find_element_by_xpath(first_name_xpath).send_keys(first_name[2:])
-    driver.find_element_by_xpath(last_name_xpath).send_keys(last_name[:2])
-    driver.find_element_by_xpath(last_name_xpath).send_keys(last_name[2:])
-
-    driver.find_element_by_xpath(email_xpath).send_keys(email[:email.index("@") + 2])
-    driver.find_element_by_xpath(email_xpath).send_keys(email[email.index("@") + 2:-1])
-    driver.find_element_by_xpath(email_xpath).send_keys(email[-1])
+    driver.find_element_by_xpath(first_name_xpath).send_keys(first_name)
+    driver.find_element_by_xpath(last_name_xpath).send_keys(last_name)
+    driver.find_element_by_xpath(email_xpath).send_keys(email)
     time.sleep(1)
     driver.find_element_by_xpath(expiration_date_xpath).send_keys(expiration_date)
     driver.find_element_by_xpath(option_role_xpath).click()
@@ -232,17 +242,11 @@ def request_account():
     last_name_xpath = "//input[@id='lastName']"
     email_xpath = "//input[@id='email']"
 
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, first_name_xpath)))
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, first_name_xpath)))
 
-    # Bug - separate names and emails and send multiple times
-    driver.find_element_by_xpath(first_name_xpath).send_keys(first_name[:2])
-    driver.find_element_by_xpath(first_name_xpath).send_keys(first_name[2:])
-    driver.find_element_by_xpath(last_name_xpath).send_keys(last_name[:2])
-    driver.find_element_by_xpath(last_name_xpath).send_keys(last_name[2:])
-
-    driver.find_element_by_xpath(email_xpath).send_keys(email[:email.index("@") + 2])
-    driver.find_element_by_xpath(email_xpath).send_keys(email[email.index("@") + 2:-1])
-    driver.find_element_by_xpath(email_xpath).send_keys(email[-1])
+    driver.find_element_by_xpath(first_name_xpath).send_keys(first_name)
+    driver.find_element_by_xpath(last_name_xpath).send_keys(last_name)
+    driver.find_element_by_xpath(email_xpath).send_keys(email)
 
     driver.find_element_by_xpath("//input[@formcontrolname='contact']").send_keys(request_inputs)
     driver.find_element_by_xpath("//input[@formcontrolname='function']").send_keys(request_inputs)
@@ -255,6 +259,14 @@ def request_account():
     # Submit
     submit_xpath = "//button[@type='submit']"
     wait_to_be_clickable_and_click(submit_xpath)
+
+    # Click OK
+    confirmation_xpath = "//label[contains (.,'An email has been sent to the administrator')]"
+    wait_to_be_visible(confirmation_xpath)
+
+    button_ok_xpath = "//button[contains(.,'OK')]"
+    wait_to_be_clickable_and_click(button_ok_xpath)
+
     return email
 
 
@@ -270,9 +282,8 @@ def accept_deny_account_request(user, accept):
     wait_to_be_visible("//label[contains(.,'Institution')]")
 
     if accept:
-        # Choose exp date and role
+        # Choose role
         role = "Expert"
-        wait_and_send_keys("//input[@aria-label='Date input field']", "20170505")
         wait_to_be_present_and_click("//select[@id='role']/option[contains(.,'"+role+"')]")
         wait_to_be_clickable_and_click("//button[@type='submit' and contains(.,'Accept')]")
     else:
@@ -313,10 +324,9 @@ def view(name, service, editable=True):
 
 def edit_center(name):
     wait_to_be_present_and_click("//shanoir-table//tr[contains(.,'" + name + "')]//img[contains(@src, 'edit.png')]")
-
     assert wait_to_be_visible("//centerdetail//div[contains(., 'Edit center')]")
 
-    input_values = {"phoneNumber": "+33220111222", "website": "www.chutest.fr"}
+    input_values = {"phoneNumber": "0220111222", "website": "www.chutest.fr"}
     for key, value in input_values.iteritems():
         wait_and_send_keys("//input[@id='"+key+"']", value)
 
@@ -326,11 +336,76 @@ def edit_center(name):
 
 def delete(name):
     wait_to_be_present_and_click("//shanoir-table//tr[contains(.,'" + name + "')]//img[contains(@src, 'garbage')]")
-
     assert wait_to_be_visible("//confirm-dialog[div[contains(.,'Are you sure you want to delete')]]")
 
     wait_to_be_clickable_and_click("//button[contains(.,'OK')]")
     assert check_if_shanoir_table_has_rows()
+
+
+def add_manufacturer():
+    new_man_model_button_xpath = "//button[contains(.,'new manufacturer model')]"
+    wait_to_be_clickable_and_click(new_man_model_button_xpath)
+
+    new_man_model_xpath = "//manufmodeldetail//div[contains(.,'Create manufacturer model')]"
+    wait_to_be_visible(new_man_model_xpath)
+    modality_option_xpath = "//select[@id='datasetModalityType']/option[@value='MR_DATASET']"
+    wait_to_be_clickable_and_click(modality_option_xpath)
+
+    # Create new manufacturer
+    new_man_xpath = "//manufmodeldetail//button[contains(.,'new manufacturer')]"
+    wait_to_be_clickable_and_click(new_man_xpath)
+    manufacturer_xpath = "//manufdetail//div[contains(.,'Create manufacturer')]"
+    assert wait_to_be_visible(manufacturer_xpath)
+
+    manufacturer_name = "Testmanuf " + str(random.randint(1000, 9999))
+    manufacturer_input_xpath = "//manufdetail//input[@id='name']"
+    wait_and_send_keys(manufacturer_input_xpath, manufacturer_name)
+    wait_to_be_clickable_and_click("//manufdetail//button[@type='submit']")
+
+    model_name = "Testmodel "+ str(random.randint(1000, 9999))
+    wait_and_send_keys("//input[@id='name']", model_name)
+    wait_and_send_keys("//input[@id='magneticField']", '3.5')
+
+    wait_to_be_clickable_and_click("//manufmodeldetail//button[@type='submit']")
+    return (manufacturer_name, model_name)
+
+
+def add_acq_eq(center, mode="add", man_model="", page="acq_eq"):
+    if mode == "add":
+        if page == "center":
+            wait_to_be_clickable_and_click("//shanoir-table//span[contains(.,'new acq. equip.')]")
+        elif page == "acq_eq":
+            wait_to_be_clickable_and_click("//button[contains(.,'new acq. equip.')]")
+        assert wait_to_be_visible("//acqequipdetail//div[contains(.,'Create acquisition equipment')]")
+    elif mode == "edit":
+        if page == "center":
+            assert wait_to_be_visible("//list[@title='Acquisition Equipments List']")
+            span_model_xpath = "//list[@title='Acquisition Equipments List']//span[contains(.,'"+man_model+"')]"
+            wait_to_be_clickable_and_click(span_model_xpath)
+        elif page == "acq_eq":
+            tr_testmodel_xpath = "//tr[td[contains(.,'"+center+"')] and td[contains(.,'"+man_model+"')]]//img[contains\
+            (@src,'edit')]"
+            assert wait_to_be_visible(tr_testmodel_xpath)
+            wait_to_be_clickable_and_click(tr_testmodel_xpath)
+
+    if man_model == "":
+        (manufacturer_name, model_name) = add_manufacturer()
+    else:
+        wait_to_be_clickable_and_click("//select[@id='manufModel']/option[contains(.,'" + man_model + "')]")
+
+    wait_to_be_clickable_and_click("//select[@id='center']/option[contains(.,'"+center+"')]")
+
+    acq_eq_number = random.randint(100000, 999999)
+
+    # Clear and send new serial number
+    input_serial_xpath = "//input[@id='serialNumber']"
+    assert clear_input(input_serial_xpath)
+    wait_and_send_keys(input_serial_xpath, acq_eq_number)
+    time.sleep(1)
+    wait_to_be_clickable_and_click("//acqequipdetail//button[@type='submit']")
+
+    print acq_eq_number
+    return str(acq_eq_number)
 
 
 def test_shanoir_ng_users(user, password):
@@ -361,7 +436,7 @@ def test_shanoir_ng_users(user, password):
     clean_search()
 
 
-def test_shanoir_ng_studies():
+def test_shanoir_ng_center():
     manage_centers()
     # Create
     chu = add_center()
@@ -371,10 +446,23 @@ def test_shanoir_ng_studies():
     # Edit
     search(search_string=chu, select_option="Name")
     edit_center(name=chu)
-    # Delete
-    search(search_string=chu, select_option="Name")
-    delete(name=chu)
+    # # Delete (not implemented)
+    # search(search_string=chu, select_option="Name")
+    # delete(name=chu)
+    return chu
 
+
+def test_shanoir_ng_acq_eq(chu):
+    # ACQ EQ
+    manage_acq_eq()
+    # Create
+    acq_number = add_acq_eq(chu, man_model="Verio", mode="add", page="acq_eq")
+
+    # Edit
+    search(search_string=acq_number,select_option="Serial number")
+    new_acq_number = add_acq_eq(chu, man_model="Verio", mode="edit", page="acq_eq")
+
+    return new_acq_number
 
 if __name__ == "__main__":
     start_selenium()
@@ -383,8 +471,10 @@ if __name__ == "__main__":
         test_shanoir_ng_users(args.user, args.password)
     elif args.shanoir == "studies":
         login(args.user, args.password)
-        test_shanoir_ng_studies()
+        # chu = test_shanoir_ng_center()
+        acq_eq = test_shanoir_ng_acq_eq("CHU Test 3577")
 
+    time.sleep(1)
     logout()
     driver.quit()
 

@@ -56,7 +56,7 @@
 						<label i18n="Examination detail|Center label@@examinationDetailCenter" class="required-label">Center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/centerDetail']" [queryParams]="{mode: 'view', id: examination.center?.id}">
+								<a [routerLink]="['/centerDetail']" [queryParams]="{mode: 'view', id: examination.centerId}">
 									{{examination.centerName}}
 								</a>
 							</ng-template>
