@@ -3,7 +3,6 @@ package org.shanoir.ng.importer.dicom;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -25,6 +24,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * to read additional informations, e.g. missing in the DicomDir, into the
  * JsonNode tree. This class splits the instances array nodes into two
  * different array nodes: non-images and images on using the sop instance uid.
+ * Before the instances are number with their instance number and added like
+ * this by DicomDirToJsonReader. DicomFileAnalyzer removes/deletes the instances
+ * node and splits into two nodes: images and nonImages. As this class is reading
+ * the content of each dicom file already it adds as well the informations, which
+ * are later necessary to separate datasets inside each serie: acquisitionNumber,
+ * echoNumbers and imageOrientationsPatient.
  * 
  * @author mkain
  *
@@ -92,6 +97,17 @@ public class DicomFileAnalyzer {
 		}
 	}
 
+	/**
+	 * This method opens the connection to each dcm file and reads its attributes
+	 * and extracts meta-data from the dicom, that will be used later.
+	 * @param dicomFile
+	 * @param serie
+	 * @param instances
+	 * @param instance
+	 * @param index
+	 * @param nonImages
+	 * @param images
+	 */
 	private void processDicomFile(File dicomFile, JsonNode serie, JsonNode instances, JsonNode instance, int index, ArrayNode nonImages, ArrayNode images) {
 		DicomInputStream dIS = null;
 		try {
@@ -116,11 +132,11 @@ public class DicomFileAnalyzer {
 					nonImages.add(nonImage);
 				// images at the second
 				} else {
-					//ObjectNode image = mapper.createObjectNode();
-					//image.put(indexString, instanceFilePath);
-					String pattern = Pattern.quote(uploadFolder);
-					String instanceSuffixPath = instanceFilePath.split(pattern)[1];
-					images.add(instanceSuffixPath);
+					// do not change here: use absolute path all time and find other solution for image preview
+					ObjectNode image = mapper.createObjectNode();
+					image.put("path", instanceFilePath);
+					addImageSeparateDatasetsInfo(image, datasetAttributes);
+					images.add(image);
 				}
 			}
 			checkIsMultiFrame(serie, datasetAttributes, sopClassUID);
@@ -128,7 +144,6 @@ public class DicomFileAnalyzer {
 			checkSeriesDate(serie, datasetAttributes);
 			addSeriesEquipment(serie, datasetAttributes);
 			addSeriesIsCompressed(serie, datasetAttributes);
-			addSeriesSeparateDatasetsInfo(serie, datasetAttributes);
 		} catch (IOException e) {
 			LOG.error("Error during DICOM file process", e);
 		} finally {
@@ -143,31 +158,32 @@ public class DicomFileAnalyzer {
 	}
 
 	/**
-	 * @param serie
+	 * This method adds all required infos to separate datasets within series for each image.
+	 * @param image
 	 * @param datasetAttributes
 	 */
-	private void addSeriesSeparateDatasetsInfo(JsonNode serie, Attributes datasetAttributes) {
-		if (serie.path("acquisitionNumber").isMissingNode()) {
+	private void addImageSeparateDatasetsInfo(JsonNode image, Attributes datasetAttributes) {
+		if (image.path("acquisitionNumber").isMissingNode()) {
 			String acquisitionNumber = datasetAttributes.getString(Tag.AcquisitionNumber);
 			if (acquisitionNumber != null && !acquisitionNumber.isEmpty()) {
-				((ObjectNode) serie).put("acquisitionNumber", acquisitionNumber);
+				((ObjectNode) image).put("acquisitionNumber", acquisitionNumber);
 			}
 		}
-		if (serie.path("echoNumbers").isMissingNode()) {
+		if (image.path("echoNumbers").isMissingNode()) {
 			ObjectNode echoNumbers = mapper.createObjectNode();
 			String[] echoNumbersArray = datasetAttributes.getStrings(Tag.EchoNumbers);
 			for (int i = 0; i < echoNumbersArray.length; i++) {
 				echoNumbers.put("echoNumber", echoNumbersArray[i]);		
 			}
-			((ObjectNode) serie).set("echoNumbers", echoNumbers);
+			((ObjectNode) image).set("echoNumbers", echoNumbers);
 		}
-		if (serie.path("imageOrientationPatient").isMissingNode()) {
+		if (image.path("imageOrientationPatient").isMissingNode()) {
 			ObjectNode imageOrientationPatient = mapper.createObjectNode();
 			String[] imageOrientationPatientArray = datasetAttributes.getStrings(Tag.ImageOrientationPatient);
 			for (int i = 0; i < imageOrientationPatientArray.length; i++) {
 				imageOrientationPatient.put("imageOrientationPatient", imageOrientationPatientArray[i]);		
 			}
-			((ObjectNode) serie).set("imageOrientationPatient", imageOrientationPatient);
+			((ObjectNode) image).set("imageOrientationPatient", imageOrientationPatient);
 		}
 	}
 	
