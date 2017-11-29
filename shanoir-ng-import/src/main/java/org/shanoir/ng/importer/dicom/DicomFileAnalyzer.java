@@ -3,6 +3,9 @@ package org.shanoir.ng.importer.dicom;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -67,19 +70,23 @@ public class DicomFileAnalyzer {
 								// instance level
 								JsonNode instances = serie.path("instances");
 								if (instances.isArray()) {
-									int index = 1;
 									ArrayNode nonImages = mapper.createArrayNode();
 									ArrayNode images = mapper.createArrayNode();
 									for (JsonNode instance : instances) {
-										String indexString = new Integer(index).toString();
-										String instanceFilePath = instance.path(indexString).asText();
-										File instanceFile = new File(instanceFilePath);
-										if (instanceFile.exists()) {
-											processDicomFile(instanceFile, serie, instances, instance, index, nonImages, images);
-										} else {
-											throw new FileNotFoundException("InstanceFilePath in DicomDir: missing file: " + instanceFilePath);
+										Iterator<Entry<String, JsonNode>> children = instance.fields();
+										while (children.hasNext()) {
+											Map.Entry<String, JsonNode> entry =
+													(Map.Entry<String, JsonNode>) children.next();
+											String instanceFilePath = entry.getValue().asText();
+											File instanceFile = new File(instanceFilePath);
+											if (instanceFile.exists()) {
+												processDicomFile(instanceFile, serie, instances, instanceFilePath, nonImages, images);
+											} else {
+												throw new FileNotFoundException(
+														"InstanceFilePath in DicomDir: missing file: "
+																+ instanceFilePath);
+											}
 										}
-										index = index + 1;
 									}
 									((ObjectNode) serie).set("nonImages", nonImages);
 									String nonImagesSizeStr = new Integer(nonImages.size()).toString();
@@ -108,14 +115,11 @@ public class DicomFileAnalyzer {
 	 * @param nonImages
 	 * @param images
 	 */
-	private void processDicomFile(File dicomFile, JsonNode serie, JsonNode instances, JsonNode instance, int index, ArrayNode nonImages, ArrayNode images) {
+	private void processDicomFile(File dicomFile, JsonNode serie, JsonNode instances, String instanceFilePath, ArrayNode nonImages, ArrayNode images) {
 		DicomInputStream dIS = null;
 		try {
 			dIS = new DicomInputStream(dicomFile);
 			Attributes datasetAttributes = dIS.readDataset(-1, -1);
-
-			String indexString = new Integer(index).toString();
-			String instanceFilePath = instance.path(indexString).asText();
 
 			String sopClassUID = datasetAttributes.getString(Tag.SOPClassUID);
 			((ObjectNode) serie).put("sopClassUID", sopClassUID);
@@ -128,7 +132,7 @@ public class DicomFileAnalyzer {
 				if (UID.PrivateSiemensCSANonImageStorage.equals(sopClassUID)
 					|| UID.MRSpectroscopyStorage.equals(sopClassUID)) {
 					ObjectNode nonImage = mapper.createObjectNode();
-					nonImage.put(indexString, instanceFilePath);
+					nonImage.put("path", instanceFilePath);
 					nonImages.add(nonImage);
 				// images at the second
 				} else {
@@ -172,18 +176,26 @@ public class DicomFileAnalyzer {
 		if (image.path("echoNumbers").isMissingNode()) {
 			ObjectNode echoNumbers = mapper.createObjectNode();
 			String[] echoNumbersArray = datasetAttributes.getStrings(Tag.EchoNumbers);
-			for (int i = 0; i < echoNumbersArray.length; i++) {
-				echoNumbers.put("echoNumber", echoNumbersArray[i]);		
+			if (echoNumbersArray != null) {
+				for (int i = 0; i < echoNumbersArray.length; i++) {
+					echoNumbers.put("echoNumber", echoNumbersArray[i]);		
+				}
+				((ObjectNode) image).set("echoNumbers", echoNumbers);
+			} else {
+				LOG.info("echoNumbersArray in dcm file null: " + image.path("path").asText());
 			}
-			((ObjectNode) image).set("echoNumbers", echoNumbers);
 		}
 		if (image.path("imageOrientationPatient").isMissingNode()) {
 			ObjectNode imageOrientationPatient = mapper.createObjectNode();
 			String[] imageOrientationPatientArray = datasetAttributes.getStrings(Tag.ImageOrientationPatient);
-			for (int i = 0; i < imageOrientationPatientArray.length; i++) {
-				imageOrientationPatient.put("imageOrientationPatient", imageOrientationPatientArray[i]);		
+			if (imageOrientationPatientArray != null) {
+				for (int i = 0; i < imageOrientationPatientArray.length; i++) {
+					imageOrientationPatient.put("imageOrientationPatient", imageOrientationPatientArray[i]);		
+				}
+				((ObjectNode) image).set("imageOrientationPatient", imageOrientationPatient);
+			} else {
+				LOG.info("imageOrientationPatientArray in dcm file null: " + image.path("path").asText());
 			}
-			((ObjectNode) image).set("imageOrientationPatient", imageOrientationPatient);
 		}
 	}
 	

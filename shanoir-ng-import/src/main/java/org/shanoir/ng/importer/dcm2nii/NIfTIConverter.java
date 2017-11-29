@@ -84,13 +84,12 @@ public class NIfTIConverter {
 	 * @param serie
 	 */
 	private void separateDatasetsInSerie(final File serieIDFolderFile, final JsonNode serie) {
-		final HashMap<SerieToDatasetsSeparator, List<String>>
-			datasetMap = new HashMap<SerieToDatasetsSeparator, List<String>>();
+		final HashMap<SerieToDatasetsSeparator, List<JsonNode>>
+			datasetMap = new HashMap<SerieToDatasetsSeparator, List<JsonNode>>();
 
 		JsonNode images = serie.path("images");
 		if (images.isArray()) {
 			for (JsonNode image : images) {
-				String path = image.path("path").asText();
 				final int acquisitionNumber = image.path("acquisitionNumber").asInt();
 				// echoNumbers conversion
 				JsonNode echoNumbersNode = image.path("echoNumbers");
@@ -106,22 +105,22 @@ public class NIfTIConverter {
 					imageOrientationPatients.add(imageOrientationPatient.asDouble());
 				}
 				double[] imageOrientationPatientsDoubleArray = convertDoubles(imageOrientationPatients);
-				SerieToDatasetsSeparator seriesToDatasetsComparator =
+				SerieToDatasetsSeparator seriesToDatasetsSeparator =
 						new SerieToDatasetsSeparator(acquisitionNumber, echoNumbersIntArray, imageOrientationPatientsDoubleArray);
 				boolean found = false;
 				for (SerieToDatasetsSeparator seriesToDatasetsComparatorIterate : datasetMap.keySet()) {
-					if (seriesToDatasetsComparatorIterate.equals(seriesToDatasetsComparator)) {
+					if (seriesToDatasetsComparatorIterate.equals(seriesToDatasetsSeparator)) {
 						found = true;
-						seriesToDatasetsComparator = seriesToDatasetsComparatorIterate;
+						seriesToDatasetsSeparator = seriesToDatasetsComparatorIterate;
 						break;
 					}
 				}
 				if (found) {
-					datasetMap.get(seriesToDatasetsComparator).add(path);
+					datasetMap.get(seriesToDatasetsSeparator).add(image);
 				} else {
-					final List<String> pathList = new ArrayList<String>();
-					pathList.add(path);
-					datasetMap.put(seriesToDatasetsComparator, pathList);
+					final List<JsonNode> imageList = new ArrayList<JsonNode>();
+					imageList.add(image);
+					datasetMap.put(seriesToDatasetsSeparator, imageList);
 				}
 			}
 		}
@@ -137,12 +136,16 @@ public class NIfTIConverter {
 				LOG.error("deleteFolder : the creation of " + folder + " failed");
 			}
 			// move the files into the folder
-			for (final String path : datasetMap.get(datasets)) {
-				final File fileToMove = new File(serieIDFolderFile.getAbsolutePath() + File.separator + path);
-				// Move file to new directory
-				success = new File(path).renameTo(new File(folder, fileToMove.getName()));
-				if (!success) {
-					LOG.error("deleteFolder : moving of " + fileToMove + " failed");
+			for (final JsonNode image : datasetMap.get(datasets)) {
+				String path = image.path("path").asText();
+				final File oldFile = new File(path);
+				if (oldFile.exists()) {
+					final File newFile = new File(folder, oldFile.getName());
+					success = oldFile.renameTo(newFile);
+					((ObjectNode) image).put("path", newFile.getAbsolutePath());
+					if (!success) {
+						LOG.error("deleteFolder : moving of " + oldFile + " failed");
+					}					
 				}
 			}
 			index++;
@@ -187,7 +190,7 @@ public class NIfTIConverter {
 				if (oldFile.exists()) {
 					File newFile = new File(serieIDFolderFile.getAbsolutePath() + File.separator + oldFile.getName());
 					oldFile.renameTo(newFile);
-					((ObjectNode)image).put("path", newFile.getAbsolutePath());
+					((ObjectNode) image).put("path", newFile.getAbsolutePath());
 				} else {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating serie id folder: file to copy does not exist.", null));
