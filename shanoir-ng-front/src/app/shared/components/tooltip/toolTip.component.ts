@@ -18,33 +18,33 @@ import { Component, ViewChild, ElementRef, Renderer } from '@angular/core';
     ]
 })
 
-export class ToolTipComponent {
+export class TooltipComponent {
 
     private opened: boolean = false;
     private static documentListenerInit = false;
-    private static openedTips: Set<ToolTipComponent>; // every opened menu in the document (upgrade idea : named groups of menu)
+    private static openedTips: Set<TooltipComponent>; // every opened menu in the document (upgrade idea : named groups of menu)
     @ViewChild('container') container: ElementRef;
 
     constructor(public elementRef: ElementRef, private renderer: Renderer) { 
-        ToolTipComponent.openedTips = new Set<ToolTipComponent>();
-        if (!ToolTipComponent.documentListenerInit) {
-            ToolTipComponent.documentListenerInit = true;
-            document.addEventListener('mouseover', ToolTipComponent.mouseOverDocument.bind(this));
+        TooltipComponent.openedTips = new Set<TooltipComponent>();
+        if (!TooltipComponent.documentListenerInit) {
+            TooltipComponent.documentListenerInit = true;
+            document.addEventListener('mouseover', TooltipComponent.mouseOverDocument.bind(this));
         }
     }
 
     public open() {
         this.opened =  true;
-        ToolTipComponent.openedTips.add(this);
+        TooltipComponent.openedTips.add(this);
     }
 
     public close() {
-        ToolTipComponent.openedTips.delete(this);
+        TooltipComponent.openedTips.delete(this);
         this.opened =  false;
     }
 
     public static mouseOverDocument = (event: Event) => {
-        ToolTipComponent.openedTips.forEach((tip) => {
+        TooltipComponent.openedTips.forEach((tip) => {
             if (!tip.container.nativeElement.contains(event.target)) {
                 tip.close();
             };

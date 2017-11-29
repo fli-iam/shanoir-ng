@@ -27,7 +27,7 @@
             <dropdown-menu label="Administration" *ngIf="isUserAdmin()">
                 <menu-item label="Manage users" i18n-label="Administration menu|Manage users@@navbarManageUsers" link="user-list" icon="assets/images/icons/users-1.png"></menu-item>
                 <li *ngIf="dev" class="horizontal-bar"><hr/></li>
-                <menu-item *ngIf="dev" label="Tree test page" link="treeTest" icon="assets/images/icons/share-1.png"></menu-item>
+                <menu-item *ngIf="dev" label="Tree test page" link="tree-test" icon="assets/images/icons/share-1.png"></menu-item>
                 <menu-item *ngIf="dev" label="Preferences" i18n-label="Administration menu|Manage user preferences@@navbarUserPreferences" icon="assets/images/icons/controls-7.png">
                     <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="this.mode == 'pink'" icon="assets/images/icons/user-5.png"></menu-item>
                     <menu-item label="Extreme pink mode" (click)="toggleXtremPink()" [boolVar]="this.mode == 'xtremPink'" icon="assets/images/icons/user-5.png"></menu-item>

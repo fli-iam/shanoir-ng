@@ -53,7 +53,7 @@ import { StudyListComponent }   from './studies/study-list/study-list.component'
 import { StudyService } from './studies/shared/study.service';
 import { StudyTreeComponent }   from './studies/tree/study-tree.component';
 import { TableComponent} from "./shared/components/table/table.component";
-import { ToolTipComponent }   from './shared/components/toolTip/toolTip.component';
+import { TooltipComponent }   from './shared/components/tooltip/tooltip.component';
 import { TreeNodeComponent }   from './shared/components/tree/tree.node.component';
 import { UserComponent }   from './users/user/user.component';
 import { UserListComponent }   from './users/user-list/user-list.component';
@@ -111,7 +111,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         StudyTreeComponent,
         TableComponent,
         TreeNodeComponent,
-        ToolTipComponent,
+        TooltipComponent,
         UserListComponent
     ],
     entryComponents: [
