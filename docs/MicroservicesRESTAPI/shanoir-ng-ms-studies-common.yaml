@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: Shanoir NG common Studies Microservice
+  description: Common API for studies microservice
+  version: 2.0.0
+paths:
+  /common:
+    post:
+      operationId: findStudySubjectCenterNamesByIds
+      description: >-
+        If exists, returns the study name, subject name, center name
+        corresponding to the given ids
+      requestBody:
+        description: 'Object with center id, study id and subject id'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonIdsDTO'
+      responses:
+        '200':
+          description: 'object with center name, study name and subject name'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonIdNamesDTO'
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          $ref: '#/components/schemas/ErrorModel'
+        '500':
+          description: unexpected error
+          $ref: '#/components/schemas/ErrorModel'
+components:
+  schemas:
+    CommonIdsDTO:
+      type: object
+      properties:
+        centerId:
+          type: integer
+          format: int64
+        studyId:
+          type: integer
+          format: int64
+        subjectId:
+          type: integer
+          format: int64
+    CommonIdNamesDTO:
+      type: object
+      properties:
+        center:
+          $ref: '#/components/schemas/IdNameDTO'
+        study:
+          $ref: '#/components/schemas/IdNameDTO'
+        subject:
+          $ref: '#/components/schemas/IdNameDTO'
+    IdNameDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    ErrorModel:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        details:
+          type: object
+        message:
+          type: string

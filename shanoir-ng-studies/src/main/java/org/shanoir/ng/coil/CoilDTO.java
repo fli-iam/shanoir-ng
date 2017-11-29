@@ -1,7 +1,7 @@
 package org.shanoir.ng.coil;
 
-import org.shanoir.ng.center.CenterNameDTO;
 import org.shanoir.ng.manufacturermodel.ManufacturerModelDTO;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 
 /**
  * DTO for coil.
@@ -10,7 +10,7 @@ import org.shanoir.ng.manufacturermodel.ManufacturerModelDTO;
  */
 public class CoilDTO {
 
-	private CenterNameDTO center;
+	private IdNameDTO center;
 
 	private CoilType coilType;
 	
@@ -33,14 +33,14 @@ public class CoilDTO {
 	/**
 	 * @return the center
 	 */
-	public CenterNameDTO getCenter() {
+	public IdNameDTO getCenter() {
 		return center;
 	}
 
 	/**
 	 * @param center the center to set
 	 */
-	public void setCenter(CenterNameDTO center) {
+	public void setCenter(IdNameDTO center) {
 		this.center = center;
 	}
 

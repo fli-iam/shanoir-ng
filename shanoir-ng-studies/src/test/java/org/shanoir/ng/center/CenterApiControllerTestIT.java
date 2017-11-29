@@ -41,7 +41,7 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void findCenterByIdProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void findCentersProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void findCentersNamesProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_NAMES, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
-	
+
 	@Test
 	public void findCentersNamesWithBadRole() {
 		// test with guest role
@@ -106,7 +106,7 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void saveNewCenterProtected() {
 		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Center(), String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
@@ -135,7 +135,7 @@ public class CenterApiControllerTestIT extends KeycloakControllerTestIT {
 		
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test

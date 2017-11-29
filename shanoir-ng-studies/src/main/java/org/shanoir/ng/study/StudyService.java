@@ -2,7 +2,7 @@ package org.shanoir.ng.study;
 
 import java.util.List;
 
-import org.shanoir.ng.center.CenterNameDTO;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
@@ -17,7 +17,7 @@ import org.shanoir.ng.study.dto.StudyStudyCardDTO;
 public interface StudyService extends UniqueCheckableService<Study> {
 
 	/**
-	 * Delete a Study
+	 * Delete a study.
 	 *
 	 * @param id
 	 * @throws ShanoirStudiesException
@@ -25,7 +25,7 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	void deleteById(Long id) throws ShanoirStudiesException;
 
 	/**
-	 * delete a Study from the old Shanoir
+	 * Delete a Study from the old Shanoir.
 	 *
 	 * @param Study
 	 *            Study.
@@ -48,6 +48,13 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @return a study or null.
 	 */
 	Study findById(Long id);
+
+	/**
+	 * Find id and name for all studies.
+	 * 
+	 * @return list of studies.
+	 */
+	List<IdNameDTO> findIdsAndNames();
 
 	/**
 	 * Find all studies for a user.
@@ -104,11 +111,4 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 */
 	void updateFromShanoirOld(Study study) throws ShanoirStudiesException;
 	
-	/**
-	 * Find id and name for all studies.
-	 * 
-	 * @return list of centers.
-	 */
-	List<StudyNameDTO> findIdsAndNames();
-
 }

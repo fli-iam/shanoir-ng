@@ -1,5 +1,6 @@
 package org.shanoir.ng.study;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -7,6 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.study.Study;
 import org.shanoir.ng.study.StudyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +60,13 @@ public class StudyRepositoryTest {
 		assertEquals(2, studyList.size());
 	}
 
+	@Test
+	public void findIdsAndNamesTest() throws Exception {
+		List<IdNameDTO> studiesDb = studyRepository.findIdsAndNames();
+		assertNotNull(studiesDb);
+		assertThat(studiesDb.size()).isEqualTo(3);
+	}
+	
 	@Test
 	public void findByStudyUsers_UserIdTest() {
 		final List<Study> studyList = (List<Study>) studyRepository.findByStudyUserList_UserIdOrderByNameAsc(USER_ID);

@@ -55,8 +55,8 @@ public class ExaminationApiControllerTest {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(examinationServiceMock).deleteById(1L);
-		given(examinationServiceMock.findAll()).willReturn(Arrays.asList(new ExaminationDTO()));
-		given(examinationServiceMock.findById(1L)).willReturn(new ExaminationDTO());
+		given(examinationServiceMock.findAll()).willReturn(Arrays.asList(new Examination()));
+		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 		given(examinationServiceMock.save(Mockito.mock(Examination.class))).willReturn(new Examination());
 	}
 

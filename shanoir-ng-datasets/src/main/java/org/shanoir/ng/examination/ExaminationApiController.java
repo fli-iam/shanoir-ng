@@ -30,13 +30,14 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Autowired
 	private ExaminationMapper examinationMapper;
-	
+
 	@Autowired
 	private ExaminationService examinationService;
 
 	@Override
 	public ResponseEntity<Void> deleteExamination(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) throws ShanoirDatasetException {
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
+			throws ShanoirDatasetException {
 		if (examinationService.findById(examinationId) == null) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
@@ -50,18 +51,19 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<ExaminationDTO> findExaminationById(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) throws ShanoirDatasetException {
-		final ExaminationDTO examination = examinationService.findById(examinationId);
+			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
+			throws ShanoirDatasetException {
+		final Examination examination = examinationService.findById(examinationId);
 		if (examination == null) {
-			return new ResponseEntity<ExaminationDTO>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<ExaminationDTO>(examination, HttpStatus.OK);
+		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(examination), HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<List<ExaminationDTO>> findExaminations() {
 		// TODO: filter by user!!!
-		List<ExaminationDTO> examinations;
+		List<Examination> examinations;
 		try {
 			examinations = examinationService.findAll();
 		} catch (ShanoirDatasetException e) {
@@ -70,17 +72,18 @@ public class ExaminationApiController implements ExaminationApi {
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(examinations, HttpStatus.OK);
+		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
-	
+
 	@Override
-    public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@ApiParam(value = "id of the subject",required=true ) @PathVariable("subjectId") Long subjectId) {
-    	final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
+	public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+		final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
-    }
+	}
 
 	@Override
 	public ResponseEntity<Examination> saveNewExamination(
@@ -123,7 +126,8 @@ public class ExaminationApiController implements ExaminationApi {
 		examination.setId(examinationId);
 
 		// A basic examination can only update certain fields, check that
-//		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(examination);
+		// final FieldErrorMap accessErrors =
+		// this.getUpdateRightsErrors(examination);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
 		// Check unique constrainte
@@ -155,10 +159,12 @@ public class ExaminationApiController implements ExaminationApi {
 	 * @return an error map.
 	 */
 	private FieldErrorMap getUpdateRightsErrors(final Examination examination) {
-		/*final Examination previousStateExamination = examinationService.findById(examination.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<Examination>().validate(previousStateExamination,
-				examination);
-		return accessErrors;*/
+		/*
+		 * final Examination previousStateExamination =
+		 * examinationService.findById(examination.getId()); final FieldErrorMap
+		 * accessErrors = new EditableOnlyByValidator<Examination>().validate(
+		 * previousStateExamination, examination); return accessErrors;
+		 */
 		return null;
 	}
 

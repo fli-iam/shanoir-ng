@@ -2,7 +2,7 @@ package org.shanoir.ng.study;
 
 import java.util.List;
 
-import org.shanoir.ng.center.CenterNameDTO;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -56,6 +56,15 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<IdNameDTO>> findStudiesNames() {
+		final List<IdNameDTO> studies = studyService.findIdsAndNames();
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(studies, HttpStatus.OK);
 	}
 
 	@Override
@@ -175,13 +184,4 @@ public class StudyApiController implements StudyApi {
 		return uniqueErrors;
 	}
 	
-	@Override
-	public ResponseEntity<List<StudyNameDTO>> findStudiesNames() {
-		final List<StudyNameDTO> studies = studyService.findIdsAndNames();
-		if (studies.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(studies, HttpStatus.OK);
-	}
-
 }

@@ -2,7 +2,7 @@ package org.shanoir.ng.study;
 
 import java.util.List;
 
-import org.shanoir.ng.center.CenterNameDTO;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
@@ -43,6 +43,16 @@ public interface StudyApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<StudyDTO>> findStudies();
+
+	@ApiOperation(value = "", notes = "Returns id and name for all the studies", response = IdNameDTO.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found studies", response = IdNameDTO.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no study found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<List<IdNameDTO>> findStudiesNames();
 
 	@ApiOperation(value = "", notes = "If exists, returns the studies with theirs study cards that the user is allowed to see", response = SimpleStudyDTO.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = SimpleStudyDTO.class),
@@ -88,14 +98,4 @@ public interface StudyApi {
 			@ApiParam(value = "study to update", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
 	
-	@ApiOperation(value = "", notes = "Returns id and name for all the studies", response = StudyNameDTO.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found studies", response = StudyNameDTO.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no study found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/allnames", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<StudyNameDTO>> findStudiesNames();
-
 }

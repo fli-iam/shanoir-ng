@@ -10,9 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.center.Center;
-import org.shanoir.ng.center.CenterApiController;
-import org.shanoir.ng.center.CenterService;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +63,7 @@ public class CenterApiControllerTest {
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(new Center()));
 		given(centerServiceMock.findById(1L)).willReturn(new Center());
-		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new CenterNameDTO()));
+		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
 		given(centerServiceMock.save(Mockito.mock(Center.class))).willReturn(new Center());
 	}
 

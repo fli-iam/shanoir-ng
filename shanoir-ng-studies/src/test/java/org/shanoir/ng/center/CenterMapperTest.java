@@ -6,9 +6,12 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentMapper;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -26,6 +29,9 @@ public class CenterMapperTest {
 	private static final Long CENTER_ID = 1L;
 	private static final String CENTER_NAME = "test";
 
+	@MockBean
+	private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
+
 	@Autowired
 	private CenterMapper centerMapper;
 
@@ -38,8 +44,8 @@ public class CenterMapperTest {
 	}
 
 	@Test
-	public void centersToCenterNameDTOsTest() {
-		final List<CenterNameDTO> centerDTOs = centerMapper.centersToCenterNameDTOs(Arrays.asList(createCenter()));
+	public void centersToIdNameDTOsTest() {
+		final List<IdNameDTO> centerDTOs = centerMapper.centersToIdNameDTOs(Arrays.asList(createCenter()));
 		Assert.assertNotNull(centerDTOs);
 		Assert.assertTrue(centerDTOs.size() == 1);
 		Assert.assertTrue(centerDTOs.get(0).getId().equals(CENTER_ID));
@@ -53,8 +59,8 @@ public class CenterMapperTest {
 	}
 
 	@Test
-	public void centerToCenterNameDTOTest() {
-		final CenterNameDTO centerDTO = centerMapper.centerToCenterNameDTO(createCenter());
+	public void centerToIdNameDTOTest() {
+		final IdNameDTO centerDTO = centerMapper.centerToIdNameDTO(createCenter());
 		Assert.assertNotNull(centerDTO);
 		Assert.assertTrue(centerDTO.getId().equals(CENTER_ID));
 	}
