@@ -143,9 +143,20 @@ public class DicomFileAnalyzer {
 					images.add(image);
 				}
 			}
+			/**
+			 * Attention: the below methods set informations on the serie level,
+			 * that are extracted of each dicom file (== instance), as we are on
+			 * the instance level here. Normally, the first file wins, as the below
+			 * methods check if the node is already existing in the json created.
+			 * This logic was like this before in shanoir old and I think there is
+			 * no other way than taking one file (the first?) as reference for the serie.
+			 * The below infos are not contained in the dicomdir, that is why we go on the
+			 * file level.
+			 */
 			checkIsMultiFrame(serie, datasetAttributes, sopClassUID);
 			checkSeriesDescription(serie, datasetAttributes);
 			checkSeriesDate(serie, datasetAttributes);
+			checkProtocolName(serie, datasetAttributes);
 			addSeriesEquipment(serie, datasetAttributes);
 			addSeriesIsCompressed(serie, datasetAttributes);
 		} catch (IOException e) {
@@ -200,6 +211,7 @@ public class DicomFileAnalyzer {
 	}
 	
 	/**
+	 * Adds on analyzing the transfersyntaxuid if serie is compressed or not.
 	 * @param serie
 	 * @param datasetAttributes
 	 */
@@ -215,6 +227,7 @@ public class DicomFileAnalyzer {
 	}
 	
 	/**
+	 * Adds the equipment information.
 	 * @param serie
 	 * @param datasetAttributes
 	 */
@@ -232,13 +245,15 @@ public class DicomFileAnalyzer {
 	}
 
 	/**
-	 * Get seriesDescription from DicomDir, if null or empty, get the seriesDescription
-	 * from .dcm file, if existing replace it in JsonNode tree.
+	 * Normally we get the seriesDescription from the DicomDir, if not: null or empty,
+	 * get the seriesDescription from the .dcm file, if existing in .dcm file add it in
+	 * JsonNode tree.
 	 * @param serie
 	 * @param datasetAttributes
 	 */
 	private void checkSeriesDescription(JsonNode serie, Attributes datasetAttributes) {
 		if (serie.path("seriesDescription").isNull()) {
+			// has not been found in dicomdir, so we get it from .dcm file:
 			String seriesDescriptionDicomFile = datasetAttributes.getString(Tag.SeriesDescription);
 			if (seriesDescriptionDicomFile != null && !seriesDescriptionDicomFile.isEmpty()) {
 				((ObjectNode) serie).put("seriesDescription", seriesDescriptionDicomFile);
@@ -247,16 +262,35 @@ public class DicomFileAnalyzer {
 	}
 	
 	/**
-	 * Get seriesDate from DicomDir, if null or empty, get the seriesDate
-	 * from .dcm file, if existing replace it in JsonNode tree.
+	 * Normally we get the seriesDate from the DicomDir, if not: null or empty,
+	 * get the seriesDate from the .dcm file, if existing in .dcm file add it in
+	 * JsonNode tree.
 	 * @param serie
 	 * @param datasetAttributes
 	 */
 	private void checkSeriesDate(JsonNode serie, Attributes datasetAttributes) {
 		if (serie.path("seriesDate").isNull()) {
+			// has not been found in dicomdir, so we get it from .dcm file:
 			String seriesDateDicomFile = datasetAttributes.getString(Tag.SeriesDate);
 			if (seriesDateDicomFile != null && !seriesDateDicomFile.isEmpty()) {
 				((ObjectNode) serie).put("seriesDate", seriesDateDicomFile);
+			}
+		}
+	}
+	
+	/**
+	 * Normally we get the protocolName from the DicomDir, if not: null or empty,
+	 * get the protocolName from the .dcm file, if existing in .dcm file add it in
+	 * JsonNode tree.
+	 * @param serie
+	 * @param datasetAttributes
+	 */
+	private void checkProtocolName(JsonNode serie, Attributes datasetAttributes) {
+		if (serie.path("protocolName").isNull()) {
+			// has not been found in dicomdir, so we get it from .dcm file:
+			String protocolNameDicomFile = datasetAttributes.getString(Tag.ProtocolName);
+			if (protocolNameDicomFile != null && !protocolNameDicomFile.isEmpty()) {
+				((ObjectNode) serie).put("protocolName", protocolNameDicomFile);
 			}
 		}
 	}

@@ -9,7 +9,9 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -27,24 +29,23 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * @author mkain
  *
  */
+@Service
 public class NIfTIConverter {
+
+	private static final String DOUBLE_EQUAL = "==";
+
+	private static final String SEMI_COLON = ";";
 
 	private static final Logger LOG = LoggerFactory.getLogger(NIfTIConverter.class);
 
 	private static final String SERIES = "SERIES";
 	
 	private static final String DATASET = "dataset";
-
-	private JsonNode dicomDirJson;
 	
-	private File unzipFolderFile;
+	@Value("${shanoir.import.series.donotseparatedatasetsinserie}")
+	private String doNotSeparateDatasetsInSerie;
 	
-	public NIfTIConverter(JsonNode dicomDirJson, File unzipFolderFile) {
-		this.dicomDirJson = dicomDirJson;
-		this.unzipFolderFile = unzipFolderFile;
-	}
-	
-	public void prepareConversion() throws RestServiceException {
+	public void prepareConversion(JsonNode dicomDirJson, File unzipFolderFile) throws RestServiceException {
 		File seriesFolderFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + SERIES);
 		if(!seriesFolderFile.exists()) {
 			seriesFolderFile.mkdirs();
@@ -65,7 +66,9 @@ public class NIfTIConverter {
 						if (series.isArray()) {
 							for (JsonNode serie : series) {
 								File serieIDFolderFile = createSerieIDFolder(seriesFolderFile, serie);
-								separateDatasetsInSerie(serieIDFolderFile, serie);
+								if (checkSerieForSeparationOfDatasetsInSerie(serie)) {
+									separateDatasetsInSerie(serieIDFolderFile, serie);
+								}
 							}
 						}
 					}
@@ -73,7 +76,26 @@ public class NIfTIConverter {
 			}
 		}	
 	}
-
+	
+	/**
+	 * This method uses the properties string donotseparatedatasetsinserie to check
+	 * if a serie is processed, where the datasets should be separated in folders or not.
+	 */
+	private boolean checkSerieForSeparationOfDatasetsInSerie(final JsonNode serie) {
+		final String[] seriesDescriptionsToNotSeparateDatasetsInSerie = doNotSeparateDatasetsInSerie.split(SEMI_COLON);
+		for (final String item : seriesDescriptionsToNotSeparateDatasetsInSerie) {
+			final String tag = item.split(DOUBLE_EQUAL)[0];
+			final String value = item.split(DOUBLE_EQUAL)[1];
+			LOG.debug("checkDicomFromProperties : tag=" + tag + ", value=" + value);
+			final String dicomValue = serie.path(tag).asText();
+			String wildcard = wildcardToRegex(value);
+			if (dicomValue != null && dicomValue.matches(wildcard)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * This method separates the datasets from a single serie in separate
 	 * folders. 3 distinct dicom tags are essential for separating the datasets:
@@ -215,4 +237,47 @@ public class NIfTIConverter {
 		return ret;
 	}
 	
+	/**
+	 * Convert a String with a wildcard to a regular expression.
+	 *
+	 * @param wildcard the wildcard
+	 *
+	 * @return the string
+	 */
+	public static String wildcardToRegex(String wildcard) {
+		StringBuffer s = new StringBuffer(wildcard.length());
+		s.append('^');
+		for (int i = 0, is = wildcard.length(); i < is; i++) {
+			char c = wildcard.charAt(i);
+			switch (c) {
+			case '*':
+				s.append(".*");
+				break;
+			case '?':
+				s.append(".");
+				break;
+				// escape special regexp-characters
+			case '(':
+			case ')':
+			case '[':
+			case ']':
+			case '$':
+			case '^':
+			case '.':
+			case '{':
+			case '}':
+			case '|':
+			case '\\':
+				s.append("\\");
+				s.append(c);
+				break;
+			default:
+				s.append(c);
+				break;
+			}
+		}
+		s.append('$');
+		return (s.toString());
+	}
+
 }

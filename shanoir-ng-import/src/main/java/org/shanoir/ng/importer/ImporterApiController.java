@@ -56,6 +56,9 @@ public class ImporterApiController implements ImporterApi {
 
 	@Autowired
 	private DicomFileAnalyzer dicomFileAnalyzer;
+	
+	@Autowired
+	private NIfTIConverter niftiConverter;
 
 	public ResponseEntity<Void> uploadFiles(
 			@ApiParam(value = "file detail") @RequestPart("files") MultipartFile[] files) throws RestServiceException {
@@ -152,8 +155,7 @@ public class ImporterApiController implements ImporterApi {
 
 			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode);
 
-			NIfTIConverter niftiConverter = new NIfTIConverter(dicomDirJsonNode, unzipFolderFile);
-			niftiConverter.prepareConversion();
+			niftiConverter.prepareConversion(dicomDirJsonNode, unzipFolderFile);
 
 			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(dicomDirJsonNode);
