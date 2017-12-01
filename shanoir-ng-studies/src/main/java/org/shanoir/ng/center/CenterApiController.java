@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -76,8 +77,8 @@ public class CenterApiController implements CenterApi {
 	}
 
 	@Override
-	public ResponseEntity<List<CenterNameDTO>> findCentersNames() {
-		final List<CenterNameDTO> centers = centerService.findIdsAndNames();
+	public ResponseEntity<List<IdNameDTO>> findCentersNames() {
+		final List<IdNameDTO> centers = centerService.findIdsAndNames();
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

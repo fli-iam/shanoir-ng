@@ -1,12 +1,12 @@
-package org.shanoir.ng.study;
+package org.shanoir.ng.shared.dto;
 
 /**
- * DTO for studies with id and name.
+ * DTO for remote entities with id and name.
  * 
- * @author ifakhfakh
+ * @author msimon
  *
  */
-public class StudyNameDTO {
+public class IdNameDTO {
 
 	private Long id;
 
@@ -15,18 +15,18 @@ public class StudyNameDTO {
 	/**
 	 * Default constructor.
 	 */
-	public StudyNameDTO() {
+	public IdNameDTO() {
 	}
 
 	/**
-	 * Constructor.
+	 * Constructor with id and name.
 	 * 
 	 * @param id
-	 *            study id.
+	 *            object id.
 	 * @param name
-	 *            study name.
+	 *            object name.
 	 */
-	public StudyNameDTO(final Long id, final String name) {
+	public IdNameDTO(final Long id, final String name) {
 		this.id = id;
 		this.name = name;
 	}

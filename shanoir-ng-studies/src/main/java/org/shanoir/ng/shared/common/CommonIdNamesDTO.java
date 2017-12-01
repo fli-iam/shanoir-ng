@@ -1,10 +1,33 @@
-package org.shanoir.ng.shared.dto;
+package org.shanoir.ng.shared.common;
 
-public class StudySubjectCenterNamesDTO {
+import org.shanoir.ng.shared.dto.IdNameDTO;
 
+/**
+ * DTO with center name, study name and subject name.
+ * 
+ * @author ifakhfakh
+ *
+ */
+public class CommonIdNamesDTO {
+
+	private IdNameDTO center;
 	private IdNameDTO study;
 	private IdNameDTO subject;
-	private IdNameDTO center;
+
+	/**
+	 * @return the center
+	 */
+	public IdNameDTO getCenter() {
+		return center;
+	}
+
+	/**
+	 * @param center
+	 *            the center to set
+	 */
+	public void setCenter(IdNameDTO center) {
+		this.center = center;
+	}
 
 	/**
 	 * @return the study
@@ -34,21 +57,6 @@ public class StudySubjectCenterNamesDTO {
 	 */
 	public void setSubject(IdNameDTO subject) {
 		this.subject = subject;
-	}
-
-	/**
-	 * @return the center
-	 */
-	public IdNameDTO getCenter() {
-		return center;
-	}
-
-	/**
-	 * @param center
-	 *            the center to set
-	 */
-	public void setCenter(IdNameDTO center) {
-		this.center = center;
 	}
 
 }

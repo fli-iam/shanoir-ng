@@ -9,20 +9,16 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.AccessToken.Access;
 import org.mockito.Mockito;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.SecurityContextTestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,6 +39,7 @@ import com.google.gson.GsonBuilder;
 public class StudyApiControllerTest {
 
 	private static final String REQUEST_PATH = "/studies";
+	private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	private Gson gson;
@@ -67,6 +64,7 @@ public class StudyApiControllerTest {
 		doNothing().when(studyServiceMock).deleteById(1L);
 		given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
 		given(studyServiceMock.findById(1L)).willReturn(new Study());
+		given(studyServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
 		given(studyServiceMock.save(Mockito.mock(Study.class))).willReturn(new Study());
 	}
 
@@ -78,23 +76,22 @@ public class StudyApiControllerTest {
 	}
 
 	@Test
-	public void findStudyByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+	public void findStudiesTest() throws Exception {
+		SecurityContextTestUtil.initAuthenticationContext();
+
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
-	public void findStudiesTest() throws Exception {
-		Access realmAccess = new Access();
-		realmAccess.addRole("ROLE_ADMIN");
-		AccessToken accessToken = new AccessToken();
-		accessToken.setRealmAccess(realmAccess);
-		KeycloakSecurityContext context = new KeycloakSecurityContext(null, accessToken, null, null);
-		KeycloakPrincipal<KeycloakSecurityContext> principal = new KeycloakPrincipal<>("test", context);
-		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(principal, null));
+	public void findStudiesNamesTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
 
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
+	@Test
+	public void findStudyByIdTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 

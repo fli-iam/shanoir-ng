@@ -15,85 +15,39 @@ public class ExaminationDTO {
 
 	private Long id;
 
-	private IdNameDTO subject;
-
-	private Date examinationDate;
-
-	private Long studyId;
-
-	private String studyName;
-
 	private Long centerId;
 
 	private String centerName;
 
 	private String comment;
 
-	private String note;
-
-	private Double subjectWeight;
+	private Date examinationDate;
 
 	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
 
+	private String note;
+
+	private Long studyId;
+
+	private String studyName;
+
+	private IdNameDTO subject;
+
+	private Double subjectWeight;
+
+	/**
+	 * @return the id
+	 */
 	public Long getId() {
 		return id;
 	}
 
+	/**
+	 * @param id
+	 *            the id to set
+	 */
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public Date getExaminationDate() {
-		return examinationDate;
-	}
-
-	public void setExaminationDate(Date examinationDate) {
-		this.examinationDate = examinationDate;
-	}
-
-	/**
-	 * @return the subject
-	 */
-	public IdNameDTO getSubject() {
-		return subject;
-	}
-
-	/**
-	 * @param subject
-	 *            the subject to set
-	 */
-	public void setSubject(IdNameDTO subject) {
-		this.subject = subject;
-	}
-
-	/**
-	 * @return the studyId
-	 */
-	public Long getStudyId() {
-		return studyId;
-	}
-
-	/**
-	 * @param studyId
-	 *            the studyId to set
-	 */
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
-
-	/**
-	 * @return the studyName
-	 */
-	public String getStudyName() {
-		return studyName;
-	}
-
-	/**
-	 * @param studyName
-	 *            the studyName to set
-	 */
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
 	}
 
 	/**
@@ -142,33 +96,18 @@ public class ExaminationDTO {
 	}
 
 	/**
-	 * @return the note
+	 * @return the examinationDate
 	 */
-	public String getNote() {
-		return note;
+	public Date getExaminationDate() {
+		return examinationDate;
 	}
 
 	/**
-	 * @param note
-	 *            the note to set
+	 * @param examinationDate
+	 *            the examinationDate to set
 	 */
-	public void setNote(String note) {
-		this.note = note;
-	}
-
-	/**
-	 * @return the subjectWeight
-	 */
-	public Double getSubjectWeight() {
-		return subjectWeight;
-	}
-
-	/**
-	 * @param subjectWeight
-	 *            the subjectWeight to set
-	 */
-	public void setSubjectWeight(Double subjectWeight) {
-		this.subjectWeight = subjectWeight;
+	public void setExaminationDate(Date examinationDate) {
+		this.examinationDate = examinationDate;
 	}
 
 	/**
@@ -184,6 +123,81 @@ public class ExaminationDTO {
 	 */
 	public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
 		this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
+	}
+
+	/**
+	 * @return the note
+	 */
+	public String getNote() {
+		return note;
+	}
+
+	/**
+	 * @param note
+	 *            the note to set
+	 */
+	public void setNote(String note) {
+		this.note = note;
+	}
+
+	/**
+	 * @return the studyId
+	 */
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	/**
+	 * @param studyId
+	 *            the studyId to set
+	 */
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+
+	/**
+	 * @return the studyName
+	 */
+	public String getStudyName() {
+		return studyName;
+	}
+
+	/**
+	 * @param studyName
+	 *            the studyName to set
+	 */
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
+	}
+
+	/**
+	 * @return the subject
+	 */
+	public IdNameDTO getSubject() {
+		return subject;
+	}
+
+	/**
+	 * @param subject
+	 *            the subject to set
+	 */
+	public void setSubject(IdNameDTO subject) {
+		this.subject = subject;
+	}
+
+	/**
+	 * @return the subjectWeight
+	 */
+	public Double getSubjectWeight() {
+		return subjectWeight;
+	}
+
+	/**
+	 * @param subjectWeight
+	 *            the subjectWeight to set
+	 */
+	public void setSubjectWeight(Double subjectWeight) {
+		this.subjectWeight = subjectWeight;
 	}
 
 }

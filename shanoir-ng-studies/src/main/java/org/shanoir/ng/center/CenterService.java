@@ -3,6 +3,7 @@ package org.shanoir.ng.center;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
@@ -53,7 +54,7 @@ public interface CenterService extends UniqueCheckableService<Center> {
 	 * 
 	 * @return list of centers.
 	 */
-	List<CenterNameDTO> findIdsAndNames();
+	List<IdNameDTO> findIdsAndNames();
 
 	/**
 	 * Save a center.

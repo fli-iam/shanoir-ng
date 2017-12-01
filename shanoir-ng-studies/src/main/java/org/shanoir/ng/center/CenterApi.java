@@ -2,6 +2,7 @@ package org.shanoir.ng.center;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
@@ -57,15 +58,15 @@ public interface CenterApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<CenterDTO>> findCenters();
 
-	@ApiOperation(value = "", notes = "Returns id and name for all the centers", response = CenterNameDTO.class, responseContainer = "List", tags = {})
+	@ApiOperation(value = "", notes = "Returns id and name for all the centers", response = IdNameDTO.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found centers", response = CenterNameDTO.class, responseContainer = "List"),
+			@ApiResponse(code = 200, message = "found centers", response = IdNameDTO.class, responseContainer = "List"),
 			@ApiResponse(code = 204, message = "no center found", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<CenterNameDTO>> findCentersNames();
+	ResponseEntity<List<IdNameDTO>> findCentersNames();
 
 	@ApiOperation(value = "", notes = "Saves a new center", response = CenterDTO.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created center", response = CenterDTO.class),

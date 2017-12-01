@@ -2,6 +2,8 @@ package org.shanoir.ng.center;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
+
 /**
  * Custom repository for centers.
  * 
@@ -26,6 +28,6 @@ public interface CenterRepositoryCustom {
 	 * 
 	 * @return list of centers.
 	 */
-	List<CenterNameDTO> findIdsAndNames();
+	List<IdNameDTO> findIdsAndNames();
 
 }

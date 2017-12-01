@@ -9,6 +9,7 @@ import org.shanoir.ng.coil.CoilType;
 import org.shanoir.ng.manufacturermodel.DatasetModalityType;
 import org.shanoir.ng.manufacturermodel.Manufacturer;
 import org.shanoir.ng.manufacturermodel.ManufacturerModel;
+import org.shanoir.ng.shared.common.CommonIdsDTO;
 import org.shanoir.ng.study.Study;
 import org.shanoir.ng.subject.Subject;
 
@@ -79,6 +80,20 @@ public final class ModelsUtil {
 		equipment.setManufacturerModel(createManufacturerModel());
 		equipment.setSerialNumber(ACQ_EQPT_SERIAL_NUMBER);
 		return equipment;
+	}
+
+
+	/**
+	 * Create a DTO with ids.
+	 * 
+	 * @return DTO with ids.
+	 */
+	public static CommonIdsDTO createCommonIdsDTO() {
+		final CommonIdsDTO commonIdsDTO = new CommonIdsDTO();
+		commonIdsDTO.setCenterId(1L);
+		commonIdsDTO.setStudyId(1L);
+		commonIdsDTO.setSubjectId(1L);
+		return commonIdsDTO;
 	}
 
 	/**

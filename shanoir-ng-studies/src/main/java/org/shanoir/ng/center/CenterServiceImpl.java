@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorModelCode;
@@ -83,7 +84,7 @@ public class CenterServiceImpl implements CenterService {
 	}
 
 	@Override
-	public List<CenterNameDTO> findIdsAndNames() {
+	public List<IdNameDTO> findIdsAndNames() {
 		return centerRepository.findIdsAndNames();
 	}
 

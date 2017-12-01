@@ -13,9 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.center.Center;
-import org.shanoir.ng.center.CenterRepository;
-import org.shanoir.ng.center.CenterServiceImpl;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.study.StudyCenter;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -50,7 +48,7 @@ public class CenterServiceTest {
 		given(centerMapper.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
 		
 		given(centerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCenter()));
-		given(centerRepository.findIdsAndNames()).willReturn(Arrays.asList(new CenterNameDTO()));
+		given(centerRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
 		given(centerRepository.findOne(CENTER_ID)).willReturn(ModelsUtil.createCenter());
 		given(centerRepository.save(Mockito.any(Center.class))).willReturn(ModelsUtil.createCenter());
 	}
@@ -103,7 +101,7 @@ public class CenterServiceTest {
 
 	@Test
 	public void findIdsAndNamesTest() {
-		final List<CenterNameDTO> centers = centerService.findIdsAndNames();
+		final List<IdNameDTO> centers = centerService.findIdsAndNames();
 		Assert.assertNotNull(centers);
 		Assert.assertTrue(centers.size() == 1);
 

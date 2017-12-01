@@ -13,9 +13,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirDatasetException;
+import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Examination service test.
@@ -33,7 +39,13 @@ public class ExaminationServiceTest {
 	private ExaminationRepository examinationRepository;
 
 	@Mock
+	private MicroserviceRequestsService microservicesRequestsService;
+
+	@Mock
 	private RabbitTemplate rabbitTemplate;
+
+	@Mock
+	private RestTemplate restTemplate;
 
 	@InjectMocks
 	private ExaminationServiceImpl examinationService;
@@ -54,7 +66,12 @@ public class ExaminationServiceTest {
 
 	@Test
 	public void findAllTest() throws ShanoirDatasetException {
-		final List<ExaminationDTO> examination = examinationService.findAll();
+		IdNameDTO idNameDTO = new IdNameDTO();
+		idNameDTO.setName("test");
+		given(restTemplate.getForEntity(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class)
+				)).willReturn(new ResponseEntity<>(idNameDTO, HttpStatus.OK));
+		
+		final List<Examination> examination = examinationService.findAll();
 		Assert.assertNotNull(examination);
 		Assert.assertTrue(examination.size() == 1);
 
@@ -63,7 +80,12 @@ public class ExaminationServiceTest {
 
 	@Test
 	public void findByIdTest() throws ShanoirDatasetException {
-		final ExaminationDTO examination = examinationService.findById(EXAMINATION_ID);
+		IdNameDTO idNameDTO = new IdNameDTO();
+		idNameDTO.setName("test");
+		given(restTemplate.getForEntity(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class)
+				)).willReturn(new ResponseEntity<>(idNameDTO, HttpStatus.OK));
+		
+		final Examination examination = examinationService.findById(EXAMINATION_ID);
 		Assert.assertNotNull(examination);
 		Assert.assertTrue(ModelsUtil.EXAMINATION_NOTE.equals(examination.getNote()));
 
@@ -100,5 +122,5 @@ public class ExaminationServiceTest {
 		examination.setComment(UPDATED_EXAMINATION_COMMENT);
 		return examination;
 	}
-
+	
 }

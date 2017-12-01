@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.shanoir.ng.center.CenterNameDTO;
 import org.shanoir.ng.shared.dto.IdListDTO;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
@@ -86,6 +86,11 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public Study findById(final Long id) {
 		return studyRepository.findOne(id);
+	}
+
+	@Override
+	public List<IdNameDTO> findIdsAndNames() {
+		return studyRepository.findIdsAndNames();
 	}
 
 	@Override
@@ -219,9 +224,4 @@ public class StudyServiceImpl implements StudyService {
 
 	}
 	
-	@Override
-	public List<StudyNameDTO> findIdsAndNames() {
-		return studyRepository.findIdsAndNames();
-	}
-
 }

@@ -144,6 +144,27 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  /studies/names:
+    get:
+      operationId: findStudiesNames
+      description: Returns id and name for all the studies
+      responses:
+        '200':
+          description: found studies
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/IdNameDTO'
+        '204':
+          description: no study found
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
 parameters:
   studyId:
     name: studyId
@@ -153,6 +174,14 @@ parameters:
     type: integer
     format: int64
 definitions:
+  IdNameDTO:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
   Study:
     type: object
     required:

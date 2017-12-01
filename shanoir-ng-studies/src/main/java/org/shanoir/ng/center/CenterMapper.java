@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.mapstruct.Mapper;
 import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentMapper;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 
 /**
  * Mapper for centers.
@@ -33,21 +34,21 @@ public interface CenterMapper {
 	CenterDTO centerToCenterDTO(Center center);
 
 	/**
-	 * Map list of @Center to list of @CenterNameDTO.
+	 * Map list of @Center to list of @IdNameDTO.
 	 * 
 	 * @param centers
 	 *            list of centers.
 	 * @return list of centers DTO.
 	 */
-	List<CenterNameDTO> centersToCenterNameDTOs(List<Center> centers);
+	List<IdNameDTO> centersToIdNameDTOs(List<Center> centers);
 
 	/**
-	 * Map a @Center to a @CenterNameDTO.
+	 * Map a @Center to a @IdNameDTO.
 	 * 
 	 * @param center
 	 *            center to map.
 	 * @return center DTO.
 	 */
-	CenterNameDTO centerToCenterNameDTO(Center center);
+	IdNameDTO centerToIdNameDTO(Center center);
 
 }

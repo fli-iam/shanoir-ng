@@ -34,25 +34,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 
 	private static final String REQUEST_PATH = "/studies";
+	private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	@Autowired
 	private TestRestTemplate restTemplate;
-
-	@Test
-	public void findStudyByIdProtected() {
-		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-	}
-
-	@Test
-	public void findStudyByIdWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
-
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
 
 	@Test
 	public void findStudiesProtected() {
@@ -65,6 +51,36 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(false));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
+				String.class);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
+
+	@Test
+	public void findStudiesNamesProtected() {
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_FOR_NAMES, String.class);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+	}
+
+	@Test
+	public void findStudiesNamesWithLogin() throws ClientProtocolException, IOException {
+		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_NAMES, HttpMethod.GET, entity,
+				String.class);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
+
+	@Test
+	public void findStudyByIdProtected() {
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+	}
+
+	@Test
+	public void findStudyByIdWithLogin() throws ClientProtocolException, IOException {
+		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}

@@ -133,7 +133,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/CenterNameDTO'
+              $ref: '#/definitions/IdNameDTO'
         '204':
           description: no center found
         '401':
@@ -206,7 +206,7 @@ definitions:
         type: string
       website:
         type: string
-  CenterNameDTO:
+  IdNameDTO:
     type: object
     properties:
       id:

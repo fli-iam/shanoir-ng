@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -41,6 +42,7 @@ public class StudyServiceTest {
 	@Before
 	public void setup() {
 		given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
+		given(studyRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
 		given(studyRepository.findOne(STUDY_ID)).willReturn(ModelsUtil.createStudy());
 		given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy());
 	}
@@ -68,6 +70,15 @@ public class StudyServiceTest {
 		Assert.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
 
 		Mockito.verify(studyRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+	}
+
+	@Test
+	public void findIdsAndNamesTest() {
+		final List<IdNameDTO> studies = studyService.findIdsAndNames();
+		Assert.assertNotNull(studies);
+		Assert.assertTrue(studies.size() == 1);
+
+		Mockito.verify(studyRepository, Mockito.times(1)).findIdsAndNames();
 	}
 
 	@Test

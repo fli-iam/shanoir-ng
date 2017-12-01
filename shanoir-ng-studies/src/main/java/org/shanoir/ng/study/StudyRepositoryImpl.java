@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,7 +32,7 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<StudyNameDTO> findIdsAndNames() {
+	public List<IdNameDTO> findIdsAndNames() {
 		return em.createNativeQuery(
 				"SELECT id, name FROM study", "studyNameResult")
 				.getResultList();

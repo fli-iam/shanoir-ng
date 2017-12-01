@@ -27,7 +27,7 @@ public interface ExaminationService extends UniqueCheckableService<Examination> 
 	 * 
 	 * @return a list of examinations.
 	 */
-	List<ExaminationDTO> findAll() throws ShanoirDatasetException;
+	List<Examination> findAll() throws ShanoirDatasetException;
 
 	/**
 	 * Find examination by its id.
@@ -37,7 +37,7 @@ public interface ExaminationService extends UniqueCheckableService<Examination> 
 	 * @return an examination or null.
 	 * @throws ShanoirDatasetException 
 	 */
-	ExaminationDTO findById(Long id) throws ShanoirDatasetException;
+	Examination findById(Long id) throws ShanoirDatasetException;
 
 	/**
 	 * Save an examination.

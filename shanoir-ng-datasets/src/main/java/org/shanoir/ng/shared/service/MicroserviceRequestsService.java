@@ -19,7 +19,7 @@ public class MicroserviceRequestsService {
 	public static final String STUDY = "/studies";
 	public static final String CENTER = "/centers";
 	
-	public static final String STUDY_MS = "/studyMS";
+	public static final String COMMON = "/common";
 	
 	public static final String CENTERID = "/centerid";
 	
