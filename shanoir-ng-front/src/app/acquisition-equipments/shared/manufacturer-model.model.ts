@@ -1,5 +1,5 @@
 import { Manufacturer } from './manufacturer.model';
-import { DatasetModalityType } from "../../shared/enum/dataset-modality-type";
+import { DatasetModalityType } from "../../shared/enums/dataset-modality-type";
 
 export class ManufacturerModel {
     id: number;

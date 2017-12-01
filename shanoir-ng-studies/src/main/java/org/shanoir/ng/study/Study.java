@@ -25,7 +25,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
-import org.shanoir.ng.subject.SubjectStudy;
+import org.shanoir.ng.subjectstudy.SubjectStudy;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -70,7 +70,7 @@ public class Study extends HalEntity {
 
 	/** Associated experimental groups of subjects. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
-	private List<ExperimentalGroupOfSubjects> experimentalGroupOfSubjectsList;
+	private List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects;
 
 	/** The is mono center. */
 	@NotNull
@@ -86,7 +86,7 @@ public class Study extends HalEntity {
 	@ElementCollection
 	@CollectionTable(name = "protocole_file_path")
 	@Column(name = "path")
-	private List<String> protocolFilePathList;
+	private List<String> protocolFilePaths;
 
 	/** Start date. */
 	private Date startDate;
@@ -207,18 +207,18 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @return the experimentalGroupOfSubjectsList
+	 * @return the experimentalGroupsOfSubjects
 	 */
-	public List<ExperimentalGroupOfSubjects> getExperimentalGroupOfSubjectsList() {
-		return experimentalGroupOfSubjectsList;
+	public List<ExperimentalGroupOfSubjects> getExperimentalGroupsOfSubjects() {
+		return experimentalGroupsOfSubjects;
 	}
 
 	/**
-	 * @param experimentalGroupOfSubjectsList
-	 *            the experimentalGroupOfSubjectsList to set
+	 * @param experimentalGroupsOfSubjects
+	 *            the experimentalGroupsOfSubjects to set
 	 */
-	public void setExperimentalGroupOfSubjectsList(List<ExperimentalGroupOfSubjects> experimentalGroupOfSubjectsList) {
-		this.experimentalGroupOfSubjectsList = experimentalGroupOfSubjectsList;
+	public void setExperimentalGroupsOfSubjects(List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects) {
+		this.experimentalGroupsOfSubjects = experimentalGroupsOfSubjects;
 	}
 
 	/**
@@ -252,18 +252,18 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @return the protocolFilePathList
+	 * @return the protocolFilePaths
 	 */
-	public List<String> getProtocolFilePathList() {
-		return protocolFilePathList;
+	public List<String> getProtocolFilePaths() {
+		return protocolFilePaths;
 	}
 
 	/**
-	 * @param protocolFilePathList
-	 *            the protocolFilePathList to set
+	 * @param protocolFilePaths
+	 *            the protocolFilePaths to set
 	 */
-	public void setProtocolFilePathList(List<String> protocolFilePathList) {
-		this.protocolFilePathList = protocolFilePathList;
+	public void setProtocolFilePaths(List<String> protocolFilePaths) {
+		this.protocolFilePaths = protocolFilePaths;
 	}
 
 	/**

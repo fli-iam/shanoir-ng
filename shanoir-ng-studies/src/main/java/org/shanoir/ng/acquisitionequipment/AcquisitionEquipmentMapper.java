@@ -14,7 +14,7 @@ import org.shanoir.ng.manufacturermodel.ManufacturerModelMapper;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = {CenterMapper.class, ManufacturerModelMapper.class})
+@Mapper(componentModel = "spring", uses = { CenterMapper.class, ManufacturerModelMapper.class })
 public interface AcquisitionEquipmentMapper {
 
 	/**
@@ -34,27 +34,7 @@ public interface AcquisitionEquipmentMapper {
 	 *            acquisition equipment to map.
 	 * @return acquisition equipment DTO.
 	 */
+	@Mappings({ @Mapping(target = "studyCards", ignore = true) })
 	AcquisitionEquipmentDTO acquisitionEquipmentToAcquisitionEquipmentDTO(AcquisitionEquipment acquisitionEquipment);
-
-	/**
-	 * Map list of @AcquisitionEquipment to list of @AcquisitionEquipmentDTO.
-	 * 
-	 * @param acquisitionEquipments
-	 *            list of acquisition equipments.
-	 * @return list of acquisition equipments DTO.
-	 */
-	List<SimpleAcquisitionEquipmentDTO> acquisitionEquipmentsToSimpleAcquisitionEquipmentDTOs(
-			List<AcquisitionEquipment> acquisitionEquipments);
-
-	/**
-	 * Map a @AcquisitionEquipment to a @AcquisitionEquipmentDTO.
-	 * 
-	 * @param acquisitionEquipment
-	 *            acquisition equipment to map.
-	 * @return acquisition equipment DTO.
-	 */
-	@Mappings({ @Mapping(source = "center.name", target = "centerName")})
-	SimpleAcquisitionEquipmentDTO acquisitionEquipmentToSimpleAcquisitionEquipmentDTO(
-			AcquisitionEquipment acquisitionEquipment);
 
 }

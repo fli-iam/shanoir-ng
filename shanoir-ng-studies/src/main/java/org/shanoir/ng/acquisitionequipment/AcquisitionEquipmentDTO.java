@@ -1,5 +1,8 @@
 package org.shanoir.ng.acquisitionequipment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.shanoir.ng.manufacturermodel.ManufacturerModel;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 
@@ -19,10 +22,13 @@ public class AcquisitionEquipmentDTO {
 
 	private String serialNumber;
 
+	private List<IdNameDTO> studyCards;
+
 	/**
 	 * Default constructor.
 	 */
 	public AcquisitionEquipmentDTO() {
+		studyCards = new ArrayList<>();
 	}
 
 	/**
@@ -83,6 +89,20 @@ public class AcquisitionEquipmentDTO {
 	 */
 	public void setSerialNumber(String serialNumber) {
 		this.serialNumber = serialNumber;
+	}
+
+	/**
+	 * @return the studyCards
+	 */
+	public List<IdNameDTO> getStudyCards() {
+		return studyCards;
+	}
+
+	/**
+	 * @param studyCards the studyCards to set
+	 */
+	public void setStudyCards(List<IdNameDTO> studyCards) {
+		this.studyCards = studyCards;
 	}
 
 }

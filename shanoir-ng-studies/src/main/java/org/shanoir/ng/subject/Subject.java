@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
+import org.shanoir.ng.subjectstudy.SubjectStudy;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 

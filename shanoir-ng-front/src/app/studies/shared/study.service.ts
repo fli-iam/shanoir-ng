@@ -6,7 +6,7 @@ import { Study } from './study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import * as AppUtils from '../../utils/app.utils';
 import { HandleErrorService } from '../../shared/utils/handle-error.service';
-import { IdNameObject } from '../../examinations/shared/id-name-object.model';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
 
 @Injectable()
 export class StudyService {

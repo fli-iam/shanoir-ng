@@ -39,26 +39,9 @@ public class AcquisitionEquipmentMapperTest {
 	}
 
 	@Test
-	public void acquisitionEquipmentsToSimpleAcquisitionEquipmentDTOsTest() {
-		final List<SimpleAcquisitionEquipmentDTO> AcquisitionEquipmentDTOs = acquisitionEquipmentMapper
-				.acquisitionEquipmentsToSimpleAcquisitionEquipmentDTOs(Arrays.asList(createAcquisitionEquipment()));
-		Assert.assertNotNull(AcquisitionEquipmentDTOs);
-		Assert.assertTrue(AcquisitionEquipmentDTOs.size() == 1);
-		Assert.assertTrue(AcquisitionEquipmentDTOs.get(0).getId().equals(ACQ_EQPT_ID));
-	}
-
-	@Test
 	public void acquisitionEquipmentToAcquisitionEquipmentDTOTest() {
 		final AcquisitionEquipmentDTO AcquisitionEquipmentDTO = acquisitionEquipmentMapper
 				.acquisitionEquipmentToAcquisitionEquipmentDTO(createAcquisitionEquipment());
-		Assert.assertNotNull(AcquisitionEquipmentDTO);
-		Assert.assertTrue(AcquisitionEquipmentDTO.getId().equals(ACQ_EQPT_ID));
-	}
-
-	@Test
-	public void acquisitionEquipmentToSimpleAcquisitionEquipmentDTOTest() {
-		final SimpleAcquisitionEquipmentDTO AcquisitionEquipmentDTO = acquisitionEquipmentMapper
-				.acquisitionEquipmentToSimpleAcquisitionEquipmentDTO(createAcquisitionEquipment());
 		Assert.assertNotNull(AcquisitionEquipmentDTO);
 		Assert.assertTrue(AcquisitionEquipmentDTO.getId().equals(ACQ_EQPT_ID));
 	}

@@ -51,14 +51,15 @@ public class RabbitMqRPCReceiver {
     // msg deserialization into Subject DTO and then into subject
 		final Gson oGson = new Gson();
 		final SubjectDTO subjectDTO = oGson.fromJson(message, SubjectDTO.class);
-		Subject subject = subjectMapper.subjectDTOToSubject(subjectDTO);
+		// TODO: add function
+		/*Subject subject = subjectMapper.subjectDTOToSubject(subjectDTO);
 
     // try to save subject into db
 		try {
   		newSubject = subjectService.save(subject);
   	} catch (ShanoirSubjectException e) {
   		LOG.error("ShanoirSubjectException when saving subject", e);
-  	}
+  	}*/
 
     // return rabbitmq message with newly created subject id
 		LOG.info(" [.] Returned Subject Id" + String.valueOf(newSubject.getId()));

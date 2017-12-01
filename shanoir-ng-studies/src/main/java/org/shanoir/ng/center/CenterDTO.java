@@ -2,7 +2,7 @@ package org.shanoir.ng.center;
 
 import java.util.List;
 
-import org.shanoir.ng.acquisitionequipment.SimpleAcquisitionEquipmentDTO;
+import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentDTO;
 
 /**
  * DTO for centers.
@@ -12,7 +12,7 @@ import org.shanoir.ng.acquisitionequipment.SimpleAcquisitionEquipmentDTO;
  */
 public class CenterDTO {
 
-	private List<SimpleAcquisitionEquipmentDTO> acquisitionEquipments;
+	private List<AcquisitionEquipmentDTO> acquisitionEquipments;
 
 	private String city;
 
@@ -39,7 +39,7 @@ public class CenterDTO {
 	/**
 	 * @return the acquisitionEquipments
 	 */
-	public List<SimpleAcquisitionEquipmentDTO> getAcquisitionEquipments() {
+	public List<AcquisitionEquipmentDTO> getAcquisitionEquipments() {
 		return acquisitionEquipments;
 	}
 
@@ -47,7 +47,7 @@ public class CenterDTO {
 	 * @param acquisitionEquipments
 	 *            the acquisitionEquipments to set
 	 */
-	public void setAcquisitionEquipments(List<SimpleAcquisitionEquipmentDTO> acquisitionEquipments) {
+	public void setAcquisitionEquipments(List<AcquisitionEquipmentDTO> acquisitionEquipments) {
 		this.acquisitionEquipments = acquisitionEquipments;
 	}
 

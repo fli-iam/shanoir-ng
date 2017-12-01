@@ -15,6 +15,7 @@ import { AccountRequestComponent} from "./users/account-request/account-request.
 import { AccountRequestInfoComponent} from "./users/account-request-info/account-request-info.component";
 import { AcquisitionEquipmentComponent } from "./acquisition-equipments/acquisition-equipment/acquisition-equipment.component";
 import { AcquisitionEquipmentListComponent } from "./acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component";
+import { AcquisitionEquipmentPipe } from "./acquisition-equipments/shared/acquisition-equipment.pipe";
 import { AcquisitionEquipmentService } from "./acquisition-equipments/shared/acquisition-equipment.service";
 import { AppComponent }   from './app.component';
 import { AuthAdminGuard }   from './shared/roles/auth-admin-guard';
@@ -51,6 +52,7 @@ import { RoleService } from './roles/role.service';
 import { StudyComponent }   from './studies/study/study.component';
 import { StudyListComponent }   from './studies/study-list/study-list.component';
 import { StudyService } from './studies/shared/study.service';
+import { SubjectStudyPipe } from './subjects/shared/subject-study.pipe';
 import { StudyTreeComponent }   from './studies/tree/study-tree.component';
 import { TableComponent} from "./shared/components/table/table.component";
 import { TooltipComponent }   from './shared/components/tooltip/tooltip.component';
@@ -61,8 +63,6 @@ import { UserService } from './users/shared/user.service';
 
 import '../assets/css/common.css';
 import '../assets/css/modal.css';
-
-
 
 export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
   return new KeycloakHttp(backend, defaultOptions, keycloakService);
@@ -84,6 +84,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         AccountRequestInfoComponent,
         AcquisitionEquipmentComponent,
         AcquisitionEquipmentListComponent,
+        AcquisitionEquipmentPipe,
         AppComponent,
         Autosize,
         CenterComponent,
@@ -109,6 +110,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         StudyComponent,
         StudyListComponent,
         StudyTreeComponent,
+        SubjectStudyPipe,
         TableComponent,
         TreeNodeComponent,
         TooltipComponent,

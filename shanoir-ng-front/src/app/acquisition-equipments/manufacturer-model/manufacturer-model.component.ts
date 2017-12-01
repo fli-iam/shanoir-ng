@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 
-import { DatasetModalityType } from "../../shared/enum/dataset-modality-type";
+import { DatasetModalityType } from "../../shared/enums/dataset-modality-type";
 import { Enum } from "../../shared/utils/enum";
 import { ImagesUrlUtil } from "../../shared/utils/images-url.util";
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";

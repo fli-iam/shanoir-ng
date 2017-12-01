@@ -1,7 +1,6 @@
-package org.shanoir.ng.subject;
+package org.shanoir.ng.subjectstudy;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.shanoir.ng.study.Study;
 import org.springframework.data.repository.CrudRepository;
@@ -11,7 +10,7 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author msimon
  */
-public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Long> , SubjecStudytRepositoryCustom{
+public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Long> {
 
 	/**
 	 * Find template by data.
@@ -20,5 +19,6 @@ public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Lon
 	 *            data.
 	 * @return a template.
 	 */
-	Optional<List<SubjectStudy>> findByStudy(Study study);
+	List<SubjectStudy> findByStudy(Study study);
+	
 }

@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 import { ImagesUrlUtil } from "../../utils/images-url.util";
-import { DatasetModalityType } from "../../enum/dataset-modality-type";
+import { DatasetModalityType } from "../../enums/dataset-modality-type";
 
 @Component({
   selector: 'list',

@@ -11,7 +11,7 @@ import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { IdNameObject } from '../shared/id-name-object.model';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
 
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 

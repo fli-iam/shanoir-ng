@@ -23,10 +23,11 @@ export class StudyComponent implements OnInit {
     private isEndDateValid: boolean = true;
     private isNameUnique: Boolean = true;
     private isStartDateValid: boolean = true;
+    private loading: boolean = false;
     public mode: "view" | "edit" | "create";
     private selectedStartDateNormal: IMyDate;
     private selectedEndDateNormal: IMyDate;
-    private study: Study = new Study();
+    public study: Study = new Study();
     public studyForm: FormGroup;
     private studyId: number;
     private studyStatusEnumValue: string;
@@ -73,7 +74,7 @@ export class StudyComponent implements OnInit {
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [this.study.monoCenter, [Validators.required]],
-            'subjectNames': [this.study.subjectNames]
+            'nbSujects': [this.study.nbSujects]
         });
         this.studyForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
@@ -146,6 +147,7 @@ export class StudyComponent implements OnInit {
                 this.study = study;
                 this.getDateToDatePicker(this.study);
                 this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
+                this.loading = true;
             });
     }
 

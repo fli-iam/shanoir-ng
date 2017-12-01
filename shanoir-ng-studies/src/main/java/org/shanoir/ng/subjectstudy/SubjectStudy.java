@@ -1,4 +1,4 @@
-package org.shanoir.ng.subject;
+package org.shanoir.ng.subjectstudy;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -7,6 +7,8 @@ import javax.persistence.ManyToOne;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.shanoir.ng.study.Study;
+import org.shanoir.ng.subject.Subject;
+import org.shanoir.ng.subject.SubjectType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -28,65 +30,100 @@ public class SubjectStudy extends AbstractGenericItem {
 	/** true if the subject is physically involved in the study. */
 	private boolean physicallyInvolved;
 
-	/** Subject type. */
-	private Integer subjectType;
-
 	/** Study. */
 	@ManyToOne
-	@JoinColumn(name = "study")
+	@JoinColumn(name = "study_id")
 	private Study study;
 
 	/** Subject. */
 	@ManyToOne
-	@JoinColumn(name = "subject", updatable = true, insertable = true)
+	@JoinColumn(name = "subject_id", updatable = true, insertable = true)
 	@JsonIgnore
 	private Subject subject;
 
 	/** Identifier of the subject inside the study. */
 	private String subjectStudyIdentifier;
 
+	/** Subject type. */
+	private Integer subjectType;
+
+	/**
+	 * @return the physicallyInvolved
+	 */
 	public boolean isPhysicallyInvolved() {
 		return physicallyInvolved;
 	}
 
+	/**
+	 * @param physicallyInvolved
+	 *            the physicallyInvolved to set
+	 */
 	public void setPhysicallyInvolved(boolean physicallyInvolved) {
 		this.physicallyInvolved = physicallyInvolved;
 	}
 
+	/**
+	 * @return the study
+	 */
+	public Study getStudy() {
+		return study;
+	}
+
+	/**
+	 * @param study
+	 *            the study to set
+	 */
+	public void setStudy(Study study) {
+		this.study = study;
+	}
+
+	/**
+	 * @return the subject
+	 */
+	public Subject getSubject() {
+		return subject;
+	}
+
+	/**
+	 * @param subject
+	 *            the subject to set
+	 */
+	public void setSubject(Subject subject) {
+		this.subject = subject;
+	}
+
+	/**
+	 * @return the subjectStudyIdentifier
+	 */
+	public String getSubjectStudyIdentifier() {
+		return subjectStudyIdentifier;
+	}
+
+	/**
+	 * @param subjectStudyIdentifier
+	 *            the subjectStudyIdentifier to set
+	 */
+	public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
+		this.subjectStudyIdentifier = subjectStudyIdentifier;
+	}
+
+	/**
+	 * @return the subjectType
+	 */
 	public SubjectType getSubjectType() {
 		return SubjectType.getType(subjectType);
 	}
 
+	/**
+	 * @param subjectType
+	 *            the subjectType to set
+	 */
 	public void setSubjectType(SubjectType subjectType) {
 		if (subjectType == null) {
 			this.subjectType = null;
 		} else {
 			this.subjectType = subjectType.getId();
 		}
-	}
-
-	public Study getStudy() {
-		return study;
-	}
-
-	public void setStudy(Study study) {
-		this.study = study;
-	}
-
-	public Subject getSubject() {
-		return subject;
-	}
-
-	public void setSubject(Subject subject) {
-		this.subject = subject;
-	}
-
-	public String getSubjectStudyIdentifier() {
-		return subjectStudyIdentifier;
-	}
-
-	public void setSubjectStudyIdentifier(String subjectStudyIdentifier) {
-		this.subjectStudyIdentifier = subjectStudyIdentifier;
 	}
 
 }

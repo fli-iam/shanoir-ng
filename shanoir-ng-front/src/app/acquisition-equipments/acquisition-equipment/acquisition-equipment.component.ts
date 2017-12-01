@@ -8,7 +8,7 @@ import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
-import { DatasetModalityType } from "../../shared/enum/dataset-modality-type";
+import { DatasetModalityType } from "../../shared/enums/dataset-modality-type";
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { ImagesUrlUtil } from "../../shared/utils/images-url.util";
 import { ManufacturerModel } from '../shared/manufacturer-model.model';

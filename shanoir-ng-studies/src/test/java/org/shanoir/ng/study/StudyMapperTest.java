@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.utils.SecurityContextTestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -39,6 +40,8 @@ public class StudyMapperTest {
 
 	@Test
 	public void studyToStudyDTOTest() {
+		SecurityContextTestUtil.initAuthenticationContext();
+		
 		final StudyDTO studyDTO = studyMapper.studyToStudyDTO(createStudy());
 		Assert.assertNotNull(studyDTO);
 		Assert.assertTrue(studyDTO.getId().equals(STUDY_ID));

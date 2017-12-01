@@ -543,21 +543,31 @@ VALUES
 
 
 INSERT INTO subject_study
-	(id, physically_involved, study, subject )
+	(id, physically_involved, study_id, subject_id, subject_study_identifier, subject_type)
 VALUES
-	(1, 0, 1, 1),
-	(2, 0, 1, 2),
-	(3, 0, 2, 1);
+	(1, 0, 1, 1, 'Subject 1 for study 1', 1),
+	(2, 0, 1, 2, 'Subject 2 for study 1', 2),
+	(3, 0, 2, 1, 'Subject 1 for study 2', 2);
 
+INSERT INTO group_of_subjects
+	(id, dtype, group_name, study_id)
+VALUES
+	(1, 'EXPERIMENTAL', 'group 1', 1);
+	
+INSERT INTO subject_group_of_subjects
+	(id, group_of_subjects_id, subject_id)
+VALUES
+	(1, 1, 1),
+	(2, 1, 2);
 
 INSERT INTO `manufacturer`
 	(id, name)
 VALUES
-	(1,'GE MEDICAL SYSTEMS'),
-	(2,'Philips Medical Systems'),
-	(3,'SIEMENS'),
-	(5,'Philips Healthcare'),
-	(6,'AXIOM ARTIS DBA');
+	(1, 'GE MEDICAL SYSTEMS'),
+	(2, 'Philips Medical Systems'),
+	(3, 'SIEMENS'),
+	(5, 'Philips Healthcare'),
+	(6, 'AXIOM ARTIS DBA');
 
 INSERT INTO `manufacturer_model`
 	(id, dataset_modality_type, name, magnetic_field, manufacturer_id)

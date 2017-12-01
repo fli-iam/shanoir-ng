@@ -1,6 +1,7 @@
 package org.shanoir.ng.subject;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -33,10 +34,10 @@ public class SubjectRepositoryTest {
 
 	private static final String SUBJECT_TEST_1_DATA = "subject1";
 	private static final Long SUBJECT_TEST_1_ID = 1L;
-	
+
 	@Autowired
 	private SubjectRepository subjectRepository;
-	
+
 	/*
 	 * Mocks used to avoid unsatisfied dependency exceptions.
 	 */
@@ -46,7 +47,7 @@ public class SubjectRepositoryTest {
 	private DocumentationPluginsBootstrapper documentationPluginsBootstrapper;
 	@MockBean
 	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
-	
+
 	@Test
 	public void findAllTest() throws Exception {
 		Iterable<Subject> subjectDb = subjectRepository.findAll();
@@ -59,7 +60,7 @@ public class SubjectRepositoryTest {
 		}
 		assertThat(nbSubject).isEqualTo(4);
 	}
-	
+
 	@Test
 	public void findByTest() throws Exception {
 		List<Subject> subjectDb = subjectRepository.findBy("name", SUBJECT_TEST_1_DATA);
@@ -67,18 +68,24 @@ public class SubjectRepositoryTest {
 		assertThat(subjectDb.size()).isEqualTo(1);
 		assertThat(subjectDb.get(0).getId()).isEqualTo(SUBJECT_TEST_1_ID);
 	}
-	
+
 	@Test
 	public void findByDataTest() throws Exception {
 		Optional<Subject> subjectDb = subjectRepository.findByName(SUBJECT_TEST_1_DATA);
 		assertTrue(subjectDb.isPresent());
 		assertThat(subjectDb.get().getId()).isEqualTo(SUBJECT_TEST_1_ID);
 	}
-	
+
+	@Test
+	public void findOfsepLastNameFromRepository() {
+		String name = subjectRepository.find("001");
+		assertEquals("0010002", name);
+	}
+
 	@Test
 	public void findOneTest() throws Exception {
 		Subject subjectDb = subjectRepository.findOne(SUBJECT_TEST_1_ID);
 		assertThat(subjectDb.getName()).isEqualTo(SUBJECT_TEST_1_DATA);
 	}
-	
+
 }

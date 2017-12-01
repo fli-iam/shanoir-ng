@@ -1,6 +1,4 @@
-import { IdNameObject } from "./id-name-object.model";
-
-//import { Center } from '../../centers/shared/center.model';
+import { IdNameObject } from "../../shared/models/id-name-object.model";
 
 export class Examination {
     id: number;

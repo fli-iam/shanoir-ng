@@ -6,6 +6,7 @@ import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjectsMapper;
 
 /**
  * Mapper for studies.
@@ -13,7 +14,7 @@ import org.mapstruct.Mappings;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { ExperimentalGroupOfSubjectsMapper.class })
 @DecoratedWith(StudyDecorator.class)
 public interface StudyMapper {
 
@@ -33,7 +34,9 @@ public interface StudyMapper {
 	 *            study to map.
 	 * @return study DTO.
 	 */
-	@Mappings({ @Mapping(target = "subjectNames", ignore = true) })
+	@Mappings({ @Mapping(target = "centers", ignore = true), @Mapping(target = "membersCategories", ignore = true),
+			@Mapping(target = "nbSujects", ignore = true), @Mapping(target = "studyCards", ignore = true),
+			@Mapping(target = "subjects", ignore = true) })
 	StudyDTO studyToStudyDTO(Study study);
 
 }

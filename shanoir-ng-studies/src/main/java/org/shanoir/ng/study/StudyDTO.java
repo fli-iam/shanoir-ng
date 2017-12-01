@@ -3,6 +3,10 @@ package org.shanoir.ng.study;
 import java.sql.Date;
 import java.util.List;
 
+import org.shanoir.ng.center.CenterDTO;
+import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
+
 /**
  * DTO for study.
  * 
@@ -10,6 +14,8 @@ import java.util.List;
  *
  */
 public class StudyDTO {
+
+	private List<CenterDTO> centers;
 
 	private boolean clinical;
 
@@ -19,30 +25,29 @@ public class StudyDTO {
 
 	private List<Long> examinationIds;
 
-	// private List<ExperimentalGroupOfSubjects>
-	// experimentalGroupOfSubjectsList;
+	private List<IdNameDTO> experimentalGroupsOfSubjects;
 
 	private Long id;
+
+	private List<MembersCategoryDTO> membersCategories;
 
 	private boolean monoCenter;
 
 	private String name;
 
-	private List<String> protocolFilePathList;
+	private int nbSujects;
+
+	private List<String> protocolFilePaths;
 
 	private Date startDate;
 
-	private List<Long> studyCardIds;
+	private List<IdNameDTO> studyCards;
 
 	private StudyStatus studyStatus;
 
-	// private List<StudyCenter> studyCenterList;
-
 	private StudyType studyType;
 
-	private List<String> subjectNames;
-
-	// private List<SubjectStudy> subjectStudyList;
+	private List<SubjectStudyDTO> subjects;
 
 	private boolean visibleByDefault;
 
@@ -52,6 +57,21 @@ public class StudyDTO {
 	 * Default constructor.
 	 */
 	public StudyDTO() {
+	}
+
+	/**
+	 * @return the centers
+	 */
+	public List<CenterDTO> getCenters() {
+		return centers;
+	}
+
+	/**
+	 * @param centers
+	 *            the centers to set
+	 */
+	public void setCenters(List<CenterDTO> centers) {
+		this.centers = centers;
 	}
 
 	/**
@@ -115,6 +135,21 @@ public class StudyDTO {
 	}
 
 	/**
+	 * @return the experimentalGroupsOfSubjects
+	 */
+	public List<IdNameDTO> getExperimentalGroupsOfSubjects() {
+		return experimentalGroupsOfSubjects;
+	}
+
+	/**
+	 * @param experimentalGroupsOfSubjects
+	 *            the experimentalGroupsOfSubjects to set
+	 */
+	public void setExperimentalGroupsOfSubjects(List<IdNameDTO> experimentalGroupsOfSubjects) {
+		this.experimentalGroupsOfSubjects = experimentalGroupsOfSubjects;
+	}
+
+	/**
 	 * @return the id
 	 */
 	public Long getId() {
@@ -127,6 +162,21 @@ public class StudyDTO {
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return the membersCategories
+	 */
+	public List<MembersCategoryDTO> getMembersCategories() {
+		return membersCategories;
+	}
+
+	/**
+	 * @param membersCategories
+	 *            the membersCategories to set
+	 */
+	public void setMembersCategories(List<MembersCategoryDTO> membersCategories) {
+		this.membersCategories = membersCategories;
 	}
 
 	/**
@@ -160,18 +210,33 @@ public class StudyDTO {
 	}
 
 	/**
-	 * @return the protocolFilePathList
+	 * @return the nbSujects
 	 */
-	public List<String> getProtocolFilePathList() {
-		return protocolFilePathList;
+	public int getNbSujects() {
+		return nbSujects;
 	}
 
 	/**
-	 * @param protocolFilePathList
-	 *            the protocolFilePathList to set
+	 * @param nbSujects
+	 *            the nbSujects to set
 	 */
-	public void setProtocolFilePathList(List<String> protocolFilePathList) {
-		this.protocolFilePathList = protocolFilePathList;
+	public void setNbSujects(int nbSujects) {
+		this.nbSujects = nbSujects;
+	}
+
+	/**
+	 * @return the protocolFilePaths
+	 */
+	public List<String> getProtocolFilePaths() {
+		return protocolFilePaths;
+	}
+
+	/**
+	 * @param protocolFilePaths
+	 *            the protocolFilePaths to set
+	 */
+	public void setProtocolFilePaths(List<String> protocolFilePaths) {
+		this.protocolFilePaths = protocolFilePaths;
 	}
 
 	/**
@@ -190,18 +255,18 @@ public class StudyDTO {
 	}
 
 	/**
-	 * @return the studyCardIds
+	 * @return the studyCards
 	 */
-	public List<Long> getStudyCardIds() {
-		return studyCardIds;
+	public List<IdNameDTO> getStudyCards() {
+		return studyCards;
 	}
 
 	/**
-	 * @param studyCardIds
-	 *            the studyCardIds to set
+	 * @param studyCards
+	 *            the studyCards to set
 	 */
-	public void setStudyCardIds(List<Long> studyCardIds) {
-		this.studyCardIds = studyCardIds;
+	public void setStudyCards(List<IdNameDTO> studyCards) {
+		this.studyCards = studyCards;
 	}
 
 	/**
@@ -235,18 +300,18 @@ public class StudyDTO {
 	}
 
 	/**
-	 * @return the subjectNames
+	 * @return the subjects
 	 */
-	public List<String> getSubjectNames() {
-		return subjectNames;
+	public List<SubjectStudyDTO> getSubjects() {
+		return subjects;
 	}
 
 	/**
-	 * @param subjectNames
-	 *            the subjectNames to set
+	 * @param subjects
+	 *            the subjects to set
 	 */
-	public void setSubjectNames(List<String> subjectNames) {
-		this.subjectNames = subjectNames;
+	public void setSubjects(List<SubjectStudyDTO> subjects) {
+		this.subjects = subjects;
 	}
 
 	/**

@@ -1,34 +1,72 @@
-<ng-template ngFor let-subject [ngForOf]="subjects">
-    <node [label]="subject.name" pictoUrl="assets/images/icons/user.png">
-        <ng-template ngFor let-exam [ngForOf]="subject.examinations">
-            <node [label]="exam.name + ' [' + exam.date + ']'" pictoUrl="assets/images/icons/list.png">
-                <node *ngFor="let acq of exam.acquisitions" [label]="acq.name" pictoUrl="assets/images/icons/medical/x-ray-2.png">
-                    <node *ngFor="let dataset of acq.datasets" [label]="dataset.name" pictoUrl="assets/images/icons/medical/brain.png">
+<node label="Subjects" pictoUrl="assets/images/icons/folder-12.png">
+    <ng-template ngFor let-subject [ngForOf]="study.subjects">
+        <node [label]="subject | subjectStudyLabel" pictoUrl="assets/images/icons/user.png">
+            <ng-template ngFor let-exam [ngForOf]="subject.examinations">
+                <node [label]="exam.name + ' [' + exam.date + ']'" pictoUrl="assets/images/icons/list.png">
+                    <node *ngFor="let acq of exam.acquisitions" [label]="acq.name" pictoUrl="assets/images/icons/medical/x-ray-2.png">
+                        <node *ngFor="let dataset of acq.datasets" [label]="dataset.name" pictoUrl="assets/images/icons/medical/brain.png">
+                        </node>
                     </node>
                 </node>
-            </node>
-            <dropdown-menu mode="tree">
-                <menu-item label="Research study" link="" icon="assets/images/icons/folder-12.png"></menu-item>
-                <menu-item label="Subject" link="" icon="assets/images/icons/user.png"></menu-item>
-                <menu-item label="Investigator" link="" icon="assets/images/icons/medical/nurse.png"></menu-item>
-                <menu-item label="Acquisition equipment" link="" icon="assets/images/icons/medical/cardiogram-1.png"></menu-item>
-                <menu-item label="Coil" link="" icon="assets/images/icons/wifi.png">
-                    <menu-item label="Coil" link="" icon="assets/images/icons/wifi.png"></menu-item>
-                    <menu-item label="Experimental group of subjects" icon="assets/images/icons/users.png">
+                <dropdown-menu mode="tree">
+                    <menu-item label="Research study" link="" icon="assets/images/icons/folder-12.png"></menu-item>
+                    <menu-item label="Subject" link="" icon="assets/images/icons/user.png"></menu-item>
+                    <menu-item label="Investigator" link="" icon="assets/images/icons/medical/nurse.png"></menu-item>
+                    <menu-item label="Acquisition equipment" link="" icon="assets/images/icons/medical/cardiogram-1.png"></menu-item>
+                    <menu-item label="Coil" link="" icon="assets/images/icons/wifi.png">
                         <menu-item label="Coil" link="" icon="assets/images/icons/wifi.png"></menu-item>
-                        <menu-item label="Experimental group of subjects" icon="assets/images/icons/users.png"></menu-item>
+                        <menu-item label="Experimental group of subjects" icon="assets/images/icons/users.png">
+                            <menu-item label="Coil" link="" icon="assets/images/icons/wifi.png"></menu-item>
+                            <menu-item label="Experimental group of subjects" icon="assets/images/icons/users.png"></menu-item>
+                            <menu-item label="Score" link="" icon="assets/images/icons/podium.png"></menu-item>
+                        </menu-item>
                         <menu-item label="Score" link="" icon="assets/images/icons/podium.png"></menu-item>
                     </menu-item>
+                    <menu-item label="Experimental group of subjects" icon="assets/images/icons/users.png"></menu-item>
                     <menu-item label="Score" link="" icon="assets/images/icons/podium.png"></menu-item>
-                </menu-item>
-                <menu-item label="Experimental group of subjects" icon="assets/images/icons/users.png"></menu-item>
-                <menu-item label="Score" link="" icon="assets/images/icons/podium.png"></menu-item>
-            </dropdown-menu>
-        </ng-template>
-    </node>
-    <!--dropdown-menu mode="tree">
+                </dropdown-menu>
+            </ng-template>
+        </node>
+        <!--dropdown-menu mode="tree">
         <menu-item label="Research study" link="" icon="assets/images/icons/folder-12.png"></menu-item>
         <menu-item label="Subject" link="" icon="assets/images/icons/user.png"></menu-item>
         <menu-item label="Examination" link="" icon="assets/images/icons/medical/stethoscope.png"></menu-item>
     </dropdown-menu-->
-</ng-template>
+    </ng-template>
+</node>
+<node label="Experimental Groups (is associated to)" pictoUrl="assets/images/icons/folder-12.png">
+    <ng-template ngFor let-experimentalGroupsOfSubject [ngForOf]="study.experimentalGroupsOfSubjects">
+        <node [label]="experimentalGroupsOfSubject.name" pictoUrl="assets/images/icons/users.png">
+        </node>
+    </ng-template>
+</node>
+<node label="Principal investigators and Centers (takes place in and with)" pictoUrl="assets/images/icons/folder-12.png">
+    <ng-template ngFor let-center [ngForOf]="study.centers">
+        <node [label]="center.name" pictoUrl="assets/images/icons/home.png">
+            <ng-template ngFor let-acquisitionEquipment [ngForOf]="center.acquisitionEquipments">
+                <node [label]="acquisitionEquipment | acqEqptLabel" pictoUrl="assets/images/icons/medical/x-ray-1.png">
+                    <ng-template ngFor let-studyCard [ngForOf]="acquisitionEquipment.studyCards">
+                        <node [label]="studyCard.name" pictoUrl="assets/images/icons/study-card.png">
+                        </node>
+                    </ng-template>
+                </node>
+            </ng-template>
+        </node>
+    </ng-template>
+</node>
+<node label="Study cards" pictoUrl="assets/images/icons/folder-12.png">
+    <ng-template ngFor let-studyCard [ngForOf]="study.studyCards">
+        <node [label]="studyCard.name" pictoUrl="assets/images/icons/study-card.png">
+        </node>
+    </ng-template>
+</node>
+<node label="Members" pictoUrl="assets/images/icons/folder-12.png">
+    <ng-template ngFor let-membersCategory [ngForOf]="study.membersCategories">
+        <node [label]="membersCategory.studyUserType" pictoUrl="assets/images/icons/folder-12.png">
+            <ng-template ngFor let-member [ngForOf]="membersCategory.members">
+                <node [label]="member.name" pictoUrl="assets/images/icons/user.png">
+                </node>
+            </ng-template>
+        </node>
+    </ng-template>
+</node>

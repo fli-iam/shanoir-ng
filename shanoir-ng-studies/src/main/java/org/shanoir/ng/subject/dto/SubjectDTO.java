@@ -3,6 +3,8 @@ package  org.shanoir.ng.subject.dto;
 import java.util.Date;
 import java.util.List;
 
+import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
+
 
 public class SubjectDTO {
 
@@ -19,8 +21,6 @@ public class SubjectDTO {
     private String imagedObjectCategory;
 
     private String sex;
-
-    private String subjectIdentifier;
 
 //    private PseudonymusHashValues pseudonymusHashValues;
 
@@ -120,14 +120,6 @@ public class SubjectDTO {
 
     public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
         this.subjectStudyList = subjectStudyList;
-    }
-
-    public String getSubjectIdentifier() {
-        return subjectIdentifier;
-    }
-
-    public void setSubjectIdentifier(String subjectIdentifier) {
-        this.subjectIdentifier = subjectIdentifier;
     }
 
 //    public List<UserPersonalCommentSubject> getUserPersonalCommentList() {

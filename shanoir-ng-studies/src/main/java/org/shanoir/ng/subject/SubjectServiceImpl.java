@@ -13,6 +13,8 @@ import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.ShanoirSubjectException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.StudyRepository;
+import org.shanoir.ng.subjectstudy.SubjectStudy;
+import org.shanoir.ng.subjectstudy.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -62,7 +64,7 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	private RestTemplate restTemplate;
-	
+
 	@Autowired
 	private MicroserviceRequestsService microservicesRequestsService;
 
@@ -99,15 +101,15 @@ public class SubjectServiceImpl implements SubjectService {
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirSubjectException.logAndThrow(LOG, "Error while creating Subject: " + dive.getMessage());
 		}
-		//updateShanoirOld(savedSubject);
+		// updateShanoirOld(savedSubject);
 		return savedSubject;
 	}
-	
+
 	@Override
 	public Subject saveForOFSEP(final Subject subject, final Long studyCardId) throws ShanoirSubjectException {
 		Subject savedSubject = null;
-		String commonName=createOfsepCommonName(studyCardId);
-		if (commonName==null || commonName.equals(""))
+		String commonName = createOfsepCommonName(studyCardId);
+		if (commonName == null || commonName.equals(""))
 			subject.setName("NoCommonName");
 		else
 			subject.setName(commonName);
@@ -116,7 +118,7 @@ public class SubjectServiceImpl implements SubjectService {
 		} catch (DataIntegrityViolationException dive) {
 			ShanoirSubjectException.logAndThrow(LOG, "Error while creating Subject: " + dive.getMessage());
 		}
-		//updateShanoirOld(savedSubject);
+		// updateShanoirOld(savedSubject);
 		return savedSubject;
 	}
 
@@ -124,7 +126,7 @@ public class SubjectServiceImpl implements SubjectService {
 	public Subject saveFromJson(final File jsonFile) throws ShanoirSubjectException {
 
 		ObjectMapper mapper = new ObjectMapper();
-		Subject subject=new Subject();
+		Subject subject = new Subject();
 		try {
 			subject = mapper.readValue(jsonFile, Subject.class);
 		} catch (JsonParseException e) {
@@ -137,7 +139,6 @@ public class SubjectServiceImpl implements SubjectService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 
 		Subject savedSubject = null;
 		try {
@@ -180,8 +181,6 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 	}
 
-
-
 	/*
 	 * Update Shanoir Old.
 	 *
@@ -200,8 +199,8 @@ public class SubjectServiceImpl implements SubjectService {
 			LOG.error("Cannot send Subject " + subject.getId() + " save/update to Shanoir Old on queue : "
 					+ RabbitMqConfiguration.studyQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send Subject " + subject.getId() + " save/update because of an error while serializing Subject.",
-					e);
+			LOG.error("Cannot send Subject " + subject.getId()
+					+ " save/update because of an error while serializing Subject.", e);
 		}
 		return false;
 	}
@@ -227,41 +226,35 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public List<Subject> findAllSubjectsOfStudy(final Long studyId) {
-		List<Subject> listSubjects=new ArrayList<Subject>();
-		Optional<List<SubjectStudy>> opt=subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
-		if (opt.isPresent()) {
-			List<SubjectStudy> relList = opt.get();
-			for (int i = 0; i < relList.size(); i++){
-				SubjectStudy rel = relList.get(i);
-		        Subject sub=rel.getSubject();
-		        listSubjects.add(sub);
+		List<Subject> listSubjects = new ArrayList<Subject>();
+		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
+		if (opt != null) {
+			for (SubjectStudy rel : opt) {
+				Subject sub = rel.getSubject();
+				listSubjects.add(sub);
 
-		}
+			}
 			return listSubjects;
-		}
-		else {
-		    LOG.info("No created subjects for study " + studyId);
-		    return null;
+		} else {
+			LOG.info("No created subjects for study " + studyId);
+			return null;
 		}
 	}
 
 	@Override
 	public Subject findByIdentifier(String identifier) {
-		Optional<Subject> opt=subjectRepository.findByIdentifier(identifier);
+		Optional<Subject> opt = subjectRepository.findByIdentifier(identifier);
 		if (opt.isPresent())
-		 return opt.get();
-		else
-		{
+			return opt.get();
+		else {
 			LOG.info("No existing subjects for identifier " + identifier);
-		    return null;
+			return null;
 		}
 	}
 
-
-	public String createOfsepCommonName(Long studyCardId)
-	{
-		String commonName="";
-		Long idCenter=null;
+	public String createOfsepCommonName(Long studyCardId) {
+		String commonName = "";
+		Long idCenter = null;
 		try {
 			idCenter = getCenterIdFromStudyCard(studyCardId);
 		} catch (ShanoirStudiesException e1) {
@@ -269,7 +262,7 @@ public class SubjectServiceImpl implements SubjectService {
 			e1.printStackTrace();
 			return null;
 		}
-		
+
 		DecimalFormat formatterCenter = new DecimalFormat("000");
 		String commonNameCenter = formatterCenter.format(idCenter);
 
@@ -277,12 +270,12 @@ public class SubjectServiceImpl implements SubjectService {
 		int maxCommonNameNumber = 0;
 		try {
 			if (subjectOfsepCommonNameMaxFoundByCenter != null) {
-				String maxNameToIncrement=subjectOfsepCommonNameMaxFoundByCenter.substring(3);
+				String maxNameToIncrement = subjectOfsepCommonNameMaxFoundByCenter.substring(3);
 				maxCommonNameNumber = Integer.parseInt(maxNameToIncrement);
 			}
 			maxCommonNameNumber += 1;
 			DecimalFormat formatterSubject = new DecimalFormat("0000");
-			commonName=commonNameCenter + formatterSubject.format(maxCommonNameNumber);
+			commonName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
 
 		} catch (NumberFormatException e) {
 			LOG.error("Th common name found contains non numeric characters : " + e.getMessage());
@@ -292,19 +285,18 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	private Long getCenterIdFromStudyCard(Long studyCardId) throws ShanoirStudiesException {
-		
+
 		final HttpEntity<Long> entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
 		// Request to studycard MS to get center id
 		ResponseEntity<Long> centerIdResponse = null;
 		try {
-			centerIdResponse = restTemplate.exchange(
-					microservicesRequestsService.getStudycardMsUrl() + MicroserviceRequestsService.CENTERID + "/" + studyCardId,
-					HttpMethod.GET, entity, Long.class);
+			centerIdResponse = restTemplate.exchange(microservicesRequestsService.getStudycardMsUrl()
+					+ MicroserviceRequestsService.CENTERID + "/" + studyCardId, HttpMethod.GET, entity, Long.class);
 		} catch (RestClientException e) {
 			LOG.error("Error on study card microservice request", e);
 			throw new ShanoirStudiesException("Error while getting study card list", ErrorModelCode.SC_MS_COMM_FAILURE);
 		}
-		
+
 		Long centerId = null;
 		if (HttpStatus.OK.equals(centerIdResponse.getStatusCode())
 				|| HttpStatus.NO_CONTENT.equals(centerIdResponse.getStatusCode())) {
@@ -312,7 +304,7 @@ public class SubjectServiceImpl implements SubjectService {
 		} else {
 			throw new ShanoirStudiesException(ErrorModelCode.SC_MS_COMM_FAILURE);
 		}
-		
+
 		return centerId;
 	}
 
@@ -331,7 +323,7 @@ public class SubjectServiceImpl implements SubjectService {
 		if (centerCode == null || "".equals(centerCode)) {
 			return null;
 		}
-		String name=subjectRepository.find(centerCode);
+		String name = subjectRepository.find(centerCode);
 		return name;
 	}
 

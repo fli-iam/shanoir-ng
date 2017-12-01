@@ -67,10 +67,7 @@ export class StudyListComponent {
                 }
             },
             {
-                headerName: "Subjects", field: "subjectNames", type: "number", cellRenderer: function (params: any) {
-                    return params.data.subjectNames ? params.data.subjectNames.length : 0;
-                }
-            },
+                headerName: "Subjects", field: "nbSujects", type: "number"},
             {
                 headerName: "Examinations", field: "examinationIds", type: "number", cellRenderer: function (params: any) {
                     return params.data.examinationIds ? params.data.examinationIds.length : 0;

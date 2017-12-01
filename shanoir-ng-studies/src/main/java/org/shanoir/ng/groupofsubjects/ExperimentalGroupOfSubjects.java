@@ -1,5 +1,6 @@
 package org.shanoir.ng.groupofsubjects;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -16,7 +17,8 @@ import org.shanoir.ng.study.Study;
  *
  */
 @Entity
-@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
+@DiscriminatorValue("EXPERIMENTAL")
+@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class ExperimentalGroupOfSubjects extends GroupOfSubjects {
 
 	/**

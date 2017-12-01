@@ -143,10 +143,10 @@
 			</div>
 		</form>
 	</div>
-	<div class="layout right" *ngIf="mode=='view'">
+	<div class="layout right" *ngIf="mode=='view' && loading">
 		<span class="right-col">
 			<div class="study-data" i18n="Study data|Title@@studyDetailDataTitle">Data</div>
 		</span>
-		<study-tree></study-tree>
+		<study-tree [study]="study"></study-tree>
 	</div>
 </div>

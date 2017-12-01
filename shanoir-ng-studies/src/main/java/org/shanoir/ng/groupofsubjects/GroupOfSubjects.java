@@ -5,6 +5,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.validation.constraints.NotNull;
@@ -22,7 +24,8 @@ import org.shanoir.ng.subject.SubjectGroupOfSubjects;
  *
  */
 @Entity
-@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE) 
+@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class GroupOfSubjects extends HalEntity {
 
 	/**
