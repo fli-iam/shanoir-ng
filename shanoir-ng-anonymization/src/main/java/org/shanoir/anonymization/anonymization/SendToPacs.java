@@ -1,4 +1,4 @@
-package org.shanoir.ng.anonymization;
+package org.shanoir.anonymization.anonymization;
 
 import java.io.IOException;
 

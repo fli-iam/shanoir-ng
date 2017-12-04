@@ -21,7 +21,7 @@
 		<spring-active-profile></spring-active-profile>
 		<keycloak.version>2.5.1.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
-		<dcm4che.version>5.10.6</dcm4che.version>
+		<dcm4che.version>5.10.6</dcm4che.version> 
 		<docker.image.name>shanoir-ng/template</docker.image.name>
 		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
 	</properties>
@@ -149,7 +149,7 @@
 		<dependency>
 			<groupId>org.dcm4che</groupId>
 			<artifactId>dcm4che-dcmr</artifactId>
-			<version>${dcm4che.version}</version>
+			<version>${dcm4che.version}</version>		 
 		</dependency>
 		<dependency>
 			<groupId>org.dcm4che.tool</groupId>
