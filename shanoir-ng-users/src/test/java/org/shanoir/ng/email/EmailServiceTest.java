@@ -1,6 +1,5 @@
 package org.shanoir.ng.email;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -84,24 +83,32 @@ public class EmailServiceTest {
 	}
 
 	@Test
-	public void notifyUserAccountRequestAcceptedTest() throws Exception {
-		emailService.notifyUserAccountRequestAccepted(ModelsUtil.createUser());
+	public void notifyAccountRequestAcceptedTest() throws Exception {
+		emailService.notifyAccountRequestAccepted(ModelsUtil.createUser());
 
 		assertReceivedMessageContains("Granted: Your Shanoir account has been activated",
 				"Your account request has been granted");
 	}
 
 	@Test
-	public void notifyUserExtensionRequestAcceptedTest() throws Exception {
-		emailService.notifyUserExtensionRequestAccepted(ModelsUtil.createUser());
+	public void notifyAccountRequestDeniedTest() throws Exception {
+		emailService.notifyAccountRequestDenied(ModelsUtil.createUser());
 
-		assertReceivedMessageContains("Granted: Your Shanoir account has been extended",
+		assertReceivedMessageContains("DENIED: Your Shanoir account request has been denied",
+				"has been denied");
+	}
+
+	@Test
+	public void notifyExtensionRequestAcceptedTest() throws Exception {
+		emailService.notifyExtensionRequestAccepted(ModelsUtil.createUser());
+
+		assertReceivedMessageContains("Granted: Your Shanoir account extension has been extended",
 				"Your account extension request has been granted");
 	}
 
 	@Test
-	public void notifyUserExtensionRequestDeniedTest() throws Exception {
-		emailService.notifyUserExtensionRequestDenied(ModelsUtil.createUser());
+	public void notifyExtensionRequestDeniedTest() throws Exception {
+		emailService.notifyExtensionRequestDenied(ModelsUtil.createUser());
 
 		assertReceivedMessageContains("DENIED: Your Shanoir account extension request has been denied",
 				"has been denied");
@@ -118,7 +125,7 @@ public class EmailServiceTest {
 	private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)
 			throws IOException, MessagingException {
 		final MimeMessage[] receivedMessages = smtpServer.getReceivedMessages();
-		assertEquals(1, receivedMessages.length);
+		assertTrue(receivedMessages.length > 0);
 		final String subject = (String) receivedMessages[0].getSubject();
 		assertTrue(subject.contains(expectedSubject));
 		final String content = (String) receivedMessages[0].getContent();

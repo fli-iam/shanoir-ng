@@ -39,11 +39,11 @@ CREATE TABLE `users` (
   `extension_date` datetime DEFAULT NULL,
   `extension_motivation` varchar(255) DEFAULT NULL,
   `first_name` varchar(255) NOT NULL,
-  `is_first_expiration_notification_sent` bit(1) NOT NULL,
-  `is_second_expiration_notification_sent` bit(1) NOT NULL,
+  `first_expiration_notification_sent` bit(1) NOT NULL,
   `keycloak_id` varchar(255) DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
   `last_name` varchar(255) NOT NULL,
+  `second_expiration_notification_sent` bit(1) NOT NULL,
   `team_name` varchar(255) DEFAULT NULL,
   `username` varchar(255) NOT NULL,
   `account_request_info_id` bigint(20) DEFAULT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE `users` (
   CONSTRAINT `FKnujey376reejcmp77iuc48ja7` FOREIGN KEY (`account_request_info_id`) REFERENCES `account_request_info` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=259 DEFAULT CHARSET=utf8;
 
-INSERT INTO users (id, can_access_to_dicom_association, creation_date, email, first_name, last_login, last_name, username, role_id, expiration_date, is_first_expiration_notification_sent, is_second_expiration_notification_sent, account_request_demand)
+INSERT INTO users (id, can_access_to_dicom_association, creation_date, email, first_name, last_login, last_name, username, role_id, expiration_date, first_expiration_notification_sent, second_expiration_notification_sent, account_request_demand)
 VALUES 
 (1,1,'1970-01-01 01:00:00','noemail@noemail.fr','defaultUser','1970-01-01 01:00:00','defaultUser','defaultUser',3,NULL,0,0,0),
 (2,0,'1970-01-01 01:00:00','guest@irisa.fr','GUEST','2016-10-26 19:34:28','GUEST','guest',2,NULL,0,0,0),

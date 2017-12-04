@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <p>Dear <span th:text="${firstname}"></span> <span th:text="${lastname}"></span>,</p>
+    <p>Your account extension on <a th:href="${serverAddress}">Shanoir</a> has been denied.</p>
+    <p>If you want more detail, please contact <a th:href="'mailto:' + ${administratorEmail}">Shanoir administrators</a>.</p>
+    <p>Regards,<br/>
+    Shanoir administrator</p>
+</body>
+</html>
