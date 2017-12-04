@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <p><span>Dear administrator,</span></p>
+    <p>The account request for <span th:text="${user.firstName}"></span> <span th:text="${user.lastName}"></span> (<span th:text="${user.email}"></span>) has been granted by an administrator.</p>
+    <p><span th:text="Regards"></span></p>
+</body>
+</html>

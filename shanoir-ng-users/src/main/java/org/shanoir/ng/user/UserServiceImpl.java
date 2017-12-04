@@ -81,15 +81,15 @@ public class UserServiceImpl implements UserService {
 			userDb.setFirstExpirationNotificationSent(false);
 			userDb.setSecondExpirationNotificationSent(false);
 			final User updatedUser = updateUserOnAllSystems(userDb, user);
-			// Send email
-			emailService.notifyUserExtensionRequestAccepted(updatedUser);
+			// Send emails
+			emailService.notifyExtensionRequestAccepted(updatedUser);
 			return updatedUser;
 		} else {
 			// Account creation
 			userDb.setAccountRequestDemand(false);
 			final User updatedUser = updateUserOnAllSystems(userDb, user);
 			// Send email
-			emailService.notifyUserAccountRequestAccepted(updatedUser);
+			emailService.notifyAccountRequestAccepted(updatedUser);
 			return updatedUser;
 		}
 	}
@@ -139,13 +139,15 @@ public class UserServiceImpl implements UserService {
 			// Remove user
 			userRepository.delete(userId);
 			keycloakClient.deleteUser(user.getKeycloakId());
+			// Send emails
+			emailService.notifyAccountRequestDenied(user);
 		} else {
 			// Deny extension request
 			user.setExtensionRequestInfo(null);
 			user.setExtensionRequestDemand(false);
 			updateUserOnAllSystems(user, null);
 			// Send email
-			emailService.notifyUserExtensionRequestDenied(user);
+			emailService.notifyExtensionRequestDenied(user);
 		}
 	}
 
