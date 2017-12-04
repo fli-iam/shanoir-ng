@@ -23,7 +23,7 @@ spring:
   session:
     store-type: none
   mail:
-    host: smtp.inria.fr
+    host: SMTP_HOST
     port: 25
     properties:
       mail.smtp.from: do-not-reply@inria.fr
