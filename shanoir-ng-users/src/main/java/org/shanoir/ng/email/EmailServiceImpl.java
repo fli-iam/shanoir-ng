@@ -98,6 +98,30 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
+	public void notifyAccountRequestAccepted(final User user) {
+		notifyUserAccountRequestAccepted(user);
+		notifyAdminAccountRequestAccepted(user);
+	}
+
+	@Override
+	public void notifyAccountRequestDenied(final User user) {
+		notifyUserAccountRequestDenied(user);
+		notifyAdminAccountRequestDenied(user);
+	}
+
+	@Override
+	public void notifyExtensionRequestAccepted(final User user) {
+		notifyUserExtensionRequestAccepted(user);
+		notifyAdminExtensionRequestAccepted(user);
+	}
+
+	@Override
+	public void notifyExtensionRequestDenied(final User user) {
+		notifyUserExtensionRequestDenied(user);
+		notifyAdminExtensionRequestDenied(user);
+	}
+
+	@Override
 	public void notifyNewUser(final User user, final String password) {
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
@@ -110,71 +134,6 @@ public class EmailServiceImpl implements EmailService {
 			variables.put("password", password);
 			variables.put("username", user.getUsername());
 			final String content = build("notifyNewUser", variables);
-			messageHelper.setText(content, true);
-		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
-	}
-
-	@Override
-	public void notifyUserAccountRequestAccepted(final User user) {
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("Granted: Your Shanoir account has been activated");
-			final Map<String, Object> variables = new HashMap<String, Object>();
-			variables.put("firstname", user.getFirstName());
-			variables.put("lastname", user.getLastName());
-			variables.put("serverAddress", shanoirServerAddress);
-			final String content = build("notifyUserAccountRequestAccepted", variables);
-			messageHelper.setText(content, true);
-		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
-	}
-
-	@Override
-	public void notifyUserExtensionRequestAccepted(final User user) {
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("Granted: Your Shanoir account has been extended");
-			final Map<String, Object> variables = new HashMap<String, Object>();
-			variables.put("firstname", user.getFirstName());
-			variables.put("lastname", user.getLastName());
-			variables.put("serverAddress", shanoirServerAddress);
-			variables.put("expirationDate", shortDateFormatEN.format(user.getExpirationDate()));
-			final String content = build("notifyUserExtensionRequestAccepted", variables);
-			messageHelper.setText(content, true);
-		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
-	}
-
-	@Override
-	public void notifyUserExtensionRequestDenied(final User user) {
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("DENIED: Your Shanoir account extension request has been denied");
-			final Map<String, Object> variables = new HashMap<String, Object>();
-			variables.put("firstname", user.getFirstName());
-			variables.put("lastname", user.getLastName());
-			variables.put("serverAddress", shanoirServerAddress);
-			variables.put("expirationDate", shortDateFormatEN.format(user.getExpirationDate()));
-			final String content = build("notifyUserExtensionRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};
 		try {
@@ -213,6 +172,173 @@ public class EmailServiceImpl implements EmailService {
 			}
 		}
 		return templateEngine.process(templateFile, context);
+	}
+
+	private void notifyAdminAccountRequestAccepted(final User user) {
+		// Get admins emails
+		final List<String> adminEmails = userRepository.findAdminEmails();
+
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(adminEmails.toArray(new String[0]));
+			messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("user", user);
+			final String content = build("notifyAdminAccountRequestAccepted", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
+	}
+
+	private void notifyAdminAccountRequestDenied(final User user) {
+		// Get admins emails
+		final List<String> adminEmails = userRepository.findAdminEmails();
+
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(adminEmails.toArray(new String[0]));
+			messageHelper.setSubject("User account request DENIED (" + shanoirServerAddress + ")");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("user", user);
+			final String content = build("notifyAdminAccountRequestDenied", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
+	}
+
+	private void notifyAdminExtensionRequestAccepted(final User user) {
+		// Get admins emails
+		final List<String> adminEmails = userRepository.findAdminEmails();
+
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(adminEmails.toArray(new String[0]));
+			messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("user", user);
+			final String content = build("notifyAdminExtensionRequestAccepted", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
+	}
+
+	private void notifyAdminExtensionRequestDenied(final User user) {
+		// Get admins emails
+		final List<String> adminEmails = userRepository.findAdminEmails();
+
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(adminEmails.toArray(new String[0]));
+			messageHelper.setSubject("User account request DENIED (" + shanoirServerAddress + ")");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("user", user);
+			final String content = build("notifyAdminExtensionRequestDenied", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
+	}
+
+	private void notifyUserAccountRequestAccepted(final User user) {
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(user.getEmail());
+			messageHelper.setSubject("Granted: Your Shanoir account has been activated");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("firstname", user.getFirstName());
+			variables.put("lastname", user.getLastName());
+			variables.put("serverAddress", shanoirServerAddress);
+			final String content = build("notifyUserAccountRequestAccepted", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
+	}
+
+	private void notifyUserAccountRequestDenied(final User user) {
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(user.getEmail());
+			messageHelper.setSubject("DENIED: Your Shanoir account request has been denied");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("administratorEmail", administratorEmail);
+			variables.put("firstname", user.getFirstName());
+			variables.put("lastname", user.getLastName());
+			variables.put("serverAddress", shanoirServerAddress);
+			final String content = build("notifyUserAccountRequestDenied", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
+	}
+
+	private void notifyUserExtensionRequestAccepted(final User user) {
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(user.getEmail());
+			messageHelper.setSubject("Granted: Your Shanoir account extension has been extended");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("firstname", user.getFirstName());
+			variables.put("lastname", user.getLastName());
+			variables.put("serverAddress", shanoirServerAddress);
+			variables.put("expirationDate", shortDateFormatEN.format(user.getExpirationDate()));
+			final String content = build("notifyUserExtensionRequestAccepted", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
+	}
+
+	private void notifyUserExtensionRequestDenied(final User user) {
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(user.getEmail());
+			messageHelper.setSubject("DENIED: Your Shanoir account extension request has been denied");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("firstname", user.getFirstName());
+			variables.put("lastname", user.getLastName());
+			variables.put("serverAddress", shanoirServerAddress);
+			variables.put("expirationDate", shortDateFormatEN.format(user.getExpirationDate()));
+			final String content = build("notifyUserExtensionRequestDenied", variables);
+			messageHelper.setText(content, true);
+		};
+		try {
+			mailSender.send(messagePreparator);
+		} catch (MailException e) {
+			LOG.error("Error while sending email to new user " + user.getEmail(), e);
+		}
 	}
 
 }

@@ -27,6 +27,38 @@ public interface EmailService {
 	void notifyAdminAccountRequest(User user);
 
 	/**
+	 * Send an email to the user and all administrators on account request validation.
+	 * 
+	 * @param user
+	 *            accepted user.
+	 */
+	void notifyAccountRequestAccepted(User user);
+
+	/**
+	 * Send an email to the user and all administrators on account request validation.
+	 * 
+	 * @param user
+	 *            accepted user.
+	 */
+	void notifyAccountRequestDenied(User user);
+
+	/**
+	 * Send an email to the user and all administrators on extension request validation.
+	 * 
+	 * @param user
+	 *            user.
+	 */
+	void notifyExtensionRequestAccepted(User user);
+
+	/**
+	 * Send an email to the user and all administrators on extension request deny.
+	 * 
+	 * @param user
+	 *            user.
+	 */
+	void notifyExtensionRequestDenied(User user);
+
+	/**
 	 * Send an email on account creation.
 	 * 
 	 * @param user
@@ -35,30 +67,6 @@ public interface EmailService {
 	 *            user password.
 	 */
 	void notifyNewUser(User user, String password);
-
-	/**
-	 * Send an email on account request validation.
-	 * 
-	 * @param user
-	 *            accepted user.
-	 */
-	void notifyUserAccountRequestAccepted(User user);
-
-	/**
-	 * Send an email on extension request validation.
-	 * 
-	 * @param user
-	 *            user.
-	 */
-	void notifyUserExtensionRequestAccepted(User user);
-
-	/**
-	 * Send an email on extension request deny.
-	 * 
-	 * @param user
-	 *            user.
-	 */
-	void notifyUserExtensionRequestDenied(User user);
 
 	/**
 	 * Send an email on user password reset.
