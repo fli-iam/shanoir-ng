@@ -56,7 +56,7 @@ import { SubjectStudyPipe } from './subjects/shared/subject-study.pipe';
 import { StudyTreeComponent }   from './studies/tree/study-tree.component';
 import { TableComponent} from "./shared/components/table/table.component";
 import { TooltipComponent }   from './shared/components/tooltip/tooltip.component';
-import { TreeNodeComponent }   from './shared/components/tree/tree.node.component';
+import { TreeNodeComponent }   from './shared/components/tree/tree-node.component';
 import { UserComponent }   from './users/user/user.component';
 import { UserListComponent }   from './users/user-list/user-list.component';
 import { UserService } from './users/shared/user.service';

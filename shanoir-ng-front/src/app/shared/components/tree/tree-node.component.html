@@ -1,0 +1,16 @@
+<span *ngIf="hasChildren && isOpen" (click)="close()" class="arrow">&#x25BE;</span>
+<span *ngIf="hasChildren && !isOpen" (click)="open()" class="arrow">&#9656;</span>
+<span *ngIf="pictoUrl">
+    <img class="picto" src="{{pictoUrl}}" />
+</span>
+<input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" (change)="nodeSelected.emit(nodeParams)" class="clickable" />
+<input #editableLabel *ngIf="editable" type="text" [(ngModel)]="label" />
+<tool-tip *ngIf="tooltip">{{tooltip}}</tool-tip>
+<span *ngIf="!editable && !isClickable()" class="label">{{label}}</span>
+<a *ngIf="!editable && isClickable()" (click)="labelClick.emit(nodeParams)" href="">{{label}}</a>
+<span *ngIf="buttonPicto" class="clickable">
+    <img class="picto" src="{{buttonPicto}}" (click)="buttonClick.emit(nodeParams)" />
+</span>
+<div #childrentWrapper *ngIf="!loaded || (loaded && isOpen)" [class.hidden]="!loaded" class="content">
+    <ng-content></ng-content>
+</div>

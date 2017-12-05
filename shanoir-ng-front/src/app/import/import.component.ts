@@ -3,7 +3,6 @@ import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms'
 import { Observable } from 'rxjs/Rx';
 
 import { ImportService } from './import.service';
-import { TreeNodeComponent } from '../shared/components/tree/tree.node.component';
 import { slideDown } from '../shared/animations/animations';
 import { PatientsDicom, PatientDicom, SerieDicom } from "./dicom-data.model";
 import { ModalComponent } from '../shared/components/modal/modal.component';

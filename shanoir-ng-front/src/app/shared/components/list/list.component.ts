@@ -5,23 +5,8 @@ import { DatasetModalityType } from "../../enums/dataset-modality-type";
 
 @Component({
   selector: 'list',
-  template: `
-    <span>
-        <div class="header command-zone">
-            {{title}}
-            <img [src]="zoomOutIconPath" *ngIf="tab_open" (click)="tab_open = false"/>
-            <img [src]="zoomInIconPath" *ngIf="!tab_open" (click)="tab_open = true"/>
-        </div>
-    </span>
-    <ul *ngIf="tab_open">
-        <li *ngFor="let o of list">
-            <a [routerLink]="getLink(o)" [queryParams]="{mode: 'view', id: o.id}">
-               <span [innerHTML]="getText(o)"></span>
-            </a>
-        </li>
-    </ul>
-  `,
-  styles: ['img { height: 20px; float: right; margin-left: 5px; }']
+  templateUrl: 'list.component.html',
+  styleUrls: ['list.component.css']
 })
 export class ListComponent {
     private zoomInIconPath: string = ImagesUrlUtil.ZOOM_IN_ICON_PATH;

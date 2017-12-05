@@ -14,20 +14,8 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
 
 @Component({
     selector: 'node',
-    template: `
-        <span *ngIf="hasChildren && isOpen" (click)="close()" class="arrow">&#x25BE;</span>
-        <span *ngIf="hasChildren && !isOpen" (click)="open()" class="arrow">&#9656;</span>
-        <span *ngIf="pictoUrl"><img class="picto" src="{{pictoUrl}}"/></span>
-        <input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" (change)="nodeSelected.emit(nodeParams)" class="clickable"/>
-        <input #editableLabel *ngIf="editable" type="text" [(ngModel)]="label"/>
-        <tool-tip *ngIf="tooltip">{{tooltip}}</tool-tip>
-        <span *ngIf="!editable" class="label" [class.clickable]="labelClick.observers.length > 0" (click)="labelClick.emit(nodeParams)">{{label}}</span>
-        <span *ngIf="buttonPicto" class="clickable"><img class="picto" src="{{buttonPicto}}" (click)="buttonClick.emit(nodeParams)"/></span>
-        <div #childrentWrapper *ngIf="!loaded || (loaded && isOpen)" [class.hidden]="!loaded" class="content">
-            <ng-content></ng-content>
-        </div>
-    `,
-    styleUrls: ['tree.node.component.css'],
+    templateUrl: 'tree-node.component.html',
+    styleUrls: ['tree-node.component.css'],
     providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR]
 })
 
@@ -75,6 +63,13 @@ export class TreeNodeComponent implements ControlValueAccessor {
                 node.deployAll();
             }
         });
+    }
+
+    public isClickable(): boolean {
+        if (this.labelClick.observers.length > 0) {
+            return true;
+        }
+        return false;
     }
 
     public open() {

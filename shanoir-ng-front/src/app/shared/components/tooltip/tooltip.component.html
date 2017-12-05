@@ -1,0 +1,5 @@
+<span #container class="help" [class.opened]="opened" (mouseover)="open()" (mouseleave)="close()">?
+    <div class="content" *ngIf="opened">
+        <ng-content></ng-content>
+    </div>
+</span>
