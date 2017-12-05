@@ -1,12 +1,13 @@
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
 import { MdDialog, MdDialogConfig, MdDialogRef } from '@angular/material';
 
-import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
-import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
-import { TableComponent } from "../../shared/components/table/table.component";
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
+import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
+import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
+import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { TableComponent } from "../../shared/components/table/table.component";
 
 @Component({
     selector: 'acquisition-equipment-list',
@@ -53,10 +54,37 @@ export class AcquisitionEquipmentListComponent {
         };
 
         this.columnDefs = [
-            { headerName: "Manufacturer", field: "manufacturerModel.manufacturer.name" },
-            { headerName: "Manufacturer model name", field: "manufacturerModel.name" },
-            { headerName: "Serial number", field: "serialNumber" },
-            { headerName: "Center", field: "center.name" }
+            {
+                headerName: "Acquisition equipment", field: "name", cellRenderer: function (params: any) {
+                    let acqEquip: AcquisitionEquipment = params.data;
+                    return acqEquip.manufacturerModel.manufacturer.name + " - " + acqEquip.manufacturerModel.name + " "
+                        + (acqEquip.manufacturerModel.magneticField ? (acqEquip.manufacturerModel.magneticField + "T") : "")
+                        + " (" + DatasetModalityType[acqEquip.manufacturerModel.datasetModalityType] + ")"
+                        + " " + acqEquip.serialNumber + " - " + acqEquip.center.name;
+                }
+            },
+            {
+                headerName: "Manufacturer", field: "manufacturerModel.manufacturer.name", type: "link", clickAction: {
+                    target: "/manufacturer", getParams: function (acqEquip: AcquisitionEquipment): Object {
+                        return { id: acqEquip.manufacturerModel.manufacturer.id, mode: "view" };
+                    }
+                }, width: "200px"
+            },
+            {
+                headerName: "Manufacturer model name", field: "manufacturerModel.name", type: "link", clickAction: {
+                    target: "/manufacturer-model", getParams: function (acqEquip: AcquisitionEquipment): Object {
+                        return { id: acqEquip.manufacturerModel.id, mode: "view" };
+                    }
+                }, width: "200px"
+            },
+            { headerName: "Serial number", field: "serialNumber", width: "200px" },
+            {
+                headerName: "Center", field: "center.name", type: "link", clickAction: {
+                    target: "/center", getParams: function (acqEquip: AcquisitionEquipment): Object {
+                        return { id: acqEquip.center.id, mode: "view" };
+                    }
+                }, width: "300px"
+            }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push(
