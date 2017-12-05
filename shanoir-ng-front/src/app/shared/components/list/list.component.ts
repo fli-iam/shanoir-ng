@@ -35,7 +35,7 @@ export class ListComponent {
     getText(o: any): string {
         switch (this.title) {
             case "Acquisition Equipments List": 
-                this.text = o.manufacturerModel.manufacturerName + " - " + o.manufacturerModel.name + " " 
+                this.text = o.manufacturerModel.manufacturer.name + " - " + o.manufacturerModel.name + " " 
                     + (o.manufacturerModel.magneticField ? (o.manufacturerModel.magneticField + "T") : "") 
                     + " (" + DatasetModalityType[o.manufacturerModel.datasetModalityType] + ")"
                     + " " + o.serialNumber;

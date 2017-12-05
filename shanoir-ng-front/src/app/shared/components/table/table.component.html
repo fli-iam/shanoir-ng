@@ -68,6 +68,11 @@
                     <span *ngIf="getCellValue(item, col)" class="bool-true">&#x2713;</span>
                     <span *ngIf="!getCellValue(item, col)" class="bool-false">&#x2717;</span>
                 </span>
+                <a 
+                    *ngIf="col.type == 'link'"
+                    [routerLink]="col.clickAction.target" 
+                    [queryParams]="col.clickAction.getParams != undefined ? col.clickAction.getParams(item) : null" 
+                    >{{getFieldRawValue(item, col["field"])}}</a>
                 <span class="button" *ngIf="col.type == 'button'">
                     <a *ngIf="col.target != undefined" [routerLink]="col.target" [queryParams]="col.getParams != undefined ? col.getParams(item) : null" routerLinkActive="active">
                         <img src="{{col.img}}" />
@@ -78,7 +83,7 @@
                 </span>
                 <span 
                     class="click-dummy"
-                    *ngIf="rowClickAction && col.type != 'button'"
+                    *ngIf="rowClickAction && col.type != 'button' && col.type != 'link'"
                     [routerLink]="rowClickAction.target" 
                     [queryParams]="rowClickAction.getParams != undefined ? rowClickAction.getParams(item) : null" 
                     routerLinkActive="active"

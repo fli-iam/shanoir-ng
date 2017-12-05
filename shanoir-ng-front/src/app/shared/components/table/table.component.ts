@@ -223,7 +223,7 @@ export class TableComponent {
      */
     public getCellValue(item: Object, col: any): any {
         let result: any;
-        if (col.field == undefined) {
+        if (col.field == undefined || col.type == 'link') {
             return null;
         } if (col.hasOwnProperty("cellRenderer")) {
             let params = new Object();

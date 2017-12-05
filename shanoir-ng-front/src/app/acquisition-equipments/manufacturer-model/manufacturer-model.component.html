@@ -32,7 +32,9 @@
 						<label i18n="ManufModel detail|Manufacturer label@@manufModelDetailManuf" class="required-label">Manufacturer</label> 
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
-								{{manufModel.manufacturer?.name}}
+								<a [routerLink]="['/manufacturer']" [queryParams]="{mode: 'view', id: manufModel?.manufacturer?.id}">
+									{{manufModel.manufacturer?.name}}
+								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
 								<select id="name" required formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer">
