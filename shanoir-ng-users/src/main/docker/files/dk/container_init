@@ -42,6 +42,10 @@ run-mysql </dev/null &
 pid=$!
 wait-mysql --timeout=5
 
+echo "Create shanoir ms log directory"
+mkdir -p /vol/log/ms
+chown shanoir: /vol/log/ms
+
 # name of the mysql table
 tbl="`echo "$MS" | sed s/-/_/g`"
 if [ "$PROFILE" = dev ] ; then
