@@ -37,6 +37,10 @@ init-mysql < /dev/null
 echo "Create supervisor log directory"
 mkdir -p /vol/log/supervisor
 
+echo "Create shanoir ms log directory"
+mkdir -p /vol/log/ms
+chown shanoir: /vol/log/ms
+
 echo "Start the mysql server"
 run-mysql </dev/null &
 pid=$!

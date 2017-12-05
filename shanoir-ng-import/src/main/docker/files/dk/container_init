@@ -29,19 +29,6 @@ run-mysql </dev/null &
 pid=$!
 wait-mysql --timeout=5
 
-# name of the mysql table
-tbl="`echo "$MS" | sed s/-/_/g`"
-if [ "$PROFILE" = dev ] ; then
-	echo "Populate database"
-	mysql -u root "$tbl" < /opt/cfg/shanoirng_template.sql
-else
-	echo "Populate database - create tables"
-	mysql -u root "$tbl" < /opt/cfg/shanoirng_template_tables.sql
-
-	echo "Populate database - import users from shanoir old"
-	/opt/cfg/templateMigration.py
-fi
-
 echo "Stop mysql process"
 kill $pid
 wait
