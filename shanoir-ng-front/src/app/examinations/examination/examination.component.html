@@ -29,7 +29,9 @@
 						<label i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.studyName}}
+								<a [routerLink]="['/study']" [queryParams]="{mode: 'view', id: examination.studyId}">
+									{{examination.studyName}}
+								</a>		
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
