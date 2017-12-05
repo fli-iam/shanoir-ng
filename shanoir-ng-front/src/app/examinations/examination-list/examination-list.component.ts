@@ -61,11 +61,19 @@ export class ExaminationListComponent {
             {
                 headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
                     return dateRenderer(params.data.examinationDate);
-                }
+                },  width: "100px"
             },
-            { headerName: "Research study", field: "studyName" },
+            { headerName: "Research study", field: "studyName" , type: "link", clickAction: {
+                target: "/study", getParams: function (examination: Examination): Object {
+                    return { id: examination.studyId, mode: "view" };
+                }
+            } },
             { headerName: "Examination executive", field: "" },
-            { headerName: "Center", field: "centerName" }
+            { headerName: "Center", field: "centerName" , type: "link", clickAction: {
+                target: "/center", getParams: function (examination: Examination): Object {
+                    return { id: examination.centerId, mode: "view" };
+                }
+            }}
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push(
