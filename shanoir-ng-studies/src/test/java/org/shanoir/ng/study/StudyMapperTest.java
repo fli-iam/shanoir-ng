@@ -1,5 +1,6 @@
 package org.shanoir.ng.study;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,6 +52,8 @@ public class StudyMapperTest {
 		final Study study = new Study();
 		study.setId(STUDY_ID);
 		study.setName(STUDY_NAME);
+		study.setStudyCenterList(new ArrayList<>());
+		study.setStudyUserList(new ArrayList<>());
 		return study;
 	}
 
