@@ -155,10 +155,11 @@
 				</span>
 			</div>
 		</div>
-		<!--<div class="right" *ngIf="mode=='view'">
-			<div *ngIf="center.acquisitionEquipments?.length > 0">
-				<list title="Acquisition Equipments List" [tab_open]='true' [list]='center.acquisitionEquipments'></list>
-			</div>
-		</div>-->
+		<div class="layout right" *ngIf="mode=='view'">
+				<span class="right-col">
+					<div class="examination-data" i18n="Examination data|Title@@examinationDetailDataTitle">Data</div>
+				</span>
+				<examination-tree [examination]="examination"></examination-tree>
+		</div>
 	</form>
 </div>
