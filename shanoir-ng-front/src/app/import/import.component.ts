@@ -212,27 +212,31 @@ export class ImportComponent implements OnInit {
     }
 
     onSelectStudy(study: Study) {
-        this.studycards = study.studyCards;
-        this.studyService
-            .findSubjectsByStudyId(study.id)
-            .then(subjects => this.subjects = subjects)
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting subject list by study id!");
-            });
-        this.buildForm();
+        if (study) {
+            this.studycards = study.studyCards;
+            this.studyService
+                .findSubjectsByStudyId(study.id)
+                .then(subjects => this.subjects = subjects)
+                .catch((error) => {
+                    // TODO: display error
+                    console.log("error getting subject list by study id!");
+                });
+            this.buildForm();
+        }
     }
 
     onSelectSubject(subject: Subject) {
-        this.subject = subject;
-        this.examinationService
-            .findExaminationsBySubjectId(subject.id)
-            .then(examinations => this.examinations = examinations)
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting examination list by subject id!");
-            });
-        this.buildForm();
+        if (subject) {
+            this.subject = subject;
+            this.examinationService
+                .findExaminationsBySubjectId(subject.id)
+                .then(examinations => this.examinations = examinations)
+                .catch((error) => {
+                    // TODO: display error
+                    console.log("error getting examination list by subject id!");
+                });
+            this.buildForm();
+        }
     }
 
     startProgressTest() {

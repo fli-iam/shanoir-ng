@@ -15,7 +15,7 @@ export class ImportService {
 
     uploadFile(formData: FormData): Observable<PatientsDicom> {
         return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_URL, formData)
-            .map(this.handleErrorService.extractData)
+            .map(response => response.json() as PatientsDicom)
             .catch(this.handleErrorService.handleError);
     }
 
