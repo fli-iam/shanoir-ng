@@ -50,4 +50,14 @@ export class ExaminationService {
             .map(response => response.json() as Examination)
             .catch(this.handleErrorService.handleError);
     }
+
+    findExaminationsBySubjectId(subjectId: number): Promise<Examination[]> {
+        return this.http.get(AppUtils.BACKEND_API_EXAMINATION_ALL_BY_SUBJECT_URL + '/' + subjectId)
+            .toPromise()
+            .then(response => response.json() as Examination[])
+            .catch((error) => {
+                console.error('Error while getting examinations by subject id', error);
+                return Promise.reject(error.message || error);
+        });
+    }
 }

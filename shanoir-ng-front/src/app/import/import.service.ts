@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { PatientsDicom, SerieDicom } from './dicom-data.model';
 import * as AppUtils from '../utils/app.utils';
-import { HandleErrorService } from '../shared/utils/handle.error.service';
+import { HandleErrorService } from '../shared/utils/handle-error.service';
 
 @Injectable()
 export class ImportService {
