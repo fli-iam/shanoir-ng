@@ -33,6 +33,7 @@ import { ExaminationListComponent } from './examinations/examination-list/examin
 import { ExaminationService } from './examinations/shared/examination.service';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { HandleErrorService } from './shared/utils/handle-error.service';
+import { EditUserComponent }   from './users/edit/edit.user.component';
 import { HeaderComponent }   from './shared/header/header.component';
 import { HomeComponent }   from './home/home.component';
 import { KeycloakHttp } from "./shared/keycloak/keycloak.http";
@@ -127,6 +128,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         CenterService,
         ConfirmDialogService,
         ExaminationService,
+        ImportService,
         HandleErrorService,
         ImportService,
         KeycloakService,

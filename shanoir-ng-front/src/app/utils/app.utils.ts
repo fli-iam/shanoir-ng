@@ -20,6 +20,12 @@ export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '
 // Subjects http api
 export const BACKEND_API_SUBJECT_URL:string = BACKEND_API_STUDIES_MS_URL + '/subject';
 
+// Datasets http api
+const BACKEND_API_DATASET_MS_URL: string = process.env.BACKEND_API_DATASET_MS_URL;
+// Examinations http api
+export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examination';
+export const BACKEND_API_EXAMINATION_ALL_BY_SUBJECT_URL: string = BACKEND_API_EXAMINATION_URL + '/list';
+
 // Acquisition equipment http api
 export const BACKEND_API_ACQ_EQUIP_URL:string = BACKEND_API_STUDIES_MS_URL + '/acquisitionequipments';
 
