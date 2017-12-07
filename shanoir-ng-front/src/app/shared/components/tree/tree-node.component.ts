@@ -28,6 +28,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
     @Input() buttonPicto: string;
     @Input() nodeParams: any;
     @Input() editable: boolean = false;
+    @Input() link: boolean = false;
     @Input() tooltip: string;
     @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes: QueryList<any>; 
     @ContentChildren(forwardRef(() => DropdownMenuComponent)) menus: QueryList<any>; 

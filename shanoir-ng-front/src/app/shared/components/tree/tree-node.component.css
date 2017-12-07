@@ -5,4 +5,4 @@ input[type="checkbox"] { vertical-align: middle; }
 input[type="text"] { color: var(--very-dark-grey); }
 tool-tip { color: var(--dark-grey); }
 .content { display: inline; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
-.clickable { cursor: pointer; }
+.clickable { cursor: pointer; text-decoration: underline; }

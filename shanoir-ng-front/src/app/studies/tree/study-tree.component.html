@@ -40,12 +40,13 @@
         </node>
     </ng-template>
 </node>
-<node label="Principal investigators and Centers (takes place in and with)" pictoUrl="assets/images/icons/folder-12.png" deploy="true">
+<node label="Principal investigators and Centers (takes place in and with)" pictoUrl="assets/images/icons/folder-12.png"
+    deploy="true">
     <ng-template ngFor let-center [ngForOf]="study.centers">
-        <node [label]="center.name" pictoUrl="assets/images/icons/home.png" [nodeParams]="center.id" (labelClick)="showCenterDetails($event)">
+        <node [label]="center.name" pictoUrl="assets/images/icons/home.png" [nodeParams]="center.id" link="true" (labelClick)="showCenterDetails($event)">
             <ng-template ngFor let-acquisitionEquipment [ngForOf]="center.acquisitionEquipments">
                 <node [label]="acquisitionEquipment | acqEqptLabel" pictoUrl="assets/images/icons/medical/x-ray-1.png" [nodeParams]="acquisitionEquipment.id"
-                    (labelClick)="showAcquisitionEquipmentDetails($event)">
+                    link="true" (labelClick)="showAcquisitionEquipmentDetails($event)">
                     <ng-template ngFor let-studyCard [ngForOf]="acquisitionEquipment.studyCards">
                         <node [label]="studyCard.name" pictoUrl="assets/images/icons/study-card.png">
                         </node>
@@ -65,7 +66,7 @@
     <ng-template ngFor let-membersCategory [ngForOf]="study.membersCategories">
         <node [label]="membersCategory.studyUserType" pictoUrl="assets/images/icons/folder-12.png">
             <ng-template ngFor let-member [ngForOf]="membersCategory.members">
-                <node [label]="member.name" pictoUrl="assets/images/icons/user.png" [nodeParams]="member.id" (labelClick)="showMemberDetails($event)">
+                <node [label]="member.name" pictoUrl="assets/images/icons/user.png" [nodeParams]="member.id" link="true" (labelClick)="showMemberDetails($event)">
                 </node>
             </ng-template>
         </node>
