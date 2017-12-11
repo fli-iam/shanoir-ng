@@ -105,7 +105,7 @@ export class AcquisitionEquipmentListComponent {
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new acq. equip.", img: "assets/images/icons/add-1.png", target: "/acquisition-equipment", getParams: function (item: any): Object {
+                title: "new acq. equip.", img: "assets/images/icons/add.png", target: "/acquisition-equipment", getParams: function (item: any): Object {
                     return { mode: "create" };
                 }
             });

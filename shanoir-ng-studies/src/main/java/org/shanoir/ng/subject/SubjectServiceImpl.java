@@ -290,7 +290,7 @@ public class SubjectServiceImpl implements SubjectService {
 		// Request to studycard MS to get center id
 		ResponseEntity<Long> centerIdResponse = null;
 		try {
-			centerIdResponse = restTemplate.exchange(microservicesRequestsService.getStudycardMsUrl()
+			centerIdResponse = restTemplate.exchange(microservicesRequestsService.getStudycardsMsUrl()
 					+ MicroserviceRequestsService.CENTERID + "/" + studyCardId, HttpMethod.GET, entity, Long.class);
 		} catch (RestClientException e) {
 			LOG.error("Error on study card microservice request", e);

@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Observable } from 'rxjs/Rx';
 
+import { IdNameObject } from '../shared/models/id-name-object.model';
 import { ImportService } from './import.service';
 import { slideDown } from '../shared/animations/animations';
 import { PatientsDicom, PatientDicom, SerieDicom } from "./dicom-data.model";
@@ -10,9 +11,10 @@ import * as AppUtils from '../utils/app.utils';
 import { Study } from '../studies/shared/study.model';
 import { StudyService } from '../studies/shared/study.service';
 import { Examination } from '../examinations/shared/examination.model';
+import { StudyCard } from '../study-cards/shared/study-card.model';
 import { ExaminationService } from '../examinations/shared/examination.service';
-import { StudyCard } from '../studies/shared/study-card.model';
 import { Subject } from '../subjects/shared/subject.model';
+
 declare var papaya: any;
 
 @Component({
@@ -59,7 +61,7 @@ export class ImportComponent implements OnInit {
     public importForm: FormGroup;
     private studies: Study[];
     private study: Study;
-    private studycards: StudyCard[];
+    private studycards: IdNameObject[];
     private subjects: Subject[]; 
     private examinations: Examination[];
     

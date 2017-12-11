@@ -82,7 +82,7 @@ export class CenterListComponent {
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new center", img: "assets/images/icons/add-1.png", target: "/center", getParams: function (item: any): Object {
+                title: "new center", img: "assets/images/icons/add.png", target: "/center", getParams: function (item: any): Object {
                     return { mode: "create" };
                 }
             });

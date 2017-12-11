@@ -2,6 +2,7 @@ package org.shanoir.ng.subjectstudy;
 
 import java.util.List;
 
+import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -13,6 +14,7 @@ import org.mapstruct.Mappings;
  *
  */
 @Mapper(componentModel = "spring")
+@DecoratedWith(SubjectStudyDecorator.class)
 public interface SubjectStudyMapper {
 
 	/**
@@ -31,7 +33,8 @@ public interface SubjectStudyMapper {
 	 *            link between a subject and a study.
 	 * @return DTO.
 	 */
-	@Mappings({ @Mapping(target = "subjectId", source = "subject.id") })
+	@Mappings({ @Mapping(target = "subjectId", source = "subject.id"),
+			@Mapping(target = "subjectStudyIdentifier", ignore = true) })
 	SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy);
 
 }

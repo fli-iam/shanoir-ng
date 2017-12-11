@@ -72,10 +72,10 @@ export class UserListComponent {
             {headerName: "", type: "button", img: "assets/images/icons/edit.png", target : "/user", getParams: function(item: any): Object {
                 return {id: item.id};
             }},
-            {headerName: "", type: "button", img: "assets/images/icons/garbage-1.png", action: this.openDeleteUserConfirmDialog}
+            {headerName: "", type: "button", img: "assets/images/icons/garbage.png", action: this.openDeleteUserConfirmDialog}
         ];
         this.customActionDefs = [
-            {title: "new user", img: "assets/images/icons/add-1.png", target: "../user"},
+            {title: "new user", img: "assets/images/icons/add.png", target: "../user"},
         ];
         this.rowClickAction = {target : "/user", getParams: function(item: any): Object {
                 return {id: item.id};

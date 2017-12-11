@@ -3,8 +3,8 @@ package org.shanoir.ng.study;
 import java.util.Date;
 import java.util.List;
 
-import org.shanoir.ng.center.CenterDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
 
 /**
@@ -15,15 +15,11 @@ import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
  */
 public class StudyDTO {
 
-	private List<CenterDTO> centers;
-
 	private boolean clinical;
 
 	private boolean downloadableByDefault;
 
 	private Date endDate;
-
-	private List<Long> examinationIds;
 
 	private List<IdNameDTO> experimentalGroupsOfSubjects;
 
@@ -35,6 +31,8 @@ public class StudyDTO {
 
 	private String name;
 
+	private int nbExaminations;
+
 	private int nbSujects;
 
 	private List<String> protocolFilePaths;
@@ -42,6 +40,8 @@ public class StudyDTO {
 	private Date startDate;
 
 	private List<IdNameDTO> studyCards;
+
+	private List<StudyCenterDTO> studyCenterList;
 
 	private StudyStatus studyStatus;
 
@@ -57,21 +57,6 @@ public class StudyDTO {
 	 * Default constructor.
 	 */
 	public StudyDTO() {
-	}
-
-	/**
-	 * @return the centers
-	 */
-	public List<CenterDTO> getCenters() {
-		return centers;
-	}
-
-	/**
-	 * @param centers
-	 *            the centers to set
-	 */
-	public void setCenters(List<CenterDTO> centers) {
-		this.centers = centers;
 	}
 
 	/**
@@ -117,21 +102,6 @@ public class StudyDTO {
 	 */
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
-	}
-
-	/**
-	 * @return the examinationIds
-	 */
-	public List<Long> getExaminationIds() {
-		return examinationIds;
-	}
-
-	/**
-	 * @param examinationIds
-	 *            the examinationIds to set
-	 */
-	public void setExaminationIds(List<Long> examinationIds) {
-		this.examinationIds = examinationIds;
 	}
 
 	/**
@@ -210,6 +180,21 @@ public class StudyDTO {
 	}
 
 	/**
+	 * @return the nbExaminations
+	 */
+	public int getNbExaminations() {
+		return nbExaminations;
+	}
+
+	/**
+	 * @param nbExaminations
+	 *            the nbExaminations to set
+	 */
+	public void setNbExaminations(int nbExaminations) {
+		this.nbExaminations = nbExaminations;
+	}
+
+	/**
 	 * @return the nbSujects
 	 */
 	public int getNbSujects() {
@@ -267,6 +252,21 @@ public class StudyDTO {
 	 */
 	public void setStudyCards(List<IdNameDTO> studyCards) {
 		this.studyCards = studyCards;
+	}
+
+	/**
+	 * @return the studyCenterList
+	 */
+	public List<StudyCenterDTO> getStudyCenterList() {
+		return studyCenterList;
+	}
+
+	/**
+	 * @param studyCenterList
+	 *            the studyCenterList to set
+	 */
+	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+		this.studyCenterList = studyCenterList;
 	}
 
 	/**

@@ -194,7 +194,7 @@
                             <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
                         </select>
                         <button (click)="createUser = true" [disabled]="subject == ''">details</button>
-                        <button (click)="createUser = true"><img src="/assets/images/icons/add-1.png" />create a subject</button>
+                        <button (click)="createUser = true"><img src="/assets/images/icons/add.png" />create a subject</button>
                     </span>
                 </li>
                 <li class="required" *ngIf="subjectMode == 'group'">
@@ -206,7 +206,7 @@
                             <option value="2">STCD4789????????????</option>
                         </select>
                         <button disabled>details</button>
-                        <button disabled><img src="/assets/images/icons/add-1.png" />create a group of subjects</button>
+                        <button disabled><img src="/assets/images/icons/add.png" />create a group of subjects</button>
                     </span>
                 </li>
                 <ng-template [ngIf]="subjectMode == 'single' && subject != undefined && subject != null && subject != ''">
@@ -254,7 +254,7 @@
                             <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination.id}} - {{examination.comment}}</option>
                         </select>
                         <button disabled>details</button>
-                        <button><img src="/assets/images/icons/add-1.png" />new</button>
+                        <button><img src="/assets/images/icons/add.png" />new</button>
                     </span>
                 </li>
             </ol>

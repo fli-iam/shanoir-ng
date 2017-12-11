@@ -25,9 +25,9 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subjectstudy.SubjectStudy;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -101,7 +101,6 @@ public class Study extends HalEntity {
 	private Integer studyStatus;
 
 	/** Relations between the investigators, the centers and the studies. */
-	@JsonIgnore
 	@NotEmpty
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<StudyCenter> studyCenterList;
@@ -113,7 +112,6 @@ public class Study extends HalEntity {
 	private List<StudyUser> studyUserList;
 
 	/** Relations between the subjects and the studies. */
-	@JsonIgnore
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<SubjectStudy> subjectStudyList;
 

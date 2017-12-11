@@ -1,4 +1,4 @@
-package org.shanoir.ng.subjectstudy;
+package org.shanoir.ng.studycenter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -7,7 +7,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentMapper;
-import org.shanoir.ng.subject.Subject;
+import org.shanoir.ng.center.CenterMapper;
+import org.shanoir.ng.study.Study;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -24,38 +25,41 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class SubjectStudyMapperTest {
+public class StudyCenterMapperTest {
 
-	private static final Long SUBJECT_ID = 1L;
+	private static final Long STUDY_ID = 1L;
 
 	@MockBean
 	private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
 
+	@MockBean
+	private CenterMapper centerMapperMock;
+
 	@Autowired
-	private SubjectStudyMapper subjectStudyMapper;
+	private StudyCenterMapper studyCenterMapper;
 
 	@Test
-	public void subjectStudyListToSubjectStudyDTOListTest() {
-		final List<SubjectStudyDTO> subjectStudyDTOs = subjectStudyMapper
-				.subjectStudyListToSubjectStudyDTOList(Arrays.asList(createSubjectStudy()));
+	public void studyCenterListToStudyCenterDTOListTest() {
+		final List<StudyCenterDTO> subjectStudyDTOs = studyCenterMapper
+				.studyCenterListToStudyCenterDTOList(Arrays.asList(createStudyCenter()));
 		Assert.assertNotNull(subjectStudyDTOs);
 		Assert.assertTrue(subjectStudyDTOs.size() == 1);
-		Assert.assertTrue(subjectStudyDTOs.get(0).getSubjectId().equals(SUBJECT_ID));
+		Assert.assertTrue(subjectStudyDTOs.get(0).getStudyId().equals(STUDY_ID));
 	}
 
 	@Test
-	public void subjectStudyToSubjectStudyDTOTest() {
-		final SubjectStudyDTO subjectStudyDTO = subjectStudyMapper.subjectStudyToSubjectStudyDTO(createSubjectStudy());
+	public void studyCenterToStudyCenterDTOTest() {
+		final StudyCenterDTO subjectStudyDTO = studyCenterMapper.studyCenterToStudyCenterDTO(createStudyCenter());
 		Assert.assertNotNull(subjectStudyDTO);
-		Assert.assertTrue(subjectStudyDTO.getSubjectId().equals(SUBJECT_ID));
+		Assert.assertTrue(subjectStudyDTO.getStudyId().equals(STUDY_ID));
 	}
 
-	private SubjectStudy createSubjectStudy() {
-		final SubjectStudy center = new SubjectStudy();
-		final Subject subject = new Subject();
-		subject.setId(SUBJECT_ID);
-		center.setSubject(subject);
-		return center;
+	private StudyCenter createStudyCenter() {
+		final StudyCenter studyCenter = new StudyCenter();
+		final Study study = new Study();
+		study.setId(STUDY_ID);
+		studyCenter.setStudy(study);
+		return studyCenter;
 	}
 
 }

@@ -30,7 +30,9 @@ import { ModalComponent } from "./shared/components/modal/modal.component";
 import { DropdownMenuComponent }   from './shared/components/dropdown-menu/dropdown-menu.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
+import { ExaminationPipe } from './examinations/shared/examination.pipe';
 import { ExaminationService } from './examinations/shared/examination.service';
+import { ExaminationTreeComponent } from './examinations/tree/examination-tree.component';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { HandleErrorService } from './shared/utils/handle-error.service';
 import { HeaderComponent }   from './shared/header/header.component';
@@ -95,6 +97,8 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         UserComponent,
         ExaminationListComponent,
         ExaminationComponent,
+        ExaminationPipe,
+        ExaminationTreeComponent,
         ExtensionRequestComponent,
         HeaderComponent,
         HomeComponent,

@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.shared.dto.IdListDTO;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,7 @@ import com.google.gson.GsonBuilder;
 public class UserApiControllerTest {
 
 	private static final String REQUEST_PATH = "/users";
+	private static final String REQUEST_PATH_SEARCH = REQUEST_PATH + "/search";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	private Gson gson;
@@ -56,6 +59,7 @@ public class UserApiControllerTest {
 		doNothing().when(userServiceMock).denyAccountRequest(Mockito.anyLong());
 		given(userServiceMock.findAll()).willReturn(Arrays.asList(new User()));
 		given(userServiceMock.findById(1L)).willReturn(new User());
+		given(userServiceMock.findByIds(Arrays.asList(1L))).willReturn(Arrays.asList(new IdNameDTO()));
 		given(userServiceMock.save(Mockito.mock(User.class))).willReturn(new User());
 	}
 
@@ -97,6 +101,15 @@ public class UserApiControllerTest {
 	public void saveNewUserTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createUser())))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void searchUsersTest() throws Exception {
+		final IdListDTO list = new IdListDTO();
+		list.getIdList().add(1L);
+		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH_SEARCH).accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(list)))
 				.andExpect(status().isOk());
 	}
 

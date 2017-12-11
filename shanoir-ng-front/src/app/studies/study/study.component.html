@@ -57,13 +57,13 @@
 						</span>
 					</li>
 					<li>
-						<label i18n="Study detail|Status label@@studyDetailStatus">Status</label>
+						<label i18n="Study detail|Status label@@studyDetailStatus" class="required-label">Status</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{studyStatusEnumValue}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="studyStatus" required formControlName="studyStatus" [(ngModel)]="study.studyStatus" (change)="onSelect($event.target.value)">
+								<select id="studyStatus" required formControlName="studyStatus" [(ngModel)]="study.studyStatus">
 									<option *ngFor="let studyStatus of studyStatuses" [value]="studyStatus.key">{{studyStatus.value}}</option>
 								</select>
 								<label *ngIf="formErrors.studyStatus.includes('required')" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
@@ -75,9 +75,9 @@
 						<span class="right-col" [ngSwitch]="mode">
 							<span class="right-col">
 								<input type="radio" formControlName="withExamination" [(ngModel)]="study.withExamination" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.withExamination == true" />Yes
+								 [checked]="study.withExamination" />Yes
 								<input type="radio" formControlName="withExamination" [(ngModel)]="study.withExamination" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="'study.withExamination'?'study.withExamination == false':'true'" />No
+								 [checked]="!study.withExamination" />No
 							</span>
 						</span>
 					</li>
@@ -86,9 +86,9 @@
 						<span class="right-col" [ngSwitch]="mode">
 							<span class="right-col">
 								<input type="radio" formControlName="clinical" [(ngModel)]="study.clinical" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.clinical == true" />Yes
+								 [checked]="study.clinical" />Yes
 								<input type="radio" formControlName="clinical" [(ngModel)]="study.clinical" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="'study.clinical'?'study.clinical == false':'true'" />No
+								 [checked]="!study.clinical" />No
 							</span>
 						</span>
 					</li>
@@ -97,9 +97,9 @@
 						<span class="right-col" [ngSwitch]="mode">
 							<span class="right-col">
 								<input type="radio" formControlName="visibleByDefault" [(ngModel)]="study.visibleByDefault" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.visibleByDefault == true" />Yes
+								 [checked]="study.visibleByDefault" />Yes
 								<input type="radio" formControlName="visibleByDefault" [(ngModel)]="study.visibleByDefault" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="'study.visibleByDefault'?'study.visibleByDefault == false':'true'" />No
+								 [checked]="!study.visibleByDefault" />No
 							</span>
 						</span>
 					</li>
@@ -108,21 +108,43 @@
 						<span class="right-col" [ngSwitch]="mode">
 							<span class="right-col">
 								<input type="radio" formControlName="downloadableByDefault" [(ngModel)]="study.downloadableByDefault" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.downloadableByDefault == true" />Yes
+								 [checked]="study.downloadableByDefault" />Yes
 								<input type="radio" formControlName="downloadableByDefault" [(ngModel)]="study.downloadableByDefault" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="'study.downloadableByDefault'?'study.downloadableByDefault == false':'true'" />No
+								 [checked]="!study.downloadableByDefault" />No
 							</span>
 						</span>
 					</li>
 					<li>
-						<label i18n="Study detail|Multi-centers label@@studyDetailMonoCenter" class="required-label">Multi-centers</label>
+						<label i18n="Study detail|Mono or multicenter label@@studyDetailMonoCenter" class="required-label">Mono or multicenter</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<span class="right-col">
-								<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="false" i18n="Study detail|Yes label@@noLabel"
-								 [checked]="'study.monoCenter'?'study.monoCenter == false':'true'" />Yes
-								<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="true" i18n="Study detail|No label@@yesLabel"
-								 [checked]="study.monoCenter == true" />No
+								<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="true" i18n="Study detail|Yes label@@noLabel"
+								 [checked]="study.monoCenter" />Mono-center
+								<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="false" i18n="Study detail|No label@@yesLabel"
+								 [checked]="!study.monoCenter" />Multi-centers
 							</span>
+						</span>
+					</li>
+					<li *ngIf="mode != 'view'">
+						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigator</label>
+						<span class="right-col">
+							<select [(ngModel)]="selectedCenter" [ngModelOptions]="{standalone: true}">
+								<option *ngFor="let center of centers" [ngValue]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</option>
+							</select>
+							<img [hidden]="!enableAddIcon()" [src]="addIconPath" class="icon icon-clickable" (click)="addCenterToStudy()"/>
+							<img [hidden]="enableAddIcon()" [src]="addDisabledIconPath" class="icon"/>
+						</span>
+					</li>
+					<li *ngIf="mode != 'view'">
+						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI" class="required-label">Current centers and Investigators</label>
+						<span class="right-col study-center-list">
+							<div *ngFor="let studyCenter of study.studyCenterList">
+								<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: studyCenter.center.id}">
+									{{studyCenter.center.name}}
+								</a>
+								<img [src]="deleteIconPath" class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.id)"/>
+							</div>
+							<span *ngIf="studyCenterListEmpty()" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">No center is currently associated to the research study!</span>
 						</span>
 					</li>
 				</ol>
@@ -134,10 +156,10 @@
 						<button type="submit" i18n="View center|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-						<button type="submit" i18n="Edit center|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!studyForm.valid">Update</button>
+						<button type="submit" i18n="Edit center|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!studyForm.valid || studyCenterListEmpty()">Update</button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
-						<button type="submit" i18n="Edit center|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!studyForm.valid">Create</button>
+						<button type="submit" i18n="Edit center|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!studyForm.valid || studyCenterListEmpty()">Create</button>
 					</ng-template>
 				</span>
 			</div>

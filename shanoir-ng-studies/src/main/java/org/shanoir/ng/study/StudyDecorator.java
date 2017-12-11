@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentDTO;
-import org.shanoir.ng.center.CenterDTO;
-import org.shanoir.ng.center.CenterMapper;
+import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjectsMapper;
 import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
+import org.shanoir.ng.studycenter.StudyCenterDTO;
+import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.subjectstudy.SubjectStudyMapper;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ public abstract class StudyDecorator implements StudyMapper {
 	private static final Logger LOG = LoggerFactory.getLogger(StudyDecorator.class);
 
 	@Autowired
-	private CenterMapper centerMapper;
+	private ExperimentalGroupOfSubjectsMapper experimentalGroupOfSubjectsMapper;
 
 	@Autowired
 	private StudyMapper delegate;
@@ -50,6 +51,9 @@ public abstract class StudyDecorator implements StudyMapper {
 
 	@Autowired
 	private RestTemplate restTemplate;
+
+	@Autowired
+	private StudyCenterMapper studyCenterMapper;
 
 	@Autowired
 	private SubjectStudyMapper subjectStudyMapper;
@@ -84,10 +88,15 @@ public abstract class StudyDecorator implements StudyMapper {
 			if (study.getSubjectStudyList() != null) {
 				studyDTO.setNbSujects(study.getSubjectStudyList().size());
 			}
-
+			if (study.getExaminationIds() != null) {
+				studyDTO.setNbExaminations(study.getExaminationIds().size());
+			}
 		} else {
 			studyDTO.setSubjects(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
-			getCentersInvestigators(study, studyDTO);
+			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
+					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
+			studyDTO.setStudyCenterList(
+					studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 			getStudyCards(studyDTO);
 			getMembers(study, studyDTO);
 		}
@@ -95,40 +104,58 @@ public abstract class StudyDecorator implements StudyMapper {
 		return studyDTO;
 	}
 
-	/*
-	 * Get list of centers and investigators for current study.
-	 * 
-	 * @param study current study.
-	 * 
-	 * @param studyDTO study STO.
-	 */
-	private void getCentersInvestigators(final Study study, final StudyDTO studyDTO) {
-		studyDTO.setCenters(new ArrayList<>());
-		for (StudyCenter studyCenter : study.getStudyCenterList()) {
-			studyDTO.getCenters().add(centerMapper.centerToCenterDTO(studyCenter.getCenter()));
-		}
-	}
-
 	private void getMembers(final Study study, final StudyDTO studyDTO) {
+		final IdListDTO userIds = new IdListDTO();
+		for (StudyUser studyUser : study.getStudyUserList()) {
+			userIds.getIdList().add(studyUser.getUserId());
+		}
+
+		HttpEntity<IdListDTO> entity = null;
+		try {
+			entity = new HttpEntity<>(userIds, KeycloakUtil.getKeycloakHeader());
+		} catch (ShanoirStudiesException e) {
+			LOG.error("Error while getting users for study " + studyDTO.getId(), e);
+			return;
+		}
+
+		// Request to users MS to get users for current study
+		ResponseEntity<List<IdNameDTO>> usersResponse = null;
+		try {
+			usersResponse = restTemplate.exchange(
+					microservicesRequestsService.getUsersMsUrl() + MicroserviceRequestsService.SEARCH, HttpMethod.POST,
+					entity, new ParameterizedTypeReference<List<IdNameDTO>>() {
+					});
+		} catch (RestClientException e) {
+			LOG.error("Error while getting users for study " + studyDTO.getId(), e);
+			return;
+		}
+
+		final Map<Long, IdNameDTO> usersMap = new HashMap<>();
+		for (IdNameDTO user : usersResponse.getBody()) {
+			usersMap.put(user.getId(), user);
+		}
+
 		// Sort members by category (studyUserType)
 		final Map<StudyUserType, List<IdNameDTO>> membersMap = new HashMap<>();
 		for (StudyUser user : study.getStudyUserList()) {
-			final IdNameDTO member = new IdNameDTO(user.getUserId(), "TO COMPLETE");
-			if (membersMap.containsKey(user.getStudyUserType())) {
-				membersMap.get(user.getStudyUserType()).add(member);
-			} else {
-				final List<IdNameDTO> users = new ArrayList<>();
-				users.add(member);
-				membersMap.put(user.getStudyUserType(), users);
+			if (usersMap.containsKey(user.getUserId())) {
+				final IdNameDTO member = usersMap.get(user.getUserId());
+				if (membersMap.containsKey(user.getStudyUserType())) {
+					membersMap.get(user.getStudyUserType()).add(member);
+				} else {
+					final List<IdNameDTO> users = new ArrayList<>();
+					users.add(member);
+					membersMap.put(user.getStudyUserType(), users);
+				}
 			}
 		}
-		
+
 		// Transform map into list
 		studyDTO.setMembersCategories(new ArrayList<>());
 		for (StudyUserType type : membersMap.keySet()) {
 			studyDTO.getMembersCategories().add(new MembersCategoryDTO(type, membersMap.get(type)));
 		}
-		
+
 		// Sort categories by importance
 		Collections.sort(studyDTO.getMembersCategories(), new MembersCategoryComparator());
 	}
@@ -153,7 +180,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		ResponseEntity<List<StudyCardDTO>> studyCardResponse = null;
 		try {
 			studyCardResponse = restTemplate.exchange(
-					microservicesRequestsService.getStudycardMsUrl() + MicroserviceRequestsService.SEARCH,
+					microservicesRequestsService.getStudycardsMsUrl() + MicroserviceRequestsService.SEARCH,
 					HttpMethod.POST, entity, new ParameterizedTypeReference<List<StudyCardDTO>>() {
 					});
 		} catch (RestClientException e) {
@@ -168,7 +195,7 @@ public abstract class StudyDecorator implements StudyMapper {
 				List<IdNameDTO> studycards = new ArrayList<>();
 				for (StudyCardDTO studyCardDTO : studyCardDTOs) {
 					studycards.add(new IdNameDTO(studyCardDTO.getId(), studyCardDTO.getName()));
-					linkStudyCardToAcqEqpt(studyCardDTO, studyDTO.getCenters());
+					linkStudyCardToAcqEqpt(studyCardDTO, studyDTO.getStudyCenterList());
 				}
 				studyDTO.setStudyCards(studycards);
 			}
@@ -182,11 +209,11 @@ public abstract class StudyDecorator implements StudyMapper {
 	 * 
 	 * @param studyCardDTO study card.
 	 * 
-	 * @param centerDTOs list of centers of current study.
+	 * @param studyCenterDTOs list of centers of current study.
 	 */
-	private void linkStudyCardToAcqEqpt(final StudyCardDTO studyCardDTO, final List<CenterDTO> centerDTOs) {
-		for (CenterDTO center : centerDTOs) {
-			for (AcquisitionEquipmentDTO equipment : center.getAcquisitionEquipments()) {
+	private void linkStudyCardToAcqEqpt(final StudyCardDTO studyCardDTO, final List<StudyCenterDTO> studyCenterDTOs) {
+		for (StudyCenterDTO studyCenter : studyCenterDTOs) {
+			for (AcquisitionEquipmentDTO equipment : studyCenter.getCenter().getAcquisitionEquipments()) {
 				if (equipment.getId().equals(studyCardDTO.getAcquisitionEquipmentId())) {
 					equipment.getStudyCards().add(new IdNameDTO(studyCardDTO.getId(), studyCardDTO.getName()));
 					return;

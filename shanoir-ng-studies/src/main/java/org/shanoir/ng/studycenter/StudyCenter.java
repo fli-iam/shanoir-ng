@@ -1,4 +1,4 @@
-package org.shanoir.ng.study;
+package org.shanoir.ng.studycenter;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,6 +8,7 @@ import javax.persistence.ManyToOne;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.center.Center;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.shanoir.ng.study.Study;
 
 /**
  * Link between studies and centers.
@@ -24,11 +25,6 @@ public class StudyCenter extends AbstractGenericItem {
 	 */
 	private static final long serialVersionUID = 1007750133610651645L;
 
-	/** The study. */
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "study_id")
-	private Study study;
-
 	/** Center. */
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "center_id")
@@ -41,6 +37,26 @@ public class StudyCenter extends AbstractGenericItem {
 
 	/** Investigator function in the study */
 //	private InvestigatorFunction investigatorFunction;
+
+	/** The study. */
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "study_id")
+	private Study study;
+	
+	/**
+	 * @return the center
+	 */
+	public Center getCenter() {
+		return center;
+	}
+
+	/**
+	 * @param center
+	 *            the center to set
+	 */
+	public void setCenter(Center center) {
+		this.center = center;
+	}
 
 	/**
 	 * @return the study
@@ -55,21 +71,6 @@ public class StudyCenter extends AbstractGenericItem {
 	 */
 	public void setStudy(Study study) {
 		this.study = study;
-	}
-
-	/**
-	 * @return the center
-	 */
-	public Center getCenter() {
-		return center;
-	}
-
-	/**
-	 * @param center
-	 *            the center to set
-	 */
-	public void setCenter(Center center) {
-		this.center = center;
 	}
 
 }

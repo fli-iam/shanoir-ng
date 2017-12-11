@@ -94,7 +94,7 @@ export class ExaminationListComponent {
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new examination.", img: "assets/images/icons/add-1.png", target: "/examination", getParams: function (item: any): Object {
+                title: "new examination.", img: "assets/images/icons/add.png", target: "/examination", getParams: function (item: any): Object {
                     return { mode: "create" };
                 }
             });

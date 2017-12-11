@@ -2,6 +2,8 @@ package org.shanoir.ng.user;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.dto.IdListDTO;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -103,6 +105,17 @@ public interface UserApi {
 	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<User> saveNewUser(@ApiParam(value = "user to create", required = true) @RequestBody User user,
 			BindingResult result) throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Requests users by id list", response = IdNameDTO.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found users", response = IdNameDTO.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = IdNameDTO.class),
+			@ApiResponse(code = 403, message = "forbidden", response = IdNameDTO.class),
+			@ApiResponse(code = 404, message = "no userfound", response = IdNameDTO.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = IdNameDTO.class) })
+	@RequestMapping(value = "/search", produces = { "application/json" }, consumes = {
+			"application/json" }, method = RequestMethod.POST)
+	ResponseEntity<List<IdNameDTO>> searchUsers(
+			@ApiParam(value = "user ids", required = true) @RequestBody IdListDTO userIds);
 
 	@ApiOperation(value = "", notes = "Updates a user", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "user updated", response = Void.class),

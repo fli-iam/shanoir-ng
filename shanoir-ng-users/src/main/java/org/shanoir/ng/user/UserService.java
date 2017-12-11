@@ -3,6 +3,7 @@ package org.shanoir.ng.user;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
@@ -114,6 +115,15 @@ public interface UserService extends UniqueCheckableService<User> {
 	 * @throws ShanoirUsersException
 	 */
 	User save(User user) throws ShanoirUsersException;
+
+	/**
+	 * Search users by their id.
+	 * 
+	 * @param userIds
+	 *            list of user ids.
+	 * @return list of users with id and username.
+	 */
+	List<IdNameDTO> findByIds(List<Long> userIdList);
 
 	/**
 	 * Update a user.

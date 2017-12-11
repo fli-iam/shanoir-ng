@@ -1,5 +1,6 @@
 package org.shanoir.ng.user;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.shanoir.ng.accountrequest.AccountRequestInfoRepository;
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.role.RoleRepository;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirAuthenticationException;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
@@ -237,6 +239,18 @@ public class UserServiceImpl implements UserService {
 		emailService.notifyNewUser(savedUser, newPassword);
 		updateShanoirOld(savedUser);
 		return savedUser;
+	}
+
+	@Override
+	public List<IdNameDTO> findByIds(List<Long> userIdList) {
+		final List<User> users = userRepository.findByIdIn(userIdList);
+		List<IdNameDTO> result = new ArrayList<>();
+		if (users != null) {
+			for (User user : users) {
+				result.add(new IdNameDTO(user.getId(), user.getUsername()));
+			}
+		}
+		return result;
 	}
 
 	@Override
