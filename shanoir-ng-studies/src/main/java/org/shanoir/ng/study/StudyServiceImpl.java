@@ -171,7 +171,7 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setWithExamination(study.isWithExamination());
 
-		// Copy list of database slinks study/center
+		// Copy list of database links study/center
 		final List<StudyCenter> studyCenterDbList = new ArrayList<>(studyDb.getStudyCenterList());
 		for (final StudyCenter studyCenter : study.getStudyCenterList()) {
 			if (studyCenter.getId() == null) {

@@ -2,6 +2,7 @@ package org.shanoir.ng.study;
 
 import static org.mockito.BDDMockito.given;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -83,24 +84,25 @@ public class StudyServiceTest {
 
 	@Test
 	public void saveTest() throws ShanoirStudiesException {
-		studyService.save(createAcquisitionEquipment());
+		studyService.save(createStudy());
 
 		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
 	}
 
 	@Test
 	public void updateTest() throws ShanoirStudiesException {
-		final Study updatedStudy = studyService.update(createAcquisitionEquipment());
+		final Study updatedStudy = studyService.update(createStudy());
 		Assert.assertNotNull(updatedStudy);
 		Assert.assertTrue(UPDATED_STUDY_NAME.equals(updatedStudy.getName()));
 
 		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
 	}
 
-	private Study createAcquisitionEquipment() {
+	private Study createStudy() {
 		final Study study = new Study();
 		study.setId(STUDY_ID);
 		study.setName(UPDATED_STUDY_NAME);
+		study.setStudyCenterList(new ArrayList<>());
 		return study;
 	}
 

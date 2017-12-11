@@ -51,9 +51,11 @@ public class StudyMapperTest {
 	private Study createStudy() {
 		final Study study = new Study();
 		study.setId(STUDY_ID);
+		study.setExperimentalGroupsOfSubjects(new ArrayList<>());
 		study.setName(STUDY_NAME);
 		study.setStudyCenterList(new ArrayList<>());
 		study.setStudyUserList(new ArrayList<>());
+		study.setSubjectStudyList(new ArrayList<>());
 		return study;
 	}
 
