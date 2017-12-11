@@ -96,7 +96,7 @@ export class AcquisitionEquipmentListComponent {
         }
         if (!this.keycloakService.isUserGuest()) {
             this.columnDefs.push({
-                headerName: "", type: "button", img: "assets/images/icons/view-1.png", target: "/acquisition-equipment", getParams: function (item: any): Object {
+                headerName: "", type: "button", img: "assets/images/icons/view.png", target: "/acquisition-equipment", getParams: function (item: any): Object {
                     return { id: item.id, mode: "view" };
                 }
             });
