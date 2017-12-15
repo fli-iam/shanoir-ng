@@ -13,6 +13,8 @@ import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.dto.SimpleStudyCardDTO;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
 import org.shanoir.ng.study.dto.StudyStudyCardDTO;
+import org.shanoir.ng.studycenter.StudyCenter;
+import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,16 +50,40 @@ public class StudyServiceImpl implements StudyService {
 	private RestTemplate restTemplate;
 
 	@Autowired
+	private StudyCenterRepository studyCenterRepository;
+
+	@Autowired
 	private StudyRepository studyRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirStudiesException {
+	public boolean canUserUpdateStudy(final Long studyId, final Long userId) {
+		final Study study = studyRepository.findOne(studyId);
+		for (final StudyUser studyUser : study.getStudyUserList()) {
+			if (userId.equals(studyUser.getUserId()) && (StudyUserType.RESPONSIBLE.equals(studyUser.getStudyUserType())
+					|| StudyUserType.SEE_DOWNLOAD_IMPORT_MODIFY.equals(studyUser.getStudyUserType()))) {
+				return true;
+			}
+		}
+		LOG.warn("User with id " + userId + " can't update study with id " + studyId);
+		return false;
+	}
+
+	@Override
+	public void deleteById(final Long id, final Long userId) throws ShanoirStudiesException {
 		final Study study = studyRepository.findOne(id);
 		if (study == null) {
 			LOG.error("Study with id " + id + " not found");
 			throw new ShanoirStudiesException(ErrorModelCode.STUDY_NOT_FOUND);
 		}
-		studyRepository.delete(id);
+		for (final StudyUser studyUser : study.getStudyUserList()) {
+			if (userId.equals(studyUser.getUserId())
+					&& StudyUserType.RESPONSIBLE.equals(studyUser.getStudyUserType())) {
+				studyRepository.delete(id);
+				return;
+			}
+		}
+		LOG.error("User with id " + userId + " can't delete study with id " + id);
+		throw new ShanoirStudiesException(ErrorModelCode.NO_RIGHT_FOR_ACTION);
 	}
 
 	@Override
@@ -84,8 +110,21 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public Study findById(final Long id) {
+	public Study findById(Long id) {
 		return studyRepository.findOne(id);
+	}
+
+	@Override
+	public Study findById(final Long id, final Long userId) throws ShanoirStudiesException {
+		final Study study = studyRepository.findOne(id);
+		for (final StudyUser studyUser : study.getStudyUserList()) {
+			if (userId.equals(studyUser.getUserId())
+					&& !StudyUserType.NOT_SEE_DOWNLOAD.equals(studyUser.getStudyUserType())) {
+				return studyRepository.findOne(id);
+			}
+		}
+		LOG.error("User with id " + userId + " can't see study with id " + id);
+		throw new ShanoirStudiesException(ErrorModelCode.NO_RIGHT_FOR_ACTION);
 	}
 
 	@Override
@@ -115,7 +154,7 @@ public class StudyServiceImpl implements StudyService {
 		ResponseEntity<List<SimpleStudyCardDTO>> studyCardResponse = null;
 		try {
 			studyCardResponse = restTemplate.exchange(
-					microservicesRequestsService.getStudycardMsUrl() + MicroserviceRequestsService.SEARCH,
+					microservicesRequestsService.getStudycardsMsUrl() + MicroserviceRequestsService.SEARCH,
 					HttpMethod.POST, entity, new ParameterizedTypeReference<List<SimpleStudyCardDTO>>() {
 					});
 		} catch (RestClientException e) {
@@ -149,19 +188,46 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public Study save(final Study study) throws ShanoirStudiesException {
+		for (final StudyCenter studyCenter : study.getStudyCenterList()) {
+			studyCenter.setStudy(study);
+		}
 		return studyRepository.save(study);
 	}
 
 	@Override
 	public Study update(final Study study) throws ShanoirStudiesException {
 		final Study studyDb = studyRepository.findOne(study.getId());
-		studyDb.setName(study.getName());
-		studyDb.setEndDate(study.getEndDate());
 		studyDb.setClinical(study.isClinical());
-		studyDb.setWithExamination(study.isWithExamination());
-		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setDownloadableByDefault(study.isDownloadableByDefault());
+		studyDb.setEndDate(study.getEndDate());
+		studyDb.setName(study.getName());
 		studyDb.setStudyStatus(study.getStudyStatus());
+		studyDb.setVisibleByDefault(study.isVisibleByDefault());
+		studyDb.setWithExamination(study.isWithExamination());
+
+		// Copy list of database links study/center
+		final List<StudyCenter> studyCenterDbList = new ArrayList<>(studyDb.getStudyCenterList());
+		for (final StudyCenter studyCenter : study.getStudyCenterList()) {
+			if (studyCenter.getId() == null) {
+				// Add link study/center
+				studyCenter.setStudy(studyDb);
+				studyDb.getStudyCenterList().add(studyCenter);
+			}
+		}
+		for (final StudyCenter studyCenterDb : studyCenterDbList) {
+			boolean keepStudyCenter = false;
+			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
+				if (studyCenterDb.getId().equals(studyCenter.getId())) {
+					keepStudyCenter = true;
+					break;
+				}
+			}
+			if (!keepStudyCenter) {
+				// Move link study/center
+				studyDb.getStudyCenterList().remove(studyCenterDb);
+				studyCenterRepository.delete(studyCenterDb.getId());
+			}
+		}
 
 		studyRepository.save(studyDb);
 
@@ -223,5 +289,5 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 	}
-	
+
 }

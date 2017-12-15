@@ -1,5 +1,7 @@
 import { Component, Input } from '@angular/core';
 
+import { ImagesUrlUtil } from '../../utils/images-url.util';
+
 @Component({
     selector: 'shanoir-table',
     templateUrl: 'table.component.html',
@@ -16,9 +18,9 @@ export class TableComponent {
     private itemsLoaded: boolean = false;
     private maxResultsField: number;
 
-    private checkAllImageUrl: string;
-    private loaderImageUrl: string;
-    private uncheckAllImageUrl: string;
+    private checkAllImageUrl: string = ImagesUrlUtil.CHECK_ALL_ICON_PATH;
+    private loaderImageUrl: string = ImagesUrlUtil.LOADER_IMAGE_PATH;
+    private uncheckAllImageUrl: string = ImagesUrlUtil.UNCHECK_ALL_ICON_PATH;
 
     public isLoading: boolean = false;
     public maxResults: number = 20;
@@ -29,9 +31,6 @@ export class TableComponent {
     public currentPage: number = 1;
 
     constructor() {
-        this.checkAllImageUrl = 'assets/images/icons/check-all.png';
-        this.loaderImageUrl = 'assets/images/loader.32x32.gif';
-        this.uncheckAllImageUrl = 'assets/images/icons/uncheck-all.png';
         this.maxResultsField = this.maxResults;
     }
 

@@ -249,6 +249,36 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  /users/search:
+    post:
+      operationId: searchUsers
+      description: Requests users by id list
+      consumes:
+        - application/json
+      parameters:
+        - name: userIds
+          in: body
+          description: user ids
+          required: true
+          schema:
+            $ref: '#/definitions/IdListDTO'
+      responses:
+        '200':
+          description: found users
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/IdNameDTO'
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no user found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /roles:
     get:
       operationId: findRoles
@@ -362,6 +392,22 @@ definitions:
         type: string
         format: date
       extensionMotivation:
+        type: string
+  IdListDTO:
+    type: object
+    properties:
+      idList:
+        type: array
+        items:
+          type: integer
+          format: int64
+  IdNameDTO:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
         type: string
   Role:
     type: object

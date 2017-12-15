@@ -19,14 +19,24 @@ public class MicroserviceRequestsService {
 	
 	public static final String CENTERID = "/centerid";
 	
-	@Value("${ms.url.shanoir-ng-studycard}")
-	private String studycardMsUrl;
+	@Value("${ms.url.shanoir-ng-studycards}")
+	private String studycardsMsUrl;
+
+	@Value("${ms.url.shanoir-ng-users}")
+	private String usersMsUrl;
 
 	/**
-	 * @return the shanoirNgStudycardUrl
+	 * @return the studycardsMsUrl
 	 */
-	public String getStudycardMsUrl() {
-		return studycardMsUrl;
+	public String getStudycardsMsUrl() {
+		return studycardsMsUrl;
+	}
+
+	/**
+	 * @return the usersMsUrl
+	 */
+	public String getUsersMsUrl() {
+		return usersMsUrl;
 	}
 
 }

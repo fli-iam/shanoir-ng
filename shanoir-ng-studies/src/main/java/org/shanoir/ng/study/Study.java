@@ -1,6 +1,6 @@
 package org.shanoir.ng.study;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -12,6 +12,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.PostLoad;
 import javax.persistence.SqlResultSetMapping;
 import javax.validation.constraints.NotNull;
@@ -25,9 +26,10 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subjectstudy.SubjectStudy;
+import org.shanoir.ng.timepoint.Timepoint;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -55,6 +57,16 @@ public class Study extends HalEntity {
 	/** Coordinator. */
 	// TODO: replace by investigator
 	private Long coordinatorId;
+
+	/** Associated datasets (is result of). */
+//	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE })
+//	@JoinColumn(name = "STUDY_ID")
+//	private List<Dataset> datasetIsResultOfList = new ArrayList<Dataset>(0);
+	
+	/** Associated dataset processing lists. */
+//	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE })
+//	@JoinColumn(name = "STUDY_ID")
+//	private List<DatasetProcessing> datasetProcessingList = new ArrayList<DatasetProcessing>(0);
 
 	/** Is with downloadable by default. */
 	private boolean downloadableByDefault;
@@ -97,11 +109,15 @@ public class Study extends HalEntity {
 	@Column(name = "study_card_id")
 	private List<Long> studyCardIds;
 
+	/** Dataset list. */
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
+//	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+//	private List<RelStudyDataset> relStudyDatasetList = new ArrayList<RelStudyDataset>(0);
+
 	@NotNull
 	private Integer studyStatus;
 
 	/** Relations between the investigators, the centers and the studies. */
-	@JsonIgnore
 	@NotEmpty
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<StudyCenter> studyCenterList;
@@ -113,10 +129,14 @@ public class Study extends HalEntity {
 	private List<StudyUser> studyUserList;
 
 	/** Relations between the subjects and the studies. */
-	@JsonIgnore
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<SubjectStudy> subjectStudyList;
 
+	/** List of Timepoints dividing the study **/
+	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OrderBy("rank asc")
+	private List<Timepoint> timepoints;
+	
 	/** Is visible by default. */
 	private boolean visibleByDefault;
 
@@ -377,6 +397,20 @@ public class Study extends HalEntity {
 	 */
 	public void setStudyUserList(List<StudyUser> studyUserList) {
 		this.studyUserList = studyUserList;
+	}
+
+	/**
+	 * @return the timepoints
+	 */
+	public List<Timepoint> getTimepoints() {
+		return timepoints;
+	}
+
+	/**
+	 * @param timepoints the timepoints to set
+	 */
+	public void setTimepoints(List<Timepoint> timepoints) {
+		this.timepoints = timepoints;
 	}
 
 	/**

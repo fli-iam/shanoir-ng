@@ -6,6 +6,8 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
+import org.shanoir.ng.shared.dto.IdListDTO;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -160,6 +162,15 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
+	}
+
+	@Override
+	public ResponseEntity<List<IdNameDTO>> searchUsers(@RequestBody final IdListDTO userIds) {
+		final List<IdNameDTO> users = getUserService().findByIds(userIds.getIdList());
+		if (users.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
 
 	@Override

@@ -5,9 +5,13 @@ import { Observable } from 'rxjs/Observable';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 
+import { Center } from '../../centers/shared/center.model';
+import { CenterService } from '../../centers/shared/center.service';
 import { Enum } from "../../shared/utils/enum";
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { Study } from '../shared/study.model';
+import { StudyCenter } from '../shared/study-center.model';
 import { StudyService } from '../shared/study.service';
 import { StudyStatus } from "../shared/study-status.enum";
 
@@ -19,14 +23,20 @@ import { StudyStatus } from "../shared/study-status.enum";
 
 export class StudyComponent implements OnInit {
 
+    private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
+    private addDisabledIconPath: string = ImagesUrlUtil.ADD_DISABLED_ICON_PATH;
     public canModify: Boolean = false;
+    private centers: Center[];
+    private deleteIconPath: string = ImagesUrlUtil.DELETE_ICON_PATH;
     private isEndDateValid: boolean = true;
     private isNameUnique: Boolean = true;
     private isStartDateValid: boolean = true;
-    private loading: boolean = false;
+    private loaderImagePath: string = ImagesUrlUtil.LOADER_IMAGE_PATH;
+    private loading: boolean = true;
     public mode: "view" | "edit" | "create";
-    private selectedStartDateNormal: IMyDate;
+    private selectedCenter: Center;
     private selectedEndDateNormal: IMyDate;
+    private selectedStartDateNormal: IMyDate;
     public study: Study = new Study();
     public studyForm: FormGroup;
     private studyId: number;
@@ -45,18 +55,25 @@ export class StudyComponent implements OnInit {
     };
 
     constructor(private route: ActivatedRoute, private router: Router,
-        private studyService: StudyService, private fb: FormBuilder,
+        private centerService: CenterService, private studyService: StudyService, private fb: FormBuilder,
         private location: Location, private keycloakService: KeycloakService) {
 
     }
 
     ngOnInit(): void {
         this.getEnum();
+        this.getCenters();
         this.getStudy();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
         }
+    }
+
+    addCenterToStudy(): void {
+        let studyCenter: StudyCenter = new StudyCenter();
+        studyCenter.center = this.selectedCenter;
+        this.study.studyCenterList.push(studyCenter);
     }
 
     back(): void {
@@ -68,12 +85,13 @@ export class StudyComponent implements OnInit {
             'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
             'startDate': [this.study.startDate],
             'endDate': [this.study.endDate],
-            'studyStatus': [this.study.studyStatus],
+            'studyStatus': [this.study.studyStatus, [Validators.required]],
             'withExamination': [this.study.withExamination],
             'clinical': [this.study.clinical, [Validators.required]],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [this.study.monoCenter, [Validators.required]],
+            'studyCenterList': [this.study.studyCenterList],
             'nbSujects': [this.study.nbSujects]
         });
         this.studyForm.valueChanges
@@ -82,7 +100,7 @@ export class StudyComponent implements OnInit {
     }
 
     create(): void {
-        this.study = this.studyForm.value;
+        this.submit();
         this.studyService.create(this.study)
             .subscribe((study) => {
                 this.back();
@@ -95,6 +113,30 @@ export class StudyComponent implements OnInit {
 
     edit(): void {
         this.router.navigate(['/study'], { queryParams: { id: this.studyId, mode: "edit" } });
+    }
+
+    enableAddIcon(): boolean {
+        if ((this.study.monoCenter && !this.studyCenterListEmpty())
+            || (this.selectedCenter && this.isCenterAlreadyLinked(this.selectedCenter.id))) {
+            return false;
+        }
+        return true;
+    }
+
+    getCenters(): void {
+        this.centerService
+            .getCentersNames()
+            .then(centers => {
+                this.centers = centers;
+                if (centers) {
+                    this.selectedCenter = centers[0];
+                }
+                this.getStudy();
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting center list!");
+            });
     }
 
     getDateToDatePicker(study: Study): void {
@@ -137,9 +179,11 @@ export class StudyComponent implements OnInit {
                 if (studyId) {
                     // view or edit mode
                     this.studyId = studyId;
-                    return this.studyService.getStudy(studyId);
+                    this.loading = true;
+                    return this.studyService.getStudy(studyId, false);
                 } else {
                     // create mode
+                    this.initializeStudyData();
                     return Observable.of<Study>();
                 }
             })
@@ -147,8 +191,41 @@ export class StudyComponent implements OnInit {
                 this.study = study;
                 this.getDateToDatePicker(this.study);
                 this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
-                this.loading = true;
+                console.log(this.mode);
+                if (this.mode == 'view') {
+                    this.getStudyWithData(this.study.id);
+                }
             });
+    }
+
+    getStudyWithData(studyId): void {
+        this.studyService.getStudy(studyId, true)
+            .then((study: Study) => {
+                this.study = study;
+                this.getDateToDatePicker(this.study);
+                this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
+                this.loading = false;
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting study with data!");
+            });
+    }
+
+    initializeStudyData(): void {
+        this.study.clinical = false;
+        this.study.monoCenter = true;
+        this.study.studyCenterList = [];
+        this.study.withExamination = true;
+    }
+
+    isCenterAlreadyLinked(centerId: number): boolean {
+        for (let studyCenter of this.study.studyCenterList) {
+            if (centerId == studyCenter.center.id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     onEndDateChanged(event: IMyDateModel) {
@@ -204,8 +281,41 @@ export class StudyComponent implements OnInit {
         }
     }
 
-    update(): void {
+    removeCenterFromStudy(studyCenterId: number): void {
+        this.study.studyCenterList = this.study.studyCenterList.filter(item => item.id !== studyCenterId);
+    }
+
+    setDateFromDatePicker(): void {
+        if (this.selectedStartDateNormal) {
+            this.study.startDate = new Date(this.selectedStartDateNormal.year, this.selectedStartDateNormal.month - 1,
+                this.selectedStartDateNormal.day);
+        } else {
+            this.study.startDate = null;
+        }
+        if (this.selectedEndDateNormal) {
+            this.study.endDate = new Date(this.selectedEndDateNormal.year, this.selectedEndDateNormal.month - 1,
+                this.selectedEndDateNormal.day);
+        } else {
+            this.study.endDate = null;
+        }
+    }
+
+    studyCenterListEmpty(): boolean {
+        if (this.study.studyCenterList && this.study.studyCenterList.length > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    submit(): void {
+        let studyCenterListBackup: StudyCenter[] = this.study.studyCenterList;
         this.study = this.studyForm.value;
+        this.study.studyCenterList = studyCenterListBackup;
+        this.setDateFromDatePicker();
+    }
+
+    update(): void {
+        this.submit();
         this.studyService.update(this.studyId, this.study)
             .subscribe((study) => {
                 this.back();

@@ -1,5 +1,5 @@
 <h1>Import from DICOM</h1>
-<form class="max-content" novalidate>
+<form [formGroup]="importForm" novalidate>
     <app-modal modalDialogId="papayaModal" #papayaModal>
         <div class="app-modal-body">
             <div id="papaya" style="width:800px; height:600px;">
@@ -14,9 +14,9 @@
             <p>In this step you are invited to choose the modality of the dataset(s) you want to import into the system.</p>
             <div>
                 <span>
-                    <input type="radio" [(ngModel)]="modality" value="MRI" name="modality" (change)="tab_modality_open = false">MRI
+                    <input type="radio" [(ngModel)]="modality" value="MRI" formControlName="modality" (change)="tab_modality_open = false">MRI
                     <span class="spacer"></span>
-                    <input type="radio" [(ngModel)]="modality" value="PET" name="modality" (change)="tab_modality_open = false">PET
+                    <input type="radio" [(ngModel)]="modality" value="PET" formControlName="modality" (change)="tab_modality_open = false">PET
                 </span>
             </div>
         </fieldset>
@@ -29,11 +29,9 @@
                 Please select a DICOM zip archive to import.<br/>
                 <strong class="warning">&#9888; Important notice:</strong> this archive must contain a DICOMDIR file at its root!
             </p>
-            <!-- <file-upload #fu (change)="fu.prepareUploadRequest()" [url]="uploadUrl" [multiple]="false" [auto]="true"></file-upload> -->
-            <input type="file" (change)="uploadArchive($event)" placeholder="Upload file..."/>
-            <!-- <label *ngIf="formErrors.fu.includes('fu')" class="form-validation-alert" i18n="Import|ExtensionError label">A DICOM zip archive is required!</label> -->
-            <!--<input type="file" [disabled]="uploadProgress === 1" (change)="uploadArchive($event)" placeholder="Upload file..."/> -->
-            <!-- <progress-bar *ngIf="uploadProgress > 0 && uploadProgress < 1" [progress]="uploadProgress"></progress-bar> -->
+            <input type="file" formControlName="fu" (change)="uploadArchive($event)" placeholder="Upload file..."/>
+            <label *ngIf="extensionError==true" class="form-validation-alert" i18n="Import|ExtensionError label">A DICOM zip archive is required!</label>
+            <label *ngIf="dicomDirMissingError==true" class="form-validation-alert" i18n="Import|DicomDirMissingError label">DICOMDIR is missing in .zip file!</label>    
         </fieldset>
     </div>
 
@@ -144,9 +142,9 @@
         </fieldset>
     </div>
 
-    <div class="step-block" [class.active]="true">
+    <div class="step-block" [class.active]="false">
         <div class="header command-zone">4. Set the clinical context</div>
-        <fieldset class="step responsive">
+        <fieldset class="step">
             <ol>
                 <legend>
                     Research study
@@ -155,7 +153,7 @@
                 <li class="required">
                     <label class="required-label">Select an existing research study</label> 
                     <span class="right-col">
-                        <select name="study" required [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)">
+                        <select formControlName="study" required [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)">
                             <option *ngFor="let study of studies" [ngValue]="study">{{study.name}}</option>
                         </select>
                         <button disabled>details</button>
@@ -164,7 +162,7 @@
                 <li class="required">
                     <label class="required-label">Select an existing study card</label> 
                     <span class="right-col">
-                        <select name="studycard" required [(ngModel)]="studycard">
+                        <select formControlName="studycard" required [(ngModel)]="studycard">
                             <option *ngFor="let studycard of studycards" [ngValue]="studycard">{{studycard.name}}</option>
                         </select>
                         <button disabled>details</button>
@@ -184,19 +182,19 @@
                 </legend>
                 <li>
                     <span>
-                        <input type="radio" [(ngModel)]="subjectMode" name="subjectMode" value="single">Single subject
+                        <input type="radio" [(ngModel)]="subjectMode" formControlName="subjectMode" value="single">Single subject
                         <span class="spacer"></span>
-                        <input type="radio" [(ngModel)]="subjectMode" name="subjectMode" value="group">Experimental group of subjects
+                        <input type="radio" [(ngModel)]="subjectMode" formControlName="subjectMode" value="group">Experimental group of subjects
                     </span>
                 </li>
                 <li class="required" *ngIf="subjectMode == 'single'">
                     <label class="required-label">Select a subject</label> 
                     <span class="right-col">
-                        <select name="subject" required [(ngModel)]="subject">
+                        <select formControlName="subject" required [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)">
                             <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
                         </select>
                         <button (click)="createUser = true" [disabled]="subject == ''">details</button>
-                        <button (click)="createUser = true"><img src="/assets/images/icons/add-1.png" />create a subject</button>
+                        <button (click)="createUser = true"><img src="/assets/images/icons/add.png" />create a subject</button>
                     </span>
                 </li>
                 <li class="required" *ngIf="subjectMode == 'group'">
@@ -208,20 +206,20 @@
                             <option value="2">STCD4789????????????</option>
                         </select>
                         <button disabled>details</button>
-                        <button disabled><img src="/assets/images/icons/add-1.png" />create a group of subjects</button>
+                        <button disabled><img src="/assets/images/icons/add.png" />create a group of subjects</button>
                     </span>
                 </li>
                 <ng-template [ngIf]="subjectMode == 'single' && subject != undefined && subject != null && subject != ''">
                     <li class="">
                         <label class="">Common name</label> 
                         <span class="right-col">
-                            <input type="text" [(ngModel)]="subject.name"/>
+                            <input type="text" id="subjectName" formControlName="subjectName" required [(ngModel)]="subject.name"/>
                         </span>
                     </li>
                     <li class=""> 
                         <label class="">Subject identifier for this research study</label> 
                         <span class="right-col">
-                            <input type="text"/>
+                            <input type="text" id="subjectIdentifier" formControlName="subjectIdentifier" [(ngModel)]="subject.subjectIdentifier"/>
                         </span>
                     </li>
                     <li class="">
@@ -231,7 +229,7 @@
                         </span>
                     </li>
                     <li class="">
-                        <label class="">Subject Type	</label> 
+                        <label class="">Subject Type</label> 
                         <span class="right-col">
                             <select>
                                 <option value="" disabled selected></option>
@@ -252,13 +250,11 @@
                 <li class="required">
                     <label class="required-label">Select an examination</label> 
                     <span class="right-col">
-                        <select>
-                            <option disabled selected></option>
-                            <option>ABCD0917</option>
-                            <option>STCD4789</option>
+                        <select formControlName="examination" required [(ngModel)]="examination">
+                            <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination.id}} - {{examination.comment}}</option>
                         </select>
                         <button disabled>details</button>
-                        <button><img src="/assets/images/icons/add-1.png" />new</button>
+                        <button><img src="/assets/images/icons/add.png" />new</button>
                     </span>
                 </li>
             </ol>

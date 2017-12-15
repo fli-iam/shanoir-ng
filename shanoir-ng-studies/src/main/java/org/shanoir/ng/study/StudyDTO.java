@@ -1,11 +1,12 @@
 package org.shanoir.ng.study;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 
-import org.shanoir.ng.center.CenterDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
+import org.shanoir.ng.timepoint.TimepointDTO;
 
 /**
  * DTO for study.
@@ -15,15 +16,11 @@ import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
  */
 public class StudyDTO {
 
-	private List<CenterDTO> centers;
-
 	private boolean clinical;
 
 	private boolean downloadableByDefault;
 
 	private Date endDate;
-
-	private List<Long> examinationIds;
 
 	private List<IdNameDTO> experimentalGroupsOfSubjects;
 
@@ -35,6 +32,8 @@ public class StudyDTO {
 
 	private String name;
 
+	private int nbExaminations;
+
 	private int nbSujects;
 
 	private List<String> protocolFilePaths;
@@ -43,11 +42,15 @@ public class StudyDTO {
 
 	private List<IdNameDTO> studyCards;
 
+	private List<StudyCenterDTO> studyCenterList;
+
 	private StudyStatus studyStatus;
 
 	private StudyType studyType;
 
 	private List<SubjectStudyDTO> subjects;
+
+	private List<TimepointDTO> timepoints;
 
 	private boolean visibleByDefault;
 
@@ -57,21 +60,6 @@ public class StudyDTO {
 	 * Default constructor.
 	 */
 	public StudyDTO() {
-	}
-
-	/**
-	 * @return the centers
-	 */
-	public List<CenterDTO> getCenters() {
-		return centers;
-	}
-
-	/**
-	 * @param centers
-	 *            the centers to set
-	 */
-	public void setCenters(List<CenterDTO> centers) {
-		this.centers = centers;
 	}
 
 	/**
@@ -117,21 +105,6 @@ public class StudyDTO {
 	 */
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
-	}
-
-	/**
-	 * @return the examinationIds
-	 */
-	public List<Long> getExaminationIds() {
-		return examinationIds;
-	}
-
-	/**
-	 * @param examinationIds
-	 *            the examinationIds to set
-	 */
-	public void setExaminationIds(List<Long> examinationIds) {
-		this.examinationIds = examinationIds;
 	}
 
 	/**
@@ -210,6 +183,21 @@ public class StudyDTO {
 	}
 
 	/**
+	 * @return the nbExaminations
+	 */
+	public int getNbExaminations() {
+		return nbExaminations;
+	}
+
+	/**
+	 * @param nbExaminations
+	 *            the nbExaminations to set
+	 */
+	public void setNbExaminations(int nbExaminations) {
+		this.nbExaminations = nbExaminations;
+	}
+
+	/**
 	 * @return the nbSujects
 	 */
 	public int getNbSujects() {
@@ -270,6 +258,21 @@ public class StudyDTO {
 	}
 
 	/**
+	 * @return the studyCenterList
+	 */
+	public List<StudyCenterDTO> getStudyCenterList() {
+		return studyCenterList;
+	}
+
+	/**
+	 * @param studyCenterList
+	 *            the studyCenterList to set
+	 */
+	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+		this.studyCenterList = studyCenterList;
+	}
+
+	/**
 	 * @return the studyStatus
 	 */
 	public StudyStatus getStudyStatus() {
@@ -312,6 +315,21 @@ public class StudyDTO {
 	 */
 	public void setSubjects(List<SubjectStudyDTO> subjects) {
 		this.subjects = subjects;
+	}
+
+	/**
+	 * @return the timepoints
+	 */
+	public List<TimepointDTO> getTimepoints() {
+		return timepoints;
+	}
+
+	/**
+	 * @param timepoints
+	 *            the timepoints to set
+	 */
+	public void setTimepoints(List<TimepointDTO> timepoints) {
+		this.timepoints = timepoints;
 	}
 
 	/**

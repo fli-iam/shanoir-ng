@@ -131,6 +131,8 @@ public final class ModelsUtil {
 	public static Study createStudy() {
 		final Study study = new Study();
 		study.setName(STUDY_NAME);
+		study.setStudyCenterList(new ArrayList<>());
+		study.setStudyUserList(new ArrayList<>());
 		return study;
 	}
 

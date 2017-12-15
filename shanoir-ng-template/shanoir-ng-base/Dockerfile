@@ -40,7 +40,7 @@ COPY files/. /
 #
 #
 ENV	DOCKER_PREFIX="shanoir"			\
-	PROFILE="dev"				\
+	PROFILE=""				\
 	SHANOIR_SERVER_URL="http://localhost"	\
 	SHANOIR_INSTANCE="DEV"			\
 	SHANOIR_ADMIN_NAME="Shanoir admin"	\

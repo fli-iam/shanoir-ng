@@ -1,2 +1,6 @@
 .layout { min-width: 410px; }
 .study-data { background-color: var(--light-grey); color: var(--color-b); font-size: 20px; font-weight: bold; padding: 10px 15px; }
+.study-center-list { display: inline-block; }
+.icon { margin-left: 5px; vertical-align: middle; }
+.icon-clickable { cursor: pointer;  }
+.data-loading { padding-top: 20px; text-align: center;  }

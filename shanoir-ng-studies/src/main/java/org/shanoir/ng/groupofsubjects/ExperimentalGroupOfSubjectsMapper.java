@@ -23,7 +23,7 @@ public interface ExperimentalGroupOfSubjectsMapper {
 	 *            list of experimental group of subjects.
 	 * @return list of DTO with id and name.
 	 */
-	List<IdNameDTO> studiesToStudyDTOs(List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects);
+	List<IdNameDTO> experimentalGroupOfSubjectsToIdNameDTOs(List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects);
 
 	/**
 	 * Map a @ExperimentalGroupOfSubjects to a @StudyDTO.
@@ -33,6 +33,6 @@ public interface ExperimentalGroupOfSubjectsMapper {
 	 * @return DTO with id and name.
 	 */
 	@Mappings({ @Mapping(target = "name", source = "groupName") })
-	IdNameDTO studyToStudyDTO(ExperimentalGroupOfSubjects experimentalGroupOfSubjects);
+	IdNameDTO experimentalGroupOfSubjectsToIdNameDTO(ExperimentalGroupOfSubjects experimentalGroupOfSubjects);
 
 }

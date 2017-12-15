@@ -19,6 +19,7 @@ import org.shanoir.ng.accountrequest.AccountRequestInfo;
 import org.shanoir.ng.accountrequest.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.role.RoleRepository;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
 import org.shanoir.ng.user.User;
 import org.shanoir.ng.user.UserContext;
@@ -67,6 +68,8 @@ public class UserServiceTest {
 	public void setup() {
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
+		given(userRepository.findByIdIn(Mockito.anyListOf(Long.class)))
+				.willReturn(Arrays.asList(createUser()));
 		given(userRepository.findOne(USER_ID)).willReturn(ModelsUtil.createUser());
 		given(userRepository
 				.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(Date.class)))
@@ -184,6 +187,15 @@ public class UserServiceTest {
 		Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(user.getFirstName()));
 
 		Mockito.verify(userRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+	}
+
+	@Test
+	public void findByIdsTest() {
+		final List<IdNameDTO> users = userService.findByIds(Arrays.asList(USER_ID));
+		Assert.assertNotNull(users);
+		Assert.assertTrue(USER_USERNAME.equals(users.get(0).getName()));
+
+		Mockito.verify(userRepository, Mockito.times(1)).findByIdIn(Arrays.asList(USER_ID));
 	}
 
 	@Test

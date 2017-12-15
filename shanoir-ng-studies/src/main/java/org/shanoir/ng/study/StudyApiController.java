@@ -6,6 +6,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
@@ -19,21 +20,25 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private StudyService studyService;
-	
+
 	@Autowired
 	private StudyMapper studyMapper;
 
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
-			studyService.deleteById(studyId);
+			studyService.deleteById(studyId, KeycloakUtil.getTokenUserId());
 		} catch (ShanoirStudiesException e) {
+			if (ErrorModelCode.NO_RIGHT_FOR_ACTION.equals(e.getErrorCode())) {
+				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+			}
 			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -82,12 +87,30 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId) {
-		final Study study = studyService.findById(studyId);
+	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId,
+			@RequestParam(value = "withdata", required = false) Boolean withdata) {
+		Study study;
+		try {
+			if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+				study = studyService.findById(studyId);
+			} else {
+				study = studyService.findById(studyId, KeycloakUtil.getTokenUserId());
+			}
+		} catch (ShanoirStudiesException e) {
+			if (ErrorModelCode.NO_RIGHT_FOR_ACTION.equals(e.getErrorCode())) {
+				return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+			}
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		if (study == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
+		if (withdata) {
+			return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(studyMapper.studyToSimpleStudyDTO(study), HttpStatus.OK);
+
+		}
 	}
 
 	@Override
@@ -115,13 +138,23 @@ public class StudyApiController implements StudyApi {
 			final Study createdStudy = studyService.save(study);
 			return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
 		} catch (final ShanoirStudiesException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
 	}
 
 	@Override
 	public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
 			final BindingResult result) throws RestServiceException {
+		try {
+			// Check if user can update study
+			if (!studyService.canUserUpdateStudy(studyId, KeycloakUtil.getTokenUserId())) {
+				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+			}
+		} catch (ShanoirStudiesException e1) {
+			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 		study.setId(studyId);
 
 		// A basic study can only update certain fields, check that
@@ -141,7 +174,8 @@ public class StudyApiController implements StudyApi {
 		try {
 			studyService.update(study);
 		} catch (final ShanoirStudiesException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
 
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -183,5 +217,5 @@ public class StudyApiController implements StudyApi {
 		final FieldErrorMap uniqueErrors = uniqueValidator.validate(study);
 		return uniqueErrors;
 	}
-	
+
 }

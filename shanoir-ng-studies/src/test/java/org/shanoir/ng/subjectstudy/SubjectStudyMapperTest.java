@@ -44,7 +44,7 @@ public class SubjectStudyMapperTest {
 	}
 
 	@Test
-	public void subjectStudyToSubjectStudyDTODTOTest() {
+	public void subjectStudyToSubjectStudyDTOTest() {
 		final SubjectStudyDTO subjectStudyDTO = subjectStudyMapper.subjectStudyToSubjectStudyDTO(createSubjectStudy());
 		Assert.assertNotNull(subjectStudyDTO);
 		Assert.assertTrue(subjectStudyDTO.getSubjectId().equals(SUBJECT_ID));

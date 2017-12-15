@@ -21,7 +21,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
-import org.shanoir.ng.study.StudyCenter;
+import org.shanoir.ng.studycenter.StudyCenter;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 

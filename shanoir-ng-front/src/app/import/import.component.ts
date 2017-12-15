@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Observable } from 'rxjs/Rx';
 
+import { IdNameObject } from '../shared/models/id-name-object.model';
 import { ImportService } from './import.service';
 import { slideDown } from '../shared/animations/animations';
 import { PatientsDicom, PatientDicom, SerieDicom } from "./dicom-data.model";
@@ -9,8 +10,11 @@ import { ModalComponent } from '../shared/components/modal/modal.component';
 import * as AppUtils from '../utils/app.utils';
 import { Study } from '../studies/shared/study.model';
 import { StudyService } from '../studies/shared/study.service';
-import { StudyCard } from '../studies/shared/study-card.model';
+import { Examination } from '../examinations/shared/examination.model';
+import { StudyCard } from '../study-cards/shared/study-card.model';
+import { ExaminationService } from '../examinations/shared/examination.service';
 import { Subject } from '../subjects/shared/subject.model';
+
 declare var papaya: any;
 
 @Component({
@@ -28,7 +32,9 @@ export class ImportComponent implements OnInit {
     /* Form inputs */
     private modality: "IMR" | "PET";
     private subjectMode: "single" | "group" = "single";
-    private subject;
+    private extensionError: Boolean;
+    private dicomDirMissingError: Boolean;
+    private subject: Subject;
     private archive;
     private selectedSeries: SerieDicom[] = [];
     
@@ -47,9 +53,7 @@ export class ImportComponent implements OnInit {
     private niftiStatus: string;
     private studyCardProgress: number = 0;
     private studyCardStatus: string;
-    
-    private uploadProgress: number = 0;
-    
+
     private tab_modality_open: boolean = true;
     private tab_upload_open: boolean = true;
     private tab_series_open: boolean = true;
@@ -57,11 +61,12 @@ export class ImportComponent implements OnInit {
     public importForm: FormGroup;
     private studies: Study[];
     private study: Study;
-    private studycards: StudyCard[];
-    private subjects: Subject[];    
+    private studycards: IdNameObject[];
+    private subjects: Subject[]; 
+    private examinations: Examination[];
     
     constructor(private fb: FormBuilder, private importService: ImportService,
-        private studyService: StudyService) {
+        private studyService: StudyService, private examinationService: ExaminationService) {
     }
 
     ngOnInit(): void {
@@ -94,8 +99,15 @@ export class ImportComponent implements OnInit {
     
     buildForm(): void {
         this.importForm = this.fb.group({
-            // 'study': [this.study, Validators.required]
-            // 'fu': [this.importForm.fu, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]]
+            'study': [this.study, Validators.required],
+            'fu': new FormControl(),
+            'studycard': new FormControl(),
+            'subjectMode': new FormControl(),
+            'subjectName': new FormControl(),
+            'subjectIdentifier': new FormControl(),
+            'examination': new FormControl(),
+            'modality': [this.modality, Validators.required],
+            'subject': [this.subject, Validators.required]
         });
     
         this.importForm.valueChanges
@@ -119,7 +131,15 @@ export class ImportComponent implements OnInit {
     }
     
     formErrors = {
-        // 'study': '',
+        'fu': '',
+        'study': '',
+        'studycard': '',
+        'subjectMode': '',
+        'subjectName': '',
+        'subjectIdentifier': '',
+        'examination': '',
+        'modality': '',
+        'subject': ''
     };
             
     initPapaya(serie: SerieDicom) {
@@ -154,23 +174,29 @@ export class ImportComponent implements OnInit {
 
     uploadArchive(event: any): void {
         let file = event.srcElement.files;
+        let index = file[0].name.lastIndexOf(".");
+        let strsubstring = file[0].name.substring(index, file[0].name.length);
+        if (strsubstring != '.zip') {
+            this.extensionError = true;
+            this.dicomDirMissingError = false;
+            this.archive = '';
+        } else {
+            this.extensionError = false;
+            this.dicomDirMissingError = false;
+            this.archive = "file uploaded";
+        }
         let formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         this.importService.uploadFile(formData)
-            .then((patientDicomList: PatientsDicom) => {
+            .subscribe((patientDicomList: PatientsDicom) => {
                 this.patients = patientDicomList.patients;
+            }, (err: String) => {
+                if (err.indexOf("DICOMDIR is missing") != -1) {
+                    this.dicomDirMissingError = true;
+                    this.extensionError = false;
+                    this.archive = '';
+                }
             });
-        // TEST
-        this.uploadProgress = 0;
-        let subscription1 = Observable.timer(0, 10).subscribe(t => {
-            this.uploadProgress = t * 0.005;
-            if (this.uploadProgress >= 1) {
-                this.uploadProgress = 1;
-                subscription1.unsubscribe();
-                this.archive = "file uploaded";
-                this.tab_upload_open = false;
-            }
-        });
     }
 
     selectNode(nodeParams: any) {
@@ -188,15 +214,31 @@ export class ImportComponent implements OnInit {
     }
 
     onSelectStudy(study: Study) {
-        this.studycards = study.studyCards;
-        this.studyService
-            .findSubjectsByStudyId(study.id)
-            .then(subjects => this.subjects = subjects)
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting subject list by study id!");
-            });
-        this.buildForm();
+        if (study) {
+            this.studycards = study.studyCards;
+            this.studyService
+                .findSubjectsByStudyId(study.id)
+                .then(subjects => this.subjects = subjects)
+                .catch((error) => {
+                    // TODO: display error
+                    console.log("error getting subject list by study id!");
+                });
+            this.buildForm();
+        }
+    }
+
+    onSelectSubject(subject: Subject) {
+        if (subject) {
+            this.subject = subject;
+            this.examinationService
+                .findExaminationsBySubjectId(subject.id)
+                .then(examinations => this.examinations = examinations)
+                .catch((error) => {
+                    // TODO: display error
+                    console.log("error getting examination list by subject id!");
+                });
+            this.buildForm();
+        }
     }
 
     startProgressTest() {

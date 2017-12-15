@@ -7,6 +7,7 @@ import java.util.Date;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.role.Role;
+import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.user.User;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -34,6 +35,7 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 
 	private static final String REQUEST_PATH = "/users";
 	private static final String REQUEST_PATH_EXTENSION = REQUEST_PATH + "/extension";
+	private static final String REQUEST_PATH_SEARCH = REQUEST_PATH + "/search";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	@Autowired
@@ -42,7 +44,7 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void findUserByIdProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
@@ -57,7 +59,7 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void findUsersProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
@@ -84,12 +86,13 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_EXTENSION, HttpMethod.PUT, entity,
 				String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
 	public void requestExtensionWithLogin() {
-		final HttpEntity<ExtensionRequestInfo> entity = new HttpEntity<>(createExtensionRequestInfo(), getHeadersWithToken(true));
+		final HttpEntity<ExtensionRequestInfo> entity = new HttpEntity<>(createExtensionRequestInfo(),
+				getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_EXTENSION, HttpMethod.PUT, entity,
 				String.class);
@@ -99,7 +102,7 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 	@Test
 	public void saveNewUserProtected() {
 		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new User(), String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
@@ -109,16 +112,35 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 		user.setUsername("test");
 		final HttpEntity<User> entity = new HttpEntity<>(user, getHeadersWithToken(true));
 
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity, String.class);
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
+				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		
+
 		// Get user id
 		String userId = response.getBody().split("\"id\":")[1].split(",")[0];
 
 		// Delete user
-		final ResponseEntity<String> responseDelete = restTemplate
-				.exchange(REQUEST_PATH + "/" + userId, HttpMethod.DELETE, entity, String.class);
+		final ResponseEntity<String> responseDelete = restTemplate.exchange(REQUEST_PATH + "/" + userId,
+				HttpMethod.DELETE, entity, String.class);
 		assertEquals(HttpStatus.NO_CONTENT, responseDelete.getStatusCode());
+	}
+
+	@Test
+	public void searchUsersProtected() {
+		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH_SEARCH, new IdListDTO(),
+				String.class);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+	}
+
+	@Test
+	public void searchUsersWithLogin() {
+		final IdListDTO list = new IdListDTO();
+		list.getIdList().add(1L);
+		final HttpEntity<IdListDTO> entity = new HttpEntity<>(list, getHeadersWithToken(true));
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_SEARCH, HttpMethod.POST, entity,
+				String.class);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
 	@Test
@@ -127,7 +149,7 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
-		assertEquals(HttpStatus.FOUND, response.getStatusCode());
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test

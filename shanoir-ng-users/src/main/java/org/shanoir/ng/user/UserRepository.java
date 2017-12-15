@@ -17,14 +17,6 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends CrudRepository<User, Long>, UserRepositoryCustom {
 
 	/**
-	 * Find user by its email address
-	 *
-	 * @param email
-	 * @return a user or null
-	 */
-	Optional<User> findByEmail(String email);
-
-	/**
 	 * Find all users for a role.
 	 * 
 	 * @param roleName
@@ -35,12 +27,12 @@ public interface UserRepository extends CrudRepository<User, Long>, UserReposito
 	List<String> findAdminEmails();
 
 	/**
-	 * Find user by its username
+	 * Find user by its email address
 	 *
-	 * @param id
+	 * @param email
 	 * @return a user or null
 	 */
-	Optional<User> findByUsername(String username);
+	Optional<User> findByEmail(String email);
 
 	/**
 	 * Find users who have account that will soon expire and have not received
@@ -61,5 +53,22 @@ public interface UserRepository extends CrudRepository<User, Long>, UserReposito
 	 * @return list of users.
 	 */
 	List<User> findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Date expirationDate);
+
+	/**
+	 * Find users by their id.
+	 * 
+	 * @param userIdList
+	 *            list of user ids.
+	 * @return list of users.
+	 */
+	List<User> findByIdIn(List<Long> userIdList);
+	
+	/**
+	 * Find user by its username
+	 *
+	 * @param id
+	 * @return a user or null
+	 */
+	Optional<User> findByUsername(String username);
 
 }

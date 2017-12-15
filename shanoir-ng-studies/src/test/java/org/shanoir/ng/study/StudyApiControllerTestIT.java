@@ -9,6 +9,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.center.Center;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;

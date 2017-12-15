@@ -3,6 +3,7 @@ import { MdDialog, MdDialogConfig, MdDialogRef } from '@angular/material';
 
 import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { StudyStatus } from '../shared/study-status.enum';
@@ -21,7 +22,8 @@ export class StudyListComponent {
     public rowClickAction: Object;
     public studies: Study[];
 
-    constructor(private studyService: StudyService, private confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
+    constructor(private confirmDialogService: ConfirmDialogService, private keycloakService: KeycloakService,
+        private studyService: StudyService, private viewContainerRef: ViewContainerRef) {
         this.getStudies();
         this.createColumnDefs();
     }
@@ -67,27 +69,35 @@ export class StudyListComponent {
                 }
             },
             {
-                headerName: "Subjects", field: "nbSujects", type: "number"},
+                headerName: "Subjects", field: "nbSujects", type: "number"
+            },
             {
-                headerName: "Examinations", field: "examinationIds", type: "number", cellRenderer: function (params: any) {
-                    return params.data.examinationIds ? params.data.examinationIds.length : 0;
-                }
+                headerName: "Examinations", field: "nbExaminations", type: "number"
             },
             {
                 headerName: "", type: "button", img: "assets/images/icons/edit.png", target: "/study", getParams: function (item: any): Object {
                     return { id: item.id };
                 }
             },
-            { headerName: "", type: "button", img: "assets/images/icons/garbage-1.png", action: this.openDeleteStudyConfirmDialog }
+            { headerName: "", type: "button", img: "assets/images/icons/garbage.png", action: this.openDeleteStudyConfirmDialog }
         ];
-        this.customActionDefs = [
-            { title: "new study", img: "assets/images/icons/add-1.png", target: "../study" },
-        ];
-        this.rowClickAction = {
-            target: "/study", getParams: function (item: any): Object {
-                return { id: item.id, mode: "view" };
-            }
-        };
+
+        this.customActionDefs = [];
+        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+            this.customActionDefs.push({
+                title: "new study", img: "assets/images/icons/add.png", target: "/study", getParams: function (item: any): Object {
+                    return { mode: "create" };
+                }
+            });
+        }
+
+        if (!this.keycloakService.isUserGuest()) {
+            this.rowClickAction = {
+                target: "/study", getParams: function (item: any): Object {
+                    return { id: item.id, mode: "view" };
+                }
+            };
+        }
     }
 
     openDeleteStudyConfirmDialog = (item: Study) => {

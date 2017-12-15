@@ -62,6 +62,10 @@ paths:
       description: 'If exists, returns the study corresponding to the given id'
       parameters:
         - $ref: '#/parameters/studyId'
+        - in: query
+          name: withdata
+          type: boolean
+          description: Get study with all data or not.
       responses:
         '200':
           description: found study
