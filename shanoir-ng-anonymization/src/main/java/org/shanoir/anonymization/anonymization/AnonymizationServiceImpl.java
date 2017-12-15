@@ -135,7 +135,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			// read metadata
 			Attributes metaInformationAttributes = din.readFileMetaInformation();
 			for (int tagInt : metaInformationAttributes.tags()) {
-
+				
 				String tagString = String.format("0x%08x", Integer.valueOf(tagInt));
 				if (anonymizationMAP.containsKey(tagString)) {
 					final String basicProfile = anonymizationMAP.get(tagString);
