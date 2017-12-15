@@ -62,14 +62,27 @@ public abstract class StudyDecorator implements StudyMapper {
 	public List<StudyDTO> studiesToStudyDTOs(final List<Study> studies) {
 		final List<StudyDTO> studyDTOs = new ArrayList<>();
 		for (Study study : studies) {
-			studyDTOs.add(convertStudyToStudyDTO(study, true));
+			final StudyDTO studyDTO = convertStudyToStudyDTO(study, false);
+			if (study.getSubjectStudyList() != null) {
+				studyDTO.setNbSujects(study.getSubjectStudyList().size());
+			}
+			if (study.getExaminationIds() != null) {
+				studyDTO.setNbExaminations(study.getExaminationIds().size());
+			}
+
+			studyDTOs.add(studyDTO);
 		}
 		return studyDTOs;
+	}
+	
+	@Override
+	public StudyDTO studyToSimpleStudyDTO(Study study) {
+		return convertStudyToStudyDTO(study, false);
 	}
 
 	@Override
 	public StudyDTO studyToStudyDTO(final Study study) {
-		return convertStudyToStudyDTO(study, false);
+		return convertStudyToStudyDTO(study, true);
 	}
 
 	/*
@@ -77,26 +90,19 @@ public abstract class StudyDecorator implements StudyMapper {
 	 * 
 	 * @param study study to map.
 	 * 
-	 * @param list study belongs to a list of studies?
+	 * @param withData study with data?
 	 * 
 	 * @return study DTO.
 	 */
-	private StudyDTO convertStudyToStudyDTO(final Study study, final boolean list) {
+	private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
 		final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
 
-		if (list) {
-			if (study.getSubjectStudyList() != null) {
-				studyDTO.setNbSujects(study.getSubjectStudyList().size());
-			}
-			if (study.getExaminationIds() != null) {
-				studyDTO.setNbExaminations(study.getExaminationIds().size());
-			}
-		} else {
+		studyDTO.setStudyCenterList(
+				studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
+		if (withData) {
 			studyDTO.setSubjects(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
 					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
-			studyDTO.setStudyCenterList(
-					studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 			getStudyCards(studyDTO);
 			getMembers(study, studyDTO);
 		}

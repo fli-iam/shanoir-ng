@@ -17,12 +17,26 @@ import org.shanoir.ng.study.dto.StudyStudyCardDTO;
 public interface StudyService extends UniqueCheckableService<Study> {
 
 	/**
-	 * Delete a study.
+	 * Check if an user can update a study.
+	 * 
+	 * @param studyId
+	 *            study id.
+	 * @param userId
+	 *            user id.
+	 * @return true or false.
+	 */
+	boolean canUserUpdateStudy(Long studyId, Long userId);
+
+	/**
+	 * Delete a study. Check if current user can delete study.
 	 *
 	 * @param id
+	 *            study id.
+	 * @param userId
+	 *            user id.
 	 * @throws ShanoirStudiesException
 	 */
-	void deleteById(Long id) throws ShanoirStudiesException;
+	void deleteById(Long id, Long userId) throws ShanoirStudiesException;
 
 	/**
 	 * Delete a Study from the old Shanoir.
@@ -50,6 +64,18 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	Study findById(Long id);
 
 	/**
+	 * Find study by its id. Check if current user can see study.
+	 *
+	 * @param id
+	 *            study id.
+	 * @param userId
+	 *            user id.
+	 * @return a study or null.
+	 * @throws ShanoirStudiesException
+	 */
+	Study findById(Long id, Long userId) throws ShanoirStudiesException;
+
+	/**
 	 * Find id and name for all studies.
 	 * 
 	 * @return list of studies.
@@ -68,12 +94,12 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	/**
 	 * Find all studies with theirs study cards for a user.
 	 * 
-	 * @param id
+	 * @param userId
 	 *            user id.
 	 * @return a list of simple studies.
 	 * @throws ShanoirStudiesException
 	 */
-	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserId(Long UserId) throws ShanoirStudiesException;
+	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserId(Long userId) throws ShanoirStudiesException;
 
 	/**
 	 * add new study
@@ -101,7 +127,7 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @throws ShanoirStudiesException
 	 */
 	void updateFromMsStudyCard(StudyStudyCardDTO studyStudyCardDTO) throws ShanoirStudiesException;
-	
+
 	/**
 	 * Update a Study from the old Shanoir
 	 *
@@ -110,5 +136,5 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @throws ShanoirStudiesException
 	 */
 	void updateFromShanoirOld(Study study) throws ShanoirStudiesException;
-	
+
 }

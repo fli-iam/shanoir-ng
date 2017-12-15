@@ -131,8 +131,8 @@
 							<select [(ngModel)]="selectedCenter" [ngModelOptions]="{standalone: true}">
 								<option *ngFor="let center of centers" [ngValue]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</option>
 							</select>
-							<img [hidden]="!enableAddIcon()" [src]="addIconPath" class="icon icon-clickable" (click)="addCenterToStudy()"/>
-							<img [hidden]="enableAddIcon()" [src]="addDisabledIconPath" class="icon"/>
+							<img [hidden]="!enableAddIcon()" [src]="addIconPath" class="icon icon-clickable" (click)="addCenterToStudy()" />
+							<img [hidden]="enableAddIcon()" [src]="addDisabledIconPath" class="icon" />
 						</span>
 					</li>
 					<li *ngIf="mode != 'view'">
@@ -142,7 +142,7 @@
 								<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: studyCenter.center.id}">
 									{{studyCenter.center.name}}
 								</a>
-								<img [src]="deleteIconPath" class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.id)"/>
+								<img [src]="deleteIconPath" class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.id)" />
 							</div>
 							<span *ngIf="studyCenterListEmpty()" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">No center is currently associated to the research study!</span>
 						</span>
@@ -165,10 +165,14 @@
 			</div>
 		</form>
 	</div>
-	<div class="layout right" *ngIf="mode=='view' && loading">
+	<div class="layout right" *ngIf="mode=='view'">
 		<span class="right-col">
 			<div class="study-data" i18n="Study data|Title@@studyDetailDataTitle">Data</div>
 		</span>
-		<study-tree [study]="study"></study-tree>
+		<div *ngIf="loading" class="data-loading">
+			<img [src]="loaderImagePath" />
+			<br/>Loading...
+		</div>
+		<study-tree *ngIf="!loading" [study]="study"></study-tree>
 	</div>
 </div>

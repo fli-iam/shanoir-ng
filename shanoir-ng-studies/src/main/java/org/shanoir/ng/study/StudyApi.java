@@ -7,11 +7,13 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,6 +34,7 @@ public interface StudyApi {
 			@ApiResponse(code = 404, message = "no study found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{studyId}", produces = { "application/json" }, method = RequestMethod.DELETE)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteStudy(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
@@ -71,7 +74,8 @@ public interface StudyApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
 	@RequestMapping(value = "/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<StudyDTO> findStudyById(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "Get study with all data or not.") @RequestParam(value = "withdata", required = false) Boolean withdata);
 
 	@ApiOperation(value = "", notes = "Saves a new study", response = Study.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created study", response = Study.class),
@@ -81,6 +85,7 @@ public interface StudyApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<StudyDTO> saveNewStudy(
 			@ApiParam(value = "study to create", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
@@ -93,9 +98,10 @@ public interface StudyApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{studyId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> updateStudy(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "study to update", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
-	
+
 }

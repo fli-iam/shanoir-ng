@@ -31,7 +31,8 @@ export class StudyComponent implements OnInit {
     private isEndDateValid: boolean = true;
     private isNameUnique: Boolean = true;
     private isStartDateValid: boolean = true;
-    private loading: boolean = false;
+    private loaderImagePath: string = ImagesUrlUtil.LOADER_IMAGE_PATH;
+    private loading: boolean = true;
     public mode: "view" | "edit" | "create";
     private selectedCenter: Center;
     private selectedEndDateNormal: IMyDate;
@@ -178,7 +179,8 @@ export class StudyComponent implements OnInit {
                 if (studyId) {
                     // view or edit mode
                     this.studyId = studyId;
-                    return this.studyService.getStudy(studyId);
+                    this.loading = true;
+                    return this.studyService.getStudy(studyId, false);
                 } else {
                     // create mode
                     this.initializeStudyData();
@@ -189,7 +191,24 @@ export class StudyComponent implements OnInit {
                 this.study = study;
                 this.getDateToDatePicker(this.study);
                 this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
-                this.loading = true;
+                console.log(this.mode);
+                if (this.mode == 'view') {
+                    this.getStudyWithData(this.study.id);
+                }
+            });
+    }
+
+    getStudyWithData(studyId): void {
+        this.studyService.getStudy(studyId, true)
+            .then((study: Study) => {
+                this.study = study;
+                this.getDateToDatePicker(this.study);
+                this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
+                this.loading = false;
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting study with data!");
             });
     }
 

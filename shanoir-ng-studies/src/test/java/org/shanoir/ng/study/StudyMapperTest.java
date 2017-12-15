@@ -7,10 +7,12 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.timepoint.TimepointMapper;
 import org.shanoir.ng.utils.SecurityContextTestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -31,6 +33,9 @@ public class StudyMapperTest {
 	@Autowired
 	private StudyMapper studyMapper;
 
+	@MockBean
+	private TimepointMapper timepointMapperMock;
+
 	@Test
 	public void studiesToStudyDTOsTest() {
 		final List<StudyDTO> studyDTOs = studyMapper.studiesToStudyDTOs(Arrays.asList(createStudy()));
@@ -42,7 +47,7 @@ public class StudyMapperTest {
 	@Test
 	public void studyToStudyDTOTest() {
 		SecurityContextTestUtil.initAuthenticationContext();
-		
+
 		final StudyDTO studyDTO = studyMapper.studyToStudyDTO(createStudy());
 		Assert.assertNotNull(studyDTO);
 		Assert.assertTrue(studyDTO.getId().equals(STUDY_ID));

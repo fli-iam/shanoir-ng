@@ -56,13 +56,34 @@ public class StudyServiceImpl implements StudyService {
 	private StudyRepository studyRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirStudiesException {
+	public boolean canUserUpdateStudy(final Long studyId, final Long userId) {
+		final Study study = studyRepository.findOne(studyId);
+		for (final StudyUser studyUser : study.getStudyUserList()) {
+			if (userId.equals(studyUser.getUserId()) && (StudyUserType.RESPONSIBLE.equals(studyUser.getStudyUserType())
+					|| StudyUserType.SEE_DOWNLOAD_IMPORT_MODIFY.equals(studyUser.getStudyUserType()))) {
+				return true;
+			}
+		}
+		LOG.warn("User with id " + userId + " can't update study with id " + studyId);
+		return false;
+	}
+
+	@Override
+	public void deleteById(final Long id, final Long userId) throws ShanoirStudiesException {
 		final Study study = studyRepository.findOne(id);
 		if (study == null) {
 			LOG.error("Study with id " + id + " not found");
 			throw new ShanoirStudiesException(ErrorModelCode.STUDY_NOT_FOUND);
 		}
-		studyRepository.delete(id);
+		for (final StudyUser studyUser : study.getStudyUserList()) {
+			if (userId.equals(studyUser.getUserId())
+					&& StudyUserType.RESPONSIBLE.equals(studyUser.getStudyUserType())) {
+				studyRepository.delete(id);
+				return;
+			}
+		}
+		LOG.error("User with id " + userId + " can't delete study with id " + id);
+		throw new ShanoirStudiesException(ErrorModelCode.NO_RIGHT_FOR_ACTION);
 	}
 
 	@Override
@@ -89,8 +110,21 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public Study findById(final Long id) {
+	public Study findById(Long id) {
 		return studyRepository.findOne(id);
+	}
+
+	@Override
+	public Study findById(final Long id, final Long userId) throws ShanoirStudiesException {
+		final Study study = studyRepository.findOne(id);
+		for (final StudyUser studyUser : study.getStudyUserList()) {
+			if (userId.equals(studyUser.getUserId())
+					&& !StudyUserType.NOT_SEE_DOWNLOAD.equals(studyUser.getStudyUserType())) {
+				return studyRepository.findOne(id);
+			}
+		}
+		LOG.error("User with id " + userId + " can't see study with id " + id);
+		throw new ShanoirStudiesException(ErrorModelCode.NO_RIGHT_FOR_ACTION);
 	}
 
 	@Override
@@ -194,7 +228,7 @@ public class StudyServiceImpl implements StudyService {
 				studyCenterRepository.delete(studyCenterDb.getId());
 			}
 		}
-		
+
 		studyRepository.save(studyDb);
 
 		return studyDb;

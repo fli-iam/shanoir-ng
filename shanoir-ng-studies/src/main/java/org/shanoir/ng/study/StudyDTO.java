@@ -6,6 +6,7 @@ import java.util.List;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
+import org.shanoir.ng.timepoint.TimepointDTO;
 
 /**
  * DTO for study.
@@ -48,6 +49,8 @@ public class StudyDTO {
 	private StudyType studyType;
 
 	private List<SubjectStudyDTO> subjects;
+
+	private List<TimepointDTO> timepoints;
 
 	private boolean visibleByDefault;
 
@@ -312,6 +315,21 @@ public class StudyDTO {
 	 */
 	public void setSubjects(List<SubjectStudyDTO> subjects) {
 		this.subjects = subjects;
+	}
+
+	/**
+	 * @return the timepoints
+	 */
+	public List<TimepointDTO> getTimepoints() {
+		return timepoints;
+	}
+
+	/**
+	 * @param timepoints
+	 *            the timepoints to set
+	 */
+	public void setTimepoints(List<TimepointDTO> timepoints) {
+		this.timepoints = timepoints;
 	}
 
 	/**

@@ -76,8 +76,8 @@ export class StudyService {
                 return Promise.reject(error.message || error);
         });
     }
-    getStudy (id: number): Promise<Study> {
-        return this.http.get(AppUtils.BACKEND_API_STUDY_URL + '/' + id)
+    getStudy (id: number, withData: boolean): Promise<Study> {
+        return this.http.get(AppUtils.BACKEND_API_STUDY_URL + '/' + id + '?withdata=' + withData)
             .toPromise()
             .then(res => res.json() as Study)
             .catch((error) => {

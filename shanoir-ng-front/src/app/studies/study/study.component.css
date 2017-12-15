@@ -3,3 +3,4 @@
 .study-center-list { display: inline-block; }
 .icon { margin-left: 5px; vertical-align: middle; }
 .icon-clickable { cursor: pointer;  }
+.data-loading { padding-top: 20px; text-align: center;  }

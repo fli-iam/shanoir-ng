@@ -30,6 +30,7 @@ public class StudyServiceTest {
 
 	private static final Long STUDY_ID = 1L;
 	private static final String UPDATED_STUDY_NAME = "test";
+	private static final Long USER_ID = 1L;
 
 	@Mock
 	private StudyRepository studyRepository;
@@ -49,10 +50,22 @@ public class StudyServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirStudiesException {
-		studyService.deleteById(STUDY_ID);
+	public void deleteByIdWithAccessRightTest() throws ShanoirStudiesException {
+		final Study newStudy = ModelsUtil.createStudy();
+		final StudyUser studyUser = new StudyUser();
+		studyUser.setUserId(USER_ID);
+		studyUser.setStudyUserType(StudyUserType.RESPONSIBLE);
+		newStudy.getStudyUserList().add(studyUser);
+		given(studyRepository.findOne(STUDY_ID)).willReturn(newStudy);
+
+		studyService.deleteById(STUDY_ID, USER_ID);
 
 		Mockito.verify(studyRepository, Mockito.times(1)).delete(Mockito.anyLong());
+	}
+
+	@Test(expected = ShanoirStudiesException.class)
+	public void deleteByIdWithoutAccessRightTest() throws ShanoirStudiesException {
+		studyService.deleteById(STUDY_ID, USER_ID);
 	}
 
 	@Test
@@ -65,12 +78,33 @@ public class StudyServiceTest {
 	}
 
 	@Test
-	public void findByIdTest() {
+	public void findByIdTest() throws ShanoirStudiesException {
 		final Study study = studyService.findById(STUDY_ID);
 		Assert.assertNotNull(study);
 		Assert.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
 
 		Mockito.verify(studyRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+	}
+
+	@Test
+	public void findByIdWithAccessRightTest() throws ShanoirStudiesException {
+		final Study newStudy = ModelsUtil.createStudy();
+		final StudyUser studyUser = new StudyUser();
+		studyUser.setUserId(USER_ID);
+		studyUser.setStudyUserType(StudyUserType.SEE_DOWNLOAD);
+		newStudy.getStudyUserList().add(studyUser);
+		given(studyRepository.findOne(STUDY_ID)).willReturn(newStudy);
+
+		final Study study = studyService.findById(STUDY_ID, USER_ID);
+		Assert.assertNotNull(study);
+		Assert.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
+
+		Mockito.verify(studyRepository, Mockito.times(2)).findOne(Mockito.anyLong());
+	}
+
+	@Test(expected = ShanoirStudiesException.class)
+	public void findByIdWithoutAccessRightTest() throws ShanoirStudiesException {
+		studyService.findById(STUDY_ID, USER_ID);
 	}
 
 	@Test
