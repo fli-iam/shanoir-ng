@@ -57,6 +57,7 @@ export class StudyTreeComponent {
                 component.open();
             })
             .catch((error) => {
+                component.open();
                 // TODO: display error
                 console.log("error getting examination list!");
             });
