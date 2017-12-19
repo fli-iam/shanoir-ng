@@ -90,7 +90,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
-
 			// Perform the anonymization
 			performAnonymization(file, profile, true, patientFirstName, patientLastName, patientID);
 
@@ -279,7 +278,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	private void anonymizeTag(Integer tagInt, String basicProfile, Attributes attributes) {
 
 		String value = getFinalValueForTag(tagInt, basicProfile);
-
 		if (value == null) {
 			attributes.remove(tagInt);
 		} else if (value == "KEEP") {
