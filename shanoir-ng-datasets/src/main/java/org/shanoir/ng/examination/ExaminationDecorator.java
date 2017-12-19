@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.shanoir.ng.examination;
 
 import java.util.ArrayList;
@@ -22,6 +19,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * Decorator for examinations mapper.
+ * 
  * @author msimon
  *
  */

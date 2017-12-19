@@ -1,5 +1,9 @@
+<span *ngIf="dataLoading">
+    <img class="arrow picto" [src]="loaderImagePath" />
+</span>
 <span *ngIf="hasChildren && isOpen" (click)="close()" class="arrow">&#x25BE;</span>
 <span *ngIf="hasChildren && !isOpen" (click)="open()" class="arrow">&#9656;</span>
+<span *ngIf="!hasChildren && dataRequest && !isOpen && !dataLoading" (click)="openClick.emit(this)" class="arrow">&#9656;</span>
 <span *ngIf="pictoUrl">
     <img class="picto" src="{{pictoUrl}}" />
 </span>

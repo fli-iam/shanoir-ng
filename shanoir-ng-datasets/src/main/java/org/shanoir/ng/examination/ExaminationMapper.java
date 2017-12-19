@@ -6,6 +6,7 @@ import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.shanoir.ng.datasetacquisition.DatasetAcquisitionMapper;
 
 /**
  * Mapper for examinations.
@@ -13,7 +14,7 @@ import org.mapstruct.Mappings;
  * @author yyao
  *
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { DatasetAcquisitionMapper.class })
 @DecoratedWith(ExaminationDecorator.class)
 public interface ExaminationMapper {
 
@@ -25,16 +26,34 @@ public interface ExaminationMapper {
 	 * @return list of examinations DTO.
 	 */
 	List<ExaminationDTO> examinationsToExaminationDTOs(List<Examination> examinations);
-	
-	@Mappings({ @Mapping(target = "centerName", ignore = true), @Mapping(target = "studyName", ignore = true),
-		@Mapping(target = "subject", ignore = true) })
+
 	/**
-	 * Map a Examination to a @ExaminationDTO.
+	 * Map list of @Examination to list of @SubjectExaminationDTO.
+	 * 
+	 * @param examination
+	 *            examination to map.
+	 * @return list of subject examination DTO.
+	 */
+	List<SubjectExaminationDTO> examinationsToSubjectExaminationDTOs(List<Examination> examinations);
+
+	@Mappings({ @Mapping(target = "centerName", ignore = true), @Mapping(target = "studyName", ignore = true),
+			@Mapping(target = "subject", ignore = true) })
+	/**
+	 * Map a @Examination to a @ExaminationDTO.
 	 * 
 	 * @param examination
 	 *            examination to map.
 	 * @return examination DTO.
 	 */
 	ExaminationDTO examinationToExaminationDTO(Examination examination);
-	
+
+	/**
+	 * Map a @Examination to a @SubjectExaminationDTO.
+	 * 
+	 * @param examination
+	 *            examination to map.
+	 * @return subject examination DTO.
+	 */
+	SubjectExaminationDTO examinationToSubjectExaminationDTO(Examination examination);
+
 }

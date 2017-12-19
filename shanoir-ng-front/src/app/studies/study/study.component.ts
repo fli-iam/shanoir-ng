@@ -131,7 +131,6 @@ export class StudyComponent implements OnInit {
                 if (centers) {
                     this.selectedCenter = centers[0];
                 }
-                this.getStudy();
             })
             .catch((error) => {
                 // TODO: display error
@@ -191,7 +190,6 @@ export class StudyComponent implements OnInit {
                 this.study = study;
                 this.getDateToDatePicker(this.study);
                 this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
-                console.log(this.mode);
                 if (this.mode == 'view') {
                     this.getStudyWithData(this.study.id);
                 }

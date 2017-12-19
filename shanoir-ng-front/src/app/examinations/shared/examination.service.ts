@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 import { Response, Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
-import { Examination } from './examination.model';
 import * as AppUtils from '../../utils/app.utils';
+import { Examination } from './examination.model';
 import { HandleErrorService } from '../../shared/utils/handle-error.service';
+import { SubjectExamination } from '../shared/subject-examination.model';
 
 @Injectable()
 export class ExaminationService {
@@ -17,7 +18,7 @@ export class ExaminationService {
             .catch((error) => {
                 console.error('Error while getting examinations', error);
                 return Promise.reject(error.message || error);
-        });
+            });
     }
 
     delete(id: number): Promise<Response> {
@@ -26,17 +27,17 @@ export class ExaminationService {
             .catch((error) => {
                 console.error('Error delete examination', error);
                 return Promise.reject(error.message || error);
-        });
+            });
     }
 
-    getExamination (id: number): Promise<Examination> {
+    getExamination(id: number): Promise<Examination> {
         return this.http.get(AppUtils.BACKEND_API_EXAMINATION_URL + '/' + id)
             .toPromise()
             .then(res => res.json() as Examination)
             .catch((error) => {
                 console.error('Error while getting examination', error);
                 return Promise.reject(error.message || error);
-        });
+            });
     }
 
     create(examination: Examination): Observable<Examination> {
@@ -51,13 +52,13 @@ export class ExaminationService {
             .catch(this.handleErrorService.handleError);
     }
 
-    findExaminationsBySubjectId(subjectId: number): Promise<Examination[]> {
+    findExaminationsBySubjectId(subjectId: number): Promise<SubjectExamination[]> {
         return this.http.get(AppUtils.BACKEND_API_EXAMINATION_ALL_BY_SUBJECT_URL + '/' + subjectId)
             .toPromise()
-            .then(response => response.json() as Examination[])
+            .then(response => response.json() as SubjectExamination[])
             .catch((error) => {
                 console.error('Error while getting examinations by subject id', error);
                 return Promise.reject(error.message || error);
-        });
+            });
     }
 }

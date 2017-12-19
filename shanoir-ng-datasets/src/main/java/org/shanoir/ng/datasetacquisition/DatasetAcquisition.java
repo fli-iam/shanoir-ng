@@ -34,7 +34,7 @@ public class DatasetAcquisition extends AbstractGenericItem {
 
 	/** Datasets. */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetAcquisition", cascade = CascadeType.ALL)
-	private List<Dataset> datasetList;
+	private List<Dataset> datasets;
 
 	/** Related Examination. */
 	@ManyToOne
@@ -66,18 +66,18 @@ public class DatasetAcquisition extends AbstractGenericItem {
 	}
 
 	/**
-	 * @return the datasetList
+	 * @return the datasets
 	 */
-	public List<Dataset> getDatasetList() {
-		return datasetList;
+	public List<Dataset> getDatasets() {
+		return datasets;
 	}
 
 	/**
-	 * @param datasetList
-	 *            the datasetList to set
+	 * @param datasets
+	 *            the datasets to set
 	 */
-	public void setDatasetList(List<Dataset> datasetList) {
-		this.datasetList = datasetList;
+	public void setDatasets(List<Dataset> datasets) {
+		this.datasets = datasets;
 	}
 
 	/**

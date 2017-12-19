@@ -1,7 +1,11 @@
-import { Component, Input, Output, ContentChildren, forwardRef, QueryList, ChangeDetectorRef, 
-    EventEmitter, ViewChild, ElementRef } from '@angular/core';
-import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
+import {
+    Component, Input, Output, ContentChildren, forwardRef, QueryList, ChangeDetectorRef,
+    EventEmitter, ViewChild, ElementRef
+} from '@angular/core';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+
+import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
+import { ImagesUrlUtil } from '../../utils/images-url.util';
 
 const noop = () => {
 };
@@ -30,19 +34,23 @@ export class TreeNodeComponent implements ControlValueAccessor {
     @Input() editable: boolean = false;
     @Input() link: boolean = false;
     @Input() tooltip: string;
-    @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes: QueryList<any>; 
-    @ContentChildren(forwardRef(() => DropdownMenuComponent)) menus: QueryList<any>; 
+    @Input() dataRequest: boolean = false;
+    @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes: QueryList<any>;
+    @ContentChildren(forwardRef(() => DropdownMenuComponent)) menus: QueryList<any>;
+    public dataLoading: boolean = false;
     public isOpen: boolean = false;
     public loaded: boolean = false;
+    private loaderImagePath: string = ImagesUrlUtil.LOADER_IMAGE_PATH;
     public hasChildren: boolean;
     public checked: boolean;
-    @ViewChild('box') boxElt:ElementRef;
+    @ViewChild('box') boxElt: ElementRef;
     @Output() buttonClick = new EventEmitter();
     @Output() labelClick = new EventEmitter();
     @Output() nodeSelected = new EventEmitter();
+    @Output() openClick = new EventEmitter();
     private onTouchedCallback: () => void = noop;
     private onChangeCallback: (_: any) => void = noop;
-    
+
     constructor(private cdr: ChangeDetectorRef) {
 
     }
@@ -59,11 +67,6 @@ export class TreeNodeComponent implements ControlValueAccessor {
     public deployAll() {
         this.open();
         this.cdr.detectChanges();
-        this.childNodes.forEach((node, index) => {
-            if (index!= 0) { // TODO : THE IF INDEX != 0 HAS TO BE REMOVED ONCE THE BUG IS FIXED : https://github.com/angular/angular/issues/10098
-                node.deployAll();
-            }
-        });
     }
 
     public isClickable(): boolean {
@@ -74,11 +77,12 @@ export class TreeNodeComponent implements ControlValueAccessor {
     }
 
     public open() {
-        this.isOpen =  true;
+        this.dataLoading = false;
+        this.isOpen = true;
     }
 
     public close() {
-        this.isOpen =  false;
+        this.isOpen = false;
     }
 
     public toggle() {
@@ -89,12 +93,11 @@ export class TreeNodeComponent implements ControlValueAccessor {
     public updateChildren(): void {
         this.hasChildren = this.childNodes.toArray().length > 1; // TODO : set to 0 when the bug is fixed https://github.com/angular/angular/issues/10098
         this.childNodes.forEach((child, index) => {
-            if (index!= 0) { // TODO : THE IF INDEX != 0 HAS TO BE REMOVED ONCE THE BUG IS FIXED : https://github.com/angular/angular/issues/10098
+            if (index != 0) { // TODO : THE IF INDEX != 0 HAS TO BE REMOVED ONCE THE BUG IS FIXED : https://github.com/angular/angular/issues/10098
                 child.notifyParent = this.updateSelf;
             }
         });
     }
-    
 
     get value(): boolean {
         return this.checked;
@@ -105,7 +108,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
             this.checked = value;
             this.onChangeCallback(value);
             this.childNodes.forEach((node, index) => {
-                if (index!= 0) { // TODO : THE IF INDEX != 0 HAS TO BE REMOVED ONCE THE BUG IS FIXED : https://github.com/angular/angular/issues/10098
+                if (index != 0) { // TODO : THE IF INDEX != 0 HAS TO BE REMOVED ONCE THE BUG IS FIXED : https://github.com/angular/angular/issues/10098
                     node.value = value;
                 }
             });
@@ -119,7 +122,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
         let allOn: boolean = true;
         let allOff: boolean = true;
         this.childNodes.forEach((child, index) => {
-            if (index!= 0) { // TODO : THE IF INDEX != 0 HAS TO BE REMOVED ONCE THE BUG IS FIXED : https://github.com/angular/angular/issues/10098
+            if (index != 0) { // TODO : THE IF INDEX != 0 HAS TO BE REMOVED ONCE THE BUG IS FIXED : https://github.com/angular/angular/issues/10098
                 if (!child.checked) {
                     allOn = false;
                 } else {
@@ -127,8 +130,8 @@ export class TreeNodeComponent implements ControlValueAccessor {
                 }
             }
         });
-        if(allOff) this.setBox(false);
-        else if(allOn) this.setBox(true);
+        if (allOff) this.setBox(false);
+        else if (allOn) this.setBox(true);
         else this.setBox(null);
     };
 

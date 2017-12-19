@@ -10,10 +10,10 @@ import { ModalComponent } from '../shared/components/modal/modal.component';
 import * as AppUtils from '../utils/app.utils';
 import { Study } from '../studies/shared/study.model';
 import { StudyService } from '../studies/shared/study.service';
-import { Examination } from '../examinations/shared/examination.model';
 import { StudyCard } from '../study-cards/shared/study-card.model';
 import { ExaminationService } from '../examinations/shared/examination.service';
 import { Subject } from '../subjects/shared/subject.model';
+import { SubjectExamination } from '../examinations/shared/subject-examination.model';
 
 declare var papaya: any;
 
@@ -63,7 +63,7 @@ export class ImportComponent implements OnInit {
     private study: Study;
     private studycards: IdNameObject[];
     private subjects: Subject[]; 
-    private examinations: Examination[];
+    private examinations: SubjectExamination[];
     
     constructor(private fb: FormBuilder, private importService: ImportService,
         private studyService: StudyService, private examinationService: ExaminationService) {

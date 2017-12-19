@@ -49,7 +49,7 @@ public class Examination extends HalEntity {
 
 	/** Dataset acquisitions. */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = CascadeType.ALL)
-	private List<DatasetAcquisition> datasetAcquisitionList;
+	private List<DatasetAcquisition> datasetAcquisitions;
 
 	/** Examination date. */
 	@NotNull
@@ -81,7 +81,7 @@ public class Examination extends HalEntity {
 	private boolean investigatorExternal;
 
 	/** Investigator. */
-//	@NotNull
+	// @NotNull
 	private Long investigatorId;
 
 	/** Notes about this examination. */
@@ -93,9 +93,6 @@ public class Examination extends HalEntity {
 	private Long studyId;
 
 	/** Subject. Can be null only if experimentalGroupOfSubjects is not null. */
-//	@OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = CascadeType.ALL)
-//	@ManyToOne(fetch = FetchType.LAZY)
-//	@JoinColumn(name = "SUBJECT_ID", referencedColumnName = "SUBJECT_ID", updatable = true)
 	private Long subjectId;
 
 	/**
@@ -150,18 +147,18 @@ public class Examination extends HalEntity {
 	}
 
 	/**
-	 * @return the datasetAcquisitionList
+	 * @return the datasetAcquisitions
 	 */
-	public List<DatasetAcquisition> getDatasetAcquisitionList() {
-		return datasetAcquisitionList;
+	public List<DatasetAcquisition> getDatasetAcquisitions() {
+		return datasetAcquisitions;
 	}
 
 	/**
 	 * @param datasetAcquisitionList
 	 *            the datasetAcquisitionList to set
 	 */
-	public void setDatasetAcquisitionList(List<DatasetAcquisition> datasetAcquisitionList) {
-		this.datasetAcquisitionList = datasetAcquisitionList;
+	public void setDatasetAcquisitions(List<DatasetAcquisition> datasetAcquisitions) {
+		this.datasetAcquisitions = datasetAcquisitions;
 	}
 
 	/**
