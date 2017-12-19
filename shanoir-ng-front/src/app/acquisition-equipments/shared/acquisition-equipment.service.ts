@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Response, Http } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
 import { AcquisitionEquipment } from './acquisition-equipment.model';
@@ -8,46 +8,46 @@ import { HandleErrorService } from '../../shared/utils/handle-error.service';
 
 @Injectable()
 export class AcquisitionEquipmentService {
-    constructor(private http: Http, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
 
     getAcquisitionEquipments(): Promise<AcquisitionEquipment[]> {
-        return this.http.get(AppUtils.BACKEND_API_ACQ_EQUIP_URL)
+        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL)
             .toPromise()
-            .then(response => response.json() as AcquisitionEquipment[])
+            .then(response => response)
             .catch((error) => {
                 console.error('Error while getting acqEquips', error);
                 return Promise.reject(error.message || error);
-        });
+            });
     }
 
-    delete(id: number): Promise<Response> {
-        return this.http.delete(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id)
+    delete(id: number): Promise<void> {
+        return this.http.delete<void>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id)
             .toPromise()
             .catch((error) => {
                 console.error('Error delete acqEquip', error);
                 return Promise.reject(error.message || error);
-        });
+            });
     }
 
-    getAcquisitionEquipment (id: number): Promise<AcquisitionEquipment> {
-        return this.http.get(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id)
+    getAcquisitionEquipment(id: number): Promise<AcquisitionEquipment> {
+        return this.http.get<AcquisitionEquipment>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id)
             .toPromise()
-            .then(res => res.json() as AcquisitionEquipment)
+            .then(res => res)
             .catch((error) => {
                 console.error('Error while getting acqEquip', error);
                 return Promise.reject(error.message || error);
-        });
+            });
     }
 
     create(acqEquip: AcquisitionEquipment): Observable<AcquisitionEquipment> {
-        return this.http.post(AppUtils.BACKEND_API_ACQ_EQUIP_URL, JSON.stringify(acqEquip))
-            .map(this.handleErrorService.extractData)
+        return this.http.post<AcquisitionEquipment>(AppUtils.BACKEND_API_ACQ_EQUIP_URL, JSON.stringify(acqEquip))
+            .map(res => res)
             .catch(this.handleErrorService.handleError);
     }
 
     update(id: number, acqEquip: AcquisitionEquipment): Observable<AcquisitionEquipment> {
-        return this.http.put(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id, JSON.stringify(acqEquip))
-            .map(response => response.json() as AcquisitionEquipment)
+        return this.http.put<AcquisitionEquipment>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id, JSON.stringify(acqEquip))
+            .map(response => response)
             .catch(this.handleErrorService.handleError);
     }
 }

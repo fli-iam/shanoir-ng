@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Response, Http } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
 import { Study } from './study.model';
@@ -10,85 +10,85 @@ import { IdNameObject } from '../../shared/models/id-name-object.model';
 
 @Injectable()
 export class StudyService {
-    constructor(private http: Http, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
 
     findStudiesByUserId(): Promise<Study[]> {
-        return this.http.get(AppUtils.BACKEND_API_STUDY_URL)
+        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
             .toPromise()
-            .then(response => response.json() as Study[])
-            .catch((error) => {
-                console.error('Error while getting studies by user id', error);
-                return Promise.reject(error.message || error);
-        });
-    }
-
-    findStudiesWithStudyCardsByUserId(): Promise<Study[]> {
-        return this.http.get(AppUtils.BACKEND_API_STUDY_WITH_CARDS_BY_USER_URL)
-            .toPromise()
-            .then(response => response.json() as Study[])
+            .then(response => response)
             .catch((error) => {
                 console.error('Error while getting studies by user id', error);
                 return Promise.reject(error.message || error);
             });
-        }
+    }
+
+    findStudiesWithStudyCardsByUserId(): Promise<Study[]> {
+        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_WITH_CARDS_BY_USER_URL)
+            .toPromise()
+            .then(response => response)
+            .catch((error) => {
+                console.error('Error while getting studies by user id', error);
+                return Promise.reject(error.message || error);
+            });
+    }
 
     create(study: Study): Observable<Study> {
-        return this.http.post(AppUtils.BACKEND_API_STUDY_URL, JSON.stringify(study))
-            .map(this.handleErrorService.extractData)
+        return this.http.post<Study>(AppUtils.BACKEND_API_STUDY_URL, JSON.stringify(study))
+            .map(res => res)
             .catch(this.handleErrorService.handleError);
     }
 
-    delete(id: number): Promise<Response> {
-        return this.http.delete(AppUtils.BACKEND_API_STUDY_URL + '/' + id)
+    delete(id: number): Promise<void> {
+        return this.http.delete<void>(AppUtils.BACKEND_API_STUDY_URL + '/' + id)
             .toPromise()
             .catch((error) => {
                 console.error('Error delete study', error);
                 return Promise.reject(error);
-        });
+            });
     }
 
     getStudies(): Promise<Study[]> {
-        return this.http.get(AppUtils.BACKEND_API_STUDY_URL)
+        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
             .toPromise()
-            .then(response => response.json() as Study[])
+            .then(response => response)
             .catch((error) => {
                 console.error('Error while getting studies', error);
                 return Promise.reject(error.message || error);
-        });
+            });
     }
 
     getStudiesNames(): Promise<IdNameObject[]> {
-        return this.http.get(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
+        return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
             .toPromise()
-            .then(response => response.json() as IdNameObject[])
+            .then(response => response)
             .catch((error) => {
                 console.error('Error while getting studies', error);
                 return Promise.reject(error.message || error);
-        });
+            });
     }
 
     findSubjectsByStudyId(studyId: number): Promise<Subject[]> {
-        return this.http.get(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
+        return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
             .toPromise()
-            .then(response => response.json() as Subject[])
+            .then(response => response)
             .catch((error) => {
                 console.error('Error while getting subjects by study id', error);
                 return Promise.reject(error.message || error);
-        });
+            });
     }
-    getStudy (id: number, withData: boolean): Promise<Study> {
-        return this.http.get(AppUtils.BACKEND_API_STUDY_URL + '/' + id + '?withdata=' + withData)
+    getStudy(id: number, withData: boolean): Promise<Study> {
+        return this.http.get<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id + '?withdata=' + withData)
             .toPromise()
-            .then(res => res.json() as Study)
+            .then(res => res)
             .catch((error) => {
                 console.error('Error while getting study', error);
                 return Promise.reject(error.message || error);
-        });
+            });
     }
 
     update(id: number, study: Study): Observable<Study> {
-        return this.http.put(AppUtils.BACKEND_API_STUDY_URL + '/' + id, JSON.stringify(study))
-            .map(response => response.json() as Study)
+        return this.http.put<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id, JSON.stringify(study))
+            .map(response => response)
             .catch(this.handleErrorService.handleError);
     }
 }

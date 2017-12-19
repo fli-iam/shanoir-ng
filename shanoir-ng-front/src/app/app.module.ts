@@ -1,7 +1,7 @@
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Http, HttpModule, RequestOptions, XHRBackend } from '@angular/http';
 import { MaterialModule } from '@angular/material';
 import { NgModule } from '@angular/core';
 
@@ -11,23 +11,23 @@ import { MyDatePickerModule } from 'mydatepicker';
 import { routing } from './app.routing';
 
 import { AccountEventsService } from './users/account/account-events.service';
-import { AccountRequestComponent} from "./users/account-request/account-request.component";
-import { AccountRequestInfoComponent} from "./users/account-request-info/account-request-info.component";
+import { AccountRequestComponent } from "./users/account-request/account-request.component";
+import { AccountRequestInfoComponent } from "./users/account-request-info/account-request-info.component";
 import { AcquisitionEquipmentComponent } from "./acquisition-equipments/acquisition-equipment/acquisition-equipment.component";
 import { AcquisitionEquipmentListComponent } from "./acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component";
 import { AcquisitionEquipmentPipe } from "./acquisition-equipments/shared/acquisition-equipment.pipe";
 import { AcquisitionEquipmentService } from "./acquisition-equipments/shared/acquisition-equipment.service";
-import { AppComponent }   from './app.component';
-import { AuthAdminGuard }   from './shared/roles/auth-admin-guard';
-import { AuthNotGuestGuard }   from './shared/roles/auth-not-guest-guard';
+import { AppComponent } from './app.component';
+import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
+import { AuthNotGuestGuard } from './shared/roles/auth-not-guest-guard';
 import { CenterComponent } from './centers/center/center.component';
-import { CenterListComponent }   from './centers/center-list/center-list.component';
+import { CenterListComponent } from './centers/center-list/center-list.component';
 import { CenterService } from './centers/shared/center.service';
 import { ConfirmDialogComponent } from "./shared/components/confirm-dialog/confirm-dialog.component";
 import { ConfirmDialogService } from "./shared/components/confirm-dialog/confirm-dialog.service";
-import { ConsoleComponent }   from './shared/console/console.line.component';
+import { ConsoleComponent } from './shared/console/console.line.component';
 import { ModalComponent } from "./shared/components/modal/modal.component";
-import { DropdownMenuComponent }   from './shared/components/dropdown-menu/dropdown-menu.component';
+import { DropdownMenuComponent } from './shared/components/dropdown-menu/dropdown-menu.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationPipe } from './examinations/shared/examination.pipe';
@@ -35,47 +35,44 @@ import { ExaminationService } from './examinations/shared/examination.service';
 import { ExaminationTreeComponent } from './examinations/tree/examination-tree.component';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { HandleErrorService } from './shared/utils/handle-error.service';
-import { HeaderComponent }   from './shared/header/header.component';
-import { HomeComponent }   from './home/home.component';
-import { KeycloakHttp } from "./shared/keycloak/keycloak.http";
+import { HeaderComponent } from './shared/header/header.component';
+import { HomeComponent } from './home/home.component';
+import { KeycloakHttpInterceptor } from "./shared/keycloak/keycloak.http.interceptor";
 import { KeycloakService } from "./shared/keycloak/keycloak.service";
-import { ImportComponent }   from './import/import.component';
+import { ImportComponent } from './import/import.component';
 import { ListComponent } from "./shared/components/list/list.component";
 import { ImportService } from './import/import.service';
-import { LoadingBarComponent }   from './shared/components/loading-bar/loading-bar.component';
+import { LoadingBarComponent } from './shared/components/loading-bar/loading-bar.component';
 import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
 import { ManufacturerModelPipe } from './acquisition-equipments/shared/manufacturer-model.pipe';
 import { ManufacturerModelService } from './acquisition-equipments/shared/manufacturer-model.service';
 import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
-import { MenuItemComponent }   from './shared/components/dropdown-menu/menu-item/menu-item.component';
-import { NavbarComponent }   from './shared/navbar/navbar.component';
+import { MenuItemComponent } from './shared/components/dropdown-menu/menu-item/menu-item.component';
+import { NavbarComponent } from './shared/navbar/navbar.component';
 import { RoleService } from './roles/role.service';
-import { StudyComponent }   from './studies/study/study.component';
-import { StudyListComponent }   from './studies/study-list/study-list.component';
+import { StudyComponent } from './studies/study/study.component';
+import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyService } from './studies/shared/study.service';
+import { SubjectExaminationPipe } from './examinations/shared/subject-examination.pipe';
 import { SubjectStudyPipe } from './subjects/shared/subject-study.pipe';
-import { StudyTreeComponent }   from './studies/tree/study-tree.component';
-import { TableComponent} from "./shared/components/table/table.component";
-import { TooltipComponent }   from './shared/components/tooltip/tooltip.component';
-import { TreeNodeComponent }   from './shared/components/tree/tree-node.component';
-import { UserComponent }   from './users/user/user.component';
-import { UserListComponent }   from './users/user-list/user-list.component';
+import { StudyTreeComponent } from './studies/tree/study-tree.component';
+import { TableComponent } from "./shared/components/table/table.component";
+import { TooltipComponent } from './shared/components/tooltip/tooltip.component';
+import { TreeNodeComponent } from './shared/components/tree/tree-node.component';
+import { UserComponent } from './users/user/user.component';
+import { UserListComponent } from './users/user-list/user-list.component';
 import { UserService } from './users/shared/user.service';
 
 import '../assets/css/common.css';
 import '../assets/css/modal.css';
-
-export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions, keycloakService: KeycloakService) {
-  return new KeycloakHttp(backend, defaultOptions, keycloakService);
-}
 
 @NgModule({
     imports: [
         BrowserAnimationsModule,
         CommonModule,
         FormsModule,
-        HttpModule,
+        HttpClientModule,
         MaterialModule,
         MyDatePickerModule,
         ReactiveFormsModule,
@@ -114,6 +111,7 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         StudyComponent,
         StudyListComponent,
         StudyTreeComponent,
+        SubjectExaminationPipe,
         SubjectStudyPipe,
         TableComponent,
         TreeNodeComponent,
@@ -140,11 +138,11 @@ export function httpFactory(backend: XHRBackend, defaultOptions: RequestOptions,
         StudyService,
         UserService,
         {
-            provide: Http,
-            useFactory: httpFactory,
-            deps: [XHRBackend, RequestOptions, KeycloakService]
+            provide: HTTP_INTERCEPTORS,
+            useClass: KeycloakHttpInterceptor,
+            multi: true
         }
     ],
-    bootstrap:    [ AppComponent ],
+    bootstrap: [AppComponent],
 })
 export class AppModule { }
