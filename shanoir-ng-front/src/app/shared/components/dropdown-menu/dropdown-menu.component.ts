@@ -13,14 +13,14 @@ export const animDur: number = 100;
     animations: [trigger('slideDown', [
         transition(
             ':enter', [
-                style({height: 0}),
-                animate(animDur+'ms ease-in-out', style({height: '*', 'padding-bottom': '*'}))
+                style({ height: 0 }),
+                animate(animDur + 'ms ease-in-out', style({ height: '*', 'padding-bottom': '*' }))
             ]
         ),
         transition(
             ':leave', [
-                style({height: '*'}),
-                animate(animDur+'ms ease-in-out', style({height: 0, 'padding-bottom': '0'}))
+                style({ height: '*' }),
+                animate(animDur + 'ms ease-in-out', style({ height: 0, 'padding-bottom': '0' }))
             ]
         )
     ])]
@@ -28,8 +28,8 @@ export const animDur: number = 100;
 export class DropdownMenuComponent {
 
     @Input() label: string;
-    @Input() link: string; 
-    @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>; 
+    @Input() link: string;
+    @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
     @Input() boolVar: boolean;
     @ViewChild('container') container: ElementRef;
     @Input() mode: "top" | "tree";
@@ -43,7 +43,7 @@ export class DropdownMenuComponent {
     private static documentListenerInit = false;
     private static openedMenus: Set<DropdownMenuComponent>; // every opened menu in the document (upgrade idea : named groups of menu)
 
-    constructor(public elementRef: ElementRef, private renderer: Renderer) { 
+    constructor(public elementRef: ElementRef, private renderer: Renderer) {
         this.mode = "top";
         DropdownMenuComponent.openedMenus = new Set<DropdownMenuComponent>();
 
@@ -53,13 +53,13 @@ export class DropdownMenuComponent {
         }
     }
 
-    ngAfterViewInit() { 
+    ngAfterViewInit() {
         this.itemMenus.forEach((itemMenu: MenuItemComponent) => {
             itemMenu.siblings = this.itemMenus;
             itemMenu.parent = this;
         });
 
-        let subscription = Observable.timer(0,100).subscribe (t=> {
+        let subscription = Observable.timer(0, 100).subscribe(t => {
             this.hasChildren = this.itemMenus.length > 0;
             this.opened = false;
             this.overflow = true;
@@ -67,11 +67,10 @@ export class DropdownMenuComponent {
             subscription.unsubscribe();
         });
 
-        this.renderer.setElementClass(this.elementRef.nativeElement, this.mode+"-mode", true);
+        this.renderer.setElementClass(this.elementRef.nativeElement, this.mode + "-mode", true);
     }
 
     public open(event: Event) {
-        //this.closeSiblings();
         if (DropdownMenuComponent.openedMenus.size > 0) {
             event.stopPropagation();
             DropdownMenuComponent.closeAll(event, () => {
@@ -83,16 +82,16 @@ export class DropdownMenuComponent {
     }
 
     private openAction() {
-        this.opened =  true;
+        this.opened = true;
         DropdownMenuComponent.openedMenus.add(this);
         setTimeout(() => this.overflow = false, animDur);
     }
 
-    public close(callback: () => void = () => {}) {
+    public close(callback: () => void = () => { }) {
         if (this.hasChildren && this.opened) {
             this.closeChildren(() => {
                 this.overflow = true;
-                this.opened =  false;
+                this.opened = false;
                 DropdownMenuComponent.openedMenus.delete(this);
                 setTimeout(callback, animDur);
             });
@@ -101,14 +100,14 @@ export class DropdownMenuComponent {
         }
     }
 
-    public closeChildren(callback: () => void = () => {}) {
+    public closeChildren(callback: () => void = () => { }) {
         let menusToClose: MenuItemComponent[] = [];
         this.itemMenus.forEach((itemMenu, index) => {
-            if (index!= 0 && itemMenu.hasChildren && itemMenu.opened) // REMOVE index != 0 WHEN BUG FIXED
+            if (index != 0 && itemMenu.hasChildren && itemMenu.opened) // REMOVE index != 0 WHEN BUG FIXED
                 menusToClose.push(itemMenu);
         });
         let subMenusRemaining: number = menusToClose.length;
-        if (subMenusRemaining == 0 ) {
+        if (subMenusRemaining == 0) {
             callback();
             return;
         } else {
@@ -131,7 +130,7 @@ export class DropdownMenuComponent {
     public click() {
         if (this.link != undefined || this.boolVar == undefined) {
             this.cascadingClose();
-        } 
+        }
     }
 
     public cascadingClose() {
@@ -139,7 +138,7 @@ export class DropdownMenuComponent {
             this.parent.cascadingClose();
     }
 
-    public static closeAll = (event: Event, callback: () => void = () => {}) => {
+    public static closeAll = (event: Event, callback: () => void = () => { }) => {
         let remains: number = DropdownMenuComponent.openedMenus.size;
         DropdownMenuComponent.openedMenus.forEach((menu) => {
             if (!menu.container.nativeElement.contains(event.target)) {
