@@ -2,6 +2,7 @@ import { Component, Input, ContentChildren, forwardRef, QueryList } from '@angul
 import { style, state, animate, transition, trigger } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 
+import { ImagesUrlUtil } from '../../../utils/images-url.util';
 
 export const animDur: number = 100;
 
@@ -39,6 +40,7 @@ export class MenuItemComponent {
     public hasChildren: boolean = true;
     public overflow: boolean = false;
     public init: boolean = false;
+    private notepadIconPath: string = ImagesUrlUtil.NOTEPAD_ICON_PATH;
 
     public closeAll: () => void;
 

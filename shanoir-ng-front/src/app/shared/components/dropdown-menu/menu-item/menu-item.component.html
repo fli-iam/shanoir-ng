@@ -7,13 +7,13 @@
         *ngIf="hasChildren"
         class="label"
         (click)="toggle()"
-        ><img src="{{icon}}" onerror="if (this.src != 'assets/images/icons/medical/notepad.png') this.src = 'assets/images/icons/medical/notepad.png';"/>{{label}}
+        ><img src="{{icon}}" onerror="if (this.src != folderIconPath) this.src = folderIconPath;"/>{{label}}
         <span class="arrow">&nbsp;&#9656;</span>
     </span>
     <span 
         *ngIf="!hasChildren && boolVar != undefined"
         class="label"
-        ><img src="{{icon}}" onerror="if (this.src != 'assets/images/icons/medical/notepad.png') this.src = 'assets/images/icons/medical/notepad.png';"/>{{label}}
+        ><img src="{{icon}}" onerror="if (this.src != folderIconPath) this.src = folderIconPath;"/>{{label}}
         <span class="arrow" *ngIf="boolVar != undefined && boolVar">&nbsp;&#x2713;</span>
         <span class="arrow" *ngIf="boolVar != undefined && !boolVar">&nbsp;&#x2717;</span>
     </span>
@@ -23,7 +23,7 @@
         [routerLinkActive]="link? 'active' : 'unactive'"
         class="label" 
         (click)="click()"
-        ><img src="{{icon}}" onerror="if (this.src != 'assets/images/icons/medical/notepad.png') this.src = 'assets/images/icons/medical/notepad.png';"/>{{label}}
+        ><img src="{{icon}}" onerror="if (this.src != folderIconPath) this.src = folderIconPath;"/>{{label}}
     </span>
     <!-- ul #contentWrapper class="sub-content" [class.hidden]="!opened" [@myAnimation]="opened" -->
     <ul #contentWrapper class="sub-content" *ngIf="opened" [@slideRight]="opened" [hidden]="!init">
