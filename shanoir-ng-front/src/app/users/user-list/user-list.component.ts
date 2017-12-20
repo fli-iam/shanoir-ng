@@ -2,6 +2,7 @@ import { Component, ViewChild, ViewContainerRef } from '@angular/core';
 
 import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { TableComponent } from "../../shared/components/table/table.component";
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
@@ -68,13 +69,13 @@ export class UserListComponent {
             {headerName: "Last Login", field: "lastLogin", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.lastLogin);
             }},
-            {headerName: "", type: "button", img: "assets/images/icons/edit.png", target : "/user", getParams: function(item: any): Object {
+            {headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target : "/user", getParams: function(item: any): Object {
                 return {id: item.id};
             }},
-            {headerName: "", type: "button", img: "assets/images/icons/garbage.png", action: this.openDeleteUserConfirmDialog}
+            {headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteUserConfirmDialog}
         ];
         this.customActionDefs = [
-            {title: "new user", img: "assets/images/icons/add.png", target: "../user"},
+            {title: "new user", img: ImagesUrlUtil.ADD_ICON_PATH, target: "../user"},
         ];
         this.rowClickAction = {target : "/user", getParams: function(item: any): Object {
                 return {id: item.id};

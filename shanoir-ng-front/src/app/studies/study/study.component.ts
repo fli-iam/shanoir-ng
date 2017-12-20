@@ -14,6 +14,7 @@ import { Study } from '../shared/study.model';
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyService } from '../shared/study.service';
 import { StudyStatus } from "../shared/study-status.enum";
+import { Timepoint } from '../shared/timepoint.model';
 
 @Component({
     selector: 'study-detail',
@@ -28,6 +29,7 @@ export class StudyComponent implements OnInit {
     public canModify: Boolean = false;
     private centers: Center[];
     private deleteIconPath: string = ImagesUrlUtil.DELETE_ICON_PATH;
+    private editIconPath: string = ImagesUrlUtil.EDIT_ICON_PATH;
     private isEndDateValid: boolean = true;
     private isNameUnique: Boolean = true;
     private isStartDateValid: boolean = true;
@@ -113,6 +115,10 @@ export class StudyComponent implements OnInit {
 
     edit(): void {
         this.router.navigate(['/study'], { queryParams: { id: this.studyId, mode: "edit" } });
+    }
+
+    editTimepoint(timepoint: Timepoint): void {
+        // TODO
     }
 
     enableAddIcon(): boolean {
@@ -214,6 +220,7 @@ export class StudyComponent implements OnInit {
         this.study.clinical = false;
         this.study.monoCenter = true;
         this.study.studyCenterList = [];
+        this.study.timepoints = [];
         this.study.withExamination = true;
     }
 
@@ -281,6 +288,13 @@ export class StudyComponent implements OnInit {
 
     removeCenterFromStudy(studyCenterId: number): void {
         this.study.studyCenterList = this.study.studyCenterList.filter(item => item.id !== studyCenterId);
+    }
+
+    removeTimepoint(timepoint: Timepoint): void {
+        const index: number = this.study.timepoints.indexOf(timepoint);
+        if (index !== -1) {
+            this.study.timepoints.splice(index, 1);
+        }
     }
 
     setDateFromDatePicker(): void {

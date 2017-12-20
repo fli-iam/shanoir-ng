@@ -4,6 +4,7 @@ import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
 import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { TableComponent } from "../../shared/components/table/table.component";
@@ -59,21 +60,21 @@ export class CenterListComponent {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push(
                 {
-                    headerName: "", type: "button", img: "assets/images/icons/edit.png", target: "/center", getParams: function (item: any): Object {
+                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/center", getParams: function (item: any): Object {
                         return { id: item.id, mode: "edit" };
                     }
                 });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.columnDefs.push({
-                headerName: "", type: "button", img: "assets/images/icons/view.png", target: "/center", getParams: function (item: any): Object {
+                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/center", getParams: function (item: any): Object {
                     return { id: item.id, mode: "view" };
                 }
             });
         }
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push({
-                headerName: "", type: "button", img: "assets/images/icons/medical/cardiogram-1.png", tip: "Add acq. equip.",
+                headerName: "", type: "button", img: ImagesUrlUtil.CARDIOGRAM_ICON_PATH, tip: "Add acq. equip.",
                 action: this.openCreateAcqEquip
             });
         }
@@ -81,7 +82,7 @@ export class CenterListComponent {
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new center", img: "assets/images/icons/add.png", target: "/center", getParams: function (item: any): Object {
+                title: "new center", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/center", getParams: function (item: any): Object {
                     return { mode: "create" };
                 }
             });

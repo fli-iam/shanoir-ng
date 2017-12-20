@@ -3,6 +3,7 @@ import { Component, ViewChild, ViewContainerRef } from '@angular/core';
 import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { StudyStatus } from '../shared/study-status.enum';
@@ -74,17 +75,17 @@ export class StudyListComponent {
                 headerName: "Examinations", field: "nbExaminations", type: "number"
             },
             {
-                headerName: "", type: "button", img: "assets/images/icons/edit.png", target: "/study", getParams: function (item: any): Object {
+                headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/study", getParams: function (item: any): Object {
                     return { id: item.id };
                 }
             },
-            { headerName: "", type: "button", img: "assets/images/icons/garbage.png", action: this.openDeleteStudyConfirmDialog }
+            { headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteStudyConfirmDialog }
         ];
 
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new study", img: "assets/images/icons/add.png", target: "/study", getParams: function (item: any): Object {
+                title: "new study", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/study", getParams: function (item: any): Object {
                     return { mode: "create" };
                 }
             });

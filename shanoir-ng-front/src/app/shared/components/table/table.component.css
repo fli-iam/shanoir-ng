@@ -45,9 +45,7 @@
 		.shanoir-table tr:hover td:not(.loading):not(.empty) { height: 20px; background-color: var(--color-b-light); cursor: pointer; }
 	.shanoir-table td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
 		.shanoir-table td + td { border-left: 1px dotted var(--grey); }
-		.shanoir-table td.bool { text-align: center; font-weight: bold; }
-			.shanoir-table td.bool .bool-true { color: green; }
-			.shanoir-table td.bool .bool-false { color: darkred; }
+		.shanoir-table td.bool { text-align: center; }
 		.shanoir-table td.cell-date { text-align: right; }
 		.shanoir-table td.cell-number { text-align: right; }
 		.shanoir-table td.cell-nofield { text-align: center; }

@@ -4,6 +4,7 @@ import { StudyCenter } from "./study-center.model";
 import { StudyStatus } from "./study-status.enum";
 import { StudyType } from "./study-type.enum";
 import { SubjectStudy } from "../../subjects/shared/subject-study.model";
+import { Timepoint } from "./timepoint.model";
 
 export class Study {
     clinical: boolean;
@@ -23,6 +24,7 @@ export class Study {
     studyStatus: StudyStatus;
     studyType: StudyType;
     subjects: SubjectStudy[];
+    timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;
 }

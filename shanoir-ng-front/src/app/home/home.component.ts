@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
+import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 
 @Component({
     selector: 'home',
@@ -9,11 +10,7 @@ import { KeycloakService } from '../shared/keycloak/keycloak.service';
 })
 
 export class HomeComponent {
-    shanoirBigLogoUrl: string;
-
-    constructor() {
-        this.shanoirBigLogoUrl = 'assets/images/logo.shanoir.black.png';
-    }
+    shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
     
     isAuthenticated(): boolean {
         return KeycloakService.auth.loggedIn;

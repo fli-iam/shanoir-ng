@@ -127,6 +127,9 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
 .error-message label { color: var(--color-error); }
 .error-message li { color: var(--color-error); }
 
+.bool-true { color: green; font-weight: bold }
+.bool-false { color: darkred; font-weight: bold }
+
 .shanoir-table table { border-collapse: collapse; }
   .shanoir-table table td, .shanoir-table table th { border: 1px solid gray; }
 

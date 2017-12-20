@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ExaminationService } from '../../examinations/shared/examination.service';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { Study } from '../shared/study.model';
 import { StudyUserType } from '../shared/study-user-type.enum';
 import { Subject } from '../../subjects/shared/subject.model';
@@ -17,8 +18,17 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 
 export class StudyTreeComponent {
 
+    private brainIconPath: string = ImagesUrlUtil.BRAIN_ICON_PATH;
+    private folderIconPath: string = ImagesUrlUtil.FOLDER_12_ICON_PATH;
+    private homeIconPath: string = ImagesUrlUtil.HOME_ICON_PATH;
+    private listIconPath: string = ImagesUrlUtil.LIST_ICON_PATH;
     @Input() study: Study;
+    private studyCardIconPath: string = ImagesUrlUtil.STUDY_CARD_ICON_PATH;
     @Output() subjectUpdatedEvent = new EventEmitter();
+    private userIconPath: string = ImagesUrlUtil.USER_ICON_PATH;
+    private usersIconPath: string = ImagesUrlUtil.USERS_ICON_PATH;
+    private xRay1IconPath: string = ImagesUrlUtil.X_RAY_1_ICON_PATH;
+    private xRay2IconPath: string = ImagesUrlUtil.X_RAY_2_ICON_PATH;
 
     constructor(private examinationService: ExaminationService, private router: Router) {
     }

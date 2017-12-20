@@ -6,6 +6,7 @@ import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/c
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
 import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { TableComponent } from "../../shared/components/table/table.component";
 
 @Component({
@@ -88,14 +89,14 @@ export class AcquisitionEquipmentListComponent {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push(
                 {
-                    headerName: "", type: "button", img: "assets/images/icons/edit.png", target: "/acquisition-equipment", getParams: function (item: any): Object {
+                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/acquisition-equipment", getParams: function (item: any): Object {
                         return { id: item.id, mode: "edit" };
                     }
                 });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.columnDefs.push({
-                headerName: "", type: "button", img: "assets/images/icons/view.png", target: "/acquisition-equipment", getParams: function (item: any): Object {
+                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/acquisition-equipment", getParams: function (item: any): Object {
                     return { id: item.id, mode: "view" };
                 }
             });
@@ -104,7 +105,7 @@ export class AcquisitionEquipmentListComponent {
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new acq. equip.", img: "assets/images/icons/add.png", target: "/acquisition-equipment", getParams: function (item: any): Object {
+                title: "new acq. equip.", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/acquisition-equipment", getParams: function (item: any): Object {
                     return { mode: "create" };
                 }
             });

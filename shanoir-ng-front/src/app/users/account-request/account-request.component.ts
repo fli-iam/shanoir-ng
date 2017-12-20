@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+
 const GUEST_ROLE_ID: number = 2;
 
 @Component({
@@ -9,13 +11,9 @@ const GUEST_ROLE_ID: number = 2;
 })
 
 export class AccountRequestComponent {
-    public shanoirLogoUrl: string;
+    public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
     public requestSent: boolean = false;
     public errorOnRequest: boolean = false;
-
-    constructor() {
-        this.shanoirLogoUrl = 'assets/images/logo.shanoir.white.png';
-    }
 
     closeAccountRequest(res: any) {
         if (!res) {
