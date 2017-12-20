@@ -1,5 +1,6 @@
 package org.shanoir.ng.datasetacquisition;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,6 +57,7 @@ public class DatasetAcquisitionMapperTest {
 	private DatasetAcquisition createDatasetAcquisition() {
 		final DatasetAcquisition datasetAcquisition = new DatasetAcquisition();
 		datasetAcquisition.setId(DATASET_ACQUISITION_ID);
+		datasetAcquisition.setDatasets(new ArrayList<>());
 		return datasetAcquisition;
 	}
 
