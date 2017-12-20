@@ -1,3 +1,4 @@
+const path = require('path');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -38,14 +39,14 @@ module.exports = {
                 }),
                 include: [helpers.root('src', 'assets')]
             },
-            
+
             /**
              * File loader for supporting images, for example, in CSS files.
              */
             {
                 test: /\.(jpg|png|gif)$/,
                 loader: 'file-loader'
-           }
+            }
         ]
     },
 
@@ -53,8 +54,8 @@ module.exports = {
         // Workaround for angular/angular#11580
         new webpack.ContextReplacementPlugin(
             // The (\\|\/) piece accounts for path separators in *nix and Windows
-            /angular(\\|\/)core(\\|\/)@angular/,
-            helpers.root('./src'), // location of your src
+            /(.+)?angular(\\|\/)core(.+)?/,
+            path.join(__dirname, 'src'), // location of your src
             {} // a map of your routes
         ),
 

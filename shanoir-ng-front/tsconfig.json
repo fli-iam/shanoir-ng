@@ -4,19 +4,15 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "lib": [
-            "es2015",
+            "es2017",
             "dom"
         ],
-        "module": "commonjs",
         "moduleResolution": "node",
         "noImplicitAny": false,
         "removeComments": false,
         "sourceMap": true,
         "suppressImplicitAnyIndexErrors": true,
-        "target": "es5"
-    },
-    "exclude": [
-        "aot",
-        "node_modules"
-    ]
+        "target": "es5",
+        "typeRoots": ["./node_modules/@types"]
+    }
 }

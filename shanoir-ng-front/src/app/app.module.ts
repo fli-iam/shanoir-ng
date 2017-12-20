@@ -2,7 +2,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MaterialModule } from '@angular/material';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { NgModule } from '@angular/core';
 
 import { Autosize } from 'angular2-autosize/angular2-autosize';
@@ -73,7 +73,7 @@ import '../assets/css/modal.css';
         CommonModule,
         FormsModule,
         HttpClientModule,
-        MaterialModule,
+        MatDialogModule,
         MyDatePickerModule,
         ReactiveFormsModule,
         routing
@@ -134,6 +134,7 @@ import '../assets/css/modal.css';
         KeycloakService,
         ManufacturerModelService,
         ManufacturerService,
+        MatDialog,
         RoleService,
         StudyService,
         UserService,

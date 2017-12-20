@@ -1,5 +1,5 @@
 import { Injectable, ViewContainerRef } from '@angular/core';
-import { MdDialogRef, MdDialog, MdDialogConfig } from '@angular/material';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 
 import { Observable } from 'rxjs/Rx';
 
@@ -8,11 +8,11 @@ import { ConfirmDialogComponent } from './confirm-dialog.component';
 @Injectable()
 export class ConfirmDialogService {
 
-    constructor(private dialog: MdDialog) { }
+    constructor(private dialog: MatDialog) { }
 
     public confirm(title: string, message: string, viewContainerRef: ViewContainerRef): Observable<boolean> {
-        let dialogRef: MdDialogRef<ConfirmDialogComponent>;
-        let config = new MdDialogConfig();
+        let dialogRef: MatDialogRef<ConfirmDialogComponent>;
+        let config = new MatDialogConfig();
         config.viewContainerRef = viewContainerRef;
 
         dialogRef = this.dialog.open(ConfirmDialogComponent, config);

@@ -1,5 +1,4 @@
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
-import { MdDialog, MdDialogConfig, MdDialogRef } from '@angular/material';
 
 import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";

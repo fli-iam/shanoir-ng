@@ -1,5 +1,4 @@
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
-import { MdDialog, MdDialogConfig, MdDialogRef } from '@angular/material';
 
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
