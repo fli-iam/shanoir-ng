@@ -84,7 +84,7 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form .required-label:after{ content:" *"; }
   form .form-validation-alert { color: var(--color-error); }
   form .right-col label { text-align: right; display: block; }
-  form .right-col button { padding: 0 5px; margin: 0 0 0 5px; border: 1px solid var(--grey); height: 21px; }
+  form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--greyer); height: 18px; }
     form .right-col button:active { background-color: var(--color-b-light); }
     form .right-col button img { height: 12px; vertical-align: sub; margin-right: 5px; opacity: 0.5; }
     form .right-col button:hover:enabled img { opacity: 1; }
