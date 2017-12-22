@@ -13,7 +13,7 @@ import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueValidator;
@@ -103,7 +103,7 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 		try {
 			manufacturerModelService.update(manufacturerModel);
 		} catch (final ShanoirStudiesException e) {
-			if (ErrorModelCode.MANUFACTURER_MODEL_NOT_FOUND.equals(e.getErrorCode())) {
+			if (StudiesErrorModelCode.MANUFACTURER_MODEL_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			throw new RestServiceException(

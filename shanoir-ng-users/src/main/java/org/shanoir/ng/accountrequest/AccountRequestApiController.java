@@ -4,9 +4,10 @@ import java.util.Date;
 
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.error.UsersFieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.UsersErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
 import org.shanoir.ng.user.User;
@@ -36,7 +37,7 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 		 * Tell Spring to remove the hibernante validation error on username or
 		 * role blank for user account request
 		 */
-		final FieldErrorMap hibernateErrors = FieldErrorMap.fieldErrorMapIgnoreUsernameAndRoleBlank(result);
+		final FieldErrorMap hibernateErrors = UsersFieldErrorMap.fieldErrorMapIgnoreUsernameAndRoleBlank(result);
 		// Check unique constrainte
 		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
 		/* Merge errors. */
@@ -56,7 +57,7 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 		try {
 			getUserService().save(user);
 		} catch (final ShanoirUsersException e) {
-			if (ErrorModelCode.PASSWORD_NOT_CORRECT == e.getErrorCode()) {
+			if (UsersErrorModelCode.PASSWORD_NOT_CORRECT == e.getErrorCode()) {
 				throw new RestServiceException(new ErrorModel(422, "Password does not match policy", null));
 			}
 			throw new RestServiceException(new ErrorModel(422, "Bad arguments", null));

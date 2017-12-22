@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirSubjectException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -58,7 +58,7 @@ public class SubjectServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirSubjectException {
+	public void deleteByIdTest() throws ShanoirStudiesException {
 		subjectService.deleteById(SUBJECT_ID);
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -83,19 +83,19 @@ public class SubjectServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirSubjectException {
+	public void saveTest() throws ShanoirStudiesException {
 		subjectService.save(createSubjectTosave());
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
 
 	@Test
-	public void saveJsonTest() throws ShanoirSubjectException {
+	public void saveJsonTest() throws ShanoirStudiesException {
 		subjectService.save(createJsonSubjectTosave());
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirSubjectException {
+	public void updateTest() throws ShanoirStudiesException {
 		final Subject updatedSubject = subjectService.update(createSubjectToUpdate());
 		Assert.assertNotNull(updatedSubject);
 		Assert.assertTrue(UPDATED_SUBJECT_DATA.equals(updatedSubject.getName()));
@@ -104,7 +104,7 @@ public class SubjectServiceTest {
 	}
 
 	@Test
-	public void updateFromShanoirOldTest() throws ShanoirSubjectException {
+	public void updateFromShanoirOldTest() throws ShanoirStudiesException {
 		subjectService.updateFromShanoirOld(createSubjectToUpdate());
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).findOne(Mockito.anyLong());

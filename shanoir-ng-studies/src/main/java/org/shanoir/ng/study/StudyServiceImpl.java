@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.dto.SimpleStudyCardDTO;
@@ -73,7 +73,7 @@ public class StudyServiceImpl implements StudyService {
 		final Study study = studyRepository.findOne(id);
 		if (study == null) {
 			LOG.error("Study with id " + id + " not found");
-			throw new ShanoirStudiesException(ErrorModelCode.STUDY_NOT_FOUND);
+			throw new ShanoirStudiesException(StudiesErrorModelCode.STUDY_NOT_FOUND);
 		}
 		for (final StudyUser studyUser : study.getStudyUserList()) {
 			if (userId.equals(studyUser.getUserId())
@@ -83,7 +83,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		LOG.error("User with id " + userId + " can't delete study with id " + id);
-		throw new ShanoirStudiesException(ErrorModelCode.NO_RIGHT_FOR_ACTION);
+		throw new ShanoirStudiesException(StudiesErrorModelCode.NO_RIGHT_FOR_ACTION);
 	}
 
 	@Override
@@ -93,8 +93,8 @@ public class StudyServiceImpl implements StudyService {
 			try {
 				studyRepository.delete(study);
 			} catch (Exception e) {
-				ShanoirStudiesException.logAndThrow(LOG,
-						"Error while deleting study from Shanoir Old: " + e.getMessage());
+				LOG.error("Error while deleting study from Shanoir Old", e);
+				throw new ShanoirStudiesException("Error while deleting study from Shanoir Old");
 			}
 		}
 	}
@@ -124,7 +124,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		LOG.error("User with id " + userId + " can't see study with id " + id);
-		throw new ShanoirStudiesException(ErrorModelCode.NO_RIGHT_FOR_ACTION);
+		throw new ShanoirStudiesException(StudiesErrorModelCode.NO_RIGHT_FOR_ACTION);
 	}
 
 	@Override
@@ -159,7 +159,7 @@ public class StudyServiceImpl implements StudyService {
 					});
 		} catch (RestClientException e) {
 			LOG.error("Error on study card microservice request", e);
-			throw new ShanoirStudiesException("Error while getting study card list", ErrorModelCode.SC_MS_COMM_FAILURE);
+			throw new ShanoirStudiesException("Error while getting study card list", StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
 
 		List<SimpleStudyCardDTO> studyCards = null;
@@ -167,7 +167,7 @@ public class StudyServiceImpl implements StudyService {
 				|| HttpStatus.NO_CONTENT.equals(studyCardResponse.getStatusCode())) {
 			studyCards = studyCardResponse.getBody();
 		} else {
-			throw new ShanoirStudiesException(ErrorModelCode.SC_MS_COMM_FAILURE);
+			throw new ShanoirStudiesException(StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
 		final Map<Long, SimpleStudyCardDTO> studyCardsmap = new HashMap<>();
 		for (final SimpleStudyCardDTO simpleStudyCard : studyCards) {
@@ -243,7 +243,7 @@ public class StudyServiceImpl implements StudyService {
 			final Study study = studyRepository.findOne(studyStudyCardDTO.getNewStudyId());
 			if (study == null) {
 				LOG.error("Study with id " + studyStudyCardDTO.getNewStudyId() + " not found");
-				throw new ShanoirStudiesException(ErrorModelCode.STUDY_NOT_FOUND);
+				throw new ShanoirStudiesException(StudiesErrorModelCode.STUDY_NOT_FOUND);
 			}
 			study.getStudyCardIds().add(studyStudyCardDTO.getStudyCardId());
 		}
@@ -254,7 +254,7 @@ public class StudyServiceImpl implements StudyService {
 			final Study study = studyRepository.findOne(studyStudyCardDTO.getOldStudyId());
 			if (study == null) {
 				LOG.error("Study with id " + studyStudyCardDTO.getOldStudyId() + " not found");
-				throw new ShanoirStudiesException(ErrorModelCode.STUDY_NOT_FOUND);
+				throw new ShanoirStudiesException(StudiesErrorModelCode.STUDY_NOT_FOUND);
 			}
 			study.getStudyCardIds().remove(studyStudyCardDTO.getOldStudyId());
 		}
@@ -267,8 +267,8 @@ public class StudyServiceImpl implements StudyService {
 			try {
 				studyRepository.save(study);
 			} catch (Exception e) {
-				ShanoirStudiesException.logAndThrow(LOG,
-						"Error while creating new study from Shanoir Old: " + e.getMessage());
+				LOG.error("Error while creating study from Shanoir Old", e);
+				throw new ShanoirStudiesException("Error while creating study from Shanoir Old");
 			}
 		} else {
 			final Study studyDb = studyRepository.findOne(study.getId());
@@ -278,8 +278,8 @@ public class StudyServiceImpl implements StudyService {
 							+ ") from shanoir-old");
 					studyRepository.save(study);
 				} catch (Exception e) {
-					ShanoirStudiesException.logAndThrow(LOG,
-							"Error while updating study from Shanoir Old: " + e.getMessage());
+					LOG.error("Error while updating study from Shanoir Old", e);
+					throw new ShanoirStudiesException("Error while updating study from Shanoir Old");
 				}
 			} else {
 				LOG.warn("Import new study with name " + study.getName() + "  (id: " + study.getId()

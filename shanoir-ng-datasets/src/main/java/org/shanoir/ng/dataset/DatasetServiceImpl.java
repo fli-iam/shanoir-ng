@@ -3,7 +3,7 @@ package org.shanoir.ng.dataset;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.exception.ShanoirDatasetException;
+import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -36,7 +36,7 @@ public class DatasetServiceImpl implements DatasetService {
 	private DatasetRepository datasetRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirDatasetException {
+	public void deleteById(final Long id) throws ShanoirDatasetsException {
 		datasetRepository.delete(id);
 	}
 
@@ -51,32 +51,34 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public Dataset save(final Dataset dataset) throws ShanoirDatasetException {
+	public Dataset save(final Dataset dataset) throws ShanoirDatasetsException {
 		Dataset savedDataset = null;
 		try {
 			savedDataset = datasetRepository.save(dataset);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirDatasetException.logAndThrow(LOG, "Error while creating template: " + dive.getMessage());
+			LOG.error("Error while creating dataset", dive);
+			throw new ShanoirDatasetsException("Error while creating dataset");
 		}
 		updateShanoirOld(savedDataset);
 		return savedDataset;
 	}
 
 	@Override
-	public Dataset update(final Dataset dataset) throws ShanoirDatasetException {
+	public Dataset update(final Dataset dataset) throws ShanoirDatasetsException {
 		final Dataset datasetDb = datasetRepository.findOne(dataset.getId());
 		updateDatasetValues(datasetDb, dataset);
 		try {
 			datasetRepository.save(datasetDb);
 		} catch (Exception e) {
-			ShanoirDatasetException.logAndThrow(LOG, "Error while updating dataset: " + e.getMessage());
+			LOG.error("Error while updating dataset", e);
+			throw new ShanoirDatasetsException("Error while updating dataset");
 		}
 		updateShanoirOld(datasetDb);
 		return datasetDb;
 	}
 
 	@Override
-	public void updateFromShanoirOld(final Dataset dataset) throws ShanoirDatasetException {
+	public void updateFromShanoirOld(final Dataset dataset) throws ShanoirDatasetsException {
 		if (dataset.getId() == null) {
 			throw new IllegalArgumentException("Template id cannot be null");
 		} else {
@@ -86,8 +88,8 @@ public class DatasetServiceImpl implements DatasetService {
 //					datasetDb.setData(dataset.getData());
 					datasetRepository.save(datasetDb);
 				} catch (Exception e) {
-					ShanoirDatasetException.logAndThrow(LOG,
-							"Error while updating dataset from Shanoir Old: " + e.getMessage());
+					LOG.error("Error while updating dataset from Shanoir Old", e);
+					throw new ShanoirDatasetsException("Error while updating dataset from Shanoir Old");
 				}
 			}
 		}

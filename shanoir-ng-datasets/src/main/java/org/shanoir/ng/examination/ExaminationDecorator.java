@@ -3,8 +3,7 @@ package org.shanoir.ng.examination;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.StudySubjectCenterNamesDTO;
-import org.shanoir.ng.shared.exception.ShanoirDatasetException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -61,7 +60,7 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 		HttpEntity<StudyIdsDTO> entity = null;
 		try {
 			entity = new HttpEntity<>(studyIds, KeycloakUtil.getKeycloakHeader());
-		} catch (ShanoirDatasetException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error on keycloak request - " + e.getMessage());
 		}
 

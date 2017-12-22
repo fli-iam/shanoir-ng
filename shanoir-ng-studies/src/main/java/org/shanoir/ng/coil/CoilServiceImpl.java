@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class CoilServiceImpl implements CoilService {
 		final Coil coil = coilRepository.findOne(id);
 		if (coil == null) {
 			LOG.error("Coil with id " + id + " not found");
-			throw new ShanoirStudiesException(ErrorModelCode.COIL_NOT_FOUND);
+			throw new ShanoirStudiesException(StudiesErrorModelCode.COIL_NOT_FOUND);
 		}
 		coilRepository.delete(id);
 		deleteCoilOnShanoirOld(id);
@@ -70,7 +70,8 @@ public class CoilServiceImpl implements CoilService {
 		try {
 			savedCoil = coilRepository.save(center);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while creating coil: " + dive.getMessage());
+			LOG.error("Error while creating coil", dive);
+			throw new ShanoirStudiesException("Error while creating coil");
 		}
 		updateShanoirOld(savedCoil);
 		return savedCoil;
@@ -83,7 +84,8 @@ public class CoilServiceImpl implements CoilService {
 		try {
 			coilRepository.save(coilDb);
 		} catch (Exception e) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while updating coil: " + e.getMessage());
+			LOG.error("Error while updating coil", e);
+			throw new ShanoirStudiesException("Error while updating coil");
 		}
 		updateShanoirOld(coilDb);
 		return coilDb;
@@ -99,8 +101,8 @@ public class CoilServiceImpl implements CoilService {
 				try {
 					coilRepository.save(centerDb);
 				} catch (Exception e) {
-					ShanoirStudiesException.logAndThrow(LOG,
-							"Error while updating coil from Shanoir Old: " + e.getMessage());
+					LOG.error("Error while updating coil from Shanoir Old", e);
+					throw new ShanoirStudiesException("Error while updating coil from Shanoir Old");
 				}
 			}
 		}

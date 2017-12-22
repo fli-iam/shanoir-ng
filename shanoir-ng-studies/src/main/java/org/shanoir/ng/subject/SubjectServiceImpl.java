@@ -8,9 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
-import org.shanoir.ng.shared.exception.ShanoirSubjectException;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.StudyRepository;
 import org.shanoir.ng.subjectstudy.SubjectStudy;
@@ -69,7 +68,7 @@ public class SubjectServiceImpl implements SubjectService {
 	private MicroserviceRequestsService microservicesRequestsService;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirSubjectException {
+	public void deleteById(final Long id) throws ShanoirStudiesException {
 		subjectRepository.delete(id);
 	}
 
@@ -94,19 +93,20 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
-	public Subject save(final Subject subject) throws ShanoirSubjectException {
+	public Subject save(final Subject subject) throws ShanoirStudiesException {
 		Subject savedSubject = null;
 		try {
 			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirSubjectException.logAndThrow(LOG, "Error while creating Subject: " + dive.getMessage());
+			LOG.error("Error while creating subject", dive);
+			throw new ShanoirStudiesException("Error while creating subject");
 		}
 		// updateShanoirOld(savedSubject);
 		return savedSubject;
 	}
 
 	@Override
-	public Subject saveForOFSEP(final Subject subject, final Long studyCardId) throws ShanoirSubjectException {
+	public Subject saveForOFSEP(final Subject subject, final Long studyCardId) throws ShanoirStudiesException {
 		Subject savedSubject = null;
 		String commonName = createOfsepCommonName(studyCardId);
 		if (commonName == null || commonName.equals(""))
@@ -116,14 +116,15 @@ public class SubjectServiceImpl implements SubjectService {
 		try {
 			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirSubjectException.logAndThrow(LOG, "Error while creating Subject: " + dive.getMessage());
+			LOG.error("Error while creating subject", dive);
+			throw new ShanoirStudiesException("Error while creating subject");
 		}
 		// updateShanoirOld(savedSubject);
 		return savedSubject;
 	}
 
 	@Override
-	public Subject saveFromJson(final File jsonFile) throws ShanoirSubjectException {
+	public Subject saveFromJson(final File jsonFile) throws ShanoirStudiesException {
 
 		ObjectMapper mapper = new ObjectMapper();
 		Subject subject = new Subject();
@@ -144,27 +145,29 @@ public class SubjectServiceImpl implements SubjectService {
 		try {
 			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirSubjectException.logAndThrow(LOG, "Error while creating Subject: " + dive.getMessage());
+			LOG.error("Error while creating subject", dive);
+			throw new ShanoirStudiesException("Error while creating subject");
 		}
 		updateShanoirOld(savedSubject);
 		return savedSubject;
 	}
 
 	@Override
-	public Subject update(final Subject subject) throws ShanoirSubjectException {
+	public Subject update(final Subject subject) throws ShanoirStudiesException {
 		final Subject subjectDb = subjectRepository.findOne(subject.getId());
 		updateSubjectValues(subjectDb, subject);
 		try {
 			subjectRepository.save(subjectDb);
 		} catch (Exception e) {
-			ShanoirSubjectException.logAndThrow(LOG, "Error while updating Subject: " + e.getMessage());
+			LOG.error("Error while updating subject", e);
+			throw new ShanoirStudiesException("Error while updating subject");
 		}
 		updateShanoirOld(subjectDb);
 		return subjectDb;
 	}
 
 	@Override
-	public void updateFromShanoirOld(final Subject subject) throws ShanoirSubjectException {
+	public void updateFromShanoirOld(final Subject subject) throws ShanoirStudiesException {
 		if (subject.getId() == null) {
 			throw new IllegalArgumentException("Subject id cannot be null");
 		} else {
@@ -174,8 +177,8 @@ public class SubjectServiceImpl implements SubjectService {
 					subjectDb.setName(subject.getName());
 					subjectRepository.save(subjectDb);
 				} catch (Exception e) {
-					ShanoirSubjectException.logAndThrow(LOG,
-							"Error while updating Subject from Shanoir Old: " + e.getMessage());
+					LOG.error("Error while updating subject from Shanoir Old", e);
+					throw new ShanoirStudiesException("Error while updating subject from Shanoir Old");
 				}
 			}
 		}
@@ -294,7 +297,7 @@ public class SubjectServiceImpl implements SubjectService {
 					+ MicroserviceRequestsService.CENTERID + "/" + studyCardId, HttpMethod.GET, entity, Long.class);
 		} catch (RestClientException e) {
 			LOG.error("Error on study card microservice request", e);
-			throw new ShanoirStudiesException("Error while getting study card list", ErrorModelCode.SC_MS_COMM_FAILURE);
+			throw new ShanoirStudiesException("Error while getting study card list", StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
 
 		Long centerId = null;
@@ -302,7 +305,7 @@ public class SubjectServiceImpl implements SubjectService {
 				|| HttpStatus.NO_CONTENT.equals(centerIdResponse.getStatusCode())) {
 			centerId = centerIdResponse.getBody();
 		} else {
-			throw new ShanoirStudiesException(ErrorModelCode.SC_MS_COMM_FAILURE);
+			throw new ShanoirStudiesException(StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
 
 		return centerId;

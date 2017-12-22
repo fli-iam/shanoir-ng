@@ -67,8 +67,9 @@ public class TemplateServiceImpl implements TemplateService {
 		Template savedTemplate = null;
 		try {
 			savedTemplate = templateRepository.save(template);
-		} catch (DataIntegrityViolationException dive) {
-			ShanoirTemplateException.logAndThrow(LOG, "Error while creating template: " + dive.getMessage());
+		} catch (DataIntegrityViolationException e) {
+			LOG.error("Error while creating template", e);
+			throw new ShanoirTemplateException("Error while creating template");
 		}
 		updateShanoirOld(savedTemplate);
 		return savedTemplate;
@@ -81,7 +82,8 @@ public class TemplateServiceImpl implements TemplateService {
 		try {
 			templateRepository.save(templateDb);
 		} catch (Exception e) {
-			ShanoirTemplateException.logAndThrow(LOG, "Error while updating template: " + e.getMessage());
+			LOG.error("Error while updating template", e);
+			throw new ShanoirTemplateException("Error while updating template");
 		}
 		updateShanoirOld(templateDb);
 		return templateDb;
@@ -98,8 +100,8 @@ public class TemplateServiceImpl implements TemplateService {
 					templateDb.setData(template.getData());
 					templateRepository.save(templateDb);
 				} catch (Exception e) {
-					ShanoirTemplateException.logAndThrow(LOG,
-							"Error while updating template from Shanoir Old: " + e.getMessage());
+					LOG.error("Error while updating template from Shanoir Old", e);
+					throw new ShanoirTemplateException("Error while updating template from Shanoir Old");
 				}
 			}
 		}

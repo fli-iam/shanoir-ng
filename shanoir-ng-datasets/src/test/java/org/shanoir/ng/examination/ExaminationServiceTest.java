@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.ShanoirDatasetException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -58,14 +58,14 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirDatasetException {
+	public void deleteByIdTest() throws ShanoirException {
 		examinationService.deleteById(EXAMINATION_ID);
 
 		Mockito.verify(examinationRepository, Mockito.times(1)).delete(Mockito.anyLong());
 	}
 
 	@Test
-	public void findAllTest() throws ShanoirDatasetException {
+	public void findAllTest() throws ShanoirException {
 		IdNameDTO idNameDTO = new IdNameDTO();
 		idNameDTO.setName("test");
 		given(restTemplate.getForEntity(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class)
@@ -79,7 +79,7 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
-	public void findByIdTest() throws ShanoirDatasetException {
+	public void findByIdTest() throws ShanoirException {
 		IdNameDTO idNameDTO = new IdNameDTO();
 		idNameDTO.setName("test");
 		given(restTemplate.getForEntity(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class)
@@ -93,14 +93,14 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirDatasetException {
+	public void saveTest() throws ShanoirException {
 		examinationService.save(createExamination());
 
 		Mockito.verify(examinationRepository, Mockito.times(1)).save(Mockito.any(Examination.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirDatasetException {
+	public void updateTest() throws ShanoirException {
 		final Examination updatedExamination = examinationService.update(createExamination());
 		Assert.assertNotNull(updatedExamination);
 		Assert.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
@@ -109,7 +109,7 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
-	public void updateFromShanoirOldTest() throws ShanoirDatasetException {
+	public void updateFromShanoirOldTest() throws ShanoirException {
 		examinationService.updateFromShanoirOld(createExamination());
 
 		Mockito.verify(examinationRepository, Mockito.times(1)).findOne(Mockito.anyLong());

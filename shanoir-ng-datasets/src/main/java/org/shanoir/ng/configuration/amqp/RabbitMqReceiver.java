@@ -4,7 +4,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.shanoir.ng.dataset.Dataset;
 import org.shanoir.ng.dataset.DatasetService;
-import org.shanoir.ng.shared.exception.ShanoirDatasetException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class RabbitMqReceiver {
 		try {
 			datasetService.updateFromShanoirOld(template);
 			latch.countDown();
-		} catch (ShanoirDatasetException e) {
+		} catch (ShanoirException e) {
 			// Exception.
 			// TODO: how to manage these exceptions to avoid messages loop
 		}

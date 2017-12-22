@@ -10,7 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirDatasetException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -42,7 +42,7 @@ public class DatasetServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirDatasetException {
+	public void deleteByIdTest() throws ShanoirException {
 		datasetService.deleteById(DATASET_ID);
 
 		Mockito.verify(datasetRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -58,14 +58,14 @@ public class DatasetServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirDatasetException {
+	public void saveTest() throws ShanoirException {
 		datasetService.save(createDataset());
 
 		Mockito.verify(datasetRepository, Mockito.times(1)).save(Mockito.any(Dataset.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirDatasetException {
+	public void updateTest() throws ShanoirException {
 		final Dataset updatedTemplate = datasetService.update(createDataset());
 		Assert.assertNotNull(updatedTemplate);
 		Assert.assertTrue(UPDATED_DATASET_NAME.equals(updatedTemplate.getName()));
@@ -74,7 +74,7 @@ public class DatasetServiceTest {
 	}
 
 	@Test
-	public void updateFromShanoirOldTest() throws ShanoirDatasetException {
+	public void updateFromShanoirOldTest() throws ShanoirException {
 		datasetService.updateFromShanoirOld(createDataset());
 
 		Mockito.verify(datasetRepository, Mockito.times(1)).findOne(Mockito.anyLong());

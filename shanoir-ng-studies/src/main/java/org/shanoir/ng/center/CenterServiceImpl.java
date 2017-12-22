@@ -8,7 +8,7 @@ import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class CenterServiceImpl implements CenterService {
 		final Center center = centerRepository.findOne(id);
 		if (center == null) {
 			LOG.error("Center with id " + id + " not found");
-			throw new ShanoirStudiesException(ErrorModelCode.CENTER_NOT_FOUND);
+			throw new ShanoirStudiesException(StudiesErrorModelCode.CENTER_NOT_FOUND);
 		}
 		final List<FieldError> errors = new ArrayList<FieldError>();
 		if (!center.getAcquisitionEquipments().isEmpty()) {
@@ -94,7 +94,8 @@ public class CenterServiceImpl implements CenterService {
 		try {
 			savedCenter = centerRepository.save(center);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while creating center: " + dive.getMessage());
+			LOG.error("Error while creating center", dive);
+			throw new ShanoirStudiesException("Error while creating center");
 		}
 		updateShanoirOld(savedCenter);
 		return savedCenter;
@@ -107,7 +108,8 @@ public class CenterServiceImpl implements CenterService {
 		try {
 			centerRepository.save(centerDb);
 		} catch (Exception e) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while updating center: " + e.getMessage());
+			LOG.error("Error while updating center", e);
+			throw new ShanoirStudiesException("Error while updating center");
 		}
 		updateShanoirOld(centerDb);
 		return centerDb;
@@ -123,8 +125,8 @@ public class CenterServiceImpl implements CenterService {
 				try {
 					centerRepository.save(centerDb);
 				} catch (Exception e) {
-					ShanoirStudiesException.logAndThrow(LOG,
-							"Error while updating center from Shanoir Old: " + e.getMessage());
+					LOG.error("Error while updating center from Shanoir Old", e);
+					throw new ShanoirStudiesException("Error while updating center from Shanoir Old");
 				}
 			}
 		}

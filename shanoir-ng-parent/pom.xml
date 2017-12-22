@@ -9,35 +9,12 @@
 	<packaging>pom</packaging>
 
 	<name>shanoir-ng-parent</name>
-	<description>Parent project for Shanoir-ng</description>
-
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.4.1.RELEASE</version>
-		<relativePath />
-	</parent>
+	<description>Parent project for Shanoir NG</description>
 
 	<modules>
-		<module>../shanoir-ng-users</module>
-		<module>../shanoir-ng-studies</module>
-		<module>../shanoir-ng-studycards</module>
-		<module>../shanoir-ng-datasets</module>
-		<module>../shanoir-ng-import</module>
+		<module>../shanoir-ng-back</module>
 		<module>../shanoir-ng-front</module>
 	</modules>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>Brixton.RELEASE</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -52,6 +29,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.18.1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.7</version>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -73,7 +56,7 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
-					<!-- <execution> <id>post-unit-test</id> <phase>test</phase> <goals>
+					<!-- <execution> <id>post-unit-test</id> <phase>test</phase> <goals> 
 						<goal>report</goal> </goals> </execution> -->
 				</executions>
 			</plugin>

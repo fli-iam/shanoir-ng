@@ -3,7 +3,7 @@ package org.shanoir.ng.manufacturermodel;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -58,7 +58,8 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 		try {
 			savedManufacturerModel = manufacturerModelRepository.save(manufacturerModel);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while creating manufacturer model: " + dive.getMessage());
+			LOG.error("Error while creating manufacturer model", dive);
+			throw new ShanoirStudiesException("Error while creating manufacturer model");
 		}
 		updateShanoirOld(savedManufacturerModel);
 		return savedManufacturerModel;
@@ -69,7 +70,7 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 		final ManufacturerModel manufacturerModelDb = manufacturerModelRepository.findOne(manufacturerModel.getId());
 		if (manufacturerModelDb == null) {
 			LOG.error("Manufacturer model with id " + manufacturerModel.getId() + " not found");
-			throw new ShanoirStudiesException(ErrorModelCode.MANUFACTURER_MODEL_NOT_FOUND);
+			throw new ShanoirStudiesException(StudiesErrorModelCode.MANUFACTURER_MODEL_NOT_FOUND);
 		}
 		manufacturerModelDb.setDatasetModalityType(manufacturerModel.getDatasetModalityType());
 		manufacturerModelDb.setMagneticField(manufacturerModel.getMagneticField());
@@ -78,7 +79,8 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 		try {
 			manufacturerModelRepository.save(manufacturerModelDb);
 		} catch (Exception e) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while updating manufacturer model: " + e.getMessage());
+			LOG.error("Error while updating manufacturer model", e);
+			throw new ShanoirStudiesException("Error while updating manufacturer model");
 		}
 		updateShanoirOld(manufacturerModelDb);
 		return manufacturerModelDb;

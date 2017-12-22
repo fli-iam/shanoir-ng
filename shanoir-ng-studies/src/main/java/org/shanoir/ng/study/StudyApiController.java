@@ -6,7 +6,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
@@ -36,7 +36,7 @@ public class StudyApiController implements StudyApi {
 		try {
 			studyService.deleteById(studyId, KeycloakUtil.getTokenUserId());
 		} catch (ShanoirStudiesException e) {
-			if (ErrorModelCode.NO_RIGHT_FOR_ACTION.equals(e.getErrorCode())) {
+			if (StudiesErrorModelCode.NO_RIGHT_FOR_ACTION.equals(e.getErrorCode())) {
 				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
 			}
 			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -97,7 +97,7 @@ public class StudyApiController implements StudyApi {
 				study = studyService.findById(studyId, KeycloakUtil.getTokenUserId());
 			}
 		} catch (ShanoirStudiesException e) {
-			if (ErrorModelCode.NO_RIGHT_FOR_ACTION.equals(e.getErrorCode())) {
+			if (StudiesErrorModelCode.NO_RIGHT_FOR_ACTION.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 			}
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

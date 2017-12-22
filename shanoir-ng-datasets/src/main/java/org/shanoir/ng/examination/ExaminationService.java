@@ -2,7 +2,7 @@ package org.shanoir.ng.examination;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.exception.ShanoirDatasetException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
@@ -18,16 +18,16 @@ public interface ExaminationService extends UniqueCheckableService<Examination> 
 	 * 
 	 * @param id
 	 *            examination id.
-	 * @throws ShanoirDatasetException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirDatasetException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * Get all the examinations.
 	 * 
 	 * @return a list of examinations.
 	 */
-	List<Examination> findAll() throws ShanoirDatasetException;
+	List<Examination> findAll() throws ShanoirException;
 
 	/**
 	 * Find examination by its id.
@@ -35,9 +35,9 @@ public interface ExaminationService extends UniqueCheckableService<Examination> 
 	 * @param id
 	 *            examination id.
 	 * @return an examination or null.
-	 * @throws ShanoirDatasetException 
+	 * @throws ShanoirException 
 	 */
-	Examination findById(Long id) throws ShanoirDatasetException;
+	Examination findById(Long id) throws ShanoirException;
 
 	/**
 	 * Save an examination.
@@ -45,9 +45,9 @@ public interface ExaminationService extends UniqueCheckableService<Examination> 
 	 * @param examination
 	 *            examination to create.
 	 * @return created examination.
-	 * @throws ShanoirDatasetException
+	 * @throws ShanoirException
 	 */
-	Examination save(Examination examination) throws ShanoirDatasetException;
+	Examination save(Examination examination) throws ShanoirException;
 
 	/**
 	 * Update an examination.
@@ -55,18 +55,18 @@ public interface ExaminationService extends UniqueCheckableService<Examination> 
 	 * @param examination
 	 *            examination to update.
 	 * @return updated examination.
-	 * @throws ShanoirDatasetException
+	 * @throws ShanoirException
 	 */
-	Examination update(Examination examination) throws ShanoirDatasetException;
+	Examination update(Examination examination) throws ShanoirException;
 
 	/**
 	 * Update an examination from the old Shanoir
 	 * 
 	 * @param examination
 	 *            examination.
-	 * @throws ShanoirDatasetException
+	 * @throws ShanoirException
 	 */
-	void updateFromShanoirOld(Examination examination) throws ShanoirDatasetException;
+	void updateFromShanoirOld(Examination examination) throws ShanoirException;
 
 	/**
 	 * @param subjectId

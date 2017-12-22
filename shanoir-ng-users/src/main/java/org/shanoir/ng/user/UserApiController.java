@@ -9,9 +9,10 @@ import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.error.UsersFieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.UsersErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
 import org.shanoir.ng.utils.KeycloakUtils;
@@ -52,7 +53,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		try {
 			getUserService().confirmAccountRequest(userId, user);
 		} catch (final ShanoirUsersException e) {
-			if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
+			if (UsersErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -79,7 +80,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		try {
 			getUserService().denyAccountRequest(userId);
 		} catch (final ShanoirUsersException e) {
-			if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
+			if (UsersErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -110,7 +111,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		try {
 			getUserService().requestExtension(KeycloakUtils.getTokenUserId(), requestInfo);
 		} catch (final ShanoirUsersException e) {
-			if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
+			if (UsersErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -135,7 +136,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		 * Tell Spring to remove the hibernate validation error on username
 		 * blank now
 		 */
-		final FieldErrorMap hibernateErrors = FieldErrorMap.fieldErrorMapIgnoreUsernameBlank(result);
+		final FieldErrorMap hibernateErrors = UsersFieldErrorMap.fieldErrorMapIgnoreUsernameBlank(result);
 		// Check unique constrainte
 		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(user);
 		/* Merge errors. */
@@ -155,7 +156,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			final User createdUser = getUserService().save(user);
 			return new ResponseEntity<>(createdUser, HttpStatus.OK);
 		} catch (final ShanoirUsersException e) {
-			if (ErrorModelCode.PASSWORD_NOT_CORRECT == e.getErrorCode()) {
+			if (UsersErrorModelCode.PASSWORD_NOT_CORRECT == e.getErrorCode()) {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 						"Password does not match policy", null));
 			}
@@ -198,7 +199,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			getUserService().update(user);
 		} catch (final ShanoirUsersException e) {
 			LOG.error("Error while trying to update user " + userId + " : ", e);
-			if (ErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
+			if (UsersErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			throw new RestServiceException(

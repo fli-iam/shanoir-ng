@@ -13,9 +13,9 @@ import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.role.RoleRepository;
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirAuthenticationException;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
+import org.shanoir.ng.shared.exception.UsersErrorModelCode;
 import org.shanoir.ng.utils.KeycloakUtils;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.shanoir.ng.utils.Utils;
@@ -68,11 +68,11 @@ public class UserServiceImpl implements UserService {
 		final User userDb = userRepository.findOne(userId);
 		if (userDb == null) {
 			LOG.error("User with id " + userId + " not found");
-			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
+			throw new ShanoirUsersException(UsersErrorModelCode.USER_NOT_FOUND);
 		}
 		if (!userDb.isAccountRequestDemand() && !userDb.isExtensionRequestDemand()) {
 			LOG.error("User with id " + userId + " has no request (account or extension)");
-			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
+			throw new ShanoirUsersException(UsersErrorModelCode.NO_ACCOUNT_REQUEST);
 		}
 
 		// Confirm and update user
@@ -105,21 +105,23 @@ public class UserServiceImpl implements UserService {
 		if (principal instanceof UserContext) {
 			// For tests
 			if (id.equals(((UserContext) principal).getId())) {
-				ShanoirUsersException.logAndThrow(LOG, "Forbidden to delete connected user.");
+				LOG.error("Forbidden to delete connected user");
+				throw new ShanoirUsersException("Forbidden to delete connected user");
 			}
 		} else {
 			final Map<String, Object> otherClaims = ((KeycloakPrincipal) principal).getKeycloakSecurityContext()
 					.getToken().getOtherClaims();
 			if (otherClaims.containsKey(KeycloakUtils.USER_ID_TOKEN_ATT)
 					&& id.equals(Long.valueOf(otherClaims.get(KeycloakUtils.USER_ID_TOKEN_ATT).toString()))) {
-				ShanoirUsersException.logAndThrow(LOG, "Forbidden to delete connected user.");
+				LOG.error("Forbidden to delete connected user");
+				throw new ShanoirUsersException("Forbidden to delete connected user");
 			}
 		}
 
 		final User user = userRepository.findOne(id);
 		if (user == null) {
 			LOG.error("User with id " + id + " not found");
-			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
+			throw new ShanoirUsersException(UsersErrorModelCode.USER_NOT_FOUND);
 		}
 		userRepository.delete(id);
 		deleteUserOnShanoirOld(id);
@@ -131,11 +133,11 @@ public class UserServiceImpl implements UserService {
 		final User user = userRepository.findOne(userId);
 		if (user == null) {
 			LOG.error("User with id " + userId + " not found");
-			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
+			throw new ShanoirUsersException(UsersErrorModelCode.USER_NOT_FOUND);
 		}
 		if (!user.isAccountRequestDemand() && !user.isExtensionRequestDemand()) {
 			LOG.error("User with id " + userId + " has no request (account or extension)");
-			throw new ShanoirUsersException(ErrorModelCode.NO_ACCOUNT_REQUEST);
+			throw new ShanoirUsersException(UsersErrorModelCode.NO_ACCOUNT_REQUEST);
 		}
 		if (user.isAccountRequestDemand()) {
 			// Remove user
@@ -195,14 +197,15 @@ public class UserServiceImpl implements UserService {
 		final User user = userRepository.findOne(userId);
 		if (user == null) {
 			LOG.error("User with id " + userId + " not found");
-			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
+			throw new ShanoirUsersException(UsersErrorModelCode.USER_NOT_FOUND);
 		}
 		user.setExtensionRequestDemand(Boolean.TRUE);
 		user.setExtensionRequestInfo(requestInfo);
 		try {
 			userRepository.save(user);
-		} catch (DataIntegrityViolationException dive) {
-			ShanoirUsersException.logAndThrow(LOG, "Error on request extension: " + dive.getMessage());
+		} catch (DataIntegrityViolationException e) {
+			LOG.error("Error on request extension", e);
+			throw new ShanoirUsersException("Error on request extension");
 		}
 	}
 
@@ -226,8 +229,9 @@ public class UserServiceImpl implements UserService {
 				// Send email to administrators
 				emailService.notifyAdminAccountRequest(savedUser);
 			}
-		} catch (DataIntegrityViolationException dive) {
-			ShanoirUsersException.logAndThrow(LOG, "Error while creating user: " + dive.getMessage());
+		} catch (DataIntegrityViolationException e) {
+			LOG.error("Error while creating user", e);
+			throw new ShanoirUsersException("Error while creating user");
 		}
 		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
 		if (keycloakUserId != null) {
@@ -258,7 +262,7 @@ public class UserServiceImpl implements UserService {
 		final User userDb = userRepository.findOne(user.getId());
 		if (userDb == null) {
 			LOG.error("User with id " + user.getId() + " not found");
-			throw new ShanoirUsersException(ErrorModelCode.USER_NOT_FOUND);
+			throw new ShanoirUsersException(UsersErrorModelCode.USER_NOT_FOUND);
 		}
 		return updateUserOnAllSystems(userDb, user);
 	}
@@ -289,7 +293,8 @@ public class UserServiceImpl implements UserService {
 		try {
 			userRepository.save(userDb);
 		} catch (Exception e) {
-			ShanoirUsersException.logAndThrow(LOG, "Error while updating user from Shanoir Old: " + e.getMessage());
+			LOG.error("Error while updating user from Shanoir Old", e);
+			throw new ShanoirUsersException("Error while updating user from Shanoir Old");
 		}
 	}
 
@@ -381,7 +386,8 @@ public class UserServiceImpl implements UserService {
 		try {
 			userRepository.save(userDb);
 		} catch (Exception e) {
-			ShanoirUsersException.logAndThrow(LOG, "Error while updating user: " + e.getMessage());
+			LOG.error("Error while updating user", e);
+			throw new ShanoirUsersException("Error while updating user");
 		}
 		updateShanoirOld(userDb);
 		keycloakClient.updateUser(userDb);

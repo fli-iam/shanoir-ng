@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response.StatusType;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.UsersErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -64,7 +64,7 @@ public final class KeycloakUtils {
 
 		final AccessToken accessToken = context.getToken();
 		if (accessToken == null) {
-			throw new ShanoirUsersException("Token not found", ErrorModelCode.USER_NOT_FOUND);
+			throw new ShanoirUsersException("Token not found", UsersErrorModelCode.USER_NOT_FOUND);
 		}
 		
 		final Map<String, Object> otherClaims = accessToken.getOtherClaims();
@@ -72,7 +72,7 @@ public final class KeycloakUtils {
 			return Long.valueOf(otherClaims.get(USER_ID_TOKEN_ATT).toString());
 		}
 
-		throw new ShanoirUsersException("User id not found in token", ErrorModelCode.USER_NOT_FOUND);
+		throw new ShanoirUsersException("User id not found in token", UsersErrorModelCode.USER_NOT_FOUND);
 	}
 
 	/*
@@ -84,7 +84,7 @@ public final class KeycloakUtils {
 	@SuppressWarnings("rawtypes")
 	private static KeycloakSecurityContext getKeycloakSecurityContext() throws ShanoirUsersException {
 		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
-			throw new ShanoirUsersException("Anonymous user", ErrorModelCode.USER_NOT_FOUND);
+			throw new ShanoirUsersException("Anonymous user", UsersErrorModelCode.USER_NOT_FOUND);
 		}
 		final KeycloakPrincipal principal = (KeycloakPrincipal) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal();

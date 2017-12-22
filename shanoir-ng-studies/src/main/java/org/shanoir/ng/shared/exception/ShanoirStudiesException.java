@@ -3,16 +3,18 @@ package org.shanoir.ng.shared.exception;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.slf4j.Logger;
 
-public class ShanoirStudiesException extends Exception {
+/**
+ * Study microservice exception.
+ * 
+ * @author msimon
+ *
+ */
+public class ShanoirStudiesException extends ShanoirException {
 
 	/**
 	 * UID
 	 */
-	private static final long serialVersionUID = -3427894964632186339L;
-
-	private int errorCode;
-
-	private FieldErrorMap errorMap;
+	private static final long serialVersionUID = 614665107614340916L;
 
 	/**
 	 * Constructor.
@@ -31,8 +33,7 @@ public class ShanoirStudiesException extends Exception {
 	 *            error code.
 	 */
 	public ShanoirStudiesException(final int errorCode) {
-		super();
-		this.errorCode = errorCode;
+		super(errorCode);
 	}
 
 	/**
@@ -42,8 +43,7 @@ public class ShanoirStudiesException extends Exception {
 	 *            error map.
 	 */
 	public ShanoirStudiesException(final FieldErrorMap errorMap) {
-		super();
-		this.errorMap = errorMap;
+		super(errorMap);
 	}
 
 	/**
@@ -55,37 +55,7 @@ public class ShanoirStudiesException extends Exception {
 	 *            error code.
 	 */
 	public ShanoirStudiesException(final String message, final int errorCode) {
-		super(message);
-		this.errorCode = errorCode;
-	}
-
-	/**
-	 * @return the errorCode
-	 */
-	public int getErrorCode() {
-		return errorCode;
-	}
-
-	/**
-	 * @return the errorMap
-	 */
-	public FieldErrorMap getErrorMap() {
-		return errorMap;
-	}
-
-	/**
-	 * Log error and throw exception
-	 * 
-	 * @param logger
-	 *            logger.
-	 * @param message
-	 *            message.
-	 * @throws ShanoirUsersException
-	 */
-	public static void logAndThrow(final Logger logger, final String message) throws ShanoirStudiesException {
-		final ShanoirStudiesException e = new ShanoirStudiesException(message);
-		logger.error(message, e);
-		throw e;
+		super(message, errorCode);
 	}
 
 }

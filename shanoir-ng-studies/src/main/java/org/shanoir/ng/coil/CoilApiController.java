@@ -7,7 +7,7 @@ import javax.validation.Valid;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
@@ -44,7 +44,7 @@ public class CoilApiController implements CoilApi {
 		try {
 			coilService.deleteById(coilId);
 		} catch (ShanoirStudiesException e) {
-			if (ErrorModelCode.COIL_NOT_FOUND.equals(e.getErrorCode())) {
+			if (StudiesErrorModelCode.COIL_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (e.getErrorMap() != null) {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Forbidden",

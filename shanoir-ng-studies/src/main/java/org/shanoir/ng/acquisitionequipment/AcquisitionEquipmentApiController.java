@@ -5,7 +5,7 @@ import java.util.List;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueValidator;
@@ -37,7 +37,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		try {
 			acquisitionEquipmentService.deleteById(acquisitionEquipmentId);
 		} catch (ShanoirStudiesException e) {
-			if (ErrorModelCode.ACQ_EQPT_NOT_FOUND.equals(e.getErrorCode())) {
+			if (StudiesErrorModelCode.ACQ_EQPT_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);

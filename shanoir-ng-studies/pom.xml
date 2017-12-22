@@ -5,27 +5,31 @@
 
 	<parent>
 		<groupId>org.shanoir-ng</groupId>
-		<artifactId>shanoir-ng</artifactId>
+		<artifactId>shanoir-ng-back</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>../shanoir-ng-parent</relativePath>
+		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
 	<artifactId>shanoir-ng-studies</artifactId>
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-studies</name>
-	<description>Studies management project for Shanoir-ng</description>
+	<description>Studies management project for Shanoir NG</description>
 
 	<properties>
-		<keycloak.version>3.1.0.Final</keycloak.version>
-		<resteasy.version>3.1.0.Final</resteasy.version>
-		<springfox-version>2.5.0</springfox-version>
 		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
 		<spring.active.profile></spring.active.profile>
 		<docker.image.name>shanoir-ng/studies</docker.image.name>
 	</properties>
 
 	<dependencies>
+		<!-- Common MS dependency -->
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-ms-common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	
 		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core Needed 
 			for semi-automatically generated Ids -->
 		<dependency>
@@ -40,58 +44,10 @@
 			<version>${org.mapstruct.version}</version>
 		</dependency>
 
-		<!-- Spring boot -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-redis</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.session</groupId>
-			<artifactId>spring-session</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
-		</dependency>
-
 		<!-- Database connector -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-		</dependency>
-
-		<!-- SpringFox Swagger UI -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-joda</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>${springfox-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>${springfox-version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>org.mapstruct</artifactId>
-					<groupId>mapstruct</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- AMQP -->
@@ -102,57 +58,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-amqp</artifactId>
-		</dependency>
-
-		<!-- Keycloak -->
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-tomcat8-adapter</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-spring-boot-adapter</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-spring-security-adapter</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-admin-client</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-
-		<!-- Resteasy -->
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jackson2-provider</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>
-
-		<!-- Test -->
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

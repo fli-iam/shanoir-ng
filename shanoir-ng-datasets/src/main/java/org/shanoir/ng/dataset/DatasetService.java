@@ -1,6 +1,6 @@
 package org.shanoir.ng.dataset;
 
-import org.shanoir.ng.shared.exception.ShanoirDatasetException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
@@ -16,9 +16,9 @@ public interface DatasetService extends UniqueCheckableService<Dataset> {
 	 * 
 	 * @param id
 	 *            dataset id.
-	 * @throws ShanoirDatasetException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirDatasetException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * Find dataset by its id.
@@ -35,9 +35,9 @@ public interface DatasetService extends UniqueCheckableService<Dataset> {
 	 * @param dataset
 	 *            dataset to create.
 	 * @return created dataset.
-	 * @throws ShanoirDatasetException
+	 * @throws ShanoirException
 	 */
-	Dataset save(Dataset dataset) throws ShanoirDatasetException;
+	Dataset save(Dataset dataset) throws ShanoirException;
 
 	/**
 	 * Update a dataset.
@@ -45,17 +45,17 @@ public interface DatasetService extends UniqueCheckableService<Dataset> {
 	 * @param dataset
 	 *            dataset to update.
 	 * @return updated dataset.
-	 * @throws ShanoirDatasetException
+	 * @throws ShanoirException
 	 */
-	Dataset update(Dataset dataset) throws ShanoirDatasetException;
+	Dataset update(Dataset dataset) throws ShanoirException;
 
 	/**
 	 * Update a dataset from the old Shanoir
 	 * 
 	 * @param dataset
 	 *            dataset.
-	 * @throws ShanoirDatasetException
+	 * @throws ShanoirException
 	 */
-	void updateFromShanoirOld(Dataset dataset) throws ShanoirDatasetException;
+	void updateFromShanoirOld(Dataset dataset) throws ShanoirException;
 
 }

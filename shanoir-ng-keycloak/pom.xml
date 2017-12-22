@@ -13,7 +13,7 @@
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-keycloak</name>
-	<description>Shanoir-ng project used to initialize Keycloak server</description>
+	<description>Shanoir NG project used to initialize Keycloak server</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

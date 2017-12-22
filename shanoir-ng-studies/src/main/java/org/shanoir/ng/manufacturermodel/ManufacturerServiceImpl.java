@@ -3,7 +3,7 @@ package org.shanoir.ng.manufacturermodel;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -58,7 +58,8 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 		try {
 			savedManufacturer = manufacturerRepository.save(manufacturer);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while creating manufacturer: " + dive.getMessage());
+			LOG.error("Error while creating manufacturer", dive);
+			throw new ShanoirStudiesException("Error while creating manufacturer");
 		}
 		updateShanoirOld(savedManufacturer);
 		return savedManufacturer;
@@ -69,13 +70,14 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 		final Manufacturer manufacturerDb = manufacturerRepository.findOne(manufacturer.getId());
 		if (manufacturerDb == null) {
 			LOG.error("Manufacturer with id " + manufacturer.getId() + " not found");
-			throw new ShanoirStudiesException(ErrorModelCode.MANUFACTURER_NOT_FOUND);
+			throw new ShanoirStudiesException(StudiesErrorModelCode.MANUFACTURER_NOT_FOUND);
 		}
 		manufacturerDb.setName(manufacturer.getName());
 		try {
 			manufacturerRepository.save(manufacturerDb);
 		} catch (Exception e) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while updating manufacturer: " + e.getMessage());
+			LOG.error("Error while updating manufacturer", e);
+			throw new ShanoirStudiesException("Error while updating manufacturer");
 		}
 		updateShanoirOld(manufacturerDb);
 		return manufacturerDb;

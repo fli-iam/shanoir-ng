@@ -3,7 +3,7 @@ package org.shanoir.ng.examination;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.exception.ShanoirDatasetException;
+import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +37,12 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private RabbitTemplate rabbitTemplate;
 	
 	@Override
-	public void deleteById(final Long id) throws ShanoirDatasetException {
+	public void deleteById(final Long id) throws ShanoirDatasetsException {
 		examinationRepository.delete(id);
 	}
 
 	@Override
-	public List<Examination> findAll() throws ShanoirDatasetException {
+	public List<Examination> findAll() throws ShanoirDatasetsException {
 		return Utils.toList(examinationRepository.findAll());
 	}
 
@@ -57,37 +57,39 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public Examination findById(final Long id) throws ShanoirDatasetException {
+	public Examination findById(final Long id) throws ShanoirDatasetsException {
 		return examinationRepository.findOne(id);
 	}
 
 	@Override
-	public Examination save(final Examination examination) throws ShanoirDatasetException {
+	public Examination save(final Examination examination) throws ShanoirDatasetsException {
 		Examination savedExamination = null;
 		try {
 			savedExamination = examinationRepository.save(examination);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirDatasetException.logAndThrow(LOG, "Error while creating examination: " + dive.getMessage());
+			LOG.error("Error while creating examination", dive);
+			throw new ShanoirDatasetsException("Error while creating examination");
 		}
 		updateShanoirOld(savedExamination);
 		return savedExamination;
 	}
 
 	@Override
-	public Examination update(final Examination examination) throws ShanoirDatasetException {
+	public Examination update(final Examination examination) throws ShanoirDatasetsException {
 		final Examination examinationDb = examinationRepository.findOne(examination.getId());
 		updateExaminationValues(examinationDb, examination);
 		try {
 			examinationRepository.save(examinationDb);
 		} catch (Exception e) {
-			ShanoirDatasetException.logAndThrow(LOG, "Error while updating examination: " + e.getMessage());
+			LOG.error("Error while updating examination", e);
+			throw new ShanoirDatasetsException("Error while updating examination");
 		}
 		updateShanoirOld(examinationDb);
 		return examinationDb;
 	}
 
 	@Override
-	public void updateFromShanoirOld(final Examination examination) throws ShanoirDatasetException {
+	public void updateFromShanoirOld(final Examination examination) throws ShanoirDatasetsException {
 		if (examination.getId() == null) {
 			throw new IllegalArgumentException("Examination id cannot be null");
 		} else {
@@ -96,8 +98,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 				try {
 					examinationRepository.save(examinationDb);
 				} catch (Exception e) {
-					ShanoirDatasetException.logAndThrow(LOG,
-							"Error while updating examination from Shanoir Old: " + e.getMessage());
+					LOG.error("Error while updating examination from Shanoir Old", e);
+					throw new ShanoirDatasetsException("Error while updating examination from Shanoir Old");
 				}
 			}
 		}

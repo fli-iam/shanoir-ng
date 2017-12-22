@@ -8,7 +8,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
@@ -46,7 +46,7 @@ public class CenterApiController implements CenterApi {
 		try {
 			centerService.deleteById(centerId);
 		} catch (ShanoirStudiesException e) {
-			if (ErrorModelCode.CENTER_NOT_FOUND.equals(e.getErrorCode())) {
+			if (StudiesErrorModelCode.CENTER_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (e.getErrorMap() != null) {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Forbidden",

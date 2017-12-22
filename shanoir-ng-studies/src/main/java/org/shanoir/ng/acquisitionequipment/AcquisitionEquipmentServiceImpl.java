@@ -3,8 +3,8 @@ package org.shanoir.ng.acquisitionequipment;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		final AcquisitionEquipment equipment = acquisitionEquipmentRepository.findOne(id);
 		if (equipment == null) {
 			LOG.error("Acquisition equipment with id " + id + " not found");
-			throw new ShanoirStudiesException(ErrorModelCode.ACQ_EQPT_NOT_FOUND);
+			throw new ShanoirStudiesException(StudiesErrorModelCode.ACQ_EQPT_NOT_FOUND);
 		}
 		acquisitionEquipmentRepository.delete(id);
 		deleteEquipmentOnShanoirOld(id);
@@ -64,7 +64,8 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		try {
 			savedEquipment = acquisitionEquipmentRepository.save(acquisitionEquipment);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while creating acquisition equipment: " + dive.getMessage());
+			LOG.error("Error while creating acquisition equipment", dive);
+			throw new ShanoirStudiesException("Error while creating acquisition equipment");
 		}
 		updateShanoirOld(savedEquipment);
 		return savedEquipment;
@@ -75,13 +76,14 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		final AcquisitionEquipment equipmentDb = acquisitionEquipmentRepository.findOne(acquisitionEquipment.getId());
 		if (equipmentDb == null) {
 			LOG.error("Acquisition equipment with id " + acquisitionEquipment.getId() + " not found");
-			throw new ShanoirStudiesException(ErrorModelCode.ACQ_EQPT_NOT_FOUND);
+			throw new ShanoirStudiesException(StudiesErrorModelCode.ACQ_EQPT_NOT_FOUND);
 		}
 		updateEquipmentValues(equipmentDb, acquisitionEquipment);
 		try {
 			acquisitionEquipmentRepository.save(equipmentDb);
 		} catch (Exception e) {
-			ShanoirStudiesException.logAndThrow(LOG, "Error while updating acquisition equipment: " + e.getMessage());
+			LOG.error("Error while updating acquisition equipment", e);
+			throw new ShanoirStudiesException("Error while updating acquisition equipment");
 		}
 		updateShanoirOld(equipmentDb);
 		return equipmentDb;

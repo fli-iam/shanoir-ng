@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
-import org.shanoir.ng.shared.exception.ShanoirSubjectException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
@@ -20,9 +20,9 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 *
 	 * @param id
 	 *            subject id.
-	 * @throws ShanoirSubjectException
+	 * @throws ShanoirStudiesException
 	 */
-	void deleteById(Long id) throws ShanoirSubjectException;
+	void deleteById(Long id) throws ShanoirStudiesException;
 
 	/**
 	 * Get all the subjects.
@@ -55,9 +55,9 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @param subject
 	 *            subject to create.
 	 * @return created subject.
-	 * @throws ShanoirSubjectException
+	 * @throws ShanoirStudiesException
 	 */
-	Subject save(Subject subject) throws ShanoirSubjectException;
+	Subject save(Subject subject) throws ShanoirStudiesException;
 	
 	/**
 	 * Save a subject for OFSEP.
@@ -67,10 +67,10 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @param studyCardId
 	 * 			id of the study card used to generate the subject common name
 	 * @return created subject.
-	 * @throws ShanoirSubjectException
+	 * @throws ShanoirStudiesException
 	 */
 
-	Subject saveForOFSEP( Subject subject,  Long studyCardId) throws ShanoirSubjectException;
+	Subject saveForOFSEP( Subject subject,  Long studyCardId) throws ShanoirStudiesException;
 
 	/**
 	 * Update a subject.
@@ -78,18 +78,18 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @param subject
 	 *            subject to update.
 	 * @return updated subject.
-	 * @throws ShanoirSubjectException
+	 * @throws ShanoirStudiesException
 	 */
-	Subject update(Subject subject) throws ShanoirSubjectException;
+	Subject update(Subject subject) throws ShanoirStudiesException;
 
 	/**
 	 * Update a subject from the old Shanoir
 	 *
 	 * @param subject
 	 *            subject.
-	 * @throws ShanoirSubjectException
+	 * @throws ShanoirStudiesException
 	 */
-	void updateFromShanoirOld(Subject subject) throws ShanoirSubjectException;
+	void updateFromShanoirOld(Subject subject) throws ShanoirStudiesException;
 
 	/*
 	 * Update Shanoir Old with new subject.
@@ -118,7 +118,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 */
 	Subject findByIdentifier(String indentifier);
 
-	Subject saveFromJson(File jsonFile) throws ShanoirSubjectException;
+	Subject saveFromJson(File jsonFile) throws ShanoirStudiesException;
 
 	public String findSubjectOfsepByCenter(final String centerCode);
 

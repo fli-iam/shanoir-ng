@@ -3,8 +3,8 @@ package org.shanoir.ng.studycard;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudyCardsException;
+import org.shanoir.ng.shared.exception.StudyCardsErrorModelCode;
 import org.shanoir.ng.studycard.dto.StudyStudyCardDTO;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class StudyCardServiceImpl implements StudyCardService {
 		final StudyCard studyCard = studyCardRepository.findOne(id);
 		if (studyCard == null) {
 			LOG.error("Study card with id " + id + " not found");
-			throw new ShanoirStudyCardsException(ErrorModelCode.STUDY_CARD_NOT_FOUND);
+			throw new ShanoirStudyCardsException(StudyCardsErrorModelCode.STUDY_CARD_NOT_FOUND);
 		}
 		studyCardRepository.delete(id);
 
@@ -73,7 +73,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 		try {
 			savedStudyCard = studyCardRepository.save(studyCard);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirStudyCardsException.logAndThrow(LOG, "Error while creating Study Card: " + dive.getMessage());
+			LOG.error("Error while creating study card", dive);
+			throw new ShanoirStudyCardsException("Error while creating study card");
 		}
 		final StudyStudyCardDTO studyCardDTO = new StudyStudyCardDTO(studyCard.getId(), studyCard.getStudyId(), null);
 		updateMsStudies(studyCardDTO);
@@ -93,7 +94,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 		try {
 			studyCardRepository.save(studyCardDb);
 		} catch (Exception e) {
-			ShanoirStudyCardsException.logAndThrow(LOG, "Error while updating Study Card: " + e.getMessage());
+			LOG.error("Error while updating study card", e);
+			throw new ShanoirStudyCardsException("Error while updating study card");
 		}
 		final StudyStudyCardDTO studyCardDTO = new StudyStudyCardDTO(studyCard.getId(), studyCard.getStudyId(),
 				oldStudyId);
@@ -108,8 +110,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 			try {
 				studyCardRepository.save(studyCard);
 			} catch (Exception e) {
-				ShanoirStudyCardsException.logAndThrow(LOG,
-						"Error while creating new study card from Shanoir Old: " + e.getMessage());
+				LOG.error("Error while creating study card from Shanoir Old", e);
+				throw new ShanoirStudyCardsException("Error while creating study card from Shanoir Old");
 			}
 		} else {
 			final StudyCard studyCardDb = studyCardRepository.findOne(studyCard.getId());
@@ -119,8 +121,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 							+ studyCard.getId() + ") from shanoir-old");
 					studyCardRepository.save(studyCard);
 				} catch (Exception e) {
-					ShanoirStudyCardsException.logAndThrow(LOG,
-							"Error while updating Study Card from Shanoir Old: " + e.getMessage());
+					LOG.error("Error while updating study card from Shanoir Old", e);
+					throw new ShanoirStudyCardsException("Error while updating study card from Shanoir Old");
 				}
 			} else {
 				LOG.warn("Import new study card with name " + studyCard.getName() + "  (id: " + studyCard.getId()
@@ -138,8 +140,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 			try {
 				studyCardRepository.delete(studyCard);
 			} catch (Exception e) {
-				ShanoirStudyCardsException.logAndThrow(LOG,
-						"Error while deleting study card from Shanoir Old: " + e.getMessage());
+				LOG.error("Error while deleting study card from Shanoir Old", e);
+				throw new ShanoirStudyCardsException("Error while deleting study card from Shanoir Old");
 			}
 		}
 	}

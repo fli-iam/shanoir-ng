@@ -3,7 +3,6 @@ package org.shanoir.ng.configuration.amqp;
 import java.io.IOException;
 
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
-import org.shanoir.ng.shared.exception.ShanoirSubjectException;
 import org.shanoir.ng.study.StudyService;
 import org.shanoir.ng.study.dto.StudyStudyCardDTO;
 import org.shanoir.ng.subject.Subject;

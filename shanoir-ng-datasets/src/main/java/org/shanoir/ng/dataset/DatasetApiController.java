@@ -3,11 +3,11 @@ package org.shanoir.ng.dataset;
 import javax.validation.Valid;
 
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.exception.DatasetsErrorModelCode;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirDatasetException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
@@ -38,8 +38,8 @@ public class DatasetApiController implements DatasetApi {
 		}
 		try {
 			datasetService.deleteById(datasetId);
-		} catch (ShanoirDatasetException e) {
-			if (ErrorModelCode.DATASET_NOT_FOUND.equals(e.getErrorCode())) {
+		} catch (ShanoirException e) {
+			if (DatasetsErrorModelCode.DATASET_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			} else if (e.getErrorMap() != null) {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Forbidden",
@@ -83,7 +83,7 @@ public class DatasetApiController implements DatasetApi {
 		try {
 			final Dataset createdDataset = datasetService.save(dataset);
 			return new ResponseEntity<>(createdDataset, HttpStatus.OK);
-		} catch (ShanoirDatasetException e) {
+		} catch (ShanoirException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -112,7 +112,7 @@ public class DatasetApiController implements DatasetApi {
 		/* Update dataset in db. */
 		try {
 			datasetService.update(dataset);
-		} catch (ShanoirDatasetException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update dataset " + datasetId + " : ", e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));

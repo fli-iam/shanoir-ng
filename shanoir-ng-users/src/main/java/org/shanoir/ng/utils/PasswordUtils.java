@@ -4,7 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.UsersErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +82,7 @@ public final class PasswordUtils {
 		}
 		
 		LOG.error("Password does not match policy for user " + username + " : ");
-		throw new ShanoirUsersException(ErrorModelCode.PASSWORD_NOT_CORRECT);
+		throw new ShanoirUsersException(UsersErrorModelCode.PASSWORD_NOT_CORRECT);
 	}
 
 	/**

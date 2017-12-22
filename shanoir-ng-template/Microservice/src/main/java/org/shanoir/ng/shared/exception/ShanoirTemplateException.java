@@ -1,21 +1,17 @@
 package org.shanoir.ng.shared.exception;
 
-import org.slf4j.Logger;
-
 /**
  * Microservice exception.
  * 
  * @author msimon
  *
  */
-public class ShanoirTemplateException extends Exception {
+public class ShanoirTemplateException extends ShanoirException {
 
 	/**
 	 * Serial version uid
 	 */
-	private static final long serialVersionUID = -1272303994850855360L;
-
-	private int errorCode;
+	private static final long serialVersionUID = -3239198004067077517L;
 
 	/**
 	 * Constructor.
@@ -34,8 +30,7 @@ public class ShanoirTemplateException extends Exception {
 	 *            error code.
 	 */
 	public ShanoirTemplateException(final int errorCode) {
-		super();
-		this.errorCode = errorCode;
+		super(errorCode);
 	}
 
 	/**
@@ -47,30 +42,7 @@ public class ShanoirTemplateException extends Exception {
 	 *            error code.
 	 */
 	public ShanoirTemplateException(final String message, final int errorCode) {
-		super(message);
-		this.errorCode = errorCode;
-	}
-
-	/**
-	 * @return the errorCode
-	 */
-	public int getErrorCode() {
-		return errorCode;
-	}
-
-	/**
-	 * Log error and throw exception
-	 * 
-	 * @param logger
-	 *            logger.
-	 * @param message
-	 *            message.
-	 * @throws ShanoirTemplateException
-	 */
-	public static void logAndThrow(final Logger logger, final String message) throws ShanoirTemplateException {
-		final ShanoirTemplateException e = new ShanoirTemplateException(message);
-		logger.error(message, e);
-		throw e;
+		super(message, errorCode);
 	}
 
 }

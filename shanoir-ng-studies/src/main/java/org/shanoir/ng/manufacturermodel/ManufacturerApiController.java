@@ -7,7 +7,7 @@ import javax.validation.Valid;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueValidator;
@@ -87,7 +87,7 @@ public class ManufacturerApiController implements ManufacturerApi {
 		try {
 			manufacturerService.update(manufacturer);
 		} catch (final ShanoirStudiesException e) {
-			if (ErrorModelCode.MANUFACTURER_NOT_FOUND.equals(e.getErrorCode())) {
+			if (StudiesErrorModelCode.MANUFACTURER_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			throw new RestServiceException(

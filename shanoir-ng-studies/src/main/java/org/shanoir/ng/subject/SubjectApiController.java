@@ -6,7 +6,8 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirSubjectException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.subject.dto.SubjectDTO;
@@ -42,7 +43,7 @@ public class SubjectApiController implements SubjectApi {
 		}
 		try {
 			subjectService.deleteById(subjectId);
-		} catch (ShanoirSubjectException e) {
+		} catch (ShanoirStudiesException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 		}
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
@@ -90,7 +91,7 @@ public class SubjectApiController implements SubjectApi {
 			final Subject createdSubject = subjectService.save(subject);
 			subjectService.updateShanoirOld(createdSubject);
 			return new ResponseEntity<Subject>(createdSubject, HttpStatus.OK);
-		} catch (ShanoirSubjectException e) {
+		} catch (ShanoirStudiesException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -121,7 +122,7 @@ public class SubjectApiController implements SubjectApi {
 			final Subject createdSubject = subjectService.saveForOFSEP(subject, studyCardId);
 			subjectService.updateShanoirOld(createdSubject);
 			return new ResponseEntity<Subject>(createdSubject, HttpStatus.OK);
-		} catch (ShanoirSubjectException e) {
+		} catch (ShanoirStudiesException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -153,7 +154,7 @@ public class SubjectApiController implements SubjectApi {
 		/* Update template in db. */
 		try {
 			subjectService.update(subject);
-		} catch (ShanoirSubjectException e) {
+		} catch (ShanoirStudiesException e) {
 			LOG.error("Error while trying to update subject " + subjectId + " : ", e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
