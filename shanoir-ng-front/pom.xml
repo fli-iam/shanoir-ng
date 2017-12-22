@@ -11,7 +11,7 @@
 	</parent>
 
 	<artifactId>shanoir-ng-front</artifactId>
-	<packaging>war</packaging>
+	<packaging>pom</packaging>
 
 	<name>shanoir-ng-front</name>
 	<description>Front project for Shanoir-ng</description>
