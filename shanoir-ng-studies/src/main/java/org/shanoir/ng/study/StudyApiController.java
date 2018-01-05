@@ -105,7 +105,7 @@ public class StudyApiController implements StudyApi {
 		if (study == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		if (withdata) {
+		if (withdata != null && withdata) {
 			return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(studyMapper.studyToSimpleStudyDTO(study), HttpStatus.OK);
