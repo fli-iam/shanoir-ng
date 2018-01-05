@@ -9,11 +9,11 @@ import javax.validation.ConstraintValidatorContext;
  * @author msimon
  *
  */
-public class ManufactureModelTypeCheckValidator
-		implements ConstraintValidator<ManufactureModelTypeCheck, ManufacturerModel> {
+public class ManufacturerModelTypeCheckValidator
+		implements ConstraintValidator<ManufacturerModelTypeCheck, ManufacturerModel> {
 
 	@Override
-	public void initialize(final ManufactureModelTypeCheck constraintAnnotation) {
+	public void initialize(final ManufacturerModelTypeCheck constraintAnnotation) {
 	}
 
 	@Override

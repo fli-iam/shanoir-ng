@@ -16,8 +16,8 @@ import javax.validation.Payload;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = ManufactureModelTypeCheckValidator.class)
-public @interface ManufactureModelTypeCheck {
+@Constraint(validatedBy = ManufacturerModelTypeCheckValidator.class)
+public @interface ManufacturerModelTypeCheck {
 
 	/**
 	 * Message.

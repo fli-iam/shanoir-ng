@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-@ManufactureModelTypeCheck
+@ManufacturerModelTypeCheck
 public class ManufacturerModel extends HalEntity {
 
 	/**
