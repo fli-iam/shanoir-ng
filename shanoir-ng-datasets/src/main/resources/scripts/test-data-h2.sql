@@ -17,4 +17,9 @@ INSERT INTO dataset
 	(id, cardinality_of_related_subjects, dataset_acquisition_id, name) 
 VALUES 
 	(1, 1, 1, 'Dataset1');
+
+INSERT INTO mr_dataset
+	(id, echo_time_id, flip_angle_id, inversion_time_id, mr_dataset_nature, mr_quality_procedure_type, repetition_time_id) 
+VALUES 
+	(1, null, null, null, 1, 1, null);
 	

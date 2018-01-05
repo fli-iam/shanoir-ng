@@ -9,7 +9,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author msimon
  *
  */
-public interface DatasetService extends UniqueCheckableService<Dataset> {
+public interface DatasetService<T extends Dataset> extends UniqueCheckableService<T> {
 
 	/**
 	 * Delete a dataset.
@@ -27,7 +27,7 @@ public interface DatasetService extends UniqueCheckableService<Dataset> {
 	 *            dataset id.
 	 * @return a dataset or null.
 	 */
-	Dataset findById(Long id);
+	T findById(Long id);
 
 	/**
 	 * Save a dataset.
@@ -37,7 +37,7 @@ public interface DatasetService extends UniqueCheckableService<Dataset> {
 	 * @return created dataset.
 	 * @throws ShanoirException
 	 */
-	Dataset save(Dataset dataset) throws ShanoirException;
+	T save(T dataset) throws ShanoirException;
 
 	/**
 	 * Update a dataset.
@@ -47,7 +47,7 @@ public interface DatasetService extends UniqueCheckableService<Dataset> {
 	 * @return updated dataset.
 	 * @throws ShanoirException
 	 */
-	Dataset update(Dataset dataset) throws ShanoirException;
+	T update(T dataset) throws ShanoirException;
 
 	/**
 	 * Update a dataset from the old Shanoir
@@ -56,6 +56,6 @@ public interface DatasetService extends UniqueCheckableService<Dataset> {
 	 *            dataset.
 	 * @throws ShanoirException
 	 */
-	void updateFromShanoirOld(Dataset dataset) throws ShanoirException;
+	void updateFromShanoirOld(T dataset) throws ShanoirException;
 
 }

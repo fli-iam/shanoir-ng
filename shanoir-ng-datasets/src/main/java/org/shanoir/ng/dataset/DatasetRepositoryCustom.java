@@ -8,7 +8,7 @@ import java.util.List;
  * @author msimon
  *
  */
-public interface DatasetRepositoryCustom {
+public interface DatasetRepositoryCustom<T extends Dataset> {
 
 	/**
 	 * Find datasets by field value.
@@ -19,6 +19,6 @@ public interface DatasetRepositoryCustom {
 	 *            value.
 	 * @return list of datasets.
 	 */
-	List<Dataset> findBy(String fieldName, Object value);
+	List<T> findBy(String fieldName, Object value);
 
 }

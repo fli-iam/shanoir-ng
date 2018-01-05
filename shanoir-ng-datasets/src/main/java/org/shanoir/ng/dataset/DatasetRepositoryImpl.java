@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
+public class DatasetRepositoryImpl implements DatasetRepositoryCustom<Dataset> {
 
 	@PersistenceContext
     private EntityManager em;
@@ -23,7 +24,7 @@ public class DatasetRepositoryImpl implements DatasetRepositoryCustom {
 	@Override
 	public List<Dataset> findBy(String fieldName, Object value) {
 		return em.createQuery(
-				"SELECT d FROM Dataset d WHERE d." + fieldName + " LIKE :value")
+				"SELECT d FROM #{#entityName} d WHERE d." + fieldName + " LIKE :value")
 				.setParameter("value", value)
 				.getResultList();
 	}

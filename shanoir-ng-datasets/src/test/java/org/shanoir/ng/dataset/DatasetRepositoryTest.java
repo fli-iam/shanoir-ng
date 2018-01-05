@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.MrDatasetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -32,7 +34,7 @@ public class DatasetRepositoryTest {
 	private static final Long DATASET_TEST_1_ID = 1L;
 	
 	@Autowired
-	private DatasetRepository repository;
+	private MrDatasetRepository repository;
 	
 	/*
 	 * Mocks used to avoid unsatisfied dependency exceptions.
@@ -46,7 +48,7 @@ public class DatasetRepositoryTest {
 	
 	@Test
 	public void findByTest() throws Exception {
-		List<Dataset> datasetsDb = repository.findBy("name", DATASET_TEST_1_NAME);
+		List<MrDataset> datasetsDb = repository.findBy("name", DATASET_TEST_1_NAME);
 		assertNotNull(datasetsDb);
 		assertThat(datasetsDb.size()).isEqualTo(1);
 		assertThat(datasetsDb.get(0).getId()).isEqualTo(DATASET_TEST_1_ID);
@@ -55,7 +57,7 @@ public class DatasetRepositoryTest {
 	
 	@Test
 	public void findOneTest() throws Exception {
-		Dataset datasetDb = repository.findOne(DATASET_TEST_1_ID);
+		MrDataset datasetDb = repository.findOne(DATASET_TEST_1_ID);
 		assertThat(datasetDb.getName()).isEqualTo(DATASET_TEST_1_NAME);
 	}
 	

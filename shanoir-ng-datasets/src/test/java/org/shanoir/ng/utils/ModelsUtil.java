@@ -3,7 +3,7 @@ package org.shanoir.ng.utils;
 import java.util.Date;
 
 import org.shanoir.ng.dataset.CardinalityOfRelatedSubjects;
-import org.shanoir.ng.dataset.Dataset;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.examination.Examination;
 
 /**
@@ -29,8 +29,8 @@ public final class ModelsUtil {
 	 * 
 	 * @return dataset.
 	 */
-	public static Dataset createDataset() {
-		final Dataset template = new Dataset();
+	public static MrDataset createMrDataset() {
+		final MrDataset template = new MrDataset();
 		template.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
 		template.setName(DATASET_NAME);
 		return template;

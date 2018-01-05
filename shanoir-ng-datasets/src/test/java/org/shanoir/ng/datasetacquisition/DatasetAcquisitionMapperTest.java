@@ -7,6 +7,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.datasetacquisition.mr.MrDatasetAcquisition;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,7 +46,7 @@ public class DatasetAcquisitionMapperTest {
 	@Test
 	public void datasetAcquisitionToExaminationDatasetAcquisitionDTOTest() {
 		final DatasetAcquisition datasetAcquisition = createDatasetAcquisition();
-		datasetAcquisition.setDatasets(Arrays.asList(ModelsUtil.createDataset()));
+		datasetAcquisition.setDatasets(Arrays.asList(ModelsUtil.createMrDataset()));
 
 		final ExaminationDatasetAcquisitionDTO datasetAcquisitionDTO = datasetAcquisitionMapper
 				.datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition);
@@ -55,7 +56,7 @@ public class DatasetAcquisitionMapperTest {
 	}
 
 	private DatasetAcquisition createDatasetAcquisition() {
-		final DatasetAcquisition datasetAcquisition = new DatasetAcquisition();
+		final DatasetAcquisition datasetAcquisition = new MrDatasetAcquisition();
 		datasetAcquisition.setId(DATASET_ACQUISITION_ID);
 		datasetAcquisition.setDatasets(new ArrayList<>());
 		return datasetAcquisition;

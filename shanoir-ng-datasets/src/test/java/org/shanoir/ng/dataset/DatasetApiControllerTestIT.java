@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,13 +55,13 @@ public class DatasetApiControllerTestIT extends KeycloakControllerTestIT {
 
 	@Test
 	public void saveNewDatasetProtected() {
-		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Dataset(), String.class);
+		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new MrDataset(), String.class);
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 
 	@Test
 	public void saveNewDatasetWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Dataset> entity = new HttpEntity<>(ModelsUtil.createDataset(), getHeadersWithToken(true));
+		final HttpEntity<Dataset> entity = new HttpEntity<>(ModelsUtil.createMrDataset(), getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 				String.class);
@@ -69,7 +70,7 @@ public class DatasetApiControllerTestIT extends KeycloakControllerTestIT {
 
 	@Test
 	public void updateNewDatasetProtected() {
-		final HttpEntity<Dataset> entity = new HttpEntity<>(ModelsUtil.createDataset());
+		final HttpEntity<Dataset> entity = new HttpEntity<>(ModelsUtil.createMrDataset());
 		
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
@@ -78,7 +79,7 @@ public class DatasetApiControllerTestIT extends KeycloakControllerTestIT {
 
 	@Test
 	public void updateNewDatasetWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Dataset> entity = new HttpEntity<>(ModelsUtil.createDataset(), getHeadersWithToken(true));
+		final HttpEntity<Dataset> entity = new HttpEntity<>(ModelsUtil.createMrDataset(), getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);

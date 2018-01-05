@@ -9,6 +9,7 @@ import java.util.Locale;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -65,7 +66,7 @@ public class DatasetMapperTest {
 	}
 
 	private Dataset createDataset() throws ParseException {
-		final Dataset dataset = new Dataset();
+		final Dataset dataset = new MrDataset();
 		dataset.setCreationDate(shortDateFormatEN.parse(DATE_STR));
 		dataset.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 		dataset.setId(DATASET_ID);

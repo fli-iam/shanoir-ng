@@ -1,8 +1,10 @@
-package org.shanoir.ng.dataset;
+package org.shanoir.ng.dataset.modality;
 
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.dataset.Dataset;
+import org.shanoir.ng.dataset.DatasetService;
 import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,18 +24,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 @Service
-public class DatasetServiceImpl implements DatasetService {
+public class CtDatasetServiceImpl implements DatasetService<CtDataset> {
 
 	/**
 	 * Logger
 	 */
-	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CtDatasetServiceImpl.class);
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
-	private DatasetRepository datasetRepository;
+	private CtDatasetRepository datasetRepository;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirDatasetsException {
@@ -41,18 +43,18 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public List<Dataset> findBy(final String fieldName, final Object value) {
+	public List<CtDataset> findBy(final String fieldName, final Object value) {
 		return datasetRepository.findBy(fieldName, value);
 	}
 
 	@Override
-	public Dataset findById(final Long id) {
+	public CtDataset findById(final Long id) {
 		return datasetRepository.findOne(id);
 	}
-
+	
 	@Override
-	public Dataset save(final Dataset dataset) throws ShanoirDatasetsException {
-		Dataset savedDataset = null;
+	public CtDataset save(final CtDataset dataset) throws ShanoirDatasetsException {
+		CtDataset savedDataset = null;
 		try {
 			savedDataset = datasetRepository.save(dataset);
 		} catch (DataIntegrityViolationException dive) {
@@ -64,8 +66,8 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public Dataset update(final Dataset dataset) throws ShanoirDatasetsException {
-		final Dataset datasetDb = datasetRepository.findOne(dataset.getId());
+	public CtDataset update(final CtDataset dataset) throws ShanoirDatasetsException {
+		final CtDataset datasetDb = datasetRepository.findOne(dataset.getId());
 		updateDatasetValues(datasetDb, dataset);
 		try {
 			datasetRepository.save(datasetDb);
@@ -78,11 +80,11 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public void updateFromShanoirOld(final Dataset dataset) throws ShanoirDatasetsException {
+	public void updateFromShanoirOld(final CtDataset dataset) throws ShanoirDatasetsException {
 		if (dataset.getId() == null) {
 			throw new IllegalArgumentException("Template id cannot be null");
 		} else {
-			final Dataset datasetDb = datasetRepository.findOne(dataset.getId());
+			final CtDataset datasetDb = datasetRepository.findOne(dataset.getId());
 			if (datasetDb != null) {
 				try {
 //					datasetDb.setData(dataset.getData());

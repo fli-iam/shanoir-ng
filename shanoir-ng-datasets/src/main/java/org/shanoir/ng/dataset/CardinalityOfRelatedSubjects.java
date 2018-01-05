@@ -30,16 +30,16 @@ public enum CardinalityOfRelatedSubjects {
 	 * Get a cardinality by its id.
 	 * 
 	 * @param id
-	 *            format id.
+	 *            cardinality id.
 	 * @return cardinality of related subjects.
 	 */
 	public static CardinalityOfRelatedSubjects getCardinality(final Integer id) {
 		if (id == null) {
 			return null;
 		}
-		for (CardinalityOfRelatedSubjects format : CardinalityOfRelatedSubjects.values()) {
-			if (id.equals(format.getId())) {
-				return format;
+		for (CardinalityOfRelatedSubjects cardinality : CardinalityOfRelatedSubjects.values()) {
+			if (id.equals(cardinality.getId())) {
+				return cardinality;
 			}
 		}
 		throw new IllegalArgumentException("No matching cardinality of related subjects for id " + id);
