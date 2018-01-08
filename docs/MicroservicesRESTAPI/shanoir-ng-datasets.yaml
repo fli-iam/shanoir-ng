@@ -6,36 +6,6 @@ info:
 produces:
   - application/json
 paths:
-  /datasets:
-    post:
-      operationId: saveNewDataset
-      description: Saves a new dataset
-      consumes:
-        - application/json
-      parameters:
-        - name: dataset
-          in: body
-          description: dataset to create
-          required: true
-          schema:
-            $ref: '#/definitions/Dataset'
-      responses:
-        '200':
-          description: created dataset
-          schema:
-            $ref: '#/definitions/Dataset'
-        '401':
-          description: unauthorized
-        '403':
-          description: forbidden
-        '422':
-          description: bad parameters
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
   '/datasets/{datasetId}':
     get:
       operationId: findDatasetById
