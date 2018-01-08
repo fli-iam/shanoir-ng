@@ -3,7 +3,9 @@ package org.shanoir.ng.utils;
 import java.util.Date;
 
 import org.shanoir.ng.dataset.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.examination.Examination;
 
 /**
@@ -25,15 +27,39 @@ public final class ModelsUtil {
 	public static final Long EXAMINATION_STUDY_ID = 1L;
 
 	/**
-	 * Create a dataset.
+	 * Create a CT dataset.
 	 * 
-	 * @return dataset.
+	 * @return CT dataset.
+	 */
+	public static CtDataset createCtDataset() {
+		final CtDataset dataset = new CtDataset();
+		dataset.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+		dataset.setName(DATASET_NAME);
+		return dataset;
+	}
+
+	/**
+	 * Create an MR dataset.
+	 * 
+	 * @return MR dataset.
 	 */
 	public static MrDataset createMrDataset() {
-		final MrDataset template = new MrDataset();
-		template.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
-		template.setName(DATASET_NAME);
-		return template;
+		final MrDataset dataset = new MrDataset();
+		dataset.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+		dataset.setName(DATASET_NAME);
+		return dataset;
+	}
+
+	/**
+	 * Create a PET dataset.
+	 * 
+	 * @return PET dataset.
+	 */
+	public static PetDataset createPetDataset() {
+		final PetDataset dataset = new PetDataset();
+		dataset.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+		dataset.setName(DATASET_NAME);
+		return dataset;
 	}
 
 	/**

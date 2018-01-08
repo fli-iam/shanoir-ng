@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,21 +48,6 @@ public class DatasetApiControllerTestIT extends KeycloakControllerTestIT {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
-				String.class);
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-	}
-
-	@Test
-	public void saveNewDatasetProtected() {
-		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new MrDataset(), String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-	}
-
-	@Test
-	public void saveNewDatasetWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Dataset> entity = new HttpEntity<>(ModelsUtil.createMrDataset(), getHeadersWithToken(true));
-
-		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 				String.class);
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}

@@ -30,6 +30,10 @@ public class MrDataset extends Dataset {
 	 */
 	private static final long serialVersionUID = 6801936202135911035L;
 
+	/** list Diffusion gradients. */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrDataset", cascade = CascadeType.ALL)
+	private List<DiffusionGradient> diffusionGradients;
+
 	/** Echo time. */
 	@ManyToOne
 	@JoinColumn(name = "echo_time_id")
@@ -56,9 +60,20 @@ public class MrDataset extends Dataset {
 	@JoinColumn(name = "repetition_time_id")
 	private RepetitionTime repetitionTime;
 
-	/** list Diffusion gradients. */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrDataset", cascade = CascadeType.ALL)
-	private List<DiffusionGradient> diffusionGradients;
+	/**
+	 * @return the diffusionGradients
+	 */
+	public List<DiffusionGradient> getDiffusionGradients() {
+		return diffusionGradients;
+	}
+
+	/**
+	 * @param diffusionGradients
+	 *            the diffusionGradients to set
+	 */
+	public void setDiffusionGradients(List<DiffusionGradient> diffusionGradients) {
+		this.diffusionGradients = diffusionGradients;
+	}
 
 	/**
 	 * @return the echoTime
@@ -158,19 +173,9 @@ public class MrDataset extends Dataset {
 		this.repetitionTime = repetitionTime;
 	}
 
-	/**
-	 * @return the diffusionGradients
-	 */
-	public List<DiffusionGradient> getDiffusionGradients() {
-		return diffusionGradients;
-	}
-
-	/**
-	 * @param diffusionGradients
-	 *            the diffusionGradients to set
-	 */
-	public void setDiffusionGradients(List<DiffusionGradient> diffusionGradients) {
-		this.diffusionGradients = diffusionGradients;
+	@Override
+	public String getType() {
+		return "Mr";
 	}
 
 }

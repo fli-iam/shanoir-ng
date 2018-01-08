@@ -40,4 +40,9 @@ public class RegistrationDataset extends Dataset {
 		}
 	}
 
+	@Override
+	public String getType() {
+		return "Registration";
+	}
+
 }

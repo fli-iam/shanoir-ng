@@ -40,4 +40,9 @@ public class CalibrationDataset extends Dataset {
 		}
 	}
 
+	@Override
+	public String getType() {
+		return "Calibration";
+	}
+
 }

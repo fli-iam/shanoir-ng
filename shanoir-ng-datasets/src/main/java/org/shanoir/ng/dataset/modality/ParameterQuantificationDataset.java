@@ -41,4 +41,9 @@ public class ParameterQuantificationDataset extends Dataset {
 		}
 	}
 
+	@Override
+	public String getType() {
+		return "ParameterQuantification";
+	}
+
 }

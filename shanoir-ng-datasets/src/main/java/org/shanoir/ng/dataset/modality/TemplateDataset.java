@@ -40,4 +40,9 @@ public class TemplateDataset extends Dataset {
 		}
 	}
 
+	@Override
+	public String getType() {
+		return "Template";
+	}
+
 }

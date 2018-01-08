@@ -21,7 +21,7 @@ public class RabbitMqReceiver {
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMqReceiver.class);
 
 	@Autowired
-	private DatasetService datasetService;
+	private DatasetService<Dataset> datasetService;
 
 	private CountDownLatch latch = new CountDownLatch(1);
 

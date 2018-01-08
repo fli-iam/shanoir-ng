@@ -16,7 +16,7 @@ paths:
         '200':
           description: found dataset
           schema:
-            $ref: '#/definitions/Dataset'
+            $ref: '#/definitions/DatasetDTO'
         '401':
           description: unauthorized
         '403':
@@ -409,6 +409,60 @@ definitions:
       studyId:
         type: integer
         format: int64
+  DatasetDTO:
+    type: object
+    required:
+      - id
+      - cardinalityOfRelatedSubjects
+    properties:
+      id:
+        type: integer
+        format: int64
+      cardinalityOfRelatedSubjects:
+        type: string
+        enum:
+          - Single-Subject Dataset
+          - Multiple-Subjects Dataset
+      comment:
+        type: string
+      creationDate:
+        type: string
+        format: date
+      datasetModalityType:
+        type: string
+        enum:
+          - MR Dataset
+          - MEG Dataset
+          - CT Dataset
+          - SPECT Dataset
+          - PET Dataset
+          - EEG Dataset
+      exploredEntity:
+        type: string
+        enum:
+          - Anatomical Dataset
+          - Functional Dataset
+          - Hemodynamic Dataset
+          - Metabolic Dataset
+          - Calibration
+      groupOfSubjectsId:
+        type: integer
+        format: int64
+      name:
+        type: string
+      processedDatasetType:
+        type: string
+        enum:
+          - ReconstructedDataset
+          - NonReconstructedDataset
+      studyId:
+        type: integer
+        format: int64
+      subjectId:
+        type: integer
+        format: int64
+      type:
+        type: string
   InputOfDatasetProcessing:
     type: object
     required:

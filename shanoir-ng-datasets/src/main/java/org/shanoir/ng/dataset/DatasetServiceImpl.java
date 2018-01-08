@@ -1,10 +1,12 @@
-package org.shanoir.ng.dataset.modality;
-
-import java.util.List;
+package org.shanoir.ng.dataset;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.dataset.Dataset;
-import org.shanoir.ng.dataset.DatasetService;
+import org.shanoir.ng.dataset.modality.CtDataset;
+import org.shanoir.ng.dataset.modality.CtDatasetRepository;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.MrDatasetRepository;
+import org.shanoir.ng.dataset.modality.PetDataset;
+import org.shanoir.ng.dataset.modality.PetDatasetRepository;
 import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,18 +26,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 @Service
-public class CtDatasetServiceImpl implements DatasetService<CtDataset> {
+public class DatasetServiceImpl implements DatasetService<Dataset> {
 
 	/**
 	 * Logger
 	 */
-	private static final Logger LOG = LoggerFactory.getLogger(CtDatasetServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
+
+	@Autowired
+	private CtDatasetRepository ctDatasetRepository;
+
+	@Autowired
+	private DatasetRepository datasetRepository;
+
+	@Autowired
+	private MrDatasetRepository mrDatasetRepository;
+
+	@Autowired
+	private PetDatasetRepository petDatasetRepository;
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
-	private CtDatasetRepository datasetRepository;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirDatasetsException {
@@ -43,51 +54,58 @@ public class CtDatasetServiceImpl implements DatasetService<CtDataset> {
 	}
 
 	@Override
-	public List<CtDataset> findBy(final String fieldName, final Object value) {
-		return datasetRepository.findBy(fieldName, value);
+	public Dataset findById(final Long id) {
+		return datasetRepository.findOne(id);
 	}
 
 	@Override
-	public CtDataset findById(final Long id) {
-		return datasetRepository.findOne(id);
-	}
-	
-	@Override
-	public CtDataset save(final CtDataset dataset) throws ShanoirDatasetsException {
-		CtDataset savedDataset = null;
+	public Dataset save(final Dataset dataset) throws ShanoirDatasetsException {
+		Dataset savedDataset = null;
 		try {
-			savedDataset = datasetRepository.save(dataset);
+			if (dataset instanceof CtDataset) {
+				savedDataset = ctDatasetRepository.save((CtDataset) dataset);
+			} else if (dataset instanceof MrDataset) {
+				savedDataset = mrDatasetRepository.save((MrDataset) dataset);
+			} else if (dataset instanceof PetDataset) {
+				savedDataset = petDatasetRepository.save((PetDataset) dataset);
+			}
 		} catch (DataIntegrityViolationException dive) {
 			LOG.error("Error while creating dataset", dive);
 			throw new ShanoirDatasetsException("Error while creating dataset");
 		}
-		updateShanoirOld(savedDataset);
+		// updateShanoirOld(savedDataset);
 		return savedDataset;
 	}
 
 	@Override
-	public CtDataset update(final CtDataset dataset) throws ShanoirDatasetsException {
-		final CtDataset datasetDb = datasetRepository.findOne(dataset.getId());
+	public Dataset update(final Dataset dataset) throws ShanoirDatasetsException {
+		final Dataset datasetDb = datasetRepository.findOne(dataset.getId());
 		updateDatasetValues(datasetDb, dataset);
 		try {
-			datasetRepository.save(datasetDb);
+			if (datasetDb instanceof CtDataset) {
+				ctDatasetRepository.save((CtDataset) datasetDb);
+			} else if (datasetDb instanceof MrDataset) {
+				mrDatasetRepository.save((MrDataset) datasetDb);
+			} else if (datasetDb instanceof PetDataset) {
+				petDatasetRepository.save((PetDataset) datasetDb);
+			}
 		} catch (Exception e) {
 			LOG.error("Error while updating dataset", e);
 			throw new ShanoirDatasetsException("Error while updating dataset");
 		}
-		updateShanoirOld(datasetDb);
+		// updateShanoirOld(datasetDb);
 		return datasetDb;
 	}
 
 	@Override
-	public void updateFromShanoirOld(final CtDataset dataset) throws ShanoirDatasetsException {
+	public void updateFromShanoirOld(final Dataset dataset) throws ShanoirDatasetsException {
 		if (dataset.getId() == null) {
 			throw new IllegalArgumentException("Template id cannot be null");
 		} else {
-			final CtDataset datasetDb = datasetRepository.findOne(dataset.getId());
+			final Dataset datasetDb = datasetRepository.findOne(dataset.getId());
 			if (datasetDb != null) {
 				try {
-//					datasetDb.setData(dataset.getData());
+					// datasetDb.setData(dataset.getData());
 					datasetRepository.save(datasetDb);
 				} catch (Exception e) {
 					LOG.error("Error while updating dataset from Shanoir Old", e);
@@ -114,8 +132,8 @@ public class CtDatasetServiceImpl implements DatasetService<CtDataset> {
 			LOG.error("Cannot send dataset " + dataset.getId() + " save/update to Shanoir Old on queue : "
 					+ RabbitMqConfiguration.datasetQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send dataset " + dataset.getId() + " save/update because of an error while serializing dataset.",
-					e);
+			LOG.error("Cannot send dataset " + dataset.getId()
+					+ " save/update because of an error while serializing dataset.", e);
 		}
 		return false;
 	}

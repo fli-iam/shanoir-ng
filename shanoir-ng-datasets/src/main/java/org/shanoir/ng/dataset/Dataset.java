@@ -11,12 +11,31 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import org.shanoir.ng.dataset.modality.CalibrationDataset;
+import org.shanoir.ng.dataset.modality.CtDataset;
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.MegDataset;
+import org.shanoir.ng.dataset.modality.MeshDataset;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
+import org.shanoir.ng.dataset.modality.PetDataset;
+import org.shanoir.ng.dataset.modality.RegistrationDataset;
+import org.shanoir.ng.dataset.modality.SegmentationDataset;
+import org.shanoir.ng.dataset.modality.SpectDataset;
+import org.shanoir.ng.dataset.modality.StatisticalDataset;
+import org.shanoir.ng.dataset.modality.TemplateDataset;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.processing.DatasetProcessing;
 import org.shanoir.ng.processing.InputOfDatasetProcessing;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 /**
  * Dataset.
@@ -26,6 +45,20 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
+@JsonSubTypes({ @JsonSubTypes.Type(value = CalibrationDataset.class, name = "Calibration"),
+		@JsonSubTypes.Type(value = CtDataset.class, name = "Ct"),
+		@JsonSubTypes.Type(value = EegDataset.class, name = "Eeg"),
+		@JsonSubTypes.Type(value = MegDataset.class, name = "Meg"),
+		@JsonSubTypes.Type(value = MeshDataset.class, name = "Mesh"),
+		@JsonSubTypes.Type(value = MrDataset.class, name = "Mr"),
+		@JsonSubTypes.Type(value = ParameterQuantificationDataset.class, name = "ParameterQuantification"),
+		@JsonSubTypes.Type(value = PetDataset.class, name = "Pet"),
+		@JsonSubTypes.Type(value = RegistrationDataset.class, name = "Registration"),
+		@JsonSubTypes.Type(value = SegmentationDataset.class, name = "Segmentation"),
+		@JsonSubTypes.Type(value = SpectDataset.class, name = "Spect"),
+		@JsonSubTypes.Type(value = StatisticalDataset.class, name = "Statistical"),
+		@JsonSubTypes.Type(value = TemplateDataset.class, name = "Template") })
 public abstract class Dataset extends AbstractGenericItem {
 
 	/**
@@ -365,5 +398,13 @@ public abstract class Dataset extends AbstractGenericItem {
 	public void setSubjectId(Long subjectId) {
 		this.subjectId = subjectId;
 	}
+
+	/**
+	 * Gets the type.
+	 *
+	 * @return the type
+	 */
+	@Transient
+	public abstract String getType();
 
 }
