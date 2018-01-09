@@ -1,0 +1,53 @@
+<div class="content-component">
+    <form [formGroup]="uploadExtraDataForm" class="max-content" novalidate>
+		<div class="layout">
+			<fieldset>
+				<ol>
+                    <li class="required">
+                        <label i18n="uploadExtraData| Explication label@@uploadExtraDataExplication" class="required-label">You can attach extra data to existing examinations. To do this, you can upload as many files as you wish of any type, and select in the next step the examination to which they are associated. 
+							</label> 
+							<div class="form-group">
+									<label for="file">Choose File</label>
+									<input type="file"
+										   id="file"
+										   name="file"
+										   (change)="handleFileInput($event.target.files)" >
+							</div>
+					</li>
+					<li class="required">
+						    <label i18n="uploadExtraData|research study label@@uploadExtraDataResearchStudy" class="required-label">Select an existing research study 
+								</label>
+								<select id="studyId" required formControlName="studyId" [(ngModel)]="examinationStudyId">
+										<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
+									</select> 
+					</li>
+					<li class="required">
+						    <label i18n="uploadExtraData|subject label@@uploadExtraDataSubject" class="required-label">Select a subject 
+								</label> 
+					</li>
+					<li class="required">
+						    <label i18n="uploadExtraData|examination label@@uploadExtraDataExamination" class="required-label">Select an examination
+								</label> 
+							<input type="text" id="examination" formControlName="examination" [(ngModel)]="examinationId" />
+					</li>
+				</ol>
+			</fieldset>
+			<div class="footer command-zone">
+				<span [ngSwitch]="mode">
+					<button i18n="uploadExtraData detail|Back button label@@backButton" class="Button" (click)="back()">Back</button>	
+					<button i18n="uploadExtraData detail|Cancel button label@@cancelButton" class="Button" (click)="back()">Cancel</button>
+					<button i18n="uploadExtraData detail|Cancel button label@@cancelButton" class="Button" (click)="add()">Add</button>
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
+						<button type="submit" i18n="uploadExtraData detail|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
+						<button type="submit" i18n="uploadExtraData detail|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!uploadExtraDataForm.valid">Update</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
+						<button type="submit" i18n="uploadExtraData detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!uploadExtraDataForm.valid">Create</button>
+					</ng-template>
+				</span>
+			</div>
+        </div>
+    </form>
+</div>

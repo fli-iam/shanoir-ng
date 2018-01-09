@@ -1,0 +1,52 @@
+<div class="content-component">
+    <form [formGroup]="instAssessemntForm" class="max-content" novalidate>
+		<div class="layout">
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'"> 
+					<div class="header command-zone" i18n="View instAssessment|Title@@instAssessmentDetailViewTitle">Details on Instrument Based Assessement</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'"> 
+					<div class="header command-zone" i18n="Edit instAssessment|Title@@instAssessmentDetailEditTitle">Edit Instrument Based Assessement</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'"> 
+					<div class="header command-zone" i18n="Create instAssessment|Title@@instAssessmentDetailCreateTitle">Create Instrument Based Assessement</div>
+				</ng-template>
+			</span>
+			<fieldset>
+				<ol>
+                    <li class="required">
+                        <label i18n="instAssessment detail|User question label@@instAssessmentDetailUserQuestion" class="required-label">Object 
+							</label> 
+						<input type="text" id="object" />
+					</li>
+					<li class="required">
+                        <label i18n="instAssessment detail|User question label@@instAssessmentDetailUserQuestion" class="required-label">Content 
+							</label> 
+
+							<!--><div [froalaEditor]> Hello, Froala! </div><-->
+							<!--><textarea [froalaEditor] formControlName="formModel"></textarea><-->
+						<textarea ></textarea>
+
+					</li>
+					
+				</ol>
+			</fieldset>
+			<div class="footer command-zone">
+				<span [ngSwitch]="mode">
+					<button i18n="instAssessment detail|Back button label@@backButton" class="Button" (click)="back()">Back</button>	
+					<button i18n="instAssessment detail|Cancel button label@@cancelButton" class="Button" (click)="back()">Cancel</button>
+					<button i18n="instAssessment detail|Cancel button label@@cancelButton" class="Button" (click)="add()">Send Mail</button>
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
+						<button type="submit" i18n="instAssessment detail|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
+						<button type="submit" i18n="instAssessment detail|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!instAssessmentForm.valid">Update</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
+						<button type="submit" i18n="instAssessment detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!instAssessmentForm.valid">Create</button>
+					</ng-template>
+				</span>
+			</div>
+        </div>
+    </form>
+</div>

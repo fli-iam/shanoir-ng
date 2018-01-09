@@ -61,4 +61,14 @@ export class ExaminationService {
                 return Promise.reject(error.message || error);
             });
     }
+
+    postFile(fileToUpload: File): Observable<boolean> {
+        const endpoint = 'your-destination-url';
+        const formData: FormData = new FormData();
+        formData.append('fileKey', fileToUpload, fileToUpload.name);
+        return this.http
+          .post(endpoint, formData)
+          .map(response => response)
+          .catch(this.handleErrorService.handleError);
+    }
 }
