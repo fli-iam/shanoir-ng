@@ -15,7 +15,6 @@
     "ngc": "ngc --i18nFile=./messages.xlf --locale=en --i18nFormat=xlf2",
     "ngc:fr": "ngc --i18nFile=./src/locale/messages.fr.xlf --locale=fr --i18nFormat=xlf2",
     "start": "webpack-dev-server --config config/webpack.dev.js --progress --profile --watch --content-base src/",
-
     "test": "karma start"
   },
   "licenses": [
@@ -44,6 +43,7 @@
     "angular-in-memory-web-api": "0.5.2",
     "core-js": "2.5.3",
     "mydatepicker": "2.6.1",
+    "ng2-froala-editor": "^1.0.17",
     "reflect-metadata": "0.1.10",
     "rxjs": "5.5.5",
     "systemjs": "0.20.19",

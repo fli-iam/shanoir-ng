@@ -138,6 +138,37 @@
 
 						</span>
 					</li>
+					<li>
+							<label i18n="Examination detail|Assessments label@@examinationDetailAssessments">Assessments</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
+									<!--{{examination.note}}-->
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
+									(click)="instAssessmentModal.show()">
+										<img [src]="addIconPath"/>
+										new Instrument Based Assessment										
+									</button>
+								</ng-template>
+							</span>
+						</li>
+
+						<li>
+							<label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									
+									<button i18n="Examination detail|Attach new files button@@examinationDetailAttachNewFiles"
+									(click)="attachNewFilesModal.show()">
+										<img [src]="addIconPath"/>
+										Attach extra data to existing examinations									
+									</button>
+								</ng-template>
+							</span>
+						</li>
 				</ol>
 			</fieldset>
 			<div class="footer command-zone">
@@ -163,3 +194,15 @@
 		</div>
 	</form>
 </div>
+
+<app-modal modalDialogId="instAssessmentModal" #instAssessmentModal>
+		<div class="app-modal-body">
+		  <instrument-essessment-detail  (closing)="closePopin($event)"></instrument-essessment-detail>
+		</div>
+</app-modal>
+
+<app-modal modalDialogId="attachNewFilesModal" #attachNewFilesModal>
+		<div class="app-modal-body">
+		  <upload-extra-data  [examinationStudyId]="examination.studyId" [studies]="studies" (closing)="closeAttachedFilePopin($event)"></upload-extra-data>
+		</div>
+</app-modal>

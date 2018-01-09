@@ -63,9 +63,15 @@ import { TreeNodeComponent } from './shared/components/tree/tree-node.component'
 import { UserComponent } from './users/user/user.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserService } from './users/shared/user.service';
+import "froala-editor/js/froala_editor.pkgd.min.js";
+import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 
 import '../assets/css/common.css';
 import '../assets/css/modal.css';
+import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
+import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
+import { UploadExtraDataComponent } from './examinations/Attached files/upload-extra-data.component';
+
 
 @NgModule({
     imports: [
@@ -76,7 +82,9 @@ import '../assets/css/modal.css';
         MatDialogModule,
         MyDatePickerModule,
         ReactiveFormsModule,
-        routing
+        routing,
+        FroalaEditorModule.forRoot(), 
+       FroalaViewModule.forRoot(),
     ],
     declarations: [
         AccountRequestComponent,
@@ -96,6 +104,8 @@ import '../assets/css/modal.css';
         ExaminationComponent,
         ExaminationPipe,
         ExaminationTreeComponent,
+        NewInstrumentComponent,
+        UploadExtraDataComponent,
         ExtensionRequestComponent,
         HeaderComponent,
         HomeComponent,
@@ -116,7 +126,8 @@ import '../assets/css/modal.css';
         TableComponent,
         TreeNodeComponent,
         TooltipComponent,
-        UserListComponent
+        UserListComponent,
+        InstrumentAssessmentComponent
     ],
     entryComponents: [
         ConfirmDialogComponent

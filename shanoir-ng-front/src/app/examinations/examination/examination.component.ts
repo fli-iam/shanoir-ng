@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input , ViewChild} from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -12,6 +12,8 @@ import { CenterService } from '../../centers/shared/center.service';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { ImagesUrlUtil } from "../../shared/utils/images-url.util";
 
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 
@@ -24,6 +26,8 @@ import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatep
 
 export class ExaminationComponent implements OnInit {
 
+    @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
+    @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
     public examinationForm: FormGroup
     private examination: Examination = new Examination();
     private examinationId: number;
@@ -34,6 +38,7 @@ export class ExaminationComponent implements OnInit {
     private studies: IdNameObject[];
     private subjects: IdNameObject[];
     private examinationExecutives: Object[];
+    private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
     isDateValid: boolean = true;
     selectedDateNormal: IMyDate;
 
@@ -202,9 +207,7 @@ export class ExaminationComponent implements OnInit {
             .subscribe((examination) => {
                 this.back();
             }, (err: String) => {
-               /* if (err.indexOf("name should be unique") != -1) {
-                    this.isNameUnique = false;
-                }*/
+
             });
     }
 
@@ -220,5 +223,13 @@ export class ExaminationComponent implements OnInit {
             });
     }
 
+
+    closePopin(instAssessmentId?: number) {
+        this.instAssessmentModal.hide();
+    }
+
+    closeAttachedFilePopin(id?: number) {
+        this.attachNewFilesModal.hide();
+    }
 
 }

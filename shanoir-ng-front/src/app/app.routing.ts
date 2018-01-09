@@ -20,6 +20,7 @@ import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyTreeComponent } from './studies/tree/study-tree.component';
 import { UserComponent } from './users/user/user.component';
 import { UserListComponent } from './users/user-list/user-list.component';
+import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 
 const appRoutes: Routes = [
   {
@@ -80,6 +81,10 @@ const appRoutes: Routes = [
   },{
     path: 'examination',
     component: ExaminationComponent,
+    canActivate: [AuthNotGuestGuard]
+  },{
+    path: 'new-instrument',
+    component: NewInstrumentComponent,
     canActivate: [AuthNotGuestGuard]
   },{
     path: 'tree-test',
