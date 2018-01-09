@@ -67,7 +67,7 @@ public class PetProtocol extends AbstractGenericItem {
 	private String numberOfSubsets;
 
 	/** The PET Dataset acquisition. */
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne(cascade = CascadeType.ALL, mappedBy = "petProtocol")
 	private PetDatasetAcquisition petDatasetAcquisition;
 
 	/**

@@ -64,7 +64,7 @@ CREATE TABLE `examination` (
   `experimental_group_of_subjects_id` bigint(20) DEFAULT NULL,
   `investigator_center_id` bigint(20) DEFAULT NULL,
   `investigator_external` bit(1) NOT NULL,
-  `investigator_id` bigint(20) NOT NULL,
+  `investigator_id` bigint(20) DEFAULT NULL,
   `note` longtext,
   `study_id` bigint(20) NOT NULL,
   `subject_id` bigint(20) DEFAULT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE `examination` (
   PRIMARY KEY (`id`),
   KEY `FKr6tia0a2qg6r44r8cp6a8x771` (`timepoint_id`),
   CONSTRAINT `FKr6tia0a2qg6r44r8cp6a8x771` FOREIGN KEY (`timepoint_id`) REFERENCES `timepoint` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `instrument_based_assessment` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -132,6 +132,115 @@ CREATE TABLE `dataset_acquisition` (
   PRIMARY KEY (`id`),
   KEY `FKjlkt90yo04ld9stkmr4k1pam` (`examination_id`),
   CONSTRAINT `FKjlkt90yo04ld9stkmr4k1pam` FOREIGN KEY (`examination_id`) REFERENCES `examination` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `ct_protocol` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `ct_dataset_acquisition` (
+  `id` bigint(20) NOT NULL,
+  `ct_protocol_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKrf86wblh9s84tt1d6b9cqhbik` (`ct_protocol_id`),
+  CONSTRAINT `FKnbcl0katei6jrf0fuvtnbf5qh` FOREIGN KEY (`id`) REFERENCES `dataset_acquisition` (`id`),
+  CONSTRAINT `FKrf86wblh9s84tt1d6b9cqhbik` FOREIGN KEY (`ct_protocol_id`) REFERENCES `ct_protocol` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `mr_protocol` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `acquisition_contrast` int(11) DEFAULT NULL,
+  `acquisition_duration` double DEFAULT NULL,
+  `acquisition_resolutionx` int(11) DEFAULT NULL,
+  `acquisition_resolutiony` int(11) DEFAULT NULL,
+  `axis_orientation_at_acquisition` int(11) DEFAULT NULL,
+  `comment` varchar(255) DEFAULT NULL,
+  `contrast_agent_concentration` double DEFAULT NULL,
+  `contrast_agent_product` varchar(255) DEFAULT NULL,
+  `contrast_agent_used` int(11) DEFAULT NULL,
+  `echo_train_length` int(11) DEFAULT NULL,
+  `filters` varchar(255) DEFAULT NULL,
+  `fovx` double DEFAULT NULL,
+  `fovy` double DEFAULT NULL,
+  `imaged_nucleus` int(11) DEFAULT NULL,
+  `imaging_frequency` double DEFAULT NULL,
+  `injected_volume` double DEFAULT NULL,
+  `magnetization_transfer` bit(1) DEFAULT NULL,
+  `mr_sequence_application` int(11) DEFAULT NULL,
+  `mr_sequencekspace_fill` int(11) DEFAULT NULL,
+  `mr_sequence_name` varchar(255) DEFAULT NULL,
+  `mr_sequence_physics` int(11) DEFAULT NULL,
+  `number_of_averages` int(11) DEFAULT NULL,
+  `number_of_phase_encoding_steps` int(11) DEFAULT NULL,
+  `number_of_temporal_positions` int(11) DEFAULT NULL,
+  `parallel_acquisition` bit(1) DEFAULT NULL,
+  `parallel_acquisition_technique` int(11) DEFAULT NULL,
+  `patient_position` int(11) DEFAULT NULL,
+  `percent_phase_fov` double DEFAULT NULL,
+  `percent_sampling` double DEFAULT NULL,
+  `pixel_bandwidth` double DEFAULT NULL,
+  `pixel_spacingx` double DEFAULT NULL,
+  `pixel_spacingy` double DEFAULT NULL,
+  `protocol_name` varchar(255) DEFAULT NULL,
+  `receiving_coil_id` bigint(20) DEFAULT NULL,
+  `slice_order` int(11) DEFAULT NULL,
+  `slice_orientation_at_acquisition` int(11) DEFAULT NULL,
+  `slice_spacing` double DEFAULT NULL,
+  `slice_thickness` double DEFAULT NULL,
+  `temporal_resolution` double DEFAULT NULL,
+  `time_reduction_factor_for_the_inplane_direction` double DEFAULT NULL,
+  `time_reduction_factor_for_the_out_ofplane_direction` double DEFAULT NULL,
+  `transmitting_coil_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `mr_dataset_acquisition` (
+  `id` bigint(20) NOT NULL,
+  `mr_protocol_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKmmqwm4sxqkg7s28w4ijtbd74w` (`mr_protocol_id`),
+  CONSTRAINT `FK94fbnym1k5qoab3wb1opnqm7n` FOREIGN KEY (`id`) REFERENCES `dataset_acquisition` (`id`),
+  CONSTRAINT `FKmmqwm4sxqkg7s28w4ijtbd74w` FOREIGN KEY (`mr_protocol_id`) REFERENCES `mr_protocol` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `pet_protocol` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `attenuation_correction_method` varchar(255) DEFAULT NULL,
+  `convolution_kernel` varchar(255) DEFAULT NULL,
+  `decay_correction` varchar(255) DEFAULT NULL,
+  `decay_factor` int(11) DEFAULT NULL,
+  `dimensionx` int(11) NOT NULL,
+  `dimensiony` int(11) NOT NULL,
+  `dose_calibration_factor` int(11) DEFAULT NULL,
+  `energy_window_lower_limit` int(11) DEFAULT NULL,
+  `energy_window_upper_limit` int(11) DEFAULT NULL,
+  `number_of_iterations` varchar(255) DEFAULT NULL,
+  `number_of_slices` int(11) NOT NULL,
+  `number_of_subsets` varchar(255) DEFAULT NULL,
+  `radionuclide_half_life` double DEFAULT NULL,
+  `radionuclide_total_dose` int(11) DEFAULT NULL,
+  `radiopharmaceutical_code` varchar(255) DEFAULT NULL,
+  `randoms_correction_method` varchar(255) DEFAULT NULL,
+  `reconstruction_method` varchar(255) DEFAULT NULL,
+  `rescale_slope` bigint(20) DEFAULT NULL,
+  `rescale_type` varchar(255) DEFAULT NULL,
+  `scatter_correction_method` varchar(255) DEFAULT NULL,
+  `scatter_fraction_factor` int(11) DEFAULT NULL,
+  `units` varchar(255) DEFAULT NULL,
+  `voxel_sizex` varchar(255) NOT NULL,
+  `voxel_sizey` varchar(255) NOT NULL,
+  `voxel_sizez` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `pet_dataset_acquisition` (
+  `id` bigint(20) NOT NULL,
+  `pet_protocol_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK2m5gqjwoxg4sj85iy703ovda5` (`pet_protocol_id`),
+  CONSTRAINT `FK2m5gqjwoxg4sj85iy703ovda5` FOREIGN KEY (`pet_protocol_id`) REFERENCES `pet_protocol` (`id`),
+  CONSTRAINT `FKk6ntqflihbyffrt4s4jxn4y8g` FOREIGN KEY (`id`) REFERENCES `dataset_acquisition` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `dataset` (
@@ -156,6 +265,140 @@ CREATE TABLE `dataset` (
   CONSTRAINT `FKe9f1d0hhxgaae17g24s4ma4if` FOREIGN KEY (`dataset_aprocessing_id`) REFERENCES `dataset_processing` (`id`),
   CONSTRAINT `FKjkg5k0bq6iwsbti7gk8qs45n9` FOREIGN KEY (`dataset_acquisition_id`) REFERENCES `dataset_acquisition` (`id`),
   CONSTRAINT `FKnxwkicqfi0bhxcf4vhxy6ter1` FOREIGN KEY (`referenced_dataset_for_superimposition_id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `calibration_dataset` (
+  `calibration_dataset_type` int(11) DEFAULT NULL,
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FKdlyq1k6loyh9hwl564tfyx2w5` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `ct_dataset` (
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FKa543uue55g1k7hkw0un1dip9u` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `eeg_dataset` (
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FKo2jjh4q0t5mvn9y1rh0alqf2b` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `meg_dataset` (
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FKq2w8q5r8esvf6i49gul9cy1mu` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `mesh_dataset` (
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FKqmi93jnftco7l78yumd8xtngr` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `echo_time` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `echo_number` int(11) DEFAULT NULL,
+  `echo_time_value` double NOT NULL,
+  `mr_protocol_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKn5d4vrne592n952vov3h2v1bi` (`mr_protocol_id`),
+  CONSTRAINT `FKn5d4vrne592n952vov3h2v1bi` FOREIGN KEY (`mr_protocol_id`) REFERENCES `mr_protocol` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `flip_angle` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `flip_angle_value` double NOT NULL,
+  `mr_protocol_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK7jpqgc6jwmgbskyhe7j0u6ip5` (`mr_protocol_id`),
+  CONSTRAINT `FK7jpqgc6jwmgbskyhe7j0u6ip5` FOREIGN KEY (`mr_protocol_id`) REFERENCES `mr_protocol` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `inversion_time` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `inversion_time_value` double NOT NULL,
+  `mr_protocol_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK15ugsj5f8f8gqrmnld5n2ncti` (`mr_protocol_id`),
+  CONSTRAINT `FK15ugsj5f8f8gqrmnld5n2ncti` FOREIGN KEY (`mr_protocol_id`) REFERENCES `mr_protocol` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `repetition_time` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `repetition_time_value` double NOT NULL,
+  `mr_protocol_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKnqa9hturret1vac0hl1phw9lt` (`mr_protocol_id`),
+  CONSTRAINT `FKnqa9hturret1vac0hl1phw9lt` FOREIGN KEY (`mr_protocol_id`) REFERENCES `mr_protocol` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `mr_dataset` (
+  `mr_dataset_nature` int(11) DEFAULT NULL,
+  `mr_quality_procedure_type` int(11) DEFAULT NULL,
+  `id` bigint(20) NOT NULL,
+  `echo_time_id` bigint(20) DEFAULT NULL,
+  `flip_angle_id` bigint(20) DEFAULT NULL,
+  `inversion_time_id` bigint(20) DEFAULT NULL,
+  `repetition_time_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK28lp49mgs48sxrfod3k5svjl9` (`echo_time_id`),
+  KEY `FKsqdefddsomgobf3g4n98mb72x` (`flip_angle_id`),
+  KEY `FKdbbue211xcar0kutocno57g4l` (`inversion_time_id`),
+  KEY `FKa7re8qd619tqje13lncd9r8u9` (`repetition_time_id`),
+  CONSTRAINT `FK28lp49mgs48sxrfod3k5svjl9` FOREIGN KEY (`echo_time_id`) REFERENCES `echo_time` (`id`),
+  CONSTRAINT `FKa7re8qd619tqje13lncd9r8u9` FOREIGN KEY (`repetition_time_id`) REFERENCES `repetition_time` (`id`),
+  CONSTRAINT `FKdbbue211xcar0kutocno57g4l` FOREIGN KEY (`inversion_time_id`) REFERENCES `inversion_time` (`id`),
+  CONSTRAINT `FKdnipc0t8no2h5u9hg7p62cmyf` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`),
+  CONSTRAINT `FKsqdefddsomgobf3g4n98mb72x` FOREIGN KEY (`flip_angle_id`) REFERENCES `flip_angle` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `parameter_quantification_dataset` (
+  `parameter_quantification_dataset_nature` int(11) DEFAULT NULL,
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FK8nehljhf7cu8gp775ucoqio18` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `pet_dataset` (
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FK7ggwaa6nb4810nrt8skv73hsh` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `registration_dataset` (
+  `registration_dataset_type` int(11) DEFAULT NULL,
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FKk937pga0vh36jl9ffua00vi6v` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `segmentation_dataset` (
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FKikr8fbhbvqmher21kp7ib514w` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `spect_dataset` (
+  `spect_dataset_nature` int(11) DEFAULT NULL,
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FKnjm68t9hsgkknv5qo97tjofwq` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `statistical_dataset` (
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FKg7n0qrdhkh90hudunih7ho9hl` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `template_dataset` (
+  `template_dataset_nature` int(11) DEFAULT NULL,
+  `id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FKi2u82rhpqh1nr05lnb14mpkij` FOREIGN KEY (`id`) REFERENCES `dataset` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `dataset_expression` (
@@ -197,3 +440,17 @@ CREATE TABLE `input_of_dataset_processing` (
   CONSTRAINT `FKkx7tyqxgturnph56eamy8b2j` FOREIGN KEY (`dataset_id`) REFERENCES `dataset` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `diffusion_gradient` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `diffusion_gradientbvalue` double NOT NULL,
+  `diffusion_gradient_orientationx` double NOT NULL,
+  `diffusion_gradient_orientationy` double NOT NULL,
+  `diffusion_gradient_orientationz` double NOT NULL,
+  `mr_dataset_id` bigint(20) DEFAULT NULL,
+  `mr_protocol_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK6bx7fuj68kun7qt6b1iwbn4tp` (`mr_dataset_id`),
+  KEY `FK1s2racr65xpajre4hcoeemova` (`mr_protocol_id`),
+  CONSTRAINT `FK1s2racr65xpajre4hcoeemova` FOREIGN KEY (`mr_protocol_id`) REFERENCES `mr_protocol` (`id`),
+  CONSTRAINT `FK6bx7fuj68kun7qt6b1iwbn4tp` FOREIGN KEY (`mr_dataset_id`) REFERENCES `mr_dataset` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -21,7 +21,7 @@ public class CtProtocol extends AbstractGenericItem {
 	private static final long serialVersionUID = 5062475142212117502L;
 
 	/** The MR Dataset acquisition. */
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne(cascade = CascadeType.ALL, mappedBy = "ctProtocol")
 	private CtDatasetAcquisition ctDatasetAcquisition;
 
 	/**
