@@ -1,12 +1,13 @@
 package org.shanoir.ng.dataset;
 
-import org.springframework.data.repository.CrudRepository;
+import javax.transaction.Transactional;
 
 /**
  * Repository for datasets.
  *
  * @author msimon
  */
-public interface DatasetRepository extends CrudRepository<Dataset, Long>, DatasetRepositoryCustom {
+@Transactional
+public interface DatasetRepository extends DatasetBaseRepository<Dataset> {
 
 }

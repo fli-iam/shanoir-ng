@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,15 +44,18 @@ public class DatasetApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
-	private DatasetService datasetServiceMock;
+	private DatasetService<Dataset> datasetServiceMock;
+
+	@MockBean
+	private DatasetMapper datasetMapperMock;
 
 	@Before
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(datasetServiceMock).deleteById(1L);
-		given(datasetServiceMock.findById(1L)).willReturn(new Dataset());
-		given(datasetServiceMock.save(Mockito.mock(Dataset.class))).willReturn(new Dataset());
+		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
+		given(datasetServiceMock.save(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 	}
 
 	@Test
@@ -69,17 +73,12 @@ public class DatasetApiControllerTest {
 
 	@Test
 	@WithMockUser
-	public void saveNewDatasetTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createDataset())))
-				.andExpect(status().isOk());
-	}
-
-	@Test
-	@WithMockUser
 	public void updateDatasetTest() throws Exception {
+		String json = gson.toJson(ModelsUtil.createMrDataset());
+		// Cheat to add dataset type into json
+		json = json.replace("}", "") + ",\"type\":\"Mr\"}";
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createDataset())))
+				.contentType(MediaType.APPLICATION_JSON).content(json))
 				.andExpect(status().isNoContent());
 	}
 

@@ -1,9 +1,8 @@
 package org.shanoir.ng.dataset;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 
-import java.util.List;
+import java.util.Iterator;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,8 +27,8 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 @ActiveProfiles("test")
 public class DatasetRepositoryTest {
 
-	private static final String DATASET_TEST_1_NAME = "Dataset1";
-	private static final Long DATASET_TEST_1_ID = 1L;
+	private static final String MR_DATASET_TEST_1_NAME = "MRDataset1";
+	private static final Long MR_DATASET_TEST_1_ID = 1L;
 	
 	@Autowired
 	private DatasetRepository repository;
@@ -45,18 +44,22 @@ public class DatasetRepositoryTest {
 	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
 	
 	@Test
-	public void findByTest() throws Exception {
-		List<Dataset> datasetsDb = repository.findBy("name", DATASET_TEST_1_NAME);
-		assertNotNull(datasetsDb);
-		assertThat(datasetsDb.size()).isEqualTo(1);
-		assertThat(datasetsDb.get(0).getId()).isEqualTo(DATASET_TEST_1_ID);
+	public void findAllTest() throws Exception {
+		Iterable<Dataset> datasetsDb = repository.findAll();
+		assertThat(datasetsDb).isNotNull();
+		int nbDatasets = 0;
+		Iterator<Dataset> datasetsIt = datasetsDb.iterator();
+		while (datasetsIt.hasNext()) {
+			datasetsIt.next();
+			nbDatasets++;
+		}
+		assertThat(nbDatasets).isEqualTo(3);
 	}
-	
 	
 	@Test
 	public void findOneTest() throws Exception {
-		Dataset datasetDb = repository.findOne(DATASET_TEST_1_ID);
-		assertThat(datasetDb.getName()).isEqualTo(DATASET_TEST_1_NAME);
+		Dataset datasetDb = repository.findOne(MR_DATASET_TEST_1_ID);
+		assertThat(datasetDb.getName()).isEqualTo(MR_DATASET_TEST_1_NAME);
 	}
 	
 }

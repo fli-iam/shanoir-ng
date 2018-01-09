@@ -6,36 +6,6 @@ info:
 produces:
   - application/json
 paths:
-  /datasets:
-    post:
-      operationId: saveNewDataset
-      description: Saves a new dataset
-      consumes:
-        - application/json
-      parameters:
-        - name: dataset
-          in: body
-          description: dataset to create
-          required: true
-          schema:
-            $ref: '#/definitions/Dataset'
-      responses:
-        '200':
-          description: created dataset
-          schema:
-            $ref: '#/definitions/Dataset'
-        '401':
-          description: unauthorized
-        '403':
-          description: forbidden
-        '422':
-          description: bad parameters
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
   '/datasets/{datasetId}':
     get:
       operationId: findDatasetById
@@ -46,7 +16,7 @@ paths:
         '200':
           description: found dataset
           schema:
-            $ref: '#/definitions/Dataset'
+            $ref: '#/definitions/DatasetDTO'
         '401':
           description: unauthorized
         '403':
@@ -439,6 +409,60 @@ definitions:
       studyId:
         type: integer
         format: int64
+  DatasetDTO:
+    type: object
+    required:
+      - id
+      - cardinalityOfRelatedSubjects
+    properties:
+      id:
+        type: integer
+        format: int64
+      cardinalityOfRelatedSubjects:
+        type: string
+        enum:
+          - Single-Subject Dataset
+          - Multiple-Subjects Dataset
+      comment:
+        type: string
+      creationDate:
+        type: string
+        format: date
+      datasetModalityType:
+        type: string
+        enum:
+          - MR Dataset
+          - MEG Dataset
+          - CT Dataset
+          - SPECT Dataset
+          - PET Dataset
+          - EEG Dataset
+      exploredEntity:
+        type: string
+        enum:
+          - Anatomical Dataset
+          - Functional Dataset
+          - Hemodynamic Dataset
+          - Metabolic Dataset
+          - Calibration
+      groupOfSubjectsId:
+        type: integer
+        format: int64
+      name:
+        type: string
+      processedDatasetType:
+        type: string
+        enum:
+          - ReconstructedDataset
+          - NonReconstructedDataset
+      studyId:
+        type: integer
+        format: int64
+      subjectId:
+        type: integer
+        format: int64
+      type:
+        type: string
   InputOfDatasetProcessing:
     type: object
     required:

@@ -28,6 +28,15 @@ public interface DatasetMapper {
 	List<IdNameDTO> datasetsToIdNameDTOs(List<Dataset> datasets);
 
 	/**
+	 * Map a @Dataset to a @DatasetDTO.
+	 * 
+	 * @param datasets
+	 *            dataset.
+	 * @return dataset DTO.
+	 */
+	DatasetDTO datasetToDatasetDTO(Dataset dataset);
+
+	/**
 	 * Map a @Dataset to a @IdNameDTO.
 	 * 
 	 * @param dataset

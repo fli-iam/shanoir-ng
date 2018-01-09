@@ -1,8 +1,12 @@
 package org.shanoir.ng.dataset;
 
-import java.util.List;
-
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.dataset.modality.CtDataset;
+import org.shanoir.ng.dataset.modality.CtDatasetRepository;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.MrDatasetRepository;
+import org.shanoir.ng.dataset.modality.PetDataset;
+import org.shanoir.ng.dataset.modality.PetDatasetRepository;
 import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 @Service
-public class DatasetServiceImpl implements DatasetService {
+public class DatasetServiceImpl implements DatasetService<Dataset> {
 
 	/**
 	 * Logger
@@ -30,19 +34,23 @@ public class DatasetServiceImpl implements DatasetService {
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
+	private CtDatasetRepository ctDatasetRepository;
 
 	@Autowired
 	private DatasetRepository datasetRepository;
 
+	@Autowired
+	private MrDatasetRepository mrDatasetRepository;
+
+	@Autowired
+	private PetDatasetRepository petDatasetRepository;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
 	@Override
 	public void deleteById(final Long id) throws ShanoirDatasetsException {
 		datasetRepository.delete(id);
-	}
-
-	@Override
-	public List<Dataset> findBy(final String fieldName, final Object value) {
-		return datasetRepository.findBy(fieldName, value);
 	}
 
 	@Override
@@ -54,12 +62,18 @@ public class DatasetServiceImpl implements DatasetService {
 	public Dataset save(final Dataset dataset) throws ShanoirDatasetsException {
 		Dataset savedDataset = null;
 		try {
-			savedDataset = datasetRepository.save(dataset);
+			if (dataset instanceof CtDataset) {
+				savedDataset = ctDatasetRepository.save((CtDataset) dataset);
+			} else if (dataset instanceof MrDataset) {
+				savedDataset = mrDatasetRepository.save((MrDataset) dataset);
+			} else if (dataset instanceof PetDataset) {
+				savedDataset = petDatasetRepository.save((PetDataset) dataset);
+			}
 		} catch (DataIntegrityViolationException dive) {
 			LOG.error("Error while creating dataset", dive);
 			throw new ShanoirDatasetsException("Error while creating dataset");
 		}
-		updateShanoirOld(savedDataset);
+		// updateShanoirOld(savedDataset);
 		return savedDataset;
 	}
 
@@ -68,12 +82,18 @@ public class DatasetServiceImpl implements DatasetService {
 		final Dataset datasetDb = datasetRepository.findOne(dataset.getId());
 		updateDatasetValues(datasetDb, dataset);
 		try {
-			datasetRepository.save(datasetDb);
+			if (datasetDb instanceof CtDataset) {
+				ctDatasetRepository.save((CtDataset) datasetDb);
+			} else if (datasetDb instanceof MrDataset) {
+				mrDatasetRepository.save((MrDataset) datasetDb);
+			} else if (datasetDb instanceof PetDataset) {
+				petDatasetRepository.save((PetDataset) datasetDb);
+			}
 		} catch (Exception e) {
 			LOG.error("Error while updating dataset", e);
 			throw new ShanoirDatasetsException("Error while updating dataset");
 		}
-		updateShanoirOld(datasetDb);
+		// updateShanoirOld(datasetDb);
 		return datasetDb;
 	}
 
@@ -85,7 +105,7 @@ public class DatasetServiceImpl implements DatasetService {
 			final Dataset datasetDb = datasetRepository.findOne(dataset.getId());
 			if (datasetDb != null) {
 				try {
-//					datasetDb.setData(dataset.getData());
+					// datasetDb.setData(dataset.getData());
 					datasetRepository.save(datasetDb);
 				} catch (Exception e) {
 					LOG.error("Error while updating dataset from Shanoir Old", e);
@@ -112,8 +132,8 @@ public class DatasetServiceImpl implements DatasetService {
 			LOG.error("Cannot send dataset " + dataset.getId() + " save/update to Shanoir Old on queue : "
 					+ RabbitMqConfiguration.datasetQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send dataset " + dataset.getId() + " save/update because of an error while serializing dataset.",
-					e);
+			LOG.error("Cannot send dataset " + dataset.getId()
+					+ " save/update because of an error while serializing dataset.", e);
 		}
 		return false;
 	}

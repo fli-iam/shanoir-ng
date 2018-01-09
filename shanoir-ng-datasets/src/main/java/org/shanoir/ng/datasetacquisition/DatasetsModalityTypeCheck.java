@@ -1,4 +1,4 @@
-package org.shanoir.ng.manufacturermodel;
+package org.shanoir.ng.datasetacquisition;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,20 +9,21 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 /**
- * Annotation checking if manufacturer model is correct depending on its type.
+ * Annotation checking if datasets of an acquisition have same modality type
+ * than the acquisition.
  * 
  * @author msimon
  *
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = ManufactureModelTypeCheckValidator.class)
-public @interface ManufactureModelTypeCheck {
+@Constraint(validatedBy = DatasetsModalityTypeCheckValidator.class)
+public @interface DatasetsModalityTypeCheck {
 
 	/**
 	 * Message.
 	 */
-	String message() default "Manufacturer model not correct depending on its type.";
+	String message() default "Some datasets have not same modality type than acquisition.";
 
 	/**
 	 * Groups.
