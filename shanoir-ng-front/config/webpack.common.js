@@ -63,12 +63,6 @@ module.exports = {
             name: ['app', 'vendor', 'polyfills']
         }),
 
-
-        new webpack.ProvidePlugin({
-            $: "jquery",
-            jQuery: "jquery"
-          }),
-
         /*
          * Plugin: CopyWebpackPlugin
          * Description: Copy files and directories in webpack.
@@ -78,15 +72,7 @@ module.exports = {
          * See: https://www.npmjs.com/package/copy-webpack-plugin
          */
         new CopyWebpackPlugin([
-            { from: 'src/assets', to: 'assets' },
-            {
-                from: 'node_modules/font-awesome/css/font-awesome.min.css',
-                to: 'assets/font-awesome/css/font-awesome.min.css',
-            },
-            {
-                from: 'node_modules/font-awesome/fonts',
-                to: 'assets/font-awesome/fonts'
-            }
+            { from: 'src/assets', to: 'assets' }
         ])
     ]
 };
