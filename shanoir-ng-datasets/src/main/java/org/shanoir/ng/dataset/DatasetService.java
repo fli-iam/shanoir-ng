@@ -1,7 +1,6 @@
 package org.shanoir.ng.dataset;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
  * Dataset service.
@@ -9,7 +8,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author msimon
  *
  */
-public interface DatasetService<T extends Dataset> extends UniqueCheckableService<T> {
+public interface DatasetService<T extends Dataset> {
 
 	/**
 	 * Delete a dataset.

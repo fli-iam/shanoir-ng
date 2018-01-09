@@ -40,4 +40,9 @@ public class SpectDataset extends Dataset {
 		}
 	}
 
+	@Override
+	public String getType() {
+		return "Spect";
+	}
+
 }

@@ -1,4 +1,4 @@
-package org.shanoir.ng.dataset;
+package org.shanoir.ng.dataset.modality;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,13 +25,13 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @ActiveProfiles("test")
-public class DatasetRepositoryTest {
+public class MrDatasetRepositoryTest {
 
 	private static final String MR_DATASET_TEST_1_NAME = "MRDataset1";
 	private static final Long MR_DATASET_TEST_1_ID = 1L;
 	
 	@Autowired
-	private DatasetRepository repository;
+	private MrDatasetRepository repository;
 	
 	/*
 	 * Mocks used to avoid unsatisfied dependency exceptions.
@@ -45,20 +45,20 @@ public class DatasetRepositoryTest {
 	
 	@Test
 	public void findAllTest() throws Exception {
-		Iterable<Dataset> datasetsDb = repository.findAll();
+		Iterable<MrDataset> datasetsDb = repository.findAll();
 		assertThat(datasetsDb).isNotNull();
 		int nbDatasets = 0;
-		Iterator<Dataset> datasetsIt = datasetsDb.iterator();
+		Iterator<MrDataset> datasetsIt = datasetsDb.iterator();
 		while (datasetsIt.hasNext()) {
 			datasetsIt.next();
 			nbDatasets++;
 		}
-		assertThat(nbDatasets).isEqualTo(3);
+		assertThat(nbDatasets).isEqualTo(1);
 	}
 	
 	@Test
 	public void findOneTest() throws Exception {
-		Dataset datasetDb = repository.findOne(MR_DATASET_TEST_1_ID);
+		MrDataset datasetDb = repository.findOne(MR_DATASET_TEST_1_ID);
 		assertThat(datasetDb.getName()).isEqualTo(MR_DATASET_TEST_1_NAME);
 	}
 	

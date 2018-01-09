@@ -18,4 +18,9 @@ public class EegDataset extends Dataset {
 	 */
 	private static final long serialVersionUID = -7618433089837302003L;
 
+	@Override
+	public String getType() {
+		return "Eeg";
+	}
+
 }

@@ -9,7 +9,6 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +27,12 @@ public class DatasetApiController implements DatasetApi {
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
 
 	@Autowired
-	private DatasetService datasetService;
+	private DatasetMapper datasetMapper;
+	
+	@Autowired
+	private DatasetService<Dataset> datasetService;
 
+	@Override
 	public ResponseEntity<Void> deleteDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
 			throws RestServiceException {
@@ -50,45 +53,17 @@ public class DatasetApiController implements DatasetApi {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
-	public ResponseEntity<Dataset> findDatasetById(
+	@Override
+	public ResponseEntity<DatasetDTO> findDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId) {
 		final Dataset dataset = datasetService.findById(datasetId);
 		if (dataset == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(dataset, HttpStatus.OK);
+		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(dataset), HttpStatus.OK);
 	}
 
-	public ResponseEntity<Dataset> saveNewDataset(
-			@ApiParam(value = "dataset to create", required = true) @Valid @RequestBody Dataset dataset,
-			final BindingResult result) throws RestServiceException {
-		/* Validation */
-		// A basic user can only update certain fields, check that
-		final FieldErrorMap accessErrors = this.getCreationRightsErrors(dataset);
-		// Check hibernate validation
-		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constrainte
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(dataset);
-		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}
-
-		// Guarantees it is a creation, not an update
-		dataset.setId(null);
-
-		/* Save dataset in db. */
-		try {
-			final Dataset createdDataset = datasetService.save(dataset);
-			return new ResponseEntity<>(createdDataset, HttpStatus.OK);
-		} catch (ShanoirException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-		}
-	}
-
+	@Override
 	public ResponseEntity<Void> updateDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@ApiParam(value = "study to update", required = true) @Valid @RequestBody Dataset dataset,
@@ -100,10 +75,8 @@ public class DatasetApiController implements DatasetApi {
 		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(dataset);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constrainte
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(dataset);
 		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
@@ -133,30 +106,6 @@ public class DatasetApiController implements DatasetApi {
 		final FieldErrorMap accessErrors = new EditableOnlyByValidator<Dataset>().validate(previousStateDataset,
 				dataset);
 		return accessErrors;
-	}
-
-	/*
-	 * Get access rights errors.
-	 *
-	 * @param dataset dataset.
-	 * 
-	 * @return an error map.
-	 */
-	private FieldErrorMap getCreationRightsErrors(final Dataset center) {
-		return new EditableOnlyByValidator<Dataset>().validate(center);
-	}
-
-	/*
-	 * Get unique constraint errors
-	 *
-	 * @param dataset dataset.
-	 * 
-	 * @return an error map
-	 */
-	private FieldErrorMap getUniqueConstraintErrors(final Dataset dataset) {
-		final UniqueValidator<Dataset> uniqueValidator = new UniqueValidator<Dataset>(datasetService);
-		final FieldErrorMap uniqueErrors = uniqueValidator.validate(dataset);
-		return uniqueErrors;
 	}
 
 }

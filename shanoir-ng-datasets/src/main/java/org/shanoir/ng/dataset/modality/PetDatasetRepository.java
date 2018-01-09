@@ -2,7 +2,7 @@ package org.shanoir.ng.dataset.modality;
 
 import javax.transaction.Transactional;
 
-import org.shanoir.ng.dataset.DatasetRepository;
+import org.shanoir.ng.dataset.DatasetBaseRepository;
 
 /**
  * Repository for PET datasets.
@@ -10,6 +10,6 @@ import org.shanoir.ng.dataset.DatasetRepository;
  * @author msimon
  */
 @Transactional
-public interface PetDatasetRepository extends DatasetRepository<PetDataset> {
+public interface PetDatasetRepository extends DatasetBaseRepository<PetDataset> {
 
 }

@@ -44,7 +44,10 @@ public class DatasetApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
-	private DatasetService datasetServiceMock;
+	private DatasetService<Dataset> datasetServiceMock;
+
+	@MockBean
+	private DatasetMapper datasetMapperMock;
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -52,7 +55,7 @@ public class DatasetApiControllerTest {
 
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
-		given(datasetServiceMock.save(Mockito.mock(Dataset.class))).willReturn(new MrDataset());
+		given(datasetServiceMock.save(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 	}
 
 	@Test
@@ -70,17 +73,12 @@ public class DatasetApiControllerTest {
 
 	@Test
 	@WithMockUser
-	public void saveNewDatasetTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createMrDataset())))
-				.andExpect(status().isOk());
-	}
-
-	@Test
-	@WithMockUser
 	public void updateDatasetTest() throws Exception {
+		String json = gson.toJson(ModelsUtil.createMrDataset());
+		// Cheat to add dataset type into json
+		json = json.replace("}", "") + ",\"type\":\"Mr\"}";
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createMrDataset())))
+				.contentType(MediaType.APPLICATION_JSON).content(json))
 				.andExpect(status().isNoContent());
 	}
 

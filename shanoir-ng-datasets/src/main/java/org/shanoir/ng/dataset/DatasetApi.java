@@ -43,20 +43,8 @@ public interface DatasetApi {
 			@ApiResponse(code = 404, message = "no study found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/{datasetId}", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<Dataset> findDatasetById(
+	ResponseEntity<DatasetDTO> findDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
-
-	@ApiOperation(value = "", notes = "Saves a new dataset", response = Dataset.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created study", response = Dataset.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<Dataset> saveNewDataset(
-			@ApiParam(value = "dataset to create", required = true) @Valid @RequestBody Dataset dataset,
-			BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates a dataset", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "dataset updated", response = Void.class),
@@ -68,7 +56,7 @@ public interface DatasetApi {
 			"application/json" }, method = RequestMethod.PUT)
 	ResponseEntity<Void> updateDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
-			@ApiParam(value = "study to update", required = true) @Valid @RequestBody Dataset study,
+			@ApiParam(value = "study to update", required = true) @Valid @RequestBody Dataset dataset,
 			BindingResult result) throws RestServiceException;
 
 }

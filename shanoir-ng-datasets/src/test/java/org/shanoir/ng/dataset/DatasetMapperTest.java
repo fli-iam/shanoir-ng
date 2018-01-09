@@ -48,6 +48,14 @@ public class DatasetMapperTest {
 	}
 
 	@Test
+	public void datasetToDatasetDTODTOTest() throws ParseException {
+		final DatasetDTO datasetDTO = datasetMapper.datasetToDatasetDTO(createDataset());
+		Assert.assertNotNull(datasetDTO);
+		Assert.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
+		Assert.assertTrue(DATASET_NAME.equals(datasetDTO.getName()));
+	}
+
+	@Test
 	public void datasetToIdNameDTOTest() throws ParseException {
 		final IdNameDTO datasetDTO = datasetMapper.datasetToIdNameDTO(createDataset());
 		Assert.assertNotNull(datasetDTO);
