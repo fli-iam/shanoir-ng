@@ -46,6 +46,9 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private DatasetService<Dataset> datasetServiceMock;
 
+	@MockBean
+	private DatasetMapper datasetMapperMock;
+
 	@Before
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
