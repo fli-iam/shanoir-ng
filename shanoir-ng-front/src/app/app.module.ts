@@ -63,14 +63,12 @@ import { TreeNodeComponent } from './shared/components/tree/tree-node.component'
 import { UserComponent } from './users/user/user.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserService } from './users/shared/user.service';
-import "froala-editor/js/froala_editor.pkgd.min.js";
-import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 
 import '../assets/css/common.css';
 import '../assets/css/modal.css';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
 import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
-import { UploadExtraDataComponent } from './examinations/Attached files/upload-extra-data.component';
+import { UploadExtraDataComponent } from './examinations/attached-files/upload-extra-data.component';
 
 
 @NgModule({
@@ -82,9 +80,7 @@ import { UploadExtraDataComponent } from './examinations/Attached files/upload-e
         MatDialogModule,
         MyDatePickerModule,
         ReactiveFormsModule,
-        routing,
-        FroalaEditorModule.forRoot(), 
-       FroalaViewModule.forRoot(),
+        routing
     ],
     declarations: [
         AccountRequestComponent,

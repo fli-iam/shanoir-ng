@@ -80,10 +80,6 @@ module.exports = {
         new CopyWebpackPlugin([
             { from: 'src/assets', to: 'assets' },
             {
-                from: 'node_modules/froala-editor/css/',
-                to: 'assets/froala-editor/css/',
-            },
-            {
                 from: 'node_modules/font-awesome/css/font-awesome.min.css',
                 to: 'assets/font-awesome/css/font-awesome.min.css',
             },
