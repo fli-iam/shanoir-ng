@@ -145,7 +145,7 @@ public class MrProtocol extends AbstractGenericItem {
 	private Boolean magnetizationTransfer;
 
 	/** The MR Dataset acquisition. */
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne(cascade = CascadeType.ALL, mappedBy = "mrProtocol")
 	private MrDatasetAcquisition mrDatasetAcquisition;
 
 	/**
