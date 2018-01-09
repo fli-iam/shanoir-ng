@@ -55,11 +55,6 @@ public class CoilServiceImpl implements CoilService {
 	}
 
 	@Override
-	public List<Coil> findBy(final String fieldName, final Object value) {
-		return coilRepository.findBy(fieldName, value);
-	}
-
-	@Override
 	public Coil findById(final Long id) {
 		return coilRepository.findOne(id);
 	}

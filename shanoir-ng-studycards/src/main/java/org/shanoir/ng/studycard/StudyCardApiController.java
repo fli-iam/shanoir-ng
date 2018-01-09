@@ -178,14 +178,13 @@ public class StudyCardApiController implements StudyCardApi {
 	}
 
 	@Override
-	public ResponseEntity<Long> searchCenterId(@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
+	public ResponseEntity<Long> searchCenterId(
+			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
 		final Long centerId = studyCardService.searchCenterId(studyCardId);
-		if (centerId==null || centerId.equals("")) {
+		if (centerId == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(centerId, HttpStatus.OK);
 	}
-	
-
 
 }

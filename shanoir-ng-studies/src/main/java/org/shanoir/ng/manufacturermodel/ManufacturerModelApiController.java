@@ -13,10 +13,9 @@ import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
-import org.shanoir.ng.shared.validation.UniqueValidator;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,12 +55,10 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 		/* Validation */
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constraint
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(manufacturerModel);
 		// Check other constraints
 		final FieldErrorMap constraintErrors = this.getConstraintsErrors(manufacturerModel);
 		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(hibernateErrors, uniqueErrors, constraintErrors);
+		final FieldErrorMap errors = new FieldErrorMap(hibernateErrors, constraintErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
@@ -88,12 +85,10 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constraint
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(manufacturerModel);
 		// Check other constraints
 		final FieldErrorMap constraintErrors = this.getConstraintsErrors(manufacturerModel);
 		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(hibernateErrors, uniqueErrors, constraintErrors);
+		final FieldErrorMap errors = new FieldErrorMap(hibernateErrors, constraintErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
@@ -111,20 +106,6 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 		}
 
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	}
-
-	/*
-	 * Get unique constraint errors.
-	 *
-	 * @param manufacturerModel manufacturer model.
-	 * 
-	 * @return an error map.
-	 */
-	private FieldErrorMap getUniqueConstraintErrors(final ManufacturerModel manufacturerModel) {
-		final UniqueValidator<ManufacturerModel> uniqueValidator = new UniqueValidator<ManufacturerModel>(
-				manufacturerModelService);
-		final FieldErrorMap uniqueErrors = uniqueValidator.validate(manufacturerModel);
-		return uniqueErrors;
 	}
 
 	/*

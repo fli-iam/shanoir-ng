@@ -3,7 +3,6 @@ package org.shanoir.ng.examination;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
  * Examination service.
@@ -11,7 +10,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author ifakhfakh
  *
  */
-public interface ExaminationService extends UniqueCheckableService<Examination> {
+public interface ExaminationService {
 
 	/**
 	 * Delete an examination.

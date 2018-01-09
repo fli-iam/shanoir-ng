@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
  * Coil service.
@@ -12,7 +11,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  * @author msimon
  *
  */
-public interface CoilService extends UniqueCheckableService<Coil> {
+public interface CoilService {
 
 	/**
 	 * Delete a coil.

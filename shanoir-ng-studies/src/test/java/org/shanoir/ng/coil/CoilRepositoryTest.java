@@ -1,11 +1,9 @@
 package org.shanoir.ng.coil;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -58,14 +56,6 @@ public class CoilRepositoryTest {
 			nbCoils++;
 		}
 		assertThat(nbCoils).isEqualTo(3);
-	}
-	
-	@Test
-	public void findByTest() throws Exception {
-		List<Coil> coilsDb = repository.findBy("name", COIL_TEST_1_NAME);
-		assertNotNull(coilsDb);
-		assertThat(coilsDb.size()).isEqualTo(1);
-		assertThat(coilsDb.get(0).getId()).isEqualTo(COIL_TEST_1_ID);
 	}
 	
 	@Test

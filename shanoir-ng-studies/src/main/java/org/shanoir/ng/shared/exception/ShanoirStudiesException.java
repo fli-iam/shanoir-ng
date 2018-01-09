@@ -1,7 +1,6 @@
 package org.shanoir.ng.shared.exception;
 
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.slf4j.Logger;
 
 /**
  * Study microservice exception.

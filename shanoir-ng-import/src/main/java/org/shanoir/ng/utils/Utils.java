@@ -21,19 +21,18 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  * @author jlouis
  */
 public class Utils {
-	
+
 	// dcmdjpeg (from dcmtk) path under linux
 	static String DCMDJPEG_LINUX_PATH = "/usr/bin/dcmdjpeg";
 
-	 // dcmdjpeg (from dcmtk) path under windows
+	// dcmdjpeg (from dcmtk) path under windows
 	static String DCMDJPEG_WINDOWS_PATH = "dcmdjpeg/windows/dcmdjpeg.exe";
-	
+
 	/** The Constant KB. */
 	private static final int KB = 1024;
 
 	/** The Constant BUFFER_SIZE. */
 	private static final int BUFFER_SIZE = 2 * KB;
-
 
 	/**
 	 * Convert Iterable to List
@@ -66,7 +65,7 @@ public class Utils {
 		// o1.equals(o2) is not equivalent to o2.equals(o1) ! For instance with
 		// java.sql.Timestamp and java.util.Date
 	}
-	
+
 	/**
 	 * Returns the path to dcmdjpeg.
 	 *
@@ -76,14 +75,14 @@ public class Utils {
 		String cmd = "";
 
 		if (SystemUtils.IS_OS_WINDOWS) {
-			cmd =  DCMDJPEG_WINDOWS_PATH;
+			cmd = DCMDJPEG_WINDOWS_PATH;
 		} else if (SystemUtils.IS_OS_LINUX) {
 			cmd = DCMDJPEG_LINUX_PATH;
 		}
 
 		return cmd;
 	}
-	
+
 	/**
 	 * Check if the given compressed file contains a file whith name fileName.
 	 *
@@ -113,54 +112,80 @@ public class Utils {
 		zipfile.close();
 		return result;
 	}
-	
-    /**
-     * Extracts a zip file specified by the zipFilePath to a directory specified by
-     * destDirectory (will be created if does not exists)
-     * @param zipFilePath
-     * @param destDirectory
-     * @throws IOException
-     */
-    public static void unzip(String zipFilePath, String destDirectory) throws IOException {
-        File destDir = new File(destDirectory);
-        if (!destDir.exists()) {
-            destDir.mkdir();
-        }
-        ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
-        ZipEntry entry = zipIn.getNextEntry();
-        // iterates over entries in the .zip file
-        while (entry != null) {
-            String filePath = destDirectory + File.separator + entry.getName();
-            if (!entry.isDirectory()) {
-                // if the entry is a file, extracts it
-                extractFile(zipIn, filePath);
-            } else {
-                // if the entry is a directory, make the directory
-                File dir = new File(filePath);
-                dir.mkdir();
-            }
-            zipIn.closeEntry();
-            entry = zipIn.getNextEntry();
-        }
-        zipIn.close();
-    }
-    
-    /**
-     * Extracts a zip entry (file entry)
-     * @param zipIn
-     * @param filePath
-     * @throws IOException
-     */
-    private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
-        byte[] bytesIn = new byte[BUFFER_SIZE];
-        int read = 0;
-        while ((read = zipIn.read(bytesIn)) != -1) {
-            bos.write(bytesIn, 0, read);
-        }
-        bos.close();
-    }
-	
+
+	/**
+	 * Extracts a zip file specified by the zipFilePath to a directory specified
+	 * by destDirectory (will be created if does not exists)
+	 * 
+	 * @param zipFilePath
+	 * @param destDirectory
+	 * @throws IOException
+	 */
+	public static void unzip(String zipFilePath, String destDirectory) throws IOException {
+		File destDir = new File(destDirectory);
+		if (!destDir.exists()) {
+			destDir.mkdir();
+		}
+		ZipInputStream zipIn = null;
+		try {
+			zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
+			ZipEntry entry = zipIn.getNextEntry();
+			// iterates over entries in the .zip file
+			while (entry != null) {
+				String filePath = destDirectory + File.separator + entry.getName();
+				if (!entry.isDirectory()) {
+					// if the entry is a file, extracts it
+					extractFile(zipIn, filePath);
+				} else {
+					// if the entry is a directory, make the directory
+					File dir = new File(filePath);
+					dir.mkdir();
+				}
+				zipIn.closeEntry();
+				entry = zipIn.getNextEntry();
+			}
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			if (zipIn != null) {
+				try {
+					zipIn.close();
+				} catch (IOException e) {
+					throw e;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Extracts a zip entry (file entry)
+	 * 
+	 * @param zipIn
+	 * @param filePath
+	 * @throws IOException
+	 */
+	private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
+		BufferedOutputStream bos = null;
+		try {
+			bos = new BufferedOutputStream(new FileOutputStream(filePath));
+			byte[] bytesIn = new byte[BUFFER_SIZE];
+			int read = 0;
+			while ((read = zipIn.read(bytesIn)) != -1) {
+				bos.write(bytesIn, 0, read);
+			}
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			if (bos != null) {
+				try {
+					bos.close();
+				} catch (IOException e) {
+					throw e;
+				}
+			}
+		}
+	}
+
 	/**
 	 * Replace the file separators to make it work under windows or unix system.
 	 *
@@ -172,5 +197,5 @@ public class Utils {
 	public static String convertFilePath(final String firstImagePath) {
 		return firstImagePath.replaceAll("\\\\", "/");
 	}
-	
+
 }

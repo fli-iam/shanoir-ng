@@ -1,5 +1,6 @@
 package org.shanoir.ng.manufacturermodel;
 
+import org.shanoir.ng.shared.model.ItemRepositoryCustom;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -8,6 +9,6 @@ import org.springframework.data.repository.CrudRepository;
  * @author msimon
  *
  */
-public interface ManufacturerRepository extends CrudRepository<Manufacturer, Long>, ManufacturerRepositoryCustom {
+public interface ManufacturerRepository extends CrudRepository<Manufacturer, Long>, ItemRepositoryCustom<Manufacturer> {
 
 }

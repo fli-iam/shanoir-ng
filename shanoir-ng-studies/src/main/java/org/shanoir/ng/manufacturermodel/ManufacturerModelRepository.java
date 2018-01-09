@@ -8,6 +8,6 @@ import org.springframework.data.repository.CrudRepository;
  * @author msimon
  *
  */
-public interface ManufacturerModelRepository extends CrudRepository<ManufacturerModel, Long>, ManufacturerModelRepositoryCustom {
+public interface ManufacturerModelRepository extends CrudRepository<ManufacturerModel, Long> {
 
 }

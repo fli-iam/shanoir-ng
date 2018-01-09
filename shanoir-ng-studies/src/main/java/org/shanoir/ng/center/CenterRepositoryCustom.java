@@ -3,6 +3,7 @@ package org.shanoir.ng.center;
 import java.util.List;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.model.ItemRepositoryCustom;
 
 /**
  * Custom repository for centers.
@@ -10,18 +11,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
  * @author msimon
  *
  */
-public interface CenterRepositoryCustom {
-
-	/**
-	 * Find centers by field value.
-	 * 
-	 * @param fieldName
-	 *            searched field name.
-	 * @param value
-	 *            value.
-	 * @return list of centers.
-	 */
-	List<Center> findBy(String fieldName, Object value);
+public interface CenterRepositoryCustom extends ItemRepositoryCustom<Center> {
 
 	/**
 	 * Find id and name for all centers.

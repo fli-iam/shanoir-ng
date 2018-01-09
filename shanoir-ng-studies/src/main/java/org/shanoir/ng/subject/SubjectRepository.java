@@ -2,6 +2,7 @@ package org.shanoir.ng.subject;
 
 import java.util.Optional;
 
+import org.shanoir.ng.shared.model.ItemRepositoryCustom;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +12,7 @@ import org.springframework.data.repository.query.Param;
  *
  * @author msimon
  */
-public interface SubjectRepository extends CrudRepository<Subject, Long>, SubjectRepositoryCustom {
+public interface SubjectRepository extends CrudRepository<Subject, Long>, ItemRepositoryCustom<Subject> {
 
 	/**
 	 * Find subject by name.
@@ -21,6 +22,7 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	 * @return a Subject.
 	 */
 	Optional<Subject> findByName(String name);
+	
 	/**
 	 * Find subject by identifier.
 	 *

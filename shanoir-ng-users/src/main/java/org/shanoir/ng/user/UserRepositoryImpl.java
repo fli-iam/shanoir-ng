@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.shanoir.ng.shared.model.ItemRepositoryCustom;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Repository;
  *
  */
 @Repository
-public class UserRepositoryImpl implements UserRepositoryCustom {
+public class UserRepositoryImpl implements ItemRepositoryCustom<User> {
 
 	@PersistenceContext
     private EntityManager em;
@@ -22,8 +23,10 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<User> findBy(String fieldName, Object value) {
+		final StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT u FROM User u WHERE u.").append(fieldName).append(" LIKE :value");
 		return em.createQuery(
-				"SELECT u FROM User u WHERE u." + fieldName + " LIKE :value")
+				sqlQuery.toString())
 				.setParameter("value", value)
 				.getResultList();
 	}

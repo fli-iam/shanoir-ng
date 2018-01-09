@@ -1,10 +1,8 @@
 package org.shanoir.ng.manufacturermodel;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,14 +54,6 @@ public class ManufacturerModelRepositoryTest {
 			nbManufacturerModels++;
 		}
 		assertThat(nbManufacturerModels).isEqualTo(3);
-	}
-	
-	@Test
-	public void findByTest() throws Exception {
-		List<ManufacturerModel> manufacturerModelsDb = repository.findBy("name", MANUFACTURER_MODEL_TEST_1_NAME);
-		assertNotNull(manufacturerModelsDb);
-		assertThat(manufacturerModelsDb.size()).isEqualTo(1);
-		assertThat(manufacturerModelsDb.get(0).getId()).isEqualTo(MANUFACTURER_MODEL_TEST_1_ID);
 	}
 	
 	@Test

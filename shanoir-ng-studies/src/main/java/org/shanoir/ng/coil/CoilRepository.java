@@ -9,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author msimon
  */
-public interface CoilRepository extends CrudRepository<Coil, Long>, CoilRepositoryCustom {
+public interface CoilRepository extends CrudRepository<Coil, Long> {
 
 	/**
 	 * Find coil by name.

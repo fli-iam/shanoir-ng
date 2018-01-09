@@ -41,8 +41,6 @@ public class ManufacturerModelServiceTest {
 	@Before
 	public void setup() {
 		given(manufacturerModelRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturerModel()));
-		given(manufacturerModelRepository.findBy("name", ModelsUtil.MANUFACTURER_MODEL_NAME))
-				.willReturn(Arrays.asList(ModelsUtil.createManufacturerModel()));
 		given(manufacturerModelRepository.findOne(MANUFACTURER_MODEL_ID))
 				.willReturn(ModelsUtil.createManufacturerModel());
 		given(manufacturerModelRepository.save(Mockito.any(ManufacturerModel.class)))
@@ -56,17 +54,6 @@ public class ManufacturerModelServiceTest {
 		Assert.assertTrue(manufacturerModels.size() == 1);
 
 		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).findAll();
-	}
-
-	@Test
-	public void findByTest() {
-		final List<ManufacturerModel> manufacturerModels = manufacturerModelService.findBy("name",
-				ModelsUtil.MANUFACTURER_MODEL_NAME);
-		Assert.assertNotNull(manufacturerModels);
-		Assert.assertTrue(manufacturerModels.size() == 1);
-		Assert.assertTrue(ModelsUtil.MANUFACTURER_MODEL_NAME.equals(manufacturerModels.get(0).getName()));
-
-		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).findBy(Mockito.anyString(), Mockito.anyObject());
 	}
 
 	@Test

@@ -2,25 +2,16 @@ package org.shanoir.ng.acquisitionequipment;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.model.ItemRepositoryCustom;
+
 /**
  * Repository for acquisition equipments.
  * 
  * @author msimon
  *
  */
-public interface AcquisitionEquipmentRepositoryCustom {
+public interface AcquisitionEquipmentRepositoryCustom extends ItemRepositoryCustom<AcquisitionEquipment> {
 
-	/**
-	 * Find acquisition equipments by field value.
-	 * 
-	 * @param fieldName
-	 *            searched field name.
-	 * @param value
-	 *            value.
-	 * @author yyao
-	 */
-	List<AcquisitionEquipment> findBy(String fieldName, Object value);
-	
 	/**
 	 * Find acquisition equipments by a couple of field value.
 	 * 

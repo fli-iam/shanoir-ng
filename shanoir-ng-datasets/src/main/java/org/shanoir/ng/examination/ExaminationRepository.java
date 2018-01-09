@@ -9,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author ifakhfakh
  */
-public interface ExaminationRepository extends CrudRepository<Examination, Long>, ExaminationRepositoryCustom {
+public interface ExaminationRepository extends CrudRepository<Examination, Long> {
 
 	/**
 	 * @param subjectId

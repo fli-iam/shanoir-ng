@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.shared.model.ItemRepositoryCustom;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Repository;
  * @author jlouis
  */
 @Repository
-public interface UserRepository extends CrudRepository<User, Long>, UserRepositoryCustom {
+public interface UserRepository extends CrudRepository<User, Long>, ItemRepositoryCustom<User> {
 
 	/**
 	 * Find all users for a role.

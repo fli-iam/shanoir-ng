@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.shanoir.ng.shared.model.ItemRepositoryCustom;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class TemplateRepositoryImpl implements TemplateRepositoryCustom {
+public class TemplateRepositoryImpl implements ItemRepositoryCustom<Template> {
 
 	@PersistenceContext
     private EntityManager em;

@@ -43,11 +43,6 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 	}
 
 	@Override
-	public List<ManufacturerModel> findBy(String fieldName, Object value) {
-		return manufacturerModelRepository.findBy(fieldName, value);
-	}
-
-	@Override
 	public ManufacturerModel findById(final Long id) {
 		return manufacturerModelRepository.findOne(id);
 	}

@@ -2,6 +2,7 @@ package org.shanoir.ng.template;
 
 import java.util.Optional;
 
+import org.shanoir.ng.shared.model.ItemRepositoryCustom;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -9,7 +10,7 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author msimon
  */
-public interface TemplateRepository extends CrudRepository<Template, Long>, TemplateRepositoryCustom {
+public interface TemplateRepository extends CrudRepository<Template, Long>, ItemRepositoryCustom<Template> {
 
 	/**
 	 * Find template by data.

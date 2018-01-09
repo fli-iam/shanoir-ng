@@ -7,11 +7,10 @@ import javax.validation.Valid;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,10 +79,8 @@ public class CoilApiController implements CoilApi {
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(coil);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constrainte
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(coil);
 		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
@@ -114,10 +111,8 @@ public class CoilApiController implements CoilApi {
 		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(coil);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constrainte
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(coil);
 		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
@@ -157,19 +152,6 @@ public class CoilApiController implements CoilApi {
 	 */
 	private FieldErrorMap getCreationRightsErrors(final Coil coil) {
 		return new EditableOnlyByValidator<Coil>().validate(coil);
-	}
-
-	/*
-	 * Get unique constraint errors
-	 *
-	 * @param coil coil.
-	 * 
-	 * @return an error map
-	 */
-	private FieldErrorMap getUniqueConstraintErrors(final Coil coil) {
-		final UniqueValidator<Coil> uniqueValidator = new UniqueValidator<Coil>(coilService);
-		final FieldErrorMap uniqueErrors = uniqueValidator.validate(coil);
-		return uniqueErrors;
 	}
 
 }

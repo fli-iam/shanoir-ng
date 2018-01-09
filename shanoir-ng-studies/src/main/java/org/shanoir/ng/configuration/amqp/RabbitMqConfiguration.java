@@ -30,18 +30,8 @@ public class RabbitMqConfiguration {
 	private static final String STUDYCARD_QUEUE_TO_STUDY = "studycard_queue_to_study";
 
 	@Bean
-	public RabbitMqRPCClient client() {
-		return new RabbitMqRPCClient();
-	}
-
-	@Bean
 	RabbitMqReceiver receiver() {
 		return new RabbitMqReceiver();
-	}
-
-	@Bean
-	RabbitMqRPCReceiver receiverRPC() {
-		return new RabbitMqRPCReceiver();
 	}
 
 	@Bean

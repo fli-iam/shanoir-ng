@@ -10,7 +10,6 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,10 +95,8 @@ public class ExaminationApiController implements ExaminationApi {
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(examination);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constrainte
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(examination);
 		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
@@ -131,10 +128,8 @@ public class ExaminationApiController implements ExaminationApi {
 		// this.getUpdateRightsErrors(examination);
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constrainte
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(examination);
 		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(hibernateErrors, uniqueErrors);
+		final FieldErrorMap errors = new FieldErrorMap(hibernateErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
@@ -159,38 +154,8 @@ public class ExaminationApiController implements ExaminationApi {
 	 * 
 	 * @return an error map.
 	 */
-	private FieldErrorMap getUpdateRightsErrors(final Examination examination) {
-		/*
-		 * final Examination previousStateExamination =
-		 * examinationService.findById(examination.getId()); final FieldErrorMap
-		 * accessErrors = new EditableOnlyByValidator<Examination>().validate(
-		 * previousStateExamination, examination); return accessErrors;
-		 */
-		return null;
-	}
-
-	/*
-	 * Get access rights errors.
-	 *
-	 * @param examination examination.
-	 * 
-	 * @return an error map.
-	 */
 	private FieldErrorMap getCreationRightsErrors(final Examination examination) {
 		return new EditableOnlyByValidator<Examination>().validate(examination);
-	}
-
-	/*
-	 * Get unique constraint errors
-	 *
-	 * @param examination
-	 * 
-	 * @return an error map
-	 */
-	private FieldErrorMap getUniqueConstraintErrors(final Examination examination) {
-		final UniqueValidator<Examination> uniqueValidator = new UniqueValidator<Examination>(examinationService);
-		final FieldErrorMap uniqueErrors = uniqueValidator.validate(examination);
-		return uniqueErrors;
 	}
 
 }

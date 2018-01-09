@@ -1,15 +1,11 @@
 package org.shanoir.ng.examination;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.examination.Examination;
-import org.shanoir.ng.examination.ExaminationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -59,21 +55,6 @@ public class ExaminationRepositoryTest {
 		}
 		assertThat(nbTemplates).isEqualTo(3);
 	}
-
-	@Test
-	public void findByTest() throws Exception {
-		List<Examination> examinationDb = repository.findBy("note", EXAMINATION_TEST_1_NOTE);
-		assertNotNull(examinationDb);
-		assertThat(examinationDb.size()).isEqualTo(1);
-		assertThat(examinationDb.get(0).getId()).isEqualTo(EXAMINATION_TEST_1_ID);
-	}
-
-	/*
-	 * @Test public void findByDataTest() throws Exception { Optional<Template>
-	 * templateDb = repository.findByData(TEMPLATE_TEST_1_DATA);
-	 * assertTrue(templateDb.isPresent());
-	 * assertThat(templateDb.get().getId()).isEqualTo(TEMPLATE_TEST_1_ID); }
-	 */
 
 	@Test
 	public void findOneTest() throws Exception {
