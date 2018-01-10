@@ -15,7 +15,15 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
         // Get the auth header from the service.
         const authHeader = KeycloakService.auth.authz.token;
         // Clone the request to add the new header.
-        const authReq = req.clone({ setHeaders: { 'Authorization': 'Bearer ' + authHeader, 'Content-Type': 'application/json' } });
+        let authReq = req.clone({
+            setHeaders: {
+                Authorization: `Bearer ${authHeader}`
+            }
+        });
+        // Do not add Content-Type application/json for Form Data
+        if (!(req.body instanceof FormData)) {
+            authReq = authReq.clone({ headers: req.headers.set('Content-Type', 'application/json') });
+        }
         // Pass on the cloned request instead of the original request.
         return next.handle(authReq);
     }
