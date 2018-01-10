@@ -179,9 +179,7 @@ public class Instrument extends AbstractGenericItem {
 	 *            the instrumentType to set
 	 */
 	public void setInstrumentType(InstrumentType instrumentType) {
-		if (instrumentType == null) {
-			this.instrumentType = null;
-		} else {
+		if (instrumentType != null) {
 			this.instrumentType = instrumentType.getId();
 		}
 	}
@@ -258,9 +256,7 @@ public class Instrument extends AbstractGenericItem {
 	 *            the passationMode to set
 	 */
 	public void setPassationMode(PassationMode passationMode) {
-		if (passationMode == null) {
-			this.passationMode = null;
-		} else {
+		if (passationMode != null) {
 			this.passationMode = passationMode.getId();
 		}
 	}

@@ -119,9 +119,7 @@ public class InstrumentVariable extends AbstractGenericItem {
 	 *            the domain to set
 	 */
 	public void setDomain(Domain domain) {
-		if (domain == null) {
-			this.domain = null;
-		} else {
+		if (domain != null) {
 			this.domain = domain.getId();
 		}
 	}
@@ -168,9 +166,7 @@ public class InstrumentVariable extends AbstractGenericItem {
 	 *            the quality to set
 	 */
 	public void setQuality(Quality quality) {
-		if (quality == null) {
-			this.quality = null;
-		} else {
+		if (quality != null) {
 			this.quality = quality.getId();
 		}
 	}

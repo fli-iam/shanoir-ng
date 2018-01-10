@@ -154,9 +154,7 @@ public abstract class Dataset extends AbstractGenericItem {
 	 *            the cardinalityOfRelatedSubjects to set
 	 */
 	public void setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects cardinalityOfRelatedSubjects) {
-		if (cardinalityOfRelatedSubjects == null) {
-			this.cardinalityOfRelatedSubjects = null;
-		} else {
+		if (cardinalityOfRelatedSubjects != null) {
 			this.cardinalityOfRelatedSubjects = cardinalityOfRelatedSubjects.getId();
 		}
 	}

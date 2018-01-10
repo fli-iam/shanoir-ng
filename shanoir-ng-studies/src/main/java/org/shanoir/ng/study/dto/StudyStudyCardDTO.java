@@ -1,7 +1,5 @@
 package org.shanoir.ng.study.dto;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * DTO for link between a study and a study card.
  * 
@@ -16,7 +14,6 @@ public class StudyStudyCardDTO {
 	// Delete old link to study
 	private Long oldStudyId;
 
-	@NotNull
 	private Long studyCardId;
 
 	/**

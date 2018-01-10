@@ -97,9 +97,7 @@ public class StudyUser implements Serializable {
 	 *            the studyUserType to set
 	 */
 	public void setStudyUserType(StudyUserType studyUserType) {
-		if (studyUserType == null) {
-			this.studyUserType = null;
-		} else {
+		if (studyUserType != null) {
 			this.studyUserType = studyUserType.getId();
 		}
 	}

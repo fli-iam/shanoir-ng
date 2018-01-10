@@ -1,7 +1,5 @@
 package org.shanoir.ng.study.dto;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * Simple DTO for study cards.
  * 
@@ -10,10 +8,8 @@ import javax.validation.constraints.NotNull;
  */
 public class SimpleStudyCardDTO {
 
-	@NotNull
 	private Long id;
 
-	@NotNull
 	private String name;
 
 	/**

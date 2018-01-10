@@ -328,9 +328,7 @@ public class Study extends HalEntity {
 	 *            the studyStatus to set
 	 */
 	public void setStudyStatus(StudyStatus studyStatus) {
-		if (studyStatus == null) {
-			this.studyStatus = null;
-		} else {
+		if (studyStatus != null) {
 			this.studyStatus = studyStatus.getId();
 		}
 	}

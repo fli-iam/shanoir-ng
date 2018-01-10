@@ -62,9 +62,7 @@ public class ManufacturerModel extends HalEntity {
 	 *            the datasetModalityType to set
 	 */
 	public void setDatasetModalityType(DatasetModalityType datasetModalityType) {
-		if (datasetModalityType == null) {
-			this.datasetModalityType = null;
-		} else {
+		if (datasetModalityType != null) {
 			this.datasetModalityType = datasetModalityType.getId();
 		}
 	}

@@ -30,9 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -130,15 +128,9 @@ public class SubjectServiceImpl implements SubjectService {
 		Subject subject = new Subject();
 		try {
 			subject = mapper.readValue(jsonFile, Subject.class);
-		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("Error while reading subject json file", e);
+			throw new ShanoirStudiesException("Error while creating subject");
 		}
 
 		Subject savedSubject = null;
@@ -261,8 +253,6 @@ public class SubjectServiceImpl implements SubjectService {
 		try {
 			idCenter = getCenterIdFromStudyCard(studyCardId);
 		} catch (ShanoirStudiesException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 			return null;
 		}
 
