@@ -148,11 +148,7 @@ public class Utils {
 			throw e;
 		} finally {
 			if (zipIn != null) {
-				try {
-					zipIn.close();
-				} catch (IOException e) {
-					throw e;
-				}
+				zipIn.close();
 			}
 		}
 	}
@@ -177,11 +173,7 @@ public class Utils {
 			throw e;
 		} finally {
 			if (bos != null) {
-				try {
-					bos.close();
-				} catch (IOException e) {
-					throw e;
-				}
+				bos.close();
 			}
 		}
 	}
