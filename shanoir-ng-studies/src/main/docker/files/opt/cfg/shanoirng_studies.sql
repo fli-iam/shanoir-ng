@@ -231,7 +231,7 @@ VALUES
 	(133, '\0', 191, '\0', NULL, '\0', 'CaractRF', NULL, 1, 1, '\0', 1),
 	(134, '\0', NULL, '\0', NULL, 1, 'Sharing_SynesthesiaData', NULL, 1, 1, '\0', 1);
 
-CREATE TABLE `protocole_file_path` (
+CREATE TABLE `protocol_file_path` (
   `study_id` bigint(20) NOT NULL,
   `path` varchar(255) DEFAULT NULL,
   KEY `FK1k7xvi02wcbuvj5cs8xp9c6h4` (`study_id`),
@@ -12350,3 +12350,15 @@ VALUES
 	(99, 2, 2, 19, 'HEAD/NECK 20', 20, NULL),
 	(100, 2, 2, 19, 'Rx/Tx Cp', NULL, NULL),
 	(101, 23, 2, 51, 'dS HEAD 32ch', 32, NULL);
+
+CREATE TABLE `timepoint` (
+  `id` bigint(20) NOT NULL,
+  `comment` varchar(255) DEFAULT NULL,
+  `days` bigint(20) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `rank` bigint(20) NOT NULL,
+  `study_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKo2x3e9dhemdt9alu8okyx4eq8` (`study_id`),
+  CONSTRAINT `FKo2x3e9dhemdt9alu8okyx4eq8` FOREIGN KEY (`study_id`) REFERENCES `study` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
