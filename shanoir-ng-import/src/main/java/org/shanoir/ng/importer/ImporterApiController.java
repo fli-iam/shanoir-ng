@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -12,6 +13,7 @@ import org.shanoir.ng.importer.dcm2nii.NIfTIConverter;
 import org.shanoir.ng.importer.dicom.DicomDirToJsonReader;
 import org.shanoir.ng.importer.dicom.DicomFileAnalyzer;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.model.Patients;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.Utils;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.Gson;
 
 import io.swagger.annotations.ApiParam;
 
@@ -56,7 +59,7 @@ public class ImporterApiController implements ImporterApi {
 
 	@Autowired
 	private DicomFileAnalyzer dicomFileAnalyzer;
-	
+
 	@Autowired
 	private NIfTIConverter niftiConverter;
 
@@ -93,7 +96,7 @@ public class ImporterApiController implements ImporterApi {
 	/**
 	 * This method takes a multipart file and stores it in a configured upload
 	 * folder with a random name and the suffix .upload
-	 * 
+	 *
 	 * @param file
 	 * @throws IOException
 	 */
@@ -113,7 +116,7 @@ public class ImporterApiController implements ImporterApi {
 	/**
 	 * @todo refactor and clean-up here
 	 */
-	public ResponseEntity<String> uploadDicomZipFile(
+	public ResponseEntity<Patients> uploadDicomZipFile(
 			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
 			throws RestServiceException {
 		if (dicomZipFile == null)
@@ -159,10 +162,10 @@ public class ImporterApiController implements ImporterApi {
 
 			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(dicomDirJsonNode);
-			LOG.info(dicomDirJsonString);
-			return new ResponseEntity<String>(dicomDirJsonString, HttpStatus.OK);
-
+			Patients patients = dicomDirToJsonReader.getMapper().readValue(dicomDirJsonString,Patients.class);
+			return new ResponseEntity<Patients>(patients, HttpStatus.OK);
 		} catch (IOException e) {
+			System.out.println(e.getMessage());
 			LOG.error(e.getMessage());
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
@@ -171,7 +174,7 @@ public class ImporterApiController implements ImporterApi {
 
 	/**
 	 * Check if sent file is of type .zip.
-	 * 
+	 *
 	 * @param file
 	 */
 	private boolean isZipFile(MultipartFile file) {
