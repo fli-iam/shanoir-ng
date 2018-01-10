@@ -18,15 +18,14 @@ import org.springframework.stereotype.Component;
 public class StudyCardRepositoryImpl implements ItemRepositoryCustom<StudyCard> {
 
 	@PersistenceContext
-    private EntityManager em;
+	private EntityManager em;
 
 	@SuppressWarnings("unchecked")
-	//@Override
+	@Override
 	public List<StudyCard> findBy(String fieldName, Object value) {
-		return em.createQuery(
-				"SELECT sc FROM StudyCard sc WHERE sc." + fieldName + " LIKE :value")
-				.setParameter("value", value)
-				.getResultList();
+		final StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT sc FROM StudyCard sc WHERE sc.").append(fieldName).append(" LIKE :value");
+		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
 	}
 
 }

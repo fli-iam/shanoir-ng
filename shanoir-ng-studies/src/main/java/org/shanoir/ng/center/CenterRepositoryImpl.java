@@ -18,23 +18,20 @@ import org.springframework.stereotype.Component;
 public class CenterRepositoryImpl implements CenterRepositoryCustom {
 
 	@PersistenceContext
-    private EntityManager em;
+	private EntityManager em;
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Center> findBy(String fieldName, Object value) {
-		return em.createQuery(
-				"SELECT c FROM Center c WHERE c." + fieldName + " LIKE :value")
-				.setParameter("value", value)
-				.getResultList();
+		final StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT c FROM Center c WHERE c.").append(fieldName).append(" LIKE :value");
+		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<IdNameDTO> findIdsAndNames() {
-		return em.createNativeQuery(
-				"SELECT id, name FROM center", "centerNameResult")
-				.getResultList();
+		return em.createNativeQuery("SELECT id, name FROM center", "centerNameResult").getResultList();
 	}
 
 }

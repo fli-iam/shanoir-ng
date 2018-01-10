@@ -9,8 +9,6 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.study.Study;
-import org.shanoir.ng.study.StudyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,7 +26,8 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 @ActiveProfiles("test")
 public class StudyRepositoryTest {
 
-	private static final Long USER_ID = 1L;
+	private static final Long STUDY_TEST_1_ID = 1L;
+	private static final String STUDY_TEST_1_NAME = "shanoirStudy1";
 
 	/*
 	 * Mocks used to avoid unsatisfied dependency exceptions.
@@ -61,6 +60,14 @@ public class StudyRepositoryTest {
 	}
 
 	@Test
+	public void findByTest() throws Exception {
+		List<Study> studiesDb = studyRepository.findBy("name", STUDY_TEST_1_NAME);
+		assertNotNull(studiesDb);
+		assertThat(studiesDb.size()).isEqualTo(1);
+		assertThat(studiesDb.get(0).getId()).isEqualTo(STUDY_TEST_1_ID);
+	}
+
+	@Test
 	public void findIdsAndNamesTest() throws Exception {
 		List<IdNameDTO> studiesDb = studyRepository.findIdsAndNames();
 		assertNotNull(studiesDb);
@@ -69,7 +76,7 @@ public class StudyRepositoryTest {
 	
 	@Test
 	public void findByStudyUsers_UserIdTest() {
-		final List<Study> studyList = (List<Study>) studyRepository.findByStudyUserList_UserIdOrderByNameAsc(USER_ID);
+		final List<Study> studyList = (List<Study>) studyRepository.findByStudyUserList_UserIdOrderByNameAsc(STUDY_TEST_1_ID);
 		assertNotNull(studyList);
 		assertEquals(3, studyList.size());
 	}

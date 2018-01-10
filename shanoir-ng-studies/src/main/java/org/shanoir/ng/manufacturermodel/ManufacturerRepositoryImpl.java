@@ -23,8 +23,9 @@ public class ManufacturerRepositoryImpl implements ItemRepositoryCustom<Manufact
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Manufacturer> findBy(String fieldName, Object value) {
-		return em.createQuery("SELECT m FROM Manufacturer m WHERE m." + fieldName + " LIKE :value")
-				.setParameter("value", value).getResultList();
+		final StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT m FROM Manufacturer m WHERE m.").append(fieldName).append(" LIKE :value");
+		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
 	}
 
 }

@@ -18,17 +18,14 @@ import org.springframework.stereotype.Repository;
 public class UserRepositoryImpl implements ItemRepositoryCustom<User> {
 
 	@PersistenceContext
-    private EntityManager em;
+	private EntityManager em;
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<User> findBy(String fieldName, Object value) {
 		final StringBuilder sqlQuery = new StringBuilder();
 		sqlQuery.append("SELECT u FROM User u WHERE u.").append(fieldName).append(" LIKE :value");
-		return em.createQuery(
-				sqlQuery.toString())
-				.setParameter("value", value)
-				.getResultList();
+		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
 	}
 
 }

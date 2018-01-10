@@ -18,15 +18,14 @@ import org.springframework.stereotype.Repository;
 public class SubjectRepositoryImpl implements ItemRepositoryCustom<Subject> {
 
 	@PersistenceContext
-    private EntityManager em;
+	private EntityManager em;
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Subject> findBy(String fieldName, Object value) {
-		return em.createQuery(
-				"SELECT s FROM Subject s WHERE s." + fieldName + " LIKE :value")
-				.setParameter("value", value)
-				.getResultList();
+		final StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT s FROM Subject s WHERE s.").append(fieldName).append(" LIKE :value");
+		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
 	}
 
 }

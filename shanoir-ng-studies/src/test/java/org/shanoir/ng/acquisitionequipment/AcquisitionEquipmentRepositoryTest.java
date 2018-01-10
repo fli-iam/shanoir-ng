@@ -1,8 +1,10 @@
 package org.shanoir.ng.acquisitionequipment;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,6 +58,14 @@ public class AcquisitionEquipmentRepositoryTest {
 		assertThat(nbEquipments).isEqualTo(3);
 	}
 	
+	@Test
+	public void findByTest() throws Exception {
+		List<AcquisitionEquipment> equipmentsDb = repository.findBy("serialNumber", ACQ_EQPT_TEST_1_SERIAL_NUMBER);
+		assertNotNull(equipmentsDb);
+		assertThat(equipmentsDb.size()).isEqualTo(1);
+		assertThat(equipmentsDb.get(0).getId()).isEqualTo(ACQ_EQPT_TEST_1_ID);
+	}
+
 	@Test
 	public void findOneTest() throws Exception {
 		AcquisitionEquipment equipmentDb = repository.findOne(ACQ_EQPT_TEST_1_ID);

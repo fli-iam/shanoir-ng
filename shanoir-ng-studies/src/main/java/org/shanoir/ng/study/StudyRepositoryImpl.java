@@ -18,24 +18,20 @@ import org.springframework.stereotype.Component;
 public class StudyRepositoryImpl implements StudyRepositoryCustom {
 
 	@PersistenceContext
-    private EntityManager em;
+	private EntityManager em;
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Study> findBy(String fieldName, Object value) {
-		return em.createQuery(
-				"SELECT s FROM Study s WHERE s." + fieldName + " LIKE :value")
-				.setParameter("value", value)
-				.getResultList();
+		final StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT s FROM Study s WHERE s.").append(fieldName).append(" LIKE :value");
+		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
 	}
-	
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<IdNameDTO> findIdsAndNames() {
-		return em.createNativeQuery(
-				"SELECT id, name FROM study", "studyNameResult")
-				.getResultList();
+		return em.createNativeQuery("SELECT id, name FROM study", "studyNameResult").getResultList();
 	}
 
 }
