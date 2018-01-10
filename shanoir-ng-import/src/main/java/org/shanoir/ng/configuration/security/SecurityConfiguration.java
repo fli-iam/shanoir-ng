@@ -39,9 +39,6 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 	@Value("${front.server.url}")
 	private String frontServerUrl;
 	
-	@Value("${shanoir.import.upload.folder}")
-	private String uploadFolder;
-	
 	/**
 	 * Registers the KeycloakAuthenticationProvider with the authentication
 	 * manager.
@@ -93,7 +90,6 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 	    ServletRegistrationBean bean = new ServletRegistrationBean(
 	      new ImageViewerServlet(), "/viewer/ImageViewerServlet/*");
 	    bean.setLoadOnStartup(1);
-	    bean.addInitParameter("uploadFolder", uploadFolder);
 	    return bean;
 	}
 

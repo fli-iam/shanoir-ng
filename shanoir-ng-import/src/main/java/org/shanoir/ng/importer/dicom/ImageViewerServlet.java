@@ -9,9 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Enumeration;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
@@ -39,26 +37,12 @@ public class ImageViewerServlet extends HttpServlet {
 	/** The Constant BUFFER_SIZE. */
 	private static final int BUFFER_SIZE = 10 * KB;
 
-	protected String uploadFolder;
-
-	/*
-	 * get uploadFolder value
-	 */
-	@Override
-	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
-		Enumeration<String> test = config.getInitParameterNames();
-		if (test != null) {
-			this.uploadFolder = config.getInitParameter("uploadFolder");
-		}
-	}
-
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
 		String pathInfo = request.getPathInfo();
-		URL url = new URL("file:///" + uploadFolder + pathInfo);
+		URL url = new URL("file:///" + pathInfo);
 		final URLConnection uCon = url.openConnection();
 		final InputStream is = uCon.getInputStream();
 		response.setContentType("application/dicom");
