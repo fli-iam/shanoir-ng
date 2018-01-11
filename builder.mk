@@ -4,7 +4,7 @@
 
 # designed to build all images from scratch
 
-MICROSERVICES = users studies studycards
+MICROSERVICES = users studies studycards datasets
 
 # keycloak images
 #
@@ -26,6 +26,10 @@ base-image:
 # base image for the microservices
 base-ms-image: base-image
 	docker build -t shanoir-ng/base-ms shanoir-ng-template/shanoir-ng-base-ms
+
+# microservices common project build
+ms-common:
+	(cd shanoir-ng-ms-common/ && mvn install)
 
 # microservices
 $(MICROSERVICES): %: base-ms-image
