@@ -32,7 +32,7 @@ ms-common:
 	(cd shanoir-ng-ms-common/ && mvn install)
 
 # microservices
-$(MICROSERVICES): %: base-ms-image
+$(MICROSERVICES): %: base-ms-image ms-common
 	# https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-4%29-Docker-shanoir-ng-users
 	(cd 'shanoir-ng-$@/' && mvn clean package docker:build -DskipTests -Pqualif)
 
