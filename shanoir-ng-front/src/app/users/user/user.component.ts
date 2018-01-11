@@ -244,7 +244,7 @@ export class UserComponent implements OnInit {
             }
         } else {
             this.isDateValid = true;
-            setTimeout(() => this.selectedDateNormal = null);
+            setTimeout(():void => this.selectedDateNormal = null);
         }
     }
 

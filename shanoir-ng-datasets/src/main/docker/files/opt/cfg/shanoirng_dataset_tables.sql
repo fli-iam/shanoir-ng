@@ -7,16 +7,6 @@ CREATE TABLE `scientific_article` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `timepoint` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `comment` varchar(255) DEFAULT NULL,
-  `days` bigint(20) DEFAULT NULL,
-  `name` varchar(255) NOT NULL,
-  `rank` bigint(20) NOT NULL,
-  `study_id` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE `instrument` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `acronym` varchar(255) NOT NULL,
@@ -69,12 +59,10 @@ CREATE TABLE `examination` (
   `study_id` bigint(20) NOT NULL,
   `subject_id` bigint(20) DEFAULT NULL,
   `subject_weight` double DEFAULT NULL,
-  `weight_unit_of_measure` int(11) DEFAULT NULL,
   `timepoint_id` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FKr6tia0a2qg6r44r8cp6a8x771` (`timepoint_id`),
-  CONSTRAINT `FKr6tia0a2qg6r44r8cp6a8x771` FOREIGN KEY (`timepoint_id`) REFERENCES `timepoint` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+  `weight_unit_of_measure` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `instrument_based_assessment` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -106,9 +94,9 @@ CREATE TABLE `score` (
   CONSTRAINT `FKax4en8sb6r08ocu5tjqxxnke5` FOREIGN KEY (`variable_assessment_id`) REFERENCES `variable_assessment` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `extra_data_file_pathlist_table` (
+CREATE TABLE `extra_data_file_path` (
   `examination_id` bigint(20) NOT NULL,
-  `extra_data_file_pathlist` varchar(255) DEFAULT NULL,
+  `path` varchar(255) DEFAULT NULL,
   KEY `FKsa2t6lt66decp890btytoscaw` (`examination_id`),
   CONSTRAINT `FKsa2t6lt66decp890btytoscaw` FOREIGN KEY (`examination_id`) REFERENCES `examination` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -189,8 +177,8 @@ CREATE TABLE `mr_protocol` (
   `slice_spacing` double DEFAULT NULL,
   `slice_thickness` double DEFAULT NULL,
   `temporal_resolution` double DEFAULT NULL,
-  `time_reduction_factor_for_the_inplane_direction` double DEFAULT NULL,
-  `time_reduction_factor_for_the_out_ofplane_direction` double DEFAULT NULL,
+  `time_reduction_factor_for_the_in_plane_direction` double DEFAULT NULL,
+  `time_reduction_factor_for_the_out_of_plane_direction` double DEFAULT NULL,
   `transmitting_coil_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -256,13 +244,13 @@ CREATE TABLE `dataset` (
   `study_id` bigint(20) DEFAULT NULL,
   `subject_id` bigint(20) DEFAULT NULL,
   `dataset_acquisition_id` bigint(20) DEFAULT NULL,
-  `dataset_aprocessing_id` bigint(20) DEFAULT NULL,
+  `dataset_processing_id` bigint(20) DEFAULT NULL,
   `referenced_dataset_for_superimposition_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKjkg5k0bq6iwsbti7gk8qs45n9` (`dataset_acquisition_id`),
-  KEY `FKe9f1d0hhxgaae17g24s4ma4if` (`dataset_aprocessing_id`),
+  KEY `FKe9f1d0hhxgaae17g24s4ma4if` (`dataset_processing_id`),
   KEY `FKnxwkicqfi0bhxcf4vhxy6ter1` (`referenced_dataset_for_superimposition_id`),
-  CONSTRAINT `FKe9f1d0hhxgaae17g24s4ma4if` FOREIGN KEY (`dataset_aprocessing_id`) REFERENCES `dataset_processing` (`id`),
+  CONSTRAINT `FKe9f1d0hhxgaae17g24s4ma4if` FOREIGN KEY (`dataset_processing_id`) REFERENCES `dataset_processing` (`id`),
   CONSTRAINT `FKjkg5k0bq6iwsbti7gk8qs45n9` FOREIGN KEY (`dataset_acquisition_id`) REFERENCES `dataset_acquisition` (`id`),
   CONSTRAINT `FKnxwkicqfi0bhxcf4vhxy6ter1` FOREIGN KEY (`referenced_dataset_for_superimposition_id`) REFERENCES `dataset` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
@@ -422,7 +410,7 @@ CREATE TABLE `dataset_expression` (
 
 CREATE TABLE `dataset_file` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `path` varchar(255) DEFAULT NULL,
+  `path` text DEFAULT NULL,
   `dataset_expression_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKab9ewwdtyfj9cv5senm315hfd` (`dataset_expression_id`),

@@ -281,13 +281,13 @@ public class MrProtocol extends AbstractGenericItem {
 	 * From dicom tag (0018,9069) VR=FD, VM=1 Parallel Reduction Factor
 	 * In-plane.
 	 */
-	private Double timeReductionFactorForTheInplaneDirection;
+	private Double timeReductionFactorForTheInPlaneDirection;
 
 	/**
 	 * From dicom tag (0018,9155) VR=FD, VM=1 Parallel Reduction Factor
 	 * out-of-plane.
 	 */
-	private Double timeReductionFactorForTheOutOfplaneDirection;
+	private Double timeReductionFactorForTheOutOfPlaneDirection;
 
 	/** Transmitting coil. */
 	private Long transmittingCoilId;
@@ -1012,33 +1012,33 @@ public class MrProtocol extends AbstractGenericItem {
 	}
 
 	/**
-	 * @return the timeReductionFactorForTheInplaneDirection
+	 * @return the timeReductionFactorForTheInPlaneDirection
 	 */
-	public Double getTimeReductionFactorForTheInplaneDirection() {
-		return timeReductionFactorForTheInplaneDirection;
+	public Double getTimeReductionFactorForTheInPlaneDirection() {
+		return timeReductionFactorForTheInPlaneDirection;
 	}
 
 	/**
-	 * @param timeReductionFactorForTheInplaneDirection
-	 *            the timeReductionFactorForTheInplaneDirection to set
+	 * @param timeReductionFactorForTheInPlaneDirection
+	 *            the timeReductionFactorForTheInPlaneDirection to set
 	 */
-	public void setTimeReductionFactorForTheInplaneDirection(Double timeReductionFactorForTheInplaneDirection) {
-		this.timeReductionFactorForTheInplaneDirection = timeReductionFactorForTheInplaneDirection;
+	public void setTimeReductionFactorForTheInPlaneDirection(Double timeReductionFactorForTheInPlaneDirection) {
+		this.timeReductionFactorForTheInPlaneDirection = timeReductionFactorForTheInPlaneDirection;
 	}
 
 	/**
-	 * @return the timeReductionFactorForTheOutOfplaneDirection
+	 * @return the timeReductionFactorForTheOutOfPlaneDirection
 	 */
-	public Double getTimeReductionFactorForTheOutOfplaneDirection() {
-		return timeReductionFactorForTheOutOfplaneDirection;
+	public Double getTimeReductionFactorForTheOutOfPlaneDirection() {
+		return timeReductionFactorForTheOutOfPlaneDirection;
 	}
 
 	/**
-	 * @param timeReductionFactorForTheOutOfplaneDirection
-	 *            the timeReductionFactorForTheOutOfplaneDirection to set
+	 * @param timeReductionFactorForTheOutOfPlaneDirection
+	 *            the timeReductionFactorForTheOutOfPlaneDirection to set
 	 */
-	public void setTimeReductionFactorForTheOutOfplaneDirection(Double timeReductionFactorForTheOutOfplaneDirection) {
-		this.timeReductionFactorForTheOutOfplaneDirection = timeReductionFactorForTheOutOfplaneDirection;
+	public void setTimeReductionFactorForTheOutOfPlaneDirection(Double timeReductionFactorForTheOutOfPlaneDirection) {
+		this.timeReductionFactorForTheOutOfPlaneDirection = timeReductionFactorForTheOutOfPlaneDirection;
 	}
 
 	/**
