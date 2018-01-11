@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.Collection;
-import java.util.List;
 
 import javax.validation.Valid;
 
@@ -29,11 +28,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.gson.Gson;
 
 import io.swagger.annotations.ApiParam;
-
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-08-10T08:45:26.334Z")
 
 @Controller
 public class ImporterApiController implements ImporterApi {
