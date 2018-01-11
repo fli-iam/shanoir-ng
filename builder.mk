@@ -29,7 +29,7 @@ base-ms-image: base-image
 
 # microservices common project build
 ms-common:
-	(cd shanoir-ng-back/ && mvn install)
+	(cd shanoir-ng-ms-common/ && mvn install)
 
 # microservices
 $(MICROSERVICES): %: base-ms-image ms-common
