@@ -14,7 +14,7 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 export class ExaminationTreeComponent {
 
     @Input() examination: Examination;
-    private fileIconPath: string = ImagesUrlUtil.FILE_ICON_PATH;
-    private folderIconPath: string = ImagesUrlUtil.FOLDER_12_ICON_PATH;
+    public fileIconPath: string = ImagesUrlUtil.FILE_ICON_PATH;
+    public folderIconPath: string = ImagesUrlUtil.FOLDER_12_ICON_PATH;
 
 }

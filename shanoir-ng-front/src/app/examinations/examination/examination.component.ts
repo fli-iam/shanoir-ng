@@ -29,13 +29,13 @@ export class ExaminationComponent implements OnInit {
     @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
     public examinationForm: FormGroup
-    private examination: Examination = new Examination();
+    public examination: Examination = new Examination();
     private examinationId: number;
     public mode: "view" | "edit" | "create";
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
     private centers: IdNameObject[];
-    private studies: IdNameObject[];
+    public studies: IdNameObject[];
     private subjects: IdNameObject[];
     private examinationExecutives: Object[];
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
@@ -148,7 +148,7 @@ export class ExaminationComponent implements OnInit {
             }
         } else {
             this.isDateValid = true;
-            setTimeout(() => this.selectedDateNormal = null);
+            setTimeout(():void => this.selectedDateNormal = null);
         }
     }
 

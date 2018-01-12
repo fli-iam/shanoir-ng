@@ -19,7 +19,7 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 export class StudyTreeComponent {
 
     private brainIconPath: string = ImagesUrlUtil.BRAIN_ICON_PATH;
-    private folderIconPath: string = ImagesUrlUtil.FOLDER_12_ICON_PATH;
+    public folderIconPath: string = ImagesUrlUtil.FOLDER_12_ICON_PATH;
     private homeIconPath: string = ImagesUrlUtil.HOME_ICON_PATH;
     private listIconPath: string = ImagesUrlUtil.LIST_ICON_PATH;
     @Input() study: Study;
