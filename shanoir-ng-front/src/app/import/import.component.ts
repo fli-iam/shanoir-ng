@@ -31,35 +31,40 @@ export class ImportComponent implements OnInit {
     private extensionError: Boolean;
     private dicomDirMissingError: Boolean;
     
-    private archive: string;
-    private modality: string;
-    private subjectMode: "single" | "group" = "single";
-    private patients: PatientDicom[];
+    public archive: string;
+    public modality: string;
+    public subjectMode: "single" | "group" = "single";
+    public patients: PatientDicom[];
     private patientDicom: PatientDicom;
-    private subject: Subject;
-    private studies: Study[];
-    private study: Study;
-    private studycards: IdNameObject[];
+    public subject: Subject;
+    public studies: Study[];
+    public study: Study;
+    public studycards: IdNameObject[];
     private subjects: Subject[]; 
-    private examinations: SubjectExamination[];
+    public examinations: SubjectExamination[];
     private seriesSelected: boolean;
     private selectedSeries: PatientDicom;
     private detailedPatient: Object;
+    public dsAcqOpened: boolean = false;
     private detailedSerie: Object;
     
-    private tab_modality_open: boolean = true;
-    private tab_upload_open: boolean = true;
-    private tab_series_open: boolean = true;
+    public tab_modality_open: boolean = true;
+    public tab_upload_open: boolean = true;
+    public tab_series_open: boolean = true;
 
-    private pacsProgress: number = 0;
-    private pacsStatus: string;
-    private anonymProgress: number = 0;
-    private anonymStatus: string;
-    private niftiProgress: number = 0;
-    private niftiStatus: string;
-    private studyCardProgress: number = 0;
-    private studyCardStatus: string;
-    private createUser: boolean = false;
+    public pacsProgress: number = 0;
+    public pacsStatus: string;
+    public anonymProgress: number = 0;
+    public anonymStatus: string;
+    public niftiProgress: number = 0;
+    public niftiStatus: string;
+    public studyCardProgress: number = 0;
+    public studyCardStatus: string;
+    public createUser: boolean = false;
+
+    //TODO: remove after json3 creation
+    public studycard: IdNameObject;
+    public examination: SubjectExamination;
 
     constructor(private fb: FormBuilder, private importService: ImportService,
         private studyService: StudyService, private examinationService: ExaminationService) {
@@ -126,7 +131,7 @@ export class ImportComponent implements OnInit {
     };
             
     initPapaya(serie: SerieDicom) {
-        var params = [];
+        var params: object[] = [];
         let imagesList: string[] = [];
         let dicomImagesList: Array<string[]> = [];
         for (let image of serie.images) {

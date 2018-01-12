@@ -210,7 +210,7 @@
                         <button disabled><img src="/assets/images/icons/add.png" />create a group of subjects</button>
                     </span>
                 </li>
-                <ng-template [ngIf]="subjectMode == 'single' && subject != undefined && subject != null && subject != ''">
+                <ng-template [ngIf]="subjectMode == 'single' && subject != undefined && subject != null">
                     <li class="">
                         <label class="">Common name</label> 
                         <span class="right-col">
@@ -292,7 +292,7 @@
                 <console-line label="The study card" [progress]="studyCardProgress" [status]="studyCardStatus"></console-line>
             </div>
             <div class="commands">
-                <button (click)="startProgressTest()">Start</button>
+                <!-- <button (click)="startProgressTest()">Start</button> -->
             </div>
         </fieldset>
     </div>
