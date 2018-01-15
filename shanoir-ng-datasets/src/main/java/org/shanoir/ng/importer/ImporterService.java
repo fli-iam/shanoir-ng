@@ -3,12 +3,10 @@ package org.shanoir.ng.importer;
 import org.shanoir.ng.dataset.DatasetApiController;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisitionServiceImpl;
-import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.examination.Examination;
 import org.shanoir.ng.examination.ExaminationService;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
-import org.shanoir.ng.importer.dto.Patients;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -78,12 +76,17 @@ public class ImporterService {
 		datasetAcquisition.setExamination(examination);
 		datasetAcquisition.setRank(rank);
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		datasetAcquisition.setSoftwareRelease(softwareRelease);
-		datasetAcquisition.setAcquisitionEquipmentId(acquisitionEquipmentId);
-		datasetAcquisition.setDatasets(datasets);
+//		datasetAcquisition.setSoftwareRelease(softwareRelease);
+//		datasetAcquisition.setAcquisitionEquipmentId(acquisitionEquipmentId);
+//		datasetAcquisition.setDatasets(datasets);
 		
 	
-		datasetAcquisitionServiceImpl.save(datasetAcquisition);
+		try {
+			datasetAcquisitionServiceImpl.save(datasetAcquisition);
+		} catch (ShanoirException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 }
