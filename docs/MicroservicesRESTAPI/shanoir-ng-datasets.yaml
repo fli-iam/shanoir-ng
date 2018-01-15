@@ -73,6 +73,34 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  '/datasetacquisition':
+    post:
+      operationId: createNewDatasetAcquisition
+      description: Creates new dataset acquisition
+      consumes:
+        - application/json
+      parameters:
+        - name: importJob
+          in: body
+          description: DatasetAcquisition to create
+          required: true
+          schema:
+            $ref: '#/definitions/importJob'
+      responses:
+        '204':
+          description: created Dataset Acquitistion
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '422':
+          description: bad parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
 parameters:
   datasetId:
     name: datasetId
@@ -82,6 +110,8 @@ parameters:
     type: integer
     format: int64
 definitions:
+  importJob:
+    type: object
   Dataset:
     type: object
     required:
