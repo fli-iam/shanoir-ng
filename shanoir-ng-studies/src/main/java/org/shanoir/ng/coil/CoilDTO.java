@@ -1,6 +1,5 @@
 package org.shanoir.ng.coil;
 
-import org.shanoir.ng.manufacturermodel.ManufacturerModelDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 
 /**
@@ -16,7 +15,7 @@ public class CoilDTO {
 	
 	private Long id;
 
-	private ManufacturerModelDTO manufacturerModel;
+	private IdNameDTO manufacturerModel;
 
 	private String name;
 
@@ -72,17 +71,19 @@ public class CoilDTO {
 		this.id = id;
 	}
 
+
+
 	/**
 	 * @return the manufacturerModel
 	 */
-	public ManufacturerModelDTO getManufacturerModel() {
+	public IdNameDTO getManufacturerModel() {
 		return manufacturerModel;
 	}
 
 	/**
 	 * @param manufacturerModel the manufacturerModel to set
 	 */
-	public void setManufacturerModel(ManufacturerModelDTO manufacturerModel) {
+	public void setManufacturerModel(IdNameDTO manufacturerModel) {
 		this.manufacturerModel = manufacturerModel;
 	}
 

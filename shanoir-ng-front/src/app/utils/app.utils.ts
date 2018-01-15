@@ -20,8 +20,12 @@ export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '
 // Subjects http api
 export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/subject';
 
+// Centers http api
+export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils';
+
 // Datasets http api
 const BACKEND_API_DATASET_MS_URL: string = process.env.BACKEND_API_DATASET_MS_URL;
+
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
 export const BACKEND_API_EXAMINATION_ALL_BY_SUBJECT_URL: string = BACKEND_API_EXAMINATION_URL + '/subjects';
@@ -29,10 +33,9 @@ export const BACKEND_API_EXAMINATION_ALL_BY_SUBJECT_URL: string = BACKEND_API_EX
 // Acquisition equipment http api
 export const BACKEND_API_ACQ_EQUIP_URL: string = BACKEND_API_STUDIES_MS_URL + '/acquisitionequipments';
 
-// Examination http api
-
 // Manufacturer model http api
 export const BACKEND_API_MANUF_MODEL_URL: string = BACKEND_API_STUDIES_MS_URL + '/manufacturermodels';
+export const BACKEND_API_MANUF_MODEL_NAMES_URL: string = BACKEND_API_MANUF_MODEL_URL + '/names';
 
 // Manufacturer http api
 export const BACKEND_API_MANUF_URL: string = BACKEND_API_STUDIES_MS_URL + '/manufacturers';

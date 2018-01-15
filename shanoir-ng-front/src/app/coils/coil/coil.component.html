@@ -1,0 +1,149 @@
+<div class="content-component">
+	<form [formGroup]="coilForm" class="max-content" novalidate>
+		<div class="layout left">
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">
+					<div class="header command-zone" i18n="View coil|Title@@coilDetailViewTitle">Details on coil</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'">
+					<div class="header command-zone" i18n="Edit coil|Title@@coilDetailEditTitle">Edit coil</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'">
+					<div class="header command-zone" i18n="Create coil|Title@@coilDetailCreateTitle">Create coil</div>
+				</ng-template>
+			</span>
+			<fieldset>
+				<ol>
+					<li>
+						<label i18n="Coil detail|Coil name label@@examinationDetailName" class="required-label">Name</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">	
+									{{coil.name}}		
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" id="name" formControlName="name" [(ngModel)]="coil.name" />
+								<!--><select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
+									<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
+								</select>
+								<label *ngIf="formErrors.studyId.includes('required')" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
+						<-->	</ng-template>
+						</span>
+					</li>
+
+					<li>
+						<label i18n="Coil detail|Serial Number label@@coilDetailSerialNumber">Serial Number</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{coil.serialNumber}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+									<input type="text" id="serialNb" formControlName="serialNb" [(ngModel)]="coil.serialNumber" />
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Coil detail|Coil Type label@@CoilDetailCoilType" class="required-label">Coil Type</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+									{{coil.coilType}}
+							<!--	{{examination.subject?.name}}-->
+							</ng-template> 
+						 	<ng-template ngSwitchDefault>
+									<select id="coilType" required formControlName="coilType" [(ngModel)]="coil.coilType">
+											<option *ngFor="let coilType of coilTypes" [value]="coilType.key">{{coilType.value}}</option>
+									</select>
+									<!--<label *ngIf="formErrors.studyStatus.includes('required')" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
+								<select id="subject" required formControlName="Subject" [(ngModel)]="examination.subject">
+									<option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
+								</select> -->
+							</ng-template>
+						</span>
+					</li>
+					<li>
+							<label i18n="Coil detail|Coil date label@@CoilDetailNbChannels">Number of channels</label>
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
+								    {{coil.numberOfChannels}} 
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<input type="text" id="nbChannel" formControlName="nbChannel" [(ngModel)]="coil.numberOfChannels" />
+								</ng-template>
+							</span>
+						</li>
+						<li>
+								<label i18n="Coil detail|Center label@@coilDetailCenter" class="required-label">Center</label>
+								<span class="right-col" [ngSwitch]="mode">
+									<ng-template [ngSwitchCase]="'view'">
+										<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: coil.center?.id}">
+											{{coil.center?.name}}
+										</a> 
+									</ng-template>
+									<ng-template ngSwitchDefault>
+										<select id="center" required formControlName="center" [(ngModel)]="coil.center">
+											<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
+										</select>
+										<button i18n="Coil detail|Create new center label@@coilDetailNewCenter" (click)="centerModal.show()	">
+												<img [src]="addIconPath"/>
+												new center
+											</button>
+										<label *ngIf="formErrors.center.includes('required')" class="form-validation-alert" i18n="Coil detail|Center required error@@coilDetailCenterRequiredError">Center is required!</label>
+									</ng-template>
+								</span>
+						</li>
+					 <li>
+						<label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel" class="required-label">Acquisition Equipment Model</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+
+									<a [routerLink]="['/manufacturer-model']" [queryParams]="{mode: 'view', id: coil.manufacturerModel?.id}">
+										{{coil.manufacturerModel?.name}}
+									</a>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								
+									<select id="acquiEquipModel" required formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel">
+											<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel.name}}</option>
+										</select>
+										<button i18n="Coil detail|Create new model label@@coilDetailNewManufModel" (click)="manufModelModal.show()">
+											<img [src]="addIconPath"/>
+											new manufacturer model
+										</button>
+										<label *ngIf="formErrors.manufacturerModel.includes('required')" class="form-validation-alert" i18n="Coil detail|Manufacturer model required error@@coilDetailManufModelRequiredError">Acquisition Equipment model is required!</label>
+							</ng-template>
+						</span>
+					</li> 
+					
+					
+				</ol>
+			</fieldset>
+			<div class="footer command-zone">
+				<span [ngSwitch]="mode">
+					<button i18n="View coil|Back button label@@backButton" class="Button" (click)="back()">Back</button>
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
+						<button type="submit" i18n="View coil|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
+						<button type="submit" i18n="Edit coil|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!coilForm.valid">Update</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
+						<button type="submit" i18n="Edit coil|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!coilForm.valid">Create</button>
+					</ng-template>
+				</span>
+			</div>
+		</div>
+	</form>
+</div>
+
+<app-modal modalDialogId="manufModelModal" #manufModelModal>
+		<div class="app-modal-body">
+		  <manufacturer-model-detail [modeFromAcqEquip]="'create'" (closing)="closePopin($event)"></manufacturer-model-detail>
+		</div>
+</app-modal>
+
+<app-modal modalDialogId="centerModal" #centerModal>
+		<div class="app-modal-body">
+		  <center-detail [modeFromCoil]="'create'" (closing)="closeCenterPopin($event)"></center-detail>
+		</div>
+</app-modal> 
+
+

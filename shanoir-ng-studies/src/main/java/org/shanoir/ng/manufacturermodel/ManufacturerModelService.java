@@ -2,6 +2,7 @@ package org.shanoir.ng.manufacturermodel;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 
 /**
@@ -47,5 +48,12 @@ public interface ManufacturerModelService {
 	 * @throws ShanoirStudiesException
 	 */
 	ManufacturerModel update(ManufacturerModel manufacturerModel) throws ShanoirStudiesException;
+	
+	/**
+	 * Find id and name for all manufacturer models.
+	 * 
+	 * @return list of IdNameDTO.
+	 */
+	List<IdNameDTO> findIdsAndNames();
 
 }
