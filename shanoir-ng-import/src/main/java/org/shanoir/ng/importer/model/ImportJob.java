@@ -23,5 +23,8 @@ public class ImportJob {
 
     @JsonProperty("patients")
     private Patients patients;
+    
+    @JsonProperty("examinationId")
+    private Long examinationId;
 
 }
