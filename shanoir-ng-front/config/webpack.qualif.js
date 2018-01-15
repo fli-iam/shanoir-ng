@@ -5,7 +5,8 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CompressionWebpackPlugin = require("compression-webpack-plugin");
 const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
-const AotPlugin = require('@ngtools/webpack').AotPlugin;
+const AngularCompilerPlugin = require('@ngtools/webpack').AngularCompilerPlugin;
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 /**
  * Webpack Constants
@@ -35,8 +36,8 @@ module.exports = webpackMerge(commonConfig, {
     module: {
         rules: [
             {
-                test: /\.ts$/,
-                loaders: ['@ngtools/webpack']
+                test: /(?:\.ngfactory\.js|\.ngstyle\.js|\.ts)$/,
+                loader: '@ngtools/webpack'
             },
             /**
              * File loader for supporting images, for example, in CSS files.
@@ -44,34 +45,36 @@ module.exports = webpackMerge(commonConfig, {
             {
                 test: /\.(jpg|png|gif)$/,
                 loader: 'file-loader'
-           }
+            }
         ]
     },
 
     plugins: [
-        new AotPlugin({
+        new AngularCompilerPlugin({
             tsConfigPath: './tsconfig-aot.json',
-            entryModule: helpers.root('src/app/app.module#AppModule')
+            entryModule: 'src/app/app.module#AppModule',
+            sourceMap: true
         }),
 
         new HtmlWebpackPlugin({
             filename: 'index.html',
             template: 'src/index-qualif.html',
-            inject: true  
+            inject: true
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
 
-        new webpack.optimize.UglifyJsPlugin({ // https://github.com/angular/angular/issues/10618
-            "compress": { "warnings": false },
+        new UglifyJsPlugin({
             "sourceMap": false,
-            "comments": false,
-            "mangle": true,
-            "minimize": true
+            "uglifyOptions": {
+                "compress": { "warnings": false },
+                "mangle": true,
+                "output": { "comments": false }
+            }
         }),
 
         new ExtractTextPlugin('[name].[hash].css'),
-        
+
         new webpack.LoaderOptionsPlugin({
             htmlLoader: {
                 minimize: false // workaround for ng2
@@ -83,7 +86,7 @@ module.exports = webpackMerge(commonConfig, {
             asset: "[path].gz[query]",
             algorithm: "gzip",
             test: new RegExp(
-                "\\.(" + ["js", "css"].join("|") +")$"
+                "\\.(" + ["js", "css"].join("|") + ")$"
             ),
             threshold: 10240,
             minRatio: 0.8

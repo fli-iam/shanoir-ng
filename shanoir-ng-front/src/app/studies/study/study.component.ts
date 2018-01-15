@@ -202,7 +202,7 @@ export class StudyComponent implements OnInit {
             });
     }
 
-    getStudyWithData(studyId): void {
+    getStudyWithData(studyId: number): void {
         this.studyService.getStudy(studyId, true)
             .then((study: Study) => {
                 this.study = study;
@@ -248,7 +248,7 @@ export class StudyComponent implements OnInit {
             }
         } else {
             this.isEndDateValid = true;
-            setTimeout(() => this.selectedEndDateNormal = null);
+            setTimeout(():void => this.selectedEndDateNormal = null);
         }
     }
 
@@ -267,7 +267,7 @@ export class StudyComponent implements OnInit {
             }
         } else {
             this.isStartDateValid = true;
-            setTimeout(() => this.selectedStartDateNormal = null);
+            setTimeout(():void => this.selectedStartDateNormal = null);
         }
     }
 

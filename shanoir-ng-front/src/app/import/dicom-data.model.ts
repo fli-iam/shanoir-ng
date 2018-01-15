@@ -1,6 +1,15 @@
 export class PatientsDicom {
+    // subjects: SubjectDicom;
+    // fromDicomZip: boolean;
+    // fromShanoirUploader: boolean;
+    // fromPacs: boolean;
     patients: PatientDicom[];
 }
+
+// export class SubjectDicom {
+//     id: string;
+//     name: string;
+// }
 
 export class PatientDicom {
     patientID: string;
@@ -27,11 +36,13 @@ export class SerieDicom {
     seriesNumber: number;
     numberOfSeriesRelatedInstances: number;
     sopClassUID: string;
-    equipment: EquipmentDicom;
+    // isSpectroscopy: boolean;
+    // isMultiFrame: boolean;
+    equipment: EquipmentDicom; 
     isCompressed: boolean;
     nonImages: any[];
     nonImagesNumber: number;
-    images: string[];
+    images: ImageDicom[];
     imagesNumber: number;
 }
 
@@ -39,4 +50,19 @@ export class EquipmentDicom {
     manufacturer: string;
     manufacturerModelName: string;
     deviceSerialNumber: string;
+}
+
+export class ImageDicom {
+    path: string;
+    acquisitionNumber: number;
+    echoNumbers: EchoNumber[];
+    imageOrientationPatient: ImageOrientationPatient[];
+}
+
+export class EchoNumber {
+    echoNumber: number;
+}
+
+export class ImageOrientationPatient {
+    imageOrientationPatient: number;
 }

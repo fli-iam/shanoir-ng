@@ -96,7 +96,7 @@ public class Study extends HalEntity {
 
 	/** List of protocol files directly attached to the study. */
 	@ElementCollection
-	@CollectionTable(name = "protocole_file_path")
+	@CollectionTable(name = "protocol_file_path")
 	@Column(name = "path")
 	private List<String> protocolFilePaths;
 

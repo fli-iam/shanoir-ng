@@ -7,24 +7,10 @@
             </div>
         </div>
     </app-modal>
-
+    
     <div class="step-block active" [class.active]="true">
-        <div class="header command-zone" (click)="tab_modality_open = !tab_modality_open">1. Choose modality<span *ngIf="modality" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step" [@slideDown]="tab_modality_open" *ngIf="tab_modality_open"> 
-            <p>In this step you are invited to choose the modality of the dataset(s) you want to import into the system.</p>
-            <div>
-                <span>
-                    <input type="radio" [(ngModel)]="modality" value="MRI" formControlName="modality" (change)="tab_modality_open = false">MRI
-                    <span class="spacer"></span>
-                    <input type="radio" [(ngModel)]="modality" value="PET" formControlName="modality" (change)="tab_modality_open = false">PET
-                </span>
-            </div>
-        </fieldset>
-    </div>
-
-    <div class="step-block" [class.active]="modality">
-        <div class="header command-zone" (click)="tab_upload_open = !tab_upload_open">2. Select DICOM archive<span *ngIf="archive" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step dicom" [@slideDown]="tab_upload_open && modality" *ngIf="tab_upload_open && modality">
+        <div class="header command-zone" (click)="tab_upload_open = !tab_upload_open">1. Select DICOM archive<span *ngIf="archive" class="check-mark">&#x2713;</span></div>
+        <fieldset class="step dicom" [@slideDown]="tab_upload_open" *ngIf="tab_upload_open">
             <p>
                 Please select a DICOM zip archive to import.<br/>
                 <strong class="warning">&#9888; Important notice:</strong> this archive must contain a DICOMDIR file at its root!
@@ -36,7 +22,21 @@
     </div>
 
     <div class="step-block" [class.active]="archive">
-        <div class="header command-zone" (click)="tab_series_open = !tab_series_open">3. Select series<span *ngIf="true" class="check-mark">&#x2713;</span></div>
+        <div class="header command-zone" (click)="tab_modality_open = !tab_modality_open">2. Modality<span *ngIf="modality" class="check-mark">&#x2713;</span></div>
+        <fieldset class="step" [@slideDown]="tab_modality_open && archive" *ngIf="tab_modality_open && archive"> 
+            <p>The modality of the dataset(s) that you are importing is: </p>
+            <div>
+                <span>
+                    <input type="radio" [(ngModel)]="modality" value="MR" formControlName="modality" (change)="tab_modality_open = false">MRI
+                    <span class="spacer"></span>
+                    <input type="radio" [(ngModel)]="modality" value="PT" formControlName="modality" (change)="tab_modality_open = false">PET
+                </span>
+            </div>
+        </fieldset>
+    </div>
+
+    <div class="step-block" [class.active]="archive">
+        <div class="header command-zone" (click)="tab_series_open = !tab_series_open">3. Select series<span *ngIf="patients" class="check-mark">&#x2713;</span></div>
         <fieldset class="step" [@slideDown]="tab_series_open && archive" *ngIf="tab_series_open && archive"> 
             <p>Please select only the series useful for your study.</p>
             <div class="middle-content">
@@ -54,10 +54,11 @@
                                 [label]="study.studyDescription"
                                 [editable]="true"
                                 [nodeParams]="study"
-                                (nodeSelected)="selectNode($event)"
+                                (nodeSelected)="selectNode(patient)"
                                 tooltip="You can change the study description here. The value will then be overwritten in the dicom files."
                                 pictoUrl="/assets/images/icons/medical/x-ray-2.png" 
-                                hasBox="true">
+                                hasBox="true"
+                                deploy=true>
                                     <node 
                                         *ngFor="let serie of study.series" 
                                         [label]="serie.seriesDescription" 
@@ -65,9 +66,9 @@
                                         buttonPicto="/assets/images/icons/search.png"
                                         (buttonClick)="initPapaya(serie);papayaModal.show();"
                                         hasBox="true" 
-                                        [(ngModel)]="serie.selected" 
+                                        [(ngModel)]="serie.selected"  
                                         [nodeParams]="serie"
-                                        (nodeSelected)="selectNode($event)"
+                                        (nodeSelected)="selectNode(patient)"
                                         (labelClick)="showSerieDetails($event)"
                                         [class.selected]="detailedSerie == serie"
                                         [ngModelOptions]="{standalone: true}">
@@ -142,7 +143,7 @@
         </fieldset>
     </div>
 
-    <div class="step-block" [class.active]="false">
+    <div class="step-block" [class.active]="true">
         <div class="header command-zone">4. Set the clinical context</div>
         <fieldset class="step">
             <ol>
@@ -209,7 +210,7 @@
                         <button disabled><img src="/assets/images/icons/add.png" />create a group of subjects</button>
                     </span>
                 </li>
-                <ng-template [ngIf]="subjectMode == 'single' && subject != undefined && subject != null && subject != ''">
+                <ng-template [ngIf]="subjectMode == 'single' && subject != undefined && subject != null">
                     <li class="">
                         <label class="">Common name</label> 
                         <span class="right-col">
@@ -291,7 +292,7 @@
                 <console-line label="The study card" [progress]="studyCardProgress" [status]="studyCardStatus"></console-line>
             </div>
             <div class="commands">
-                <button (click)="startProgressTest()">Start</button>
+                <!-- <button (click)="startProgressTest()">Start</button> -->
             </div>
         </fieldset>
     </div>

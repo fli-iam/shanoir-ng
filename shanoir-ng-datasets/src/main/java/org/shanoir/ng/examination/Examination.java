@@ -9,9 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.validation.constraints.NotNull;
@@ -62,8 +60,8 @@ public class Examination extends HalEntity {
 
 	/** List of extra files directly attached to the examinations. */
 	@ElementCollection
-	@CollectionTable(name = "extra_data_file_pathlist_table")
-	@Column(name = "extra_data_file_pathlist")
+	@CollectionTable(name = "extra_data_file_path")
+	@Column(name = "path")
 	private List<String> extraDataFilePathList;
 
 	/** List of the instrumentBasedAssessment related to this examination. */
@@ -101,9 +99,7 @@ public class Examination extends HalEntity {
 	private Double subjectWeight;
 
 	/** Study Timepoint */
-	@ManyToOne
-	@JoinColumn(name = "timepoint_id")
-	private Timepoint timepoint;
+	private Long timepointId;
 
 	/** The unit of weight, can be in kg or g */
 	private Integer weightUnitOfMeasure;
@@ -327,18 +323,18 @@ public class Examination extends HalEntity {
 	}
 
 	/**
-	 * @return the timepoint
+	 * @return the timepointId
 	 */
-	public Timepoint getTimepoint() {
-		return timepoint;
+	public Long getTimepointId() {
+		return timepointId;
 	}
 
 	/**
-	 * @param timepoint
-	 *            the timepoint to set
+	 * @param timepointId
+	 *            the timepointId to set
 	 */
-	public void setTimepoint(Timepoint timepoint) {
-		this.timepoint = timepoint;
+	public void setTimepointId(Long timepointId) {
+		this.timepointId = timepointId;
 	}
 
 	/**

@@ -26,66 +26,54 @@ declare var papaya: any;
 
 export class ImportComponent implements OnInit {
     @ViewChild('papayaModal') papayaModal: ModalComponent;
-    private patients: PatientDicom[];
-    private patientDicom: PatientDicom;
-    
-    /* Form inputs */
-    private modality: "IMR" | "PET";
-    private subjectMode: "single" | "group" = "single";
-    private extensionError: Boolean;
-    private dicomDirMissingError: Boolean;
-    private subject: Subject;
-    private archive;
-    private selectedSeries: SerieDicom[] = [];
-    
-    /* Display variables */
-    private step: number = 1;
-    private detailedSerie: Object;
-    private detailedPatient: Object;
-    private dsAcqOpened: boolean = false;
-    private createUser: boolean = false;
-    
-    private pacsProgress: number = 0;
-    private pacsStatus: string;
-    private anonymProgress: number = 0;
-    private anonymStatus: string;
-    private niftiProgress: number = 0;
-    private niftiStatus: string;
-    private studyCardProgress: number = 0;
-    private studyCardStatus: string;
-
-    private tab_modality_open: boolean = true;
-    private tab_upload_open: boolean = true;
-    private tab_series_open: boolean = true;
     
     public importForm: FormGroup;
-    private studies: Study[];
-    private study: Study;
-    private studycards: IdNameObject[];
-    private subjects: Subject[]; 
-    private examinations: SubjectExamination[];
+    private extensionError: Boolean;
+    private dicomDirMissingError: Boolean;
     
+    public archive: string;
+    public modality: string;
+    public subjectMode: "single" | "group" = "single";
+    public patients: PatientDicom[];
+    private patientDicom: PatientDicom;
+    public subject: Subject;
+    public studies: Study[];
+    public study: Study;
+    public studycards: IdNameObject[];
+    private subjects: Subject[]; 
+    public examinations: SubjectExamination[];
+    private seriesSelected: boolean;
+    private selectedSeries: PatientDicom;
+    private detailedPatient: Object;
+    public dsAcqOpened: boolean = false;
+    private detailedSerie: Object;
+    
+    public tab_modality_open: boolean = true;
+    public tab_upload_open: boolean = true;
+    public tab_series_open: boolean = true;
+
+    public pacsProgress: number = 0;
+    public pacsStatus: string;
+    public anonymProgress: number = 0;
+    public anonymStatus: string;
+    public niftiProgress: number = 0;
+    public niftiStatus: string;
+    public studyCardProgress: number = 0;
+    public studyCardStatus: string;
+    public createUser: boolean = false;
+
+    //TODO: remove after json3 creation
+    public studycard: IdNameObject;
+    public examination: SubjectExamination;
+
     constructor(private fb: FormBuilder, private importService: ImportService,
         private studyService: StudyService, private examinationService: ExaminationService) {
     }
 
     ngOnInit(): void {
-        this.findStudiesWithStudyCardsByUserId();
         this.buildForm();
     }
 
-    findStudiesWithStudyCardsByUserId(): void {
-        this.studyService
-            .findStudiesWithStudyCardsByUserId()
-            .then(studies => {
-                this.studies = studies;
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting study list by user!");
-            });
-    }
-    
     closeEditSubject(subject: any) {
         // Add the subject to the select box and select it
         console.log(subject);
@@ -106,7 +94,7 @@ export class ImportComponent implements OnInit {
             'subjectName': new FormControl(),
             'subjectIdentifier': new FormControl(),
             'examination': new FormControl(),
-            'modality': [this.modality, Validators.required],
+            'modality': [{value: this.modality, disabled: true}, Validators.required],
             'subject': [this.subject, Validators.required]
         });
     
@@ -143,11 +131,11 @@ export class ImportComponent implements OnInit {
     };
             
     initPapaya(serie: SerieDicom) {
-        var params = [];
+        var params: object[] = [];
         let imagesList: string[] = [];
         let dicomImagesList: Array<string[]> = [];
         for (let image of serie.images) {
-            imagesList.push(AppUtils.BACKEND_API_IMAGE_VIEWER_URL + image);
+            imagesList.push(AppUtils.BACKEND_API_IMAGE_VIEWER_URL + image["path"]);
         }
         dicomImagesList.push(imagesList);
         params["images"] = dicomImagesList;
@@ -156,6 +144,35 @@ export class ImportComponent implements OnInit {
         papaya.Container.addViewer("papaya", params);
     }
     
+    uploadArchive(event: any): void {
+        let file:any = event.srcElement.files;
+        let index:any = file[0].name.lastIndexOf(".");
+        let strsubstring: any = file[0].name.substring(index, file[0].name.length);
+        if (strsubstring != '.zip') {
+            this.extensionError = true;
+            this.dicomDirMissingError = false;
+            this.archive = '';
+        } else {
+            this.extensionError = false;
+            this.dicomDirMissingError = false;
+            this.archive = "file uploaded";
+        }
+        let formData: FormData = new FormData();
+        formData.append('file', file[0], file[0].name);
+        this.importService.uploadFile(formData)
+            .subscribe((patientDicomList: PatientsDicom) => {
+                let modalityOfDicomDir:any = patientDicomList.patients[0].studies[0].series[0].modality.toString();
+                this.modality = modalityOfDicomDir;
+                this.patients = patientDicomList.patients;
+            }, (err: String) => {
+                if (err.indexOf("DICOMDIR is missing") != -1) {
+                    this.dicomDirMissingError = true;
+                    this.extensionError = false;
+                    this.archive = '';
+                }
+            });
+    }
+
     showSerieDetails(nodeParams: any) {
         if (nodeParams && this.detailedSerie && nodeParams.id == this.detailedSerie["id"]) {
             this.detailedSerie = null;
@@ -172,45 +189,29 @@ export class ImportComponent implements OnInit {
         }
     }
 
-    uploadArchive(event: any): void {
-        let file = event.srcElement.files;
-        let index = file[0].name.lastIndexOf(".");
-        let strsubstring = file[0].name.substring(index, file[0].name.length);
-        if (strsubstring != '.zip') {
-            this.extensionError = true;
-            this.dicomDirMissingError = false;
-            this.archive = '';
-        } else {
-            this.extensionError = false;
-            this.dicomDirMissingError = false;
-            this.archive = "file uploaded";
-        }
-        let formData: FormData = new FormData();
-        formData.append('file', file[0], file[0].name);
-        this.importService.uploadFile(formData)
-            .subscribe((patientDicomList: PatientsDicom) => {
-                this.patients = patientDicomList.patients;
-            }, (err: String) => {
-                if (err.indexOf("DICOMDIR is missing") != -1) {
-                    this.dicomDirMissingError = true;
-                    this.extensionError = false;
-                    this.archive = '';
-                }
+    selectNode(nodeParams: PatientDicom) {
+        this.selectedSeries = nodeParams;
+    }
+
+    validateSeriesSelected () : void {
+        this.findStudiesWithStudyCardsByUserId();
+    }
+
+    // TODO: to be called later according to the new spec
+    // selectDicomSeries(): void {
+    //     this.importService.selectSeries(this.selectedSeries);
+    // }
+
+    findStudiesWithStudyCardsByUserId(): void {
+        this.studyService
+            .findStudiesWithStudyCardsByUserId()
+            .then(studies => {
+                this.studies = studies;
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting study list by user!");
             });
-    }
-
-    selectNode(nodeParams: any) {
-        console.log("nodeParams: ", nodeParams);
-        if (nodeParams.seriesInstanceUID) {
-            this.selectedSeries.push(nodeParams);
-        } else if (nodeParams.studyInstanceUID) {
-            this.selectedSeries.push(nodeParams.series);
-        }
-        console.log("final selected series: ", this.selectedSeries);
-    }
-
-    selectDicomSeries(): void {
-        this.importService.selectSeries(this.selectedSeries);
     }
 
     onSelectStudy(study: Study) {
@@ -241,45 +242,45 @@ export class ImportComponent implements OnInit {
         }
     }
 
-    startProgressTest() {
-        this.pacsStatus = "";
-        this.anonymStatus = "";
-        this.niftiStatus = "";
-        this.studyCardStatus = "";
-        this.pacsProgress = 0;
-        this.anonymProgress = 0;
-        this.niftiProgress = 0;
-        this.studyCardProgress = 0;
-        let subscription1 = Observable.timer(0, 10).subscribe(t => {
-            this.pacsProgress = t * 0.005;
-            if (this.pacsProgress >= 1) {
-                this.pacsProgress = 1;
-                this.pacsStatus = "ok";
-                subscription1.unsubscribe();
-                let subscription2 = Observable.timer(0, 10).subscribe(t => {
-                    this.anonymProgress = t * 0.002;
-                    if (this.anonymProgress >= 1) {
-                        this.anonymProgress = 1;
-                        this.anonymStatus = "ok";
-                        subscription2.unsubscribe();
-                        let subscription3 = Observable.timer(0, 10).subscribe(t => {
-                            this.niftiProgress = t * 0.01;
-                            if (this.niftiProgress >= 1) {
-                                this.niftiProgress = 1;
-                                this.niftiStatus = "ok";
-                                subscription3.unsubscribe();
-                                let subscription4 = Observable.timer(0, 10).subscribe(t => {
-                                    this.studyCardProgress = t * 0.01;
-                                    if (this.studyCardProgress >= 0.3) {
-                                        this.studyCardStatus = "error";
-                                        subscription4.unsubscribe();
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    }
+    // startProgressTest() {
+    //     this.pacsStatus = "";
+    //     this.anonymStatus = "";
+    //     this.niftiStatus = "";
+    //     this.studyCardStatus = "";
+    //     this.pacsProgress = 0;
+    //     this.anonymProgress = 0;
+    //     this.niftiProgress = 0;
+    //     this.studyCardProgress = 0;
+    //     let subscription1:any = Observable.timer(0, 10).subscribe(t => {
+    //         this.pacsProgress = t * 0.005;
+    //         if (this.pacsProgress >= 1) {
+    //             this.pacsProgress = 1;
+    //             this.pacsStatus = "ok";
+    //             subscription1.unsubscribe();
+    //             let subscription2 = Observable.timer(0, 10).subscribe(t => {
+    //                 this.anonymProgress = t * 0.002;
+    //                 if (this.anonymProgress >= 1) {
+    //                     this.anonymProgress = 1;
+    //                     this.anonymStatus = "ok";
+    //                     subscription2.unsubscribe();
+    //                     let subscription3 = Observable.timer(0, 10).subscribe(t => {
+    //                         this.niftiProgress = t * 0.01;
+    //                         if (this.niftiProgress >= 1) {
+    //                             this.niftiProgress = 1;
+    //                             this.niftiStatus = "ok";
+    //                             subscription3.unsubscribe();
+    //                             let subscription4 = Observable.timer(0, 10).subscribe(t => {
+    //                                 this.studyCardProgress = t * 0.01;
+    //                                 if (this.studyCardProgress >= 0.3) {
+    //                                     this.studyCardStatus = "error";
+    //                                     subscription4.unsubscribe();
+    //                                 }
+    //                             });
+    //                         }
+    //                     });
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
 }

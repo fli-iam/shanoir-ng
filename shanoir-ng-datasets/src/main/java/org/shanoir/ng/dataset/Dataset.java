@@ -96,7 +96,7 @@ public abstract class Dataset extends AbstractGenericItem {
 
 	/** Dataset Processing. */
 	@ManyToOne(cascade = CascadeType.REMOVE)
-	@JoinColumn(name = "dataset_aprocessing_id")
+	@JoinColumn(name = "dataset_processing_id")
 	private DatasetProcessing datasetProcessing;
 
 	/** Explored entity. */

@@ -25,7 +25,7 @@ export class UploadExtraDataComponent implements OnInit {
     @Output() closing: EventEmitter<any> = new EventEmitter();
     public canModify: Boolean = false;
     private examination: Examination = new Examination();
-    private examinationId: number;
+    public examinationId: number;
 
     constructor(private route: ActivatedRoute, private router: Router,
         private fb: FormBuilder, private location: Location,

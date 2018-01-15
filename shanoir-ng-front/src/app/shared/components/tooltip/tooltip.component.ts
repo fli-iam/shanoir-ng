@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
 
 export class TooltipComponent {
 
-    private opened: boolean = false;
+    public opened: boolean = false;
 
     public open() {
         this.opened = true;
