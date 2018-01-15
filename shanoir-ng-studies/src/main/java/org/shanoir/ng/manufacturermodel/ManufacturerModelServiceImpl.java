@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -103,6 +104,11 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 					+ " save/update because of an error while serializing manufacturer model.", e);
 		}
 		return false;
+	}
+
+	@Override
+	public List<IdNameDTO> findIdsAndNames() {
+		return manufacturerModelRepository.findIdsAndNames();
 	}
 
 }

@@ -21,6 +21,8 @@ import { StudyTreeComponent } from './studies/tree/study-tree.component';
 import { UserComponent } from './users/user/user.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
+import { CoilListComponent } from './coils/coil-list/coil-list.component';
+import { CoilComponent } from './coils/coil/coil.component';
 
 const appRoutes: Routes = [
   {
@@ -93,6 +95,15 @@ const appRoutes: Routes = [
     path: 'user-list',
     component: UserListComponent,
     canActivate: [AuthAdminGuard]
+  }, {
+    path: 'coil-list',
+    component: CoilListComponent,
+    canActivate: [AuthNotGuestGuard]
+  }
+  ,{
+    path: 'coil',
+    component: CoilComponent,
+    canActivate: [AuthNotGuestGuard]
   }
 ];
 

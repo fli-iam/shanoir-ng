@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -20,6 +20,8 @@ export class CenterComponent implements OnInit {
     public centerForm: FormGroup;
     private centerId: number;
     public mode: "view" | "edit" | "create";
+    @Input() modeFromCoil: "view" | "edit" | "create";
+    @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
     private phoneNumberPatternError = false;
@@ -31,6 +33,7 @@ export class CenterComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        if (this.modeFromCoil) { this.mode = this.modeFromCoil; }
         this.getCenter();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -42,11 +45,13 @@ export class CenterComponent implements OnInit {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let centerId = queryParams['id'];
+                if (!this.modeFromCoil) {
                 let mode = queryParams['mode'];
                 if (mode) {
                     this.mode = mode;
                 }
-                if (centerId) {
+            }
+                if (centerId && this.mode !== 'create') {
                     // view or edit mode
                     this.centerId = centerId;
                     return this.centerService.getCenter(centerId);
