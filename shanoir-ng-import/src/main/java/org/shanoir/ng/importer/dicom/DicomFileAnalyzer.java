@@ -11,6 +11,7 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.io.DicomInputStream;
+import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,8 +43,15 @@ public class DicomFileAnalyzer {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DicomFileAnalyzer.class);
 	
+	private static final String DOUBLE_EQUAL = "==";
+
+	private static final String SEMI_COLON = ";";
+	
 	@Value("${shanoir.import.upload.folder}")
 	private String uploadFolder;
+	
+	@Value("${shanoir.import.series.isspectroscopy}")
+	private String isSpectroscopy;
 
 	private ObjectMapper mapper = new ObjectMapper();
 	
@@ -120,41 +128,45 @@ public class DicomFileAnalyzer {
 		try {
 			dIS = new DicomInputStream(dicomFile);
 			Attributes datasetAttributes = dIS.readDataset(-1, -1);
-
 			String sopClassUID = datasetAttributes.getString(Tag.SOPClassUID);
 			((ObjectNode) serie).put("sopClassUID", sopClassUID);
+			checkSeriesDescription(serie, datasetAttributes);
 			// Some DICOM files with a particular SOP Class UID are to be ignored: such as Raw Data Storage
 			if (sopClassUID.startsWith("1.2.840.10008.5.1.4.1.1.66")) {
-				//((ArrayNode) instances).remove(index);
+				// ((ArrayNode) instances).remove(index);
 				// do nothing here as instances array will be deleted after split
 			} else {
 				// divide here between non-images and images, non-images at first
+				String seriesDescription = serie.path("seriesDescription").asText();
 				if (UID.PrivateSiemensCSANonImageStorage.equals(sopClassUID)
-					|| UID.MRSpectroscopyStorage.equals(sopClassUID)) {
+						|| UID.MRSpectroscopyStorage.equals(sopClassUID)
+						|| checkSerieIsSpectroscopy(seriesDescription)) {
 					ObjectNode nonImage = mapper.createObjectNode();
 					nonImage.put("path", instanceFilePath);
 					nonImages.add(nonImage);
-				// images at the second
+					((ObjectNode) serie).put("isSpectroscopy", true);
+					LOG.warn("Attention: spectroscopy serie is included in this import!");
+					// images at the second
 				} else {
-					// do not change here: use absolute path all time and find other solution for image preview
+					// do not change here: use absolute path all time and find other solution for
+					// image preview
 					ObjectNode image = mapper.createObjectNode();
 					image.put("path", instanceFilePath);
 					addImageSeparateDatasetsInfo(image, datasetAttributes);
 					images.add(image);
+					((ObjectNode) serie).put("isSpectroscopy", false);
 				}
 			}
 			/**
-			 * Attention: the below methods set informations on the serie level,
-			 * that are extracted of each dicom file (== instance), as we are on
-			 * the instance level here. Normally, the first file wins, as the below
-			 * methods check if the node is already existing in the json created.
-			 * This logic was like this before in shanoir old and I think there is
-			 * no other way than taking one file (the first?) as reference for the serie.
-			 * The below infos are not contained in the dicomdir, that is why we go on the
-			 * file level.
+			 * Attention: the below methods set informations on the serie level, that are
+			 * extracted of each dicom file (== instance), as we are on the instance level
+			 * here. Normally, the first file wins, as the below methods check if the node
+			 * is already existing in the json created. This logic was like this before in
+			 * shanoir old and I think there is no other way than taking one file (the
+			 * first?) as reference for the serie. The below infos are not contained in the
+			 * dicomdir, that is why we go on the file level.
 			 */
 			checkIsMultiFrame(serie, datasetAttributes, sopClassUID);
-			checkSeriesDescription(serie, datasetAttributes);
 			checkSeriesDate(serie, datasetAttributes);
 			checkProtocolName(serie, datasetAttributes);
 			addSeriesEquipment(serie, datasetAttributes);
@@ -173,6 +185,24 @@ public class DicomFileAnalyzer {
 	}
 
 	/**
+	 * This method uses the properties string isspectroscopy to check
+	 * if a serie contains spectroscopy.
+	 */
+	private boolean checkSerieIsSpectroscopy(final String seriesDescription) {
+		final String[] seriesDescriptionsToIdentifySpectroscopyInSerie = isSpectroscopy.split(SEMI_COLON);
+		for (final String item : seriesDescriptionsToIdentifySpectroscopyInSerie) {
+			final String tag = item.split(DOUBLE_EQUAL)[0];
+			final String value = item.split(DOUBLE_EQUAL)[1];
+			LOG.debug("checkIsSpectroscopy : tag=" + tag + ", value=" + value);
+			String wildcard = ImportUtils.wildcardToRegex(value);
+			if (seriesDescription != null && seriesDescription.matches(wildcard)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * This method adds all required infos to separate datasets within series for each image.
 	 * @param image
 	 * @param datasetAttributes
@@ -185,11 +215,11 @@ public class DicomFileAnalyzer {
 			}
 		}
 		if (image.path("echoNumbers").isMissingNode()) {
-			ObjectNode echoNumbers = mapper.createObjectNode();
-			String[] echoNumbersArray = datasetAttributes.getStrings(Tag.EchoNumbers);
+			ArrayNode echoNumbers = mapper.createArrayNode();
+			int[] echoNumbersArray = datasetAttributes.getInts(Tag.EchoNumbers);
 			if (echoNumbersArray != null) {
 				for (int i = 0; i < echoNumbersArray.length; i++) {
-					echoNumbers.put("echoNumber", echoNumbersArray[i]);		
+					echoNumbers.add(echoNumbersArray[i]);		
 				}
 				((ObjectNode) image).set("echoNumbers", echoNumbers);
 			} else {
@@ -197,11 +227,11 @@ public class DicomFileAnalyzer {
 			}
 		}
 		if (image.path("imageOrientationPatient").isMissingNode()) {
-			ObjectNode imageOrientationPatient = mapper.createObjectNode();
-			String[] imageOrientationPatientArray = datasetAttributes.getStrings(Tag.ImageOrientationPatient);
+			ArrayNode imageOrientationPatient = mapper.createArrayNode();
+			double[] imageOrientationPatientArray = datasetAttributes.getDoubles(Tag.ImageOrientationPatient);
 			if (imageOrientationPatientArray != null) {
 				for (int i = 0; i < imageOrientationPatientArray.length; i++) {
-					imageOrientationPatient.put("imageOrientationPatient", imageOrientationPatientArray[i]);		
+					imageOrientationPatient.add(imageOrientationPatientArray[i]);		
 				}
 				((ObjectNode) image).set("imageOrientationPatient", imageOrientationPatient);
 			} else {

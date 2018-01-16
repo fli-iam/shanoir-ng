@@ -72,6 +72,8 @@ shanoir:
     series:
       # this long name has been kept, as Elise and Isabelle know it like this; to find it for further adaptions in later time
       donotseparatedatasetsinserie: seriesDescription==*ASL*;seriesDescription==*asl*;protocolName==*ASL*;seriesDescription==*VIBE*DYN*;seriesDescription==*MoCoSeries*;seriesDescription==*DIFF*;seriesDescription==*Diff*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*;seriesDescription==*BOLD*;seriesDescription==*Bold*;seriesDescription==*bold*;seriesDescription==*intermediate t-Map*;protocolName==*DYN*;protocolName==*Dyn*;protocolName==*dyn*;seriesDescription==*QSM*;seriesDescription==*qsm*;seriesDescription==*RELAXO*;seriesDescription==*Relaxo*;
+      # If in the serie, the dicom value equals the "value" for the "tag", then the serie will be considered as spectroscopy
+      isspectroscopy: seriesDescription==*CSI*
   conversion:
     dcm2nii:
       converters:
@@ -88,8 +90,6 @@ shanoir:
             linux: /opt/clidcm/libx64/clidcm
             windows: C:/Dev/workspace/Shanoir_Dev/external/clidcm/bin/windows/clidcm.exe
             lib: /opt/clidcm/libx64/
-# If in the serie, the dicom value equals the "value" for the "tag", then the serie will be considered as spectroscopy
-# isSpectroscopy=seriesDescription==*CSI*
 
 ---
 
@@ -105,6 +105,7 @@ spring:
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
     data: classpath:/scripts/import.sql
+    initialize: true
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:

@@ -8,13 +8,13 @@ import java.util.Collection;
 
 import javax.validation.Valid;
 
-import org.shanoir.ng.importer.dcm2nii.NIfTIConverter;
+import org.shanoir.ng.importer.dcm2nii.NIfTIConverterService;
 import org.shanoir.ng.importer.dicom.DicomDirToJsonReader;
 import org.shanoir.ng.importer.dicom.DicomFileAnalyzer;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class ImporterApiController implements ImporterApi {
 	private DicomFileAnalyzer dicomFileAnalyzer;
 	
 	@Autowired
-	private NIfTIConverter niftiConverter;
+	private NIfTIConverterService niftiConverter;
 
 	public ResponseEntity<Void> uploadFiles(
 			@ApiParam(value = "file detail") @RequestPart("files") MultipartFile[] files) throws RestServiceException {
@@ -125,7 +125,7 @@ public class ImporterApiController implements ImporterApi {
 
 		try {
 			File tempFile = saveTempFile(dicomZipFile);
-			if (!Utils.checkZipContainsFile(DICOMDIR, tempFile))
+			if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile))
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 						"DICOMDIR is missing in .zip file.", null));
 
@@ -143,7 +143,7 @@ public class ImporterApiController implements ImporterApi {
 						"Error while unzipping file: folder already exists.", null));
 			}
 
-			Utils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
+			ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
 
 			File dicomDirFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + DICOMDIR);
 			DicomDirToJsonReader dicomDirToJsonReader = null;
@@ -155,7 +155,7 @@ public class ImporterApiController implements ImporterApi {
 
 			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode);
 
-			niftiConverter.prepareConversion(dicomDirJsonNode, unzipFolderFile);
+			niftiConverter.prepareAndRunConversion(dicomDirJsonNode, unzipFolderFile);
 
 			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(dicomDirJsonNode);
