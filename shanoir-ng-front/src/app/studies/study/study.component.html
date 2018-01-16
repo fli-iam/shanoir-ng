@@ -1,5 +1,5 @@
 <div class="content-component detail max-content">
-	<div class="layout" [ngClass]="{'left': mode=='view'}">
+	<div class="layout left">
 		<form [formGroup]="studyForm" novalidate>
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
