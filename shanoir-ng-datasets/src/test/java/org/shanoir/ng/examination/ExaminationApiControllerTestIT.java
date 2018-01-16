@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.dataset.DatasetMapper;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,10 @@ public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	@MockBean
-	private ExaminationMapper EexaminationMapperMock;
+	private DatasetMapper datasetMapperMock;
+	
+	@MockBean
+	private ExaminationMapper examinationMapperMock;
 	
 	@Autowired
 	private TestRestTemplate restTemplate;

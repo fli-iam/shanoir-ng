@@ -148,7 +148,8 @@ public class DatasetServiceImpl implements DatasetService<Dataset> {
 	 * @return database dataset with new values.
 	 */
 	private Dataset updateDatasetValues(final Dataset datasetDb, final Dataset dataset) {
-		datasetDb.setName(dataset.getName());
+		datasetDb.setStudyId(dataset.getStudyId());
+		// TODO: to complete
 		return datasetDb;
 	}
 

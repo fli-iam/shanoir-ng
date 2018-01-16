@@ -76,10 +76,9 @@ public class DatasetApiControllerTest {
 	public void updateDatasetTest() throws Exception {
 		String json = gson.toJson(ModelsUtil.createMrDataset());
 		// Cheat to add dataset type into json
-		json = json.replace("}", "") + ",\"type\":\"Mr\"}";
+		json = json.substring(0, json.length() - 1) + ",\"type\":\"Mr\"}";
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(json))
-				.andExpect(status().isNoContent());
+				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isNoContent());
 	}
 
 }

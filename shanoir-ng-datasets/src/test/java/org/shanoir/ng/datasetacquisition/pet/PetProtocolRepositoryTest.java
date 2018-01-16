@@ -1,4 +1,4 @@
-package org.shanoir.ng.dataset.modality;
+package org.shanoir.ng.datasetacquisition.pet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,7 +17,7 @@ import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapp
 import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 
 /**
- * Tests for repository 'mrdataset'.
+ * Tests for repository 'petprotocol'.
  * 
  * @author msimon
  *
@@ -25,13 +25,13 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @ActiveProfiles("test")
-public class MrDatasetRepositoryTest {
+public class PetProtocolRepositoryTest {
 
-	private static final String MR_DATASET_TEST_1_NAME = "MRDataset1";
-	private static final Long MR_DATASET_TEST_1_ID = 1L;
+	private static final int PET_PROTOCOL_TEST_1_NB_SLICES = 5;
+	private static final Long PET_PROTOCOL_TEST_1_ID = 1L;
 	
 	@Autowired
-	private MrDatasetRepository repository;
+	private PetProtocolRepository repository;
 	
 	/*
 	 * Mocks used to avoid unsatisfied dependency exceptions.
@@ -45,21 +45,21 @@ public class MrDatasetRepositoryTest {
 	
 	@Test
 	public void findAllTest() throws Exception {
-		Iterable<MrDataset> datasetsDb = repository.findAll();
-		assertThat(datasetsDb).isNotNull();
-		int nbDatasets = 0;
-		Iterator<MrDataset> datasetsIt = datasetsDb.iterator();
-		while (datasetsIt.hasNext()) {
-			datasetsIt.next();
-			nbDatasets++;
+		Iterable<PetProtocol> petProtocolsDb = repository.findAll();
+		assertThat(petProtocolsDb).isNotNull();
+		int nbPetProtocols = 0;
+		Iterator<PetProtocol> petProtocolsIt = petProtocolsDb.iterator();
+		while (petProtocolsIt.hasNext()) {
+			petProtocolsIt.next();
+			nbPetProtocols++;
 		}
-		assertThat(nbDatasets).isEqualTo(1);
+		assertThat(nbPetProtocols).isEqualTo(1);
 	}
 	
 	@Test
 	public void findOneTest() throws Exception {
-		MrDataset datasetDb = repository.findOne(MR_DATASET_TEST_1_ID);
-		assertThat(datasetDb.getName()).isEqualTo(MR_DATASET_TEST_1_NAME);
+		PetProtocol petProtocolDb = repository.findOne(PET_PROTOCOL_TEST_1_ID);
+		assertThat(petProtocolDb.getNumberOfSlices()).isEqualTo(PET_PROTOCOL_TEST_1_NB_SLICES);
 	}
 	
 }

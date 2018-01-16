@@ -11,8 +11,8 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
@@ -31,6 +31,7 @@ import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.processing.DatasetProcessing;
 import org.shanoir.ng.processing.InputOfDatasetProcessing;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -66,19 +67,6 @@ public abstract class Dataset extends AbstractGenericItem {
 	 */
 	private static final long serialVersionUID = -6712556010816448026L;
 
-	/**
-	 * Flag to indicate whether this dataset is related to a single subject or
-	 * to multiple subjects.
-	 */
-	@NotNull
-	private Integer cardinalityOfRelatedSubjects;
-
-	/**
-	 * A comment on the dataset. In case of importing from dicom files, it could
-	 * be the series description for instance.
-	 */
-	private String comment;
-
 	/** Creation date of the dataset. */
 	private Date creationDate;
 
@@ -91,16 +79,10 @@ public abstract class Dataset extends AbstractGenericItem {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "dataset", cascade = CascadeType.ALL)
 	private List<DatasetExpression> datasetExpressions;
 
-	/** Dataset Modality Type. */
-	private Integer datasetModalityType;
-
 	/** Dataset Processing. */
 	@ManyToOne(cascade = CascadeType.REMOVE)
 	@JoinColumn(name = "dataset_processing_id")
 	private DatasetProcessing datasetProcessing;
-
-	/** Explored entity. */
-	private Integer exploredEntity;
 
 	/**
 	 * Group of subjects. Constraint: not null if dataset.subject == null and
@@ -112,14 +94,9 @@ public abstract class Dataset extends AbstractGenericItem {
 	@OneToMany(mappedBy = "dataset", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<InputOfDatasetProcessing> inputOfDatasetProcessings;
 
-	/**
-	 * The name of this dataset. For instance, it could be 'BrainWeb',
-	 * 'ICBM152', 'T1-weighted High resolution image without injection' etc.
-	 */
-	private String name;
-
-	/** Processed dataset type. */
-	private Integer processedDatasetType;
+	/** Origin metadata. */
+	@OneToOne
+	private DatasetMetadata originMetadata;
 
 	/**
 	 * Parent dataset with the same sampling grid, ie that can be superimposed
@@ -142,37 +119,9 @@ public abstract class Dataset extends AbstractGenericItem {
 	/** Subject. */
 	private Long subjectId;
 
-	/**
-	 * @return the cardinalityOfRelatedSubjects
-	 */
-	public CardinalityOfRelatedSubjects getCardinalityOfRelatedSubjects() {
-		return CardinalityOfRelatedSubjects.getCardinality(cardinalityOfRelatedSubjects);
-	}
-
-	/**
-	 * @param cardinalityOfRelatedSubjects
-	 *            the cardinalityOfRelatedSubjects to set
-	 */
-	public void setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects cardinalityOfRelatedSubjects) {
-		if (cardinalityOfRelatedSubjects != null) {
-			this.cardinalityOfRelatedSubjects = cardinalityOfRelatedSubjects.getId();
-		}
-	}
-
-	/**
-	 * @return the comment
-	 */
-	public String getComment() {
-		return comment;
-	}
-
-	/**
-	 * @param comment
-	 *            the comment to set
-	 */
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+	/** Metadata updated by study card. */
+	@OneToOne
+	private DatasetMetadata updatedMetadata;
 
 	/**
 	 * @return the creationDate
@@ -220,25 +169,6 @@ public abstract class Dataset extends AbstractGenericItem {
 	}
 
 	/**
-	 * @return the datasetModalityType
-	 */
-	public DatasetModalityType getDatasetModalityType() {
-		return DatasetModalityType.getType(datasetModalityType);
-	}
-
-	/**
-	 * @param datasetModalityType
-	 *            the datasetModalityType to set
-	 */
-	public void setDatasetModalityType(DatasetModalityType datasetModalityType) {
-		if (datasetModalityType == null) {
-			this.datasetModalityType = null;
-		} else {
-			this.datasetModalityType = datasetModalityType.getId();
-		}
-	}
-
-	/**
 	 * @return the datasetProcessing
 	 */
 	public DatasetProcessing getDatasetProcessing() {
@@ -251,25 +181,6 @@ public abstract class Dataset extends AbstractGenericItem {
 	 */
 	public void setDatasetProcessing(DatasetProcessing datasetProcessing) {
 		this.datasetProcessing = datasetProcessing;
-	}
-
-	/**
-	 * @return the exploredEntity
-	 */
-	public ExploredEntity getExploredEntity() {
-		return ExploredEntity.getEntity(exploredEntity);
-	}
-
-	/**
-	 * @param exploredEntity
-	 *            the exploredEntity to set
-	 */
-	public void setExploredEntity(ExploredEntity exploredEntity) {
-		if (exploredEntity == null) {
-			this.exploredEntity = null;
-		} else {
-			this.exploredEntity = exploredEntity.getId();
-		}
 	}
 
 	/**
@@ -303,37 +214,46 @@ public abstract class Dataset extends AbstractGenericItem {
 	}
 
 	/**
+	 * Get dataset name. If name is not present, returns
+	 * "[id] [creation date] [type]".
+	 * 
 	 * @return the name
 	 */
 	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * @return the processedDatasetType
-	 */
-	public ProcessedDatasetType getProcessedDatasetType() {
-		return ProcessedDatasetType.getType(processedDatasetType);
-	}
-
-	/**
-	 * @param processedDatasetType
-	 *            the processedDatasetType to set
-	 */
-	public void setProcessedDatasetType(ProcessedDatasetType processedDatasetType) {
-		if (processedDatasetType == null) {
-			this.processedDatasetType = null;
+		if (updatedMetadata != null && !StringUtils.isEmpty(updatedMetadata.getName())) {
+			return updatedMetadata.getName();
+		} else if (!StringUtils.isEmpty(originMetadata.getName())) {
+			return originMetadata.getName();
 		} else {
-			this.processedDatasetType = processedDatasetType.getId();
+			final StringBuilder result = new StringBuilder();
+			result.append(this.getId());
+			if (creationDate != null) {
+				// TODO: change pattern
+//				result.append(" ").append(DateTimeFormatter.ofPattern("dd/MM/yyyy").format(creationDate));
+				result.append(" ").append(creationDate.toString());
+			}
+			String modalityType = originMetadata.getDatasetModalityType().name();
+			if (updatedMetadata != null) {
+				modalityType = updatedMetadata.getDatasetModalityType().name();
+			}
+			result.append(" ").append(modalityType.split("_")[0]);
+			return result.toString();
 		}
+	}
+
+	/**
+	 * @return the originMetadata
+	 */
+	public DatasetMetadata getOriginMetadata() {
+		return originMetadata;
+	}
+
+	/**
+	 * @param originMetadata
+	 *            the originMetadata to set
+	 */
+	public void setOriginMetadata(DatasetMetadata originMetadata) {
+		this.originMetadata = originMetadata;
 	}
 
 	/**
@@ -395,6 +315,21 @@ public abstract class Dataset extends AbstractGenericItem {
 	 */
 	public void setSubjectId(Long subjectId) {
 		this.subjectId = subjectId;
+	}
+
+	/**
+	 * @return the updatedMetadata
+	 */
+	public DatasetMetadata getUpdatedMetadata() {
+		return updatedMetadata;
+	}
+
+	/**
+	 * @param updatedMetadata
+	 *            the updatedMetadata to set
+	 */
+	public void setUpdatedMetadata(DatasetMetadata updatedMetadata) {
+		this.updatedMetadata = updatedMetadata;
 	}
 
 	/**

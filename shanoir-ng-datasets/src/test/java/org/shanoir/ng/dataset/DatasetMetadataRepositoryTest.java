@@ -1,4 +1,4 @@
-package org.shanoir.ng.dataset.modality;
+package org.shanoir.ng.dataset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,7 +17,7 @@ import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapp
 import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 
 /**
- * Tests for repository 'mrdataset'.
+ * Tests for repository 'datasetMetadata'.
  * 
  * @author msimon
  *
@@ -25,13 +25,13 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @ActiveProfiles("test")
-public class MrDatasetRepositoryTest {
+public class DatasetMetadataRepositoryTest {
 
 	private static final String MR_DATASET_TEST_1_NAME = "MRDataset1";
 	private static final Long MR_DATASET_TEST_1_ID = 1L;
 	
 	@Autowired
-	private MrDatasetRepository repository;
+	private DatasetMetadataRepository repository;
 	
 	/*
 	 * Mocks used to avoid unsatisfied dependency exceptions.
@@ -45,21 +45,21 @@ public class MrDatasetRepositoryTest {
 	
 	@Test
 	public void findAllTest() throws Exception {
-		Iterable<MrDataset> datasetsDb = repository.findAll();
-		assertThat(datasetsDb).isNotNull();
-		int nbDatasets = 0;
-		Iterator<MrDataset> datasetsIt = datasetsDb.iterator();
-		while (datasetsIt.hasNext()) {
-			datasetsIt.next();
-			nbDatasets++;
+		Iterable<DatasetMetadata> datasetMetadataDb = repository.findAll();
+		assertThat(datasetMetadataDb).isNotNull();
+		int nbDatasetMetadata = 0;
+		Iterator<DatasetMetadata> datasetMetadataIt = datasetMetadataDb.iterator();
+		while (datasetMetadataIt.hasNext()) {
+			datasetMetadataIt.next();
+			nbDatasetMetadata++;
 		}
-		assertThat(nbDatasets).isEqualTo(1);
+		assertThat(nbDatasetMetadata).isEqualTo(3);
 	}
 	
 	@Test
 	public void findOneTest() throws Exception {
-		MrDataset datasetDb = repository.findOne(MR_DATASET_TEST_1_ID);
-		assertThat(datasetDb.getName()).isEqualTo(MR_DATASET_TEST_1_NAME);
+		DatasetMetadata datasetMetadataDb = repository.findOne(MR_DATASET_TEST_1_ID);
+		assertThat(datasetMetadataDb.getName()).isEqualTo(MR_DATASET_TEST_1_NAME);
 	}
 	
 }

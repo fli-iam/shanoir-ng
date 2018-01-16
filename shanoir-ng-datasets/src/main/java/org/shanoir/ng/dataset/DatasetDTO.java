@@ -10,59 +10,19 @@ import java.util.Date;
  */
 public class DatasetDTO {
 
-	private CardinalityOfRelatedSubjects cardinalityOfRelatedSubjects;
-
-	private String comment;
-
 	private Date creationDate;
-
-	private DatasetModalityType datasetModalityType;
-
-	private ExploredEntity exploredEntity;
 
 	private Long groupOfSubjectsId;
 
 	private Long id;
 
-	private String name;
-
-	private ProcessedDatasetType processedDatasetType;
+	private DatasetMetadataDTO originMetadata;
 
 	private Long studyId;
 
 	private Long subjectId;
 
-	private String type;
-
-	/**
-	 * @return the cardinalityOfRelatedSubjects
-	 */
-	public CardinalityOfRelatedSubjects getCardinalityOfRelatedSubjects() {
-		return cardinalityOfRelatedSubjects;
-	}
-
-	/**
-	 * @param cardinalityOfRelatedSubjects
-	 *            the cardinalityOfRelatedSubjects to set
-	 */
-	public void setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects cardinalityOfRelatedSubjects) {
-		this.cardinalityOfRelatedSubjects = cardinalityOfRelatedSubjects;
-	}
-
-	/**
-	 * @return the comment
-	 */
-	public String getComment() {
-		return comment;
-	}
-
-	/**
-	 * @param comment
-	 *            the comment to set
-	 */
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+	private DatasetMetadataDTO updatedMetadata;
 
 	/**
 	 * @return the creationDate
@@ -77,36 +37,6 @@ public class DatasetDTO {
 	 */
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
-	}
-
-	/**
-	 * @return the datasetModalityType
-	 */
-	public DatasetModalityType getDatasetModalityType() {
-		return datasetModalityType;
-	}
-
-	/**
-	 * @param datasetModalityType
-	 *            the datasetModalityType to set
-	 */
-	public void setDatasetModalityType(DatasetModalityType datasetModalityType) {
-		this.datasetModalityType = datasetModalityType;
-	}
-
-	/**
-	 * @return the exploredEntity
-	 */
-	public ExploredEntity getExploredEntity() {
-		return exploredEntity;
-	}
-
-	/**
-	 * @param exploredEntity
-	 *            the exploredEntity to set
-	 */
-	public void setExploredEntity(ExploredEntity exploredEntity) {
-		this.exploredEntity = exploredEntity;
 	}
 
 	/**
@@ -140,33 +70,18 @@ public class DatasetDTO {
 	}
 
 	/**
-	 * @return the name
+	 * @return the originMetadata
 	 */
-	public String getName() {
-		return name;
+	public DatasetMetadataDTO getOriginMetadata() {
+		return originMetadata;
 	}
 
 	/**
-	 * @param name
-	 *            the name to set
+	 * @param originMetadata
+	 *            the originMetadata to set
 	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * @return the processedDatasetType
-	 */
-	public ProcessedDatasetType getProcessedDatasetType() {
-		return processedDatasetType;
-	}
-
-	/**
-	 * @param processedDatasetType
-	 *            the processedDatasetType to set
-	 */
-	public void setProcessedDatasetType(ProcessedDatasetType processedDatasetType) {
-		this.processedDatasetType = processedDatasetType;
+	public void setOriginMetadata(DatasetMetadataDTO originMetadata) {
+		this.originMetadata = originMetadata;
 	}
 
 	/**
@@ -200,18 +115,18 @@ public class DatasetDTO {
 	}
 
 	/**
-	 * @return the type
+	 * @return the updatedMetadata
 	 */
-	public String getType() {
-		return type;
+	public DatasetMetadataDTO getUpdatedMetadata() {
+		return updatedMetadata;
 	}
 
 	/**
-	 * @param type
-	 *            the type to set
+	 * @param updatedMetadata
+	 *            the updatedMetadata to set
 	 */
-	public void setType(String type) {
-		this.type = type;
+	public void setUpdatedMetadata(DatasetMetadataDTO updatedMetadata) {
+		this.updatedMetadata = updatedMetadata;
 	}
 
 }
