@@ -1,5 +1,6 @@
 package org.shanoir.ng.datasetfile;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -26,6 +27,7 @@ public class DatasetFile extends AbstractGenericItem {
 	@JoinColumn(name = "dataset_expression_id")
 	private DatasetExpression datasetExpression;
 
+	@Column(columnDefinition = "TEXT")
 	private String path;
 
 	/**

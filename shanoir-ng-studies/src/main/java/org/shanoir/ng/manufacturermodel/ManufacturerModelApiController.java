@@ -9,7 +9,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -44,15 +43,6 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 
 	public ResponseEntity<List<ManufacturerModel>> findManufacturerModels() {
 		final List<ManufacturerModel> manufacturerModels = manufacturerModelService.findAll();
-		if (manufacturerModels.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(manufacturerModels, HttpStatus.OK);
-	}
-	
-	@Override
-	public ResponseEntity<List<IdNameDTO>> findManufacturerModelsNames() {
-		final List<IdNameDTO> manufacturerModels = manufacturerModelService.findIdsAndNames();
 		if (manufacturerModels.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

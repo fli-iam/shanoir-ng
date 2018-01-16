@@ -786,7 +786,6 @@ VALUES
 	(168,'000010',28,58),
 	(169,'141228',63,6);
 
-
 INSERT INTO `coil`
 	(id, center_id, coil_type, manufacturer_model_id, name, number_of_channels, serial_number)
 VALUES
@@ -881,4 +880,3 @@ VALUES
 	(99, 2, 2, 19, 'HEAD/NECK 20', 20, NULL),
 	(100, 2, 2, 19, 'Rx/Tx Cp', NULL, NULL),
 	(101, 23, 2, 51, 'dS HEAD 32ch', 32, NULL);
-

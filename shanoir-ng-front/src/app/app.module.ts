@@ -69,9 +69,6 @@ import '../assets/css/modal.css';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
 import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 import { UploadExtraDataComponent } from './examinations/attached-files/upload-extra-data.component';
-import { CoilComponent } from './coils/coil/coil.component';
-import { CoilListComponent } from './coils/coil-list/coil-list.component';
-import { CoilService } from './coils/shared/coil.service';
 
 
 @NgModule({
@@ -126,9 +123,7 @@ import { CoilService } from './coils/shared/coil.service';
         TreeNodeComponent,
         TooltipComponent,
         UserListComponent,
-        InstrumentAssessmentComponent,
-        CoilComponent,
-        CoilListComponent
+        InstrumentAssessmentComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -149,7 +144,6 @@ import { CoilService } from './coils/shared/coil.service';
         MatDialog,
         RoleService,
         StudyService,
-        CoilService,
         UserService,
         {
             provide: HTTP_INTERCEPTORS,

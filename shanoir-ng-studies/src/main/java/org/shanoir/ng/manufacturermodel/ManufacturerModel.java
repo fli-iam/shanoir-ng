@@ -1,16 +1,12 @@
 package org.shanoir.ng.manufacturermodel;
 
-import javax.persistence.ColumnResult;
-import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.PostLoad;
-import javax.persistence.SqlResultSetMapping;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.Length;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
@@ -25,10 +21,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-@SqlResultSetMapping(name="ManufacturerModelNameResult", classes = {
-	    @ConstructorResult(targetClass = IdNameDTO.class, 
-	    columns = {@ColumnResult(name="id", type = Long.class), @ColumnResult(name="name")})
-	})
 @ManufacturerModelTypeCheck
 public class ManufacturerModel extends HalEntity {
 

@@ -4,7 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
-const AotPlugin = require('@ngtools/webpack').AotPlugin;
+const AngularCompilerPlugin = require('@ngtools/webpack').AngularCompilerPlugin;
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 /**
  * Webpack Constants
@@ -34,16 +35,17 @@ module.exports = webpackMerge(commonConfig, {
     module: {
         rules: [
             {
-                test: /\.ts$/,
-                loaders: ['@ngtools/webpack']
+                test: /(?:\.ngfactory\.js|\.ngstyle\.js|\.ts)$/,
+                loader: '@ngtools/webpack'
             }
         ]
     },
 
     plugins: [
-        new AotPlugin({
+        new AngularCompilerPlugin({
             tsConfigPath: './tsconfig-aot.json',
-            entryModule: helpers.root('src/app/app.module#AppModule')
+            entryModule: 'src/app/app.module#AppModule',
+            sourceMap: true
         }),
 
         new HtmlWebpackPlugin({
@@ -52,16 +54,22 @@ module.exports = webpackMerge(commonConfig, {
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
-        new webpack.optimize.UglifyJsPlugin({ // https://github.com/angular/angular/issues/10618
-            mangle: {
-                keep_fnames: true
+
+        new UglifyJsPlugin({
+            "sourceMap": false,
+            "uglifyOptions": {
+                "compress": { "warnings": false },
+                "mangle": true,
+                "output": { "comments": false }
             }
         }),
+
         new webpack.DefinePlugin({
             'process.env': {
                 'ENV': JSON.stringify(ENV)
             }
         }),
+
         new webpack.LoaderOptionsPlugin({
             htmlLoader: {
                 minimize: false // workaround for ng2
