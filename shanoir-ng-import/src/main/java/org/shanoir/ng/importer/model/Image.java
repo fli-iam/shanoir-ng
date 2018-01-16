@@ -1,5 +1,7 @@
 package org.shanoir.ng.importer.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Image {
@@ -9,8 +11,8 @@ public class Image {
 		@JsonProperty("acquisitionNumber")
         public String acquisitionNumber;
 		@JsonProperty("echoNumbers")
-        public EchoNumbers echoNumbers;
+        public List<Integer> echoNumbers;
 		@JsonProperty("imageOrientationPatient")
-        public ImageOrientationPatient imageOrientationPatient;
+        public List<Double> imageOrientationPatient;
 
 }
