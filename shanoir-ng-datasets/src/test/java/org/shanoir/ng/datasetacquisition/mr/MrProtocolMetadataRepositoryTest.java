@@ -1,4 +1,4 @@
-package org.shanoir.ng.dataset.modality;
+package org.shanoir.ng.datasetacquisition.mr;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,7 +17,7 @@ import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapp
 import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 
 /**
- * Tests for repository 'mrdataset'.
+ * Tests for repository 'mrprotocolmetadata'.
  * 
  * @author msimon
  *
@@ -25,13 +25,13 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @ActiveProfiles("test")
-public class MrDatasetRepositoryTest {
+public class MrProtocolMetadataRepositoryTest {
 
-	private static final String MR_DATASET_TEST_1_NAME = "MRDataset1";
-	private static final Long MR_DATASET_TEST_1_ID = 1L;
+	private static final String MR_PROTOCOL_METADATA_TEST_1_NAME = "MRProtocol1";
+	private static final Long MR_PROTOCOL_METADATA_TEST_1_ID = 1L;
 	
 	@Autowired
-	private MrDatasetRepository repository;
+	private MrProtocolMetadataRepository repository;
 	
 	/*
 	 * Mocks used to avoid unsatisfied dependency exceptions.
@@ -45,21 +45,21 @@ public class MrDatasetRepositoryTest {
 	
 	@Test
 	public void findAllTest() throws Exception {
-		Iterable<MrDataset> datasetsDb = repository.findAll();
-		assertThat(datasetsDb).isNotNull();
-		int nbDatasets = 0;
-		Iterator<MrDataset> datasetsIt = datasetsDb.iterator();
-		while (datasetsIt.hasNext()) {
-			datasetsIt.next();
-			nbDatasets++;
+		Iterable<MrProtocolMetadata> mrProtocolMetadataDb = repository.findAll();
+		assertThat(mrProtocolMetadataDb).isNotNull();
+		int nbMrProtocolMetadata = 0;
+		Iterator<MrProtocolMetadata> mrProtocolMetadataIt = mrProtocolMetadataDb.iterator();
+		while (mrProtocolMetadataIt.hasNext()) {
+			mrProtocolMetadataIt.next();
+			nbMrProtocolMetadata++;
 		}
-		assertThat(nbDatasets).isEqualTo(1);
+		assertThat(nbMrProtocolMetadata).isEqualTo(1);
 	}
 	
 	@Test
 	public void findOneTest() throws Exception {
-		MrDataset datasetDb = repository.findOne(MR_DATASET_TEST_1_ID);
-		assertThat(datasetDb.getName()).isEqualTo(MR_DATASET_TEST_1_NAME);
+		MrProtocolMetadata mrProtocolMetadataDb = repository.findOne(MR_PROTOCOL_METADATA_TEST_1_ID);
+		assertThat(mrProtocolMetadataDb.getName()).isEqualTo(MR_PROTOCOL_METADATA_TEST_1_NAME);
 	}
 	
 }

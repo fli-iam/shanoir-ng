@@ -17,7 +17,7 @@ import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapp
 import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 
 /**
- * Tests for repository 'dataset'.
+ * Tests for repository 'ctdataset'.
  * 
  * @author msimon
  *

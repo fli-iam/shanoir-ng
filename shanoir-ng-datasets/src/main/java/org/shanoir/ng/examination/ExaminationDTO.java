@@ -1,7 +1,6 @@
 package org.shanoir.ng.examination;
 
 import java.util.Date;
-import java.util.List;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
 
@@ -22,8 +21,6 @@ public class ExaminationDTO {
 	private String comment;
 
 	private Date examinationDate;
-
-	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
 
 	private String note;
 
@@ -108,21 +105,6 @@ public class ExaminationDTO {
 	 */
 	public void setExaminationDate(Date examinationDate) {
 		this.examinationDate = examinationDate;
-	}
-
-	/**
-	 * @return the instrumentBasedAssessmentList
-	 */
-	public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
-		return instrumentBasedAssessmentList;
-	}
-
-	/**
-	 * @param instrumentBasedAssessmentList
-	 *            the instrumentBasedAssessmentList to set
-	 */
-	public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
-		this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
 	}
 
 	/**

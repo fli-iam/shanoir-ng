@@ -3,6 +3,7 @@ package org.shanoir.ng.utils;
 import java.util.Date;
 
 import org.shanoir.ng.dataset.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.DatasetMetadata;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
@@ -31,10 +32,9 @@ public final class ModelsUtil {
 	 * 
 	 * @return CT dataset.
 	 */
-	public static CtDataset createCtDataset() {
+	public CtDataset createCtDataset() {
 		final CtDataset dataset = new CtDataset();
-		dataset.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
-		dataset.setName(DATASET_NAME);
+		dataset.setOriginMetadata(createDatasetSCMetadata());
 		return dataset;
 	}
 
@@ -45,8 +45,8 @@ public final class ModelsUtil {
 	 */
 	public static MrDataset createMrDataset() {
 		final MrDataset dataset = new MrDataset();
-		dataset.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
-		dataset.setName(DATASET_NAME);
+		dataset.setStudyId(EXAMINATION_STUDY_ID);
+		dataset.setOriginMetadata(createDatasetSCMetadata());
 		return dataset;
 	}
 
@@ -57,8 +57,7 @@ public final class ModelsUtil {
 	 */
 	public static PetDataset createPetDataset() {
 		final PetDataset dataset = new PetDataset();
-		dataset.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
-		dataset.setName(DATASET_NAME);
+		dataset.setOriginMetadata(createDatasetSCMetadata());
 		return dataset;
 	}
 
@@ -77,6 +76,18 @@ public final class ModelsUtil {
 		examination.setNote(EXAMINATION_NOTE);
 		examination.setStudyId(EXAMINATION_STUDY_ID);
 		return examination;
+	}
+
+	/*
+	 * Create an origin metadata for dataset.
+	 * 
+	 * @return metadata.
+	 */
+	private static DatasetMetadata createDatasetSCMetadata() {
+		final DatasetMetadata metadata = new DatasetMetadata();
+		metadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+		metadata.setName(DATASET_NAME);
+		return metadata;
 	}
 
 }

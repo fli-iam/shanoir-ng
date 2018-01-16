@@ -60,7 +60,10 @@ public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionM
 				if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {
 					datasetNameSet.add(datasetName);
 				}
-				final String datasetComment = dataset.getComment();
+				String datasetComment = dataset.getOriginMetadata().getComment();
+				if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
+					datasetComment = dataset.getUpdatedMetadata().getComment();
+				}
 				if (!StringUtils.isEmpty(datasetComment) && !datasetCommentSet.contains(datasetComment)) {
 					datasetCommentSet.add(datasetComment);
 				}

@@ -26,7 +26,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 public class DatasetServiceTest {
 
 	private static final Long DATASET_ID = 1L;
-	private static final String UPDATED_DATASET_NAME = "test";
+	private static final Long UPDATED_STUDY_ID = 2L;
 
 	@Mock
 	private DatasetRepository datasetRepository;
@@ -73,7 +73,7 @@ public class DatasetServiceTest {
 	public void updateTest() throws ShanoirException {
 		final Dataset updatedTemplate = datasetService.update(createMrDataset());
 		Assert.assertNotNull(updatedTemplate);
-		Assert.assertTrue(UPDATED_DATASET_NAME.equals(updatedTemplate.getName()));
+		Assert.assertTrue(UPDATED_STUDY_ID.equals(updatedTemplate.getStudyId()));
 
 		Mockito.verify(mrDatasetRepository, Mockito.times(1)).save(Mockito.any(MrDataset.class));
 	}
@@ -89,7 +89,7 @@ public class DatasetServiceTest {
 	private MrDataset createMrDataset() {
 		final MrDataset dataset = new MrDataset();
 		dataset.setId(DATASET_ID);
-		dataset.setName(UPDATED_DATASET_NAME);
+		dataset.setStudyId(UPDATED_STUDY_ID);
 		return dataset;
 	}
 

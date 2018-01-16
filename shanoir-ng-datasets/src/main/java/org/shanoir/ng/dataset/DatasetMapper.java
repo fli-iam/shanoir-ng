@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 
 /**
@@ -14,7 +12,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class })
 @DecoratedWith(DatasetDecorator.class)
 public interface DatasetMapper {
 
@@ -43,7 +41,6 @@ public interface DatasetMapper {
 	 *            dataset to map.
 	 * @return dataset DTO.
 	 */
-	@Mappings({ @Mapping(target = "name", ignore = true) })
 	IdNameDTO datasetToIdNameDTO(Dataset dataset);
 
 }
