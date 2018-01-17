@@ -1,4 +1,4 @@
-package org.shanoir.ng.examination;
+package org.shanoir.ng.studycard;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.studycard.StudyCard;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,30 +22,30 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * Integration tests for examination controller.
+ * Integration tests for study card controller.
  *
- * @author ifakhfakh
+ * @author msimon
  *
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")
-public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
-
-	private static final String REQUEST_PATH = "/examinations";
+public class StudyCardApiControllerTestIT extends KeycloakControllerTestIT {
+	
+	private static final String REQUEST_PATH = "/studycards";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	@Autowired
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void findExaminationByIdProtected() {
+	public void findStudyCardByIdProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_WITH_ID, String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
-	public void findExaminationByIdWithLogin() throws ClientProtocolException, IOException {
+	public void findStudyCardByIdWithLogin() throws ClientProtocolException, IOException {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.GET, entity,
@@ -53,13 +54,13 @@ public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
 	}
 
 	@Test
-	public void findExaminationsProtected() {
+	public void findTemplatesProtected() {
 		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH, String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
-	public void findExaminationsWithLogin() throws ClientProtocolException, IOException {
+	public void findTemplatesWithLogin() throws ClientProtocolException, IOException {
 		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.GET, entity,
@@ -68,16 +69,14 @@ public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
 	}
 
 	@Test
-	public void saveNewExaminationProtected() {
-		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new Examination(),
-				String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+	public void saveNewTemplateProtected() {
+		final ResponseEntity<String> response = restTemplate.postForEntity(REQUEST_PATH, new StudyCard(), String.class);
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
-	public void saveNewExaminationWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination(),
-				getHeadersWithToken(true));
+	public void saveNewTemplateWithLogin() throws ClientProtocolException, IOException {
+		final HttpEntity<StudyCard> entity = new HttpEntity<StudyCard>(ModelsUtil.createStudyCard(), getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH, HttpMethod.POST, entity,
 				String.class);
@@ -85,18 +84,17 @@ public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
 	}
 
 	@Test
-	public void updateNewExaminationProtected() {
-		final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination());
-
+	public void updateNewTemplateProtected() {
+		final HttpEntity<StudyCard> entity = new HttpEntity<StudyCard>(ModelsUtil.createStudyCard());
+		
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+		assertEquals(HttpStatus.FOUND, response.getStatusCode());
 	}
 
 	@Test
-	public void updateNewExaminationWithLogin() throws ClientProtocolException, IOException {
-		final HttpEntity<Examination> entity = new HttpEntity<Examination>(ModelsUtil.createExamination(),
-				getHeadersWithToken(true));
+	public void updateNewTemplateWithLogin() throws ClientProtocolException, IOException {
+		final HttpEntity<StudyCard> entity = new HttpEntity<StudyCard>(ModelsUtil.createStudyCard(), getHeadersWithToken(true));
 
 		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_WITH_ID, HttpMethod.PUT, entity,
 				String.class);

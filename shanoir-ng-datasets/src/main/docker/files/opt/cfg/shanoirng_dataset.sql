@@ -1,5 +1,17 @@
 ﻿use shanoir_ng_datasets;
 
+CREATE TABLE `study_cards` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `acquisition_equipment_id` bigint(20) DEFAULT NULL,
+  `center_id` bigint(20) DEFAULT NULL,
+  `disabled` bit(1) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `nifti_converter_id` bigint(20) DEFAULT NULL,
+  `study_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_innrdxbwjv64hhx7o58oxaj58` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
 CREATE TABLE `scientific_article` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `scientific_article_reference` varchar(255) NOT NULL,

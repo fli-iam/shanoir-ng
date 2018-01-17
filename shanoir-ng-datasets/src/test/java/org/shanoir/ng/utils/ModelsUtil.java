@@ -8,6 +8,7 @@ import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.examination.Examination;
+import org.shanoir.ng.studycard.StudyCard;
 
 /**
  * Utility class for test. Generates models.
@@ -27,6 +28,10 @@ public final class ModelsUtil {
 	public static final String EXAMINATION_NOTE = "test examination";
 	public static final Long EXAMINATION_STUDY_ID = 1L;
 
+	// Study card data
+	public static final String STUDY_CARD_NAME = "name";
+	public static final Boolean STUDY_CARD_DISABLED = false;
+	
 	/**
 	 * Create a CT dataset.
 	 * 
@@ -78,6 +83,18 @@ public final class ModelsUtil {
 		return examination;
 	}
 
+	/**
+	 * Create a template.
+	 * 
+	 * @return template.
+	 */
+	public static StudyCard createStudyCard() {
+		final StudyCard studyCard = new StudyCard();
+		studyCard.setName(STUDY_CARD_NAME);
+		studyCard.setDisabled(STUDY_CARD_DISABLED);
+		return studyCard;
+	}
+	
 	/*
 	 * Create an origin metadata for dataset.
 	 * 
