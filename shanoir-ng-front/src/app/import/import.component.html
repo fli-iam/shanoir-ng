@@ -138,12 +138,12 @@
                 </div>
             </div>
             <div class="commands">
-                 <button i18n="Import|NextButton label" [disabled]="!selectedSeries?.length > 0" (click)="selectDicomSeries()">Next</button>
+                 <button i18n="Import|NextButton label" [disabled]="!seriesSelected" (click)="selectDicomSeries()">Next</button>
             </div>
         </fieldset>
     </div>
 
-    <div class="step-block" [class.active]="true">
+    <div class="step-block" [class.active]="seriesSelected">
         <div class="header command-zone">4. Set the clinical context</div>
         <fieldset class="step">
             <ol>
