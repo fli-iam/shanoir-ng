@@ -62,7 +62,7 @@ CREATE TABLE `examination` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `center_id` bigint(20) NOT NULL,
   `comment` varchar(255) DEFAULT NULL,
-  `examination_date` datetime NOT NULL,
+  `examination_date` date NOT NULL,
   `experimental_group_of_subjects_id` bigint(20) DEFAULT NULL,
   `investigator_center_id` bigint(20) DEFAULT NULL,
   `investigator_external` bit(1) NOT NULL,
@@ -267,7 +267,7 @@ CREATE TABLE `dataset_metadata` (
 
 CREATE TABLE `dataset` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `creation_date` datetime DEFAULT NULL,
+  `creation_date` date DEFAULT NULL,
   `group_of_subjects_id` bigint(20) DEFAULT NULL,
   `study_id` bigint(20) DEFAULT NULL,
   `subject_id` bigint(20) DEFAULT NULL,
@@ -436,7 +436,7 @@ CREATE TABLE `template_dataset` (
 
 CREATE TABLE `dataset_expression` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `creation_date` datetime DEFAULT NULL,
+  `creation_date` date DEFAULT NULL,
   `dataset_expression_format` int(11) DEFAULT NULL,
   `dataset_processing_type` int(11) DEFAULT NULL,
   `frame_count` int(11) DEFAULT NULL,

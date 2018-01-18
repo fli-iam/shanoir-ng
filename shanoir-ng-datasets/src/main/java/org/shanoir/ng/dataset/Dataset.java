@@ -1,6 +1,6 @@
 package org.shanoir.ng.dataset;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -30,6 +30,7 @@ import org.shanoir.ng.dataset.modality.TemplateDataset;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.processing.DatasetProcessing;
 import org.shanoir.ng.processing.InputOfDatasetProcessing;
+import org.shanoir.ng.shared.jackson.LocalDateDeserializer;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.springframework.util.StringUtils;
 
@@ -37,6 +38,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Dataset.
@@ -68,7 +70,8 @@ public abstract class Dataset extends AbstractGenericItem {
 	private static final long serialVersionUID = -6712556010816448026L;
 
 	/** Creation date of the dataset. */
-	private Date creationDate;
+	@JsonDeserialize(using = LocalDateDeserializer.class)
+	private LocalDate creationDate;
 
 	/** Dataset Acquisition. */
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -126,7 +129,7 @@ public abstract class Dataset extends AbstractGenericItem {
 	/**
 	 * @return the creationDate
 	 */
-	public Date getCreationDate() {
+	public LocalDate getCreationDate() {
 		return creationDate;
 	}
 
@@ -134,7 +137,7 @@ public abstract class Dataset extends AbstractGenericItem {
 	 * @param creationDate
 	 *            the creationDate to set
 	 */
-	public void setCreationDate(Date creationDate) {
+	public void setCreationDate(LocalDate creationDate) {
 		this.creationDate = creationDate;
 	}
 

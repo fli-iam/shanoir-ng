@@ -1,10 +1,9 @@
 package org.shanoir.ng.dataset;
 
-import java.text.DateFormat;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,8 +27,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("test")
 public class DatasetMapperTest {
 
-	private static final DateFormat shortDateFormatEN = DateFormat.getDateInstance(DateFormat.SHORT,
-			new Locale("FR", "fr"));
 	private static final String DATE_STR = "01/01/18";
 
 	private static final Long DATASET_ID = 1L;
@@ -75,7 +72,7 @@ public class DatasetMapperTest {
 
 	private Dataset createDataset() throws ParseException {
 		final Dataset dataset = new MrDataset();
-		dataset.setCreationDate(shortDateFormatEN.parse(DATE_STR));
+		dataset.setCreationDate(LocalDate.parse(DATE_STR));
 		dataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.MR_DATASET);
 		dataset.setId(DATASET_ID);
 		dataset.getOriginMetadata().setName(DATASET_NAME);

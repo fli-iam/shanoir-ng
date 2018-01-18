@@ -1,6 +1,6 @@
 package org.shanoir.ng.examination;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -17,8 +17,10 @@ import javax.validation.constraints.NotNull;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
+import org.shanoir.ng.shared.jackson.LocalDateDeserializer;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Examination.
@@ -51,7 +53,8 @@ public class Examination extends HalEntity {
 
 	/** Examination date. */
 	@NotNull
-	private Date examinationDate;
+	@JsonDeserialize(using = LocalDateDeserializer.class)
+	private LocalDate examinationDate;
 
 	/**
 	 * Experimental group of subjects. Can be null only if subject is not null.
@@ -160,7 +163,7 @@ public class Examination extends HalEntity {
 	/**
 	 * @return the examinationDate
 	 */
-	public Date getExaminationDate() {
+	public LocalDate getExaminationDate() {
 		return examinationDate;
 	}
 
@@ -168,7 +171,7 @@ public class Examination extends HalEntity {
 	 * @param examinationDate
 	 *            the examinationDate to set
 	 */
-	public void setExaminationDate(Date examinationDate) {
+	public void setExaminationDate(LocalDate examinationDate) {
 		this.examinationDate = examinationDate;
 	}
 

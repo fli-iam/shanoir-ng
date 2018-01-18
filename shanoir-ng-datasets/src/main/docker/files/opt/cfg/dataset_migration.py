@@ -79,7 +79,7 @@ sourceCursor.execute("""SELECT EXAMINATION_ID, CENTER_ID, COMMENT, EXAMINATION_D
 
 query = """INSERT INTO examination
 	(id, center_id, comment, examination_date, experimental_group_of_subjects_id, investigator_center_id, investigator_external, investigator_id, note, study_id, subject_id, subject_weight, timepoint_id, weight_unit_of_measure)
-	VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+	VALUES (%s, %s, %s, DATE(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
@@ -265,7 +265,7 @@ sourceCursor.execute("""SELECT DATASET_ID, DATASET_CREATION_DATE, GROUP_OF_SUBJE
 query = """INSERT INTO dataset
 	(id, creation_date, group_of_subjects_id, study_id, subject_id, dataset_acquisition_id, dataset_processing_id,
 	referenced_dataset_for_superimposition_id, updated_metadata_id)
-	VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+	VALUES (%s, DATE(%s), %s, %s, %s, %s, %s, %s, %s)"""
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
@@ -422,7 +422,7 @@ print("Import registration_dataset: start")
 
 sourceCursor.execute("SELECT DATASET_ID, REF_REGISTRATION_DATASET_TYPE_ID FROM REGISTRATION_DATASET")
 
-query = "INSERT INTO registration_dataset (id, registration_dataset) VALUES (%s, %s)"
+query = "INSERT INTO registration_dataset (id, registration_dataset_type) VALUES (%s, %s)"
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
@@ -482,7 +482,7 @@ sourceCursor.execute("""SELECT DATASET_EXPRESSION_ID, EXPRESSION_CREATION_DATE, 
 query = """INSERT INTO dataset_expression
 	(id, creation_date, dataset_expression_format, dataset_processing_type, frame_count, multi_frame, nifti_converter_id,
 	nifti_converter_version, original_nifti_conversion, dataset_id, original_dataset_expression_id)
-	VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+	VALUES (%s, DATE(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()

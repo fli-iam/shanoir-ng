@@ -1,6 +1,6 @@
 package org.shanoir.ng.utils;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.shanoir.ng.dataset.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.DatasetMetadata;
@@ -75,7 +75,7 @@ public final class ModelsUtil {
 		final Examination examination = new Examination();
 		examination.setCenterId(EXAMINATION_CENTER_ID);
 		examination.setComment(EXAMINATION_COMMENT);
-		examination.setExaminationDate(new Date());
+		examination.setExaminationDate(LocalDate.now());
 		examination.setInvestigatorExternal(false);
 		examination.setInvestigatorId(EXAMINATION_INVESTIGATOR_ID);
 		examination.setNote(EXAMINATION_NOTE);

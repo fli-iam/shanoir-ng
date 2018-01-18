@@ -1,6 +1,6 @@
 package org.shanoir.ng.dataset;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * DTO for dataset.
@@ -10,7 +10,7 @@ import java.util.Date;
  */
 public class DatasetDTO {
 
-	private Date creationDate;
+	private LocalDate creationDate;
 
 	private Long groupOfSubjectsId;
 
@@ -27,7 +27,7 @@ public class DatasetDTO {
 	/**
 	 * @return the creationDate
 	 */
-	public Date getCreationDate() {
+	public LocalDate getCreationDate() {
 		return creationDate;
 	}
 
@@ -35,7 +35,7 @@ public class DatasetDTO {
 	 * @param creationDate
 	 *            the creationDate to set
 	 */
-	public void setCreationDate(Date creationDate) {
+	public void setCreationDate(LocalDate creationDate) {
 		this.creationDate = creationDate;
 	}
 
