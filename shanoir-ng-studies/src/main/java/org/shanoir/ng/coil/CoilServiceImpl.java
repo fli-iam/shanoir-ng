@@ -37,6 +37,9 @@ public class CoilServiceImpl implements CoilService {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+	
+	@Autowired
+	private CoilMapper coilMapper;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirStudiesException {
@@ -75,7 +78,7 @@ public class CoilServiceImpl implements CoilService {
 	@Override
 	public Coil update(final Coil center) throws ShanoirStudiesException {
 		final Coil coilDb = coilRepository.findOne(center.getId());
-		updateCenterValues(coilDb, center);
+		updateCoilValues(coilDb, center);
 		try {
 			coilRepository.save(coilDb);
 		} catch (Exception e) {
@@ -108,35 +111,36 @@ public class CoilServiceImpl implements CoilService {
 	 * 
 	 * @param centerId center id.
 	 */
-	private void deleteCoilOnShanoirOld(final Long centerId) {
+	private void deleteCoilOnShanoirOld(final Long coilId) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteCenterQueueOut().getName(),
-					new ObjectMapper().writeValueAsString(centerId));
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteCoilQueueOut().getName(),
+					new ObjectMapper().writeValueAsString(coilId));
 		} catch (AmqpException e) {
-			LOG.error("Cannot send center " + centerId + " delete to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.deleteCenterQueueOut().getName(), e);
+			LOG.error("Cannot send coil " + coilId + " delete to Shanoir Old on queue : "
+					+ RabbitMqConfiguration.deleteCoilQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send center " + centerId + " because of an error while serializing center.", e);
+			LOG.error("Cannot send coil " + coilId + " because of an error while serializing coil.", e);
 		}
 	}
 
 	/*
 	 * Update Shanoir Old.
 	 * 
-	 * @param center center.
+	 * @param coil Coil.
 	 * 
 	 * @return false if it fails, true if it succeed.
 	 */
 	private boolean updateShanoirOld(final Coil coil) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.centerQueueOut().getName(),
-					new ObjectMapper().writeValueAsString(coil));
+			final CoilDTO coilDTO = coilMapper.coilToCoilDTO(coil);
+			rabbitTemplate.convertAndSend(RabbitMqConfiguration.coilQueueOut().getName(),
+					new ObjectMapper().writeValueAsString(coilDTO));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send coil " + coil.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.centerQueueOut().getName(), e);
+					+ RabbitMqConfiguration.coilQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send coil " + coil.getId()
 					+ " save/update because of an error while serializing coil.", e);
@@ -153,7 +157,7 @@ public class CoilServiceImpl implements CoilService {
 	 * 
 	 * @return database coil with new values.
 	 */
-	private Coil updateCenterValues(final Coil coilDb, final Coil coil) {
+	private Coil updateCoilValues(final Coil coilDb, final Coil coil) {
 		coilDb.setCoilType(coil.getCoilType());
 		coilDb.setName(coil.getName());
 		coilDb.setNumberOfChannels(coil.getNumberOfChannels());
