@@ -3,6 +3,7 @@ package org.shanoir.ng.study;
 import java.util.List;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
@@ -99,7 +100,7 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @return a list of simple studies.
 	 * @throws ShanoirStudiesException
 	 */
-	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserId(Long userId) throws ShanoirStudiesException;
+	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserId(Long userId) throws ShanoirException;
 
 	/**
 	 * add new study

@@ -8,6 +8,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
@@ -35,7 +36,7 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
 			studyService.deleteById(studyId, KeycloakUtil.getTokenUserId());
-		} catch (ShanoirStudiesException e) {
+		} catch (ShanoirException e) {
 			if (StudiesErrorModelCode.NO_RIGHT_FOR_ACTION.equals(e.getErrorCode())) {
 				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
 			}
@@ -54,7 +55,7 @@ public class StudyApiController implements StudyApi {
 			} else {
 				studies = studyService.findStudiesByUserId(KeycloakUtil.getTokenUserId());
 			}
-		} catch (ShanoirStudiesException e) {
+		} catch (ShanoirException e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		if (studies.isEmpty()) {
@@ -77,7 +78,7 @@ public class StudyApiController implements StudyApi {
 		List<SimpleStudyDTO> studies;
 		try {
 			studies = studyService.findStudiesWithStudyCardsByUserId(KeycloakUtil.getTokenUserId());
-		} catch (ShanoirStudiesException e) {
+		} catch (ShanoirException e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		if (studies.isEmpty()) {
@@ -96,7 +97,7 @@ public class StudyApiController implements StudyApi {
 			} else {
 				study = studyService.findById(studyId, KeycloakUtil.getTokenUserId());
 			}
-		} catch (ShanoirStudiesException e) {
+		} catch (ShanoirException e) {
 			if (StudiesErrorModelCode.NO_RIGHT_FOR_ACTION.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 			}
@@ -151,7 +152,7 @@ public class StudyApiController implements StudyApi {
 			if (!studyService.canUserUpdateStudy(studyId, KeycloakUtil.getTokenUserId())) {
 				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
 			}
-		} catch (ShanoirStudiesException e1) {
+		} catch (ShanoirException e) {
 			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		

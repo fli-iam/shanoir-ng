@@ -12,10 +12,11 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.error.UsersFieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.UsersErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
-import org.shanoir.ng.utils.KeycloakUtils;
+import org.shanoir.ng.shared.exception.UsersErrorModelCode;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -109,8 +110,8 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	@Override
 	public ResponseEntity<Void> requestExtension(@RequestBody final ExtensionRequestInfo requestInfo) {
 		try {
-			getUserService().requestExtension(KeycloakUtils.getTokenUserId(), requestInfo);
-		} catch (final ShanoirUsersException e) {
+			getUserService().requestExtension(KeycloakUtil.getTokenUserId(), requestInfo);
+		} catch (final ShanoirException e) {
 			if (UsersErrorModelCode.USER_NOT_FOUND.equals(e.getErrorCode())) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}

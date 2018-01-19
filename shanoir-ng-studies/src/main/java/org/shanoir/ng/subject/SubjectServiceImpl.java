@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
@@ -279,7 +280,12 @@ public class SubjectServiceImpl implements SubjectService {
 
 	private Long getCenterIdFromStudyCard(Long studyCardId) throws ShanoirStudiesException {
 
-		final HttpEntity<Long> entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
+		HttpEntity<Long> entity = null;
+		try {
+			entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
+		} catch (ShanoirException e) {
+			throw ((ShanoirStudiesException) e);
+		}
 		// Request to studycard MS to get center id
 		ResponseEntity<Long> centerIdResponse = null;
 		try {

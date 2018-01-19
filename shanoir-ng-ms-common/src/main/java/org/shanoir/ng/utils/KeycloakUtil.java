@@ -20,7 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public final class KeycloakUtil {
 
-	private static final String USER_ID_TOKEN_ATT = "userId";
+	public static final String USER_ID_TOKEN_ATT = "userId";
 
 	/**
 	 * Get current user roles from Keycloak token.
