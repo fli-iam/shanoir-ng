@@ -17,7 +17,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import  org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
  * Unit tests for study controller.
@@ -33,11 +33,7 @@ public class ImporterApiControllerTest {
 	private static final String REQUEST_PATH = "/importer/upload_dicom/";
 
 	@Autowired
-	private MockMvc mvc;
-	
-	@Autowired
 	private ImporterApiController iac;
-
 
 	@Before
 	public void setup() {
@@ -45,33 +41,35 @@ public class ImporterApiControllerTest {
 	}
 
 	/**
-	 * Test that rest services returns 200 when running (assume that code in rest service is fine)
-	 * If file doesn't exists, then return an message in stdout saying file is missing
+	 * Test that rest services returns 200 when running (assume that code in
+	 * rest service is fine) If file doesn't exists, then return an message in
+	 * stdout saying file is missing
 	 * 
 	 * @throws Exception
 	 */
-	
+
 	@Test
 	public void uploadFileTest() throws Exception {
-		
+
 		String filePath = "/media/extra/shanoir/sample.zip";
 		File f = new File(filePath);
-		if(f.exists() && !f.isDirectory()) { 
-		
-		    MockMultipartFile multipartFile = new MockMultipartFile("file","DCM_IMPORT_SAMPLE.zip","application/zip", new FileInputStream(new File(filePath)));
-		
-		    MockMvc mockMvc = MockMvcBuilders.standaloneSetup(iac).build();
-		    mockMvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH)
-		            .file(multipartFile))
-		    		.andDo(print())
-		            .andExpect(status().isOk());
-		
+		if (f.exists() && !f.isDirectory()) {
+
+			MockMultipartFile multipartFile = new MockMultipartFile("file", "DCM_IMPORT_SAMPLE.zip", "application/zip",
+					new FileInputStream(new File(filePath)));
+
+			MockMvc mockMvc = MockMvcBuilders.standaloneSetup(iac).build();
+			mockMvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH).file(multipartFile)).andDo(print())
+					.andExpect(status().isOk());
+
 		} else {
 
-			System.out.println("[TEST CASE ERROR] UNABLE TO RETRIEVE FILE FOR TESTCASE ImporterApiControllerTest.uploadFileTest() at location : " + filePath );
-		
+			System.out.println(
+					"[TEST CASE ERROR] UNABLE TO RETRIEVE FILE FOR TESTCASE ImporterApiControllerTest.uploadFileTest() at location : "
+							+ filePath);
+
 		}
-		
+
 	}
 
 }

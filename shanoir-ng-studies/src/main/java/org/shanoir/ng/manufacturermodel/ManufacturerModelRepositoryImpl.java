@@ -5,9 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.shanoir.ng.center.Center;
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.springframework.stereotype.Component;
 
 /**
  * Implementation of custom repository for centers.
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Component;
  * @author msimon
  *
  */
-@Component
 public class ManufacturerModelRepositoryImpl implements ManufacturerModelRepositoryCustom {
 
 	@PersistenceContext
