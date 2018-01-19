@@ -7,6 +7,7 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { Pageable } from '../../shared/components/table/pageable.model';
 
 @Component({
     selector: 'examination-list',
@@ -20,9 +21,12 @@ export class ExaminationListComponent {
     public rowClickAction: Object;
     public loading: boolean = false;
     private createAcqEquip = false;
+    private pageable: Pageable;
+    public nbExaminations: number = 0;
 
     constructor(private examinationService: ExaminationService, private confirmDialogService: ConfirmDialogService,
         private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
+        this.countExaminations();
         this.getExaminations();
         this.createColumnDefs();
     }
@@ -30,11 +34,22 @@ export class ExaminationListComponent {
     // Grid data
     getExaminations(): void {
         this.loading = true;
-        this.examinationService.getExaminations().then(examinations => {
+        this.examinationService.getExaminations(this.pageable).then(examinations => {
             if (examinations) {
                 this.examinations = examinations;
             }
             this.loading = false;
+        })
+            .catch((error) => {
+                // TODO: display error
+                this.examinations = [];
+            });
+    }
+
+    countExaminations(): void {
+        this.loading = true;
+        this.examinationService.countExaminations().then(nbExaminations => {
+            this.nbExaminations = nbExaminations;
         })
             .catch((error) => {
                 // TODO: display error
@@ -61,19 +76,23 @@ export class ExaminationListComponent {
             {
                 headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
                     return dateRenderer(params.data.examinationDate);
-                },  width: "100px"
+                }, width: "100px"
             },
-            { headerName: "Research study", field: "studyName" , type: "link", clickAction: {
-                target: "/study", getParams: function (examination: Examination): Object {
-                    return { id: examination.studyId, mode: "view" };
+            {
+                headerName: "Research study", field: "studyName", type: "link", clickAction: {
+                    target: "/study", getParams: function (examination: Examination): Object {
+                        return { id: examination.studyId, mode: "view" };
+                    }
                 }
-            } },
+            },
             { headerName: "Examination executive", field: "" },
-            { headerName: "Center", field: "centerName" , type: "link", clickAction: {
-                target: "/center", getParams: function (examination: Examination): Object {
-                    return { id: examination.centerId, mode: "view" };
+            {
+                headerName: "Center", field: "centerName", type: "link", clickAction: {
+                    target: "/center", getParams: function (examination: Examination): Object {
+                        return { id: examination.centerId, mode: "view" };
+                    }
                 }
-            }}
+            }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push(
@@ -132,6 +151,11 @@ export class ExaminationListComponent {
         if (ids.length > 0) {
             console.log("TODO : delete those ids : " + ids);
         }
+    }
+
+    public reloadExaminations(pageable: Pageable): void {
+        this.pageable = pageable;
+        this.getExaminations();
     }
 
 }

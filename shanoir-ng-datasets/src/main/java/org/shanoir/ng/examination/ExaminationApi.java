@@ -6,7 +6,7 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -25,6 +25,14 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/examinations")
 public interface ExaminationApi {
 
+	@ApiOperation(value = "", notes = "Returns the number of examinations for an user", response = Integer.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found examinations", response = Integer.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/count", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<Integer> countExaminations();
+
 	@ApiOperation(value = "", notes = "Deletes an examination", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "examination deleted", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
@@ -35,7 +43,7 @@ public interface ExaminationApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteExamination(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
-			throws ShanoirException;
+			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the examination corresponding to the given id", response = Examination.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found examination", response = Examination.class),
@@ -46,7 +54,7 @@ public interface ExaminationApi {
 	@RequestMapping(value = "/{examinationId}", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<ExaminationDTO> findExaminationById(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
-			throws ShanoirException;
+			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Returns all the examinations", response = Examination.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
@@ -56,7 +64,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<ExaminationDTO>> findExaminations();
+	ResponseEntity<List<ExaminationDTO>> findExaminations(Pageable pageable);
 
 	@ApiOperation(value = "", notes = "Returns the list of examinations by subject id", response = Examination.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {

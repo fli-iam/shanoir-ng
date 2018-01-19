@@ -52,7 +52,7 @@
     <!-- Table ontent -->
     <tbody *ngIf="!isLoading && items.length > 0">
         <tr 
-            *ngFor="let item of items.slice((currentPage-1)*maxResults, currentPage*maxResults); let i = index" 
+            *ngFor="let item of getItems(); let i = index" 
             [class.odd]="i%2!=0" 
             [class.even]="i%2==0" 
             >
@@ -112,7 +112,7 @@
                 <span class="options">
                     <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
                     <span *ngIf="items != undefined && items != null">Found : {{items.length}}</span>
-                    <span *ngIf="itemsSave != undefined && itemsSave != null">Total : {{itemsSave.length}}</span>
+                    <span *ngIf="itemsSave != undefined && itemsSave != null">Total : {{nbAllItems}}</span>
                     <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
                 </span>
             </th>

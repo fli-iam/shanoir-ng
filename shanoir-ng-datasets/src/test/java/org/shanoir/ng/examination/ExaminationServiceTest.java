@@ -51,10 +51,19 @@ public class ExaminationServiceTest {
 	private ExaminationServiceImpl examinationService;
 
 	@Before
-	public void setup() {
+	public void setup() throws ShanoirException {
+		given(examinationRepository.countByStudyIdIn(Mockito.anyListOf(Long.class))).willReturn(2L);
 		given(examinationRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createExamination()));
 		given(examinationRepository.findOne(EXAMINATION_ID)).willReturn(ModelsUtil.createExamination());
 		given(examinationRepository.save(Mockito.any(Examination.class))).willReturn(ModelsUtil.createExamination());
+	}
+
+	@Test
+	public void countExaminationsByUserId() throws ShanoirException {
+		final long nbExaminations = examinationService.countExaminationsByUserId();
+		Assert.assertTrue(2 == nbExaminations);
+
+		Mockito.verify(examinationRepository, Mockito.times(1)).countByStudyIdIn(Mockito.anyListOf(Long.class));
 	}
 
 	@Test
@@ -71,7 +80,7 @@ public class ExaminationServiceTest {
 		given(restTemplate.getForEntity(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class)
 				)).willReturn(new ResponseEntity<>(idNameDTO, HttpStatus.OK));
 		
-		final List<Examination> examination = examinationService.findAll();
+		final List<Examination> examination = examinationService.findAll(null);
 		Assert.assertNotNull(examination);
 		Assert.assertTrue(examination.size() == 1);
 
@@ -80,11 +89,6 @@ public class ExaminationServiceTest {
 
 	@Test
 	public void findByIdTest() throws ShanoirException {
-		IdNameDTO idNameDTO = new IdNameDTO();
-		idNameDTO.setName("test");
-		given(restTemplate.getForEntity(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class)
-				)).willReturn(new ResponseEntity<>(idNameDTO, HttpStatus.OK));
-		
 		final Examination examination = examinationService.findById(EXAMINATION_ID);
 		Assert.assertNotNull(examination);
 		Assert.assertTrue(ModelsUtil.EXAMINATION_NOTE.equals(examination.getNote()));

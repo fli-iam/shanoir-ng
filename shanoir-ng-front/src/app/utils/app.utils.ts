@@ -1,3 +1,5 @@
+import { Pageable } from '../shared/components/table/pageable.model';
+
 // Users http api
 const BACKEND_API_USERS_MS_URL: string = process.env.BACKEND_API_USERS_MS_URL;
 export const BACKEND_API_USER_URL: string = BACKEND_API_USERS_MS_URL + '/users';
@@ -28,6 +30,7 @@ const BACKEND_API_DATASET_MS_URL: string = process.env.BACKEND_API_DATASET_MS_UR
 
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
+export const BACKEND_API_EXAMINATION_COUNT_URL: string = BACKEND_API_EXAMINATION_URL + '/count';
 export const BACKEND_API_EXAMINATION_ALL_BY_SUBJECT_URL: string = BACKEND_API_EXAMINATION_URL + '/subjects';
 
 // Acquisition equipment http api
@@ -45,3 +48,14 @@ const BACKEND_API_IMPORT_MS_URL: string = process.env.BACKEND_API_IMPORT_MS_URL;
 export const BACKEND_API_UPLOAD_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_dicom/';
 export const BACKEND_API_UPLOAD_DICOM_SELECT_SERIES_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/select_series/';
 export const BACKEND_API_IMAGE_VIEWER_URL: string = BACKEND_API_IMPORT_MS_URL + '/viewer/ImageViewerServlet/';
+
+export function getPageableQuery(pageable: Pageable): string {
+    let requestUrl: string = '';
+    if (pageable != null) {
+        requestUrl += '?page=' + pageable.page + '&size=' + pageable.size
+        if (pageable.sortProperty != null) {
+            requestUrl += '&sort=' + pageable.sortProperty + ',' + (pageable.asc ? 'asc' : 'desc');
+        }
+    }
+    return requestUrl;
+}

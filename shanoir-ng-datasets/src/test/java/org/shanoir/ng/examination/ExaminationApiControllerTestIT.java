@@ -32,10 +32,26 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class ExaminationApiControllerTestIT extends KeycloakControllerTestIT {
 
 	private static final String REQUEST_PATH = "/examinations";
+	private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	@Autowired
 	private TestRestTemplate restTemplate;
+
+	@Test
+	public void countExaminationsProtected() {
+		final ResponseEntity<String> response = restTemplate.getForEntity(REQUEST_PATH_COUNT, String.class);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+	}
+
+	@Test
+	public void countExaminationsWithLogin() throws ClientProtocolException, IOException {
+		final HttpEntity<String> entity = new HttpEntity<String>(getHeadersWithToken(true));
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_COUNT, HttpMethod.GET, entity,
+				String.class);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
 
 	@Test
 	public void findExaminationByIdProtected() {
