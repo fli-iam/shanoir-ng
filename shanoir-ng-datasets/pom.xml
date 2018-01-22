@@ -20,6 +20,7 @@
 		<spring-active-profile></spring-active-profile>
 		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
 		<docker.image.name>shanoir-ng/datasets</docker.image.name>
+		<dcm4che.version>5.10.6</dcm4che.version> 
 	</properties>
 
 	<dependencies>
@@ -50,6 +51,35 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+		
+		<!-- DCM4CHE dependencies -->
+		<dependency>
+			<groupId>org.dcm4che</groupId>
+			<artifactId>dcm4che-core</artifactId>
+			<version>${dcm4che.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.dcm4che</groupId>
+			<artifactId>dcm4che-dcmr</artifactId>
+			<version>${dcm4che.version}</version>		 
+		</dependency>
+		<dependency>
+			<groupId>org.dcm4che.tool</groupId>
+			<artifactId>dcm4che-tool-storescu</artifactId>
+			<version>${dcm4che.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 
@@ -165,6 +195,14 @@
 			<url>http://repo.spring.io/libs-release-local</url>
 			<snapshots>
 				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>dcm4che-snapshots</id>
+			<name>Dcm4Che Snapshots</name>
+			<url>http://www.dcm4che.org/maven2/</url>
+			<snapshots>
+				<enabled>true</enabled>
 			</snapshots>
 		</repository>
 	</repositories>

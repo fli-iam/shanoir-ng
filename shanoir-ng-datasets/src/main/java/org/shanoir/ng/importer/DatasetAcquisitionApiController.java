@@ -19,8 +19,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	private ImporterService importerService;
 	
     public ResponseEntity<Void> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody ImportJob importJob) {
-    	importerService.setImportJob(importJob);
-    	importerService.createAllDatasetAcquisition();
+//    	importerService.setImportJob(importJob);
+//    	importerService.createAllDatasetAcquisition();
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
