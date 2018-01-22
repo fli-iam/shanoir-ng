@@ -9,7 +9,7 @@ paths:
   /examinations:
     get:
       operationId: findExaminations
-      description: Returns all the examinations
+      description: Returns all the examinations reachable by an user
       responses:
         '200':
           description: found examinations
@@ -52,6 +52,24 @@ paths:
           description: bad parameters
           schema:
             $ref: '#/definitions/ErrorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /examinations/count:
+    get:
+      operationId: countExaminations
+      description: Returns the number of examinations for an user
+      responses:
+        '200':
+          description: found examinations
+          schema:
+            type: integer
+            format: int32
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
         '500':
           description: unexpected error
           schema:

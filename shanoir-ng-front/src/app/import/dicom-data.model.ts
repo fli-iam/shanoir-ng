@@ -36,8 +36,8 @@ export class SerieDicom {
     seriesNumber: number;
     numberOfSeriesRelatedInstances: number;
     sopClassUID: string;
-    // isSpectroscopy: boolean;
-    // isMultiFrame: boolean;
+    isSpectroscopy: boolean;
+    isMultiFrame: boolean;
     equipment: EquipmentDicom; 
     isCompressed: boolean;
     nonImages: any[];
@@ -55,14 +55,6 @@ export class EquipmentDicom {
 export class ImageDicom {
     path: string;
     acquisitionNumber: number;
-    echoNumbers: EchoNumber[];
-    imageOrientationPatient: ImageOrientationPatient[];
-}
-
-export class EchoNumber {
-    echoNumber: number;
-}
-
-export class ImageOrientationPatient {
-    imageOrientationPatient: number;
+    echoNumbers: number[];
+    imageOrientationPatient: number[];
 }

@@ -10,7 +10,7 @@ import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentDTO;
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjectsMapper;
 import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
@@ -119,7 +119,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		HttpEntity<IdListDTO> entity = null;
 		try {
 			entity = new HttpEntity<>(userIds, KeycloakUtil.getKeycloakHeader());
-		} catch (ShanoirStudiesException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error while getting users for study " + studyDTO.getId(), e);
 			return;
 		}
@@ -177,7 +177,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		HttpEntity<IdListDTO> entity = null;
 		try {
 			entity = new HttpEntity<>(studyIds, KeycloakUtil.getKeycloakHeader());
-		} catch (ShanoirStudiesException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error while getting study cards for study " + studyDTO.getId(), e);
 			return;
 		}

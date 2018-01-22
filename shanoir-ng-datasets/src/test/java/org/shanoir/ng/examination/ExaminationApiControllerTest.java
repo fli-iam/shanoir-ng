@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -37,6 +38,7 @@ import com.google.gson.GsonBuilder;
 public class ExaminationApiControllerTest {
 
 	private static final String REQUEST_PATH = "/examinations";
+	private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
 	private Gson gson;
@@ -55,9 +57,16 @@ public class ExaminationApiControllerTest {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(examinationServiceMock).deleteById(1L);
-		given(examinationServiceMock.findAll()).willReturn(Arrays.asList(new Examination()));
+		given(examinationServiceMock.countExaminationsByUserId()).willReturn(2L);
+		given(examinationServiceMock.findAll(Mockito.any(Pageable.class))).willReturn(Arrays.asList(new Examination()));
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 		given(examinationServiceMock.save(Mockito.mock(Examination.class))).willReturn(new Examination());
+	}
+
+	@Test
+	public void countExaminationsTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_COUNT).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
 	}
 
 	@Test

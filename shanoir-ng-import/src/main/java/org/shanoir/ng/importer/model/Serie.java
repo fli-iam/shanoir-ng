@@ -46,6 +46,9 @@ public class Serie   {
 	  @JsonProperty("isMultiFrame")
 	  private Boolean isMultiFrame = null;
 	  
+	  @JsonProperty("isSpectroscopy")
+	  private Boolean isSpectroscopy = null;
+	  
 	  @JsonProperty("nonImages")
 	  private List<Object> nonImages = null;
 

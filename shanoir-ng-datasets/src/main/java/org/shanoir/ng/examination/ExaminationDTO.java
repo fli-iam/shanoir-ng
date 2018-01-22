@@ -1,7 +1,6 @@
 package org.shanoir.ng.examination;
 
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
 
@@ -21,9 +20,7 @@ public class ExaminationDTO {
 
 	private String comment;
 
-	private Date examinationDate;
-
-	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
+	private LocalDate examinationDate;
 
 	private String note;
 
@@ -98,7 +95,7 @@ public class ExaminationDTO {
 	/**
 	 * @return the examinationDate
 	 */
-	public Date getExaminationDate() {
+	public LocalDate getExaminationDate() {
 		return examinationDate;
 	}
 
@@ -106,23 +103,8 @@ public class ExaminationDTO {
 	 * @param examinationDate
 	 *            the examinationDate to set
 	 */
-	public void setExaminationDate(Date examinationDate) {
+	public void setExaminationDate(LocalDate examinationDate) {
 		this.examinationDate = examinationDate;
-	}
-
-	/**
-	 * @return the instrumentBasedAssessmentList
-	 */
-	public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
-		return instrumentBasedAssessmentList;
-	}
-
-	/**
-	 * @param instrumentBasedAssessmentList
-	 *            the instrumentBasedAssessmentList to set
-	 */
-	public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
-		this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
 	}
 
 	/**

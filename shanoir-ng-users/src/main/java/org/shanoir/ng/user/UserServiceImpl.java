@@ -16,7 +16,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirAuthenticationException;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
 import org.shanoir.ng.shared.exception.UsersErrorModelCode;
-import org.shanoir.ng.utils.KeycloakUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -111,8 +111,8 @@ public class UserServiceImpl implements UserService {
 		} else {
 			final Map<String, Object> otherClaims = ((KeycloakPrincipal) principal).getKeycloakSecurityContext()
 					.getToken().getOtherClaims();
-			if (otherClaims.containsKey(KeycloakUtils.USER_ID_TOKEN_ATT)
-					&& id.equals(Long.valueOf(otherClaims.get(KeycloakUtils.USER_ID_TOKEN_ATT).toString()))) {
+			if (otherClaims.containsKey(KeycloakUtil.USER_ID_TOKEN_ATT)
+					&& id.equals(Long.valueOf(otherClaims.get(KeycloakUtil.USER_ID_TOKEN_ATT).toString()))) {
 				LOG.error("Forbidden to delete connected user");
 				throw new ShanoirUsersException("Forbidden to delete connected user");
 			}

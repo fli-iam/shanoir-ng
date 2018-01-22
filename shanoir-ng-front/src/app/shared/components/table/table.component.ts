@@ -1,6 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { ImagesUrlUtil } from '../../utils/images-url.util';
+import { Pageable } from './pageable.model';
 
 @Component({
     selector: 'shanoir-table',
@@ -9,11 +10,14 @@ import { ImagesUrlUtil } from '../../utils/images-url.util';
 })
 
 export class TableComponent {
+    @Input() backPagination: boolean;
     @Input() columnDefs: any[];
     @Input() items: Object[];
+    @Input() nbAllItems: number;
     @Input() customActionDefs: any[];
     @Input() rowClickAction: Object;
     @Input() selectionAllowed: boolean = false;
+    @Output() queryListEvent = new EventEmitter();
     private itemsSave: Object[];
     private itemsLoaded: boolean = false;
     private maxResultsField: number;
@@ -42,10 +46,13 @@ export class TableComponent {
      */
     @Input()
     set loading(loading: boolean) {
-        if (this.isLoading && !loading) { 
+        if (this.isLoading && !loading) {
             if (this.items != undefined) {
                 this.itemsSave = [];
                 for (let item of this.items) { this.itemsSave.push(item); }
+                if (!this.backPagination) {
+                    this.nbAllItems = this.itemsSave.length;
+                }
                 // Choose default sorting
                 this.lastSortedCol = this.columnDefs[0];
                 for (let col of this.columnDefs) {
@@ -84,7 +91,7 @@ export class TableComponent {
      */
     public sortBy(col: Object): void {
         let defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
-        let asc: boolean =  col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
+        let asc: boolean = col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
         this.sortByOrderBy(col, asc);
         this.goToPage(1);
     }
@@ -104,8 +111,8 @@ export class TableComponent {
         if (this.itemsLoaded) {
             this.items = [];
             let itemsTmp = [];
-            for (let item of this.itemsSave) { 
-                this.items.push(item); 
+            for (let item of this.itemsSave) {
+                this.items.push(item);
             }
         }
         this.searchStr = "";
@@ -130,8 +137,8 @@ export class TableComponent {
         // null values can't be compared
         let negInf: any;
         switch (col["type"]) {
-            case "number": 
-                negInf = -1*Infinity;
+            case "number":
+                negInf = -1 * Infinity;
                 break;
             case "date":
                 negInf = new Date();
@@ -140,7 +147,7 @@ export class TableComponent {
                 negInf = "";
         }
         /* Sort function */
-        this.items.sort((n1,n2) => {
+        this.items.sort((n1, n2) => {
             let cell1 = this.getCellValue(n1, col);
             let cell2 = this.getCellValue(n2, col);
             if (col["type"] == "date") {
@@ -159,13 +166,13 @@ export class TableComponent {
                 }
                 return 0;
             }
-            
+
             if (cell1 == null) {
                 cell1 = negInf;
             } else {
                 if (col["type"] == null || col["type"] == "sting") {
                     // Sort insensitive
-                   // cell1 = cell1.toLowerCase();
+                    // cell1 = cell1.toLowerCase();
                 }
             }
             if (cell2 == null) {
@@ -173,10 +180,10 @@ export class TableComponent {
             } else {
                 if (col["type"] == null || col["type"] == "string") {
                     // Sort insensitive
-                   // cell2 = cell2.toLowerCase();
+                    // cell2 = cell2.toLowerCase();
                 }
             }
-            
+
             // Comparison
             if (cell1 > cell2) {
                 return asc ? 1 : -1;
@@ -237,16 +244,16 @@ export class TableComponent {
      * Just get the field value, but not using any renderer!
      */
     private getFieldRawValue(obj: Object, path: string): any {
-        function index(robj: any, i: string) {return robj[i]}; 
-        return path.split('.').reduce( index, obj ); 
+        function index(robj: any, i: string) { return robj[i] };
+        return path.split('.').reduce(index, obj);
     }
-    
+
     /**
      * Convert a cell content to a displayable string
      */
     public renderCell(item: Object, col: any): string {
         let result: any = this.getCellValue(item, col);
-        if (result == null || this.isValueBoolean(result)) { 
+        if (result == null || this.isValueBoolean(result)) {
             return "";
         } else {
             return "" + result;
@@ -285,16 +292,24 @@ export class TableComponent {
      * Get a column type and format it to be used a dom element class
      */
     private getColTypeStr(col: any): string {
-        let type: string = this.getColType(col) ;
-        return type != null ? "col-"+type : "";
+        let type: string = this.getColType(col);
+        return type != null ? "col-" + type : "";
     }
 
     /** 
      * Get a cell type and format it to be used a dom element class
      */
     private getCellTypeStr(col: any): string {
-        let type: string = this.getColType(col) ;
-        return type != null ? "cell-"+type : "";
+        let type: string = this.getColType(col);
+        return type != null ? "cell-" + type : "";
+    }
+
+    public getItems(): Object[] {
+        if (this.backPagination) {
+            return this.items;
+        } else {
+            return this.items.slice((this.currentPage - 1) * this.maxResults, this.currentPage * this.maxResults);
+        }
     }
 
     /**
@@ -311,25 +326,27 @@ export class TableComponent {
     }
 
     public getMaxPage(): number {
-        if (this.items == undefined || this.items == null) {
+        if (this.nbAllItems) {
+            return Math.ceil(this.nbAllItems / this.maxResults);
+        } else if (this.items == undefined || this.items == null) {
             return 0;
         } else {
-            return Math.ceil(this.items.length/this.maxResults);
+            return Math.ceil(this.items.length / this.maxResults);
         }
     }
 
 
     public getPagerList(): number[] {
         let nbLinks = 7; // Must be odd
-        let half = (Math.floor(nbLinks/2));
+        let half = (Math.floor(nbLinks / 2));
         let list: number[] = [];
-        if (this.currentPage <= half+2) {
+        if (this.currentPage <= half + 2) {
             if (this.getMaxPage() <= nbLinks) {
-                for (let i=1; i<=nbLinks+1 && i<=this.getMaxPage(); i++) {
+                for (let i = 1; i <= nbLinks + 1 && i <= this.getMaxPage(); i++) {
                     list.push(i);
                 }
             } else {
-                for (let i=1; i<=nbLinks; i++) {
+                for (let i = 1; i <= nbLinks; i++) {
                     list.push(i);
                 }
                 list.push(null);
@@ -338,12 +355,12 @@ export class TableComponent {
         } else {
             list.push(1);
             list.push(null);
-            if (this.getMaxPage() <= this.currentPage+half) {
-                for (let i=this.getMaxPage()-nbLinks+1; i<=this.getMaxPage(); i++) {
+            if (this.getMaxPage() <= this.currentPage + half) {
+                for (let i = this.getMaxPage() - nbLinks + 1; i <= this.getMaxPage(); i++) {
                     list.push(i);
                 }
             } else {
-                for (let i=this.currentPage-half+1; i<=this.currentPage+half-1; i++) {
+                for (let i = this.currentPage - half + 1; i <= this.currentPage + half - 1; i++) {
                     list.push(i);
                 }
                 list.push(null);
@@ -356,7 +373,16 @@ export class TableComponent {
 
     public goToPage(p: number): void {
         this.currentPage = p;
-        // TODO : paging from the database? -> modify users[] here.
+        if (this.backPagination) {
+            // Paging from the database.
+            let pageable: Pageable = {
+                page: this.currentPage - 1,
+                size: this.maxResults,
+                sortProperty: this.lastSortedCol["field"],
+                asc: this.lastSortedAsc
+            };
+            this.queryListEvent.emit(pageable);
+        }
     }
 
 

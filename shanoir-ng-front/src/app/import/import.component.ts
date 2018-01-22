@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Rx';
 import { IdNameObject } from '../shared/models/id-name-object.model';
 import { ImportService } from './import.service';
 import { slideDown } from '../shared/animations/animations';
-import { PatientsDicom, PatientDicom, SerieDicom } from "./dicom-data.model";
+import { PatientsDicom, PatientDicom, SerieDicom, EquipmentDicom } from "./dicom-data.model";
 import { ModalComponent } from '../shared/components/modal/modal.component';
 import * as AppUtils from '../utils/app.utils';
 import { Study } from '../studies/shared/study.model';
@@ -42,7 +42,7 @@ export class ImportComponent implements OnInit {
     public studycards: IdNameObject[];
     private subjects: Subject[]; 
     public examinations: SubjectExamination[];
-    private seriesSelected: boolean;
+    private seriesSelected: boolean = false;
     private selectedSeries: PatientDicom;
     private detailedPatient: Object;
     public dsAcqOpened: boolean = false;
@@ -191,10 +191,19 @@ export class ImportComponent implements OnInit {
 
     selectNode(nodeParams: PatientDicom) {
         this.selectedSeries = nodeParams;
+        for (let study of nodeParams.studies) {
+            for (let serie of study.series) {
+                this.seriesSelected = false;
+                if (serie.selected) {
+                    this.seriesSelected = true;
+                    break;
+                } 
+            }
+        }
     }
 
     validateSeriesSelected () : void {
-        this.findStudiesWithStudyCardsByUserId();
+        this.findStudiesWithStudyCardsByUserAndEquipment(this.selectedSeries.studies[0].series[0].equipment);
     }
 
     // TODO: to be called later according to the new spec
@@ -202,15 +211,15 @@ export class ImportComponent implements OnInit {
     //     this.importService.selectSeries(this.selectedSeries);
     // }
 
-    findStudiesWithStudyCardsByUserId(): void {
+    findStudiesWithStudyCardsByUserAndEquipment(equipment: EquipmentDicom): void {
         this.studyService
-            .findStudiesWithStudyCardsByUserId()
+            .findStudiesWithStudyCardsByUserAndEquipment(equipment)
             .then(studies => {
                 this.studies = studies;
             })
             .catch((error) => {
                 // TODO: display error
-                console.log("error getting study list by user!");
+                console.log("error getting study and study card list by user and equipment!");
             });
     }
 

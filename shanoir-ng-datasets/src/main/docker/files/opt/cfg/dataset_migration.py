@@ -4,11 +4,22 @@
 import os
 import pymysql
 
-sourceConn = pymysql.connect(host="localhost", user="root", password="nimda", database="shanoirdb", charset="utf8")
-targetConn = pymysql.connect(host="localhost", user="root", password="nimda", database="shanoir_ng_datasets", charset="utf8")
+sourceConn = pymysql.connect(host="mysql", user="shanoir", password="shanoir", database="shanoirdb", charset="utf8")
+targetConn = pymysql.connect(host="localhost", user="shanoir", password="shanoir", database="shanoir_ng_datasets", charset="utf8")
 
 sourceCursor = sourceConn.cursor()
 targetCursor = targetConn.cursor()
+
+print("Import study cards: start")
+    
+sourceCursor.execute("SELECT STUDY_CARD_ID, ACQUISITION_EQUIPMENT_ID, CENTER_ID, IS_DISABLED, NAME, NIFTI_CONVERTER_ID, STUDY_ID FROM STUDY_CARD")
+
+query = "INSERT INTO study_cards (id, acquisition_equipment_id, center_id, disabled, name, nifti_converter_id, study_id) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import study cards: end")
 
 print("Import scientific_article: start")
 
@@ -68,7 +79,7 @@ sourceCursor.execute("""SELECT EXAMINATION_ID, CENTER_ID, COMMENT, EXAMINATION_D
 
 query = """INSERT INTO examination
 	(id, center_id, comment, examination_date, experimental_group_of_subjects_id, investigator_center_id, investigator_external, investigator_id, note, study_id, subject_id, subject_weight, timepoint_id, weight_unit_of_measure)
-	VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+	VALUES (%s, %s, %s, DATE(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
@@ -166,44 +177,55 @@ targetConn.commit()
 
 print("Import ct_dataset_acquisition: end")
 
-print("Import mr_protocol: start")
+print("Import mr_protocol_metadata: start")
 
-sourceCursor.execute("""SELECT MR_PROTOCOL_ID, REF_ACQUISITION_CONTRAST_ID, ACQUISITION_DURATION, ACQUISITION_RESOLUTION_X,
-	ACQUISITION_RESOLUTION_Y, REF_AXIS_ORIENTATION_AT_ACQUISITION_ID, COMMENT, CONTRAST_AGENT_CONCENTRATION,
-	CONTRAST_AGENT_PRODUCT, REF_CONTRAST_AGENT_USED_ID, ECHO_TRAIN_LENGTH, FILTERS, FOV_X, FOV_Y, REF_IMAGED_NUCLEUS_ID,
-	IMAGING_FREQUENCY, INJECTED_VOLUME,	REF_MR_SEQUENCE_APPLICATION_ID, REF_MR_SEQUENCE_K_SPACE_FILL_ID,
-	MR_SEQUENCE_NAME, REF_MR_SEQUENCE_PHYSICS_ID, NUMBER_OF_AVERAGES, NUMBER_OF_PHASE_ENCODING_STEPS, NUMBER_OF_TEMPORAL_POSITIONS,
-	REF_PARALLEL_ACQUISITION_TECHNIQUE_ID, REF_PATIENT_POSITION_ID, PERCENT_PHASE_FOV, PERCENT_SAMPLING,
-	PIXEL_BANDWITH, PIXEL_SPACING_X, PIXEL_SPACING_Y, PROTOCOL_NAME, RECEIVING_COIL_ID, REF_SLICE_ORDER_ID,
-	REF_SLICE_ORIENTATION_AT_ACQUISITION_ID, SLICE_SPACING, SLICE_THICKNESS, TEMPORAL_RESOLUTION,
+sourceCursor.execute("""SELECT MR_PROTOCOL_ID, REF_ACQUISITION_CONTRAST_ID, REF_AXIS_ORIENTATION_AT_ACQUISITION_ID,
+	COMMENT, CONTRAST_AGENT_CONCENTRATION, CONTRAST_AGENT_PRODUCT, REF_CONTRAST_AGENT_USED_ID, INJECTED_VOLUME,
+	REF_MR_SEQUENCE_APPLICATION_ID, REF_MR_SEQUENCE_K_SPACE_FILL_ID, MR_SEQUENCE_NAME, REF_MR_SEQUENCE_PHYSICS_ID, PROTOCOL_NAME,
+	REF_PARALLEL_ACQUISITION_TECHNIQUE_ID, RECEIVING_COIL_ID, REF_SLICE_ORDER_ID, REF_SLICE_ORIENTATION_AT_ACQUISITION_ID,
 	TIME_REDUCTION_FACTOR_FOR_THE_IN_PLANE_DIRECTION, TIME_REDUCTION_FACTOR_FOR_THE_OUT_OF_PLANE_DIRECTION, TRANSMITTING_COIL_ID
 	FROM MR_PROTOCOL""")
 
-query = """INSERT INTO mr_protocol
-	(id, acquisition_contrast, acquisition_duration, acquisition_resolutionx, acquisition_resolutiony,
-	axis_orientation_at_acquisition, comment, contrast_agent_concentration, contrast_agent_product, contrast_agent_used,
-	echo_train_length, filters, fovx, fovy, imaged_nucleus, imaging_frequency, injected_volume,
-	mr_sequence_application, mr_sequencekspace_fill, mr_sequence_name, mr_sequence_physics, number_of_averages,
-	number_of_phase_encoding_steps, number_of_temporal_positions, parallel_acquisition_technique,
-	patient_position, percent_phase_fov, percent_sampling, pixel_bandwidth, pixel_spacingx, pixel_spacingy, protocol_name,
-	receiving_coil_id, slice_order, slice_orientation_at_acquisition, slice_spacing, slice_thickness, temporal_resolution,
+query = """INSERT INTO mr_protocol_metadata
+	(id, acquisition_contrast, axis_orientation_at_acquisition, comment, contrast_agent_concentration, contrast_agent_product,
+	contrast_agent_used, injected_volume, mr_sequence_application, mr_sequencekspace_fill, mr_sequence_name, mr_sequence_physics,
+	name, parallel_acquisition_technique, receiving_coil_id, slice_order, slice_orientation_at_acquisition,
 	time_reduction_factor_for_the_in_plane_direction, time_reduction_factor_for_the_out_of_plane_direction, transmitting_coil_id)
-	VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-	%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+	VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 
 sourceCursor.execute("SELECT MR_PROTOCOL_ID FROM MR_PROTOCOL WHERE MAGNETIZATION_TRANSFER_ID = 1")
 
-query = "UPDATE mr_protocol SET magnetization_transfer = 1 WHERE id = %s"
+query = "UPDATE mr_protocol_metadata SET magnetization_transfer = 1 WHERE id = %s"
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 
 sourceCursor.execute("SELECT MR_PROTOCOL_ID FROM MR_PROTOCOL WHERE PARALLEL_ACQUISITION_ID = 1")
 
-query = "UPDATE mr_protocol SET parallel_acquisition = 1 WHERE id = %s"
+query = "UPDATE mr_protocol_metadata SET parallel_acquisition = 1 WHERE id = %s"
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import mr_protocol_metadata: end")
+
+print("Import mr_protocol: start")
+
+sourceCursor.execute("""SELECT MR_PROTOCOL_ID, ACQUISITION_DURATION, ACQUISITION_RESOLUTION_X, ACQUISITION_RESOLUTION_Y,
+	ECHO_TRAIN_LENGTH, FILTERS, FOV_X, FOV_Y, REF_IMAGED_NUCLEUS_ID, IMAGING_FREQUENCY, NUMBER_OF_AVERAGES,
+	NUMBER_OF_PHASE_ENCODING_STEPS, NUMBER_OF_TEMPORAL_POSITIONS, REF_PATIENT_POSITION_ID, PERCENT_PHASE_FOV, PERCENT_SAMPLING,
+	PIXEL_BANDWITH, PIXEL_SPACING_X, PIXEL_SPACING_Y, SLICE_SPACING, SLICE_THICKNESS, TEMPORAL_RESOLUTION,
+	MR_PROTOCOL_ID FROM MR_PROTOCOL""")
+
+query = """INSERT INTO mr_protocol
+	(id, acquisition_duration, acquisition_resolutionx, acquisition_resolutiony, echo_train_length, filters, fovx, fovy,
+	imaged_nucleus, imaging_frequency, number_of_averages, number_of_phase_encoding_steps, number_of_temporal_positions,
+	patient_position, percent_phase_fov, percent_sampling, pixel_bandwidth, pixel_spacingx, pixel_spacingy, slice_spacing,
+	slice_thickness, temporal_resolution, updated_metadata_id)
+	VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
@@ -221,17 +243,29 @@ targetConn.commit()
 
 print("Import mr_dataset_acquisition: end")
 
+print("Import dataset_metadata: start")
+
+sourceCursor.execute("""SELECT DATASET_ID, REF_CARDINALITY_OF_RELATED_SUBJECTS_ID, COMMENT, 
+	REF_DATASET_MODALITY_TYPE_ID, REF_EXPLORED_ENTITY_ID, NAME, REF_PROCESSED_DATASET_TYPE_ID FROM DATASET""")
+
+query = """INSERT INTO dataset_metadata
+	(id, cardinality_of_related_subjects, comment, dataset_modality_type, explored_entity, name, processed_dataset_type)
+	VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import dataset_metadata: end")
+
 print("Import dataset: start")
 
-sourceCursor.execute("""SELECT DATASET_ID, REF_CARDINALITY_OF_RELATED_SUBJECTS_ID, COMMENT, DATASET_CREATION_DATE,
-	REF_DATASET_MODALITY_TYPE_ID, REF_EXPLORED_ENTITY_ID, GROUP_OF_SUBJECTS_ID,	NAME, REF_PROCESSED_DATASET_TYPE_ID, STUDY_ID,
-	SUBJECT_ID, DATASET_ACQUISITION_ID, DATASET_PROCESSING_ID, REFERENCED_DATASET_FOR_SUPERIMPOSITION_DATASET_ID FROM DATASET""")
+sourceCursor.execute("""SELECT DATASET_ID, DATASET_CREATION_DATE, GROUP_OF_SUBJECTS_ID, STUDY_ID, SUBJECT_ID,
+	DATASET_ACQUISITION_ID, DATASET_PROCESSING_ID, REFERENCED_DATASET_FOR_SUPERIMPOSITION_DATASET_ID, DATASET_ID FROM DATASET""")
 
 query = """INSERT INTO dataset
-	(id, cardinality_of_related_subjects, comment, creation_date, dataset_modality_type, explored_entity, group_of_subjects_id,
-	name, processed_dataset_type, study_id, subject_id, dataset_acquisition_id, dataset_processing_id,
-	referenced_dataset_for_superimposition_id)
-	VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+	(id, creation_date, group_of_subjects_id, study_id, subject_id, dataset_acquisition_id, dataset_processing_id,
+	referenced_dataset_for_superimposition_id, updated_metadata_id)
+	VALUES (%s, DATE(%s), %s, %s, %s, %s, %s, %s, %s)"""
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
@@ -337,13 +371,24 @@ targetConn.commit()
 
 print("Import repetition_time: end")
 
+print("Import mr_dataset_metadata: start")
+
+sourceCursor.execute("SELECT DATASET_ID, REF_MR_DATASET_NATURE_ID FROM MR_DATASET")
+
+query = "INSERT INTO mr_dataset_metadata (id, mr_dataset_nature) VALUES (%s, %s)"
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
+print("Import mr_dataset_metadata: end")
+
 print("Import mr_dataset: start")
 
-sourceCursor.execute("""SELECT DATASET_ID, REF_MR_DATASET_NATURE_ID, REF_MR_QUALITY_PROCEDURE_TYPE_ID, ECHO_TIME_ID,
-	FLIP_ANGLE_ID, INVERSION_TIME_ID, REPETITION_TIME_ID FROM MR_DATASET""")
+sourceCursor.execute("""SELECT DATASET_ID, REF_MR_QUALITY_PROCEDURE_TYPE_ID, ECHO_TIME_ID,
+	FLIP_ANGLE_ID, INVERSION_TIME_ID, REPETITION_TIME_ID, DATASET_ID FROM MR_DATASET""")
 
 query = """INSERT INTO mr_dataset
-	(id, mr_dataset_nature, mr_quality_procedure_type, echo_time_id, flip_angle_id, inversion_time_id, repetition_time_id)
+	(id, mr_quality_procedure_type, echo_time_id, flip_angle_id, inversion_time_id, repetition_time_id, updated_mr_metadata_id)
 	VALUES (%s, %s, %s, %s, %s, %s, %s)"""
 
 targetCursor.executemany(query, sourceCursor.fetchall())
@@ -377,7 +422,7 @@ print("Import registration_dataset: start")
 
 sourceCursor.execute("SELECT DATASET_ID, REF_REGISTRATION_DATASET_TYPE_ID FROM REGISTRATION_DATASET")
 
-query = "INSERT INTO registration_dataset (id, registration_dataset) VALUES (%s, %s)"
+query = "INSERT INTO registration_dataset (id, registration_dataset_type) VALUES (%s, %s)"
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
@@ -437,7 +482,7 @@ sourceCursor.execute("""SELECT DATASET_EXPRESSION_ID, EXPRESSION_CREATION_DATE, 
 query = """INSERT INTO dataset_expression
 	(id, creation_date, dataset_expression_format, dataset_processing_type, frame_count, multi_frame, nifti_converter_id,
 	nifti_converter_version, original_nifti_conversion, dataset_id, original_dataset_expression_id)
-	VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+	VALUES (%s, DATE(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()

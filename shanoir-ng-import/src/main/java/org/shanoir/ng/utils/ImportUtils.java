@@ -19,14 +19,18 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  * Utility class
  *
  * @author jlouis
+ * @author mkain
  */
-public class Utils {
-
+public class ImportUtils {
+	
+	/**
+	 * @todo: read from application.yml -> Yao
+	 */
 	// dcmdjpeg (from dcmtk) path under linux
-	static String DCMDJPEG_LINUX_PATH = "/usr/bin/dcmdjpeg";
+	private static String DCMDJPEG_LINUX_PATH = "/usr/bin/dcmdjpeg";
 
 	// dcmdjpeg (from dcmtk) path under windows
-	static String DCMDJPEG_WINDOWS_PATH = "dcmdjpeg/windows/dcmdjpeg.exe";
+	private static String DCMDJPEG_WINDOWS_PATH = "dcmdjpeg/windows/dcmdjpeg.exe";
 
 	/** The Constant KB. */
 	private static final int KB = 1024;
@@ -73,13 +77,11 @@ public class Utils {
 	 */
 	public static String getDcmdjpegPath() {
 		String cmd = "";
-
 		if (SystemUtils.IS_OS_WINDOWS) {
 			cmd = DCMDJPEG_WINDOWS_PATH;
 		} else if (SystemUtils.IS_OS_LINUX) {
 			cmd = DCMDJPEG_LINUX_PATH;
 		}
-
 		return cmd;
 	}
 
@@ -188,6 +190,71 @@ public class Utils {
 	 */
 	public static String convertFilePath(final String firstImagePath) {
 		return firstImagePath.replaceAll("\\\\", "/");
+	}
+	
+	/**
+	 * List all the folders of the given directory.
+	 *
+	 * @param serieFolder
+	 *            the serie folder
+	 *
+	 * @return the list< file>
+	 */
+	public static List<File> listFolders(File serieFolder) {
+		List<File> result = null;
+		if (serieFolder != null) {
+			result = new ArrayList<File>();
+			final File[] listFiles = serieFolder.listFiles();
+			for (final File file : listFiles) {
+				if (file.isDirectory()) {
+					result.add(file);
+				}
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Convert a String with a wildcard to a regular expression.
+	 *
+	 * @param wildcard the wildcard
+	 *
+	 * @return the string
+	 */
+	public static String wildcardToRegex(String wildcard) {
+		StringBuffer s = new StringBuffer(wildcard.length());
+		s.append('^');
+		for (int i = 0, is = wildcard.length(); i < is; i++) {
+			char c = wildcard.charAt(i);
+			switch (c) {
+			case '*':
+				s.append(".*");
+				break;
+			case '?':
+				s.append(".");
+				break;
+				// escape special regexp-characters
+			case '(':
+			case ')':
+			case '[':
+			case ']':
+			case '$':
+			case '^':
+			case '.':
+			case '{':
+			case '}':
+			case '|':
+			case '\\':
+				s.append("\\");
+				s.append(c);
+				break;
+			default:
+				s.append(c);
+				break;
+			}
+		}
+		s.append('$');
+		return (s.toString());
 	}
 
 }

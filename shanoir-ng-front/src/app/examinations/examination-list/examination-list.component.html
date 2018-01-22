@@ -3,6 +3,8 @@
         <h2 i18n="Manage examinations|Title@@examinationListTitle">Manage examinations</h2>
         <!-- hr/ -->
     </div>
-  
-    <shanoir-table [items]="examinations" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
+
+    <shanoir-table [items]="examinations" [nbAllItems]="nbExaminations" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs"
+        [loading]="loading" [rowClickAction]="rowClickAction" [backPagination]="true" (queryListEvent)="reloadExaminations($event)">
+    </shanoir-table>
 </div>

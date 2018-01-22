@@ -12,7 +12,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.role.RoleRepository;
-import org.shanoir.ng.utils.KeycloakUtils;
+import org.shanoir.ng.utils.KeycloakShanoirUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +75,7 @@ public class KeycloakClient {
 	 */
 	public String createUserWithPassword(final User user, final String password) {
 		try {
-			final String keycloakId = KeycloakUtils
+			final String keycloakId = KeycloakShanoirUtil
 					.getCreatedUserId(getKeycloak().realm(keycloakRealm).users().create(getUserRepresentation(user)));
 
 			final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);

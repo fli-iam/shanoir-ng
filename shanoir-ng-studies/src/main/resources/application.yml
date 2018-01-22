@@ -55,7 +55,7 @@ keycloak:
         - /*
 # microservices url
 ms.url:
-  shanoir-ng-studycards: http://shanoir-ng-studycards/
+  shanoir-ng-studycards: http://shanoir-ng-datasets/
   shanoir-ng-users: http://shanoir-ng-users/
 # logging configuration
 logging:
@@ -100,7 +100,7 @@ keycloak:
     secret: 209376e5-1d42-4fa3-8cdb-160946fd6383
 # microservices url
 ms.url:
-  shanoir-ng-studycards: http://localhost:9905/studycards
+  shanoir-ng-studycards: http://localhost:9906/studycards
   shanoir-ng-users: http://localhost:9901/users
 # logging configuration
 logging:

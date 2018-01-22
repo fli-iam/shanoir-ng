@@ -1,0 +1,5 @@
+/***********************/
+/* coil list component */
+/***********************/
+.CoilListComponent { float: left; overflow: auto; }
+.title { margin-bottom: 15px; }

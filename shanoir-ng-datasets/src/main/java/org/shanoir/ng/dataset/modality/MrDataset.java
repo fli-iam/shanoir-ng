@@ -8,6 +8,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import org.shanoir.ng.dataset.Dataset;
 import org.shanoir.ng.shared.model.DiffusionGradient;
@@ -49,16 +50,21 @@ public class MrDataset extends Dataset {
 	@JoinColumn(name = "inversion_time_id")
 	private InversionTime inversionTime;
 
-	/** MR Dataset Nature. */
-	private Integer mrDatasetNature;
-
 	/** Mr Quality procedure. */
 	private Integer mrQualityProcedureType;
+
+	/** Origin metadata. */
+	@OneToOne
+	private MrDatasetMetadata originMrMetadata;
 
 	/** Repetition time. */
 	@ManyToOne
 	@JoinColumn(name = "repetition_time_id")
 	private RepetitionTime repetitionTime;
+
+	/** Metadata updated by study card. */
+	@OneToOne
+	private MrDatasetMetadata updatedMrMetadata;
 
 	/**
 	 * @return the diffusionGradients
@@ -121,25 +127,6 @@ public class MrDataset extends Dataset {
 	}
 
 	/**
-	 * @return the mrDatasetNature
-	 */
-	public MrDatasetNature getMrDatasetNature() {
-		return MrDatasetNature.getNature(mrDatasetNature);
-	}
-
-	/**
-	 * @param mrDatasetNature
-	 *            the mrDatasetNature to set
-	 */
-	public void setMrDatasetNature(MrDatasetNature mrDatasetNature) {
-		if (mrDatasetNature == null) {
-			this.mrDatasetNature = null;
-		} else {
-			this.mrDatasetNature = mrDatasetNature.getId();
-		}
-	}
-
-	/**
 	 * @return the mrQualityProcedureType
 	 */
 	public MrQualityProcedureType getMrQualityProcedureType() {
@@ -156,6 +143,21 @@ public class MrDataset extends Dataset {
 		} else {
 			this.mrQualityProcedureType = mrQualityProcedureType.getId();
 		}
+	}
+
+	/**
+	 * @return the originMrMetadata
+	 */
+	public MrDatasetMetadata getOriginMrMetadata() {
+		return originMrMetadata;
+	}
+
+	/**
+	 * @param originMrMetadata
+	 *            the originMrMetadata to set
+	 */
+	public void setOriginMrMetadata(MrDatasetMetadata originMrMetadata) {
+		this.originMrMetadata = originMrMetadata;
 	}
 
 	/**
@@ -176,6 +178,21 @@ public class MrDataset extends Dataset {
 	@Override
 	public String getType() {
 		return "Mr";
+	}
+
+	/**
+	 * @return the updatedMrMetadata
+	 */
+	public MrDatasetMetadata getUpdatedMrMetadata() {
+		return updatedMrMetadata;
+	}
+
+	/**
+	 * @param updatedMrMetadata
+	 *            the updatedMrMetadata to set
+	 */
+	public void setUpdatedMrMetadata(MrDatasetMetadata updatedMrMetadata) {
+		this.updatedMrMetadata = updatedMrMetadata;
 	}
 
 }

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { ManufacturerModel } from './manufacturer-model.model';
 import * as AppUtils from '../../utils/app.utils';
 import { HandleErrorService } from '../../shared/utils/handle-error.service';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
 
 @Injectable()
 export class ManufacturerModelService {
@@ -16,6 +17,16 @@ export class ManufacturerModelService {
             .then(response => response)
             .catch((error) => {
                 console.error('Error while getting manufModels', error);
+                return Promise.reject(error.message || error);
+            });
+    }
+
+    getManufacturerModelsNames(): Promise<IdNameObject[]> {
+        return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_MANUF_MODEL_NAMES_URL)
+            .toPromise()
+            .then(response => response)
+            .catch((error) => {
+                console.error('Error while getting manufacturer models', error);
                 return Promise.reject(error.message || error);
             });
     }

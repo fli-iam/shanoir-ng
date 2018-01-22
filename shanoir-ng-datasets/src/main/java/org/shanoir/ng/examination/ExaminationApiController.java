@@ -8,11 +8,13 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -34,25 +36,37 @@ public class ExaminationApiController implements ExaminationApi {
 	private ExaminationService examinationService;
 
 	@Override
+	public ResponseEntity<Integer> countExaminations() {
+		try {
+			return new ResponseEntity<>((int) examinationService.countExaminationsByUserId(), HttpStatus.OK);
+		} catch (ShanoirDatasetsException e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@Override
 	public ResponseEntity<Void> deleteExamination(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
-			throws ShanoirException {
-		if (examinationService.findById(examinationId) == null) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-		}
+			throws RestServiceException {
 		try {
+			// Check if user rights needed
 			examinationService.deleteById(examinationId);
 		} catch (ShanoirException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
 	public ResponseEntity<ExaminationDTO> findExaminationById(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
-			throws ShanoirException {
-		final Examination examination = examinationService.findById(examinationId);
+			throws RestServiceException {
+		Examination examination = null;
+		try {
+			examination = examinationService.findById(examinationId);
+		} catch (ShanoirDatasetsException e1) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		if (examination == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -60,12 +74,12 @@ public class ExaminationApiController implements ExaminationApi {
 	}
 
 	@Override
-	public ResponseEntity<List<ExaminationDTO>> findExaminations() {
-		// TODO: filter by user!!!
+	public ResponseEntity<List<ExaminationDTO>> findExaminations(final Pageable pageable) {
 		List<Examination> examinations;
 		try {
-			examinations = examinationService.findAll();
-		} catch (ShanoirException e) {
+			// Get examinations reachable by connected user
+			examinations = examinationService.findAll(pageable);
+		} catch (ShanoirDatasetsException e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		if (examinations.isEmpty()) {
@@ -109,7 +123,7 @@ public class ExaminationApiController implements ExaminationApi {
 		try {
 			final Examination createdExamination = examinationService.save(examination);
 			return new ResponseEntity<Examination>(createdExamination, HttpStatus.OK);
-		} catch (ShanoirException e) {
+		} catch (ShanoirDatasetsException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -138,7 +152,7 @@ public class ExaminationApiController implements ExaminationApi {
 		/* Update examination in db. */
 		try {
 			examinationService.update(examination);
-		} catch (ShanoirException e) {
+		} catch (ShanoirDatasetsException e) {
 			LOG.error("Error while trying to update examination " + examinationId + " : ", e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));

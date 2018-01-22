@@ -12,7 +12,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.user.User;
 import org.shanoir.ng.user.UserRepository;
-import org.shanoir.ng.utils.KeycloakUtils;
+import org.shanoir.ng.utils.KeycloakShanoirUtil;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,7 +123,7 @@ public class KeycloakServerInit extends SpringBootServletInitializer {
 
 		final Iterable<User> users = userRepository.findAll();
 		for (final User user : users) {
-			final String keycloakId = KeycloakUtils
+			final String keycloakId = KeycloakShanoirUtil
 					.getCreatedUserId(getKeycloak().realm(keycloakRealm).users().create(getUserRepresentation(user)));
 			user.setKeycloakId(keycloakId);
 			userRepository.save(user);

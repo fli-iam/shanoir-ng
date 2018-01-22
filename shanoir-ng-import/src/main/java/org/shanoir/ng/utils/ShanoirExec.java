@@ -6,7 +6,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ShanoirExec {
 	
 	/**
@@ -15,14 +17,7 @@ public class ShanoirExec {
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirExec.class);
 	
 	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.lib}")
-    private static String clidcmPathLib;
-	
-	/**
-	 * Instantiates a new shanoir tk exec.
-	 */
-	private ShanoirExec() {
-		super();
-	}
+    private String clidcmPathLib;
 	
 	/**
 	 * Exec the clidcm command to convert Dicom files to Nifti files.
@@ -36,16 +31,16 @@ public class ShanoirExec {
 	 *
 	 * @return the string
 	 */
-	public static String clidcmExec(final String inputFolder, final String clidcmPath, final String outputFolder) {
+	public String clidcmExec(final String inputFolder, final String clidcmPath, final String outputFolder) {
 		LOG.debug("clidcmExec : Begin");
 		LOG.info("clidcmExec : " + clidcmPath);
 
 		String[] cmd = new String[4];
 		cmd[0] = clidcmPath;
 
-		cmd[1] = Utils.convertFilePath(inputFolder);
+		cmd[1] = ImportUtils.convertFilePath(inputFolder);
 		cmd[2] = "--dir";
-		cmd[3] = Utils.convertFilePath(outputFolder);
+		cmd[3] = ImportUtils.convertFilePath(outputFolder);
 
 		Map<String, String> systemEnv = System.getenv();
 		int size = systemEnv.size();
@@ -84,7 +79,7 @@ public class ShanoirExec {
 	 *
 	 * @return the string
 	 */
-	public static String dcm2niiExec(final String inputFolder, final String dcm2niiPath, final String outputFolder) {
+	public String dcm2niiExec(final String inputFolder, final String dcm2niiPath, final String outputFolder) {
 		return dcm2niiExec(inputFolder, dcm2niiPath, outputFolder,false);
 	}
 
@@ -103,7 +98,7 @@ public class ShanoirExec {
 	 *
 	 * @return the string
 	 */
-	public static String dcm2niiExec(final String inputFolder, final String dcm2niiPath, final String outputFolder, boolean is4D) {
+	public String dcm2niiExec(final String inputFolder, final String dcm2niiPath, final String outputFolder, boolean is4D) {
 		LOG.debug("dcm2niiExec : Begin");
 		LOG.info("dcm2niiExec : " + dcm2niiPath);
 
@@ -244,7 +239,7 @@ public class ShanoirExec {
 	 *
 	 * @return the string
 	 */
-	public static String mcverterExec(final String inputFolder, final String mcverterPath, final String outputFolder, boolean is4D) {
+	public String mcverterExec(final String inputFolder, final String mcverterPath, final String outputFolder, boolean is4D) {
 		LOG.debug("mcverterExec : Begin");
 		LOG.info("mcverterExec : " + mcverterPath);
 
@@ -300,7 +295,7 @@ public class ShanoirExec {
 	 *
 	 * @return string containing the version
 	 */
-	public static String mcverterVersionExec(final String mcverterPath) {
+	public String mcverterVersionExec(final String mcverterPath) {
 		LOG.debug("mcverterVersionExec : Begin");
 
 		String[] cmd = new String[2];
@@ -385,7 +380,7 @@ public class ShanoirExec {
 	 *
 	 * @return the version
 	 */
-	public static String dcm2niiVersionExec(final String dcm2niiPath) {
+	public String dcm2niiVersionExec(final String dcm2niiPath) {
 		LOG.debug("dcm2niiVersionExec : Begin");
 		LOG.info("dcm2niiVersionExec : " + dcm2niiPath);
 		String[] cmd = new String[1];
@@ -409,7 +404,7 @@ public class ShanoirExec {
 	 *
 	 * @return the string
 	 */
-	public static String dicom2niftiExec(String inputFolder, final String dicom2niftiPath, final String outputFolder, boolean is4D) {
+	public String dicom2niftiExec(String inputFolder, final String dicom2niftiPath, final String outputFolder, boolean is4D) {
 		LOG.debug("dicom2niftiExec : Begin");
 
 		LOG.debug("dicom2niftiExec : " + dicom2niftiPath);
@@ -455,7 +450,7 @@ public class ShanoirExec {
 	 *
 	 * @return the string
 	 */
-	public static String dcmdjpeg(final String dcmdjpegPath, final String inputFile, final String outputFile) {
+	public String dcmdjpeg(final String dcmdjpegPath, final String inputFile, final String outputFile) {
 		LOG.debug("dcmdjpeg : Begin");
 		LOG.info("dcmdjpeg : " + dcmdjpegPath);
 
@@ -477,7 +472,7 @@ public class ShanoirExec {
 	 *            the command line as a string array
 	 * @return the output result
 	 */
-	public static String exec(final String[] cmd) {
+	public String exec(final String[] cmd) {
 		return exec(cmd, null);
 	}
 	
@@ -494,7 +489,7 @@ public class ShanoirExec {
 	 *
 	 * @return the output result
 	 */
-	public static String exec(final String[] cmd, final String[] envp) {
+	public String exec(final String[] cmd, final String[] envp) {
 
 		String executingCommand = "";
 		for (final String item : cmd) {

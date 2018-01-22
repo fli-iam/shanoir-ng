@@ -20,4 +20,7 @@ public class DatasetsErrorModelCode extends ErrorModelCode {
 	/** No dataset found */
 	public static final Integer DATASET_NOT_FOUND = 292;
 
+	/** No study card found */
+	public static final Integer STUDY_CARD_NOT_FOUND = 301;
+	
 }

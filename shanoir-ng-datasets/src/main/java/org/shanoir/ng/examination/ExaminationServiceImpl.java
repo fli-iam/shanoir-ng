@@ -1,17 +1,28 @@
 package org.shanoir.ng.examination;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
-import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.service.MicroserviceRequestsService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +45,18 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private ExaminationRepository examinationRepository;
 
 	@Autowired
+	private MicroserviceRequestsService microservicesRequestsService;
+
+	@Autowired
 	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private RestTemplate restTemplate;
+
+	@Override
+	public long countExaminationsByUserId() throws ShanoirDatasetsException {
+		return examinationRepository.countByStudyIdIn(getStudiesForUser());
+	}
 	
 	@Override
 	public void deleteById(final Long id) throws ShanoirDatasetsException {
@@ -42,8 +64,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public List<Examination> findAll() throws ShanoirDatasetsException {
-		return Utils.toList(examinationRepository.findAll());
+	public List<Examination> findAll(final Pageable pageable) {
+		// Get list of studies reachable by connected user
+		return examinationRepository.findByStudyIdIn(getStudiesForUser(), pageable);
 	}
 
 	@Override
@@ -98,6 +121,49 @@ public class ExaminationServiceImpl implements ExaminationService {
 				}
 			}
 		}
+	}
+
+	/*
+	 * Get list of studies reachable by connected user.
+	 * 
+	 * @return list of study ids.
+	 */
+	private List<Long> getStudiesForUser() {
+		HttpEntity<Object> entity = null;
+		try {
+			entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
+		} catch (ShanoirException e) {
+			LOG.error("Error on keycloak request - " + e.getMessage());
+		}
+
+		// Request to study MS to get list of studies reachable by connected
+		// user
+		ResponseEntity<IdNameDTO[]> response = null;
+		try {
+			response = restTemplate.exchange(
+					microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.STUDY, HttpMethod.GET,
+					entity, IdNameDTO[].class);
+		} catch (RestClientException e) {
+			LOG.error("Error on study microservice request - " + e.getMessage());
+		}
+
+		final List<Long> studyIds = new ArrayList<>();
+		if (response != null) {
+			IdNameDTO[] studies = null;
+			if (HttpStatus.OK.equals(response.getStatusCode())
+					|| HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+				studies = response.getBody();
+			} else {
+				LOG.error("Error on study microservice response - status code: " + response.getStatusCode());
+			}
+
+			if (studies != null) {
+				for (IdNameDTO idNameDTO : studies) {
+					studyIds.add(idNameDTO.getId());
+				}
+			}
+		}
+		return studyIds;
 	}
 
 	/*

@@ -1,10 +1,9 @@
 package org.shanoir.ng.dataset;
 
-import java.text.DateFormat;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,8 +27,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("test")
 public class DatasetMapperTest {
 
-	private static final DateFormat shortDateFormatEN = DateFormat.getDateInstance(DateFormat.SHORT,
-			new Locale("FR", "fr"));
 	private static final String DATE_STR = "01/01/18";
 
 	private static final Long DATASET_ID = 1L;
@@ -52,7 +49,7 @@ public class DatasetMapperTest {
 		final DatasetDTO datasetDTO = datasetMapper.datasetToDatasetDTO(createDataset());
 		Assert.assertNotNull(datasetDTO);
 		Assert.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
-		Assert.assertTrue(DATASET_NAME.equals(datasetDTO.getName()));
+		Assert.assertTrue(DATASET_NAME.equals(datasetDTO.getOriginMetadata().getName()));
 	}
 
 	@Test
@@ -66,7 +63,7 @@ public class DatasetMapperTest {
 	@Test
 	public void datasetWithoutNameToIdNameDTOTest() throws ParseException {
 		final Dataset dataset = createDataset();
-		dataset.setName(null);
+		dataset.getOriginMetadata().setName(null);
 		final IdNameDTO datasetDTO = datasetMapper.datasetToIdNameDTO(dataset);
 		Assert.assertNotNull(datasetDTO);
 		Assert.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
@@ -75,10 +72,10 @@ public class DatasetMapperTest {
 
 	private Dataset createDataset() throws ParseException {
 		final Dataset dataset = new MrDataset();
-		dataset.setCreationDate(shortDateFormatEN.parse(DATE_STR));
-		dataset.setDatasetModalityType(DatasetModalityType.MR_DATASET);
+		dataset.setCreationDate(LocalDate.parse(DATE_STR));
+		dataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.MR_DATASET);
 		dataset.setId(DATASET_ID);
-		dataset.setName(DATASET_NAME);
+		dataset.getOriginMetadata().setName(DATASET_NAME);
 		return dataset;
 	}
 

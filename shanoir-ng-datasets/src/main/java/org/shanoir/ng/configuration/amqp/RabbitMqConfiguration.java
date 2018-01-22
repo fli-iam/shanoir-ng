@@ -19,6 +19,7 @@ public class RabbitMqConfiguration {
 	private static final String DATASET_QUEUE_NAME_OUT = "dataset_queue_from_ng";
 	private static final String EXAMINATION_QUEUE_NAME_IN = "examination_queue";
 	private static final String EXAMINATION_QUEUE_NAME_OUT = "examination_queue_from_ng";
+	private static final String STUDYCARD_QUEUE_TO_STUDY = "studycard_queue_to_study";
 
     @Bean
     public static Queue datasetQueueOut() {
@@ -34,6 +35,11 @@ public class RabbitMqConfiguration {
     public static Queue examinationQueueOut() {
     	return new Queue(EXAMINATION_QUEUE_NAME_OUT, true);
     }
+
+	@Bean
+	public static Queue queueToStudy() {
+		return new Queue(STUDYCARD_QUEUE_TO_STUDY, true);
+	}
 
     @Bean
     SimpleMessageListenerContainer container(final ConnectionFactory connectionFactory,

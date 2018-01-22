@@ -7,6 +7,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import * as AppUtils from '../../utils/app.utils';
 import { HandleErrorService } from '../../shared/utils/handle-error.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { EquipmentDicom } from "../../import/dicom-data.model";
 
 @Injectable()
 export class StudyService {
@@ -22,12 +23,12 @@ export class StudyService {
             });
     }
 
-    findStudiesWithStudyCardsByUserId(): Promise<Study[]> {
-        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_WITH_CARDS_BY_USER_URL)
+    findStudiesWithStudyCardsByUserAndEquipment(equipment: EquipmentDicom): Promise<Study[]> {
+        return this.http.post<Study[]>(AppUtils.BACKEND_API_STUDY_WITH_CARDS_BY_USER_EQUIPMENT_URL, JSON.stringify(equipment))
             .toPromise()
             .then(response => response)
             .catch((error) => {
-                console.error('Error while getting studies by user id', error);
+                console.error('Error while getting studies by user and equipment', error);
                 return Promise.reject(error.message || error);
             });
     }

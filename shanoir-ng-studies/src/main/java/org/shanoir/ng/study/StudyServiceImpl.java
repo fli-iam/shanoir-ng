@@ -7,8 +7,9 @@ import java.util.Map;
 
 import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.dto.SimpleStudyCardDTO;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
@@ -138,7 +139,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public List<SimpleStudyDTO> findStudiesWithStudyCardsByUserId(final Long userId) throws ShanoirStudiesException {
+	public List<SimpleStudyDTO> findStudiesWithStudyCardsByUserId(final Long userId) throws ShanoirException {
 		final List<Study> studies = findStudiesByUserId(userId);
 		if (CollectionUtils.isEmpty(studies)) {
 			return new ArrayList<>();
