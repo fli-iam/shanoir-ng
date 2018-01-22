@@ -30,6 +30,9 @@ public class CoilServiceTest {
 	private static final String UPDATED_COIL_NAME = "test";
 
 	@Mock
+	private CoilMapper coilMapper;
+
+	@Mock
 	private CoilRepository coilRepository;
 
 	@Mock

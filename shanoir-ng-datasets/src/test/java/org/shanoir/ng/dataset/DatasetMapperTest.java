@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("test")
 public class DatasetMapperTest {
 
-	private static final String DATE_STR = "01/01/18";
+	private static final String DATE_STR = "2018-01-01";
 
 	private static final Long DATASET_ID = 1L;
 	private static final String DATASET_NAME = "test";
@@ -73,6 +73,7 @@ public class DatasetMapperTest {
 	private Dataset createDataset() throws ParseException {
 		final Dataset dataset = new MrDataset();
 		dataset.setCreationDate(LocalDate.parse(DATE_STR));
+		dataset.setOriginMetadata(new DatasetMetadata());
 		dataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.MR_DATASET);
 		dataset.setId(DATASET_ID);
 		dataset.getOriginMetadata().setName(DATASET_NAME);
