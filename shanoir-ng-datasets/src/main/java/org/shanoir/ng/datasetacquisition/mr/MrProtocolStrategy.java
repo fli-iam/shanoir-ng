@@ -168,21 +168,21 @@ public class MrProtocolStrategy {
         // Volume injected of diluted contrast agent
         final Double injectedVolume = dicomAttributes.getDouble(Tag.ContrastBolusVolume,-1D);
         LOG.debug("extractMetadata : injectedVolume=" + injectedVolume);
-        mrProtocol.setInjectedVolume(injectedVolume);
+        mrProtocol.getOriginMetadata().setInjectedVolume(injectedVolume);
 
         // Contrast agent concentration
         final Double contrastAgentConcentration = dicomAttributes.getDouble(Tag.ContrastBolusIngredientConcentration,-1D);
         LOG.debug("extractMetadata : contrastAgentConcentration=" + contrastAgentConcentration);
-        mrProtocol.setContrastAgentConcentration(contrastAgentConcentration);
+        mrProtocol.getOriginMetadata().setContrastAgentConcentration(contrastAgentConcentration);
 
         // Parallel acquisition. Authorized values : YES, NO
         final String parallelAcquisitionExtracted = dicomAttributes.getString(Tag.ParallelAcquisition);
         LOG.debug("extractMetadata : parallelAcquisitionExtracted=" + parallelAcquisitionExtracted);
         if (parallelAcquisitionExtracted != null) {
         	if (!parallelAcquisitionExtracted.equals("NO")) {
-        		mrProtocol.setParallelAcquisition(true);
+        		mrProtocol.getOriginMetadata().setParallelAcquisition(true);
         	} else {
-        		mrProtocol.setParallelAcquisition(false);
+        		mrProtocol.getOriginMetadata().setParallelAcquisition(false);
         	}
 		}
 
@@ -190,28 +190,28 @@ public class MrProtocolStrategy {
         final String parallelAcquisitionTechniqueExtracted = dicomAttributes.getString(Tag.ParallelAcquisitionTechnique);
         LOG.debug("extractMetadata : parallelAcquisitionTechniqueExtracted=" + parallelAcquisitionTechniqueExtracted);
         if (parallelAcquisitionTechniqueExtracted != null) {
-        	mrProtocol.setParallelAcquisitionTechnique(ParallelAcquisitionTechnique.getIdByTechnique(parallelAcquisitionTechniqueExtracted));
+        	mrProtocol.getOriginMetadata().setParallelAcquisitionTechnique(ParallelAcquisitionTechnique.getIdByTechnique(parallelAcquisitionTechniqueExtracted));
 
         }
 
         // Time reduction factor for the in-plane direction
         final Double timeReductionFactorForTheInPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorInPlane,-1D);
         LOG.debug("extractMetadata : timeReductionFactorForTheInPlaneDirection=" + timeReductionFactorForTheInPlaneDirection);
-        mrProtocol.setTimeReductionFactorForTheInPlaneDirection(timeReductionFactorForTheInPlaneDirection);
+        mrProtocol.getOriginMetadata().setTimeReductionFactorForTheInPlaneDirection(timeReductionFactorForTheInPlaneDirection);
         
         // Time reduction factor for the out-of-plane direction
         final Double timeReductionFactorForTheOutOfPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorOutOfPlane,-1D);
         LOG.debug("extractMetadata : timeReductionFactorForTheOutOfPlaneDirection=" + timeReductionFactorForTheOutOfPlaneDirection);
-        mrProtocol.setTimeReductionFactorForTheOutOfPlaneDirection(timeReductionFactorForTheOutOfPlaneDirection);
+        mrProtocol.getOriginMetadata().setTimeReductionFactorForTheOutOfPlaneDirection(timeReductionFactorForTheOutOfPlaneDirection);
 
         // Magnetization transfer. Authorized values : YES, NO
         final String magnetizationTransferExtracted = dicomAttributes.getString(Tag.MagnetizationTransfer);
         LOG.debug("extractMetadata : magnetizationTransferExtracted=" + magnetizationTransferExtracted);
         if (magnetizationTransferExtracted != null) {
         	if (!magnetizationTransferExtracted.equals("NO")) {
-        		mrProtocol.setMagnetizationTransfer(true);
+        		mrProtocol.getOriginMetadata().setMagnetizationTransfer(true);
         	} else {
-        		mrProtocol.setMagnetizationTransfer(false);
+        		mrProtocol.getOriginMetadata().setMagnetizationTransfer(false);
         	}
 		}
 
