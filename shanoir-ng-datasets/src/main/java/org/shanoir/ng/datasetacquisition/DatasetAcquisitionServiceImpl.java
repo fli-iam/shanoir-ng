@@ -20,10 +20,9 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
-@Scope("prototype")
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService<DatasetAcquisition> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
 	
 	@Autowired
 	DicomProcessing dicomProcessing;
@@ -33,7 +32,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService<
 
 	@Override
 	public void createDatasetAcquisition(Serie serie, int rank, Examination examination) {
-
 		// TODO Auto-generated method stub
 		
 	}

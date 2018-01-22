@@ -2,7 +2,10 @@ package org.shanoir.ng.importer;
 
 import org.shanoir.ng.dataset.DatasetApiController;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.DatasetAcquisitionFactory;
+import org.shanoir.ng.datasetacquisition.DatasetAcquisitionService;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisitionServiceImpl;
+import org.shanoir.ng.datasetacquisition.DatasetAcquisitionStrategy;
 import org.shanoir.ng.examination.Examination;
 import org.shanoir.ng.examination.ExaminationService;
 import org.shanoir.ng.importer.dto.ImportJob;
@@ -20,18 +23,15 @@ import org.springframework.stereotype.Service;
 @Scope("prototype")
 public class ImporterService {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ImporterService.class);
 	
 	@Autowired
 	ExaminationService examinationService;
 	
-	@Autowired
-	DatasetAcquisition datasetAcquisition;
-	
 	private ImportJob importJob;
 	
 	@Autowired
-	private DatasetAcquisitionServiceImpl datasetAcquisitionServiceImpl;
+	private DatasetAcquisitionService<DatasetAcquisition> datasetAcquisitionService;
 	
 	public void setImportJob(ImportJob importJob) {
 		this.importJob = importJob;
@@ -63,7 +63,7 @@ public class ImporterService {
 				for (Study study : patient.studies) {
 					for (Serie serie : study.series ) {
 						if (serie.getSelected()) {
-							createSingleDatasetAcquisition(serie,rank,examination);
+							createDatasetAcquisitionForSerie(serie,rank,examination);
 							rank++;
 						}
 					}
@@ -72,21 +72,20 @@ public class ImporterService {
 		}
 	}
 	
-	public void createSingleDatasetAcquisition(Serie serie, int rank, Examination examination) {
-		datasetAcquisition.setExamination(examination);
-		datasetAcquisition.setRank(rank);
-		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-//		datasetAcquisition.setSoftwareRelease(softwareRelease);
-//		datasetAcquisition.setAcquisitionEquipmentId(acquisitionEquipmentId);
-//		datasetAcquisition.setDatasets(datasets);
-		
-	
-		try {
-			datasetAcquisitionServiceImpl.save(datasetAcquisition);
-		} catch (ShanoirException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination) {
+		if (serie.getModality() != null) {
+			DatasetAcquisitionStrategy datasetAcquisitionStrategy = DatasetAcquisitionFactory.getDatasetAcquisitionStrategy(serie.getModality());
+			if (datasetAcquisitionStrategy != null ) {
+				DatasetAcquisition datasetAcquisition = datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie,rank,examination);
+				try {
+					datasetAcquisitionService.save(datasetAcquisition);
+				} catch (ShanoirException e) {
+					// TODO Auto-generated catch block
+					LOG.error("Unable to persist Dataset Acquisition",e);
+				}
+			}
 		}
+
 		
 	}
 }

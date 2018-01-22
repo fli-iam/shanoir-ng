@@ -55,6 +55,20 @@ public enum ParallelAcquisitionTechnique {
 	}
 
 	/**
+	 * Get a parallel acquisition technique by its id.
+	 * 
+	 * @param id
+	 *            technique id.
+	 * @return parallel acquisition technique.
+	 */
+	public static ParallelAcquisitionTechnique getIdByTechnique(final String technique) {
+		if (technique == null) {
+			return null;
+		}
+		return ParallelAcquisitionTechnique.valueOf(technique);
+	}
+	
+	/**
 	 * @return the id
 	 */
 	public int getId() {

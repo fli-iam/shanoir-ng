@@ -59,6 +59,9 @@ public class Serie   {
 
 	  @JsonProperty("imagesNumber")
 	  private Integer imagesNumber = null;
+	  
+	  @JsonProperty("datasets")
+	  private List<Dataset> datasets = null;
 
 	public Boolean getSelected() {
 		return selected;
@@ -187,7 +190,15 @@ public class Serie   {
 	public void setImagesNumber(Integer imagesNumber) {
 		this.imagesNumber = imagesNumber;
 	}
+
+	public List<Dataset> getDatasets() {
+		return datasets;
+	}
+
+	public void setDatasets(List<Dataset> datasets) {
+		this.datasets = datasets;
+	}
 	  
 	  
 
-	}
+}

@@ -1,6 +1,11 @@
 package org.shanoir.ng.utils;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.shanoir.ng.shared.model.AbstractGenericItem;
@@ -42,5 +47,8 @@ public class Utils {
 		return o1.equals(o2) || o2.equals(o1);
 		// o1.equals(o2) is not equivalent to o2.equals(o1) ! For instance with
 		// java.sql.Timestamp and java.util.Date
+	}
+	public static LocalDate DateToLocalDate(Date date)  {
+		return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalDate();
 	}
 }

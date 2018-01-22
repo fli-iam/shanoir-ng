@@ -49,5 +49,12 @@ public class DicomProcessing {
 		
 		return null;
 	}
+	
+	public Attributes getDicomObjectAttributes(Image image) throws IOException {
+		File dicomFile = new File(image.path);
+		DicomInputStream dIS = new DicomInputStream(dicomFile);
+		Attributes datasetAttributes = dIS.readDataset(-1, Tag.PixelData);
+		return datasetAttributes;
+	}
 
 }
