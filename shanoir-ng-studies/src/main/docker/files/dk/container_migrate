@@ -9,7 +9,7 @@ subprocess.check_call(["configure-hosts"])
 
 def apply_mysql(filename):
     print("apply %r" % filename)
-    subprocess.check_call("mysql -h mysql -u shanoir -pshanoir shanoirdb <%r" %
+    subprocess.check_call("mysql -h localhost -u shanoir -pshanoir shanoir_ng_studies <%r" %
             os.path.join("/opt/cfg/", filename), shell = True)
 
 
