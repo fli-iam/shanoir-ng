@@ -18,13 +18,13 @@ def _():
     apply_mysql("studies_tables_v2.0.1.sql")
     subprocess.check_call(["/opt/cfg/studies_migration_v2.0.1.py", "1"])
 
-echo "Start the mysql server"
+print("Start the mysql server")
 run-mysql </dev/null &
 pid=$!
 wait-mysql --timeout=5
 
 run()
 
-echo "Stop mysql process"
+print("Stop mysql process")
 kill $pid
 wait
