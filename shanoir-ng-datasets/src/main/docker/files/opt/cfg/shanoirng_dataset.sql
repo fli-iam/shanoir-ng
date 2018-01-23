@@ -455,6 +455,7 @@ CREATE TABLE `dataset_expression` (
 
 CREATE TABLE `dataset_file` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `pacs` bit(1) DEFAULT NULL,
   `path` text DEFAULT NULL,
   `dataset_expression_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
