@@ -14,6 +14,7 @@ import org.shanoir.ng.importer.dicom.DicomDirToJsonReader;
 import org.shanoir.ng.importer.dicom.DicomFileAnalyzer;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Patients;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -114,7 +115,7 @@ public class ImporterApiController implements ImporterApi {
 	/**
 	 * @todo refactor and clean-up here
 	 */
-	public ResponseEntity<List<Patient>> uploadDicomZipFile(
+	public ResponseEntity<ImportJob> uploadDicomZipFile(
 			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
 			throws RestServiceException {
 		if (dicomZipFile == null)
@@ -161,8 +162,9 @@ public class ImporterApiController implements ImporterApi {
 			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(dicomDirJsonNode);
 			Patients patientsDTO = dicomDirToJsonReader.getMapper().readValue(dicomDirJsonString,Patients.class);
-			List<Patient> patients = patientsDTO.getPatients();
-			return new ResponseEntity<List<Patient>>(patients, HttpStatus.OK);
+			ImportJob importJob = new ImportJob();
+			importJob.setPatients(patientsDTO.getPatients());
+			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			LOG.error(e.getMessage());

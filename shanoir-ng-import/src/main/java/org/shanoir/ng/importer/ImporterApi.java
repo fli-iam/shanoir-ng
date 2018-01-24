@@ -3,6 +3,7 @@ package org.shanoir.ng.importer;
 import java.util.Collection;
 
 import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,7 @@ public interface ImporterApi {
         produces = { "application/json" }, 
         consumes = { "multipart/form-data" },
         method = RequestMethod.POST)
-    ResponseEntity<List<Patient>> uploadDicomZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException;
+    ResponseEntity<ImportJob> uploadDicomZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException;
     
     @ApiOperation(value = "Select series", notes = "Select series", response = Void.class, tags={ "Select series", })
     @ApiResponses(value = { 
