@@ -10,8 +10,6 @@ import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.importer.dto.Image;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 @Service
 public class DicomProcessing {
 	

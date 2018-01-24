@@ -2,7 +2,6 @@ package org.shanoir.ng.datasetacquisition.mr;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -5,17 +5,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.Collection;
-import java.util.List;
 
 import javax.validation.Valid;
 
 import org.shanoir.ng.importer.dcm2nii.NIfTIConverterService;
 import org.shanoir.ng.importer.dicom.DicomDirToJsonReader;
 import org.shanoir.ng.importer.dicom.DicomFileAnalyzer;
-import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Patients;
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Patients;
+import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.ImportUtils;

@@ -5,9 +5,7 @@ import java.util.List;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.dcm4che3.data.UID;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
-import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.utils.Utils;

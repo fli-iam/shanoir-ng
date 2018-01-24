@@ -1,6 +1,5 @@
 package org.shanoir.ng.datasetacquisition;
 
-import org.shanoir.ng.dataset.DatasetApiController;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.examination.Examination;
 import org.shanoir.ng.examination.ExaminationService;
@@ -9,7 +8,6 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 /**

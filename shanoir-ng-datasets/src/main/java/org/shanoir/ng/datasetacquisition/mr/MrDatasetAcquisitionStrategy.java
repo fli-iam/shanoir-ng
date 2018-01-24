@@ -9,8 +9,6 @@ import org.shanoir.ng.datasetacquisition.DatasetAcquisitionStrategy;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.examination.Examination;
 import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.processing.DatasetProcessing;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

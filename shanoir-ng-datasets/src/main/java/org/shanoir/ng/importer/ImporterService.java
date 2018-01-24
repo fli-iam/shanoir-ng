@@ -1,10 +1,8 @@
 package org.shanoir.ng.importer;
 
-import org.shanoir.ng.dataset.DatasetApiController;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisitionFactory;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisitionService;
-import org.shanoir.ng.datasetacquisition.DatasetAcquisitionServiceImpl;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisitionStrategy;
 import org.shanoir.ng.examination.Examination;
 import org.shanoir.ng.examination.ExaminationService;
