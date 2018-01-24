@@ -1,6 +1,7 @@
 package org.shanoir.ng.importer.model;
 
 import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -22,9 +23,80 @@ public class ImportJob {
     private boolean fromPacs;
 
     @JsonProperty("patients")
-    private Patients patients;
+    private List<Patient> patients;
     
     @JsonProperty("examinationId")
     private Long examinationId;
+    
+    @JsonProperty("frontStudyId")
+    private Long frontStudyId;
+
+    @JsonProperty("frontStudyCardId")
+    private Long frontStudyCardId;
+    
+	public List<Subject> getSubjects() {
+		return subjects;
+	}
+
+	public void setSubjects(List<Subject> subjects) {
+		this.subjects = subjects;
+	}
+
+	public boolean isFromDicomZip() {
+		return fromDicomZip;
+	}
+
+	public void setFromDicomZip(boolean fromDicomZip) {
+		this.fromDicomZip = fromDicomZip;
+	}
+
+	public boolean isFromShanoirUploader() {
+		return fromShanoirUploader;
+	}
+
+	public void setFromShanoirUploader(boolean fromShanoirUploader) {
+		this.fromShanoirUploader = fromShanoirUploader;
+	}
+
+	public boolean isFromPacs() {
+		return fromPacs;
+	}
+
+	public void setFromPacs(boolean fromPacs) {
+		this.fromPacs = fromPacs;
+	}
+
+	public List<Patient> getPatients() {
+		return patients;
+	}
+
+	public void setPatients(List<Patient> patients) {
+		this.patients = patients;
+	}
+
+	public Long getExaminationId() {
+		return examinationId;
+	}
+
+	public void setExaminationId(Long examinationId) {
+		this.examinationId = examinationId;
+	}
+
+	public Long getFrontStudyId() {
+		return frontStudyId;
+	}
+
+	public void setFrontStudyId(Long frontStudyId) {
+		this.frontStudyId = frontStudyId;
+	}
+
+	public Long getFrontStudyCardId() {
+		return frontStudyCardId;
+	}
+
+	public void setFrontStudyCardId(Long frontStudyCardId) {
+		this.frontStudyCardId = frontStudyCardId;
+	}
 
 }
+

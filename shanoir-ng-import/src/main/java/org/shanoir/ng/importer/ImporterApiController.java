@@ -5,14 +5,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.List;
 
 import javax.validation.Valid;
 
 import org.shanoir.ng.importer.dcm2nii.NIfTIConverterService;
 import org.shanoir.ng.importer.dicom.DicomDirToJsonReader;
 import org.shanoir.ng.importer.dicom.DicomFileAnalyzer;
-import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Patients;
+import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.ImportUtils;
@@ -112,7 +114,7 @@ public class ImporterApiController implements ImporterApi {
 	/**
 	 * @todo refactor and clean-up here
 	 */
-	public ResponseEntity<Patients> uploadDicomZipFile(
+	public ResponseEntity<List<Patient>> uploadDicomZipFile(
 			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
 			throws RestServiceException {
 		if (dicomZipFile == null)
@@ -154,12 +156,13 @@ public class ImporterApiController implements ImporterApi {
 
 			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode);
 
-			niftiConverter.prepareAndRunConversion(dicomDirJsonNode, unzipFolderFile);
+//			niftiConverter.prepareAndRunConversion(dicomDirJsonNode, unzipFolderFile);
 
 			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(dicomDirJsonNode);
-			Patients patients = dicomDirToJsonReader.getMapper().readValue(dicomDirJsonString,Patients.class);
-			return new ResponseEntity<Patients>(patients, HttpStatus.OK);
+			Patients patientsDTO = dicomDirToJsonReader.getMapper().readValue(dicomDirJsonString,Patients.class);
+			List<Patient> patients = patientsDTO.getPatients();
+			return new ResponseEntity<List<Patient>>(patients, HttpStatus.OK);
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			LOG.error(e.getMessage());

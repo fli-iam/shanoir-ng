@@ -2,8 +2,8 @@ package org.shanoir.ng.importer;
 
 import java.util.Collection;
 
-import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.importer.model.Patients;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
-
+import java.util.List;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -46,7 +46,7 @@ public interface ImporterApi {
         produces = { "application/json" }, 
         consumes = { "multipart/form-data" },
         method = RequestMethod.POST)
-    ResponseEntity<Patients> uploadDicomZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException;
+    ResponseEntity<List<Patient>> uploadDicomZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException;
     
     @ApiOperation(value = "Select series", notes = "Select series", response = Void.class, tags={ "Select series", })
     @ApiResponses(value = { 

@@ -7,6 +7,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Patients {
 	
     @JsonProperty("patients")
-    public List<Patient> patients;
+    private List<Patient> patients;
+
+	public List<Patient> getPatients() {
+		return patients;
+	}
+
+	public void setPatients(List<Patient> patients) {
+		this.patients = patients;
+	}
+    
+    
 	
 }
