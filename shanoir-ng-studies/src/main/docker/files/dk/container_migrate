@@ -19,12 +19,10 @@ def _():
     subprocess.check_call(["/opt/cfg/studies_migration_v2.0.1.py", "1"])
 
 print("Start the mysql server")
-subprocess.check_call(["run-mysql"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-subprocess.check_call(["pid=$!"])
+p_mysql = subprocess.Popen(["run-mysql"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 subprocess.check_call(["wait-mysql", "--timeout=5"])
 
 run()
 
 print("Stop mysql process")
-subprocess.check_call(["kill", "$pid"])
-subprocess.check_call(["wait"])
+p_mysql.kill()
