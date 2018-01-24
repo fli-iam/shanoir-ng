@@ -2,6 +2,8 @@ package org.shanoir.ng.importer.dto;
 
 import java.util.List;
 
+import org.shanoir.ng.datasetfile.DatasetFile;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**

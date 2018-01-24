@@ -7,7 +7,7 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.io.DicomInputStream;
-import org.shanoir.ng.importer.dto.DatasetFile;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.springframework.stereotype.Service;
 
 @Service

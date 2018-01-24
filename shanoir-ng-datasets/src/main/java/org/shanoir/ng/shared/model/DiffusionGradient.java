@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
  * This class represents a diffusion gradient. It is used in the MR protocol to

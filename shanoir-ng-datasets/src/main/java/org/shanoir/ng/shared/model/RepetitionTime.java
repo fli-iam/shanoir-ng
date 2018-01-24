@@ -6,7 +6,6 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
  * This class represents an repetition time. It is used in the MR protocol to

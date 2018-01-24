@@ -1,6 +1,7 @@
 package org.shanoir.ng.dataset;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -160,6 +161,9 @@ public abstract class Dataset extends AbstractGenericItem {
 	 * @return the datasetExpressions
 	 */
 	public List<DatasetExpression> getDatasetExpressions() {
+		if (datasetExpressions == null) {
+			datasetExpressions = new ArrayList<DatasetExpression>();
+		}
 		return datasetExpressions;
 	}
 

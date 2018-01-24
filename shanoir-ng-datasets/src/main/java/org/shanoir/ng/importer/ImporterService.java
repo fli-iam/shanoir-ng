@@ -58,8 +58,8 @@ public class ImporterService {
 		if (examination != null) {
 			int rank = 0;
 			for (Patient patient : importJob.getPatients()) {
-				for (Study study : patient.studies) {
-					for (Serie serie : study.series ) {
+				for (Study study : patient.getStudies()) {
+					for (Serie serie : study.getSeries() ) {
 						if (serie.getSelected()) {
 							createDatasetAcquisitionForSerie(serie,rank,examination,importJob);
 							rank++;

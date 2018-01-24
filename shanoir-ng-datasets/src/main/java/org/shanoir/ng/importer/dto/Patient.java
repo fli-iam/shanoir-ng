@@ -1,6 +1,10 @@
 package org.shanoir.ng.importer.dto;
 
 import java.util.List;
+
+import org.shanoir.ng.importer.dto.Study;
+import org.shanoir.ng.importer.dto.Subject;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -9,24 +13,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 public class Patient {
-     @JsonProperty("patientID")
-     private String patientID;
+	
+    @JsonProperty("subjects")
+    private List<Subject> subjects;
+    
+    @JsonProperty("patientID")
+    private String patientID;
 
-     @JsonProperty("patientName")
-     private String patientName;
+    @JsonProperty("patientName")
+    private String patientName;
 
-     @JsonProperty("patientBirthDate")
-     private String patientBirthDate;
+    @JsonProperty("patientBirthDate")
+    private String patientBirthDate;
 
-     @JsonProperty("patientSex")
-     private String patientSex;
+    @JsonProperty("patientSex")
+    private String patientSex;
 
-     @JsonProperty("studies")
-     private List<Study> studies;
-     
-     @JsonProperty("frontSubjectId")
-     private Long frontSubjectId;
+    @JsonProperty("studies")
+    private List<Study> studies;
+    
+    @JsonProperty("frontSubjectId")
+    private Long frontSubjectId;
 
+    @JsonProperty("frontExperimentalGroupOfSubjectId")
+    private Long frontExperimentalGroupOfSubjectId;
+    
 	public String getPatientID() {
 		return patientID;
 	}
@@ -73,6 +84,22 @@ public class Patient {
 
 	public void setFrontSubjectId(Long frontSubjectId) {
 		this.frontSubjectId = frontSubjectId;
+	}
+
+	public List<Subject> getSubjects() {
+		return subjects;
+	}
+
+	public void setSubjects(List<Subject> subjects) {
+		this.subjects = subjects;
+	}
+
+	public Long getFrontExperimentalGroupOfSubjectId() {
+		return frontExperimentalGroupOfSubjectId;
+	}
+
+	public void setFrontExperimentalGroupOfSubjectId(Long frontExperimentalGroupOfSubjectId) {
+		this.frontExperimentalGroupOfSubjectId = frontExperimentalGroupOfSubjectId;
 	}
 
 }

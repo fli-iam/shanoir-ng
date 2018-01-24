@@ -7,7 +7,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
  * This class represents an echo time. It is used in the MR protocol to list and

@@ -4,19 +4,19 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Image {
+public class DatasetFile {
 
 	@JsonProperty("path")
-	public String path;
-
+	private String path;
+	
 	@JsonProperty("acquisitionNumber")
-	public String acquisitionNumber;
-
+	private String acquisitionNumber;
+	
 	@JsonProperty("echoNumbers")
-	public List<Integer> echoNumbers;
-
+	private List<Integer> echoNumbers;
+	
 	@JsonProperty("imageOrientationPatient")
-	public List<Double> imageOrientationPatient;
+	private List<Double> imageOrientationPatient;
 
 	public String getPath() {
 		return path;

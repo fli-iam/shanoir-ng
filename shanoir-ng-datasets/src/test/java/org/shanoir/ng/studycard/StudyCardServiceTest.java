@@ -14,9 +14,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
-import org.shanoir.ng.studycard.StudyCard;
-import org.shanoir.ng.studycard.StudyCardRepository;
-import org.shanoir.ng.studycard.StudyCardServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
