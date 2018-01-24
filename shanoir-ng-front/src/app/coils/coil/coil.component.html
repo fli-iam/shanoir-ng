@@ -136,13 +136,13 @@
 
 <app-modal modalDialogId="manufModelModal" #manufModelModal>
 		<div class="app-modal-body">
-		  <manufacturer-model-detail [modeFromAcqEquip]="'create'" (closing)="closePopin($event)"></manufacturer-model-detail>
+		  <manufacturer-model-detail [modeFromAcqEquip]="'create'" (closing)="closePopin()"></manufacturer-model-detail>
 		</div>
 </app-modal>
 
 <app-modal modalDialogId="centerModal" #centerModal>
 		<div class="app-modal-body">
-		  <center-detail [modeFromCoil]="'create'" (closing)="closeCenterPopin($event)"></center-detail>
+		  <center-detail [modeFromCoil]="'create'" (closing)="closeCenterPopin()"></center-detail>
 		</div>
 </app-modal> 
 

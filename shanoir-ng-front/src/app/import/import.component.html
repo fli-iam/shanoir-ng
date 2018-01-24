@@ -138,7 +138,7 @@
                 </div>
             </div>
             <div class="commands">
-                 <button i18n="Import|NextButton label" [disabled]="!seriesSelected" (click)="selectDicomSeries()">Next</button>
+                 <button i18n="Import|NextButton label" [disabled]="!seriesSelected" (click)="validateSeriesSelected()">Next</button>
             </div>
         </fieldset>
     </div>
@@ -155,19 +155,25 @@
                     <label class="required-label">Select an existing research study</label> 
                     <span class="right-col">
                         <select formControlName="study" required [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)">
-                            <option *ngFor="let study of studies" [ngValue]="study">{{study.name}}</option>
+                            <option *ngFor="let study of studies" [ngValue]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study.name}}</option>
                         </select>
-                        <button disabled>details</button>
+                        <button i18n="Import|StudyDetailsButton label" *ngIf="study != null" (click)="studyModal.show(study.id)">details</button>
                     </span>
                 </li>
                 <li class="required">
                     <label class="required-label">Select an existing study card</label> 
                     <span class="right-col">
-                        <select formControlName="studycard" required [(ngModel)]="studycard">
-                            <option *ngFor="let studycard of studycards" [ngValue]="studycard">{{studycard.name}}</option>
+                        <select formControlName="studycard" required [(ngModel)]="studycard" (ngModelChange)="onSelectStudycard($event)">
+                            <option *ngFor="let studycard of studycards" [ngValue]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard.name}}</option>
                         </select>
                         <button disabled>details</button>
                         <button disabled>edit</button>
+                    </span>
+                </li> 
+                <li>
+                    <span>
+                        <label *ngIf="studycardMissingError==true" class="form-validation-alert" i18n="Import|StudycardMissingError label">Warning: no study card is defined for this research study. You cannot import data into this research study.</label>
+                        <label *ngIf="studycardNotCompatibleError==true" class="form-validation-alert" i18n="Import|StudycardNotCompatibleError label">Warning: The Acquisition Equipment defined in the study card is not compatible with the data that you are importing.</label>
                     </span>
                 </li>
                 <li class="required">
@@ -329,6 +335,12 @@
     </div>
     
 </form>
+
+<app-modal modalDialogId="studyModal" #studyModal>
+    <div class="app-modal-body">
+        <study-detail [modeFromImport]="'view'" (closing)="closePopin()"></study-detail>
+    </div>
+</app-modal>
 
 <div class="overlay" *ngIf="createUser">
     <div class="content">

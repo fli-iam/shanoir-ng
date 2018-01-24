@@ -19,5 +19,5 @@ public interface CenterRepositoryCustom extends ItemRepositoryCustom<Center> {
 	 * @return list of centers.
 	 */
 	List<IdNameDTO> findIdsAndNames();
-
+	
 }

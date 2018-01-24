@@ -33,5 +33,5 @@ public class CenterRepositoryImpl implements CenterRepositoryCustom {
 	public List<IdNameDTO> findIdsAndNames() {
 		return em.createNativeQuery("SELECT id, name FROM center", "centerNameResult").getResultList();
 	}
-
+	
 }

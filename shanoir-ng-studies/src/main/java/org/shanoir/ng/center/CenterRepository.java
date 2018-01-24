@@ -19,5 +19,7 @@ public interface CenterRepository extends CrudRepository<Center, Long>, CenterRe
 	 * @return a center.
 	 */
 	Optional<Center> findByName(String name);
+	
+	String findNameById(Long id);
 
 }

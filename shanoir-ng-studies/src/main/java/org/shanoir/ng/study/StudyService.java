@@ -97,10 +97,12 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * 
 	 * @param userId
 	 *            user id.
+	 * @param equipment 
+	 *			  equipment used during dicom import
 	 * @return a list of simple studies.
-	 * @throws ShanoirStudiesException
+	 * @throws ShanoirException
 	 */
-	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserId(Long userId) throws ShanoirException;
+	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(Long userId, EquipmentDicom equipment) throws ShanoirException;
 
 	/**
 	 * add new study

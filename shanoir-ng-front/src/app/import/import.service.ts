@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
-import { PatientsDicom, PatientDicom, SerieDicom } from './dicom-data.model';
+import { ImportJob, PatientDicom, SerieDicom } from './dicom-data.model';
 import * as AppUtils from '../utils/app.utils';
 import { HandleErrorService } from '../shared/utils/handle-error.service';
 
@@ -11,8 +11,8 @@ export class ImportService {
 
     constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
 
-    uploadFile(formData: FormData): Observable<PatientsDicom> {
-        return this.http.post<PatientsDicom>(AppUtils.BACKEND_API_UPLOAD_DICOM_URL, formData)
+    uploadFile(formData: FormData): Observable<ImportJob> {
+        return this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_DICOM_URL, formData)
             .map(response => response)
             .catch(this.handleErrorService.handleError);
     }

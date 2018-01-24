@@ -24,6 +24,9 @@ import { Timepoint } from '../shared/timepoint.model';
 
 export class StudyComponent implements OnInit {
 
+    @Input() modeFromImport: "view" | "edit" | "create";
+    @Input() idFromImport: number;
+
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
     private addDisabledIconPath: string = ImagesUrlUtil.ADD_DISABLED_ICON_PATH;
     public canModify: Boolean = false;
@@ -174,6 +177,9 @@ export class StudyComponent implements OnInit {
     }
 
     getStudy(): void {
+        if (this.idFromImport != null) {
+            this.studyId = this.idFromImport;
+        } else {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let studyId = queryParams['id'];
@@ -200,6 +206,7 @@ export class StudyComponent implements OnInit {
                     this.getStudyWithData(this.study.id);
                 }
             });
+        }
     }
 
     getStudyWithData(studyId: number): void {

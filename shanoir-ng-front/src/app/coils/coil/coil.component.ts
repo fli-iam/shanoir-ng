@@ -187,11 +187,11 @@ export class CoilComponent implements OnInit {
             });
     }
 
-    closePopin(manufModelId?: number) {
+    closePopin() {
         this.manufModelModal.hide();
     }
 
-    closeCenterPopin(id?: number) {
+    closeCenterPopin() {
         this.centerModal.hide();
     }
 

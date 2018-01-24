@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.shanoir.ng.acquisitionequipment.AcquisitionEquipment;
+import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentRepository;
+import org.shanoir.ng.center.CenterRepository;
 import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -55,6 +58,12 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private StudyRepository studyRepository;
+	
+	@Autowired
+	private CenterRepository centerRepository;
+	
+	@Autowired
+	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
 	@Override
 	public boolean canUserUpdateStudy(final Long studyId, final Long userId) {
@@ -139,7 +148,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public List<SimpleStudyDTO> findStudiesWithStudyCardsByUserId(final Long userId) throws ShanoirException {
+	public List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(final Long userId, final EquipmentDicom equipment) throws ShanoirException {
 		final List<Study> studies = findStudiesByUserId(userId);
 		if (CollectionUtils.isEmpty(studies)) {
 			return new ArrayList<>();
@@ -152,18 +161,18 @@ public class StudyServiceImpl implements StudyService {
 		final HttpEntity<IdListDTO> entity = new HttpEntity<>(studyIds, KeycloakUtil.getKeycloakHeader());
 
 		// Request to studycard MS to get cards for list of studies
-		ResponseEntity<List<SimpleStudyCardDTO>> studyCardResponse = null;
+		ResponseEntity<List<StudyCardDTO>> studyCardResponse = null;
 		try {
 			studyCardResponse = restTemplate.exchange(
 					microservicesRequestsService.getStudycardsMsUrl() + MicroserviceRequestsService.SEARCH,
-					HttpMethod.POST, entity, new ParameterizedTypeReference<List<SimpleStudyCardDTO>>() {
+					HttpMethod.POST, entity, new ParameterizedTypeReference<List<StudyCardDTO>>() {
 					});
 		} catch (RestClientException e) {
 			LOG.error("Error on study card microservice request", e);
 			throw new ShanoirStudiesException("Error while getting study card list", StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
 
-		List<SimpleStudyCardDTO> studyCards = null;
+		List<StudyCardDTO> studyCards = null;
 		if (HttpStatus.OK.equals(studyCardResponse.getStatusCode())
 				|| HttpStatus.NO_CONTENT.equals(studyCardResponse.getStatusCode())) {
 			studyCards = studyCardResponse.getBody();
@@ -171,15 +180,38 @@ public class StudyServiceImpl implements StudyService {
 			throw new ShanoirStudiesException(StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
 		final Map<Long, SimpleStudyCardDTO> studyCardsmap = new HashMap<>();
-		for (final SimpleStudyCardDTO simpleStudyCard : studyCards) {
-			studyCardsmap.put(simpleStudyCard.getId(), simpleStudyCard);
+		for (final StudyCardDTO studyCard : studyCards) {
+			SimpleStudyCardDTO simpleStudyCard = new SimpleStudyCardDTO(studyCard.getId(), studyCard.getName());
+			simpleStudyCard.setCenter(new IdNameDTO(studyCard.getCenterId(), centerRepository.findOne(studyCard.getCenterId()).getName()));
+			AcquisitionEquipment acquisitionEquipment = acquisitionEquipmentRepository.findOne(studyCard.getAcquisitionEquipmentId());
+			String serialNumber = acquisitionEquipment.getSerialNumber();
+			String manufacturerModel = acquisitionEquipment.getManufacturerModel().getName();
+			String manufacturer = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
+			if (!serialNumber.equals(equipment.getDeviceSerialNumber())
+					|| !manufacturerModel.equals(equipment.getManufacturerModelName())
+					|| !manufacturer.equals(equipment.getManufacturer())) {
+				simpleStudyCard.setCompatible(false);		
+			} else {
+				simpleStudyCard.setCompatible(true);
+			}
+			studyCardsmap.put(studyCard.getId(), simpleStudyCard);
 		}
 
 		final List<SimpleStudyDTO> simpleStudies = new ArrayList<>();
 		for (final Study study : studies) {
 			final SimpleStudyDTO simpleStudy = new SimpleStudyDTO(study.getId(), study.getName());
+			
+			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
+				IdNameDTO center = new IdNameDTO(studyCenter.getCenter().getId(), studyCenter.getCenter().getName());
+				simpleStudy.getCenters().add(center);
+			}
+			
 			for (final Long studyCardId : study.getStudyCardIds()) {
 				simpleStudy.getStudyCards().add(studyCardsmap.get(studyCardId));
+				simpleStudy.setCompatible(false);
+				if (studyCardsmap.get(studyCardId).getCompatible()) {
+					simpleStudy.setCompatible(true);
+				}
 			}
 			simpleStudies.add(simpleStudy);
 		}

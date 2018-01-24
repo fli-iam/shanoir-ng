@@ -1,5 +1,7 @@
 package org.shanoir.ng.study.dto;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
+
 /**
  * Simple DTO for study cards.
  * 
@@ -11,6 +13,10 @@ public class SimpleStudyCardDTO {
 	private Long id;
 
 	private String name;
+	
+	private Boolean compatible;
+	
+	private IdNameDTO center;
 
 	/**
 	 * Simple constructor.
@@ -59,6 +65,22 @@ public class SimpleStudyCardDTO {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Boolean getCompatible() {
+		return compatible;
+	}
+
+	public void setCompatible(Boolean compatible) {
+		this.compatible = compatible;
+	}
+
+	public IdNameDTO getCenter() {
+		return center;
+	}
+
+	public void setCenter(IdNameDTO center) {
+		this.center = center;
 	}
 
 }

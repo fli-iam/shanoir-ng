@@ -74,10 +74,10 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<SimpleStudyDTO>> findStudiesWithStudyCardsByUserId() {
+	public ResponseEntity<List<SimpleStudyDTO>> findStudiesWithStudyCardsByUserAndEquipment(@RequestBody final EquipmentDicom equipment, final BindingResult result) {
 		List<SimpleStudyDTO> studies;
 		try {
-			studies = studyService.findStudiesWithStudyCardsByUserId(KeycloakUtil.getTokenUserId());
+			studies = studyService.findStudiesWithStudyCardsByUserAndEquipment(KeycloakUtil.getTokenUserId(), equipment);
 		} catch (ShanoirException e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}

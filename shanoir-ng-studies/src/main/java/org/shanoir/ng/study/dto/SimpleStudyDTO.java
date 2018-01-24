@@ -3,6 +3,8 @@ package org.shanoir.ng.study.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
+
 /**
  * Simple DTO for studies.
  * 
@@ -16,6 +18,10 @@ public class SimpleStudyDTO {
 	private String name;
 
 	private List<SimpleStudyCardDTO> studyCards;
+	
+	private List<IdNameDTO> centers;
+	
+	private Boolean compatible;
 
 	/**
 	 * Simple constructor.
@@ -34,6 +40,7 @@ public class SimpleStudyDTO {
 	public SimpleStudyDTO(final Long id, final String name) {
 		this.id = id;
 		this.name = name;
+		this.centers = new ArrayList<>();
 		this.studyCards = new ArrayList<>();
 	}
 
@@ -80,6 +87,22 @@ public class SimpleStudyDTO {
 	 */
 	public void setStudyCards(List<SimpleStudyCardDTO> studyCards) {
 		this.studyCards = studyCards;
+	}
+
+	public List<IdNameDTO> getCenters() {
+		return centers;
+	}
+
+	public void setCenters(List<IdNameDTO> centers) {
+		this.centers = centers;
+	}
+
+	public Boolean getCompatible() {
+		return compatible;
+	}
+
+	public void setCompatible(Boolean compatible) {
+		this.compatible = compatible;
 	}
 
 }

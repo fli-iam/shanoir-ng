@@ -1,22 +1,22 @@
-export class PatientsDicom {
-    // subjects: SubjectDicom;
-    // fromDicomZip: boolean;
-    // fromShanoirUploader: boolean;
-    // fromPacs: boolean;
+export class ImportJob {
+    fromDicomZip: boolean;
+    fromShanoirUploader: boolean;
+    fromPacs: boolean;
     patients: PatientDicom[];
 }
 
-// export class SubjectDicom {
-//     id: string;
-//     name: string;
-// }
-
 export class PatientDicom {
+    subjects: SubjectDicom;
     patientID: string;
     patientName: string;
     patientBirthDate: Date;
     patientSex: string;
     studies: StudyDicom[];
+}
+
+export class SubjectDicom {
+    id: string;
+    name: string;
 }
 
 export class StudyDicom {
@@ -36,10 +36,11 @@ export class SerieDicom {
     seriesNumber: number;
     numberOfSeriesRelatedInstances: number;
     sopClassUID: string;
-    isSpectroscopy: boolean;
-    isMultiFrame: boolean;
     equipment: EquipmentDicom; 
     isCompressed: boolean;
+    isSpectroscopy: boolean;
+    isMultiFrame: boolean;
+    multiFrameCount: number;
     nonImages: any[];
     nonImagesNumber: number;
     images: ImageDicom[];

@@ -11,6 +11,8 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 public class StudyCardDTO extends IdNameDTO {
 
 	private Long acquisitionEquipmentId;
+	
+	private Long centerId;
 
 	/**
 	 * @return the acquisitionEquipmentId
@@ -25,6 +27,14 @@ public class StudyCardDTO extends IdNameDTO {
 	 */
 	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
 		this.acquisitionEquipmentId = acquisitionEquipmentId;
+	}
+
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
 	}
 
 }
