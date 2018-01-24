@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 
 import org.shanoir.ng.dataset.DatasetExpression;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
@@ -27,6 +28,8 @@ public class DatasetFile extends AbstractGenericItem {
 	@JoinColumn(name = "dataset_expression_id")
 	private DatasetExpression datasetExpression;
 
+	private boolean pacs;
+
 	@Column(columnDefinition = "TEXT")
 	private String path;
 
@@ -46,9 +49,54 @@ public class DatasetFile extends AbstractGenericItem {
 	}
 
 	/**
+	 * Return the wado request with the mime-type set as image/jpeg.
+	 *
+	 * @return the jpeg path
+	 */
+	@Transient
+	public String getJpegPath() {
+		return getPath().replaceFirst("application/dicom", "image/jpeg");
+	}
+
+	/**
+	 * Return the wado request with the mime-type set as image/jpeg. Only used
+	 * for multiframe.
+	 *
+	 * @return the jpeg path
+	 */
+	@Transient
+	public String getJpegPath(final int frameNumber) {
+		if (getDatasetExpression().isMultiFrame()) {
+			return getJpegPath() + "&frameNumber=" + frameNumber;
+		} else {
+			return getJpegPath();
+		}
+	}
+
+	/**
+	 * @return the pacs
+	 */
+	public boolean isPacs() {
+		return pacs;
+	}
+
+	/**
+	 * @param pacs
+	 *            the pacs to set
+	 */
+	public void setPacs(boolean pacs) {
+		this.pacs = pacs;
+	}
+
+	/**
 	 * @return the path
 	 */
 	public String getPath() {
+		if (isPacs()) {
+			if (!path.contains("contentType")) {
+				path += "&contentType=application/dicom";
+			}
+		}
 		return path;
 	}
 

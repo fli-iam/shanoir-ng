@@ -498,6 +498,13 @@ query = "INSERT INTO dataset_file (id, path, dataset_expression_id) VALUES (%s, 
 targetCursor.executemany(query, sourceCursor.fetchall())
 targetConn.commit()
 
+sourceCursor.execute("SELECT DATASET_FILE_ID FROM PACS_DATASET_FILE")
+
+query = "UPDATE dataset_file SET pacs = 1 WHERE id = %s"
+
+targetCursor.executemany(query, sourceCursor.fetchall())
+targetConn.commit()
+
 print("Import dataset_file: end")
 
 print("Import input_of_dataset_processing: start")

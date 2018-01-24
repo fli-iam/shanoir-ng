@@ -198,7 +198,7 @@ public class DatasetExpression extends AbstractGenericItem {
 	/**
 	 * @return the multiFrame
 	 */
-	public boolean getMultiFrame() {
+	public boolean isMultiFrame() {
 		return multiFrame;
 	}
 
