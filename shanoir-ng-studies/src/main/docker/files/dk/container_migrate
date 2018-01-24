@@ -15,7 +15,9 @@ def apply_mysql(filename):
 def execute_script(filename):
     print("apply %r" % filename)
     file_path = os.path.join("/opt/cfg/", filename)
-    subprocess.check_call(["chown", "+x", file_path])
+    st = os.stat(file_path)
+	# chmod +x
+    os.chmod(file_path, st.st_mode | 0111)
     subprocess.check_call([file_path, "1"])
 
 
