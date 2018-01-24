@@ -1,4 +1,4 @@
-import { Component, OnInit, Input , ViewChild} from '@angular/core';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -29,7 +29,6 @@ export class CoilComponent implements OnInit {
     private coil: Coil = new Coil();
     private coilId: number;
     public mode: "view" | "edit" | "create";
-   // private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
     private centers: IdNameObject[];
     private manufModels: IdNameObject[];
@@ -47,7 +46,7 @@ export class CoilComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        
+
         this.getCenters();
         this.getManufModels();
         this.getEnum();
@@ -76,6 +75,13 @@ export class CoilComponent implements OnInit {
                 }
             })
             .subscribe((coil: Coil) => {
+                if (this.mode == "edit") {
+                    // Link to objects coming from list requests to display selected item of drop-down list
+                    coil.center = this.getCenterById(coil.center.id);
+                    if (coil.manufacturerModel) {
+                        coil.manufacturerModel = this.getManufModelById(coil.manufacturerModel.id);
+                    }
+                }
                 this.coil = coil;
             });
     }
@@ -93,6 +99,15 @@ export class CoilComponent implements OnInit {
             });
     }
 
+    getCenterById(id: number): IdNameObject {
+        for (let center of this.centers) {
+            if (id == center.id) {
+                return center;
+            }
+        }
+        return null;
+    }
+
     getManufModels(): void {
         this.manufModelService
             .getManufacturerModelsNames()
@@ -105,6 +120,15 @@ export class CoilComponent implements OnInit {
             });
     }
 
+
+    getManufModelById(id: number): IdNameObject {
+        for (let manufModel of this.manufModels) {
+            if (id == manufModel.id) {
+                return manufModel;
+            }
+        }
+        return null;
+    }
 
     getEnum(): void {
         var types = Object.keys(CoilType);
@@ -148,11 +172,11 @@ export class CoilComponent implements OnInit {
     }
 
 
-  
+
 
     formErrors = {
-        'center':'',
-        'manufacturerModel':''
+        'center': '',
+        'manufacturerModel': ''
     };
 
     back(): void {
@@ -164,7 +188,7 @@ export class CoilComponent implements OnInit {
     }
 
     submit(): void {
-        this.coil = this.coilForm.value;       
+        this.coil = this.coilForm.value;
     }
 
     create(): void {
