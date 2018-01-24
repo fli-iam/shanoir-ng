@@ -7,13 +7,13 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.io.DicomInputStream;
-import org.shanoir.ng.importer.dto.Image;
+import org.shanoir.ng.importer.dto.DatasetFile;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DicomProcessing {
 	
-	public static Image retrieveAdditionalDicomDataForImage(File dicomFile, Image image) {
+	public static DatasetFile retrieveAdditionalDicomDataForImage(File dicomFile, DatasetFile image) {
 		DicomInputStream dIS = null;
 		try {
 			dIS = new DicomInputStream(dicomFile);
@@ -48,8 +48,8 @@ public class DicomProcessing {
 		return null;
 	}
 	
-	public Attributes getDicomObjectAttributes(Image image) throws IOException {
-		File dicomFile = new File(image.path);
+	public Attributes getDicomObjectAttributes(DatasetFile image) throws IOException {
+		File dicomFile = new File(image.getPath());
 		DicomInputStream dIS = new DicomInputStream(dicomFile);
 		Attributes datasetAttributes = dIS.readDataset(-1, Tag.PixelData);
 		return datasetAttributes;

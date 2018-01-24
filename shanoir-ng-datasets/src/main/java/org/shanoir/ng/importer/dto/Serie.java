@@ -46,6 +46,9 @@ public class Serie   {
 	  @JsonProperty("isMultiFrame")
 	  private Boolean isMultiFrame = null;
 	  
+	  @JsonProperty("multiFrameCount")
+	  private Integer multiFrameCount;
+	  
 	  @JsonProperty("nonImages")
 	  private List<Object> nonImages = null;
 
@@ -196,7 +199,19 @@ public class Serie   {
 	public void setDatasets(List<Dataset> datasets) {
 		this.datasets = datasets;
 	}
-	  
+
+	public Integer getMultiFrameCount() {
+		return multiFrameCount;
+	}
+
+	public void setMultiFrameCount(Integer multiFrameCount) {
+		this.multiFrameCount = multiFrameCount;
+	}
+	 
+	// TODO ATO : make this nicer
+	public DatasetFile getFirstDatasetFileForCurrentSerie() {
+		return getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);
+	}
 	  
 
 }

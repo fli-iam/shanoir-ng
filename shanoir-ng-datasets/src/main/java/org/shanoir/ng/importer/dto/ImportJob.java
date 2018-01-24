@@ -1,6 +1,9 @@
 package org.shanoir.ng.importer.dto;
 
 import java.util.List;
+
+import org.shanoir.ng.importer.dto.Subject;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -22,11 +25,17 @@ public class ImportJob {
     private boolean fromPacs;
 
     @JsonProperty("patients")
-    private Patients patients;
+    private List<Patient> patients;
     
     @JsonProperty("examinationId")
     private Long examinationId;
+    
+    @JsonProperty("frontStudyId")
+    private Long frontStudyId;
 
+    @JsonProperty("frontStudyCardId")
+    private Long frontStudyCardId;
+    
 	public List<Subject> getSubjects() {
 		return subjects;
 	}
@@ -59,11 +68,11 @@ public class ImportJob {
 		this.fromPacs = fromPacs;
 	}
 
-	public Patients getPatients() {
+	public List<Patient> getPatients() {
 		return patients;
 	}
 
-	public void setPatients(Patients patients) {
+	public void setPatients(List<Patient> patients) {
 		this.patients = patients;
 	}
 
@@ -73,6 +82,22 @@ public class ImportJob {
 
 	public void setExaminationId(Long examinationId) {
 		this.examinationId = examinationId;
+	}
+
+	public Long getFrontStudyId() {
+		return frontStudyId;
+	}
+
+	public void setFrontStudyId(Long frontStudyId) {
+		this.frontStudyId = frontStudyId;
+	}
+
+	public Long getFrontStudyCardId() {
+		return frontStudyCardId;
+	}
+
+	public void setFrontStudyCardId(Long frontStudyCardId) {
+		this.frontStudyCardId = frontStudyCardId;
 	}
 
 }

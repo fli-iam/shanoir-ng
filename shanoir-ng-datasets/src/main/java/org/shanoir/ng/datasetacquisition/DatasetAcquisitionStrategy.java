@@ -1,6 +1,7 @@
 package org.shanoir.ng.datasetacquisition;
 
 import org.shanoir.ng.examination.Examination;
+import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 
 /**
@@ -15,6 +16,6 @@ import org.shanoir.ng.importer.dto.Serie;
 public interface DatasetAcquisitionStrategy {
 	
 	// Create a new dataset acquistion 
-	DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination);
+	DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination,ImportJob importJob);
 	
 }

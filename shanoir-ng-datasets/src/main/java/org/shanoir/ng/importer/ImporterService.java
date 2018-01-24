@@ -57,11 +57,11 @@ public class ImporterService {
 		}
 		if (examination != null) {
 			int rank = 0;
-			for (Patient patient : importJob.getPatients().patients) {
+			for (Patient patient : importJob.getPatients()) {
 				for (Study study : patient.studies) {
 					for (Serie serie : study.series ) {
 						if (serie.getSelected()) {
-							createDatasetAcquisitionForSerie(serie,rank,examination);
+							createDatasetAcquisitionForSerie(serie,rank,examination,importJob);
 							rank++;
 						}
 					}
@@ -70,11 +70,11 @@ public class ImporterService {
 		}
 	}
 	
-	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination) {
+	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination,ImportJob importJob) {
 		if (serie.getModality() != null) {
 			DatasetAcquisitionStrategy datasetAcquisitionStrategy = DatasetAcquisitionFactory.getDatasetAcquisitionStrategy(serie.getModality());
 			if (datasetAcquisitionStrategy != null ) {
-				DatasetAcquisition datasetAcquisition = datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie,rank,examination);
+				DatasetAcquisition datasetAcquisition = datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie,rank,examination,importJob);
 				try {
 					datasetAcquisitionService.save(datasetAcquisition);
 				} catch (ShanoirException e) {

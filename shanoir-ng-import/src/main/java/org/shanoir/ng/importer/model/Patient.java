@@ -31,6 +31,9 @@ public class Patient {
      @JsonProperty("frontSubjectId")
      private Long frontSubjectId;
 
+     @JsonProperty("frontExperimentalGroupOfSubjectId")
+     private Long frontExperimentalGroupOfSubjectId;
+     
 	public String getPatientID() {
 		return patientID;
 	}
@@ -85,6 +88,14 @@ public class Patient {
 
 	public void setSubjects(List<Subject> subjects) {
 		this.subjects = subjects;
+	}
+
+	public Long getFrontExperimentalGroupOfSubjectId() {
+		return frontExperimentalGroupOfSubjectId;
+	}
+
+	public void setFrontExperimentalGroupOfSubjectId(Long frontExperimentalGroupOfSubjectId) {
+		this.frontExperimentalGroupOfSubjectId = frontExperimentalGroupOfSubjectId;
 	}
 
 }

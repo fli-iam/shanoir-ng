@@ -12,15 +12,47 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  public class Study {
 
      @JsonProperty("studyInstanceUID")
-     public String studyInstanceUID;
+     private String studyInstanceUID;
 
      @JsonProperty("studyDate")
-     public String studyDate;
+     private String studyDate;
 
      @JsonProperty("studyDescription")
-     public String studyDescription;
+     private String studyDescription;
 
      @JsonProperty("series")
-     public List<Serie> series;
+     private List<Serie> series;
+
+	public String getStudyInstanceUID() {
+		return studyInstanceUID;
+	}
+
+	public void setStudyInstanceUID(String studyInstanceUID) {
+		this.studyInstanceUID = studyInstanceUID;
+	}
+
+	public String getStudyDate() {
+		return studyDate;
+	}
+
+	public void setStudyDate(String studyDate) {
+		this.studyDate = studyDate;
+	}
+
+	public String getStudyDescription() {
+		return studyDescription;
+	}
+
+	public void setStudyDescription(String studyDescription) {
+		this.studyDescription = studyDescription;
+	}
+
+	public List<Serie> getSeries() {
+		return series;
+	}
+
+	public void setSeries(List<Serie> series) {
+		this.series = series;
+	}
 
 }
