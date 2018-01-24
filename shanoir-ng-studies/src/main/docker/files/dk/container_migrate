@@ -12,11 +12,17 @@ def apply_mysql(filename):
     subprocess.check_call("mysql -h localhost -u shanoir -pshanoir shanoir_ng_studies <%r" %
             os.path.join("/opt/cfg/", filename), shell = True)
 
+def execute_script(filename):
+    print("apply %r" % filename)
+    file_path = os.path.join("/opt/cfg/", filename)
+    subprocess.check_call(["chown", "+x", file_path])
+    subprocess.check_call([file_path, "1"])
+
 
 @migration("", "2.0.1")
 def _():
     apply_mysql("studies_tables_v2.0.1.sql")
-    subprocess.check_call(["/opt/cfg/studies_migration_v2.0.1.py", "1"])
+    execute_script("studies_migration_v2.0.1.py")
 
 print("Start the mysql server")
 p_mysql = subprocess.Popen(["run-mysql"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT)
