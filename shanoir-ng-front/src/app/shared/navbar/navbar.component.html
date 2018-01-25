@@ -5,7 +5,7 @@
             <dropdown-menu label="Manage data" *ngIf="!isUserGuest()">
                 <menu-item label="Research study" i18n-label="Manage data menu|Research study@@navbarResearchStudy" link="study-list" [icon]="folder12IconPath"></menu-item>
                 <menu-item *ngIf="dev" label="Subject" i18n-label="Manage data menu|Subject@@navbarSubject" link="" [icon]="userIconPath"></menu-item>
-                <menu-item *ngIf="dev" label="Examination" i18n-label="Manage data menu|Examination@@navbarExamination" link="examination-list" [icon]="stethoscopeIconPath"></menu-item>
+                <menu-item label="Examination" i18n-label="Manage data menu|Examination@@navbarExamination" link="examination-list" [icon]="stethoscopeIconPath"></menu-item>
                 <menu-item *ngIf="dev" label="Dataset acquisition" i18n-label="Manage data menu|Dataset acquisition@@navbarDatasetAcquisition" link="" [icon]="xRay1IconPath"></menu-item>
                 <menu-item *ngIf="dev" label="Dataset" i18n-label="Manage data menu|Dataset@@navbarDataset" link="" [icon]="brainIconPath"></menu-item>
                 <menu-item label="Center" i18n-label="Manage data menu|Center@@navbarCenter" link="center-list" [icon]="hospitalIconPath"></menu-item>   

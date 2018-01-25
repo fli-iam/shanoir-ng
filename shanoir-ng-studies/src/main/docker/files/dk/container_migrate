@@ -5,15 +5,32 @@ import subprocess
 
 from dk.migration import migration, die, run
 
+subprocess.check_call(["configure-hosts"])
+
 def apply_mysql(filename):
     print("apply %r" % filename)
-    subprocess.check_call("mysql -h mysql -u shanoir -pshanoir shanoirdb <%r" %
+    subprocess.check_call("mysql -h localhost -u shanoir -pshanoir shanoir_ng_studies <%r" %
             os.path.join("/opt/cfg/", filename), shell = True)
 
+def execute_script(filename):
+    print("apply %r" % filename)
+    file_path = os.path.join("/opt/cfg/", filename)
+    st = os.stat(file_path)
+	# chmod +x
+    os.chmod(file_path, st.st_mode | 0o111)
+    subprocess.check_call([file_path, "1"])
 
-@migration("none", "2.0.1")
+
+@migration("", "2.0.1")
 def _():
     apply_mysql("studies_tables_v2.0.1.sql")
-    os.system("/opt/cfg/studies_migration_v2.0.1.py 1")
+    execute_script("studies_migration_v2.0.1.py")
+
+print("Start the mysql server")
+p_mysql = subprocess.Popen(["run-mysql"], stdin=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+subprocess.check_call(["wait-mysql", "--timeout=5"])
 
 run()
+
+print("Stop mysql process")
+p_mysql.kill()

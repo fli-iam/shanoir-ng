@@ -34,7 +34,7 @@ ms-common:
 # microservices
 $(MICROSERVICES): %: base-ms-image ms-common
 	# https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-4%29-Docker-shanoir-ng-users
-	(cd 'shanoir-ng-$@/' && mvn clean package docker:build -DskipTests -Pqualif)
+	(cd 'shanoir-ng-$@/' && mvn clean package spring-boot:repackage docker:build -DskipTests -Pqualif)
 
 # shanoir-ng-nginx
 # https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-6%29-Docker-Nginx-with-statics
