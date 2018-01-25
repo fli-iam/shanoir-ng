@@ -33,8 +33,8 @@ export class ImportComponent implements OnInit {
     public importForm: FormGroup;
     private extensionError: Boolean;
     private dicomDirMissingError: Boolean;
-    private studycardMissingError: Boolean;
-    private studycardNotCompatibleError: Boolean;
+    public studycardMissingError: Boolean;
+    public studycardNotCompatibleError: Boolean;
     
     public archive: string;
     public modality: string;
@@ -48,7 +48,7 @@ export class ImportComponent implements OnInit {
     public studycard: StudyCard;
     private subjects: Subject[]; 
     public examinations: SubjectExamination[];
-    private seriesSelected: boolean = false;
+    public seriesSelected: boolean = false;
     private selectedSeries: PatientDicom;
     private detailedPatient: Object;
     public dsAcqOpened: boolean = false;
