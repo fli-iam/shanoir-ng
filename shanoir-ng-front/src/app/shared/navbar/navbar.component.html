@@ -11,7 +11,7 @@
                 <menu-item label="Center" i18n-label="Manage data menu|Center@@navbarCenter" link="center-list" [icon]="hospitalIconPath"></menu-item>   
                 <menu-item *ngIf="dev" label="Investigator" i18n-label="Manage data menu|Investigator@@navbarInvestigator" link="" [icon]="nurseIconPath"></menu-item>
                 <menu-item label="Acquisition equipment" i18n-label="Manage data menu|Acquisition equipment@@navbarAcquisitionEquipment" link="acquisition-equipment-list" [icon]="cardiogramIconPath"></menu-item>
-                <menu-item label="Coil" i18n-label="Manage data menu|Coil@@navbarCoil" link="" [icon]="wifiIconPath"></menu-item>
+                <menu-item *ngIf="dev" label="Coil" i18n-label="Manage data menu|Coil@@navbarCoil" link="" [icon]="wifiIconPath"></menu-item>
                 <menu-item *ngIf="dev" label="Experimental group of subjects" i18n-label="Manage data menu|Experimental group of subjects@@navbarExperimentalGroupOfSubjects" [icon]="usersIconPath"></menu-item>
                 <menu-item *ngIf="dev" label="Score" i18n-label="Manage data menu|Score@@navbarScore" link="" [icon]="podiumIconPath"></menu-item>
             </dropdown-menu>
