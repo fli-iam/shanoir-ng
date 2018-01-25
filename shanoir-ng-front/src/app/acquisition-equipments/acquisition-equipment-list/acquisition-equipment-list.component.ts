@@ -8,6 +8,8 @@ import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { TableComponent } from "../../shared/components/table/table.component";
+import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { Center } from '../../centers/shared/center.model';
 
 @Component({
     selector: 'acquisition-equipment-list',
@@ -22,6 +24,8 @@ export class AcquisitionEquipmentListComponent {
     public rowClickAction: Object;
     public loading: boolean = false;
     private createAcqEquip = false;
+    public selectedAcqEquip : AcquisitionEquipment = new AcquisitionEquipment();
+    @ViewChild('coilModal') coilModal: ModalComponent;
 
     constructor(private acqEquipService: AcquisitionEquipmentService, private confirmDialogService: ConfirmDialogService,
         private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
@@ -102,6 +106,14 @@ export class AcquisitionEquipmentListComponent {
             });
         }
 
+        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+            this.columnDefs.push({
+                headerName: "", type: "button", img: ImagesUrlUtil.CARDIOGRAM_ICON_PATH, 
+                tip: "Add coil",
+                action: this.openCreateCoil
+            });
+        }
+
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
@@ -113,7 +125,7 @@ export class AcquisitionEquipmentListComponent {
         if (!this.keycloakService.isUserGuest()) {
             this.rowClickAction = {
                 target: "/acquisition-equipment", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
+                    return { id: item.id, mode: "view" }; 
                 }
             };
         }
@@ -143,6 +155,19 @@ export class AcquisitionEquipmentListComponent {
         if (ids.length > 0) {
             console.log("TODO : delete those ids : " + ids);
         }
+    }
+
+    openCreateCoil = () => { 
+        
+        /*for (let acqEquip of this.acqEquips) {
+            if (acqEquip["isSelectedInTable"])   this.selectedAcqEquip =   acqEquip.center;     
+        }*/
+
+        this.coilModal.show();
+    }
+
+    closePopin() {
+        this.coilModal.hide();
     }
 
 }

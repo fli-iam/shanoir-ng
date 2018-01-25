@@ -5,4 +5,11 @@
     </div>
   
     <shanoir-table [items]="acqEquips" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
+
+    <!-- create coil popin -->
+    <app-modal modalDialogId="coilModal" #coilModal>
+        <div class="app-modal-body">
+            <coil [modeFromAcqEquipList]="'create'" [acqEquip]="selectedAcqEquip"  (closing)="closePopin()"></coil>
+        </div>
+    </app-modal>
 </div>

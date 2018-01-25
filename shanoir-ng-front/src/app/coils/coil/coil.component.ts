@@ -16,6 +16,7 @@ import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { Enum } from "../../shared/utils/enum";
 import { CoilType } from '../shared/coil-type.enum';
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 
 @Component({
     selector: 'coil',
@@ -29,6 +30,10 @@ export class CoilComponent implements OnInit {
     private coil: Coil = new Coil();
     private coilId: number;
     public mode: "view" | "edit" | "create";
+
+    @Input() modeFromAcqEquipList: "view" | "edit" | "create";
+    @Input() acqEquip: AcquisitionEquipment;
+   // private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
     private centers: IdNameObject[];
     private manufModels: IdNameObject[];
@@ -46,7 +51,11 @@ export class CoilComponent implements OnInit {
     }
 
     ngOnInit(): void {
-
+        if (this.modeFromAcqEquipList) { 
+            this.mode = this.modeFromAcqEquipList; 
+            this.coil.center = this.acqEquip.center;
+            this.coil.manufacturerModel = this.acqEquip.manufacturerModel;
+        }
         this.getCenters();
         this.getManufModels();
         this.getEnum();

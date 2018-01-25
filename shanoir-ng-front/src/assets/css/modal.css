@@ -127,6 +127,9 @@
 #acqEqptModal {
   width: 624px;
 }
+#coilModal {
+  width: 624px;
+}
 #manufModal {
   width: 447px;
 }
@@ -137,9 +140,7 @@
   width: 586px;
 }
 #centerModal {
-  width: 600px;
-  position: static;
-  padding: 15px;
+  width: 447px;
 }
 #papayaModal {
   width: 800px;
