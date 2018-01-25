@@ -41,7 +41,7 @@ $(MICROSERVICES): %: base-ms-image ms-common
 nginx: base-image
 	npm set registry https://registry.npmjs.org
 
-	(cd shanoir-ng-front && mvn package -Pqualif)
+	(cd shanoir-ng-front && mvn clean package -Pqualif)
 	(cd shanoir-ng-nginx && docker build -t shanoir-ng/nginx:latest .)
 
 # all images for shanoir NG
