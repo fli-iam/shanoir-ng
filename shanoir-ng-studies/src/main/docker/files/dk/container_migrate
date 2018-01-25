@@ -17,7 +17,7 @@ def execute_script(filename):
     file_path = os.path.join("/opt/cfg/", filename)
     st = os.stat(file_path)
 	# chmod +x
-    os.chmod(file_path, st.st_mode | 0111)
+    os.chmod(file_path, st.st_mode | 0o111)
     subprocess.check_call([file_path, "1"])
 
 
