@@ -167,6 +167,7 @@ public class DicomFileAnalyzer {
 			 * dicomdir, that is why we go on the file level.
 			 */
 			checkIsMultiFrame(serie, datasetAttributes, sopClassUID);
+			checkIsEnhancedMRAndAddSequenceName(serie, datasetAttributes, sopClassUID);
 			checkSeriesDate(serie, datasetAttributes);
 			checkProtocolName(serie, datasetAttributes);
 			addSeriesEquipment(serie, datasetAttributes);
@@ -336,7 +337,7 @@ public class DicomFileAnalyzer {
 			if (UID.EnhancedMRImageStorage.equals(sopClassUID)) {
 				((ObjectNode) serie).put("isMultiFrame", "true");
 				String frameCount = new Integer(getFrameCount(datasetAttributes)).toString();
-				((ObjectNode) serie).put("frameCount", frameCount);				
+				((ObjectNode) serie).put("multiFrameCount", frameCount);				
 			} else {
 				((ObjectNode) serie).put("isMultiFrame", "false");
 			}
@@ -363,4 +364,23 @@ public class DicomFileAnalyzer {
 		}
 	}
 
+	/**
+	 * Checks for enhanced Dicom and sequence name.
+	 * @param serie
+	 * @param sopClassUID
+	 */
+	private void checkIsEnhancedMRAndAddSequenceName(JsonNode serie, Attributes attributes, String sopClassUID) {
+		if (serie.path("isEnhancedMR").isMissingNode()) {
+			if (UID.EnhancedMRImageStorage.equals(sopClassUID)) {
+				((ObjectNode) serie).put("isEnhancedMR", "true");
+				String sequenceName = attributes.getString(Tag.PulseSequenceName);
+				((ObjectNode) serie).put("sequenceName", sequenceName);
+			} else {
+				((ObjectNode) serie).put("isEnhancedMR", "false");
+				String sequenceName = attributes.getString(Tag.SequenceName);
+				((ObjectNode) serie).put("sequenceName", sequenceName);
+			}
+		}
+	}
+	
 }

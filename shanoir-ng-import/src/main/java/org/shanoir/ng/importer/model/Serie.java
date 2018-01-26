@@ -8,8 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author atouboul
  *
  */
-
-public class Serie   {
+public class Serie {
+	
 	@JsonProperty("selected")
 	private Boolean selected;
 
@@ -24,6 +24,9 @@ public class Serie   {
 
 	@JsonProperty("seriesDescription")
 	private String seriesDescription;
+	
+	@JsonProperty("sequenceName")
+	private String sequenceName;
 
 	@JsonProperty("seriesDate")
 	private String seriesDate;
@@ -46,6 +49,9 @@ public class Serie   {
 	@JsonProperty("isSpectroscopy")
 	private Boolean isSpectroscopy;
 	
+	@JsonProperty("isEnhancedMR")
+	private Boolean isEnhancedMR;
+
 	@JsonProperty("isMultiFrame")
 	private Boolean isMultiFrame;
 
@@ -217,6 +223,22 @@ public class Serie   {
 
 	public void setIsSpectroscopy(Boolean isSpectroscopy) {
 		this.isSpectroscopy = isSpectroscopy;
-	} 
+	}
+	
+	public Boolean getIsEnhancedMR() {
+		return isEnhancedMR;
+	}
 
+	public void setIsEnhancedMR(Boolean isEnhancedMR) {
+		this.isEnhancedMR = isEnhancedMR;
+	}
+
+	public String getSequenceName() {
+		return sequenceName;
+	}
+
+	public void setSequenceName(String sequenceName) {
+		this.sequenceName = sequenceName;
+	}
+	
 }
