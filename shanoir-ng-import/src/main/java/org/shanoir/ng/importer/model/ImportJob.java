@@ -10,8 +10,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class ImportJob {
 
-
-
     @JsonProperty("fromDicomZip")
     private boolean fromDicomZip;
 
@@ -29,11 +27,14 @@ public class ImportJob {
     
     @JsonProperty("frontStudyId")
     private Long frontStudyId;
-
+    
     @JsonProperty("frontStudyCardId")
     private Long frontStudyCardId;
     
-	public boolean isFromDicomZip() {
+    @JsonProperty("frontConverterId")
+    private Long frontConverterId;
+    
+    public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}
 
@@ -87,6 +88,14 @@ public class ImportJob {
 
 	public void setFrontStudyCardId(Long frontStudyCardId) {
 		this.frontStudyCardId = frontStudyCardId;
+	}
+
+	public Long getFrontConverterId() {
+		return frontConverterId;
+	}
+
+	public void setFrontConverterId(Long frontConverterId) {
+		this.frontConverterId = frontConverterId;
 	}
 
 }

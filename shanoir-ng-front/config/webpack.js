@@ -14,6 +14,8 @@ const METADATA = webpackMerge(commonConfig.metadata, {
     host: 'localhost',
     BACKEND_API_USERS_MS_URL: BACKEND_API_ROOT_URL + '/users',
     BACKEND_API_STUDIES_MS_URL: BACKEND_API_ROOT_URL + '/studies',
+	BACKEND_API_DATASET_MS_URL: BACKEND_API_ROOT_URL + '/datasets',
+	BACKEND_API_IMPORT_MS_URL: BACKEND_API_ROOT_URL + '/import',
     KEYCLOAK_BASE_URL: 'http://shanoir-ng-nginx/auth',
     LOGOUT_REDIRECT_URL: 'http://localhost/shanoir-ng/index.html',
     port: 8080,
@@ -76,6 +78,8 @@ module.exports = webpackMerge(commonConfig, {
             'ENV': JSON.stringify(METADATA.ENV),
             'BACKEND_API_USERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_USERS_MS_URL),
             'BACKEND_API_STUDIES_MS_URL': JSON.stringify(METADATA.BACKEND_API_STUDIES_MS_URL),
+            'BACKEND_API_DATASET_MS_URL': JSON.stringify(METADATA.BACKEND_API_DATASET_MS_URL),
+            'BACKEND_API_IMPORT_MS_URL': JSON.stringify(METADATA.BACKEND_API_IMPORT_MS_URL),
             'KEYCLOAK_BASE_URL': JSON.stringify(METADATA.KEYCLOAK_BASE_URL),
             'LOGOUT_REDIRECT_URL': JSON.stringify(METADATA.LOGOUT_REDIRECT_URL),
             'process.env': {
@@ -83,6 +87,8 @@ module.exports = webpackMerge(commonConfig, {
                 'NODE_ENV': JSON.stringify(METADATA.ENV),
                 'BACKEND_API_USERS_MS_URL': JSON.stringify(METADATA.BACKEND_API_USERS_MS_URL),
                 'BACKEND_API_STUDIES_MS_URL': JSON.stringify(METADATA.BACKEND_API_STUDIES_MS_URL),
+                'BACKEND_API_DATASET_MS_URL': JSON.stringify(METADATA.BACKEND_API_DATASET_MS_URL),
+                'BACKEND_API_IMPORT_MS_URL': JSON.stringify(METADATA.BACKEND_API_IMPORT_MS_URL),
                 'LOGOUT_REDIRECT_URL': JSON.stringify(METADATA.LOGOUT_REDIRECT_URL),
                 'KEYCLOAK_BASE_URL': JSON.stringify(METADATA.KEYCLOAK_BASE_URL),
             }

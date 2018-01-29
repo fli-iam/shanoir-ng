@@ -20,26 +20,26 @@ export class NavbarComponent {
     public mode: "default" | "pink" | "xtremPink" = "default";
 
     /* Icons */
-    private brainIconPath: string = ImagesUrlUtil.BRAIN_ICON_PATH;
-    private cardiogramIconPath: string = ImagesUrlUtil.CARDIOGRAM_ICON_PATH;
-    private compactDiscIconPath: string = ImagesUrlUtil.COMPACT_DISC_ICON_PATH;
-    private controlsIconPath: string = ImagesUrlUtil.CONTROLS_ICON_PATH;
-    private folder12IconPath: string = ImagesUrlUtil.FOLDER_12_ICON_PATH;
-    private folder7IconPath: string = ImagesUrlUtil.FOLDER_7_ICON_PATH;
-    private hospitalIconPath: string = ImagesUrlUtil.HOSPITAL_ICON_PATH;
-    private niftiIconPath: string = ImagesUrlUtil.NIFTI_ICON_PATH;
-    private neurinfoIconPath: string = ImagesUrlUtil.NEURINFO_ICON_PATH;
-    private nurseIconPath: string = ImagesUrlUtil.NURSE_ICON_PATH;
-    private podiumIconPath: string = ImagesUrlUtil.PODIUM_ICON_PATH;
-    private shareIconPath: string = ImagesUrlUtil.SHARE_ICON_PATH;
-    private shanoirIconPath: string = ImagesUrlUtil.SHANOIR_UP_TRANSP_LOGO_PATH;
-    private stethoscopeIconPath: string = ImagesUrlUtil.STETHOSCOPE_ICON_PATH;
-    private user5IconPath: string = ImagesUrlUtil.USER_5_ICON_PATH;
-    private userIconPath: string = ImagesUrlUtil.USER_ICON_PATH;
-    private users1IconPath: string = ImagesUrlUtil.USERS_1_ICON_PATH;
-    private usersIconPath: string = ImagesUrlUtil.USERS_ICON_PATH;
-    private wifiIconPath: string = ImagesUrlUtil.WIFI_ICON_PATH;
-    private xRay1IconPath: string = ImagesUrlUtil.X_RAY_1_ICON_PATH;
+    public brainIconPath: string = ImagesUrlUtil.BRAIN_ICON_PATH;
+    public cardiogramIconPath: string = ImagesUrlUtil.CARDIOGRAM_ICON_PATH;
+    public compactDiscIconPath: string = ImagesUrlUtil.COMPACT_DISC_ICON_PATH;
+    public controlsIconPath: string = ImagesUrlUtil.CONTROLS_ICON_PATH;
+    public folder12IconPath: string = ImagesUrlUtil.FOLDER_12_ICON_PATH;
+    public folder7IconPath: string = ImagesUrlUtil.FOLDER_7_ICON_PATH;
+    public hospitalIconPath: string = ImagesUrlUtil.HOSPITAL_ICON_PATH;
+    public niftiIconPath: string = ImagesUrlUtil.NIFTI_ICON_PATH;
+    public neurinfoIconPath: string = ImagesUrlUtil.NEURINFO_ICON_PATH;
+    public nurseIconPath: string = ImagesUrlUtil.NURSE_ICON_PATH;
+    public podiumIconPath: string = ImagesUrlUtil.PODIUM_ICON_PATH;
+    public shareIconPath: string = ImagesUrlUtil.SHARE_ICON_PATH;
+    public shanoirIconPath: string = ImagesUrlUtil.SHANOIR_UP_TRANSP_LOGO_PATH;
+    public stethoscopeIconPath: string = ImagesUrlUtil.STETHOSCOPE_ICON_PATH;
+    public user5IconPath: string = ImagesUrlUtil.USER_5_ICON_PATH;
+    public userIconPath: string = ImagesUrlUtil.USER_ICON_PATH;
+    public users1IconPath: string = ImagesUrlUtil.USERS_1_ICON_PATH;
+    public usersIconPath: string = ImagesUrlUtil.USERS_ICON_PATH;
+    public wifiIconPath: string = ImagesUrlUtil.WIFI_ICON_PATH;
+    public xRay1IconPath: string = ImagesUrlUtil.X_RAY_1_ICON_PATH;
 
     constructor(private keycloakService: KeycloakService) {
     }

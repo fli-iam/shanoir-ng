@@ -34,14 +34,14 @@ ms-common:
 # microservices
 $(MICROSERVICES): %: base-ms-image ms-common
 	# https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-4%29-Docker-shanoir-ng-users
-	(cd 'shanoir-ng-$@/' && mvn clean package docker:build -DskipTests -Pqualif)
+	(cd 'shanoir-ng-$@/' && mvn clean package spring-boot:repackage docker:build -DskipTests -Pqualif)
 
 # shanoir-ng-nginx
 # https://github.com/fli-iam/shanoir-ng/wiki/Installation-guide-6%29-Docker-Nginx-with-statics
 nginx: base-image
 	npm set registry https://registry.npmjs.org
 
-	(cd shanoir-ng-front && mvn package -Pqualif)
+	(cd shanoir-ng-front && mvn clean package -Pqualif)
 	(cd shanoir-ng-nginx && docker build -t shanoir-ng/nginx:latest .)
 
 # all images for shanoir NG

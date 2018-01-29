@@ -100,7 +100,12 @@ export class CenterComponent implements OnInit {
     };
 
     back(): void {
+        if (this.closing.observers.length > 0) {
+            this.center = new Center();
+            this.closing.emit(this.centerId);
+        } else {
         this.location.back();
+        }
     }
 
     edit(): void {

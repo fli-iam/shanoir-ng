@@ -1,6 +1,5 @@
 package org.shanoir.ng.utils;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

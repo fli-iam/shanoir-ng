@@ -75,6 +75,7 @@ export class AcquisitionEquipmentComponent implements OnInit {
             })
             .subscribe((acqEquip: AcquisitionEquipment) => {
                 if (this.mode == "edit") {
+                    // Link to objects coming from list requests to display selected item of drop-down list
                     acqEquip.center = this.getCenterById(acqEquip.center.id);
                     acqEquip.manufacturerModel = this.getManufModelById(acqEquip.manufacturerModel.id);
                 }
