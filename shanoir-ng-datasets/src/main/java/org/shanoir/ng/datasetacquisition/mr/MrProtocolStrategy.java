@@ -27,8 +27,7 @@ public class MrProtocolStrategy {
 		// Retrieve protocol Name and set it as an origin metadata attribute.
 		mrProtocol.getOriginMetadata().setName(dicomAttributes.getString(Tag.ProtocolName));
 
-		//TODO Michael Kain must provide info onwhere sequenceName is available in importJob
-		mrProtocol.getOriginMetadata().setMrSequenceName("UNKNOWN FOR NOW");
+		mrProtocol.getOriginMetadata().setMrSequenceName(serie.getSequenceName());
 
 	      /*
          * Mr Sequence Application, RefMrSequenceKSpaceFill, Slice Order,

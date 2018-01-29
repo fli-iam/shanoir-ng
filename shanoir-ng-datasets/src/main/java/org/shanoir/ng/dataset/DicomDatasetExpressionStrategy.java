@@ -6,10 +6,8 @@ import java.util.Date;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
-import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
@@ -22,26 +20,25 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy {
 
-	@Autowired 
+	@Autowired
 	DicomProcessing dicomProcessing;
-	
+
 	@Value("${backup.pacs.web.port}")
 	private String backupPacsWebPort;
 
 	@Value("${backup.dicom.server.host}")
 	private String backupDicomServerHost;
-	
+
 	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie, Dataset dataset, MrDataset mrDataset,ImportJob importJob, ExpressionFormat expressionFormat) {
-		
+	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
+			ExpressionFormat expressionFormat) {
+
 		DatasetExpression pacsDatasetExpression = new DatasetExpression();
-		
+
 		pacsDatasetExpression.setCreationDate(LocalDate.now());
-		
+
 		pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
-		
-		Attributes firstDatasetImageAttribute;
-		
+
 		boolean firstDatesetImage = true;
 
 		if (serie.getIsMultiFrame()) {
@@ -50,10 +47,13 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 		}
 
 		if (expressionFormat != null & expressionFormat.getType().equals("dcm")) {
+
+			Attributes firstDatasetImageAttribute;
+			
 			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
-				
+
 				Date contentTime = null;
-				
+
 				Date acquisitionTime = null;
 				Attributes dicomAttributes = null;
 				try {
@@ -77,12 +77,12 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 				// set return type as application/dicom instead of
 				// the standard image/jpeg
 				wadoRequest += "&contentType=application/dicom";
-	
+
 				pacsDatasetFile.setPath(wadoRequest);
-	
+
 				pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
 				pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
-	
+
 				// calculate the acquisition duration for this acquisition
 				acquisitionTime = dicomAttributes.getDate(Tag.AcquisitionTime);
 				contentTime = dicomAttributes.getDate(Tag.ContentTime);
@@ -112,68 +112,55 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 						pacsDatasetExpression.setFirstImageAcquisitionTime(contentTime);
 					}
 				}
-				
-				
+
 				/**
 				 * 
 				 * Retrieve EchoTime list that will be added to the MrProtocol..
 				 * 
 				 */
-				
-				
-                final Double echoTime = dicomAttributes.getDouble(Tag.EchoTime,-1D);
-                final int[] echoNumbers = dicomAttributes.getInts(Tag.EchoNumbers);
-                final Double flipAngle = dicomAttributes.getDouble(Tag.FlipAngle,-1D);
-                final Double inversionTime = dicomAttributes.getDouble(Tag.InversionTime,-1D);
-                final Double repetitionTime = dicomAttributes.getDouble(Tag.RepetitionTime,-1D);
 
-                // TE
-                if (echoTime != null && echoNumbers != null && echoNumbers.length == 1
-                        && echoTime.doubleValue() != 0) {
-                    final EchoTime echoTimeObject = new EchoTime();
-                    echoTimeObject.setEchoNumber(echoNumbers[0]);
-                    echoTimeObject.setEchoTimeValue(echoTime);
-//                    echoTimeObject.setMrProtocol(mrProtocol);
-//                    echoTimeObject.setUnitOfMeasure(UnitOfMeasure.MS);
-                    
-                    pacsDatasetExpression.addEchoTimeToMap(echoTimeObject.hashCode(), echoTimeObject);
+				final Double echoTime = dicomAttributes.getDouble(Tag.EchoTime, -1D);
+				final int[] echoNumbers = dicomAttributes.getInts(Tag.EchoNumbers);
+				final Double flipAngle = dicomAttributes.getDouble(Tag.FlipAngle, -1D);
+				final Double inversionTime = dicomAttributes.getDouble(Tag.InversionTime, -1D);
+				final Double repetitionTime = dicomAttributes.getDouble(Tag.RepetitionTime, -1D);
 
-                }
+				// TE
+				if (echoTime != null && echoNumbers != null && echoNumbers.length == 1 && echoTime.doubleValue() != 0) {
+					final EchoTime echoTimeObject = new EchoTime();
+					echoTimeObject.setEchoNumber(echoNumbers[0]);
+					echoTimeObject.setEchoTimeValue(echoTime);
+					pacsDatasetExpression.addEchoTimeToMap(echoTimeObject.hashCode(), echoTimeObject);
 
-                // flip angle
-                if (flipAngle != null && flipAngle.doubleValue() != 0) {
-                    final FlipAngle flipAngleObject = new FlipAngle();
-                    flipAngleObject.setFlipAngleValue(flipAngle);
-                    pacsDatasetExpression.addFlipAngleToMap(flipAngle, flipAngleObject);
-                }
+				}
 
-                // Inversion time
-                if (inversionTime != null && inversionTime.doubleValue() != 0) {
-                    final InversionTime inversionTimeObject = new InversionTime();
-                    inversionTimeObject.setInversionTimeValue(inversionTime);
-                    pacsDatasetExpression.addInversionTimeToMap(inversionTime, inversionTimeObject);
-                    
-                }
+				// flip angle
+				if (flipAngle != null && flipAngle.doubleValue() != 0) {
+					final FlipAngle flipAngleObject = new FlipAngle();
+					flipAngleObject.setFlipAngleValue(flipAngle);
+					pacsDatasetExpression.addFlipAngleToMap(flipAngle, flipAngleObject);
+				}
 
-                // Repetition time
-                if (repetitionTime != null && repetitionTime.doubleValue() != 0) {
-                    final RepetitionTime repetitionTimeObject = new RepetitionTime();
-                    repetitionTimeObject.setRepetitionTimeValue(repetitionTime);
-                    pacsDatasetExpression.addRepetitionTimeToMap(repetitionTime, repetitionTimeObject);
+				// Inversion time
+				if (inversionTime != null && inversionTime.doubleValue() != 0) {
+					final InversionTime inversionTimeObject = new InversionTime();
+					inversionTimeObject.setInversionTimeValue(inversionTime);
+					pacsDatasetExpression.addInversionTimeToMap(inversionTime, inversionTimeObject);
 
-                }
-                
-                
+				}
+
+				// Repetition time
+				if (repetitionTime != null && repetitionTime.doubleValue() != 0) {
+					final RepetitionTime repetitionTimeObject = new RepetitionTime();
+					repetitionTimeObject.setRepetitionTimeValue(repetitionTime);
+					pacsDatasetExpression.addRepetitionTimeToMap(repetitionTime, repetitionTimeObject);
+
+				}
+
 			}
-			
-			/**
-			 * TODO ATO verify if this has to be here.
-			 */
-				pacsDatasetExpression.setDataset(mrDataset);
-				mrDataset.getDatasetExpressions().add(pacsDatasetExpression);
-	
-			}
-		
+
+		}
+
 		return pacsDatasetExpression;
 	}
 

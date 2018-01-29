@@ -131,7 +131,7 @@ public class MrDatasetStrategy implements DatasetStrategy {
 		 **/
 		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
 			DatasetExpressionStrategy datasetExpressionStrategy = DatasetExpressionFactory.getDatasetExpressionStrategy(expressionFormat.getType());
-			DatasetExpression datasetExpression = datasetExpressionStrategy.generateDatasetExpression(serie,dataset,mrDataset,importJob,expressionFormat);
+			DatasetExpression datasetExpression = datasetExpressionStrategy.generateDatasetExpression(serie,importJob,expressionFormat);
 			
 			
 

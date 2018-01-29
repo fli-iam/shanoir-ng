@@ -9,8 +9,7 @@ import org.shanoir.ng.importer.dto.Serie;
 public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy {
 
 	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie, Dataset dataset, MrDataset mrDataset,
-			ImportJob importJob, ExpressionFormat expressionFormat) {
+	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) {
 
 ////		if(!niftiFiles.isEmpty())
 ////		{

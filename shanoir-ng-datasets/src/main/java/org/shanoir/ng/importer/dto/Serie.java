@@ -30,6 +30,9 @@ public class Serie   {
 
 	  @JsonProperty("seriesNumber")
 	  private Integer seriesNumber = null;
+	  
+ 	  @JsonProperty("sequenceName")
+	  private String sequenceName;
 
 	  @JsonProperty("numberOfSeriesRelatedInstances")
 	  private Integer numberOfSeriesRelatedInstances = null;
@@ -207,7 +210,17 @@ public class Serie   {
 	public void setMultiFrameCount(Integer multiFrameCount) {
 		this.multiFrameCount = multiFrameCount;
 	}
+	
+	
 	 
+	public String getSequenceName() {
+		return sequenceName;
+	}
+
+	public void setSequenceName(String sequenceName) {
+		this.sequenceName = sequenceName;
+	}
+
 	// TODO ATO : make this nicer
 	public DatasetFile getFirstDatasetFileForCurrentSerie() {
 		return getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);

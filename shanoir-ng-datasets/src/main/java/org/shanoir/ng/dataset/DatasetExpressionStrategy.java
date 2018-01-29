@@ -8,6 +8,6 @@ import org.shanoir.ng.importer.dto.Serie;
 
 public interface DatasetExpressionStrategy {
 	
-	DatasetExpression generateDatasetExpression(Serie serie, Dataset dataset, MrDataset mrDataset,ImportJob importJob,ExpressionFormat expressionFormat);
+	DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,ExpressionFormat expressionFormat);
 
 }
