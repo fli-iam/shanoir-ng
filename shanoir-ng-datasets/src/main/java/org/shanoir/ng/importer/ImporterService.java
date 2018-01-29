@@ -74,8 +74,10 @@ public class ImporterService {
 		if (serie.getModality() != null) {
 			DatasetAcquisitionStrategy datasetAcquisitionStrategy = DatasetAcquisitionFactory.getDatasetAcquisitionStrategy(serie.getModality());
 			if (datasetAcquisitionStrategy != null ) {
-				DatasetAcquisition datasetAcquisition = datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie,rank,examination,importJob);
+				DatasetAcquisition datasetAcquisition = datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie,rank,importJob);
+				datasetAcquisition.setExamination(examination);
 				try {
+					
 					datasetAcquisitionService.save(datasetAcquisition);
 				} catch (ShanoirException e) {
 					// TODO Auto-generated catch block

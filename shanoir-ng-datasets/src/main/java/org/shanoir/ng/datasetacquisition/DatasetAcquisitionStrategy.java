@@ -1,12 +1,19 @@
 package org.shanoir.ng.datasetacquisition;
 
-import org.shanoir.ng.examination.Examination;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 
+
+
 /**
- * This interface allow the application to apply differents strategy on the datasets based on 
- * the modality : eg : ct, mr, mrs....
+ * 
+ * This Interface is used by all strategies available for creating a new DatasetAcquisition
+ *  based on a modality obtained obtained in the serie object sent by the MS IMPORT MicroService (cf ImporterService.class)
+ *  
+ * example of strategy :
+ * 	- MrDatasetAcquisitionStrategy -> Modality MR - Magnetic Resonance
+ *  - CtDatasetAcquisitionStrategy -> Modality CT
+ *  - MrsDatasetAcquisitionStrategy -> Modality MRS - Magnetic Resonance Spectroscopy
  * 
  * @author atouboul
  *
@@ -16,6 +23,6 @@ import org.shanoir.ng.importer.dto.Serie;
 public interface DatasetAcquisitionStrategy {
 	
 	// Create a new dataset acquistion 
-	DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination,ImportJob importJob);
+	DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob);
 	
 }

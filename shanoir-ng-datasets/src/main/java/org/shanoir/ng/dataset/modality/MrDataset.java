@@ -1,6 +1,10 @@
 package org.shanoir.ng.dataset.modality;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -16,6 +20,7 @@ import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.FlipAngle;
 import org.shanoir.ng.shared.model.InversionTime;
 import org.shanoir.ng.shared.model.RepetitionTime;
+import javax.persistence.Transient;
 
 /**
  * MR dataset.
@@ -65,7 +70,27 @@ public class MrDataset extends Dataset {
 	/** Metadata updated by study card. */
 	@OneToOne
 	private MrDatasetMetadata updatedMrMetadata;
+	
+	/** Store temporarily the first image acquisition time until all images are processed*/
+	@Transient
+	private  Date firstImageAcquisitionTime;
 
+	/** Store temporarily the last image acquisition time until all images are processed */
+	@Transient	
+	private Date lastImageAcquisitionTime;
+	
+	@Transient 
+	private Map<Integer,EchoTime> echoTimes;
+
+	@Transient 
+	private Map<Double,FlipAngle> flipAngles;
+	
+	@Transient 
+	private Map<Double,InversionTime> inversionTimes;
+
+	@Transient 
+	private Map<Double,RepetitionTime> repetitionTimes;
+	
 	/**
 	 * @return the diffusionGradients
 	 */
@@ -194,5 +219,51 @@ public class MrDataset extends Dataset {
 	public void setUpdatedMrMetadata(MrDatasetMetadata updatedMrMetadata) {
 		this.updatedMrMetadata = updatedMrMetadata;
 	}
+	
+	public Map<Integer, EchoTime> getEchoTimes() {
+		if (echoTimes == null) {
+				return new HashMap<Integer,EchoTime>();
+		}
+		return echoTimes;
+	}
+
+	public Map<Double, FlipAngle> getFlipAngles() {
+		if (flipAngles == null) {
+		return new HashMap<Double,FlipAngle>();
+		}
+		return flipAngles;
+	}
+
+	public Map<Double, InversionTime> getInversionTimes() {
+		if (inversionTimes == null) {
+			return new HashMap<Double,InversionTime>();
+		}		
+		return inversionTimes;
+	}
+
+	public Map<Double, RepetitionTime> getRepetitionTimes() {
+		if (repetitionTimes == null) {
+			return new HashMap<Double,RepetitionTime>();
+		}
+		return repetitionTimes;
+	}
+
+	public Date getFirstImageAcquisitionTime() {
+		return firstImageAcquisitionTime;
+	}
+
+	public void setFirstImageAcquisitionTime(Date firstImageAcquisitionTime) {
+		this.firstImageAcquisitionTime = firstImageAcquisitionTime;
+	}
+
+	public Date getLastImageAcquisitionTime() {
+		return lastImageAcquisitionTime;
+	}
+
+	public void setLastImageAcquisitionTime(Date lastImageAcquisitionTime) {
+		this.lastImageAcquisitionTime = lastImageAcquisitionTime;
+	}
+	
+
 
 }
