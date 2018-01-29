@@ -10,8 +10,7 @@ import org.shanoir.ng.importer.dto.Serie;
 public class NonImageDatasetExpressionStrategy implements DatasetExpressionStrategy{
 
 	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie, Dataset dataset, MrDataset mrDataset,
-			ImportJob importJob, ExpressionFormat expressionFormat) {
+	public DatasetExpression generateDatasetExpression(Serie serie,	ImportJob importJob, ExpressionFormat expressionFormat) {
 
 		// TODO ATO : Non implemented yet. waiting for dicomzip containing  both MR + MRS in a serie.
 //		// NON-IMAGES DATASETS & Spectroscopy
