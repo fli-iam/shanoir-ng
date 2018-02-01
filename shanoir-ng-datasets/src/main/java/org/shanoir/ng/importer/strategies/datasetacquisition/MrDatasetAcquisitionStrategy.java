@@ -1,4 +1,4 @@
-package org.shanoir.ng.datasetacquisition.mr;
+package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,15 +9,16 @@ import java.util.Map;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.Dataset;
-import org.shanoir.ng.dataset.modality.DatasetStrategy;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.DatasetAcquisitionStrategy;
+import org.shanoir.ng.datasetacquisition.mr.MrDatasetAcquisition;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.examination.Examination;
 import org.shanoir.ng.importer.dto.DatasetWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
+import org.shanoir.ng.importer.strategies.protocol.MrProtocolStrategy;
 import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.FlipAngle;
 import org.shanoir.ng.shared.model.InversionTime;
@@ -49,7 +50,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	MrProtocolStrategy mrProtocolStrategy;
 	
 	@Autowired
-	DatasetStrategy mrDatasetStrategy;
+	DatasetStrategy<Dataset> mrDatasetStrategy;
 	
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) {
@@ -71,9 +72,9 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		
 	
 		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level. 
-		DatasetWrapper datasetWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+		DatasetWrapper<Dataset> datasetWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
 		mrDatasetAcquisition.setDatasets(datasetWrapper.getDataset());
-
+		
 		mrDatasetAcquisition.setMrProtocol(mrProtocolStrategy.generateMrProtocolForSerie(dicomAttributes, serie));
 		
 		// total acquisition time
