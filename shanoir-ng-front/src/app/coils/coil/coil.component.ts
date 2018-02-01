@@ -153,7 +153,7 @@ export class CoilComponent implements OnInit {
     buildForm(): void {
         this.coilForm = this.fb.group({
             'name': [this.coil.name],
-            'acquiEquipModel': [this.coil.manufacturerModel],
+            'manufacturerModel': [this.coil.manufacturerModel],
             'center': [this.coil.center],
             'coilType': [this.coil.coilType],
             'nbChannel': [this.coil.numberOfChannels],
