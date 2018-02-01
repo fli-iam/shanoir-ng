@@ -147,4 +147,4 @@ keycloak:
   auth-server-url: SHANOIR_SERVER_URL/auth
 # microservices url
 ms.url:
-  shanoir-ng-studies: http://DOCKER_PREFIX-ng-studies/
+  shanoir-ng-studies: http://DOCKER_PREFIX-ng-studies:9900/
