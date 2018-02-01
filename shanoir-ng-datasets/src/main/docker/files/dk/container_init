@@ -39,7 +39,6 @@ else
 	mysql -u root "$tbl" < /opt/cfg/shanoirng_dataset_tables.sql
 
 	echo "Populate database - import datasets from shanoir old"
-	sudo chmod +x /opt/cfg/dataset_migration.py
 	/opt/cfg/dataset_migration.py
 fi
 
