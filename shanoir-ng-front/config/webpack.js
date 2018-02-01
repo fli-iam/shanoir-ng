@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 /**
  * Webpack Constants
@@ -48,9 +49,12 @@ module.exports = webpackMerge(commonConfig, {
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
-        new webpack.optimize.UglifyJsPlugin({ // https://github.com/angular/angular/issues/10618
-            mangle: {
-                keep_fnames: true
+        new UglifyJsPlugin({
+            "sourceMap": false,
+            "uglifyOptions": {
+                "compress": { "warnings": false },
+                "mangle": true,
+                "output": { "comments": false }
             }
         }),
         new ExtractTextPlugin('[name].css'),
