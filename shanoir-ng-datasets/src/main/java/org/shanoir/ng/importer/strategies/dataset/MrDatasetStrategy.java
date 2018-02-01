@@ -1,24 +1,25 @@
-package org.shanoir.ng.dataset.modality;
+package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.DatasetExpression;
-import org.shanoir.ng.dataset.DatasetExpressionFactory;
-import org.shanoir.ng.dataset.DatasetExpressionStrategy;
 import org.shanoir.ng.dataset.ProcessedDatasetType;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionFactory;
+import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionStrategy;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class MrDatasetStrategy implements DatasetStrategy {
+public class MrDatasetStrategy<T> implements DatasetStrategy {
 
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrDatasetStrategy.class);
@@ -28,10 +29,10 @@ public class MrDatasetStrategy implements DatasetStrategy {
 
 
 	@Override
-	public DatasetWrapper generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
+	public DatasetWrapper<MrDataset> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
 			ImportJob importJob) {
 		
-		DatasetWrapper datasetWrapper = new DatasetWrapper();
+		DatasetWrapper<MrDataset> datasetWrapper = new DatasetWrapper<MrDataset>();
 
 		/**
 		 * retrieve number of dataset in current serie if Number of dataset > 1 then
@@ -50,8 +51,8 @@ public class MrDatasetStrategy implements DatasetStrategy {
 		// createMrDatasetAcquisitionFromDicom()
 		for (Dataset dataset : serie.getDatasets()) {
 			// TODO ATO : implement line 350 - 372 MrDAtasetAcquisitionHome.createMrDataset
-
-			MrDataset mrDataset = generateSingleDataset(dicomAttributes, serie, dataset, datasetIndex, importJob);
+			MrDataset mrDataset = new MrDataset();
+			mrDataset = (MrDataset) generateSingleDataset(dicomAttributes, serie, dataset, datasetIndex, importJob);
 			if (mrDataset.getFirstImageAcquisitionTime() != null) {
 				if (datasetWrapper.getFirstImageAcquisitionTime() == null) {
 					datasetWrapper.setFirstImageAcquisitionTime(mrDataset.getFirstImageAcquisitionTime());

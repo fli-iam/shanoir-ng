@@ -1,15 +1,15 @@
 package org.shanoir.ng.importer;
 
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.DatasetAcquisitionFactory;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisitionService;
-import org.shanoir.ng.datasetacquisition.DatasetAcquisitionStrategy;
 import org.shanoir.ng.examination.Examination;
 import org.shanoir.ng.examination.ExaminationService;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
+import org.shanoir.ng.importer.strategies.datasetacquisition.DatasetAcquisitionFactory;
+import org.shanoir.ng.importer.strategies.datasetacquisition.DatasetAcquisitionStrategy;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

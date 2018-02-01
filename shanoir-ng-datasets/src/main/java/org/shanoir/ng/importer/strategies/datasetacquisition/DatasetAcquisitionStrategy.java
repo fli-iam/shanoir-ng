@@ -1,5 +1,6 @@
-package org.shanoir.ng.datasetacquisition;
+package org.shanoir.ng.importer.strategies.datasetacquisition;
 
+import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 

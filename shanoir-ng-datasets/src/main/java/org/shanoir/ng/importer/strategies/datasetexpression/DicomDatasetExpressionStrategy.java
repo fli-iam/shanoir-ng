@@ -1,4 +1,4 @@
-package org.shanoir.ng.dataset;
+package org.shanoir.ng.importer.strategies.datasetexpression;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -6,6 +6,8 @@ import java.util.Date;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.dataset.DatasetExpression;
+import org.shanoir.ng.dataset.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.ExpressionFormat;

@@ -1,8 +1,6 @@
-package org.shanoir.ng.dataset.modality;
+package org.shanoir.ng.importer.strategies.dataset;
 
-import java.util.List;
 import org.dcm4che3.data.Attributes;
-import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
@@ -23,13 +21,12 @@ import org.shanoir.ng.importer.dto.Serie;
  *
  */
 
-public interface DatasetStrategy {
+public interface DatasetStrategy<T> {
 
-	DatasetWrapper generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
+	DatasetWrapper<T> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
 			ImportJob importJob);
 
-	MrDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
-			ImportJob importJob);
+	T generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,			ImportJob importJob);
 
 	String computeDatasetName(String name, int index);
 
