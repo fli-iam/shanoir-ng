@@ -141,7 +141,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		ResponseEntity<IdNameDTO[]> response = null;
 		try {
 			response = restTemplate.exchange(
-					microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.STUDY, HttpMethod.GET,
+					microservicesRequestsService.getStudiesMsUrl() + MicroserviceRequestsService.STUDY, HttpMethod.GET,
 					entity, IdNameDTO[].class);
 		} catch (RestClientException e) {
 			LOG.error("Error on study microservice request - " + e.getMessage());

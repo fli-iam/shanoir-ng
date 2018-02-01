@@ -55,7 +55,7 @@ keycloak:
         - /*
 # microservices url
 ms.url:
-  shanoir-ng-study: http://shanoir-ng-study/
+  shanoir-ng-studies: http://shanoir-ng-studies/
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-dataset.log
@@ -145,3 +145,6 @@ spring:
 #keycloak
 keycloak:
   auth-server-url: SHANOIR_SERVER_URL/auth
+# microservices url
+ms.url:
+  shanoir-ng-studies: http://DOCKER_PREFIX-ng-studies/

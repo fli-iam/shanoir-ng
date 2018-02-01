@@ -68,7 +68,7 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 		ResponseEntity<StudySubjectCenterNamesDTO> namesResponse = null;
 		try {
 			namesResponse = restTemplate.exchange(
-					microservicesRequestsService.getStudyMsUrl() + MicroserviceRequestsService.COMMON, HttpMethod.POST,
+					microservicesRequestsService.getStudiesMsUrl() + MicroserviceRequestsService.COMMON, HttpMethod.POST,
 					entity, new ParameterizedTypeReference<StudySubjectCenterNamesDTO>() {
 					});
 		} catch (RestClientException e) {
