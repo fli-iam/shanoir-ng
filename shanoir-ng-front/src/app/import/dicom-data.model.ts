@@ -3,6 +3,12 @@ export class ImportJob {
     fromShanoirUploader: boolean;
     fromPacs: boolean;
     patients: PatientDicom[];
+    frontSubjectId: number;
+    frontExperimentalGroupOfSubjectId: number;
+    examinationId: number;
+    frontStudyId: number;
+    frontStudyCardId: number;
+    frontConverterId: number;
 }
 
 export class PatientDicom {
@@ -32,6 +38,7 @@ export class SerieDicom {
     modality: string;
     protocolName: string;
     seriesDescription: string;
+    sequenceName:string;
     seriesDate: Date;
     seriesNumber: number;
     numberOfSeriesRelatedInstances: number;
@@ -39,12 +46,14 @@ export class SerieDicom {
     equipment: EquipmentDicom; 
     isCompressed: boolean;
     isSpectroscopy: boolean;
+    isEnhancedMR: boolean;
     isMultiFrame: boolean;
     multiFrameCount: number;
     nonImages: any[];
     nonImagesNumber: number;
     images: ImageDicom[];
     imagesNumber: number;
+    datasets: any;
 }
 
 export class EquipmentDicom {

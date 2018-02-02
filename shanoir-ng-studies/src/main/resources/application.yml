@@ -56,6 +56,7 @@ keycloak:
 # microservices url
 ms.url:
   shanoir-ng-studycards: http://shanoir-ng-datasets/
+  shanoir-ng-import: http://shanoir-ng-importer/
   shanoir-ng-users: http://shanoir-ng-users/
 # logging configuration
 logging:
@@ -78,12 +79,12 @@ spring:
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
     data: classpath:/scripts/import.sql
-    initialize: true
+    initialize: false
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
+      ddl-auto: update
     # Show or not log for each sql query
     show-sql: true
   jooq:
@@ -101,6 +102,7 @@ keycloak:
 # microservices url
 ms.url:
   shanoir-ng-studycards: http://localhost:9906/studycards
+  shanoir-ng-import: http://localhost:9903/niftiConverter
   shanoir-ng-users: http://localhost:9901/users
 # logging configuration
 logging:

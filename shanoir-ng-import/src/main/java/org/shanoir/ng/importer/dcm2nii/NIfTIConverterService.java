@@ -213,7 +213,7 @@ public class NIfTIConverterService {
 		}
 	}
 	
-	private NIfTIConverter findById(Long id) {
+	public NIfTIConverter findById(Long id) {
 		return niftiConverterRepository.findOne(id);
 	}
 	

@@ -17,6 +17,8 @@ public class SimpleStudyCardDTO {
 	private Boolean compatible;
 	
 	private IdNameDTO center;
+	
+	private String niftiConverterName;
 
 	/**
 	 * Simple constructor.
@@ -81,6 +83,20 @@ public class SimpleStudyCardDTO {
 
 	public void setCenter(IdNameDTO center) {
 		this.center = center;
+	}
+
+	/**
+	 * @return the niftiConverterName
+	 */
+	public String getNiftiConverterName() {
+		return niftiConverterName;
+	}
+
+	/**
+	 * @param niftiConverterName the niftiConverterName to set
+	 */
+	public void setNiftiConverterName(String niftiConverterName) {
+		this.niftiConverterName = niftiConverterName;
 	}
 
 }

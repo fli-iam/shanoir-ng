@@ -56,7 +56,7 @@ keycloak:
         - ROLE_GUEST
         - ROLE_USER
       patterns:
-        - /importer/*
+        - /*
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-import.log
