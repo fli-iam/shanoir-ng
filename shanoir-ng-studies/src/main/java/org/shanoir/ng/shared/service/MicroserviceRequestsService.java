@@ -24,6 +24,9 @@ public class MicroserviceRequestsService {
 
 	@Value("${ms.url.shanoir-ng-users}")
 	private String usersMsUrl;
+	
+	@Value("${ms.url.shanoir-ng-import}")
+	private String importMsUrl;
 
 	/**
 	 * @return the studycardsMsUrl
@@ -37,6 +40,14 @@ public class MicroserviceRequestsService {
 	 */
 	public String getUsersMsUrl() {
 		return usersMsUrl;
+	}
+
+	public String getImportMsUrl() {
+		return importMsUrl;
+	}
+
+	public void setImportMsUrl(String importMsUrl) {
+		this.importMsUrl = importMsUrl;
 	}
 
 }

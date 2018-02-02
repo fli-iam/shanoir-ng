@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Observable } from 'rxjs/Rx';
 
@@ -17,7 +17,7 @@ import { SubjectExamination } from '../examinations/shared/subject-examination.m
 
 declare var papaya: any;
 // const mockImport: any = require('../../assets/mock-import.json');
-// const mockStudy: any = require('../../assets/mock-study.json');
+const mockStudy: any = require('../../assets/mock-study.json');
 
 @Component({
     selector: 'import-modality',
@@ -28,7 +28,8 @@ declare var papaya: any;
 
 export class ImportComponent implements OnInit {
     @ViewChild('papayaModal') papayaModal: ModalComponent;
-    @ViewChild('studyModal') studyModal: ModalComponent;
+    // @ViewChild('studyModal') studyModal: ModalComponent;
+    // @Output() closing: EventEmitter<any> = new EventEmitter();
     
     public importForm: FormGroup;
     private extensionError: Boolean;
@@ -53,6 +54,7 @@ export class ImportComponent implements OnInit {
     private detailedPatient: Object;
     public dsAcqOpened: boolean = false;
     private detailedSerie: Object;
+    public niftiConverterName: string;
     
     public tab_modality_open: boolean = true;
     public tab_upload_open: boolean = true;
@@ -79,24 +81,13 @@ export class ImportComponent implements OnInit {
     ngOnInit(): void {
         this.buildForm();
         //TODO: clean json mock import after dev 
-        //this.seriesSelected = true;
+        this.seriesSelected = true;
         // this.selectedSeries = mockImport;
         // this.validateSeriesSelected();
         //TODO: clean json mock study after dev
-        //this.prepareStudyStudycard(mockStudy);
+        this.prepareStudyStudycard(mockStudy);
     }
 
-    closeEditSubject(subject: any) {
-        // Add the subject to the select box and select it
-        console.log(subject);
-        if (subject) {
-            subject.name = subject.lastName;
-            subject.selected = true;
-            this.subjects.push(subject);
-        }
-        this.createUser = false;
-    }
-    
     buildForm(): void {
         this.importForm = this.fb.group({
             'study': [this.study, Validators.required],
@@ -249,36 +240,41 @@ export class ImportComponent implements OnInit {
     }
     
     onSelectStudy(study: Study) {
-        if (study.studyCards.length == 0) {
-            this.studycardMissingError = true;
-        } else {
-            this.studycardMissingError = false;
-            let compatibleStudycards: StudyCard[] = [];
-            for (let studycard of study.studyCards) {
-                if (studycard.compatible) {
-                    compatibleStudycards.push(studycard);
+        if (study) {
+            if (study.studyCards.length == 0) {
+                this.studycardMissingError = true;
+            } else {
+                this.studycardMissingError = false;
+                let compatibleStudycards: StudyCard[] = [];
+                for (let studycard of study.studyCards) {
+                    if (studycard.compatible) {
+                        compatibleStudycards.push(studycard);
+                    }
                 }
+                if (compatibleStudycards.length == 1) {
+                    // autoselect studycard
+                    this.studycard = compatibleStudycards[0];
+                } 
+                this.studycards = study.studyCards;
             }
-            if (compatibleStudycards.length == 1) {
-                // autoselect studycard
-                this.studycard = compatibleStudycards[0];
-            } 
-            this.studycards = study.studyCards;
         }
     }
 
     onSelectStudycard(studycard: StudyCard) {
-        if (studycard.compatible) {
-            this.studycardNotCompatibleError = false;
-            this.studyService
-                .findSubjectsByStudyId(this.study.id)
-                .then(subjects => this.subjects = subjects)
-                .catch((error) => {
-                    // TODO: display error
-                    console.log("error getting subject list by study id!");
-            });
-        } else {
-            this.studycardNotCompatibleError = true;
+        if (studycard) {
+            if (studycard.compatible) {
+                this.studycardNotCompatibleError = false;
+                this.niftiConverterName = studycard.niftiConverterName;
+                this.studyService
+                    .findSubjectsByStudyId(this.study.id)
+                    .then(subjects => this.subjects = subjects)
+                    .catch((error) => {
+                        // TODO: display error
+                        console.log("error getting subject list by study id!");
+                });
+            } else {
+                this.studycardNotCompatibleError = true;
+            }
         }
     }
 
@@ -295,9 +291,25 @@ export class ImportComponent implements OnInit {
         }
     }
 
-    closePopin() {
-        this.studyModal.hide();
+    // closePopin() {
+    //     this.studyModal.hide();
+    // }
+
+    closeEditSubject(subject: any) {
+        // Add the subject to the select box and select it
+        console.log(subject);
+        if (subject) {
+            subject.name = subject.lastName;
+            subject.selected = true;
+            this.subjects.push(subject);
+        }
+        this.createUser = false;
     }
+
+    // passStudyId (studyId: number) {
+    //     console.log("param: " + studyId);
+    //     console.log("study id: " + this.study.id);
+    // }
 
     // startProgressTest() {
     //     this.pacsStatus = "";

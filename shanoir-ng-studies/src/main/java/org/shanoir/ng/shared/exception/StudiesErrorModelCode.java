@@ -11,8 +11,11 @@ public class StudiesErrorModelCode extends ErrorModelCode {
 	/** User has no right to perform an action */
 	public static final Integer NO_RIGHT_FOR_ACTION = 11;
 
-	/** Login - bad credentials */
+	/** Request to studycard microservice failure */
 	public static final Integer SC_MS_COMM_FAILURE = 51;
+	
+	/** Request to import microservice failure */
+	public static final Integer IMPORT_MS_COMM_FAILURE = 52;
 
 	/** Login - bad credentials */
 	public static final Integer BAD_CREDENTIALS = 101;

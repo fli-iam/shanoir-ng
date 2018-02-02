@@ -149,7 +149,7 @@
             <ol>
                 <legend>
                     Research study
-                    <tool-tip>A research study is the global study context. Examples: Children dyshpasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
+                    <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
                 </legend>
                 <li class="required">
                     <label class="required-label">Select an existing research study</label> 
@@ -157,7 +157,7 @@
                         <select formControlName="study" required [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)">
                             <option *ngFor="let study of studies" [ngValue]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study.name}}</option>
                         </select>
-                        <button i18n="Import|StudyDetailsButton label" *ngIf="study != null" (click)="studyModal.show(study.id)">details</button>
+                        <button i18n="Import|StudyDetailsButton label" *ngIf="study != null" [routerLink]="['/study']" [queryParams]="{mode: 'view', id: study.id}">details</button>
                     </span>
                 </li>
                 <li class="required">
@@ -178,7 +178,7 @@
                 </li>
                 <li class="required">
                     <label>Nifti converter</label> 
-                    <span class="right-col">mcverter_2.0.7</span>
+                    <span class="right-col">{{niftiConverterName}}</span>
                 </li>
             </ol>
 
@@ -336,11 +336,11 @@
     
 </form>
 
-<app-modal modalDialogId="studyModal" #studyModal>
+<!-- <app-modal modalDialogId="studyModal" #studyModal>
     <div class="app-modal-body">
-        <study-detail [modeFromImport]="'view'" (closing)="closePopin()"></study-detail>
+        <study-detail [modeFromImport]="'view'" [idFromImport]="1" (closing)="closePopin()"></study-detail>
     </div>
-</app-modal>
+</app-modal> -->
 
 <div class="overlay" *ngIf="createUser">
     <div class="content">

@@ -24,7 +24,7 @@ import { Timepoint } from '../shared/timepoint.model';
 
 export class StudyComponent implements OnInit {
 
-    @Input() modeFromImport: "view" | "edit" | "create";
+    // @Input() modeFromImport: "view" | "edit" | "create";
     @Input() idFromImport: number;
 
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
@@ -66,6 +66,7 @@ export class StudyComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        // if (this.modeFromImport) { this.mode = this.modeFromImport; }
         this.getEnum();
         this.getCenters();
         this.getStudy();
@@ -177,9 +178,10 @@ export class StudyComponent implements OnInit {
     }
 
     getStudy(): void {
-        if (this.idFromImport != null) {
-            this.studyId = this.idFromImport;
-        } else {
+        // if (this.idFromImport != null) {
+        //     console.log("idFromImport: " + this.idFromImport);
+        //     this.getStudyWithData(this.idFromImport);
+        // } else {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let studyId = queryParams['id'];
@@ -206,7 +208,7 @@ export class StudyComponent implements OnInit {
                     this.getStudyWithData(this.study.id);
                 }
             });
-        }
+        // }
     }
 
     getStudyWithData(studyId: number): void {

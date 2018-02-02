@@ -56,7 +56,7 @@ keycloak:
         - ROLE_GUEST
         - ROLE_USER
       patterns:
-        - /importer/*
+        - /*
 # microservices url
 ms.url:
   shanoir-ng-datasets: http://shanoir-ng-datasets/
