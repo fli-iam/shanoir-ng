@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @Api(value = "subject", description = "the subject API")
+@RequestMapping("/subjects")
 public interface SubjectApi {
 
 	@ApiOperation(value = "", notes = "Deletes a subject", response = Void.class, tags = {})
@@ -27,7 +28,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/subject/{subjectId}", produces = { "application/json" }, method = RequestMethod.DELETE)
+	@RequestMapping(value = "/{subjectId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	ResponseEntity<Void> deleteSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
@@ -37,8 +38,9 @@ public interface SubjectApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
-	@RequestMapping(value = "/subject/all", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<Subject>> findSubjects();
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
+	//ResponseEntity<List<Subject>> findSubjects();
+	ResponseEntity<List<SubjectDTOForFront>> findSubjects();
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given id", response = Subject.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found bubject", response = Subject.class),
@@ -46,7 +48,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
-	@RequestMapping(value = "/subject/{subjectId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@RequestMapping(value = "/{subjectId}", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<Subject> findSubjectById(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
@@ -56,7 +58,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = Subject.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
-	@RequestMapping(value = "/subject", produces = { "application/json" }, consumes = {
+	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	ResponseEntity<Subject> saveNewSubject(
 			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
@@ -68,7 +70,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = Subject.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
-	@RequestMapping(value = "/subject/OFSEP/", produces = { "application/json" }, consumes = {
+	@RequestMapping(value = "/OFSEP/", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	ResponseEntity<Subject> saveNewOFSEPSubject(
 			@ApiParam(value = "subject to create and the id of the study card", required = true) @RequestBody SubjectStudyCardIdDTO subjectStudyCardIdDTO,
@@ -80,7 +82,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/subject/{subjectId}", produces = { "application/json" }, consumes = {
+	@RequestMapping(value = "/{subjectId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
 	ResponseEntity<Void> updateSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
@@ -93,7 +95,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
-	@RequestMapping(value = "/subject/{studyId}/allSubjects", produces = {
+	@RequestMapping(value = "/{studyId}/allSubjects", produces = {
 			"application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<SubjectDTO>> findSubjectsByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
@@ -104,7 +106,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
-	@RequestMapping(value = "/subject/findByIdentifier/{subjectIdentifier}", produces = {
+	@RequestMapping(value = "/findByIdentifier/{subjectIdentifier}", produces = {
 			"application/json" }, method = RequestMethod.GET)
 	ResponseEntity<Subject> findSubjectByIdentifier(
 			@ApiParam(value = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier);
