@@ -51,5 +51,5 @@ public enum ImagedNucleus {
 	public int getId() {
 		return id;
 	}
-
+	
 }

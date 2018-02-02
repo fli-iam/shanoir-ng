@@ -2,8 +2,6 @@ package org.shanoir.ng.importer.dto;
 
 import java.util.List;
 
-import org.shanoir.ng.datasetfile.DatasetFile;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -32,6 +30,9 @@ public class Serie   {
 
 	  @JsonProperty("seriesNumber")
 	  private Integer seriesNumber = null;
+	  
+ 	  @JsonProperty("sequenceName")
+	  private String sequenceName;
 
 	  @JsonProperty("numberOfSeriesRelatedInstances")
 	  private Integer numberOfSeriesRelatedInstances = null;
@@ -209,8 +210,18 @@ public class Serie   {
 	public void setMultiFrameCount(Integer multiFrameCount) {
 		this.multiFrameCount = multiFrameCount;
 	}
+	
+	
 	 
-	// TODO ATO : make this nicer
+	public String getSequenceName() {
+		return sequenceName;
+	}
+
+	public void setSequenceName(String sequenceName) {
+		this.sequenceName = sequenceName;
+	}
+
+	// TODO ATO : make this nicer as soon as model is fully defined
 	public DatasetFile getFirstDatasetFileForCurrentSerie() {
 		return getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);
 	}

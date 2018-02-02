@@ -1,23 +1,12 @@
 package org.shanoir.ng.importer;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.File;
-import java.io.FileInputStream;
-
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
  * Unit tests for study controller.
@@ -48,28 +37,54 @@ public class ImporterApiControllerTest {
 	 * @throws Exception
 	 */
 
-	@Test
+//	@Test
 	public void uploadFileTest() throws Exception {
-
-		String filePath = "/media/extra/shanoir/sample.zip";
-		File f = new File(filePath);
-		if (f.exists() && !f.isDirectory()) {
-
-			MockMultipartFile multipartFile = new MockMultipartFile("file", "DCM_IMPORT_SAMPLE.zip", "application/zip",
-					new FileInputStream(new File(filePath)));
-
-			MockMvc mockMvc = MockMvcBuilders.standaloneSetup(iac).build();
-			mockMvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH).file(multipartFile)).andDo(print())
-					.andExpect(status().isOk());
-
-		} else {
-
-			System.out.println(
-					"[TEST CASE ERROR] UNABLE TO RETRIEVE FILE FOR TESTCASE ImporterApiControllerTest.uploadFileTest() at location : "
-							+ filePath);
-
-		}
+		
+		System.out.println(formatTime("190526.44500"));
+		System.out.println(formatTime(formatNotDot("190526.44500")));
+//190927.625000
+//		String filePath = "/media/extra/shanoir/sample.zip";
+//		File f = new File(filePath);
+//		if (f.exists() && !f.isDirectory()) {
+//
+//			MockMultipartFile multipartFile = new MockMultipartFile("file", "DCM_IMPORT_SAMPLE.zip", "application/zip",
+//					new FileInputStream(new File(filePath)));
+//
+//			MockMvc mockMvc = MockMvcBuilders.standaloneSetup(iac).build();
+//			mockMvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH).file(multipartFile)).andDo(print())
+//					.andExpect(status().isOk());
+//
+//		} else {
+//
+//			System.out.println(
+//					"[TEST CASE ERROR] UNABLE TO RETRIEVE FILE FOR TESTCASE ImporterApiControllerTest.uploadFileTest() at location : "
+//							+ filePath);
+//
+//		}
 
 	}
+	
+
+
+	public static String formatNotDot(String num) {
+	num = num.trim().replaceAll("", "");
+	if (num.matches("^0*$"))
+	num = "";
+	return num;
+	}
+	
+	static public String formatTime(String Numero) {
+
+		if (Numero.matches("^0-9*$")) {
+		StringBuffer r = new StringBuffer();
+		for (int i = 0, j = 6; i < j; i++) {
+		r.append(Numero.charAt(i));
+		if ((i % 2 == 1) && (i < (j - 1)))
+		r.append(':');
+		}
+		return r.toString();
+		}
+		return Numero;
+		}
 
 }

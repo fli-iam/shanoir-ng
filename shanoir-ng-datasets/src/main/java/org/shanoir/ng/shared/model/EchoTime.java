@@ -6,6 +6,7 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import org.shanoir.ng.dataset.DatasetExpression;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
 
 /**
@@ -86,5 +87,28 @@ public class EchoTime extends AbstractGenericItem {
 	public void setEchoTimeValue(Double echoTimeValue) {
 		this.echoTimeValue = echoTimeValue;
 	}
+	
+	
+	  @Override
+	  public boolean equals(Object v) {
+	        boolean retVal = false;
+	        boolean retVal1 = false;
+	
+	        if (v instanceof EchoTime){
+	        	EchoTime echoTime = (EchoTime) v;
+	            retVal = echoTime.getEchoNumber() == this.echoNumber;
+	            retVal1 = echoTime.getEchoTimeValue() == this.echoTimeValue;
+	        }
+	
+	     return retVal && retVal1;
+	  }
+	
+	    @Override
+	    public int hashCode() {
+	        int hash = 7;
+	        hash = 17 * hash + (this.getEchoNumber() != null ? this.getEchoNumber().hashCode() : 0);
+	        hash = 17 * hash + (this.getEchoTimeValue() != null ? this.getEchoTimeValue().hashCode() : 0);
+	        return hash;
+	    }
 
 }

@@ -20,6 +20,7 @@ export KEYCLOAK_PASSWORD="${KEYCLOAK_PASSWORD-unknown}"
 configure-hosts
 override 			\
 	-e SHANOIR_SERVER_URL	\
+	-e DOCKER_PREFIX	\
 	-e SHANOIR_ADMIN_EMAIL	\
 	-e SHANOIR_ADMIN_NAME	\
 	-e SMTP_HOST		\

@@ -1,9 +1,8 @@
-package org.shanoir.ng.datasetacquisition;
+package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.shanoir.ng.datasetacquisition.mr.MrDatasetAcquisitionStrategy;
 import org.springframework.stereotype.Component;
 
 @Component

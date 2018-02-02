@@ -148,3 +148,7 @@ front.server.url: SHANOIR_SERVER_URL
 #keycloak
 keycloak:
   auth-server-url: SHANOIR_SERVER_URL/auth
+# microservices url
+ms.url:
+  shanoir-ng-studycards: http://DOCKER_PREFIX-ng-datasets:9900/
+  shanoir-ng-users: http://DOCKER_PREFIX-ng-users:9900/

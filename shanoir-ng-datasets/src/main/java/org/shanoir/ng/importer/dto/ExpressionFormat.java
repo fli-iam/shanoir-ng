@@ -2,8 +2,6 @@ package org.shanoir.ng.importer.dto;
 
 import java.util.List;
 
-import org.shanoir.ng.datasetfile.DatasetFile;
-
 public class ExpressionFormat {
 
 	private String type;

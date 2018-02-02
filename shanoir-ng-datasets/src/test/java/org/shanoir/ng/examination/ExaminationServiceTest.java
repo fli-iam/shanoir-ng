@@ -1,6 +1,7 @@
 package org.shanoir.ng.examination;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,14 +11,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,14 +35,19 @@ import org.springframework.web.client.RestTemplate;
  * @author ifakhfakh
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(KeycloakUtil.class)
 public class ExaminationServiceTest {
 
 	private static final Long EXAMINATION_ID = 1L;
+	private static final Long STUDY_ID = 1L;
 	private static final String UPDATED_EXAMINATION_COMMENT = "examination 2";
 
 	@Mock
 	private ExaminationRepository examinationRepository;
+
+	@Mock
+	private KeycloakUtil keycloakUtil;
 
 	@Mock
 	private MicroserviceRequestsService microservicesRequestsService;
@@ -53,9 +64,13 @@ public class ExaminationServiceTest {
 	@Before
 	public void setup() throws ShanoirException {
 		given(examinationRepository.countByStudyIdIn(Mockito.anyListOf(Long.class))).willReturn(2L);
-		given(examinationRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createExamination()));
+		given(examinationRepository.findByStudyIdIn(Mockito.anyListOf(Long.class), Mockito.any(Pageable.class)))
+				.willReturn(Arrays.asList(ModelsUtil.createExamination()));
 		given(examinationRepository.findOne(EXAMINATION_ID)).willReturn(ModelsUtil.createExamination());
 		given(examinationRepository.save(Mockito.any(Examination.class))).willReturn(ModelsUtil.createExamination());
+
+		PowerMockito.mockStatic(KeycloakUtil.class);
+		when(KeycloakUtil.getKeycloakHeader()).thenReturn(null);
 	}
 
 	@Test
@@ -76,15 +91,16 @@ public class ExaminationServiceTest {
 	@Test
 	public void findAllTest() throws ShanoirException {
 		IdNameDTO idNameDTO = new IdNameDTO();
-		idNameDTO.setName("test");
-		given(restTemplate.getForEntity(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class)
-				)).willReturn(new ResponseEntity<>(idNameDTO, HttpStatus.OK));
-		
-		final List<Examination> examination = examinationService.findAll(null);
-		Assert.assertNotNull(examination);
-		Assert.assertTrue(examination.size() == 1);
+		idNameDTO.setId(STUDY_ID);
+		IdNameDTO[] tab = { idNameDTO };
+		given(restTemplate.exchange(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class),
+				Matchers.<Class<IdNameDTO[]>>any())).willReturn(new ResponseEntity<>(tab, HttpStatus.OK));
 
-		Mockito.verify(examinationRepository, Mockito.times(1)).findAll();
+		final List<Examination> examinations = examinationService.findAll(null);
+		Assert.assertNotNull(examinations);
+		Assert.assertTrue(examinations.size() == 1);
+
+		Mockito.verify(examinationRepository, Mockito.times(1)).findByStudyIdIn(Arrays.asList(STUDY_ID), null);
 	}
 
 	@Test
@@ -126,5 +142,5 @@ public class ExaminationServiceTest {
 		examination.setComment(UPDATED_EXAMINATION_COMMENT);
 		return examination;
 	}
-	
+
 }
