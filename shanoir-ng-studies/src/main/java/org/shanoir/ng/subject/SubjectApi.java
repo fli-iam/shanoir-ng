@@ -39,8 +39,8 @@ public interface SubjectApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
-	//ResponseEntity<List<Subject>> findSubjects();
-	ResponseEntity<List<SubjectDTOForFront>> findSubjects();
+	ResponseEntity<List<Subject>> findSubjects();
+	
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given id", response = Subject.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found bubject", response = Subject.class),
