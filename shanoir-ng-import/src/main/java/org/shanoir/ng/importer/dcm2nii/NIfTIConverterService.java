@@ -2,27 +2,35 @@ package org.shanoir.ng.importer.dcm2nii;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.shanoir.ng.importer.model.Dataset;
+import org.shanoir.ng.importer.model.DatasetFile;
+import org.shanoir.ng.importer.model.ExpressionFormat;
+import org.shanoir.ng.importer.model.Image;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.DiffusionUtil;
-import org.shanoir.ng.utils.ShanoirExec;
 import org.shanoir.ng.utils.ImportUtils;
+import org.shanoir.ng.utils.ShanoirExec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * The NIfTIConverter does the actual conversion of dcm to nii files.
@@ -83,7 +91,7 @@ public class NIfTIConverterService {
 	/** Output files mapped by series UID. */
 	private HashMap<String, List<String>> outputFiles = new HashMap<String, List<String>>();
 	
-	public void prepareAndRunConversion(JsonNode dicomDirJson, File unzipFolderFile) throws RestServiceException {
+	public void prepareAndRunConversion(Patient patient, File unzipFolderFile, Long converterId) throws RestServiceException {
 		File seriesFolderFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + SERIES);
 		if(!seriesFolderFile.exists()) {
 			seriesFolderFile.mkdirs();
@@ -91,42 +99,32 @@ public class NIfTIConverterService {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating series folder: folder already exists.", null));
 		}
-		/**
-		 * @todo: add code here that reads from json-2 the id of the converter to use for this import
-		 */
-		Long converterId = 1L;
+
 		conversionLogs = "";
 		
-		/**
-		 * @todo: this code is maybe to replace with mapped objects of json-2 instead of JsonNode
-		 */
-		// patient level
-		JsonNode patients = dicomDirJson.path("patients");
-		if (patients.isArray()) {
-			for (JsonNode patient : patients) {
-				// study level
-				JsonNode studies = patient.path("studies");
-				if (studies.isArray()) {
-					for (JsonNode study : studies) {
-						// serie level
-						JsonNode series = study.path("series");
-						if (series.isArray()) {
-							float seriesCounter = 0;
-							int numberOfSeries = series.size();
-							for (JsonNode serie : series) {
-								File serieIDFolderFile = createSerieIDFolder(seriesFolderFile, serie);
-								boolean serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, doNotSeparateDatasetsInSerie);
-								// if the serie is not one of the series, that should not be separated, please separate the series,
-								// otherwise just do not separate the series and keep all images for one nii conversion
-								if (!serieIdentifiedForNotSeparating) {
-									separateDatasetsInSerie(serieIDFolderFile, serie);
-								}
-								boolean propFileConversionError = false;
-								runConversion(serieIDFolderFile, serie, seriesCounter, numberOfSeries, propFileConversionError, converterId);
-								++seriesCounter;
-							}
-						}
+		Set<File> pathsSet = new HashSet<File>(2000);
+		List<Study> studies = patient.getStudies();
+		for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
+			Study study = (Study) studiesIt.next();
+			List<Serie> series = study.getSeries();
+			float seriesCounter = 0;
+			int numberOfSeries = series.size();
+			for (Iterator seriesIt = series.iterator(); seriesIt.hasNext();) {
+				Serie serie = (Serie) seriesIt.next();
+				File serieIDFolderFile = createSerieIDFolder(seriesFolderFile, serie);
+				boolean serieIdentifiedForNotSeparating;
+				try {
+					serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, doNotSeparateDatasetsInSerie);
+					// if the serie is not one of the series, that should not be separated, please separate the series,
+					// otherwise just do not separate the series and keep all images for one nii conversion
+					if (!serieIdentifiedForNotSeparating) {
+						separateDatasetsInSerie(serieIDFolderFile, serie);
 					}
+					boolean propFileConversionError = false;
+					runConversion(serieIDFolderFile, serie, seriesCounter, numberOfSeries, propFileConversionError, converterId);
+					++seriesCounter;
+				} catch (NoSuchFieldException | SecurityException e) {
+					LOG.error(e.getMessage());
 				}
 			}
 		}	
@@ -150,8 +148,10 @@ public class NIfTIConverterService {
 	 * @param serie
 	 * @param seriesCounter
 	 * @param numberOfSeries
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
-	private void runConversion(File serieIDFolderFile, final JsonNode serie, float seriesCounter, int numberOfSeries, boolean propFileConversionError, Long converterId) {
+	private void runConversion(File serieIDFolderFile, final Serie serie, float seriesCounter, int numberOfSeries, boolean propFileConversionError, Long converterId) throws NoSuchFieldException, SecurityException {
 		// add all the directories (names = dataset0, dataset1, etc.)
 		List<File> datasetDirectories = ImportUtils.listFolders(serieIDFolderFile);
 		if (datasetDirectories == null || (datasetDirectories != null && datasetDirectories.isEmpty())) {
@@ -325,17 +325,26 @@ public class NIfTIConverterService {
 	/**
 	 * This method receives a serie object and a String from the properties
 	 * and checks if the tag exists with a specific value.
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
-	private boolean checkSerieForPropertiesString(final JsonNode serie, final String propertiesString) {
+	private boolean checkSerieForPropertiesString(final Serie serie, final String propertiesString) throws NoSuchFieldException, SecurityException {
 		final String[] itemArray = propertiesString.split(SEMI_COLON);
 		for (final String item : itemArray) {
 			final String tag = item.split(DOUBLE_EQUAL)[0];
 			final String value = item.split(DOUBLE_EQUAL)[1];
 			LOG.debug("checkDicomFromProperties : tag=" + tag + ", value=" + value);
-			final String dicomValue = serie.path(tag).asText();
-			String wildcard = ImportUtils.wildcardToRegex(value);
-			if (dicomValue != null && dicomValue.matches(wildcard)) {
-				return true;
+			try {
+				Class aClass = serie.getClass();
+				Field field = aClass.getDeclaredField(tag);
+				field.setAccessible(true);
+				String dicomValue = (String) field.get(serie);
+				String wildcard = ImportUtils.wildcardToRegex(value);
+				if (dicomValue != null && dicomValue.matches(wildcard)) {
+					return true;
+				}
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				LOG.error(e.getMessage());
 			}
 		}
 		return false;
@@ -348,50 +357,45 @@ public class NIfTIConverterService {
 	 * Iterate over all images and sort images in groups with the same value
 	 * for ImageOrientation, EchoNumbers and AcquisitionNumber.
 	 * 
+	 * This method translates as well from images to datasets and create the new structure.
+	 * 
 	 * @param serie
 	 */
-	private void separateDatasetsInSerie(final File serieIDFolderFile, final JsonNode serie) {
-		final HashMap<SerieToDatasetsSeparator, List<JsonNode>>
-			datasetMap = new HashMap<SerieToDatasetsSeparator, List<JsonNode>>();
-
-		JsonNode images = serie.path("images");
-		if (images.isArray()) {
-			for (JsonNode image : images) {
-				final int acquisitionNumber = image.path("acquisitionNumber").asInt();
-				// echoNumbers conversion
-				JsonNode echoNumbersNode = image.path("echoNumbers");
-				ArrayList<Integer> echoNumbers = new ArrayList<Integer>();
-				for (JsonNode echoNumber : echoNumbersNode) {
-					echoNumbers.add(echoNumber.asInt());
-				}
-				int[] echoNumbersIntArray = convertIntegers(echoNumbers);
-				// imageOrientationPatients conversion
-				JsonNode imageOrientationPatientNode = image.path("imageOrientationPatient");
-				ArrayList<Double> imageOrientationPatients = new ArrayList<Double>();
-				for (JsonNode imageOrientationPatient : imageOrientationPatientNode) {
-					imageOrientationPatients.add(imageOrientationPatient.asDouble());
-				}
-				double[] imageOrientationPatientsDoubleArray = convertDoubles(imageOrientationPatients);
-				SerieToDatasetsSeparator seriesToDatasetsSeparator =
-						new SerieToDatasetsSeparator(acquisitionNumber, echoNumbersIntArray, imageOrientationPatientsDoubleArray);
-				boolean found = false;
-				for (SerieToDatasetsSeparator seriesToDatasetsComparatorIterate : datasetMap.keySet()) {
-					if (seriesToDatasetsComparatorIterate.equals(seriesToDatasetsSeparator)) {
-						found = true;
-						seriesToDatasetsSeparator = seriesToDatasetsComparatorIterate;
-						break;
-					}
-				}
-				if (found) {
-					datasetMap.get(seriesToDatasetsSeparator).add(image);
-				} else {
-					final List<JsonNode> imageList = new ArrayList<JsonNode>();
-					imageList.add(image);
-					datasetMap.put(seriesToDatasetsSeparator, imageList);
+	private void separateDatasetsInSerie(final File serieIDFolderFile, final Serie serie) {
+		final HashMap<SerieToDatasetsSeparator, Dataset>
+			datasetMap = new HashMap<SerieToDatasetsSeparator, Dataset>();
+		List<Image> images = serie.getImages();
+		for (Iterator iterator = images.iterator(); iterator.hasNext();) {
+			Image image = (Image) iterator.next();
+			final int acquisitionNumber = image.getAcquisitionNumber();
+			int[] echoNumbersIntArray = convertIntegers(image.getEchoNumbers());
+			double[] imageOrientationPatientsDoubleArray = convertDoubles(image.getImageOrientationPatient());
+			SerieToDatasetsSeparator seriesToDatasetsSeparator =
+					new SerieToDatasetsSeparator(acquisitionNumber, echoNumbersIntArray, imageOrientationPatientsDoubleArray);
+			boolean found = false;
+			for (SerieToDatasetsSeparator seriesToDatasetsComparatorIterate : datasetMap.keySet()) {
+				if (seriesToDatasetsComparatorIterate.equals(seriesToDatasetsSeparator)) {
+					found = true;
+					seriesToDatasetsSeparator = seriesToDatasetsComparatorIterate;
+					break;
 				}
 			}
+			// existing dataset has been found, just add the image/datasetFile
+			if (found) {
+				DatasetFile datasetFile = createDatasetFile(image);
+				datasetMap.get(seriesToDatasetsSeparator).getExpressionFormats().get(0).getDatasetFiles().add(datasetFile);
+			// new dataset has to be created, new expression format and add image/datasetfile
+			} else {
+				Dataset dataset = new Dataset();
+				ExpressionFormat expressionFormat = new ExpressionFormat();
+				expressionFormat.setType("dcm");
+				dataset.getExpressionFormats().add(expressionFormat);
+				DatasetFile datasetFile = createDatasetFile(image);
+				expressionFormat.getDatasetFiles().add(datasetFile);
+				datasetMap.put(seriesToDatasetsSeparator, dataset);
+			}
 		}
-
+		
 		boolean success = true;
 		// create a separate folder for each group of images
 		int index = 0;
@@ -403,13 +407,13 @@ public class NIfTIConverterService {
 				LOG.error("deleteFolder : the creation of " + folder + " failed");
 			}
 			// move the files into the folder
-			for (final JsonNode image : datasetMap.get(datasets)) {
-				String path = image.path("path").asText();
+			for (final DatasetFile datasetFile : datasetMap.get(datasets).getExpressionFormats().get(0).getDatasetFiles()) {
+				String path = datasetFile.getPath();
 				final File oldFile = new File(path);
 				if (oldFile.exists()) {
 					final File newFile = new File(folder, oldFile.getName());
 					success = oldFile.renameTo(newFile);
-					((ObjectNode) image).put("path", newFile.getAbsolutePath());
+					datasetFile.setPath(newFile.getAbsolutePath());
 					if (!success) {
 						LOG.error("deleteFolder : moving of " + oldFile + " failed");
 					}					
@@ -421,14 +425,27 @@ public class NIfTIConverterService {
 			LOG.error("Error while converting to nifti in separateDatasetsInSerie.");
 		}
 	}
+
+	/**
+	 * @param image
+	 * @return
+	 */
+	private DatasetFile createDatasetFile(Image image) {
+		DatasetFile datasetFile = new DatasetFile();
+		datasetFile.setPath(image.getPath());
+		datasetFile.setAcquisitionNumber(image.getAcquisitionNumber());
+		datasetFile.setEchoNumbers(image.getEchoNumbers());
+		datasetFile.setImageOrientationPatient(image.getImageOrientationPatient());
+		return datasetFile;
+	}
 	
 	/**
 	 * @param seriesFolderFile
 	 * @param serie
 	 * @throws RestServiceException
 	 */
-	private File createSerieIDFolder(File seriesFolderFile, JsonNode serie) throws RestServiceException {
-		String serieID = serie.path("seriesInstanceUID").asText();
+	private File createSerieIDFolder(File seriesFolderFile, Serie serie) throws RestServiceException {
+		String serieID = serie.getSeriesInstanceUID();
 		File serieIDFolderFile = new File(seriesFolderFile.getAbsolutePath() + File.separator + serieID);
 		if(!serieIDFolderFile.exists()) {
 			serieIDFolderFile.mkdirs();
@@ -436,10 +453,10 @@ public class NIfTIConverterService {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating serie id folder: folder already exists.", null));
 		}
-		JsonNode images = serie.path("images");
+		List<Image> images = serie.getImages();
 		moveFiles(serieIDFolderFile, images);
-		JsonNode nonImages = serie.path("nonImages");
-		moveFiles(serieIDFolderFile, nonImages);
+//		List<Object> nonImages = serie.getNonImages();
+//		moveFiles(serieIDFolderFile, nonImages);
 		return serieIDFolderFile;
 	}
 
@@ -448,20 +465,19 @@ public class NIfTIConverterService {
 	 * @param images
 	 * @throws RestServiceException
 	 */
-	private void moveFiles(File serieIDFolderFile, JsonNode images) throws RestServiceException {
-		if (images.isArray()) {
-			for (JsonNode image : images) {
-				// the path has been set in processDicomFile in DicomFileAnalyzer before
-				String filePath = image.path("path").asText();
-				File oldFile = new File(filePath);
-				if (oldFile.exists()) {
-					File newFile = new File(serieIDFolderFile.getAbsolutePath() + File.separator + oldFile.getName());
-					oldFile.renameTo(newFile);
-					((ObjectNode) image).put("path", newFile.getAbsolutePath());
-				} else {
-					throw new RestServiceException(
-							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating serie id folder: file to copy does not exist.", null));
-				}
+	private void moveFiles(File serieIDFolderFile, List<Image> images) throws RestServiceException {
+		for (Iterator iterator = images.iterator(); iterator.hasNext();) {
+			Image image = (Image) iterator.next();
+			// the path has been set in processDicomFile in DicomFileAnalyzer before
+			String filePath = image.getPath();
+			File oldFile = new File(filePath);
+			if (oldFile.exists()) {
+				File newFile = new File(serieIDFolderFile.getAbsolutePath() + File.separator + oldFile.getName());
+				oldFile.renameTo(newFile);
+				image.setPath(newFile.getAbsolutePath());
+			} else {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating serie id folder: file to copy does not exist.", null));
 			}
 		}
 	}
@@ -503,7 +519,6 @@ public class NIfTIConverterService {
 		}
 		return resultList;
 	}
-
 
 	/**
 	 * Check if the newly created nifti files list contains a .prop file

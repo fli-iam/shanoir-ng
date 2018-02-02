@@ -57,6 +57,9 @@ keycloak:
         - ROLE_USER
       patterns:
         - /importer/*
+# microservices url
+ms.url:
+  shanoir-ng-datasets: http://shanoir-ng-datasets/
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-import.log
@@ -124,6 +127,9 @@ front.server.url: http://localhost:8080
 keycloak:
   auth-server-url: http://localhost/auth
   credentials.secret: 3ab5a06a-9031-47d7-bfc8-ce8cc3027034
+# microservices url
+ms.url:
+  shanoir-ng-datasets: http://localhost:9906/datasets
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-import.log
@@ -154,7 +160,8 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
-
+logging:
+  file: /tmp/shanoir-ng-import.log
 ---
 
 #################

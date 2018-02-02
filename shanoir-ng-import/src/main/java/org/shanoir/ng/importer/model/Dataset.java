@@ -1,5 +1,6 @@
 package org.shanoir.ng.importer.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,7 +10,7 @@ public class Dataset {
 	@JsonProperty("name")
 	private String name;
 	
-	private List<ExpressionFormat> expressionFormats;
+	private List<ExpressionFormat> expressionFormats = new ArrayList<>();
 
 	public String getName() {
 		return name;

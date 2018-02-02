@@ -1,37 +1,61 @@
 package org.shanoir.ng.importer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 
+import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
 import org.shanoir.ng.importer.dcm2nii.NIfTIConverterService;
 import org.shanoir.ng.importer.dicom.DicomDirToJsonReader;
 import org.shanoir.ng.importer.dicom.DicomFileAnalyzer;
+import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Patients;
 import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.ImportErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ImportUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.swagger.annotations.ApiParam;
 
+/**
+ * This is the main component of the import of Shanoir-NG.
+ * The front-end in Angular only communicates with this service.
+ * The import ms itself is calling the ms datasets service.
+ * 
+ * @author mkain
+ *
+ */
 @Controller
 public class ImporterApiController implements ImporterApi {
 
@@ -53,12 +77,25 @@ public class ImporterApiController implements ImporterApi {
 
 	@Value("${shanoir.import.upload.folder}")
 	private String uploadFolder;
+	
+	@Value("${ms.url.shanoir-ng-datasets}")
+	private String datasetsMsUrl;
 
 	@Autowired
 	private DicomFileAnalyzer dicomFileAnalyzer;
 
 	@Autowired
 	private NIfTIConverterService niftiConverter;
+	
+	@Autowired
+	private RestTemplate restTemplate;
+	
+	/**
+	 * For the moment Spring is not used here to autowire, as we could keep the
+	 * anonymization project as simple as it is, without Spring annotations.
+	 * Maybe to change and think about deeper afterwards.
+	 */
+	private AnonymizationServiceImpl anonymizer = new AnonymizationServiceImpl();
 
 	public ResponseEntity<Void> uploadFiles(
 			@ApiParam(value = "file detail") @RequestPart("files") MultipartFile[] files) throws RestServiceException {
@@ -77,17 +114,76 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> selectSeries(
-			@ApiParam(value = "selected series", required = true) @Valid @RequestBody final Collection<Serie> selectedSeries)
+	public ResponseEntity<Void> startImportJob( @ApiParam(value = "Importjob", required = true) @Valid @RequestBody final ImportJob importJob)
 			throws RestServiceException {
 		try {
-			// TODO: upload selected series to PACS?
-			LOG.debug("selected series: " + selectedSeries.toString());
+			LOG.info("start import job: " + importJob.toString());
+			
+			List<Patient> patients = importJob.getPatients();
+			for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
+				Patient patient = (Patient) patientsIt.next();
+				ArrayList<File> dicomFiles = getDicomFilesForPatient(patient);
+				anonymizer.anonymizeForShanoir(dicomFiles, "Neurinfo Profile", patient.getPatientName(), patient.getPatientID());
+				File workFolder = new File(importJob.getWorkFolder());
+				Long converterId = importJob.getFrontConverterId();
+				niftiConverter.prepareAndRunConversion(patient, workFolder, converterId);
+			}
+			
+			// HttpEntity represents the request
+			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
+
+			// Post to dataset MS to finish import
+			ResponseEntity<String> response = null;
+			try {
+				response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody, String.class);
+			} catch (RestClientException e) {
+				LOG.error("Error on dataset microservice request", e);
+				throw new ShanoirException("Error while sending import job", ImportErrorModelCode.SC_MS_COMM_FAILURE);
+			}
+
+			if (HttpStatus.OK.equals(response.getStatusCode())
+					|| HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+			} else {
+				throw new ShanoirException(ImportErrorModelCode.SC_MS_COMM_FAILURE);
+			}
+			
 			return new ResponseEntity<Void>(HttpStatus.OK);
 		} catch (Exception e) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-					"Error while saving selected series.", null));
+					e.getMessage(), null));
 		}
+	}
+
+	/**
+	 * Using Java HashSet here to avoid duplicate files for anonymization.
+	 * For performance reasons already init with 2000 buckets, assuming,
+	 * that we will normally never have more than 2000 files to process.
+	 * Maybe to be evaluated later with more bigger imports.
+	 * @param importJob
+	 * @throws FileNotFoundException 
+	 */
+	private ArrayList<File> getDicomFilesForPatient(final Patient patient) throws FileNotFoundException {
+		Set<File> pathsSet = new HashSet<File>(2000);
+		List<Study> studies = patient.getStudies();
+		for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
+			Study study = (Study) studiesIt.next();
+			List<Serie> series = study.getSeries();
+			for (Iterator seriesIt = series.iterator(); seriesIt.hasNext();) {
+				Serie serie = (Serie) seriesIt.next();
+				List<Image> images = serie.getImages();
+				for (Iterator imagesIt = images.iterator(); imagesIt.hasNext();) {
+					Image image = (Image) imagesIt.next();
+					String path = image.getPath();
+					File file = new File(path);
+					if(file.exists()) {
+						pathsSet.add(file);
+					} else {
+						throw new FileNotFoundException("File not found: " + path);
+					}
+				}
+			}
+		}
+		return new ArrayList<File>(pathsSet);
 	}
 
 	/**
@@ -155,16 +251,14 @@ public class ImporterApiController implements ImporterApi {
 
 			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode);
 
-			niftiConverter.prepareAndRunConversion(dicomDirJsonNode, unzipFolderFile);
-
 			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(dicomDirJsonNode);
 			Patients patientsDTO = dicomDirToJsonReader.getMapper().readValue(dicomDirJsonString,Patients.class);
 			ImportJob importJob = new ImportJob();
+			importJob.setWorkFolder(unzipFolderFile.getAbsolutePath());
 			importJob.setPatients(patientsDTO.getPatients());
 			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
 			LOG.error(e.getMessage());
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));

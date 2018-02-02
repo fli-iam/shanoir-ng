@@ -1,9 +1,6 @@
 package org.shanoir.ng.importer;
 
-import java.util.Collection;
-
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,15 +45,14 @@ public interface ImporterApi {
         method = RequestMethod.POST)
     ResponseEntity<ImportJob> uploadDicomZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException;
     
-    @ApiOperation(value = "Select series", notes = "Select series", response = Void.class, tags={ "Select series", })
+    @ApiOperation(value = "Start import job", notes = "Start import job", response = Void.class, tags={ "Start import job", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "series selected", response = Void.class),
+        @ApiResponse(code = 200, message = "import job started", response = Void.class),
         @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
         @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
-    @RequestMapping(value = "/select_series/",
+    @RequestMapping(value = "/start_import_job/",
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    ResponseEntity<Void> selectSeries(@ApiParam(value = "selected series" ,required=true ) @RequestBody Collection<Serie> selectedSeries)
-    		throws RestServiceException;
+    ResponseEntity<Void> startImportJob(@ApiParam(value = "ImportJob", required=true) @RequestBody ImportJob importJob) throws RestServiceException;
 }

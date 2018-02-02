@@ -1,7 +1,6 @@
 package org.shanoir.anonymization.anonymization;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -21,8 +20,8 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.io.DicomOutputStream;
-import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.anonymization.uid.generation.UIDException;
+import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,6 @@ import org.slf4j.LoggerFactory;
  * @author ifakhfakh
  * 
  */
-
 public class AnonymizationServiceImpl implements AnonymizationService {
 
 	/**
@@ -59,19 +57,34 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	Map<String, String> studyIds = new HashMap<String, String>();
 
 	public void anonymize(ArrayList<File> dicomFiles, String profile) {
-
 		anonymizationMAP = readAnonymizationFile(profile);
-
 		final int totalAmount = dicomFiles.size();
 		LOG.debug("anonymize : totalAmount=" + totalAmount);
 		int current = 0;
-
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
-
 			// Perform the anonymization
-			performAnonymization(file, profile, false, "", "", "");
+			performAnonymization(file, profile, false, "", "");
+			current++;
+			final int currentPercent = (int) (current * 100 / totalAmount);
+			LOG.debug("anonymize : anonymization current percent= " + currentPercent + " %");
+		}
+	}
+	
+	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName, String patientFirstName, String patientID) {
+		String patientName = patientLastName + "^" + patientFirstName + "^^^";
+		anonymizeForShanoir(dicomFiles, profile, patientName, patientID);
+	}
 
+	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) {
+		anonymizationMAP = readAnonymizationFile(profile);
+		final int totalAmount = dicomFiles.size();
+		LOG.debug("anonymize : totalAmount=" + totalAmount);
+		int current = 0;
+		for (int i = 0; i < dicomFiles.size(); ++i) {
+			final File file = dicomFiles.get(i);
+			// Perform the anonymization
+			performAnonymization(file, profile, true, patientName, patientID);
 			current++;
 			final int currentPercent = (int) (current * 100 / totalAmount);
 			LOG.debug("anonymize : anonymization current percent= " + currentPercent + " %");
@@ -79,43 +92,14 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		}
 	}
 
-	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientFirstName,
-			String patientLastName, String patientID) {
-
-		anonymizationMAP = readAnonymizationFile(profile);
-
-		final int totalAmount = dicomFiles.size();
-		LOG.debug("anonymize : totalAmount=" + totalAmount);
-		int current = 0;
-
-		for (int i = 0; i < dicomFiles.size(); ++i) {
-			final File file = dicomFiles.get(i);
-			// Perform the anonymization
-			performAnonymization(file, profile, true, patientFirstName, patientLastName, patientID);
-
-			current++;
-			final int currentPercent = (int) (current * 100 / totalAmount);
-			LOG.debug("anonymize : anonymization current percent= " + currentPercent + " %");
-
-		}
-	}
-
-	private void anonymizePatientMetaData(Attributes attributes, String patientFirstName, String patientLastName,
-			String patientID) {
-
-		// patient Name
-		String newPatientName = patientLastName + "^" + patientFirstName + "^^^";
-		anonymizeTagAccordingToVR(attributes, Tag.PatientName, newPatientName);
-
-		// patient Id
+	private void anonymizePatientMetaData(Attributes attributes, String patientName, String patientID) {
+		anonymizeTagAccordingToVR(attributes, Tag.PatientName, patientName);
 		anonymizeTagAccordingToVR(attributes, Tag.PatientID, patientID);
-
 		// patient birth date
 		if (patientBirthDate != null && patientBirthDate.length() != 0) {
 			String newDate = patientBirthDate.substring(0, 4) + "01" + "01";
 			anonymizeTagAccordingToVR(attributes, Tag.PatientBirthDate, newDate);
 		}
-
 	}
 
 	/**
@@ -127,14 +111,12 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 *            anonymization profile
 	 */
 	public void performAnonymization(final File dicomFile, String profile, boolean isShanoirAnonymization,
-			String patientFirstName, String patientLastName, String patientID) {
-
+			String patientName, String patientID) {
 		try {
 			DicomInputStream din = new DicomInputStream(dicomFile);
 			// read metadata
 			Attributes metaInformationAttributes = din.readFileMetaInformation();
 			for (int tagInt : metaInformationAttributes.tags()) {
-				
 				String tagString = String.format("0x%08x", Integer.valueOf(tagInt));
 				if (anonymizationMAP.containsKey(tagString)) {
 					final String basicProfile = anonymizationMAP.get(tagString);
@@ -188,7 +170,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			}
 			// Special anonymization of patient data if isShanoirAnonymization
 			if (isShanoirAnonymization) {
-				anonymizePatientMetaData(datasetAttributes, patientFirstName, patientLastName, patientID);
+				anonymizePatientMetaData(datasetAttributes, patientName, patientID);
 			}
 			LOG.debug("finish anonymization: begin storage");
 
@@ -276,7 +258,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 *            : the list of dicom attributes to modify
 	 */
 	private void anonymizeTag(Integer tagInt, String basicProfile, Attributes attributes) {
-
 		String value = getFinalValueForTag(tagInt, basicProfile);
 		if (value == null) {
 			attributes.remove(tagInt);
@@ -285,7 +266,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		} else {
 			anonymizeTagAccordingToVR(attributes, tagInt, value);
 		}
-
 	}
 
 	private void anonymizeSOPInstanceUID(int tagInt, Attributes attributes) {
@@ -298,19 +278,15 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			try {
 				newUID = generator.getNewUID();
 			} catch (UIDException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error(e.getMessage());
 			}
-
 			value = newUID;
 		}
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
-
 	}
 
 	private void anonymizeSeriesInstanceUID(int tagInt, Attributes attributes) {
 		String value;
-
 		if (seriesInstanceUIDs != null && seriesInstanceUIDs.size() != 0
 				&& seriesInstanceUIDs.get(attributes.getString(tagInt)) != null) {
 			value = seriesInstanceUIDs.get(attributes.getString(tagInt));
@@ -320,8 +296,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			try {
 				newUID = generator.getNewUID();
 			} catch (UIDException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error(e.getMessage());
 			}
 			value = newUID;
 			seriesInstanceUIDs.put(attributes.getString(tagInt), value);
@@ -335,31 +310,24 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				&& studyInstanceUIDs.get(attributes.getString(tagInt)) != null) {
 			value = studyInstanceUIDs.get(attributes.getString(tagInt));
 		} else {
-
 			UIDGeneration generator = new UIDGeneration();
 			String newUID = null;
 			try {
 				newUID = generator.getNewUID();
 			} catch (UIDException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error(e.getMessage());
 			}
 			value = newUID;
-
 			studyInstanceUIDs.put(attributes.getString(tagInt), value);
-
 		}
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}
 
 	private void anonymizeStudyId(int tagInt, Attributes attributes) {
-
 		String value;
 		if (studyIds != null && studyIds.size() != 0 && studyIds.get(attributes.getString(tagInt)) != null) {
 			value = studyIds.get(attributes.getString(tagInt));
-		}
-
-		else {
+		} else {
 			char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 			StringBuilder sb = new StringBuilder();
 			Random random = new Random();
@@ -368,7 +336,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				sb.append(c);
 			}
 			String output = sb.toString();
-
 			value = output.toString();
 			studyIds.put(attributes.getString(tagInt), value);
 		}
@@ -386,7 +353,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 */
 	private String getFinalValueForTag(final int tag, final String basicProfie) {
 		String result = "";
-
 		if (basicProfie != null) {
 			if (basicProfie.equals("X")) {
 				result = null;
@@ -396,25 +362,20 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				SecureRandom random = new SecureRandom();
 				result = new BigInteger(130, random).toString(32);
 			} else if (basicProfie.equals("U")) {
-
 				UIDGeneration generator = new UIDGeneration();
 				String newUID = null;
 				try {
 					newUID = generator.getNewUID();
 				} catch (UIDException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.error(e.getMessage());
 				}
-
 				if (tag == Tag.MediaStorageSOPInstanceUID)
 					mediaStorageSOPInstanceUID = newUID;
 				result = newUID;
-
 			} else if (basicProfie.equals("K")) {
 				result = "KEEP";
 			}
 		}
-
 		return result;
 	}
 

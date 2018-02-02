@@ -32,6 +32,13 @@
 			<artifactId>shanoir-ng-ms-common</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+
+		<!-- Anonymizer Shanoir -->
+		<dependency>
+			<groupId>org.shanoir.anonymization</groupId>
+			<artifactId>anonymization</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	
 		<!-- Database connector -->
 		<dependency>

@@ -1,12 +1,13 @@
 package org.shanoir.ng.importer.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExpressionFormat {
 
 	private String type;
 	
-	private List<DatasetFile> datasetFiles;
+	private List<DatasetFile> datasetFiles = new ArrayList<>();
 
 	public String getType() {
 		return type;
@@ -23,7 +24,5 @@ public class ExpressionFormat {
 	public void setDatasetFiles(List<DatasetFile> datasetFiles) {
 		this.datasetFiles = datasetFiles;
 	}
-	
-	
 	
 }

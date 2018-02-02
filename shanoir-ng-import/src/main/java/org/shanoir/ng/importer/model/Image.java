@@ -10,7 +10,7 @@ public class Image {
 	public String path;
 
 	@JsonProperty("acquisitionNumber")
-	public String acquisitionNumber;
+	public int acquisitionNumber;
 
 	@JsonProperty("echoNumbers")
 	public List<Integer> echoNumbers;
@@ -26,11 +26,11 @@ public class Image {
 		this.path = path;
 	}
 
-	public String getAcquisitionNumber() {
+	public int getAcquisitionNumber() {
 		return acquisitionNumber;
 	}
 
-	public void setAcquisitionNumber(String acquisitionNumber) {
+	public void setAcquisitionNumber(int acquisitionNumber) {
 		this.acquisitionNumber = acquisitionNumber;
 	}
 

@@ -18,8 +18,11 @@ public class ImportJob {
 
     @JsonProperty("fromPacs")
     private boolean fromPacs;
+    
+	@JsonProperty("workFolder")
+	public String workFolder;
 
-    @JsonProperty("patients")
+	@JsonProperty("patients")
     private List<Patient> patients;
     
     @JsonProperty("examinationId")
@@ -98,5 +101,13 @@ public class ImportJob {
 		this.frontConverterId = frontConverterId;
 	}
 
+    public String getWorkFolder() {
+		return workFolder;
+	}
+
+	public void setWorkFolder(String workFolder) {
+		this.workFolder = workFolder;
+	}
+	
 }
 

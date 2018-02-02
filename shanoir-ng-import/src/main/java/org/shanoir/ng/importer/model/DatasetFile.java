@@ -10,7 +10,7 @@ public class DatasetFile {
 	private String path;
 	
 	@JsonProperty("acquisitionNumber")
-	private String acquisitionNumber;
+	private int acquisitionNumber;
 	
 	@JsonProperty("echoNumbers")
 	private List<Integer> echoNumbers;
@@ -26,11 +26,11 @@ public class DatasetFile {
 		this.path = path;
 	}
 
-	public String getAcquisitionNumber() {
+	public int getAcquisitionNumber() {
 		return acquisitionNumber;
 	}
 
-	public void setAcquisitionNumber(String acquisitionNumber) {
+	public void setAcquisitionNumber(int acquisitionNumber) {
 		this.acquisitionNumber = acquisitionNumber;
 	}
 
