@@ -58,6 +58,15 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 		}
 		return new ResponseEntity<>(manufacturerModels, HttpStatus.OK);
 	}
+	
+	@Override
+	public ResponseEntity<List<IdNameDTO>> findCenterManufacturerModelsNames(@PathVariable("centerId") final Long centerId) {
+		final List<IdNameDTO> manufacturerModels = manufacturerModelService.findIdsAndNamesForCenter(centerId);
+		if (manufacturerModels.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(manufacturerModels, HttpStatus.OK);
+	}
 
 	public ResponseEntity<ManufacturerModel> saveNewManufacturerModel(
 			@RequestBody final ManufacturerModel manufacturerModel, final BindingResult result)
@@ -139,4 +148,5 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 		}
 		return constraintErrors;
 	}
+
 }

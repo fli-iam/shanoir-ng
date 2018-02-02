@@ -19,5 +19,14 @@ public interface ManufacturerModelRepositoryCustom extends ItemRepositoryCustom<
 	 * @return list of Manufacturer Models.
 	 */
 	List<IdNameDTO> findIdsAndNames();
-
+	
+	
+	/**
+	 * Find id and name for Manufacturer Models related to a center.
+	 * 
+	 * @param centerId: the id of the center
+	 * 
+	 * @return list of Manufacturer Models.
+	 */
+	List<IdNameDTO> findIdsAndNamesForCenter(Long centerId);
 }

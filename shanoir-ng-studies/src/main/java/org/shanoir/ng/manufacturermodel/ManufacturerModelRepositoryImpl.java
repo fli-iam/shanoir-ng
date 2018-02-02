@@ -34,5 +34,13 @@ public class ManufacturerModelRepositoryImpl implements ManufacturerModelReposit
 	}
 
 
+	@Override
+	public List<IdNameDTO> findIdsAndNamesForCenter(Long centerId) {
+		return em.createNativeQuery("SELECT id, name FROM center ", "ManufacturerModelNameResult").getResultList();
+	}
+	
+	
+
+
 
 }

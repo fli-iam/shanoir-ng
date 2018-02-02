@@ -1,7 +1,7 @@
 import { AcquisitionEquipment } from "../../acquisition-equipments/shared/acquisition-equipment.model";
 
 export class Center {
-    acquisitionEquipments: AcquisitionEquipment;
+    acquisitionEquipments: AcquisitionEquipment[];
     city: string;
     country: string;
     id: number;

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, Output, ViewChild, EventEmitter } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -33,10 +33,14 @@ export class CoilComponent implements OnInit {
 
     @Input() modeFromAcqEquipList: "view" | "edit" | "create";
     @Input() acqEquip: AcquisitionEquipment;
-   // private isNameUnique: Boolean = true;
+    @Output() closing: EventEmitter<any> = new EventEmitter();
+    // private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
-    private centers: IdNameObject[];
-    private manufModels: IdNameObject[];
+    //private centers: IdNameObject[];
+    private centers: Center[];
+    private centersNames: Center[];
+
+
     @ViewChild('manufModelModal') manufModelModal: ModalComponent;
     @ViewChild('centerModal') centerModal: ModalComponent;
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
@@ -51,15 +55,19 @@ export class CoilComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        if (this.modeFromAcqEquipList) { 
-            this.mode = this.modeFromAcqEquipList; 
-            this.coil.center = this.acqEquip.center;
-            this.coil.manufacturerModel = this.acqEquip.manufacturerModel;
-        }
+
         this.getCenters();
-        this.getManufModels();
         this.getEnum();
         this.getCoil();
+        if (this.modeFromAcqEquipList) {
+            this.mode = this.modeFromAcqEquipList;
+            this.coil.center = this.acqEquip.center;
+            this.coil.manufacturerModel = this.acqEquip.manufacturerModel;
+            if (this.coil.manufacturerModel != null && this.coil.center != null) {
+                this.coil.manufacturerModel = this.getManufacturerModelById(this.coil.manufacturerModel.id, this.coil.center.acquisitionEquipments);
+                this.coil.center = this.getCenterById(this.coil.center.id);
+            }
+        }
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
@@ -86,21 +94,28 @@ export class CoilComponent implements OnInit {
             .subscribe((coil: Coil) => {
                 if (this.mode == "edit") {
                     // Link to objects coming from list requests to display selected item of drop-down list
-                    coil.center = this.getCenterById(coil.center.id);
-                    if (coil.manufacturerModel) {
-                        coil.manufacturerModel = this.getManufModelById(coil.manufacturerModel.id);
+                    this.coil = coil;
+                    this.coil.manufacturerModel = this.getManufacturerModelById(coil.manufacturerModel.id, coil.center.acquisitionEquipments);
+
+                    // this.delay(300000000);
+                    if (this.centers != null) {
+                        this.coil.center = this.getCenterById(coil.center.id);
                     }
                 }
-                this.coil = coil;
+
             });
     }
 
+
+    /* delay(ms: number) {
+         return new Promise(resolve => setTimeout(resolve, ms));
+     }*/
     getCenters(): void {
         this.centerService
-            .getCentersNamesForExamination()
+            .getCenters()
             .then(centers => {
                 this.centers = centers;
-
+                console.log("test center 0 :  " + this.centers[0].name);
             })
             .catch((error) => {
                 // TODO: display error
@@ -108,32 +123,21 @@ export class CoilComponent implements OnInit {
             });
     }
 
-    getCenterById(id: number): IdNameObject {
+
+    getCenterById(id: number): Center {
         for (let center of this.centers) {
             if (id == center.id) {
+                console.log("returned center " + center.name);
                 return center;
             }
         }
         return null;
     }
 
-    getManufModels(): void {
-        this.manufModelService
-            .getManufacturerModelsNames()
-            .then(manufModels => {
-                this.manufModels = manufModels;
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting manufacturer model list!");
-            });
-    }
-
-
-    getManufModelById(id: number): IdNameObject {
-        for (let manufModel of this.manufModels) {
-            if (id == manufModel.id) {
-                return manufModel;
+    getManufacturerModelById(id: number, acquisitionEquipments: AcquisitionEquipment[]/*center:Center*/): ManufacturerModel {
+        for (let acquisitionEquipment of acquisitionEquipments) {
+            if (id == acquisitionEquipment.manufacturerModel.id) {
+                return acquisitionEquipment.manufacturerModel;
             }
         }
         return null;
@@ -153,8 +157,9 @@ export class CoilComponent implements OnInit {
     buildForm(): void {
         this.coilForm = this.fb.group({
             'name': [this.coil.name],
-            'acquiEquipModel': [this.coil.manufacturerModel],
+            //'manufacturerModel': [this.coil.manufacturerModel],
             'center': [this.coil.center],
+            'manufacturerModel': [this.coil.manufacturerModel],
             'coilType': [this.coil.coilType],
             'nbChannel': [this.coil.numberOfChannels],
             'serialNb': [this.coil.serialNumber]
@@ -189,7 +194,12 @@ export class CoilComponent implements OnInit {
     };
 
     back(): void {
-        this.location.back();
+        if (this.closing.observers.length > 0) {
+            this.coil = new Coil();
+            this.closing.emit(this.coilId);
+        } else {
+            this.location.back();
+        }
     }
 
     edit(): void {

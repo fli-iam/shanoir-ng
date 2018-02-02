@@ -12,7 +12,7 @@ import org.shanoir.ng.manufacturermodel.ManufacturerModelMapper;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { CenterMapper.class, ManufacturerModelMapper.class })
+@Mapper(componentModel = "spring", uses = { CenterMapper.class/*, ManufacturerModelMapper.class*/ })
 public interface CoilMapper {
 
 	/**

@@ -55,5 +55,13 @@ public interface ManufacturerModelService {
 	 * @return list of IdNameDTO.
 	 */
 	List<IdNameDTO> findIdsAndNames();
+	
+	/**
+	 * Find id and name for manufacturer models related to a center.
+	 * 
+	 * @param centerId: the id of the center
+	 * @return list of IdNameDTO.
+	 */
+	List<IdNameDTO> findIdsAndNamesForCenter(Long centerId);
 
 }

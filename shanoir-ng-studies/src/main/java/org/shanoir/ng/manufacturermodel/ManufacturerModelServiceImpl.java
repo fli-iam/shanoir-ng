@@ -111,4 +111,10 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 		return manufacturerModelRepository.findIdsAndNames();
 	}
 
+	@Override
+	public List<IdNameDTO> findIdsAndNamesForCenter(Long centerId) {
+		return manufacturerModelRepository.findIdsAndNames();
+	}
+	
+
 }

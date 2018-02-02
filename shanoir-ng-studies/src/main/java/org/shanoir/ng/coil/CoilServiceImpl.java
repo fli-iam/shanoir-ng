@@ -63,10 +63,10 @@ public class CoilServiceImpl implements CoilService {
 	}
 
 	@Override
-	public Coil save(final Coil center) throws ShanoirStudiesException {
+	public Coil save(final Coil coil) throws ShanoirStudiesException {
 		Coil savedCoil = null;
 		try {
-			savedCoil = coilRepository.save(center);
+			savedCoil = coilRepository.save(coil);
 		} catch (DataIntegrityViolationException dive) {
 			LOG.error("Error while creating coil", dive);
 			throw new ShanoirStudiesException("Error while creating coil");

@@ -45,6 +45,18 @@ public interface ManufacturerModelApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<List<IdNameDTO>> findManufacturerModelsNames();
 	
+	
+	@ApiOperation(value = "", notes = "Returns id and name of all the manufacturer models", response = IdNameDTO.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found manufacturer models", response = ManufacturerModel.class),
+			@ApiResponse(code = 204, message = "no manufacturer model found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/centerManuModelsNames/{centerId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	ResponseEntity<List<IdNameDTO>> findCenterManufacturerModelsNames(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+	
 	@ApiOperation(value = "", notes = "Returns all the manufacturer models", response = ManufacturerModel.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found manufacturer models", response = ManufacturerModel.class),

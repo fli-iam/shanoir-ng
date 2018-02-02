@@ -31,6 +31,16 @@ export class ManufacturerModelService {
             });
     }
 
+    getCenterManufacturerModelsNames(centerId:Number): Promise<IdNameObject[]> {
+        return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_CENTER_MANUF_MODEL_NAMES_URL+ '/' + centerId)
+            .toPromise()
+            .then(response => response)
+            .catch((error) => {
+                console.error('Error while getting center manufacturer models', error);
+                return Promise.reject(error.message || error);
+            });
+    }
+
     delete(id: number): Promise<void> {
         return this.http.delete<void>(AppUtils.BACKEND_API_MANUF_MODEL_URL + '/' + id)
             .toPromise()

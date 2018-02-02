@@ -101,9 +101,13 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								
-									<select id="acquiEquipModel" required formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel">
+									<!-- <select id="manufacturerModel" required formControlName="manufacturerModel" [(ngModel)]="coil.manufacturerModel">
 											<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel.name}}</option>
+										</select> -->
+										<select id="manufacturerModel" required formControlName="manufacturerModel" [(ngModel)]="coil.manufacturerModel">
+											<option *ngFor="let acquisitionEquipment of coil?.center?.acquisitionEquipments" [ngValue]="acquisitionEquipment.manufacturerModel">{{acquisitionEquipment.manufacturerModel.name}}</option>
 										</select>
+
 										<button i18n="Coil detail|Create new model label@@coilDetailNewManufModel" (click)="manufModelModal.show()">
 											<img [src]="addIconPath"/>
 											new manufacturer model

@@ -1,5 +1,8 @@
 package org.shanoir.ng.coil;
 
+import org.shanoir.ng.center.Center;
+import org.shanoir.ng.center.CenterDTO;
+import org.shanoir.ng.manufacturermodel.ManufacturerModel;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 
 /**
@@ -9,13 +12,15 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
  */
 public class CoilDTO {
 
-	private IdNameDTO center;
+	//private IdNameDTO center;
+	private CenterDTO center;
 
 	private CoilType coilType;
 	
 	private Long id;
 
-	private IdNameDTO manufacturerModel;
+	//private IdNameDTO manufacturerModel;
+	private ManufacturerModel manufacturerModel;
 
 	private String name;
 
@@ -32,22 +37,38 @@ public class CoilDTO {
 	/**
 	 * @return the center
 	 */
-	public IdNameDTO getCenter() {
+	/*public IdNameDTO getCenter() {
 		return center;
-	}
+	}*/
 
 	/**
 	 * @param center the center to set
 	 */
-	public void setCenter(IdNameDTO center) {
+	/*public void setCenter(IdNameDTO center) {
 		this.center = center;
-	}
+	}*/
+	
+	
 
 	/**
 	 * @return the coilType
 	 */
 	public CoilType getCoilType() {
 		return coilType;
+	}
+
+	/**
+	 * @return the center
+	 */
+	public CenterDTO getCenter() {
+		return center;
+	}
+
+	/**
+	 * @param center the center to set
+	 */
+	public void setCenter(CenterDTO center) {
+		this.center = center;
 	}
 
 	/**
@@ -76,22 +97,38 @@ public class CoilDTO {
 	/**
 	 * @return the manufacturerModel
 	 */
-	public IdNameDTO getManufacturerModel() {
+	/*public IdNameDTO getManufacturerModel() {
 		return manufacturerModel;
 	}
 
 	/**
 	 * @param manufacturerModel the manufacturerModel to set
 	 */
-	public void setManufacturerModel(IdNameDTO manufacturerModel) {
+	/*public void setManufacturerModel(IdNameDTO manufacturerModel) {
 		this.manufacturerModel = manufacturerModel;
 	}
+	
+	
 
 	/**
 	 * @return the name
 	 */
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * @return the manufacturerModel
+	 */
+	public ManufacturerModel getManufacturerModel() {
+		return manufacturerModel;
+	}
+
+	/**
+	 * @param manufacturerModel the manufacturerModel to set
+	 */
+	public void setManufacturerModel(ManufacturerModel manufacturerModel) {
+		this.manufacturerModel = manufacturerModel;
 	}
 
 	/**
