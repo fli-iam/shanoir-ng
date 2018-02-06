@@ -15,8 +15,8 @@ import javax.validation.Valid;
 
 import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
 import org.shanoir.ng.importer.dcm2nii.NIfTIConverterService;
-import org.shanoir.ng.importer.dicom.DicomDirToJsonReader;
-import org.shanoir.ng.importer.dicom.DicomFileAnalyzer;
+import org.shanoir.ng.importer.dicom.DicomDirToJsonReaderService;
+import org.shanoir.ng.importer.dicom.DicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
@@ -28,7 +28,6 @@ import org.shanoir.ng.shared.exception.ImportErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ImportUtils;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +81,10 @@ public class ImporterApiController implements ImporterApi {
 	private String datasetsMsUrl;
 
 	@Autowired
-	private DicomFileAnalyzer dicomFileAnalyzer;
+	private DicomDirToJsonReaderService dicomDirToJsonReader;
+	
+	@Autowired
+	private DicomFileAnalyzerService dicomFileAnalyzer;
 
 	@Autowired
 	private NIfTIConverterService niftiConverter;
@@ -129,8 +131,14 @@ public class ImporterApiController implements ImporterApi {
 				niftiConverter.prepareAndRunConversion(patient, workFolder, converterId);
 			}
 			
+			String importJobJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
+					.writeValueAsString(importJob);
+			LOG.info(importJobJsonString);
+			
 			// HttpEntity represents the request
-			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
+			// TODO link in prod version to keycloak here
+//			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
+			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob);
 
 			// Post to dataset MS to finish import
 			ResponseEntity<String> response = null;
@@ -242,11 +250,9 @@ public class ImporterApiController implements ImporterApi {
 			ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
 
 			File dicomDirFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + DICOMDIR);
-			DicomDirToJsonReader dicomDirToJsonReader = null;
 			JsonNode dicomDirJsonNode = null;
 			if (dicomDirFile.exists()) {
-				dicomDirToJsonReader = new DicomDirToJsonReader(dicomDirFile);
-				dicomDirJsonNode = dicomDirToJsonReader.readDicomDirToJsonNode();
+				dicomDirJsonNode = dicomDirToJsonReader.readDicomDirToJsonNode(dicomDirFile);
 			}
 
 			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode);
@@ -277,4 +283,5 @@ public class ImporterApiController implements ImporterApi {
 		}
 		return false;
 	}
+
 }

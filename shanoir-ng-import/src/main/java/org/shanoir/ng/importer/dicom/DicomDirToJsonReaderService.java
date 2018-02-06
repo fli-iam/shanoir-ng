@@ -10,6 +10,7 @@ import org.dcm4che3.dcmr.AcquisitionModality;
 import org.dcm4che3.media.DicomDirReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,24 +28,22 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * @author mkain
  *
  */
-public class DicomDirToJsonReader {
+@Service
+public class DicomDirToJsonReaderService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DicomDirToJsonReader.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DicomDirToJsonReaderService.class);
 
 	private ObjectMapper mapper = new ObjectMapper();
 
 	private DicomDirReader dicomDirReader;
-	
-	public DicomDirToJsonReader(final File file) throws IOException {
-		dicomDirReader = new DicomDirReader(file);
-	}
 
 	/**
 	 * This method reads a DICOMDIR and returns its higher-level content
 	 * as a Json string.
 	 * @return String - Json of DICOM tree hierarchy
 	 */
-	public JsonNode readDicomDirToJsonNode() {
+	public JsonNode readDicomDirToJsonNode(final File file) throws IOException {
+		dicomDirReader = new DicomDirReader(file);
 		JsonNode dicomDirJsonTree = mapper.createObjectNode();
 		try {
 			// patient level

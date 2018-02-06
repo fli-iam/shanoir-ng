@@ -10,7 +10,7 @@ public class Dataset {
 	@JsonProperty("name")
 	private String name;
 	
-	private List<ExpressionFormat> expressionFormats = new ArrayList<>();
+	private List<ExpressionFormat> expressionFormats = new ArrayList<ExpressionFormat>();
 
 	public String getName() {
 		return name;

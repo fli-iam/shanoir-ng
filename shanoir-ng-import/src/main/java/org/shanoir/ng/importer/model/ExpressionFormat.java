@@ -7,7 +7,7 @@ public class ExpressionFormat {
 
 	private String type;
 	
-	private List<DatasetFile> datasetFiles = new ArrayList<>();
+	private List<DatasetFile> datasetFiles = new ArrayList<DatasetFile>();
 
 	public String getType() {
 		return type;

@@ -39,9 +39,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *
  */
 @Service
-public class DicomFileAnalyzer {
+public class DicomFileAnalyzerService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DicomFileAnalyzer.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DicomFileAnalyzerService.class);
 	
 	private static final String DOUBLE_EQUAL = "==";
 
