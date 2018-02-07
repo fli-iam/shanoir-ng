@@ -3,7 +3,6 @@ package org.shanoir.ng.importer.strategies.protocol;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
-import org.omg.CORBA.INTERNAL;
 import org.shanoir.ng.datasetacquisition.mr.ImagedNucleus;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
 import org.shanoir.ng.datasetacquisition.mr.MrSequenceKSpaceFill;
@@ -14,18 +13,18 @@ import org.shanoir.ng.importer.dto.CoilType;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MrProtocolStrategy implements ProtocolStrategy {
 	
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 	
-	@Autowired
-	MrProtocol mrProtocol;
-	
 	@Override
 	public MrProtocol generateMrProtocolForSerie(Attributes dicomAttributes, Serie serie) {
+		
+		MrProtocol mrProtocol = new MrProtocol();
 		
 		// Retrieve protocol Name and set it as an origin metadata attribute.
 		mrProtocol.getOriginMetadata().setName(dicomAttributes.getString(Tag.ProtocolName));
@@ -355,7 +354,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         }
     }
 
-public static String getTransmitCoilName(final Attributes dicomAttributes) {
+    public static String getTransmitCoilName(final Attributes dicomAttributes) {
         final String result = dicomAttributes.getString(Tag.TransmitCoilName);
         if (result != null && !"".equals(result)) {
             return result;

@@ -4,8 +4,6 @@ import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 
-
-
 /**
  * 
  * This Interface is used by all strategies available for creating a new DatasetAcquisition
@@ -19,11 +17,9 @@ import org.shanoir.ng.importer.dto.Serie;
  * @author atouboul
  *
  */
-
-
 public interface DatasetAcquisitionStrategy {
 	
-	// Create a new dataset acquistion 
+	// Create a new dataset acquisition 
 	DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob);
-	
+
 }

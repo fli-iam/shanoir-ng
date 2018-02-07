@@ -18,7 +18,9 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MrDatasetStrategy<T> implements DatasetStrategy {
 
 	/** Logger. */
@@ -26,7 +28,6 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 
 	@Autowired
 	DicomProcessing dicomProcessing;
-
 
 	@Override
 	public DatasetWrapper<MrDataset> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,

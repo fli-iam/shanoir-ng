@@ -1,15 +1,16 @@
 package org.shanoir.ng.importer;
 
+import java.util.ArrayList;
+
+import org.shanoir.ng.dataset.Dataset;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.DatasetAcquisitionService;
+import org.shanoir.ng.datasetacquisition.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.Examination;
 import org.shanoir.ng.examination.ExaminationService;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
-import org.shanoir.ng.importer.strategies.datasetacquisition.DatasetAcquisitionFactory;
-import org.shanoir.ng.importer.strategies.datasetacquisition.DatasetAcquisitionStrategy;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,15 @@ public class ImporterService {
 	private static final Logger LOG = LoggerFactory.getLogger(ImporterService.class);
 	
 	@Autowired
-	ExaminationService examinationService;
-	
-	private ImportJob importJob;
+	private ExaminationService examinationService;
+
+	@Autowired
+	private DatasetAcquisitionContext datasetAcquisitionContext;
 	
 	@Autowired
-	private DatasetAcquisitionService<DatasetAcquisition> datasetAcquisitionService;
+	private DatasetAcquisitionRepository datasetAcquisitionRepository;
+	
+	private ImportJob importJob;
 	
 	public void setImportJob(ImportJob importJob) {
 		this.importJob = importJob;
@@ -52,7 +56,6 @@ public class ImporterService {
 		try {
 			examination = examinationService.findById(importJob.getExaminationId());
 		} catch (ShanoirException e) {
-			// TODO Auto-generated catch block
 			LOG.error("Unable to find Examination",e);
 		}
 		if (examination != null) {
@@ -61,7 +64,7 @@ public class ImporterService {
 				for (Study study : patient.getStudies()) {
 					for (Serie serie : study.getSeries() ) {
 						if (serie.getSelected()) {
-							createDatasetAcquisitionForSerie(serie,rank,examination,importJob);
+							createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
 							rank++;
 						}
 					}
@@ -70,22 +73,14 @@ public class ImporterService {
 		}
 	}
 	
-	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination,ImportJob importJob) {
+	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) {
 		if (serie.getModality() != null) {
-			DatasetAcquisitionStrategy datasetAcquisitionStrategy = DatasetAcquisitionFactory.getDatasetAcquisitionStrategy(serie.getModality());
-			if (datasetAcquisitionStrategy != null ) {
-				DatasetAcquisition datasetAcquisition = datasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(serie,rank,importJob);
-				datasetAcquisition.setExamination(examination);
-				try {
-					
-					datasetAcquisitionService.save(datasetAcquisition);
-				} catch (ShanoirException e) {
-					// TODO Auto-generated catch block
-					LOG.error("Unable to persist Dataset Acquisition",e);
-				}
-			}
+			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
+			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
+			datasetAcquisition.setExamination(examination);
+			datasetAcquisition.setDatasets(new ArrayList<Dataset>());
+			datasetAcquisitionRepository.save(datasetAcquisition);
 		}
-
-		
 	}
+
 }
