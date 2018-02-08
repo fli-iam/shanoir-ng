@@ -1,0 +1,6 @@
+/***********************/
+/* Subject list component */
+/***********************/
+.SubjectListComponent { float: left; overflow: auto; }
+.title { margin-bottom: 15px; }
+

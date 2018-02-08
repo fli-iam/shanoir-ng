@@ -23,6 +23,8 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
+import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
+import { SubjectComponent } from './subjects/subject/subject.component';
 
 const appRoutes: Routes = [
   {
@@ -104,7 +106,17 @@ const appRoutes: Routes = [
     path: 'coil',
     component: CoilComponent,
     canActivate: [AuthNotGuestGuard]
+  },
+  {
+    path: 'subject-list',
+    component: SubjectListComponent,
+    canActivate: [AuthNotGuestGuard]
+  },{
+    path: 'subject',
+    component: SubjectComponent,
+    canActivate: [AuthNotGuestGuard]
   }
+
 ];
 
 export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes);

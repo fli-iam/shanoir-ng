@@ -211,12 +211,17 @@ public class SubjectServiceImpl implements SubjectService {
 	 * @return database template with new values.
 	 */
 	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) {
+
 		subjectDb.setName(subject.getName());
-		subjectDb.setBirthDate(subject.getBirthDate());
+		//subjectDb.setBirthDate(subject.getBirthDate());
 		subjectDb.setIdentifier(subject.getIdentifier());
 		subjectDb.setPseudonymusHashValues(subject.getPseudonymusHashValues());
 		subjectDb.setSex(subject.getSex());
 		subjectDb.setSubjectStudyList(subject.getSubjectStudyList());
+		subjectDb.setManualHemisphericDominance(subject.getManualHemisphericDominance());
+		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
+		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
+		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
 		return subjectDb;
 	}
 

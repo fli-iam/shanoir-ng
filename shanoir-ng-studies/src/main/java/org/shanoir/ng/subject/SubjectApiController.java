@@ -49,22 +49,24 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<Subject> findSubjectById(
+	public ResponseEntity<SubjectDTO> findSubjectById(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		final Subject subject = subjectService.findById(subjectId);
 		if (subject == null) {
-			return new ResponseEntity<Subject>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<SubjectDTO>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Subject>(subject, HttpStatus.OK);
+		//return new ResponseEntity<Subject>(subject, HttpStatus.OK);
+		return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<List<Subject>> findSubjects() {
-		final List<Subject> subject = subjectService.findAll();
-		if (subject.isEmpty()) {
-			return new ResponseEntity<List<Subject>>(HttpStatus.NO_CONTENT);
+	public ResponseEntity<List<SubjectDTO>> findSubjects() {
+		final List<Subject> subjects = subjectService.findAll();
+		
+		if (subjects.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<List<Subject>>(subject, HttpStatus.OK);
+		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 
 	@Override

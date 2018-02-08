@@ -18,5 +18,6 @@ public interface SubjectMapper {
 	SubjectDTO subjectToSubjectDTO(Subject subject);
 
 	List<SubjectDTO> subjectsToSubjectDTOs(List<Subject> subjects);
+	
 
 }

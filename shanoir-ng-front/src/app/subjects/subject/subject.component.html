@@ -1,0 +1,197 @@
+<div class="content-component detail">
+	<form [formGroup]="subjectForm" class="max-content" novalidate>
+		<div class="layout" [ngClass]="{'left': mode=='view'}">
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">
+					<div class="header command-zone" i18n="View subject|Title@@subjectDetailViewTitle">Details on subject</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'">
+					<div class="header command-zone" i18n="Edit subject|Title@@subjectDetailEditTitle">Edit subject</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'">
+					<div class="header command-zone" i18n="Create subject|Title@@subjectDetailCreateTitle">Create subject</div>
+				</ng-template>
+			</span>
+			<fieldset>
+				<ol>
+					<li>
+						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory" class="required-label">Imaged object category</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{subject.imagedObjectCategory}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory">
+									<option *ngFor="let imagedObjectCategory of imagedObjectCategories" [value]="imagedObjectCategory.key">{{imagedObjectCategory.value}}</option>
+								</select>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<span [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'create'">
+								<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
+								<span class="right-col">
+									<input type="radio" value="Yes" name="Yes"> Yes
+									<input type="radio" value="No" name="No"> No
+								</span>
+
+							</ng-template>
+							<ng-template [ngSwitchCase]="'edit'">
+								<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
+								<span class="right-col">
+									<input type="radio" value="Yes" name="Yes"> Yes
+									<input type="radio" value="No" name="No"> No
+								</span>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<span [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'create'">
+								A subject global identifier will be automatically generated using the first name, the last name and the birth date of the
+								subject.
+								<br> This can help you to identify a subject that has already been inserted into the database.
+								<br> To ensure anonymity, the first name and the last name will not be saved.
+								<br> Notice that the birth Date will be set to the 1st of January of the birth Year for the same reason.
+
+							</ng-template>
+
+						</span>
+					</li>
+					<li>
+						<span [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'create'">
+								<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName">First Name</label>
+								<span class="right-col">
+									<input type="text" id="firstName" formControlName="firstName" />
+								</span>
+
+							</ng-template>
+
+						</span>
+					</li>
+					<li>
+						<span [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'create'">
+								<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName">Last Name</label>
+								<span class="right-col">
+									<input type="text" id="lastName" formControlName="lastName" />
+								</span>
+							</ng-template>
+
+						</span>
+					</li>
+					<li>
+						<label i18n="Subject detail|Name label@@subjectDetailName" class="required-label">Common name</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{subject.name}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="subject.name" (change)="resetNameErrorMsg()"
+								/>
+								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit subject|Name required error@@subjectDetailNameRequiredError">Name is required!</label>
+								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit subject|Name length error@@subjectDetailNameLengthError">Name length must be between 2 and 200!</label>
+								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Edit subject|Name unique error@@subjectDetailNameUniqueError">Name should be unique!</label>
+							</ng-template>
+						</span>
+					</li>
+
+					<li>
+						<span [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Birth date</label>
+								<span class="right-col">
+									{{subject.birthDate | date: 'dd/MM/yyyy'}}
+
+								</span>
+							</ng-template>
+
+							<ng-template [ngSwitchCase]="'create'">
+								<span>
+									<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Birth date</label>
+								</span>
+								<span class="right-col">
+									<my-date-picker id="birthDate" [options]="myDatePickerOptions" formControlName="birthDate" [(ngModel)]="birthDate" (dateChanged)="onBirthDateChanged($event)"
+									 (inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
+									</my-date-picker>
+									<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+
+								</span>
+							</ng-template>
+						</span>
+
+					</li>
+
+					<li>
+						<label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{subject.sex}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="sex" required formControlName="sex" [(ngModel)]="subject.sex">
+									<option *ngFor="let sex of sexes" [value]="sex.key">{{sex.value}}</option>
+								</select>
+							</ng-template>
+						</span>
+					</li>
+
+					<li>
+						<label i18n="Subject detail|Manual Hemispheric Dominance label@@subjectDetailManualHemisphericDominance">Manual Hemispheric Dominance</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{subject.manualHemisphericDominance}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="manualHemisphericDominance" required formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance">
+									<option *ngFor="let hemisphericDominance of HemisphericDominances" [value]="hemisphericDominance.key">{{hemisphericDominance.value}}</option>
+								</select>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Subject detail|Language Hemispheric Dominance label@@subjectDetailLanguageHemisphericDominance">Language Hemispheric Dominance</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{subject.languageHemisphericDominance}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="languageHemisphericDominance" required formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance">
+									<option *ngFor="let hemisphericDominance of HemisphericDominances" [value]="hemisphericDominance.key">{{hemisphericDominance.value}}</option>
+								</select>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Subject detail|Personal Comments label@@subjectDetailPersonalComments">Personal Comments</label>
+									<!-- <span class="right-col" [ngSwitch]="mode">
+										<ng-template [ngSwitchCase]="'view'">
+											 {{}} 
+										</ng-template>
+										<ng-template ngSwitchDefault>
+											<input type="text" id="personalComments"  formControlName="personalComments" [(ngModel)]=""  />
+										</ng-template>
+									</span> -->
+					</li>
+
+				</ol>
+			</fieldset>
+			<div class="footer command-zone">
+				<span [ngSwitch]="mode">
+					<button i18n="View subject|Back button label@@backButton" class="Button" (click)="back()">Back</button>
+					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
+						<button type="submit" i18n="View subject|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
+						<button type="submit" i18n="Edit center|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!subjectForm.valid">Update</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
+						<button type="submit" i18n="Edit subject|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!subjectForm.valid">Create</button>
+					</ng-template>
+				</span>
+			</div>
+		</div>
+	</form>
+</div>
