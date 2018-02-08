@@ -59,7 +59,7 @@ keycloak:
         - /*
 # microservices url
 ms.url:
-  shanoir-ng-datasets: http://shanoir-ng-datasets/
+  shanoir-ng-datasets: http://shanoir-ng-datasets/datasetacquisition
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-import.log
@@ -129,7 +129,7 @@ keycloak:
   credentials.secret: 3ab5a06a-9031-47d7-bfc8-ce8cc3027034
 # microservices url
 ms.url:
-  shanoir-ng-datasets: http://localhost:9906/datasets
+  shanoir-ng-datasets: http://localhost:9906/datasetacquisition
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-import.log

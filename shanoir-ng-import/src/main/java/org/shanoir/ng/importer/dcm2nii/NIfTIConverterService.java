@@ -126,6 +126,9 @@ public class NIfTIConverterService {
 				} catch (NoSuchFieldException | SecurityException e) {
 					LOG.error(e.getMessage());
 				}
+				// as images/non-images are migrated to datasets, clear the list now
+				serie.getImages().clear();
+				serie.getNonImages().clear();
 			}
 		}	
 	}
@@ -364,6 +367,7 @@ public class NIfTIConverterService {
 	private void separateDatasetsInSerie(final File serieIDFolderFile, final Serie serie) {
 		final HashMap<SerieToDatasetsSeparator, Dataset>
 			datasetMap = new HashMap<SerieToDatasetsSeparator, Dataset>();
+		serie.setDatasets(new ArrayList<Dataset>());
 		List<Image> images = serie.getImages();
 		for (Iterator iterator = images.iterator(); iterator.hasNext();) {
 			Image image = (Image) iterator.next();
@@ -393,6 +397,7 @@ public class NIfTIConverterService {
 				DatasetFile datasetFile = createDatasetFile(image);
 				expressionFormat.getDatasetFiles().add(datasetFile);
 				datasetMap.put(seriesToDatasetsSeparator, dataset);
+				serie.getDatasets().add(dataset);
 			}
 		}
 		

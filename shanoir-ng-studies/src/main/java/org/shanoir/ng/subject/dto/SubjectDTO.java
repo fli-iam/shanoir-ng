@@ -3,24 +3,159 @@ package  org.shanoir.ng.subject.dto;
 import java.util.Date;
 import java.util.List;
 
+import org.shanoir.ng.subject.HemisphericDominance;
+import org.shanoir.ng.subject.ImagedObjectCategory;
+import org.shanoir.ng.subject.Sex;
 import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
 
 
 public class SubjectDTO {
-
+ 
     private Long id;
+    
+    private String name;
+    
+    private String identifier;
 
     private Date birthDate;
 
-    private String languageHemisphericDominance;
+    private HemisphericDominance languageHemisphericDominance;
 
-    private String manualHemisphericDominance;
+    private HemisphericDominance manualHemisphericDominance;
 
-    private String name;
+    private ImagedObjectCategory imagedObjectCategory;
 
-    private String imagedObjectCategory;
+    private Sex sex;
+    
+    private List<SubjectStudyDTO> subjectStudyList;
 
-    private String sex;
+	/**
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the identifier
+	 */
+	public String getIdentifier() {
+		return identifier;
+	}
+
+	/**
+	 * @param identifier the identifier to set
+	 */
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
+	}
+
+	/**
+	 * @return the birthDate
+	 */
+	public Date getBirthDate() {
+		return birthDate;
+	}
+
+	/**
+	 * @param birthDate the birthDate to set
+	 */
+	public void setBirthDate(Date birthDate) {
+		this.birthDate = birthDate;
+	}
+
+	/**
+	 * @return the languageHemisphericDominance
+	 */
+	public HemisphericDominance getLanguageHemisphericDominance() {
+		return languageHemisphericDominance;
+	}
+
+	/**
+	 * @param languageHemisphericDominance the languageHemisphericDominance to set
+	 */
+	public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
+		this.languageHemisphericDominance = languageHemisphericDominance;
+	}
+
+	/**
+	 * @return the manualHemisphericDominance
+	 */
+	public HemisphericDominance getManualHemisphericDominance() {
+		return manualHemisphericDominance;
+	}
+
+	/**
+	 * @param manualHemisphericDominance the manualHemisphericDominance to set
+	 */
+	public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
+		this.manualHemisphericDominance = manualHemisphericDominance;
+	}
+
+	/**
+	 * @return the imagedObjectCategory
+	 */
+	public ImagedObjectCategory getImagedObjectCategory() {
+		return imagedObjectCategory;
+	}
+
+	/**
+	 * @param imagedObjectCategory the imagedObjectCategory to set
+	 */
+	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
+		this.imagedObjectCategory = imagedObjectCategory;
+	}
+
+	/**
+	 * @return the sex
+	 */
+	public Sex getSex() {
+		return sex;
+	}
+
+	/**
+	 * @param sex the sex to set
+	 */
+	public void setSex(Sex sex) {
+		this.sex = sex;
+	}
+
+	/**
+	 * @return the subjectStudyList
+	 */
+	public List<SubjectStudyDTO> getSubjectStudyList() {
+		return subjectStudyList;
+	}
+
+	/**
+	 * @param subjectStudyList the subjectStudyList to set
+	 */
+	public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
+		this.subjectStudyList = subjectStudyList;
+	}
+    
+//  private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<UserPersonalCommentSubject>(0);
 
 //    private PseudonymusHashValues pseudonymusHashValues;
 
@@ -30,112 +165,8 @@ public class SubjectDTO {
 //
 //    private List<RelSubjectGroupOfSubjects> relSubjectGroupOfSubjectsList = new ArrayList<RelSubjectGroupOfSubjects>(0);
 //
-    private List<SubjectStudyDTO> subjectStudyList;
-//
 //    private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<UserPersonalCommentSubject>(0);
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Date getBirthDate() {
-        return birthDate;
-    }
-
-    public void setBirthDate(Date birthDate) {
-        this.birthDate = birthDate;
-    }
-
-//    public List<Dataset> getDatasetList() {
-//        return datasetList;
-//    }
-//
-//    public void setDatasetList(List<Dataset> datasetList) {
-//        this.datasetList = datasetList;
-//    }
-//
-//    public List<Examination> getExaminationList() {
-//        return examinationList;
-//    }
-//
-//    public void setExaminationList(List<Examination> examinationList) {
-//        this.examinationList = examinationList;
-//    }
-
-   public String getLanguageHemisphericDominance() {
-       return languageHemisphericDominance;
-   }
-
-   public void setLanguageHemisphericDominance(String languageHemisphericDominance) {
-       this.languageHemisphericDominance = languageHemisphericDominance;
-   }
-
-   public String getManualHemisphericDominance() {
-       return manualHemisphericDominance;
-   }
-
-   public void setManualHemisphericDominance(String manualHemisphericDominance) {
-       this.manualHemisphericDominance = manualHemisphericDominance;
-   }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-   public String getImagedObjectCategory() {
-       return imagedObjectCategory;
-   }
-
-   public void setImagedObjectCategory(String imagedObjectCategory) {
-       this.imagedObjectCategory = imagedObjectCategory;
-   }
-
-    public String getSex() {
-        return sex;
-    }
-
-    public void setSex(String sex) {
-        this.sex = sex;
-    }
-
-//    public List<RelSubjectGroupOfSubjects> getRelSubjectGroupOfSubjectsList() {
-//        return relSubjectGroupOfSubjectsList;
-//    }
-//
-//    public void setRelSubjectGroupOfSubjectsList(List<RelSubjectGroupOfSubjects> relSubjectGroupOfSubjectsList) {
-//        this.relSubjectGroupOfSubjectsList = relSubjectGroupOfSubjectsList;
-//    }
-//
-    public List<SubjectStudyDTO> getSubjectStudyList() {
-        return subjectStudyList;
-    }
-
-    public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
-        this.subjectStudyList = subjectStudyList;
-    }
-
-//    public List<UserPersonalCommentSubject> getUserPersonalCommentList() {
-//        return userPersonalCommentList;
-//    }
-//
-//    public void setUserPersonalCommentList(List<UserPersonalCommentSubject> userPersonalCommentList) {
-//        this.userPersonalCommentList = userPersonalCommentList;
-//    }
-
-//    public PseudonymusHashValues getPseudonymusHashValues() {
-//        return pseudonymusHashValues;
-//    }
-//
-//    public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
-//        this.pseudonymusHashValues = pseudonymusHashValues;
-//    }
-//
+    
+    
 }

@@ -1,0 +1,12 @@
+<div class="SubjectListComponent">
+    <div class="title">
+        <h2 i18n="Manage subjects|Title@@subjectListTitle">Manage subjects</h2>
+        <!-- hr/ -->
+    </div>
+
+    <div *ngIf="deletionInternalError" class="error-message">
+        <label class="error-message" i18n="Manage subjects|Deletion error@@subjectListDeletionError">An error occured. This subject cannot be deleted. Please contact an administrator.</label>
+    </div>
+
+    <shanoir-table [items]="subjects" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
+</div>

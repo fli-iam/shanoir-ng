@@ -39,7 +39,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<Subject>> findSubjects();
+	ResponseEntity<List<SubjectDTO>> findSubjects();
 	
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given id", response = Subject.class, tags = {})
@@ -49,7 +49,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@RequestMapping(value = "/{subjectId}", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<Subject> findSubjectById(
+	ResponseEntity<SubjectDTO> findSubjectById(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
 	@ApiOperation(value = "", notes = "Saves a new subject", response = Subject.class, tags = {})
