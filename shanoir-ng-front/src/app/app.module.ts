@@ -72,6 +72,9 @@ import { UploadExtraDataComponent } from './examinations/attached-files/upload-e
 import { CoilComponent } from './coils/coil/coil.component';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilService } from './coils/shared/coil.service';
+import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
+import { SubjectService } from './subjects/shared/subject.service';
+import { SubjectComponent } from './subjects/subject/subject.component';
 
 
 @NgModule({
@@ -128,7 +131,9 @@ import { CoilService } from './coils/shared/coil.service';
         UserListComponent,
         InstrumentAssessmentComponent,
         CoilComponent,
-        CoilListComponent
+        CoilListComponent,
+        SubjectListComponent,
+        SubjectComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -150,6 +155,7 @@ import { CoilService } from './coils/shared/coil.service';
         RoleService,
         StudyService,
         CoilService,
+        SubjectService,
         UserService,
         {
             provide: HTTP_INTERCEPTORS,
