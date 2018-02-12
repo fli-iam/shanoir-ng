@@ -8,10 +8,7 @@ export class Coil {
     name: string;
     numberOfChannels: number;
     serialNumber: string;
-    //center: IdNameObject;
     center: Center;
-    //manufacturerModel: IdNameObject;
     manufacturerModel: ManufacturerModel;
     coilType:CoilType;
-
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, ViewChild, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -25,49 +25,35 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 })
 
 export class CoilComponent implements OnInit {
-
-    public coilForm: FormGroup
-    private coil: Coil = new Coil();
-    private coilId: number;
-    public mode: "view" | "edit" | "create";
-
-    @Input() modeFromAcqEquipList: "view" | "edit" | "create";
-    @Input() acqEquip: AcquisitionEquipment;
-    @Output() closing: EventEmitter<any> = new EventEmitter();
-    // private isNameUnique: Boolean = true;
-    public canModify: Boolean = false;
-    //private centers: IdNameObject[];
-    private centers: Center[];
-    private centersNames: Center[];
-
-
     @ViewChild('manufModelModal') manufModelModal: ModalComponent;
     @ViewChild('centerModal') centerModal: ModalComponent;
-    private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
-    private coilTypes: Enum[] = [];
+    @Input() modeFromAcqEquipList: "view" | "edit" | "create";
+    @Input() acqEquip: AcquisitionEquipment;
+    public coil: Coil = new Coil();
+    public coilId: number;
+    public mode: "view" | "edit" | "create";
+    public coilForm: FormGroup;
+    public canModify: Boolean = false;
+    public centers: Center[] = [];
+    public manufModels: ManufacturerModel[] = [];
+    public addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
+    public coilTypes: Enum[] = [];
 
     constructor(private route: ActivatedRoute, private router: Router,
         private coilService: CoilService, private fb: FormBuilder,
         private centerService: CenterService,
         private manufModelService: ManufacturerModelService,
         private location: Location, private keycloakService: KeycloakService) {
-
     }
 
     ngOnInit(): void {
-
-        this.getCenters();
-        this.getEnum();
-        this.getCoil();
-        if (this.modeFromAcqEquipList) {
-            this.mode = this.modeFromAcqEquipList;
+        if (this.modeFromAcqEquipList) { 
+            this.mode = this.modeFromAcqEquipList; 
             this.coil.center = this.acqEquip.center;
             this.coil.manufacturerModel = this.acqEquip.manufacturerModel;
-            if (this.coil.manufacturerModel != null && this.coil.center != null) {
-                this.coil.manufacturerModel = this.getManufacturerModelById(this.coil.manufacturerModel.id, this.coil.center.acquisitionEquipments);
-                this.coil.center = this.getCenterById(this.coil.center.id);
-            }
         }
+        this.getEnum();
+        this.getCenters();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
@@ -82,7 +68,7 @@ export class CoilComponent implements OnInit {
                 if (mode) {
                     this.mode = mode;
                 }
-                if (coilId) {
+                if (coilId && this.mode !== 'create') {
                     // view or edit mode
                     this.coilId = coilId;
                     return this.coilService.getCoil(coilId);
@@ -92,57 +78,56 @@ export class CoilComponent implements OnInit {
                 }
             })
             .subscribe((coil: Coil) => {
-                if (this.mode == "edit") {
+                if (this.mode === 'edit') {
                     // Link to objects coming from list requests to display selected item of drop-down list
-                    this.coil = coil;
-                    this.coil.manufacturerModel = this.getManufacturerModelById(coil.manufacturerModel.id, coil.center.acquisitionEquipments);
-
-                    // this.delay(300000000);
-                    if (this.centers != null) {
-                        this.coil.center = this.getCenterById(coil.center.id);
-                    }
+                    coil.center = this.getCenterById(coil.center.id);
+                    this.onSelectCenter(coil.center);
+                    coil.manufacturerModel = this.getManufModelById(coil.manufacturerModel.id);
                 }
-
+                this.coil = coil;
             });
     }
 
-
-    /* delay(ms: number) {
-         return new Promise(resolve => setTimeout(resolve, ms));
-     }*/
     getCenters(): void {
         this.centerService
             .getCenters()
             .then(centers => {
                 this.centers = centers;
-                console.log("test center 0 :  " + this.centers[0].name);
+                this.getCoil();
             })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting center list!");
-            });
+        .catch((error) => {
+            // TODO: display error
+            console.log("error getting center list!");
+        });
     }
-
-
+    
     getCenterById(id: number): Center {
         for (let center of this.centers) {
             if (id == center.id) {
-                console.log("returned center " + center.name);
                 return center;
             }
         }
         return null;
     }
-
-    getManufacturerModelById(id: number, acquisitionEquipments: AcquisitionEquipment[]/*center:Center*/): ManufacturerModel {
-        for (let acquisitionEquipment of acquisitionEquipments) {
-            if (id == acquisitionEquipment.manufacturerModel.id) {
-                return acquisitionEquipment.manufacturerModel;
+    
+    onSelectCenter(center: Center): void {
+        this.manufModels = [];
+        if (center) {
+            for (let acquisitionEquipmentOfCenter of center.acquisitionEquipments) {
+                this.manufModels.push(acquisitionEquipmentOfCenter.manufacturerModel);
+            }
+        }
+    }
+    
+    getManufModelById(id: number): ManufacturerModel {
+        for (let manufModel of this.manufModels) {
+            if (id == manufModel.id) {
+                return manufModel;
             }
         }
         return null;
     }
-
+    
     getEnum(): void {
         var types = Object.keys(CoilType);
         for (var i = 0; i < types.length; i = i + 1) {
@@ -153,13 +138,11 @@ export class CoilComponent implements OnInit {
         }
     }
 
-
     buildForm(): void {
         this.coilForm = this.fb.group({
             'name': [this.coil.name],
-            //'manufacturerModel': [this.coil.manufacturerModel],
+            'acquiEquipModel': [this.coil.manufacturerModel],
             'center': [this.coil.center],
-            'manufacturerModel': [this.coil.manufacturerModel],
             'coilType': [this.coil.coilType],
             'nbChannel': [this.coil.numberOfChannels],
             'serialNb': [this.coil.serialNumber]
@@ -185,25 +168,17 @@ export class CoilComponent implements OnInit {
         }
     }
 
-
-
-
     formErrors = {
         'center': '',
         'manufacturerModel': ''
     };
 
     back(): void {
-        if (this.closing.observers.length > 0) {
-            this.coil = new Coil();
-            this.closing.emit(this.coilId);
-        } else {
-            this.location.back();
-        }
+        this.location.back();
     }
 
     edit(): void {
-        this.router.navigate(['/coil'], { queryParams: { id: this.coilId, mode: "edit" } });
+        this.router.navigate(['/coil'], {queryParams: { id: this.coilId, mode: "edit" }});
     }
 
     submit(): void {
@@ -216,8 +191,7 @@ export class CoilComponent implements OnInit {
             .subscribe((coil) => {
                 this.back();
             }, (err: String) => {
-
-            });
+        });
     }
 
     update(): void {
@@ -226,8 +200,7 @@ export class CoilComponent implements OnInit {
             .subscribe((coil) => {
                 this.back();
             }, (err: String) => {
-
-            });
+        });
     }
 
     closePopin() {
@@ -237,6 +210,4 @@ export class CoilComponent implements OnInit {
     closeCenterPopin() {
         this.centerModal.hide();
     }
-
-
 }

@@ -12,7 +12,7 @@ export class ImportJob {
 }
 
 export class PatientDicom {
-    subjects: SubjectDicom;
+    subject: SubjectDicom;
     patientID: string;
     patientName: string;
     patientBirthDate: Date;

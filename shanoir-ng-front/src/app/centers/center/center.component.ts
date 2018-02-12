@@ -46,11 +46,11 @@ export class CenterComponent implements OnInit {
             .switchMap((queryParams: Params) => {
                 let centerId = queryParams['id'];
                 if (!this.modeFromCoil) {
-                let mode = queryParams['mode'];
-                if (mode) {
-                    this.mode = mode;
+                    let mode = queryParams['mode'];
+                    if (mode) {
+                        this.mode = mode;
+                    }
                 }
-            }
                 if (centerId && this.mode !== 'create') {
                     // view or edit mode
                     this.centerId = centerId;
