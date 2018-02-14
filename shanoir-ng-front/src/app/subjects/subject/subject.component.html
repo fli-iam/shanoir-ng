@@ -22,66 +22,66 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory">
-									<option *ngFor="let imagedObjectCategory of imagedObjectCategories" [value]="imagedObjectCategory.key">{{imagedObjectCategory.value}}</option>
+									<option *ngFor="let imagedObjectCategory of imagedObjectCategories"  [value]="imagedObjectCategory.key" >{{imagedObjectCategory.value}}</option>
 								</select>
 							</ng-template>
 						</span>
 					</li>
-					<li>
-						<span [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'create'">
+					<li *ngIf="(mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[1].key  || subject.imagedObjectCategory == imagedObjectCategories[2].key)) || mode == 'edit'">
 								<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
-								<span class="right-col">
-									<input type="radio" value="Yes" name="Yes"> Yes
-									<input type="radio" value="No" name="No"> No
+						 		<span class="right-col">
+										<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" [value]="true" [checked]="isAlreadyAnonymized == true"/>Yes
+										<input type="radio" formControlName="isAlreadyAnonymized" [(ngModel)]="isAlreadyAnonymized" [value]="false" [checked]="'isAlreadyAnonymized'?'isAlreadyAnonymized == false' :'true' "/>No
 								</span>
-
-							</ng-template>
-							<ng-template [ngSwitchCase]="'edit'">
-								<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
-								<span class="right-col">
-									<input type="radio" value="Yes" name="Yes"> Yes
-									<input type="radio" value="No" name="No"> No
-								</span>
-							</ng-template>
-						</span>
 					</li>
-					<li>
-						<span [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'create'">
+					<li *ngIf="!isAlreadyAnonymized && mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[1].key  || subject.imagedObjectCategory == imagedObjectCategories[2].key ) ">
 								A subject global identifier will be automatically generated using the first name, the last name and the birth date of the
 								subject.
 								<br> This can help you to identify a subject that has already been inserted into the database.
 								<br> To ensure anonymity, the first name and the last name will not be saved.
 								<br> Notice that the birth Date will be set to the 1st of January of the birth Year for the same reason.
 
-							</ng-template>
-
-						</span>
 					</li>
-					<li>
-						<span [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'create'">
+					<li *ngIf="!isAlreadyAnonymized && mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[1].key  || subject.imagedObjectCategory == imagedObjectCategories[2].key )">
 								<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName">First Name</label>
 								<span class="right-col">
-									<input type="text" id="firstName" formControlName="firstName" />
+									<input type="text" id="firstName" [(ngModel)]="firstName" formControlName="firstName" />
 								</span>
-
-							</ng-template>
-
-						</span>
 					</li>
-					<li>
-						<span [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'create'">
+					<li *ngIf="!isAlreadyAnonymized && mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[1].key  || subject.imagedObjectCategory == imagedObjectCategories[2].key )">
 								<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName">Last Name</label>
 								<span class="right-col">
-									<input type="text" id="lastName" formControlName="lastName" />
+									<input type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
 								</span>
+					</li>
+
+					<li *ngIf= "(mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[1].key  || subject.imagedObjectCategory == imagedObjectCategories[2].key)) || mode == 'view'">
+							<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Birth date</label>
+						
+							<span [ngSwitch]="mode">
+							<ng-template  class="right-col" [ngSwitchCase]="'view'">
+									{{subject.birthDate | date: 'dd/MM/yyyy'}}
 							</ng-template>
 
+							<ng-template class="right-col" [ngSwitchCase]="'create'">
+									<my-date-picker id="birthDate" [options]="myDatePickerOptions" formControlName="birthDate" [(ngModel)]="birthDate" (dateChanged)="onBirthDateChanged($event)"
+									 (inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
+									</my-date-picker>
+									<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+							</ng-template>
 						</span>
+
 					</li>
+
+					<li *ngIf="mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[0].key  || subject.imagedObjectCategory == imagedObjectCategories[3].key ) ">
+							<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
+							<my-date-picker id="birthDate" [options]="myDatePickerOptions" formControlName="birthDate" [(ngModel)]="birthDate" (dateChanged)="onBirthDateChanged($event)"
+									 (inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
+							</my-date-picker>
+									<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+										
+					</li>
+
 					<li>
 						<label i18n="Subject detail|Name label@@subjectDetailName" class="required-label">Common name</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -89,8 +89,7 @@
 								{{subject.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="subject.name" (change)="resetNameErrorMsg()"
-								/>
+								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="subject.name" (change)="resetNameErrorMsg()"/>
 								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit subject|Name required error@@subjectDetailNameRequiredError">Name is required!</label>
 								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit subject|Name length error@@subjectDetailNameLengthError">Name length must be between 2 and 200!</label>
 								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Edit subject|Name unique error@@subjectDetailNameUniqueError">Name should be unique!</label>
@@ -98,33 +97,9 @@
 						</span>
 					</li>
 
-					<li>
-						<span [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Birth date</label>
-								<span class="right-col">
-									{{subject.birthDate | date: 'dd/MM/yyyy'}}
+					
 
-								</span>
-							</ng-template>
-
-							<ng-template [ngSwitchCase]="'create'">
-								<span>
-									<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Birth date</label>
-								</span>
-								<span class="right-col">
-									<my-date-picker id="birthDate" [options]="myDatePickerOptions" formControlName="birthDate" [(ngModel)]="birthDate" (dateChanged)="onBirthDateChanged($event)"
-									 (inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
-									</my-date-picker>
-									<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
-
-								</span>
-							</ng-template>
-						</span>
-
-					</li>
-
-					<li>
+					<li *ngIf="( mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[1].key  || subject.imagedObjectCategory == imagedObjectCategories[2].key)) || mode == 'view' || mode == 'edit'">
 						<label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -138,7 +113,7 @@
 						</span>
 					</li>
 
-					<li>
+					<li *ngIf="( mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[1].key  || subject.imagedObjectCategory == imagedObjectCategories[2].key)) || mode == 'view' || mode == 'edit'">
 						<label i18n="Subject detail|Manual Hemispheric Dominance label@@subjectDetailManualHemisphericDominance">Manual Hemispheric Dominance</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -151,7 +126,7 @@
 							</ng-template>
 						</span>
 					</li>
-					<li>
+					<li *ngIf="( mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[1].key  || subject.imagedObjectCategory == imagedObjectCategories[2].key)) || mode == 'view' || mode == 'edit'">
 						<label i18n="Subject detail|Language Hemispheric Dominance label@@subjectDetailLanguageHemisphericDominance">Language Hemispheric Dominance</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
