@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
+import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 
 /**
  * Subject service.
@@ -107,7 +108,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @param studyId
 	 * @return list of subjects
 	 */
-	public List<Subject> findAllSubjectsOfStudy(final Long studyId);
+	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId);
 
 	/**
 	 * Find subject by its identifier.

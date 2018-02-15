@@ -4,6 +4,8 @@ import { SubjectExamination } from "../../examinations/shared/subject-examinatio
 export class SubjectStudy {
     examinations: SubjectExamination[];
     subjectId: number;
+    studyId: number;
     subjectStudyIdentifier: string;
     subjectType: SubjectType;
+    physicallyInvolved: boolean;
 }

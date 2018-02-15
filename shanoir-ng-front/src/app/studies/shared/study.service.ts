@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
 import { Study } from './study.model';
-import { Subject } from '../../subjects/shared/subject.model';
+import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import { HandleErrorService } from '../../shared/utils/handle-error.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
@@ -68,8 +68,8 @@ export class StudyService {
             });
     }
 
-    findSubjectsByStudyId(studyId: number): Promise<Subject[]> {
-        return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
+    findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
+        return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
             .toPromise()
             .then(response => response)
             .catch((error) => {

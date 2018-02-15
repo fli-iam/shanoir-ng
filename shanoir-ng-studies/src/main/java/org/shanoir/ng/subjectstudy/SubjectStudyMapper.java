@@ -34,6 +34,7 @@ public interface SubjectStudyMapper {
 	 * @return DTO.
 	 */
 	@Mappings({ @Mapping(target = "subjectId", source = "subject.id"),
+			@Mapping(target = "studyId", source = "study.id"),
 			@Mapping(target = "subjectStudyIdentifier", ignore = true) })
 	SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy);
 

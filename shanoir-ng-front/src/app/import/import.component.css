@@ -42,13 +42,7 @@ form li > label { width: 250px !important; }
             .value { display: table-cell; width:50%; padding: 3px 10px; }
         .picto { height: 14px; margin-left: 50%; }
 
-    .thumbnail { padding: 10px; height: 300; width: 300; text-align: center; position: relative; }
-        .thumbnail .info { background-color: var(--very-light-grey); width: intrinsic; width: -moz-max-content; width: -webkit-max-content; opacity: 0.55; position: absolute; margin: 0 auto; }
-        .thumbnail .title { border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; top: 10px; right: 0; left: 0; padding: 3px; }
-        .thumbnail img { width: 100%; margin-left: 40%; }
-        .thumbnail .paging { bottom: 10px; right: 10px; border-top-right-radius: 4px; border-top-left-radius: 4px; }
-            .thumbnail .paging .page { margin: 0 5px; }
-            .thumbnail .paging button { padding: 0 2px 1px; margin: 0; }
+.float-none { float: none; }
 
 @media (min-width: 768px) {
     .modal-dialog {

@@ -13,7 +13,9 @@ import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.StudyRepository;
+import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subjectstudy.SubjectStudy;
+import org.shanoir.ng.subjectstudy.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -65,6 +67,9 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	private MicroserviceRequestsService microservicesRequestsService;
+	
+	@Autowired
+	private SubjectStudyDecorator subjectStudyMapper;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirStudiesException {
@@ -226,16 +231,22 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
-	public List<Subject> findAllSubjectsOfStudy(final Long studyId) {
-		List<Subject> listSubjects = new ArrayList<Subject>();
+	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId) {
+		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<SimpleSubjectDTO>();
 		List<SubjectStudy> opt = subjectStudyRepository.findByStudy(studyRepository.findOne(studyId));
 		if (opt != null) {
 			for (SubjectStudy rel : opt) {
-				Subject sub = rel.getSubject();
-				listSubjects.add(sub);
-
+				SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
+				if (rel.getStudy().getId() == studyId) {
+					Subject sub = rel.getSubject();
+					simpleSubjectDTO.setId(sub.getId());
+					simpleSubjectDTO.setName(sub.getName());
+					simpleSubjectDTO.setIdentifier(sub.getIdentifier());
+					simpleSubjectDTO.setSubjectStudy(subjectStudyMapper.subjectStudyToSubjectStudyDTO(rel));
+					simpleSubjectDTOList.add(simpleSubjectDTO);
+				}
 			}
-			return listSubjects;
+			return simpleSubjectDTOList;
 		} else {
 			LOG.info("No created subjects for study " + studyId);
 			return null;
