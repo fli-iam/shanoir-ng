@@ -12,6 +12,7 @@ import { Enum } from "../../shared/utils/enum";
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Sex } from '../shared/sex.enum';
 import { HemisphericDominance } from '../shared/hemispheric-dominance.enum';
+import * as shajs from 'sha.js';
 
 @Component({
     selector: 'subject-detail',
@@ -32,6 +33,10 @@ export class SubjectComponent implements OnInit {
     private HemisphericDominances: Enum[] = [];
     private isBirthDateValid: boolean = true;
     private selectedBirthDateNormal: IMyDate;
+    private isAlreadyAnonymized: boolean;
+    private hashLength: number = 14;
+    private firstName : string;
+    private lastName : string;
 
     private myDatePickerOptions: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
@@ -46,8 +51,13 @@ export class SubjectComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.firstName = "";
+        this.lastName = "";
         this.getSubject();
         this.getImagedObjectCategories();
+        if ( this.mode == 'create') {
+            this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        }
         this.getSexes();
         this.getHemisphericDominances();
         this.buildForm();
@@ -113,6 +123,7 @@ export class SubjectComponent implements OnInit {
     buildForm(): void {
         this.subjectForm = this.fb.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory],
+            'isAlreadyAnonymized': new FormControl('No'),
             'name': [this.subject.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
             'firstName': [],
             'lastName': [],
@@ -128,6 +139,7 @@ export class SubjectComponent implements OnInit {
     }
 
     onValueChanged(data?: any) {
+        this.isAlreadyAnonymized = false;
         if (!this.subjectForm) { return; }
         const form = this.subjectForm;
         for (const field in this.formErrors) {
@@ -161,6 +173,8 @@ export class SubjectComponent implements OnInit {
 
     create(): void {
         this.submit();
+        this.setSubjectIdentifier();
+        this.setSubjectBirthDateToFirstOfJanuary();
         this.subjectService.create(this.subject)
             .subscribe((subject) => {
                 this.back();
@@ -230,5 +244,34 @@ export class SubjectComponent implements OnInit {
         }
     }
 
+
+    setSubjectIdentifier(): void {
+        if((this.subject.imagedObjectCategory.toString() == this.imagedObjectCategories[1].key  || this.subject.imagedObjectCategory.toString() == this.imagedObjectCategories[2].key) && !this.isAlreadyAnonymized)
+        {
+            var hash = this.firstName + this.lastName + this.subject.birthDate;
+            this.subject.identifier = this.getHash(hash, this.hashLength);
+        }
+        else{
+            var hash = this.subject.name + this.subject.birthDate;
+            this.subject.identifier = this.getHash(hash, this.hashLength);
+        }
+    }
+
+
+      getHash( stringToBeHashed : string, hashLength : number ) : string {
+
+        var hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        var hex = "";
+        hex = hash.substring(0, hashLength);
+
+		return hex;
+    } 
+
+
+    
+    setSubjectBirthDateToFirstOfJanuary () : void {
+        var newDate: Date = new Date(this.subject.birthDate.getFullYear(), 0, 1);
+        this.subject.birthDate = newDate;
+    }
 
 }
