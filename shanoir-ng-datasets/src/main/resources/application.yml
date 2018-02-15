@@ -43,15 +43,15 @@ keycloak:
   auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-datasets
-  securityConstraints:
-    - authRoles: 
-      - ROLE_ADMIN
-      - ROLE_EXPERT
-      - ROLE_GUEST
-      - ROLE_USER
-    - securityCollections:
-      - name: spring secured api
-      - patterns:
+  securityConstraints[0]:
+    securityCollections[0]:
+      name: spring secured api
+      authRoles: 
+        - ROLE_ADMIN
+        - ROLE_EXPERT
+        - ROLE_GUEST
+        - ROLE_USER
+      patterns:
         - /*
 # microservices url
 ms.url:
@@ -82,7 +82,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create
+      ddl-auto: create-drop
     # Show or not log for each sql query
     show-sql: true
   jooq:
@@ -99,7 +99,7 @@ keycloak:
     secret: 3e35c819-aa43-4fd6-a8dc-9dbe75834e40
 # microservices url
 ms.url:
-  shanoir-ng-study: http://localhost:9902/
+  shanoir-ng-studies: http://localhost:9902/
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-dataset.log
