@@ -16,6 +16,7 @@ import { Subject } from '../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject-study.model';
 import { SubjectExamination } from '../examinations/shared/subject-examination.model';
 import { SubjectType } from "../subjects/shared/subject-type.enum";
+import { Enum } from "../shared/utils/enum";
 
 declare var papaya: any;
 const mockImport: any = require('../../assets/mock-import.json');
@@ -44,13 +45,14 @@ export class ImportComponent implements OnInit {
     public subjectEditionMode: "select" | "create" = "select";
     public patients: PatientDicom[];
     private patientDicom: PatientDicom;
-    public subject: Subject;
     public studies: Study[];
     public study: Study;
     public studycards: StudyCard[];
     public studycard: StudyCard;
     private subjects: SubjectWithSubjectStudy[]; 
+    public subject: SubjectWithSubjectStudy;
     private subjectTypeEnumValue: String;
+    private subjectTypes: Enum[] = [];
     public examinations: SubjectExamination[];
     public seriesSelected: boolean = false;
     private selectedSeries: PatientDicom;
@@ -281,23 +283,33 @@ export class ImportComponent implements OnInit {
                         // TODO: display error
                         console.log("error getting subject list by study id!");
                 });
-                // this.subjectTypeEnumValue = SubjectType[];
             } else {
                 this.studycardNotCompatibleError = true;
             }
         }
     }
 
-    onSelectSubject(subject: Subject) {
+    onSelectSubject(subject: SubjectWithSubjectStudy) {
         if (subject) {
             this.subject = subject;
+            this.subjectTypeEnumValue = SubjectType[this.subject.subjectStudy.subjectType];
             this.examinationService
                 .findExaminationsBySubjectId(subject.id)
                 .then(examinations => this.examinations = examinations)
                 .catch((error) => {
                     // TODO: display error
                     console.log("error getting examination list by subject id!");
-                });
+            });
+        }
+    }
+
+    getEnum(): void {
+        var types = Object.keys(SubjectType);
+        for (var i = 0; i < types.length; i = i + 2) {
+            var newEnum: Enum = new Enum();
+            newEnum.key = types[i];
+            newEnum.value = SubjectType[types[i]];
+            this.subjectTypes.push(newEnum);
         }
     }
 

@@ -235,14 +235,8 @@
                             <tr class="item">
                                 <td class="label">Subject Type</td>
                                 <td class="value">
-                                    <select formControlName="subjectType" required [(ngModel)]="subjectType" (ngModelChange)="onSelectSubjectType($event)">
-                                        <option *ngFor="let subject of subjects" [ngValue]="subjectType">{{subject.subjectStudy.subjectType}}</option>
-                                    </select>
-                                    <select>
-                                        <option value="" disabled selected></option>
-                                        <option>Healthy volunteer</option>
-                                        <option>Patient</option>
-                                        <option>Phantom</option>
+                                    <select id="subjectType" formControlName="subjectType" [(ngModel)]="subject.subjectStudy.subjectType">
+                                        <option *ngFor="let subjectType of subjectTypes" [ngValue]="subjectType.key">{{subjectType.value}}</option>
                                     </select>
                                 </td>
                             </tr>
