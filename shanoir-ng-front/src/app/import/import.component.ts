@@ -13,10 +13,12 @@ import { StudyService } from '../studies/shared/study.service';
 import { StudyCard } from '../study-cards/shared/study-card.model';
 import { ExaminationService } from '../examinations/shared/examination.service';
 import { Subject } from '../subjects/shared/subject.model';
+import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject-study.model';
 import { SubjectExamination } from '../examinations/shared/subject-examination.model';
+import { SubjectType } from "../subjects/shared/subject-type.enum";
 
 declare var papaya: any;
-// const mockImport: any = require('../../assets/mock-import.json');
+const mockImport: any = require('../../assets/mock-import.json');
 const mockStudy: any = require('../../assets/mock-study.json');
 
 @Component({
@@ -39,7 +41,7 @@ export class ImportComponent implements OnInit {
     
     public archive: string;
     public modality: string;
-    public subjectMode: "single" | "group" = "single";
+    public subjectEditionMode: "select" | "create" = "select";
     public patients: PatientDicom[];
     private patientDicom: PatientDicom;
     public subject: Subject;
@@ -47,7 +49,8 @@ export class ImportComponent implements OnInit {
     public study: Study;
     public studycards: StudyCard[];
     public studycard: StudyCard;
-    private subjects: Subject[]; 
+    private subjects: SubjectWithSubjectStudy[]; 
+    private subjectTypeEnumValue: String;
     public examinations: SubjectExamination[];
     public seriesSelected: boolean = false;
     private selectedSeries: PatientDicom;
@@ -81,10 +84,12 @@ export class ImportComponent implements OnInit {
     ngOnInit(): void {
         this.buildForm();
         //TODO: clean json mock import after dev 
-        this.seriesSelected = true;
-        // this.selectedSeries = mockImport;
+        this.archive = "file uploaded";
+        this.selectedSeries = mockImport.patients[0];
+        this.patients = mockImport.patients;
         // this.validateSeriesSelected();
         //TODO: clean json mock study after dev
+        this.seriesSelected = true;
         this.prepareStudyStudycard(mockStudy);
     }
 
@@ -93,9 +98,11 @@ export class ImportComponent implements OnInit {
             'study': [this.study, Validators.required],
             'fu': new FormControl(),
             'studycard': [this.studycard, Validators.required],
-            'subjectMode': new FormControl(),
+            'subjectEditionMode': new FormControl(),
             'subjectName': new FormControl(),
-            'subjectIdentifier': new FormControl(),
+            'subjectStudyIdentifier': new FormControl(),
+            'physicallyInvolved': new FormControl(),
+            'subjectType': new FormControl(),
             'examination': new FormControl(),
             'modality': [{value: this.modality, disabled: true}, Validators.required],
             'subject': [this.subject, Validators.required]
@@ -125,9 +132,11 @@ export class ImportComponent implements OnInit {
         'fu': '',
         'study': '',
         'studycard': '',
-        'subjectMode': '',
+        'subjectEditionMode': '',
         'subjectName': '',
-        'subjectIdentifier': '',
+        'subjectStudyIdentifier': '',
+        'physicallyInvolved': '',
+        'subjectType': '',
         'examination': '',
         'modality': '',
         'subject': ''
@@ -272,6 +281,7 @@ export class ImportComponent implements OnInit {
                         // TODO: display error
                         console.log("error getting subject list by study id!");
                 });
+                // this.subjectTypeEnumValue = SubjectType[];
             } else {
                 this.studycardNotCompatibleError = true;
             }

@@ -3,6 +3,7 @@ package org.shanoir.ng.subject;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.springframework.http.ResponseEntity;
@@ -97,7 +98,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@RequestMapping(value = "/{studyId}/allSubjects", produces = {
 			"application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<SubjectDTO>> findSubjectsByStudyId(
+	ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given identifier", response = Subject.class, tags = {})

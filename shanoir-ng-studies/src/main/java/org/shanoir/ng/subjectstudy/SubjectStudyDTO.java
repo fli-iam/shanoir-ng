@@ -11,10 +11,14 @@ import org.shanoir.ng.subject.SubjectType;
 public class SubjectStudyDTO {
 
 	private Long subjectId;
+	
+	private Long studyId;
 
 	private String subjectStudyIdentifier;
 
 	private SubjectType subjectType;
+	
+	private boolean physicallyInvolved;
 
 	/**
 	 * @return the subjectId
@@ -28,6 +32,14 @@ public class SubjectStudyDTO {
 	 */
 	public void setSubjectId(Long subjectId) {
 		this.subjectId = subjectId;
+	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
 	/**
@@ -56,6 +68,20 @@ public class SubjectStudyDTO {
 	 */
 	public void setSubjectType(SubjectType subjectType) {
 		this.subjectType = subjectType;
+	}
+
+	/**
+	 * @return the physicallyInvolved
+	 */
+	public boolean isPhysicallyInvolved() {
+		return physicallyInvolved;
+	}
+
+	/**
+	 * @param physicallyInvolved the physicallyInvolved to set
+	 */
+	public void setPhysicallyInvolved(boolean physicallyInvolved) {
+		this.physicallyInvolved = physicallyInvolved;
 	}
 
 }

@@ -3,6 +3,6 @@ import { ExaminationDatasetAcquisition } from "../../dataset-acquisitions/shared
 export class SubjectExamination {
     id: number;
     comment: string;
-    datasetAcquisitions: ExaminationDatasetAcquisition[]
+    datasetAcquisitions: ExaminationDatasetAcquisition[];
     examinationDate: Date;
 }
