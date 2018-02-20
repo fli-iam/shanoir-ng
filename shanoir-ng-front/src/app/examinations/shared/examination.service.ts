@@ -37,8 +37,8 @@ export class ExaminationService {
             });
     }
 
-    findExaminationsBySubjectId(subjectId: number): Promise<SubjectExamination[]> {
-        return this.http.get<SubjectExamination[]>(AppUtils.BACKEND_API_EXAMINATION_ALL_BY_SUBJECT_URL + '/' + subjectId)
+    findExaminationsBySubjectAndStudy(subjectId: number, studyId: number): Promise<SubjectExamination[]> {
+        return this.http.get<SubjectExamination[]>(AppUtils.BACKEND_API_EXAMINATION_ALL_BY_SUBJECT_URL + '/' + subjectId + '/' + studyId)
             .toPromise()
             .then(response => response)
             .catch((error) => {

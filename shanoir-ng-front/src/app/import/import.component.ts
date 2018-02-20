@@ -13,9 +13,11 @@ import { StudyService } from '../studies/shared/study.service';
 import { StudyCard } from '../study-cards/shared/study-card.model';
 import { ExaminationService } from '../examinations/shared/examination.service';
 import { Subject } from '../subjects/shared/subject.model';
+import { SubjectService } from "../subjects/shared/subject.service";
 import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject-study.model';
 import { SubjectExamination } from '../examinations/shared/subject-examination.model';
 import { SubjectType } from "../subjects/shared/subject-type.enum";
+import { SubjectStudy } from "../subjects/shared/subject-study.model";
 import { Enum } from "../shared/utils/enum";
 
 declare var papaya: any;
@@ -80,10 +82,12 @@ export class ImportComponent implements OnInit {
     public examination: SubjectExamination;
 
     constructor(private fb: FormBuilder, private importService: ImportService,
-        private studyService: StudyService, private examinationService: ExaminationService) {
+        private studyService: StudyService, private examinationService: ExaminationService,
+        private subjectService: SubjectService) {
     }
 
     ngOnInit(): void {
+        this.getEnum();
         this.buildForm();
         //TODO: clean json mock import after dev 
         this.archive = "file uploaded";
@@ -115,7 +119,7 @@ export class ImportComponent implements OnInit {
         this.onValueChanged(); // (re)set validation messages now
     }
         
-    onValueChanged(data?: any) {
+    onValueChanged(data?: any): void {
         if (!this.importForm) { return; }
         const form = this.importForm;
         for (const field in this.formErrors) {
@@ -144,7 +148,7 @@ export class ImportComponent implements OnInit {
         'subject': ''
     };
             
-    initPapaya(serie: SerieDicom) {
+    initPapaya(serie: SerieDicom): void {
         var params: object[] = [];
         let imagesList: string[] = [];
         let dicomImagesList: Array<string[]> = [];
@@ -187,7 +191,7 @@ export class ImportComponent implements OnInit {
             });
     }
 
-    showSerieDetails(nodeParams: any) {
+    showSerieDetails(nodeParams: any): void {
         if (nodeParams && this.detailedSerie && nodeParams.id == this.detailedSerie["id"]) {
             this.detailedSerie = null;
         } else {
@@ -195,7 +199,7 @@ export class ImportComponent implements OnInit {
         }
     }
 
-    showPatientDetails(nodeParams: any) {
+    showPatientDetails(nodeParams: any): void {
         if (nodeParams && this.detailedPatient && nodeParams.id == this.detailedPatient["id"]) {
             this.detailedPatient = null;
         } else {
@@ -203,7 +207,7 @@ export class ImportComponent implements OnInit {
         }
     }
 
-    selectNode(nodeParams: PatientDicom) {
+    selectNode(nodeParams: PatientDicom): void {
         this.selectedSeries = nodeParams;
         for (let study of nodeParams.studies) {
             for (let serie of study.series) {
@@ -235,7 +239,7 @@ export class ImportComponent implements OnInit {
             });
     }
 
-    prepareStudyStudycard(studies: Study[]) {
+    prepareStudyStudycard(studies: Study[]): void {
         this.studies = studies;
         let compatibleStudies: Study[] = [];
         for (let study of studies) {
@@ -250,7 +254,7 @@ export class ImportComponent implements OnInit {
         }
     }
     
-    onSelectStudy(study: Study) {
+    onSelectStudy(study: Study): void {
         if (study) {
             if (study.studyCards.length == 0) {
                 this.studycardMissingError = true;
@@ -271,7 +275,7 @@ export class ImportComponent implements OnInit {
         }
     }
 
-    onSelectStudycard(studycard: StudyCard) {
+    onSelectStudycard(studycard: StudyCard): void {
         if (studycard) {
             if (studycard.compatible) {
                 this.studycardNotCompatibleError = false;
@@ -289,18 +293,26 @@ export class ImportComponent implements OnInit {
         }
     }
 
-    onSelectSubject(subject: SubjectWithSubjectStudy) {
+    onSelectSubject(subject: SubjectWithSubjectStudy): void {
         if (subject) {
             this.subject = subject;
             this.subjectTypeEnumValue = SubjectType[this.subject.subjectStudy.subjectType];
             this.examinationService
-                .findExaminationsBySubjectId(subject.id)
+                .findExaminationsBySubjectAndStudy(subject.id, study.id)
                 .then(examinations => this.examinations = examinations)
                 .catch((error) => {
                     // TODO: display error
                     console.log("error getting examination list by subject id!");
             });
         }
+    }
+    
+    updateSubjectStudy(subjectStudy: SubjectStudy) {
+        this.subjectService.updateSubjectStudy(this.subject.subjectStudy);
+    }
+
+    createSubjectStudy(subjectStudy: SubjectStudy) {
+        this.subjectService.createSubjectStudy(this.subject.subjectStudy);
     }
 
     getEnum(): void {

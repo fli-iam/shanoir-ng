@@ -6,6 +6,7 @@ import { Subject } from './subject.model';
 import * as AppUtils from '../../utils/app.utils';
 import { HandleErrorService } from '../../shared/utils/handle-error.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { SubjectStudy } from "./subject-study.model";
 
 @Injectable()
 export class SubjectService {
@@ -69,6 +70,21 @@ export class SubjectService {
     update(id: number, subject: Subject): Observable<Subject> {
         return this.http.put<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id, JSON.stringify(subject))
             .map(response => response)
+            .catch(this.handleErrorService.handleError);
+    }
+
+    updateSubjectStudy (subjectStudy: SubjectStudy): Promise<void> {
+        return this.http.put<void>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
+            .toPromise()
+            .catch((error) => {
+                console.error('Error updating relation subject study', error);
+                return Promise.reject(error);
+            });
+    }
+
+    createSubjectStudy (subjectStudy: SubjectStudy): Observable<SubjectStudy> {
+        return this.http.post<void>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL, JSON.stringify(subjectStudy))
+            .map(res => res)
             .catch(this.handleErrorService.handleError);
     }
 }

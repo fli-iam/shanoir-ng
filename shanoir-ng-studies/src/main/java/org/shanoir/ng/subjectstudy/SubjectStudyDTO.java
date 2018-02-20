@@ -9,6 +9,8 @@ import org.shanoir.ng.subject.SubjectType;
  *
  */
 public class SubjectStudyDTO {
+	
+	private Long id;
 
 	private Long subjectId;
 	
@@ -19,6 +21,14 @@ public class SubjectStudyDTO {
 	private SubjectType subjectType;
 	
 	private boolean physicallyInvolved;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	/**
 	 * @return the subjectId
