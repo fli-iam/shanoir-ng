@@ -298,7 +298,7 @@ export class ImportComponent implements OnInit {
             this.subject = subject;
             this.subjectTypeEnumValue = SubjectType[this.subject.subjectStudy.subjectType];
             this.examinationService
-                .findExaminationsBySubjectAndStudy(subject.id, study.id)
+                .findExaminationsBySubjectAndStudy(subject.id, this.study.id)
                 .then(examinations => this.examinations = examinations)
                 .catch((error) => {
                     // TODO: display error
