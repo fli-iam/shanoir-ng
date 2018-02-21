@@ -124,7 +124,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 
 	public String findSubjectOfsepByCenter(final String centerCode);
 	
-	public List<ExaminationDTO> findExaminationsForSubjectStudyRel(final Long subjectId, final Long studyId);
+	public List<ExaminationDTO> findExaminationsForSubjectStudyRel(final Long subjectId, final Long studyId) throws ShanoirStudiesException;
 
 
 }

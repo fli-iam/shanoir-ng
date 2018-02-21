@@ -66,7 +66,12 @@ public class SubjectApiController implements SubjectApi {
 		List<SubjectStudyDTO> subjectStudyList= subjectDTO.getSubjectStudyList();
 		for(SubjectStudyDTO subjectStudyDTO: subjectStudyList){
 			
-			List<ExaminationDTO> examinationDTO = subjectService.findExaminationsForSubjectStudyRel(subjectStudyDTO.getSubjectId(), subjectStudyDTO.getStudyId());
+			List<ExaminationDTO> examinationDTO =null;
+			try {
+				examinationDTO = subjectService.findExaminationsForSubjectStudyRel(subjectStudyDTO.getSubjectId(), subjectStudyDTO.getStudyId());
+			} catch (ShanoirStudiesException e) {
+				LOG.error("Error while requesting for examination list");
+			}
 				
 			subjectStudyDTO.setExaminationDTO(examinationDTO);
 			}

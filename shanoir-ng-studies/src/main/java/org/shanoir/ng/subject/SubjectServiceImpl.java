@@ -347,14 +347,14 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
-	public List<ExaminationDTO> findExaminationsForSubjectStudyRel(Long subjectId, Long studyId) {
+	public List<ExaminationDTO> findExaminationsForSubjectStudyRel(Long subjectId, Long studyId) throws ShanoirStudiesException {
 		ResponseEntity<List<ExaminationDTO>> examinationsResponse = null;
 		try {
 			HttpEntity<Long> entity = null;
 			try {
 				entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
 			} catch (ShanoirException e) {
-				//throw ((Exception) e);
+				throw ((ShanoirStudiesException) e);
 			}
 			examinationsResponse = restTemplate.exchange(
 					microservicesRequestsService.getExaminationMsUrl() + MicroserviceRequestsService.SUBJECT + subjectId +
@@ -363,7 +363,7 @@ public class SubjectServiceImpl implements SubjectService {
 					});
 		} catch (RestClientException e) {
 			LOG.error("Error on examination microservice request", e);
-			//throw new ShanoirDatasetsException("Error while getting study card list", StudiesErrorModelCode.SC_MS_COMM_FAILURE);
+			throw new ShanoirStudiesException("Error while getting study card list", StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
 		
 		List<ExaminationDTO> examinations = null;
@@ -371,7 +371,7 @@ public class SubjectServiceImpl implements SubjectService {
 				|| HttpStatus.NO_CONTENT.equals(examinationsResponse.getStatusCode())) {
 			examinations = examinationsResponse.getBody();
 		} else {
-			//throw new ShanoirStudiesException(StudiesErrorModelCode.SC_MS_COMM_FAILURE);
+			throw new ShanoirStudiesException(StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
 		
 		return examinations;
