@@ -34,7 +34,6 @@ const BACKEND_API_DATASET_MS_URL: string = process.env.BACKEND_API_DATASET_MS_UR
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
 export const BACKEND_API_EXAMINATION_COUNT_URL: string = BACKEND_API_EXAMINATION_URL + '/count';
-export const BACKEND_API_EXAMINATION_ALL_BY_SUBJECT_URL: string = BACKEND_API_EXAMINATION_URL + '/subjects';
 
 // Acquisition equipment http api
 export const BACKEND_API_ACQ_EQUIP_URL: string = BACKEND_API_STUDIES_MS_URL + '/acquisitionequipments';
