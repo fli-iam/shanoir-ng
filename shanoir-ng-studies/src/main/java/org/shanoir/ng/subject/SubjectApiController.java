@@ -12,6 +12,9 @@ import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
+import org.shanoir.ng.subjectstudy.ExaminationDTO;
+import org.shanoir.ng.subjectstudy.SubjectStudy;
+import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +59,19 @@ public class SubjectApiController implements SubjectApi {
 		if (subject == null) {
 			return new ResponseEntity<SubjectDTO>(HttpStatus.NOT_FOUND);
 		}
-		//return new ResponseEntity<Subject>(subject, HttpStatus.OK);
-		return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
+		
+		SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(subject);
+		
+		// Add List of examinations to SubjectStudy relation
+		List<SubjectStudyDTO> subjectStudyList= subjectDTO.getSubjectStudyList();
+		for(SubjectStudyDTO subjectStudyDTO: subjectStudyList){
+			
+			List<ExaminationDTO> examinationDTO = subjectService.findExaminationsForSubjectStudyRel(subjectStudyDTO.getSubjectId(), subjectStudyDTO.getStudyId());
+				
+			subjectStudyDTO.setExaminationDTO(examinationDTO);
+			}
+		
+		return new ResponseEntity<>(subjectDTO, HttpStatus.OK);
 	}
 
 	@Override
@@ -67,6 +81,7 @@ public class SubjectApiController implements SubjectApi {
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
+		
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 

@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
+import org.shanoir.ng.subjectstudy.ExaminationDTO;
 
 /**
  * Subject service.
@@ -122,6 +123,8 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	Subject saveFromJson(File jsonFile) throws ShanoirStudiesException;
 
 	public String findSubjectOfsepByCenter(final String centerCode);
+	
+	public List<ExaminationDTO> findExaminationsForSubjectStudyRel(final Long subjectId, final Long studyId);
 
 
 }

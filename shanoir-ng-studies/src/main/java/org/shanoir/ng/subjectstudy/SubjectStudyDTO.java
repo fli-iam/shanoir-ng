@@ -1,5 +1,7 @@
 package org.shanoir.ng.subjectstudy;
 
+import java.util.List;
+
 import org.shanoir.ng.subject.SubjectType;
 
 /**
@@ -21,6 +23,10 @@ public class SubjectStudyDTO {
 	private SubjectType subjectType;
 	
 	private boolean physicallyInvolved;
+	
+	private List<ExaminationDTO> examinationDTO;
+	
+	
 
 	public Long getId() {
 		return id;
@@ -93,5 +99,23 @@ public class SubjectStudyDTO {
 	public void setPhysicallyInvolved(boolean physicallyInvolved) {
 		this.physicallyInvolved = physicallyInvolved;
 	}
+
+	/**
+	 * @return the examinationDTO
+	 */
+	public List<ExaminationDTO> getExaminationDTO() {
+		return examinationDTO;
+	}
+
+	/**
+	 * @param examinationDTO the examinationDTO to set
+	 */
+	public void setExaminationDTO(List<ExaminationDTO> examinationDTO) {
+		this.examinationDTO = examinationDTO;
+	}
+
+
+	
+	
 
 }

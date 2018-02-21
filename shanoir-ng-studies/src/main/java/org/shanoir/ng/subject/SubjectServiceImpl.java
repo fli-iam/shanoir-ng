@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
+import org.shanoir.ng.study.StudyCardDTO;
 import org.shanoir.ng.study.StudyRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
+import org.shanoir.ng.subjectstudy.ExaminationDTO;
 import org.shanoir.ng.subjectstudy.SubjectStudy;
 import org.shanoir.ng.subjectstudy.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.SubjectStudyRepository;
@@ -24,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -341,5 +345,38 @@ public class SubjectServiceImpl implements SubjectService {
 		String name = subjectRepository.find(centerCode);
 		return name;
 	}
+
+	@Override
+	public List<ExaminationDTO> findExaminationsForSubjectStudyRel(Long subjectId, Long studyId) {
+		ResponseEntity<List<ExaminationDTO>> examinationsResponse = null;
+		try {
+			HttpEntity<Long> entity = null;
+			try {
+				entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
+			} catch (ShanoirException e) {
+				//throw ((Exception) e);
+			}
+			examinationsResponse = restTemplate.exchange(
+					microservicesRequestsService.getExaminationMsUrl() + MicroserviceRequestsService.SUBJECT + subjectId +
+					MicroserviceRequestsService.STUDY + studyId,
+					HttpMethod.GET, entity, new ParameterizedTypeReference<List<ExaminationDTO>>() {
+					});
+		} catch (RestClientException e) {
+			LOG.error("Error on examination microservice request", e);
+			//throw new ShanoirDatasetsException("Error while getting study card list", StudiesErrorModelCode.SC_MS_COMM_FAILURE);
+		}
+		
+		List<ExaminationDTO> examinations = null;
+		if (HttpStatus.OK.equals(examinationsResponse.getStatusCode())
+				|| HttpStatus.NO_CONTENT.equals(examinationsResponse.getStatusCode())) {
+			examinations = examinationsResponse.getBody();
+		} else {
+			//throw new ShanoirStudiesException(StudiesErrorModelCode.SC_MS_COMM_FAILURE);
+		}
+		
+		return examinations;
+	}
+	
+	
 
 }

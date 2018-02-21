@@ -85,5 +85,15 @@ public interface ExaminationService {
 	 * @author yyao
 	 */
 	List<Examination> findBySubjectId(Long subjectId);
+	
+	/**
+	 * Find examinations related to particular subject and study
+	 * 
+	 * @param subjectId: the id of the subject
+	 * @param studyId: the id of the study
+	 * @return list of examinations.
+	 */
+	List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId);
+	
 
 }

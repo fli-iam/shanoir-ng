@@ -220,4 +220,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 		return examinationDb;
 	}
 
+	@Override
+	public List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId) {
+		return examinationRepository.findBySubjectIdAndStudyId(subjectId, studyId);
+	}
+
 }

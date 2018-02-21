@@ -98,6 +98,19 @@ public class ExaminationApiController implements ExaminationApi {
 		return new ResponseEntity<>(examinationMapper.examinationsToSubjectExaminationDTOs(examinations),
 				HttpStatus.OK);
 	}
+	
+	@Override
+	public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectIdStudyId(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
+		if (examinations.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		/*return new ResponseEntity<>(examinationMapper.examinationsToSubjectExaminationDTOs(examinations),
+				HttpStatus.OK);*/
+		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+	}
 
 	@Override
 	public ResponseEntity<Examination> saveNewExamination(

@@ -1,2 +1,3 @@
 .layout { min-width: 510px; }
+.section { background-color: var(--color-b-light); border: 0; border-top: 1px solid var(--grey); margin: 0 -10px; }
 form li > label { display: inline-block; vertical-align: top; width: 280px; }

@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormControl, FormArray } from '@angular/forms';
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
@@ -13,6 +13,10 @@ import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Sex } from '../shared/sex.enum';
 import { HemisphericDominance } from '../shared/hemispheric-dominance.enum';
 import * as shajs from 'sha.js';
+import { StudyService } from '../../studies/shared/study.service';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { SubjectType } from '../shared/subject-type.enum';
+import { SubjectStudy } from '../shared/subject-study.model';
 
 @Component({
     selector: 'subject-detail',
@@ -24,19 +28,23 @@ export class SubjectComponent implements OnInit {
 
     private subject: Subject = new Subject();
     public subjectForm: FormGroup;
+    public subjectStudyForm: FormGroup;
     private subjectId: number;
     public mode: "view" | "edit" | "create";
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
     private imagedObjectCategories: Enum[] = [];
     private sexes: Enum[] = [];
+    private subjectTypes: Enum[] = [];
+    public studies: IdNameObject[];
     private HemisphericDominances: Enum[] = [];
     private isBirthDateValid: boolean = true;
     private selectedBirthDateNormal: IMyDate;
     private isAlreadyAnonymized: boolean;
     private hashLength: number = 14;
-    private firstName : string;
-    private lastName : string;
+    private firstName: string;
+    private lastName: string;
+    private items: any[] = [];
 
     private myDatePickerOptions: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
@@ -45,7 +53,9 @@ export class SubjectComponent implements OnInit {
     };
 
     constructor(private route: ActivatedRoute, private router: Router,
-        private subjectService: SubjectService, private fb: FormBuilder,
+        private subjectService: SubjectService,
+        private studyService: StudyService,
+        private fb: FormBuilder,
         private location: Location, private keycloakService: KeycloakService) {
 
     }
@@ -55,11 +65,13 @@ export class SubjectComponent implements OnInit {
         this.lastName = "";
         this.getSubject();
         this.getImagedObjectCategories();
-        if ( this.mode == 'create') {
+        if (this.mode == 'create') {
             this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         }
         this.getSexes();
         this.getHemisphericDominances();
+        this.getsubjectTypes();
+        this.getStudies();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
@@ -110,6 +122,28 @@ export class SubjectComponent implements OnInit {
         }
     }
 
+    getsubjectTypes(): void {
+        var type = Object.keys(SubjectType);
+        for (var i = 0; i < type.length; i = i + 2) {
+            var newEnum: Enum = new Enum();
+            newEnum.key = type[i];
+            newEnum.value = SubjectType[type[i]];
+            this.subjectTypes.push(newEnum);
+        }
+    }
+
+    getStudies(): void {
+        this.studyService
+            .getStudiesNames()
+            .then(studies => {
+                this.studies = studies;
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting study list!");
+            });
+    }
+
     getHemisphericDominances(): void {
         var hemisphericDominance = Object.keys(HemisphericDominance);
         for (var i = 0; i < hemisphericDominance.length; i = i + 1) {
@@ -131,13 +165,27 @@ export class SubjectComponent implements OnInit {
             'sex': [this.subject.sex],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
-            'personalComments': []
+            'personalComments': [],
+            'listOfStudies': [],
+            'subjectType': [],
+            'subjectStudyIdentifier': []
         });
+
         this.subjectForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
     }
 
+
+    get users(): FormArray {
+        return this.subjectForm.get('subjectStudyList') as FormArray;
+    }
+    addUserField() {
+        this.users.push(new FormControl());
+    }
+    deleteUserField(index: number) {
+        this.users.removeAt(index);
+    }
     onValueChanged(data?: any) {
         this.isAlreadyAnonymized = false;
         if (!this.subjectForm) { return; }
@@ -246,32 +294,48 @@ export class SubjectComponent implements OnInit {
 
 
     setSubjectIdentifier(): void {
-        if((this.subject.imagedObjectCategory.toString() == this.imagedObjectCategories[1].key  || this.subject.imagedObjectCategory.toString() == this.imagedObjectCategories[2].key) && !this.isAlreadyAnonymized)
-        {
+        if ((this.subject.imagedObjectCategory.toString() == this.imagedObjectCategories[1].key || this.subject.imagedObjectCategory.toString() == this.imagedObjectCategories[2].key) && !this.isAlreadyAnonymized) {
             var hash = this.firstName + this.lastName + this.subject.birthDate;
             this.subject.identifier = this.getHash(hash, this.hashLength);
         }
-        else{
+        else {
             var hash = this.subject.name + this.subject.birthDate;
             this.subject.identifier = this.getHash(hash, this.hashLength);
         }
     }
 
 
-      getHash( stringToBeHashed : string, hashLength : number ) : string {
+    getHash(stringToBeHashed: string, hashLength: number): string {
 
         var hash = shajs('sha').update(stringToBeHashed).digest('hex');
         var hex = "";
         hex = hash.substring(0, hashLength);
 
-		return hex;
-    } 
+        return hex;
+    }
 
 
-    
-    setSubjectBirthDateToFirstOfJanuary () : void {
+
+    setSubjectBirthDateToFirstOfJanuary(): void {
         var newDate: Date = new Date(this.subject.birthDate.getFullYear(), 0, 1);
         this.subject.birthDate = newDate;
+    }
+
+    onStudySelectChange(studyId) {
+        var newSubjectStudy: SubjectStudy = new SubjectStudy();
+        newSubjectStudy.physicallyInvolved = false;
+        newSubjectStudy.studyId = studyId;
+
+        if (this.subject.subjectStudyList != null)
+            this.subject.subjectStudyList.push(newSubjectStudy);
+        else {
+            var newsubjectStudyList: SubjectStudy[] = new Array();
+            newsubjectStudyList.push(newSubjectStudy);
+            this.subject.subjectStudyList = newsubjectStudyList;
+        }
+
+        // I want to do something here for new selectedDevice, but what I
+        // got here is always last selection, not the one I just select.
     }
 
 }

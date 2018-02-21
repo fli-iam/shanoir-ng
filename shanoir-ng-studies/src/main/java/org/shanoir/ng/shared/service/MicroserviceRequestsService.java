@@ -19,6 +19,11 @@ public class MicroserviceRequestsService {
 	
 	public static final String CENTERID = "/centerid";
 	
+	public static final String SUBJECT = "/subject/";
+	
+	public static final String STUDY = "/study/";
+	
+	
 	@Value("${ms.url.shanoir-ng-studycards}")
 	private String studycardsMsUrl;
 
@@ -27,6 +32,9 @@ public class MicroserviceRequestsService {
 	
 	@Value("${ms.url.shanoir-ng-import}")
 	private String importMsUrl;
+	
+	@Value("${ms.url.shanoir-ng-examinations}")
+	private String examinationsMsUrl;
 
 	/**
 	 * @return the studycardsMsUrl
@@ -44,6 +52,10 @@ public class MicroserviceRequestsService {
 
 	public String getImportMsUrl() {
 		return importMsUrl;
+	}
+	
+	public String getExaminationMsUrl() {
+		return examinationsMsUrl;
 	}
 
 	public void setImportMsUrl(String importMsUrl) {
