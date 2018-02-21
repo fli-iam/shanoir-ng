@@ -58,6 +58,7 @@ ms.url:
   shanoir-ng-studycards: http://shanoir-ng-datasets/
   shanoir-ng-import: http://shanoir-ng-importer/
   shanoir-ng-users: http://shanoir-ng-users/
+  shanoir-ng-examinations: http://shanoir-ng-datasets/
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-studies.log
@@ -104,6 +105,7 @@ ms.url:
   shanoir-ng-studycards: http://localhost:9906/studycards
   shanoir-ng-import: http://localhost:9903/niftiConverter
   shanoir-ng-users: http://localhost:9901/users
+  shanoir-ng-examinations: http://localhost:9906/examinations
 # logging configuration
 logging:
   file: c:\\Temp\\shanoir-ng\\shanoir-ng-studies.log
