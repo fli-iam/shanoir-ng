@@ -1,7 +1,9 @@
 package org.shanoir.ng.examination;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import org.shanoir.ng.datasetacquisition.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 
 /**
@@ -31,6 +33,8 @@ public class ExaminationDTO {
 	private IdNameDTO subject;
 
 	private Double subjectWeight;
+	
+	private List<ExaminationDatasetAcquisitionDTO> datasetAcquisitions;
 
 	/**
 	 * @return the id
@@ -180,6 +184,14 @@ public class ExaminationDTO {
 	 */
 	public void setSubjectWeight(Double subjectWeight) {
 		this.subjectWeight = subjectWeight;
+	}
+
+	public List<ExaminationDatasetAcquisitionDTO> getDatasetAcquisitions() {
+		return datasetAcquisitions;
+	}
+
+	public void setDatasetAcquisitions(List<ExaminationDatasetAcquisitionDTO> datasetAcquisitions) {
+		this.datasetAcquisitions = datasetAcquisitions;
 	}
 
 }
