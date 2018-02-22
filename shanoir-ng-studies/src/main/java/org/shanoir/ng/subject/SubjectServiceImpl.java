@@ -8,12 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
-import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
-import org.shanoir.ng.study.StudyCardDTO;
 import org.shanoir.ng.study.StudyRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subjectstudy.ExaminationDTO;

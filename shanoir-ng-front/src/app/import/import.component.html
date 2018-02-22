@@ -255,15 +255,26 @@
                     Examination
                     <tool-tip>A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent entity: MR Dataset acquisition.</tool-tip>
                 </legend>
-                <li class="required">
+                <li>
+                    <span>
+                        <input type="radio" [(ngModel)]="examEditionMode" formControlName="examEditionMode" value="select">Select an existing examination
+                        <span class="spacer"></span>
+                        <input type="radio" [(ngModel)]="examEditionMode" formControlName="examEditionMode" value="create">Create a new examination
+                    </span>
+                </li>
+                <li class="required" *ngIf="examEditionMode == 'select'">
                     <label class="required-label">Select an examination</label> 
                     <span class="right-col">
                         <select formControlName="examination" required [(ngModel)]="examination">
-                            <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination.id}} - {{examination.comment}}</option>
+                            <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
                         </select>
-                        <button disabled>details</button>
-                        <button><img src="/assets/images/icons/add.png" />new</button>
+                        <button>details</button>
                     </span>
+                </li>
+                <li>
+                    <div *ngIf="examEditionMode == 'create'">
+                        <button class="right-col" (click)="createUser = true"><img src="/assets/images/icons/add.png"/>create an examination</button>
+                    </div>
                 </li>
             </ol>
         </fieldset>

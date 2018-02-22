@@ -2,7 +2,12 @@ import { ExaminationDatasetAcquisition } from "../../dataset-acquisitions/shared
 
 export class SubjectExamination {
     id: number;
+    centerId: number;
+    centerName: string;
     comment: string;
-    datasetAcquisitions: ExaminationDatasetAcquisition[];
+    note: string;
+    studyName: string;
+    subjectWeight:number;
     examinationDate: Date;
+    datasetAcquisitions: ExaminationDatasetAcquisition[];
 }

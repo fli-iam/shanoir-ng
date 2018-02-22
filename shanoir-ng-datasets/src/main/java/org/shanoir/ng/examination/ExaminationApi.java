@@ -74,7 +74,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/subject/{subjectId}/study/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectIdStudyId(
+	ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 

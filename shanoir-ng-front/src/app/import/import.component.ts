@@ -45,6 +45,7 @@ export class ImportComponent implements OnInit {
     public archive: string;
     public modality: string;
     public subjectEditionMode: "select" | "create" = "select";
+    public examEditionMode: "select" | "create" = "select";
     public patients: PatientDicom[];
     private patientDicom: PatientDicom;
     public studies: Study[];
@@ -77,7 +78,6 @@ export class ImportComponent implements OnInit {
     public studyCardStatus: string;
     public createUser: boolean = false;
 
-
     //TODO: remove after json3 creation
     public examination: SubjectExamination;
 
@@ -105,6 +105,7 @@ export class ImportComponent implements OnInit {
             'fu': new FormControl(),
             'studycard': [this.studycard, Validators.required],
             'subjectEditionMode': new FormControl(),
+            'examEditionMode': new FormControl(),
             'subjectName': new FormControl(),
             'subjectStudyIdentifier': new FormControl(),
             'physicallyInvolved': new FormControl(),
@@ -139,6 +140,7 @@ export class ImportComponent implements OnInit {
         'study': '',
         'studycard': '',
         'subjectEditionMode': '',
+        'examEditionMode': '',
         'subjectName': '',
         'subjectStudyIdentifier': '',
         'physicallyInvolved': '',

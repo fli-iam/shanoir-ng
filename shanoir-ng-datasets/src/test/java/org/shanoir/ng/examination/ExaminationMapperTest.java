@@ -41,10 +41,27 @@ public class ExaminationMapperTest {
 	}
 
 	@Test
+	public void examinationsToSubjectExaminationDTOsTest() {
+		final List<SubjectExaminationDTO> examinationDTOs = examinationMapper
+				.examinationsToSubjectExaminationDTOs(Arrays.asList(createExamination()));
+		Assert.assertNotNull(examinationDTOs);
+		Assert.assertTrue(examinationDTOs.size() == 1);
+		Assert.assertTrue(EXAMINATION_ID.equals(examinationDTOs.get(0).getId()));
+	}
+
+	@Test
 	public void examinationToExaminationDTOTest() {
 		SecurityContextTestUtil.initAuthenticationContext();
 
 		final ExaminationDTO examinationDTO = examinationMapper.examinationToExaminationDTO(createExamination());
+		Assert.assertNotNull(examinationDTO);
+		Assert.assertTrue(EXAMINATION_ID.equals(examinationDTO.getId()));
+	}
+
+	@Test
+	public void examinationToSubjectExaminationDTOTest() {
+		final SubjectExaminationDTO examinationDTO = examinationMapper
+				.examinationToSubjectExaminationDTO(createExamination());
 		Assert.assertNotNull(examinationDTO);
 		Assert.assertTrue(EXAMINATION_ID.equals(examinationDTO.getId()));
 	}

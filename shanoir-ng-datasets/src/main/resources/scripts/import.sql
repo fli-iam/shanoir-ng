@@ -17,7 +17,8 @@ INSERT INTO examination
 VALUES
 	(1, 1, now(), false, 1, 'examination1', 1, 1, 'examination1'),
 	(2, 1, now(), false, 1, 'examination2', 1, 2, 'examination2'),
-	(3, 1, now(), false, 1, 'examination3', 1, 3, 'examination3');
+	(3, 1, now(), false, 1, 'examination3', 1, 3, 'examination3'),
+	(4, 1, now(), false, 1, 'examination4', 2, 1, 'examination4');
 
 INSERT INTO mr_protocol_metadata
 	(id, name)

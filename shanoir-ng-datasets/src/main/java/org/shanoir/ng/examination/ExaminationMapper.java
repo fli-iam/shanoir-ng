@@ -27,6 +27,15 @@ public interface ExaminationMapper {
 	 */
 	List<ExaminationDTO> examinationsToExaminationDTOs(List<Examination> examinations);
 
+	/**
+	 * Map list of @Examination to list of @SubjectExaminationDTO.
+	 * 
+	 * @param examination
+	 *            examination to map.
+	 * @return list of subject examination DTO.
+	 */
+	List<SubjectExaminationDTO> examinationsToSubjectExaminationDTOs(List<Examination> examinations);
+
 	@Mappings({ @Mapping(target = "centerName", ignore = true), @Mapping(target = "studyName", ignore = true),
 			@Mapping(target = "subject", ignore = true) })
 	/**
@@ -37,5 +46,14 @@ public interface ExaminationMapper {
 	 * @return examination DTO.
 	 */
 	ExaminationDTO examinationToExaminationDTO(Examination examination);
+
+	/**
+	 * Map a @Examination to a @SubjectExaminationDTO.
+	 * 
+	 * @param examination
+	 *            examination to map.
+	 * @return subject examination DTO.
+	 */
+	SubjectExaminationDTO examinationToSubjectExaminationDTO(Examination examination);
 
 }
