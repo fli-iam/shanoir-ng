@@ -62,6 +62,12 @@ logging:
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
+backup:
+  dicom:
+    server:
+      host: localhost
+      web:
+        port: 8080
 
 ---
 

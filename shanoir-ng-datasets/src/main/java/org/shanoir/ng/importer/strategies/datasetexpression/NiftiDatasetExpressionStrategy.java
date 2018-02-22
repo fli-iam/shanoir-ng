@@ -8,7 +8,9 @@ import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.processing.DatasetProcessingType;
+import org.springframework.stereotype.Component;
 
+@Component
 public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy {
 
 	@Override

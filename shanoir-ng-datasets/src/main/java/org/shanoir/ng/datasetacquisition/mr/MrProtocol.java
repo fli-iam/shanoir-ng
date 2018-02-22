@@ -122,7 +122,7 @@ public class MrProtocol extends AbstractGenericItem {
 	private Integer numberOfTemporalPositions;
 
 	/** Origin metadata. */
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	private MrProtocolMetadata originMetadata;
 
 	/** From (0018,5100) Patient position. */

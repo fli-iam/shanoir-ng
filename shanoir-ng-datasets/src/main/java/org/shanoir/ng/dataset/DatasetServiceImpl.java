@@ -1,6 +1,5 @@
 package org.shanoir.ng.dataset;
 
-import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.CtDatasetRepository;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -123,18 +122,18 @@ public class DatasetServiceImpl implements DatasetService<Dataset> {
 	 * @return false if it fails, true if it succeed.
 	 */
 	private boolean updateShanoirOld(final Dataset dataset) {
-		try {
-			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.datasetQueueOut().getName(),
-					new ObjectMapper().writeValueAsString(dataset));
-			return true;
-		} catch (AmqpException e) {
-			LOG.error("Cannot send dataset " + dataset.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.datasetQueueOut().getName(), e);
-		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send dataset " + dataset.getId()
-					+ " save/update because of an error while serializing dataset.", e);
-		}
+//		try {
+//			LOG.info("Send update to Shanoir Old");
+//			rabbitTemplate.convertAndSend(RabbitMqConfiguration.datasetQueueOut().getName(),
+//					new ObjectMapper().writeValueAsString(dataset));
+//			return true;
+//		} catch (AmqpException e) {
+//			LOG.error("Cannot send dataset " + dataset.getId() + " save/update to Shanoir Old on queue : "
+//					+ RabbitMqConfiguration.datasetQueueOut().getName(), e);
+//		} catch (JsonProcessingException e) {
+//			LOG.error("Cannot send dataset " + dataset.getId()
+//					+ " save/update because of an error while serializing dataset.", e);
+//		}
 		return false;
 	}
 

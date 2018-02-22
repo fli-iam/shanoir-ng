@@ -8,64 +8,67 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author atouboul
  *
  */
+public class Serie {
 
-public class Serie   {
-	  @JsonProperty("selected")
-	  private Boolean selected = null;
+	@JsonProperty("selected")
+	private Boolean selected = null;
 
-	  @JsonProperty("seriesInstanceUID")
-	  private String seriesInstanceUID = null;
+	@JsonProperty("seriesInstanceUID")
+	private String seriesInstanceUID = null;
 
-	  @JsonProperty("modality")
-	  private String modality = null;
+	@JsonProperty("modality")
+	private String modality = null;
 
-	  @JsonProperty("protocolName")
-	  private String protocolName = null;
+	@JsonProperty("protocolName")
+	private String protocolName = null;
 
-	  @JsonProperty("seriesDescription")
-	  private String seriesDescription = null;
+	@JsonProperty("seriesDescription")
+	private String seriesDescription = null;
 
-	  @JsonProperty("seriesDate")
-	  private String seriesDate = null;
+	@JsonProperty("seriesDate")
+	private String seriesDate = null;
 
-	  @JsonProperty("seriesNumber")
-	  private Integer seriesNumber = null;
-	  
- 	  @JsonProperty("sequenceName")
-	  private String sequenceName;
+	@JsonProperty("seriesNumber")
+	private Integer seriesNumber = null;
 
-	  @JsonProperty("numberOfSeriesRelatedInstances")
-	  private Integer numberOfSeriesRelatedInstances = null;
+	@JsonProperty("sequenceName")
+	private String sequenceName;
 
-	  @JsonProperty("sopClassUID")
-	  private String sopClassUID = null;
+	@JsonProperty("numberOfSeriesRelatedInstances")
+	private Integer numberOfSeriesRelatedInstances = null;
 
-	  @JsonProperty("equipment")
-	  private EquipmentDicom equipment = null;
+	@JsonProperty("sopClassUID")
+	private String sopClassUID = null;
 
-	  @JsonProperty("isCompressed")
-	  private Boolean isCompressed = null;
+	@JsonProperty("equipment")
+	private EquipmentDicom equipment = null;
 
-	  @JsonProperty("isMultiFrame")
-	  private Boolean isMultiFrame = null;
-	  
-	  @JsonProperty("multiFrameCount")
-	  private Integer multiFrameCount;
-	  
-	  @JsonProperty("nonImages")
-	  private List<Object> nonImages = null;
+	@JsonProperty("isCompressed")
+	private Boolean isCompressed = null;
 
-	  @JsonProperty("nonImagesNumber")
-	  private Integer nonImagesNumber = null;
+	@JsonProperty("isMultiFrame")
+	private Boolean isMultiFrame = null;
 
-	  @JsonProperty("images")
-	  private List<Image> images = null;
+	@JsonProperty("multiFrameCount")
+	private Integer multiFrameCount;
 
-	  @JsonProperty("imagesNumber")
-	  private Integer imagesNumber = null;
-	  
-	  @JsonProperty("datasets")
-	  private List<Dataset> datasets = null;
+	@JsonProperty("isEnhancedMR")
+	private Boolean isEnhancedMR;
+
+	@JsonProperty("nonImages")
+	private List<Object> nonImages = null;
+
+	@JsonProperty("nonImagesNumber")
+	private Integer nonImagesNumber = null;
+
+	@JsonProperty("images")
+	private List<Image> images = null;
+
+	@JsonProperty("imagesNumber")
+	private Integer imagesNumber = null;
+
+	@JsonProperty("datasets")
+	private List<Dataset> datasets = null;
 
 	public Boolean getSelected() {
 		return selected;
@@ -210,9 +213,7 @@ public class Serie   {
 	public void setMultiFrameCount(Integer multiFrameCount) {
 		this.multiFrameCount = multiFrameCount;
 	}
-	
-	
-	 
+
 	public String getSequenceName() {
 		return sequenceName;
 	}
@@ -225,6 +226,13 @@ public class Serie   {
 	public DatasetFile getFirstDatasetFileForCurrentSerie() {
 		return getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);
 	}
-	  
 
+	public Boolean getIsEnhancedMR() {
+		return isEnhancedMR;
+	}
+
+	public void setIsEnhancedMR(Boolean isEnhancedMR) {
+		this.isEnhancedMR = isEnhancedMR;
+	}
+	
 }
