@@ -78,7 +78,6 @@ public class ImporterService {
 			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
 			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 			datasetAcquisition.setExamination(examination);
-			datasetAcquisition.setDatasets(new ArrayList<Dataset>());
 			datasetAcquisitionRepository.save(datasetAcquisition);
 		}
 	}

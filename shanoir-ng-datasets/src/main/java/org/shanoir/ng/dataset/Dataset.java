@@ -99,7 +99,7 @@ public abstract class Dataset extends AbstractGenericItem {
 	private List<InputOfDatasetProcessing> inputOfDatasetProcessings;
 
 	/** Origin metadata. */
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	private DatasetMetadata originMetadata;
 
 	/**
@@ -124,7 +124,7 @@ public abstract class Dataset extends AbstractGenericItem {
 	private Long subjectId;
 
 	/** Metadata updated by study card. */
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	private DatasetMetadata updatedMetadata;
 
 	/**

@@ -4,6 +4,7 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.DatasetExpression;
+import org.shanoir.ng.dataset.DatasetMetadata;
 import org.shanoir.ng.dataset.ProcessedDatasetType;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dicom.DicomProcessing;
@@ -12,7 +13,7 @@ import org.shanoir.ng.importer.dto.DatasetWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionFactory;
+import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionStrategy;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -28,6 +29,9 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 
 	@Autowired
 	DicomProcessing dicomProcessing;
+	
+	@Autowired
+	DatasetExpressionContext datasetExpressionContext;
 
 	@Override
 	public DatasetWrapper<MrDataset> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
@@ -95,6 +99,9 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		final String serieDescription = dicomAttributes.getString(Tag.SeriesDescription);
 		final String modality = dicomAttributes.getString(Tag.Modality);
 
+		DatasetMetadata datasetMetadata = new DatasetMetadata();
+		mrDataset.setOriginMetadata(datasetMetadata);
+		
 		// set the series description as the dataset comment & name
 		if (serieDescription != null && !"".equals(serieDescription)) {
 			mrDataset.getOriginMetadata().setName(computeDatasetName(serieDescription, datasetIndex));
@@ -132,16 +139,13 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		 * 
 		 **/
 		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-			DatasetExpressionStrategy datasetExpressionStrategy = DatasetExpressionFactory.getDatasetExpressionStrategy(expressionFormat.getType());
-			DatasetExpression datasetExpression = datasetExpressionStrategy.generateDatasetExpression(serie,importJob,expressionFormat);
-			
-			
+			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
+			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);	
 
 			mrDataset.getEchoTimes().putAll(datasetExpression.getEchoTimes());
 			mrDataset.getRepetitionTimes().putAll(datasetExpression.getRepetitionTimes());
 			mrDataset.getFlipAngles().putAll(datasetExpression.getFlipAngles());
 			mrDataset.getInversionTimes().putAll(datasetExpression.getInversionTimes());
-			
 			
 			if (datasetExpression.getFirstImageAcquisitionTime() != null) {
 				if (mrDataset.getFirstImageAcquisitionTime() == null) {
