@@ -1,10 +1,9 @@
 package org.shanoir.ng.examination;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.ExaminationDatasetAcquisitionDTO;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 
 /**
  * Simple examination DTO with information for subject.
@@ -14,97 +13,19 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
  */
 public class SubjectExaminationDTO {
 
-	private Long id;
-	
-	private Long centerId;
-
-	private String centerName;
-
 	private String comment;
 
-	private LocalDate examinationDate;
-
-	private String note;
-
-	private Long studyId;
-
-	private String studyName;
-
-	private IdNameDTO subject;
-
-	private Double subjectWeight;
-	
 	private List<ExaminationDatasetAcquisitionDTO> datasetAcquisitions;
 
-	public Long getCenterId() {
-		return centerId;
-	}
+	private Date examinationDate;
 
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
-
-	public String getCenterName() {
-		return centerName;
-	}
-
-	public void setCenterName(String centerName) {
-		this.centerName = centerName;
-	}
-
-	public String getNote() {
-		return note;
-	}
-
-	public void setNote(String note) {
-		this.note = note;
-	}
-
-	public Long getStudyId() {
-		return studyId;
-	}
-
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
-
-	public String getStudyName() {
-		return studyName;
-	}
-
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
-	}
-
-	public IdNameDTO getSubject() {
-		return subject;
-	}
-
-	public void setSubject(IdNameDTO subject) {
-		this.subject = subject;
-	}
-
-	public Double getSubjectWeight() {
-		return subjectWeight;
-	}
-
-	public void setSubjectWeight(Double subjectWeight) {
-		this.subjectWeight = subjectWeight;
-	}
-
-	public void setExaminationDate(LocalDate examinationDate) {
-		this.examinationDate = examinationDate;
-	}
+	private Long id;
 
 	/**
 	 * @return the comment
 	 */
 	public String getComment() {
 		return comment;
-	}
-
-	public LocalDate getExaminationDate() {
-		return examinationDate;
 	}
 
 	/**
@@ -128,6 +49,21 @@ public class SubjectExaminationDTO {
 	 */
 	public void setDatasetAcquisitions(List<ExaminationDatasetAcquisitionDTO> datasetAcquisitions) {
 		this.datasetAcquisitions = datasetAcquisitions;
+	}
+
+	/**
+	 * @return the examinationDate
+	 */
+	public Date getExaminationDate() {
+		return examinationDate;
+	}
+
+	/**
+	 * @param examinationDate
+	 *            the examinationDate to set
+	 */
+	public void setExaminationDate(Date examinationDate) {
+		this.examinationDate = examinationDate;
 	}
 
 	/**
