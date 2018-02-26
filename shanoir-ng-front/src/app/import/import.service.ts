@@ -17,11 +17,11 @@ export class ImportService {
             .catch(this.handleErrorService.handleError);
     }
 
-    selectSeries(selectedSeries: PatientDicom[]): void {
-        this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_SELECT_SERIES_URL, JSON.stringify(selectedSeries))
+    startImportJob(importJob: ImportJob): void {
+        this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
             .toPromise()
             .catch((error) => {
-                console.error('Error while sending select series in json fromat', error);
+                console.error('Error while starting import job', error);
                 return Promise.reject(error.message || error);
             });
     }

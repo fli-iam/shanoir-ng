@@ -18,7 +18,7 @@ public class SimpleStudyCardDTO {
 	
 	private IdNameDTO center;
 	
-	private String niftiConverterName;
+	private IdNameDTO niftiConverterName;
 
 	/**
 	 * Simple constructor.
@@ -88,14 +88,14 @@ public class SimpleStudyCardDTO {
 	/**
 	 * @return the niftiConverterName
 	 */
-	public String getNiftiConverterName() {
+	public IdNameDTO getNiftiConverter() {
 		return niftiConverterName;
 	}
 
 	/**
 	 * @param niftiConverterName the niftiConverterName to set
 	 */
-	public void setNiftiConverterName(String niftiConverterName) {
+	public void setNiftiConverter(IdNameDTO niftiConverterName) {
 		this.niftiConverterName = niftiConverterName;
 	}
 

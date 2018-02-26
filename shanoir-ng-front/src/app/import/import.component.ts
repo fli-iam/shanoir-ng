@@ -34,7 +34,7 @@ const mockStudy: any = require('../../assets/mock-study.json');
 export class ImportComponent implements OnInit {
     @ViewChild('papayaModal') papayaModal: ModalComponent;
     // @ViewChild('studyModal') studyModal: ModalComponent;
-    // @Output() closing: EventEmitter<any> = new EventEmitter();
+    @ViewChild('subjectModal') subjectModal: ModalComponent;
     
     public importForm: FormGroup;
     private extensionError: Boolean;
@@ -48,6 +48,7 @@ export class ImportComponent implements OnInit {
     public examEditionMode: "select" | "create" = "select";
     public patients: PatientDicom[];
     private patientDicom: PatientDicom;
+    private workFolder : string;
     public studies: Study[];
     public study: Study;
     public studycards: StudyCard[];
@@ -56,13 +57,15 @@ export class ImportComponent implements OnInit {
     public subject: SubjectWithSubjectStudy;
     private subjectTypeEnumValue: String;
     private subjectTypes: Enum[] = [];
+    private subjectStudy: SubjectStudy;
     public examinations: SubjectExamination[];
     public seriesSelected: boolean = false;
     private selectedSeries: PatientDicom;
     private detailedPatient: Object;
     public dsAcqOpened: boolean = false;
     private detailedSerie: Object;
-    public niftiConverterName: string;
+    public niftiConverter: IdNameObject;
+    public importJob: ImportJob = new ImportJob();
     
     public tab_modality_open: boolean = true;
     public tab_upload_open: boolean = true;
@@ -76,7 +79,6 @@ export class ImportComponent implements OnInit {
     public niftiStatus: string;
     public studyCardProgress: number = 0;
     public studyCardStatus: string;
-    public createUser: boolean = false;
 
     //TODO: remove after json3 creation
     public examination: SubjectExamination;
@@ -90,13 +92,13 @@ export class ImportComponent implements OnInit {
         this.getEnum();
         this.buildForm();
         //TODO: clean json mock import after dev 
-        this.archive = "file uploaded";
-        this.selectedSeries = mockImport.patients[0];
-        this.patients = mockImport.patients;
+        // this.archive = "file uploaded";
+        // this.selectedSeries = mockImport.patients[0];
+        // this.patients = mockImport.patients;
         // this.validateSeriesSelected();
         //TODO: clean json mock study after dev
-        this.seriesSelected = true;
-        this.prepareStudyStudycard(mockStudy);
+        // this.seriesSelected = true;
+        // this.prepareStudyStudycard(mockStudy);
     }
 
     buildForm(): void {
@@ -183,6 +185,7 @@ export class ImportComponent implements OnInit {
             .subscribe((patientDicomList: ImportJob) => {
                 let modalityOfDicomDir:any = patientDicomList.patients[0].studies[0].series[0].modality.toString();
                 this.modality = modalityOfDicomDir;
+                this.workFolder = patientDicomList.workFolder;
                 this.patients = patientDicomList.patients;
             }, (err: String) => {
                 if (err.indexOf("DICOMDIR is missing") != -1) {
@@ -225,9 +228,6 @@ export class ImportComponent implements OnInit {
     validateSeriesSelected () : void {
         this.findStudiesWithStudyCardsByUserAndEquipment(this.selectedSeries.studies[0].series[0].equipment);
     }
-
-    // TODO: to be called later according to the new spec
-    // this.importService.selectSeries(this.selectedSeries);
 
     findStudiesWithStudyCardsByUserAndEquipment(equipment: EquipmentDicom): void {
         this.studyService
@@ -281,7 +281,7 @@ export class ImportComponent implements OnInit {
         if (studycard) {
             if (studycard.compatible) {
                 this.studycardNotCompatibleError = false;
-                this.niftiConverterName = studycard.niftiConverterName;
+                this.niftiConverter = studycard.niftiConverter;
                 this.studyService
                     .findSubjectsByStudyId(this.study.id)
                     .then(subjects => this.subjects = subjects)
@@ -314,7 +314,9 @@ export class ImportComponent implements OnInit {
     }
 
     createSubjectStudy(subjectStudy: SubjectStudy) {
-        this.subjectService.createSubjectStudy(this.subject.subjectStudy);
+        this.subjectStudy.studyId = this.study.id;
+        this.subjectStudy.subjectId = this.subject.id;
+        this.subjectService.createSubjectStudy(this.subjectStudy);
     }
 
     getEnum(): void {
@@ -327,9 +329,28 @@ export class ImportComponent implements OnInit {
         }
     }
 
+    startImportJob (): void {
+        if (this.study != null && this.studycard != null && this.subject != null && this.examination != null) {
+            this.importJob.patients = new Array<PatientDicom>();
+            this.importJob.patients.push(this.selectedSeries);
+            this.importJob.workFolder = this.workFolder;
+            this.importJob.fromDicomZip = true;
+            this.importJob.frontSubjectId = this.subject.id;
+            this.importJob.examinationId = this.examination.id;
+            this.importJob.frontStudyId = this.study.id;
+            this.importJob.frontStudyCardId = this.studycard.id;
+            this.importJob.frontConverterId = this.studycard.niftiConverter.id;
+            this.importService.startImportJob(this.importJob);
+        }
+    }
+
     // closePopin() {
     //     this.studyModal.hide();
     // }
+
+    closeSubjectPopin(): void {
+        this.subjectModal.hide();
+    }
 
     closeEditSubject(subject: any) {
         // Add the subject to the select box and select it
@@ -339,7 +360,6 @@ export class ImportComponent implements OnInit {
             subject.selected = true;
             this.subjects.push(subject);
         }
-        this.createUser = false;
     }
 
     // passStudyId (studyId: number) {

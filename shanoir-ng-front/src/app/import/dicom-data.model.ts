@@ -2,6 +2,7 @@ export class ImportJob {
     fromDicomZip: boolean;
     fromShanoirUploader: boolean;
     fromPacs: boolean;
+    workFolder: string;
     patients: PatientDicom[];
     frontSubjectId: number;
     frontExperimentalGroupOfSubjectId: number;

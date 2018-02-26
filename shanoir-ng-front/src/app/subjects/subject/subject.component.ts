@@ -31,6 +31,8 @@ export class SubjectComponent implements OnInit {
     public subjectStudyForm: FormGroup;
     private subjectId: number;
     public mode: "view" | "edit" | "create";
+    @Input() modeFromImport: "view" | "edit" | "create";
+    @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
     private imagedObjectCategories: Enum[] = [];
@@ -61,6 +63,7 @@ export class SubjectComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        if (this.modeFromImport) { this.mode = this.modeFromImport; }
         this.firstName = "";
         this.lastName = "";
         this.getSubject();
@@ -82,11 +85,12 @@ export class SubjectComponent implements OnInit {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let subjectId = queryParams['id'];
-                let mode = queryParams['mode'];
-                if (mode) {
-                    this.mode = mode;
+                if (!this.modeFromImport) {
+                    let mode = queryParams['mode'];
+                    if (mode) {
+                        this.mode = mode;
+                    }
                 }
-
                 if (subjectId && this.mode !== 'create') {
                     // view or edit mode
                     this.subjectId = subjectId;

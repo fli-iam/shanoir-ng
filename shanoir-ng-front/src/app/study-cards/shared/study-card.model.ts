@@ -5,5 +5,5 @@ export class StudyCard {
     name: string;
     compatible: boolean;
     center: IdNameObject;
-    niftiConverterName: string;
+    niftiConverter: IdNameObject;
 }

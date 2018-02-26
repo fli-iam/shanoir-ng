@@ -155,16 +155,16 @@
                     <label class="required-label">Select an existing research study</label> 
                     <span class="right-col">
                         <select formControlName="study" required [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)">
-                            <option *ngFor="let study of studies" [ngValue]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study.name}}</option>
+                            <option *ngFor="let study of studies" [ngValue]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study?.name}}</option>
                         </select>
-                        <button i18n="Import|StudyDetailsButton label" *ngIf="study != null" [routerLink]="['/study']" [queryParams]="{mode: 'view', id: study.id}">details</button>
+                        <a i18n="Import|StudyDetails label" *ngIf="study != null" target="_blank" [routerLink]="['/study']" [queryParams]="{mode: 'view', id: study?.id}">details</a>
                     </span>
                 </li>
                 <li class="required">
                     <label class="required-label">Select an existing study card</label> 
                     <span class="right-col">
                         <select formControlName="studycard" required [(ngModel)]="studycard" (ngModelChange)="onSelectStudycard($event)">
-                            <option *ngFor="let studycard of studycards" [ngValue]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard.name}}</option>
+                            <option *ngFor="let studycard of studycards" [ngValue]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</option>
                         </select>
                         <button disabled>details</button>
                         <button disabled>edit</button>
@@ -178,7 +178,7 @@
                 </li>
                 <li class="required">
                     <label>Nifti converter</label> 
-                    <span class="right-col">{{niftiConverterName}}</span>
+                    <span class="right-col">{{niftiConverter?.name}}</span>
                 </li>
             </ol>
 
@@ -198,9 +198,9 @@
                     <label class="required-label">Select a subject</label> 
                     <span class="right-col">
                         <select formControlName="subject" required [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)">
-                            <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
+                            <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
                         </select>
-                        <button (click)="createUser = true" [disabled]="subject == ''">details</button>
+                        <a i18n="Import|SubjectDetails label" *ngIf="subject != null" target="_blank" [routerLink]="['/subject']" [queryParams]="{mode: 'view', id: subject?.id}">details</a>
                     </span>
                 </li>
                 <!-- TODO: Subject Group -->
@@ -238,14 +238,14 @@
                                 <td class="label">Subject Type</td>
                                 <td class="value">
                                     <select id="subjectType" formControlName="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" (change)="updateSubjectStudy($event)">
-                                        <option *ngFor="let subjectType of subjectTypes" [ngValue]="subjectType.key">{{subjectType.value}}</option>
+                                        <option *ngFor="let subjectType of subjectTypes" [ngValue]="subjectType.key">{{subjectType?.value}}</option>
                                     </select>
                                 </td>
                             </tr>
                         </div>
                     </div>
-                    <div *ngIf="subjectEditionMode == 'create'">
-                        <button class="right-col" (click)="createUser = true"><img src="/assets/images/icons/add.png"/>create a subject</button>
+                    <div *ngIf="subjectEditionMode == 'create' && study != null">
+                        <button class="right-col" (click)="subjectModal.show(); createSubjectStudy($event);"><img src="/assets/images/icons/add.png"/>create a subject</button>
                     </div>
                 </li>
             </ol>
@@ -268,15 +268,45 @@
                         <select formControlName="examination" required [(ngModel)]="examination">
                             <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
                         </select>
-                        <button>details</button>
+                        <a i18n="Import|ExaminationDetails label" *ngIf="examination != null" target="_blank" [routerLink]="['/examination']" [queryParams]="{mode: 'view', id: examination?.id}">details</a>
                     </span>
                 </li>
                 <li>
-                    <div *ngIf="examEditionMode == 'create'">
-                        <button class="right-col" (click)="createUser = true"><img src="/assets/images/icons/add.png"/>create an examination</button>
+                    <div class="preview float-none" *ngIf="examEditionMode == 'create' && study != null && subject != null">
+                        <div class="preview-data">
+                            <tr class="item">
+                                <td i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</td>
+                                <td class="value">{{study.name}}</td>
+                            </tr>
+                            <tr class="item">
+                                <td i18n="Examination detail|Subject label@@examinationDetailSubject" class="required-label">Subject</td>
+                                <td class="value">{{subject.name}}</td>
+                            </tr>
+                            <tr class="item">
+                                <td i18n="Examination detail|Center label@@examinationDetailCenter" class="required-label">Center</td>
+                                <td class="value">{{studycard.center.name}}</td>
+                            </tr>
+                            <tr>
+                                <td i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</td>
+                                <td class="value">
+                                    <my-date-picker id="examinationDate" [options]="myDatePickerOptions" formControlName="examinationDate" [(ngModel)]="examinationDate"
+                                    (dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
+                                    </my-date-picker>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td i18n="Examination detail|Comment label@@examinationDetailComment" class="label">Comment</td>
+                                <td class="value">
+                                    <input type="text" id="comment" formControlName="comment" [(ngModel)]="examination.comment"/>
+                                </td>
+                            </tr>
+                        </div>
                     </div>
                 </li>
             </ol>
+            <div class="commands">
+                <button i18n="Import|NextButton label" (click)="startImportJob($event)">Next</button>
+            </div>
         </fieldset>
     </div>
 
@@ -354,8 +384,14 @@
     </div>
 </app-modal> -->
 
-<div class="overlay" *ngIf="createUser">
+<!-- <div class="overlay" *ngIf="createUser">
     <div class="content">
         <user-detail (closing)="closeEditSubject($event)"></user-detail>
     </div>
-</div>
+</div> -->
+
+<app-modal modalDialogId="subjectModal" #subjectModal>
+    <div class="app-modal-body">
+      <subject-detail [modeFromImport]="'create'" (closing)="closeSubjectPopin()"></subject-detail>
+    </div>
+</app-modal> 

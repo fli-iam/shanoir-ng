@@ -215,14 +215,14 @@ public class StudyServiceImpl implements StudyService {
 				LOG.error("Error on import microservice request for getting nifti converter by id", e);
 				throw new ShanoirStudiesException("Error while getting niftiConverter", StudiesErrorModelCode.IMPORT_MS_COMM_FAILURE);
 			}
-			String niftiConverterName;
+			IdNameDTO niftiConverter;
 			if (HttpStatus.OK.equals(studyCardResponse.getStatusCode())
 					|| HttpStatus.NO_CONTENT.equals(studyCardResponse.getStatusCode())) {
-				niftiConverterName = niftiConverterResponse.getBody().getName();
+				niftiConverter = new IdNameDTO(niftiConverterResponse.getBody().getId(), niftiConverterResponse.getBody().getName());
 			} else {
 				throw new ShanoirStudiesException(StudiesErrorModelCode.IMPORT_MS_COMM_FAILURE);
 			}
-			simpleStudyCard.setNiftiConverterName(niftiConverterName);
+			simpleStudyCard.setNiftiConverter(niftiConverter);
 			
 			studyCardsmap.put(studyCard.getId(), simpleStudyCard);
 		}
