@@ -240,5 +240,13 @@
 				</span>
 			</div>
 		</div>
+
+ 		<div class="layout right" *ngIf="mode=='view'">
+				<span class="right-col">
+					<div class="subject-data" i18n="Subject data|Title@@subjectDetailDataTitle">Data</div>
+				</span>
+				 <subject-tree [subject]="subject" [studies]="studies"></subject-tree> 
+		</div> 
+
 	</form>
 </div>

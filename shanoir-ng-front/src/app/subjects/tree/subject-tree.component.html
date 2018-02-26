@@ -1,0 +1,13 @@
+<ng-template ngFor let-studySubjectRel [ngForOf]="subject.subjectStudyList">
+            <node [label]="studySubjectRel | studyNamePipe: studies" [pictoUrl]="folderIconPath" [nodeParams]="studySubjectRel" [dataRequest]="true"
+            (openClick)="getStudyDetails($event)">
+            <ng-template ngFor let-examination [ngForOf]="studySubjectRel.examinations">
+                 <node [label]="examination | subjectExaminationLabel" [pictoUrl]="listIconPath" link="true" (labelClick)="showExaminationDetails(examination.id)">
+                    <node *ngFor="let acquisition of examination.datasetAcquisitions" [label]="acquisition.name" [pictoUrl]="xRay2IconPath">
+                        <node *ngFor="let dataset of acquisition.datasets" [label]="dataset.name" [pictoUrl]="usersIconPathbrainIconPath">
+                        </node>
+                    </node>
+                </node> 
+            </ng-template>
+        </node>
+</ng-template>
