@@ -75,6 +75,8 @@ import { CoilService } from './coils/shared/coil.service';
 import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
 import { SubjectService } from './subjects/shared/subject.service';
 import { SubjectComponent } from './subjects/subject/subject.component';
+import { SubjectTreeComponent } from './subjects/tree/subject-tree.component';
+import { StudyNamePipe } from './subjects/shared/study-name.pipe';
 
 
 @NgModule({
@@ -133,7 +135,9 @@ import { SubjectComponent } from './subjects/subject/subject.component';
         CoilComponent,
         CoilListComponent,
         SubjectListComponent,
-        SubjectComponent
+        SubjectComponent,
+        SubjectTreeComponent,
+        StudyNamePipe
     ],
     entryComponents: [
         ConfirmDialogComponent
