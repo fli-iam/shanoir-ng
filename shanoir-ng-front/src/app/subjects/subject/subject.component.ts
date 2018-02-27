@@ -171,13 +171,15 @@ export class SubjectComponent implements OnInit {
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
             'personalComments': [],
             'listOfStudies': [],
-            'subjectType': [],
-            'subjectStudyIdentifier': []
         });
 
         this.subjectForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
+
+        this.subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
+            this.isAlreadyAnonymized = false;
+          });
     }
 
 
@@ -191,7 +193,6 @@ export class SubjectComponent implements OnInit {
         this.users.removeAt(index);
     }
     onValueChanged(data?: any) {
-        this.isAlreadyAnonymized = false;
         if (!this.subjectForm) { return; }
         const form = this.subjectForm;
         for (const field in this.formErrors) {
