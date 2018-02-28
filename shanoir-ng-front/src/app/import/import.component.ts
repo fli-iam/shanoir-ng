@@ -99,9 +99,9 @@ export class ImportComponent implements OnInit {
         this.buildForm();
         //TODO: clean json mock import after dev 
 
-        this.archive = "file uploaded";
-        this.selectedSeries = mockImport.patients[0];
-        this.patients = mockImport.patients;
+        // this.archive = "file uploaded";
+        // this.selectedSeries = mockImport.patients[0];
+        // this.patients = mockImport.patients;
         // this.validateSeriesSelected();
         //TODO: clean json mock study after dev
         // this.seriesSelected = true;
