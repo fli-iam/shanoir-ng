@@ -189,7 +189,7 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr *ngFor="let relSubjectStudy of subject.subjectStudyList">
+									<tr *ngFor="let relSubjectStudy of subject.subjectStudyList; let in = index">
 										<td align="center">
 
 											<div *ngFor="let study of studies">
@@ -200,8 +200,7 @@
 
 										</td>
 										<td align="center">
-
-											<input type="text" id="subjectStudyIdentifier" formControlName="subjectStudyIdentifier" [(ngModel)]="relSubjectStudy.subjectStudyIdentifier"
+											<input type="text" id="subjectStudyIdentifier-{{in}}" [(ngModel)]="relSubjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"
 											/>
 										</td>
 										<td align="center">
@@ -210,7 +209,7 @@
 											/>
 										</td>
 										<td align="center">
-											<select id="subjectType" formControlName="subjectType" [(ngModel)]="relSubjectStudy.subjectType">
+											<select id="subjectType-{{in}}" [(ngModel)]="relSubjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
 												<option *ngFor="let subjectType of subjectTypes" [value]="subjectType.key">{{subjectType.value}}</option>
 											</select>
 										</td>
@@ -241,12 +240,12 @@
 			</div>
 		</div>
 
- 		<div class="layout right" *ngIf="mode=='view'">
-				<span class="right-col">
-					<div class="subject-data" i18n="Subject data|Title@@subjectDetailDataTitle">Data</div>
-				</span>
-				 <subject-tree [subject]="subject" [studies]="studies"></subject-tree> 
-		</div> 
+		<div class="layout right" *ngIf="mode=='view'">
+			<span class="right-col">
+				<div class="subject-data" i18n="Subject data|Title@@subjectDetailDataTitle">Data</div>
+			</span>
+			<subject-tree [subject]="subject" [studies]="studies"></subject-tree>
+		</div>
 
 	</form>
 </div>

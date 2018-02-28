@@ -23,8 +23,10 @@ import { Enum } from "../shared/utils/enum";
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 
 declare var papaya: any;
+
 const mockImport: any = require('../../assets/mock-import.json');
 const mockStudy: any = require('../../assets/mock-study.json');
+
 
 @Component({
     selector: 'import-modality',
@@ -96,9 +98,10 @@ export class ImportComponent implements OnInit {
         this.getEnum();
         this.buildForm();
         //TODO: clean json mock import after dev 
-        // this.archive = "file uploaded";
-        // this.selectedSeries = mockImport.patients[0];
-        // this.patients = mockImport.patients;
+
+        this.archive = "file uploaded";
+        this.selectedSeries = mockImport.patients[0];
+        this.patients = mockImport.patients;
         // this.validateSeriesSelected();
         //TODO: clean json mock study after dev
         // this.seriesSelected = true;
