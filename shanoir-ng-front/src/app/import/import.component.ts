@@ -11,6 +11,7 @@ import * as AppUtils from '../utils/app.utils';
 import { Study } from '../studies/shared/study.model';
 import { StudyService } from '../studies/shared/study.service';
 import { StudyCard } from '../study-cards/shared/study-card.model';
+import { Examination } from "../examinations/shared/examination.model";
 import { ExaminationService } from '../examinations/shared/examination.service';
 import { Subject } from '../subjects/shared/subject.model';
 import { SubjectService } from "../subjects/shared/subject.service";
@@ -19,6 +20,7 @@ import { SubjectExamination } from '../examinations/shared/subject-examination.m
 import { SubjectType } from "../subjects/shared/subject-type.enum";
 import { SubjectStudy } from "../subjects/shared/subject-study.model";
 import { Enum } from "../shared/utils/enum";
+import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 
 declare var papaya: any;
 const mockImport: any = require('../../assets/mock-import.json');
@@ -59,6 +61,8 @@ export class ImportComponent implements OnInit {
     private subjectTypes: Enum[] = [];
     private subjectStudy: SubjectStudy;
     public examinations: SubjectExamination[];
+    public examination: SubjectExamination;
+    public examinationDate: Date;
     public seriesSelected: boolean = false;
     private selectedSeries: PatientDicom;
     private detailedPatient: Object;
@@ -80,9 +84,9 @@ export class ImportComponent implements OnInit {
     public studyCardProgress: number = 0;
     public studyCardStatus: string;
 
-    //TODO: remove after json3 creation
-    public examination: SubjectExamination;
-
+    private isDateValid: boolean = true;
+    private selectedDateNormal: IMyDate;
+    
     constructor(private fb: FormBuilder, private importService: ImportService,
         private studyService: StudyService, private examinationService: ExaminationService,
         private subjectService: SubjectService) {
@@ -113,6 +117,8 @@ export class ImportComponent implements OnInit {
             'physicallyInvolved': new FormControl(),
             'subjectType': new FormControl(),
             'examination': new FormControl(),
+            'examinationDate': new FormControl(),
+            'examinationComment': new FormControl(),
             'modality': [{value: this.modality, disabled: true}, Validators.required],
             'subject': [this.subject, Validators.required]
         });
@@ -329,6 +335,65 @@ export class ImportComponent implements OnInit {
         }
     }
 
+    onInputFieldChanged(event: IMyInputFieldChanged) {
+        if (event.value !== '') {
+            if (!event.valid) {
+                this.isDateValid = false;
+            } else {
+                this.isDateValid = true;
+            }
+        } else {
+            this.isDateValid = true;
+            setTimeout(():void => this.selectedDateNormal = null);
+        }
+    }
+
+    private myDatePickerOptions: IMyOptions = {
+        dateFormat: 'dd/mm/yyyy',
+        height: '20px',
+        width: '160px'
+    };
+
+    onDateChanged(event: IMyDateModel) {
+        if (event.formatted !== '') {
+            this.selectedDateNormal = event.date;
+        }
+    }
+
+    setDateFromDatePicker(): void {
+        if (this.selectedDateNormal) {
+            this.examinationDate = new Date(this.selectedDateNormal.year, this.selectedDateNormal.month - 1,
+                this.selectedDateNormal.day);
+        } else {
+            this.examinationDate = null;
+        }
+    }
+
+    getDateToDatePicker(examination: Examination): void {
+        if (examination && examination.examinationDate && !isNaN(new Date(examination.examinationDate).getTime())) {
+            let examinationDate: Date = new Date(examination.examinationDate);
+            this.selectedDateNormal = {
+                year: examinationDate.getFullYear(), month: examinationDate.getMonth() + 1,
+                day: examinationDate.getDate()
+            };;
+        }
+    }
+
+    createExam() : void {
+        let examination: Examination = new Examination();
+        examination.centerId = this.studycard.center.id;
+        examination.studyId = this.study.id;
+        examination.subject = this.subject;
+        this.setDateFromDatePicker(); 
+        examination.examinationDate = this.examinationDate;
+        this.examinationService.create(examination)
+            .subscribe((examination) => {
+                this.examination.examinationDate = this.examinationDate;
+            }, (err: String) => {
+                // TODO: wait for exam ts
+            });
+    }
+
     startImportJob (): void {
         if (this.study != null && this.studycard != null && this.subject != null && this.examination != null) {
             this.importJob.patients = new Array<PatientDicom>();
@@ -347,6 +412,7 @@ export class ImportComponent implements OnInit {
     // closePopin() {
     //     this.studyModal.hide();
     // }
+    
 
     closeSubjectPopin(): void {
         this.subjectModal.hide();

@@ -262,7 +262,7 @@
                         <input type="radio" [(ngModel)]="examEditionMode" formControlName="examEditionMode" value="create">Create a new examination
                     </span>
                 </li>
-                <li class="required" *ngIf="examEditionMode == 'select'">
+                <li class="required" *ngIf="examEditionMode == 'select' && subjectEditionMode == 'select'">
                     <label class="required-label">Select an examination</label> 
                     <span class="right-col">
                         <select formControlName="examination" required [(ngModel)]="examination">
@@ -295,17 +295,19 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td i18n="Examination detail|Comment label@@examinationDetailComment" class="label">Comment</td>
+                                <td i18n="Examination detail|Comment label@@examinationDetailComment">Comment</td>
                                 <td class="value">
-                                    <input type="text" id="comment" formControlName="comment" [(ngModel)]="examination.comment"/>
+                                    <input type="text" id="examinationComment" formControlName="examinationComment" [(ngModel)]="examinationComment"/>
                                 </td>
                             </tr>
                         </div>
+                        <button i18n="Import|CreateExamButton label" [disabled]="examinationDate == null" (click)="createExam($event)">Create</button>
                     </div>
                 </li>
             </ol>
             <div class="commands">
-                <button i18n="Import|NextButton label" (click)="startImportJob($event)">Next</button>
+                <button i18n="Import|NextButton label" [disabled]="study == null || studycard == null || subject == null || examination == null"
+                    (click)="startImportJob($event)">Next</button>
             </div>
         </fieldset>
     </div>
