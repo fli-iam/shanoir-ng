@@ -1,0 +1,32 @@
+version: '3'
+services:
+  keycloak-database:
+    container_name: shanoir-ng-keycloak-database
+    environment:
+      - MYSQL_DATABASE=keycloak
+      - MYSQL_USER=keycloak
+      - MYSQL_PASSWORD=password
+    image: mysql/mysql-server
+    networks:
+      - shanoir_ng_network
+    volumes:
+      - "keycloak-database-data:/var/lib/mysql"
+  keycloak:
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=&a1A&a1A
+      - MYSQL_ADDR=shanoir-ng-keycloak-database
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=keycloak
+      - MYSQL_USER=keycloak
+      - MYSQL_PASSWORD=password
+    container_name: shanoir-ng-keycloak
+    image: jboss/keycloak
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "8080:8080"
+networks:
+  shanoir_ng_network:
+volumes:
+  keycloak-database-data:
