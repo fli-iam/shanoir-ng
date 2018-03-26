@@ -1,8 +1,14 @@
 package org.shanoir.ng.importer.dcm2nii;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,6 +21,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.DatasetFile;
+import org.shanoir.ng.importer.model.DiffusionGradient;
 import org.shanoir.ng.importer.model.ExpressionFormat;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.Patient;
@@ -117,11 +124,9 @@ public class NIfTIConverterService {
 					serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, doNotSeparateDatasetsInSerie);
 					// if the serie is not one of the series, that should not be separated, please separate the series,
 					// otherwise just do not separate the series and keep all images for one nii conversion
-					if (!serieIdentifiedForNotSeparating) {
-						separateDatasetsInSerie(serieIDFolderFile, serie);
-					}
-					boolean propFileConversionError = false;
-					runConversion(serieIDFolderFile, serie, seriesCounter, numberOfSeries, propFileConversionError, converterId);
+					serie.setDatasets(new ArrayList<Dataset>());
+					constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
+					constructNifti(serieIDFolderFile, serie, numberOfSeries, converterId);
 					++seriesCounter;
 				} catch (NoSuchFieldException | SecurityException e) {
 					LOG.error(e.getMessage());
@@ -133,88 +138,130 @@ public class NIfTIConverterService {
 		}	
 	}
 	
-	/**
-	 * This method does the actual conversion on calling the converter, either on the level
-	 * of the serie folder or on the level of each dataset folder inside the serie folder.
-	 * Attention: this code does not take care of spectroscopy aspects. There should be a
-	 * separate import code for this data.
-	 * 
-	 * In Shanoir old implementation the outputFiles is never used afterwards in the import
-	 * (only for cleaning after the import has finished). In MrDatasetAcquisitionHome in the
-	 * method getDicomFiles for each dataset0,1,.. folder all files are listed, when they are
-	 * in listed in the serie meta-data they are considered as dicom, all others as nii files.
-	 * It would be much better to add this infos to the json from here and just use them after?
-	 * 
-	 * @todo the conversion progress needs to be send to the frontend to be displayed
-	 * 
-	 * @param serieIDFolderFile
-	 * @param serie
-	 * @param seriesCounter
-	 * @param numberOfSeries
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 */
-	private void runConversion(File serieIDFolderFile, final Serie serie, float seriesCounter, int numberOfSeries, boolean propFileConversionError, Long converterId) throws NoSuchFieldException, SecurityException {
-		// add all the directories (names = dataset0, dataset1, etc.)
-		List<File> datasetDirectories = ImportUtils.listFolders(serieIDFolderFile);
-		if (datasetDirectories == null || (datasetDirectories != null && datasetDirectories.isEmpty())) {
-			datasetDirectories = new ArrayList<File>();
-			datasetDirectories.add(serieIDFolderFile);
-		}
-
-		LOG.debug("convertToNifti : create nifti files for the serie : " + serieIDFolderFile.getAbsolutePath());
-		//float datasetsCounter = 0;
-		for (final File directory : datasetDirectories) {
-			// float progress = (seriesCounter + (++datasetsCounter / datasetDirectories.size())) / numberOfSeries * 100;
-			if (directory.isDirectory()) {
-				// search for the existing files in the destination folder
-				final List<File> existingFiles = Arrays.asList(directory.listFiles());
-				LOG.info("convertToNifti : create nifti files for the dataset : " + directory.getName());
-				if (conversionLogs != null && !"".equals(conversionLogs)) {
-					conversionLogs += "\n";
-				} else {
-					conversionLogs = "";
-				}
-				boolean isConvertAs4D = checkSerieForPropertiesString(serie, convertAs4D);
-				boolean isConvertWithClidcm = checkSerieForPropertiesString(serie, convertWithClidcm);
-				NIfTIConverter converter;
-				if(isConvertWithClidcm) {
-					 converter = findById(3L);					
-				} else {
-					converter = findById(converterId);
-				}
-				convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D);
-				LOG.info("conversionLogs : " + conversionLogs);
-
-				// If one of the output files is a prop file, there has been an error
-				if (outputFiles.get(serieIDFolderFile.getName()) != null) {
-					List<File> niiFiles = diff(existingFiles, directory.getPath());
-					if (!containsPropFile(niiFiles)) {
-						for (File niiFile : niiFiles) {
-							outputFiles.get(serieIDFolderFile.getName()).add(niiFile.getAbsolutePath());
-							LOG.info("Path niiFile : " + niiFile.getAbsolutePath());
-						}
-					} else {
-						propFileConversionError = true;
-					}
-				} else {
-					List<String> niiPathList = new ArrayList<String>();
-					if (!containsPropFile(diff(existingFiles, directory.getPath()))) {
-						for (File niiFile : diff(existingFiles, directory.getPath())) {
-							niiPathList.add(niiFile.getAbsolutePath());
-							LOG.info("Path niiFile : " + niiFile.getAbsolutePath());
-						}
-						outputFiles.put(serieIDFolderFile.getName(), niiPathList);
-					} else {
-						propFileConversionError = true;
-					}
-				}
-				// delete the unused files
-				removeUnusedFiles();
-			}
-
-		}
+    /**
+	 *
+	 * Create the nifti dataset expression
+	 *  
+	 **/	
+	private ExpressionFormat generateNiftiDatasetExpression(Dataset dataset,Serie serie) {
+        LOG.debug("Create the nifti dataset expressions for dataset : " + dataset.getName() + " in serie " + serie.getSequenceName());
+        final ExpressionFormat datasetExpressionNifti = new ExpressionFormat();
+        datasetExpressionNifti.setType("nii");
+        return datasetExpressionNifti;
 	}
+
+    /**
+	 *
+	 * Create the nifti dataset expressions files
+	 *  
+	 **/
+	private void generateNiftiDatasetFiles(ExpressionFormat datasetExpressionFormat, Dataset dataset,List<File> niftiFileList) {
+        if (niftiFileList != null  && !niftiFileList.isEmpty()) {
+	        for (final File niftiFile : niftiFileList) {
+	            LOG.debug("create DatasetFile : processing the file " + niftiFile.getName());
+	            final DatasetFile niftiDatasetFile = new DatasetFile();
+	            niftiDatasetFile.setPath(niftiFile.toURI().toString().replaceAll(" ", "%20"));
+	            datasetExpressionFormat.getDatasetFiles().add(niftiDatasetFile);
+	        }
+	
+	        // if necessary, rename the bvec and bval files (for DTI)
+	        renameBvecBval(datasetExpressionFormat);
+	
+	        /*
+	         * if there was some DTI images, then we can now use the
+	         * bvec and bval files to create the diffusion gradients and
+	         * add them to the MR Protocol. Indeed, it is more likely to
+	         * do so now because extracting the diffusion gradients from
+	         * the dicom files is tricky.
+	         */
+	        extractDiffusionGradients(dataset,datasetExpressionFormat);
+        }
+    }
+
+	
+	/**
+     * Extract from the bvec and bval files the diffusion gradients and fullfill
+     * the mr protocol.
+     *
+     * @param mrProtocol
+     *            the mr protocol
+     * @param mrDataset
+     *            the mr dataset
+     * @param datasetExpressionNifti
+     *            the dataset expression nifti
+     */
+    private void extractDiffusionGradients(Dataset dataset, ExpressionFormat datasetExpressionNifti) {
+    	LOG.debug("extractDiffusionGradients : Begin");
+        if (datasetExpressionNifti != null) {
+            try {
+                boolean bvecOrBvalFound = false;
+                for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
+                    final File file = new File(new URI(datasetFile.getPath()));
+                    if (file.getName().endsWith(".bvec") || file.getName().endsWith(".bval")) {
+                        bvecOrBvalFound = true;
+                        break;
+                    }
+                }
+
+                if (bvecOrBvalFound) {
+                    String[] xValues = null;
+                    String[] yValues = null;
+                    String[] zValues = null;
+                    String[] bValues = null;
+                    for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
+                        final File file = new File(new URI(datasetFile.getPath()));
+                        if (file.getName().endsWith(".bvec")) {
+                            BufferedReader reader = new BufferedReader(new FileReader(file));
+                            String line = null;
+                            List<String> items = new ArrayList<String>();
+                            while ((line = reader.readLine()) != null) {
+                                items.add(line);
+                            }
+                            xValues = items.get(0).split("\\s");
+                            yValues = items.get(1).split("\\s");
+                            zValues = items.get(2).split("\\s");
+                        }
+                        if (file.getName().endsWith(".bval")) {
+                            BufferedReader reader = new BufferedReader(new FileReader(file));
+                            String line = null;
+                            List<String> items = new ArrayList<String>();
+                            while ((line = reader.readLine()) != null) {
+                                items.add(line);
+                            }
+                            bValues = items.get(0).split("\\s");
+                        }
+                    }
+
+                    if (xValues != null && yValues != null && zValues != null && bValues != null) {
+                        if (xValues.length == yValues.length && yValues.length == zValues.length
+                                && zValues.length == bValues.length) {
+                            for (int i = 0; i < xValues.length; i++) {
+                                final DiffusionGradient diffusionGradient = new DiffusionGradient();
+                                diffusionGradient.setDiffusionGradientBValue(Double.valueOf(bValues[i]));
+                                diffusionGradient.setDiffusionGradientOrientationX(Double.valueOf(xValues[i]));
+                                diffusionGradient.setDiffusionGradientOrientationY(Double.valueOf(yValues[i]));
+                                diffusionGradient.setDiffusionGradientOrientationZ(Double.valueOf(zValues[i]));
+                                dataset.getDiffusionGradients().add(i, diffusionGradient);
+                                LOG.debug("extractDiffusionGradients : adding diffusion gradient " + diffusionGradient
+                                        + " dataset " + dataset.getName());
+                            }
+                        } else {
+                        	LOG.error("extractDiffusionGradients : The matrices doesn't have the same size!!");
+                        }
+                    } else {
+                    	LOG.error("extractDiffusionGradients : error occured when getting the b-vector and b-values");
+                    }
+                }
+            } catch (final URISyntaxException exc) {
+            	LOG.error("extractDiffusionGradients : ", exc);
+            } catch (final FileNotFoundException exc) {
+            	LOG.error("extractDiffusionGradients : ", exc);
+            } catch (final IOException exc) {
+            	LOG.error("extractDiffusionGradients : ", exc);
+            }
+        }
+        LOG.debug("extractDiffusionGradients : End");
+    }
 	
 	public NIfTIConverter findById(Long id) {
 		return niftiConverterRepository.findOne(id);
@@ -303,6 +350,66 @@ public class NIfTIConverterService {
 	}
 	
 	/**
+     * Sometimes, dcm2nii creates files named '.bvec' and '.bval'. This methods
+     * renames them with the name of the dataset.
+     *
+     * @param datasetExpressionNifti
+     *            the dataset expression nifti
+     */
+    private void renameBvecBval(final ExpressionFormat datasetExpressionNifti) {
+        LOG.debug("renameBvecBval : Begin");
+        if (datasetExpressionNifti != null) {
+            try {
+                boolean toBeRenamed = false;
+                for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
+                    final File file = new File(new URI(datasetFile.getPath()));
+                    if (".bvec".equalsIgnoreCase(file.getName()) || ".bval".equalsIgnoreCase(file.getName())) {
+                        toBeRenamed = true;
+                        break;
+                    }
+                }
+                if (toBeRenamed) {
+                    LOG.debug("renameBvecBval : .bvec and .bval files to rename");
+                    String name = null;
+                    for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
+                        final File file = new File(new URI(datasetFile.getPath()));
+                        if (file.getName().endsWith(".nii")) {
+                            name = file.getName().substring(0, file.getName().lastIndexOf(".nii"));
+                        }
+                        if (file.getName().endsWith(".nii.gz")) {
+                            name = file.getName().substring(0, file.getName().lastIndexOf(".nii.gz"));
+                        }
+                    }
+
+                    if (name != null) {
+                        for (final DatasetFile datasetFile : datasetExpressionNifti.getDatasetFiles()) {
+                            final File file = new File(new URI(datasetFile.getPath()));
+                            if (".bvec".equalsIgnoreCase(file.getName())) {
+                                final String newName = name + ".bvec";
+                                final String newPath = datasetFile.getPath().replaceAll(".bvec", newName);
+                                file.renameTo(new File(new URI(newPath)));
+                                datasetFile.setPath(newPath);
+                                LOG.debug("renameBvecBval : .bvec renamed to " + newName);
+                            } else if (".bval".equalsIgnoreCase(file.getName())) {
+                                final String newName = name + ".bval";
+                                final String newPath = datasetFile.getPath().replaceAll(".bval", newName);
+                                file.renameTo(new File(new URI(newPath)));
+                                datasetFile.setPath(newPath);
+                                LOG.debug("renameBvecBval : .bval renamed to " + newName);
+                            }
+                        }
+                    }
+                } else {
+                	LOG.debug("renameBvecBval : no file to rename");
+                }
+            } catch (final URISyntaxException exc) {
+            	LOG.error("renameBvecBval : ", exc);
+            }
+        }
+        LOG.debug("renameBvecBval : End");
+    }
+	
+	/**
 	 * Remove unused files that are created during the conversion process.
 	 */
 	private void removeUnusedFiles() {
@@ -353,83 +460,255 @@ public class NIfTIConverterService {
 		return false;
 	}
 	
+	
 	/**
-	 * This method separates the datasets from a single serie in separate
-	 * folders. 3 distinct dicom tags are essential for separating the datasets:
-	 * acquisition number, echo numbers and image orientation(patient).
-	 * Iterate over all images and sort images in groups with the same value
-	 * for ImageOrientation, EchoNumbers and AcquisitionNumber.
+	 * This method does the actual conversion on calling the converter, either on the level
+	 * of the serie folder or on the level of each dataset folder inside the serie folder.
+	 * Attention: this code does not take care of spectroscopy aspects. There should be a
+	 * separate import code for this data.
 	 * 
-	 * This method translates as well from images to datasets and create the new structure.
+	 * In Shanoir old implementation the outputFiles is never used afterwards in the import
+	 * (only for cleaning after the import has finished). In MrDatasetAcquisitionHome in the
+	 * method getDicomFiles for each dataset0,1,.. folder all files are listed, when they are
+	 * in listed in the serie meta-data they are considered as dicom, all others as nii files.
+	 * It would be much better to add this infos to the json from here and just use them after?
 	 * 
+	 * @todo the conversion progress needs to be send to the frontend to be displayed
+	 * 
+	 * @param serieIDFolderFile
 	 * @param serie
+	 * @param seriesCounter
+	 * @param numberOfSeries
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
-	private void separateDatasetsInSerie(final File serieIDFolderFile, final Serie serie) {
-		final HashMap<SerieToDatasetsSeparator, Dataset>
-			datasetMap = new HashMap<SerieToDatasetsSeparator, Dataset>();
-		serie.setDatasets(new ArrayList<Dataset>());
-		List<Image> images = serie.getImages();
-		for (Iterator iterator = images.iterator(); iterator.hasNext();) {
-			Image image = (Image) iterator.next();
-			final int acquisitionNumber = image.getAcquisitionNumber();
-			int[] echoNumbersIntArray = convertIntegers(image.getEchoNumbers());
-			double[] imageOrientationPatientsDoubleArray = convertDoubles(image.getImageOrientationPatient());
-			SerieToDatasetsSeparator seriesToDatasetsSeparator =
-					new SerieToDatasetsSeparator(acquisitionNumber, echoNumbersIntArray, imageOrientationPatientsDoubleArray);
-			boolean found = false;
-			for (SerieToDatasetsSeparator seriesToDatasetsComparatorIterate : datasetMap.keySet()) {
-				if (seriesToDatasetsComparatorIterate.equals(seriesToDatasetsSeparator)) {
-					found = true;
-					seriesToDatasetsSeparator = seriesToDatasetsComparatorIterate;
-					break;
+	private NIfTIConverter datasetToNiftiConversionLauncher(Dataset dataset, File directory, Serie serie, Long converterId, boolean isConvertAs4D, boolean isConvertWithClidcm) throws NoSuchFieldException, SecurityException {
+
+				// search for the existing files in the destination folder
+				
+				LOG.info("convertToNifti : create nifti files for the dataset : " + dataset.getName());
+				if (conversionLogs != null && !"".equals(conversionLogs)) {
+					conversionLogs += "\n";
+				} else {
+					conversionLogs = "";
+				}
+
+				NIfTIConverter converter;
+				if(isConvertWithClidcm) {
+					 converter = findById(4L);					
+				} else {
+					converter = findById(converterId);
+				}
+				convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D);
+				LOG.info("conversionLogs : " + conversionLogs);
+				return converter;
+
+	}
+	
+	
+	/**
+	 * This method is needed to identify generated nifti files in the middle of dcm files.
+	 * 
+	 * @return List of nifti files
+	 */
+	
+	private List<File> niftiFileSorting(List<File> existingFiles,File directory,File serieIDFolderFile) {
+		// If one of the output files is a prop file, there has been an error
+		List<File> niftiFileResult = null;
+		if (outputFiles.get(serieIDFolderFile.getName()) != null) {
+			List<File> niiFiles = diff(existingFiles, directory.getPath());
+			niftiFileResult = niiFiles;
+			if (!containsPropFile(niiFiles)) {
+				for (File niiFile : niiFiles) 
+				{
+					outputFiles.get(serieIDFolderFile.getName()).add(niiFile.getAbsolutePath());
+					LOG.info("Path niiFile : " + niiFile.getAbsolutePath());
 				}
 			}
-			// existing dataset has been found, just add the image/datasetFile
-			if (found) {
-				DatasetFile datasetFile = createDatasetFile(image);
-				datasetMap.get(seriesToDatasetsSeparator).getExpressionFormats().get(0).getDatasetFiles().add(datasetFile);
-			// new dataset has to be created, new expression format and add image/datasetfile
-			} else {
-				Dataset dataset = new Dataset();
+		} else {
+			List<String> niiPathList = new ArrayList<String>();
+			if (!containsPropFile(diff(existingFiles, directory.getPath()))) {
+				List<File>  niiFileList = diff(existingFiles, directory.getPath());
+				niftiFileResult = niiFileList; 
+				for (File niiFile : niiFileList) {
+					niiPathList.add(niiFile.getAbsolutePath());
+					LOG.info("Path niiFile : " + niiFile.getAbsolutePath());
+				}
+				outputFiles.put(serieIDFolderFile.getName(), niiPathList);
+			}
+		}
+		// delete the unused files
+		removeUnusedFiles();
+		return niftiFileResult;
+	}
+	
+	/**
+	 * This method generates the nifti files of serie  in proper datasets for an entire serie.
+	 * It also constructs the associated Nifti ExpressionFormat and DatasetFiles within the Dataset object. 
+	 * Finally it also constructs the Bvec and BVal values needed for Diffusion and store them in a a list of Diffusion Gradient which is hold by the dataset itself.
+	 *
+	 * @param serieIDFolderFile
+	 * @param serie
+	 * @param serieIdentifiedForNotSeparating
+	 * @param convertedId
+	 * 
+	 */
+	private void constructNifti(File serieIDFolderFile, final Serie serie, int numberOfSeries, Long converterId) {
+
+	LOG.debug("convertToNifti : create nifti files for the serie : " + serieIDFolderFile.getAbsolutePath());
+		
+		if (serie != null) {
+			boolean isConvertAs4D=false;
+			boolean isConvertWithClidcm=false;
+			try {
+				isConvertAs4D = checkSerieForPropertiesString(serie, convertAs4D);
+				isConvertWithClidcm = checkSerieForPropertiesString(serie, convertWithClidcm);
+			} catch (NoSuchFieldException | SecurityException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			if (serie.getDatasets().size() > 1 ) {
+				// Need to construct nifti files for each dataset in current serie
+				int index = 0;
+				for (Dataset dataset : serie.getDatasets()) {
+					File directory = new File(serieIDFolderFile + File.separator + "dataset" + index);
+					if (directory.isDirectory()) {
+						LOG.info("convertToNifti : create nifti files for the dataset " + dataset.getName() + " in directory : " + directory.getName());
+						final List<File> existingFiles = Arrays.asList(directory.listFiles());
+						NIfTIConverter converter = null;
+						try {
+							converter = datasetToNiftiConversionLauncher(dataset, directory, serie, converterId, isConvertAs4D, isConvertWithClidcm);
+						} catch (NoSuchFieldException | SecurityException e) {
+							LOG.error(e.getMessage());
+						}
+						List<File> niftiGeneratedFiles = niftiFileSorting(existingFiles,directory,serieIDFolderFile);
+						constructNiftiExpressionAndDatasetFiles(converter,dataset,serie,niftiGeneratedFiles);
+						++index;
+						
+					}
+				}
+			} else if (serie.getDatasets().size() == 1) {
+				// Need to construct nifti files for only one dataset in current serie
+				Dataset dataset = serie.getDatasets().get(0);
+				if (serieIDFolderFile.isDirectory()) {
+					LOG.info("convertToNifti : create nifti files for the dataset " + dataset.getName() + " in directory : " + serieIDFolderFile.getName());
+					final List<File> existingFiles = Arrays.asList(serieIDFolderFile.listFiles());
+					NIfTIConverter converter = null;
+					try {
+						converter = datasetToNiftiConversionLauncher(dataset, serieIDFolderFile, serie, converterId, isConvertAs4D, isConvertWithClidcm);
+					} catch (NoSuchFieldException | SecurityException e) {
+						LOG.error(e.getMessage());
+					}
+					List<File> niftiGeneratedFiles = niftiFileSorting(existingFiles,serieIDFolderFile,serieIDFolderFile);
+					constructNiftiExpressionAndDatasetFiles(converter,dataset,serie,niftiGeneratedFiles);
+				}
+			}
+		}
+	}
+	
+	/**
+	 *  Build dataset Expresion and datasetFiles
+	 *  	
+	 * @param converter
+	 * @param dataset
+	 * @param serie
+	 * @param niftiGeneratedFiles
+	 */
+	private void constructNiftiExpressionAndDatasetFiles(NIfTIConverter converter, Dataset dataset, Serie serie,List<File> niftiGeneratedFiles) {
+		// Build dataset Expresion and datasetFiles
+		ExpressionFormat expressionFormat = generateNiftiDatasetExpression(dataset,serie);
+		expressionFormat.setNiftiConverter(converter);
+		dataset.getExpressionFormats().add(expressionFormat);
+		generateNiftiDatasetFiles(expressionFormat,dataset,niftiGeneratedFiles);
+	}
+	
+	
+	/**
+	 * This method extract the dicom files in proper dataset(s) (in a serie).
+	 * It also constructs the associated ExpressionFormat and DatasetFiles within the Dataset object. 
+	 * 
+	 * @param serieIDFolderFile
+	 * @param serie
+	 * @param serieIdentifiedForNotSeparating
+	 */
+	private void constructDicom(final File serieIDFolderFile, final Serie serie, final boolean serieIdentifiedForNotSeparating) {
+		
+		if (!serieIdentifiedForNotSeparating) {
+			final HashMap<SerieToDatasetsSeparator, Dataset> datasetMap = new HashMap<SerieToDatasetsSeparator, Dataset>();
+			for (Image image : serie.getImages()) {
+				final int acquisitionNumber = image.getAcquisitionNumber();
+				int[] echoNumbersIntArray = convertIntegers(image.getEchoNumbers());
+				double[] imageOrientationPatientsDoubleArray = convertDoubles(image.getImageOrientationPatient());
+				SerieToDatasetsSeparator seriesToDatasetsSeparator =
+						new SerieToDatasetsSeparator(acquisitionNumber, echoNumbersIntArray, imageOrientationPatientsDoubleArray);
+				boolean found = false;
+				for (SerieToDatasetsSeparator seriesToDatasetsComparatorIterate : datasetMap.keySet()) {
+					if (seriesToDatasetsComparatorIterate.equals(seriesToDatasetsSeparator)) {
+						found = true;
+						seriesToDatasetsSeparator = seriesToDatasetsComparatorIterate;
+						break;
+					}
+				}
+				// existing dataset has been found, just add the image/datasetFile
+				if (found) {
+					DatasetFile datasetFile = createDatasetFile(image);
+					datasetMap.get(seriesToDatasetsSeparator).getExpressionFormats().get(0).getDatasetFiles().add(datasetFile);
+				// new dataset has to be created, new expression format and add image/datasetfile
+				} else {
+					Dataset dataset = new Dataset();
+					ExpressionFormat expressionFormat = new ExpressionFormat();
+					expressionFormat.setType("dcm");
+					dataset.getExpressionFormats().add(expressionFormat);
+					DatasetFile datasetFile = createDatasetFile(image);
+					expressionFormat.getDatasetFiles().add(datasetFile);
+					datasetMap.put(seriesToDatasetsSeparator, dataset);
+					serie.getDatasets().add(dataset);
+				}
+			}
+		
+			boolean success = true;
+			// create a separate folder for each group of images
+			int index = 0;
+			for (final SerieToDatasetsSeparator datasets : datasetMap.keySet()) {
+				// create a folder
+				final File folder = new File(serieIDFolderFile.getAbsolutePath() + File.separator + DATASET + index);
+				success = folder.mkdirs();
+				if (!success) {
+					LOG.error("deleteFolder : the creation of " + folder + " failed");
+				}
+				// move the files into the folder
+				for (final DatasetFile datasetFile : datasetMap.get(datasets).getExpressionFormats().get(0).getDatasetFiles()) {
+					String path = datasetFile.getPath();
+					final File oldFile = new File(path);
+					if (oldFile.exists()) {
+						final File newFile = new File(folder, oldFile.getName());
+						success = oldFile.renameTo(newFile);
+						datasetFile.setPath(newFile.getAbsolutePath());
+						datasetMap.get(datasets).setName(serie.getSeriesDescription() + index);
+						if (!success) {
+							LOG.error("deleteFolder : moving of " + oldFile + " failed");
+						}					
+					}
+				}
+				index++;
+			}
+			if (!success) {
+				LOG.error("Error while constructing Dicom in constructDicom.");
+			}
+		} else {
+			Dataset dataset = new Dataset();
+			dataset.setName(serie.getSeriesDescription());
+			for (Image image : serie.getImages()) {
 				ExpressionFormat expressionFormat = new ExpressionFormat();
 				expressionFormat.setType("dcm");
 				dataset.getExpressionFormats().add(expressionFormat);
 				DatasetFile datasetFile = createDatasetFile(image);
 				expressionFormat.getDatasetFiles().add(datasetFile);
-				datasetMap.put(seriesToDatasetsSeparator, dataset);
-				serie.getDatasets().add(dataset);
 			}
-		}
-		
-		boolean success = true;
-		// create a separate folder for each group of images
-		int index = 0;
-		for (final SerieToDatasetsSeparator datasets : datasetMap.keySet()) {
-			// create a folder
-			final File folder = new File(serieIDFolderFile.getAbsolutePath() + File.separator + DATASET + index);
-			success = folder.mkdirs();
-			if (!success) {
-				LOG.error("deleteFolder : the creation of " + folder + " failed");
-			}
-			// move the files into the folder
-			for (final DatasetFile datasetFile : datasetMap.get(datasets).getExpressionFormats().get(0).getDatasetFiles()) {
-				String path = datasetFile.getPath();
-				final File oldFile = new File(path);
-				if (oldFile.exists()) {
-					final File newFile = new File(folder, oldFile.getName());
-					success = oldFile.renameTo(newFile);
-					datasetFile.setPath(newFile.getAbsolutePath());
-					if (!success) {
-						LOG.error("deleteFolder : moving of " + oldFile + " failed");
-					}					
-				}
-			}
-			index++;
-		}
-		if (!success) {
-			LOG.error("Error while converting to nifti in separateDatasetsInSerie.");
+			serie.getDatasets().add(dataset);
 		}
 	}
+	
 
 	/**
 	 * @param image
