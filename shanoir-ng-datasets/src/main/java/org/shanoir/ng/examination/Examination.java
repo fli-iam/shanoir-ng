@@ -108,6 +108,7 @@ public class Examination extends HalEntity {
 	private Integer weightUnitOfMeasure;
 
 	/** Flag to set the examination as pre-clinical  */ 
+	@Column(nullable=false, columnDefinition="BOOLEAN DEFAULT false")
 	private boolean preclinical;
 		
 	/**
