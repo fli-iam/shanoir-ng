@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Entity
 @Table(name = "subject")
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
-		" pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
+		"preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
 		"userPersonalCommentList" })
 
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
@@ -57,6 +57,9 @@ public class Subject extends HalEntity {
 	/** Manual Hemispheric dominance. */
 	private Integer manualHemisphericDominance;
 
+	/** Flag to set the subject as pre-clinical subject */ 
+	private boolean preclinical;
+	
 	/**
 	 * The category of the subject (phantom, human alive, human cadaver, etc.).
 	 */
@@ -179,6 +182,14 @@ public class Subject extends HalEntity {
 		} else {
 			this.imagedObjectCategory = imagedObjectCategory.getId();
 		}
+	}
+
+	public boolean isPreclinical() {
+		return preclinical;
+	}
+
+	public void setPreclinical(boolean preclinical) {
+		this.preclinical = preclinical;
 	}
 
 }

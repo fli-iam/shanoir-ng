@@ -32,6 +32,8 @@ public class ExaminationDTO {
 
 	private Double subjectWeight;
 	
+	private boolean preclinical;
+	
 	/**
 	 * @return the id
 	 */
@@ -181,4 +183,13 @@ public class ExaminationDTO {
 	public void setSubjectWeight(Double subjectWeight) {
 		this.subjectWeight = subjectWeight;
 	}
+	
+	public boolean isPreclinical() {
+		return preclinical;
+	}
+
+	public void setPreclinical(boolean preclinical) {
+		this.preclinical = preclinical;
+	}
+
 }
