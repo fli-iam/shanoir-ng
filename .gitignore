@@ -4,7 +4,6 @@
 **/typings/
 *~
 *.swp
-*.js
 *.map
 *.metadata.json
 *.settings/
