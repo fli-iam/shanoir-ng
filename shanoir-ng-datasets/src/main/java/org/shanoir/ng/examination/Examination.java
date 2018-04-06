@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  *
  */
 @Entity
-@JsonPropertyOrder({ "_links", "id", "examinationDate", "centerId", "subjectId", "studyId" })
+@JsonPropertyOrder({ "_links", "id", "examinationDate", "centerId", "subjectId", "studyId", "preclinical" })
 public class Examination extends HalEntity {
 
 	/**
@@ -107,6 +107,10 @@ public class Examination extends HalEntity {
 	/** The unit of weight, can be in kg or g */
 	private Integer weightUnitOfMeasure;
 
+	/** Flag to set the examination as pre-clinical  */ 
+	@Column(nullable=false, columnDefinition="BOOLEAN DEFAULT false")
+	private boolean preclinical;
+		
 	/**
 	 * Init HATEOAS links
 	 */
@@ -357,6 +361,14 @@ public class Examination extends HalEntity {
 		} else {
 			this.weightUnitOfMeasure = weightUnitOfMeasure.getId();
 		}
+	}
+	
+	public boolean isPreclinical() {
+		return preclinical;
+	}
+
+	public void setPreclinical(boolean preclinical) {
+		this.preclinical = preclinical;
 	}
 
 }

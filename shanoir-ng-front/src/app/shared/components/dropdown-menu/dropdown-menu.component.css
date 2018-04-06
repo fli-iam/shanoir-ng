@@ -9,7 +9,7 @@ li.active, li.opened { color: var(--very-light-grey); background-color: var(--co
         .sub-sub-content::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; box-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color); }
             .animate .sub-sub-content { overflow: hidden; }
 
-.menu-arrow { margin: 0 -6px -2px 3px; float: right; }
+.menu-arrow { margin: 0 0 0 4px; float: right; }
 .hidden { display: none !important; }
 
 .sub-content-parent { overflow: hidden; }

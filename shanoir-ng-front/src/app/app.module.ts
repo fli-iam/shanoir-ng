@@ -78,6 +78,7 @@ import { SubjectService } from './subjects/shared/subject.service';
 import { SubjectComponent } from './subjects/subject/subject.component';
 import { SubjectTreeComponent } from './subjects/tree/subject-tree.component';
 import { StudyNamePipe } from './subjects/shared/study-name.pipe';
+import { DatasetComponent } from './datasets/dataset/dataset.component';
 
 
 @NgModule({
@@ -138,7 +139,8 @@ import { StudyNamePipe } from './subjects/shared/study-name.pipe';
         SubjectListComponent,
         SubjectComponent,
         SubjectTreeComponent,
-        StudyNamePipe
+        StudyNamePipe,
+        DatasetComponent
     ],
     entryComponents: [
         ConfirmDialogComponent

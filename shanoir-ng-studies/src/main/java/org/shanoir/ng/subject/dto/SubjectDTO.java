@@ -28,6 +28,8 @@ public class SubjectDTO {
     private Sex sex;
     
     private List<SubjectStudyDTO> subjectStudyList;
+    
+    private boolean preclinical;
 
 	/**
 	 * @return the id
@@ -153,6 +155,14 @@ public class SubjectDTO {
 	 */
 	public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
 		this.subjectStudyList = subjectStudyList;
+	}
+	
+	public boolean isPreclinical() {
+		return preclinical;
+	}
+
+	public void setPreclinical(boolean preclinical) {
+		this.preclinical = preclinical;
 	}
     
 //  private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<UserPersonalCommentSubject>(0);

@@ -34,13 +34,15 @@ h2 { margin: 0; }
 hr { margin: 7px 0 !important; border-bottom: 1px solid var(--grey) !important; border: 0; }
 input { padding: 1px 5px; }
 option:disabled { color: var(--greyer); }
+ul { padding: 0; }
+li { list-style: none; } 
 
 table.layout { border: none; border-collapse: collapse; }
   table.layout td { padding: 0;	vertical-align: top; }
   table.layout td + td { border-left: 3px dashed var(--light-grey); }
 
 button { background-color: var(--color-b); border: 0px; border-radius: 2px; color: var(--very-light-grey); padding: 5px 10px; transition-property: transform, box-shadow; transition-duration: 0.3s; transition-timing-function: ease-in-out; }
-  button:enabled:hover { cursor: pointer; box-shadow: 0 0 10px var(--shadow-color); -moz-transform: scale(1.1); -webkit-transform: scale(1.1); transform: scale(1.1); }
+  button:enabled:hover { cursor: pointer; }
   button:disabled { background-color: var(--grey); border-color: var(--grey); color: var(--dark-black); cursor: auto; } 
   button:active { background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
 
@@ -76,7 +78,10 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form li > label { display: inline-block; vertical-align: top; width: 180px; }
   form fieldset ol { margin: 0; padding: 0; }
     form fieldset.responsive ol { float: left; padding: 0 50px 0 0; }
-  form fieldset li { list-style: none; padding: 3px 0; margin: 0; line-height: 1.8; }
+  form fieldset li { list-style: none; padding: 3px 0; margin: 0; height: 21px; }
+    form fieldset li input,
+    form fieldset li select,
+    form fieldset li button { height: 100%; }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { padding: 6px 15px; }
   form .footer { text-align: right; }
@@ -84,10 +89,10 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form .required-label:after{ content:" *"; }
   form .form-validation-alert { color: var(--color-error); }
   form .right-col label { text-align: right; display: block; }
-  form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--greyer); height: 18px; }
+  form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; opacity: 0.8; }
     form .right-col button:active { background-color: var(--color-b-light); }
-    form .right-col button img { height: 12px; vertical-align: sub; margin-right: 5px; opacity: 0.5; }
-    form .right-col button:hover:enabled img { opacity: 1; }
+    form .right-col button img { height: 12px; vertical-align: sub; margin: 0px 5px 2px 0px; }
+    form .right-col button:hover:enabled { opacity: 1;  }
 
   /* Date picker style overriding */
   form my-date-picker input { font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; }
@@ -140,3 +145,5 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
 .detail .right { float: right; -webkit-margin-start: 2px; }
 
 md-dialog-container { position: fixed; top: 0; background-color: var(--color-overlay); width: 100%; z-index: 10000; max-width: 100% !important; box-shadow: none !important; display: flex !important; justify-content: center !important; }
+
+.svg-inline--fa { vertical-align: baseline; }

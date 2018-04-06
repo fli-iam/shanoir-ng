@@ -80,6 +80,7 @@ public final class ModelsUtil {
 		examination.setInvestigatorId(EXAMINATION_INVESTIGATOR_ID);
 		examination.setNote(EXAMINATION_NOTE);
 		examination.setStudyId(EXAMINATION_STUDY_ID);
+		examination.setPreclinical(false);
 		return examination;
 	}
 

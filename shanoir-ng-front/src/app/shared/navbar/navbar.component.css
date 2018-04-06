@@ -1,6 +1,7 @@
 /********************/
 /* Navbar component */
 /********************/
+:host { overflow: hidden; }
 .navbar-component { box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color); margin-bottom: 25px; z-index: 100; position: relative; } 
 .shadow-fix { display: inline-block; position: static; }
 

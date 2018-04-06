@@ -4,7 +4,6 @@
 **/typings/
 *~
 *.swp
-*.js
 *.map
 *.metadata.json
 *.settings/
@@ -16,3 +15,4 @@ shanoir-ng-main.log
 shanoir-ng-nginx/webapp
 shanoir-ng-resource-server.log
 target
+**/.classpath

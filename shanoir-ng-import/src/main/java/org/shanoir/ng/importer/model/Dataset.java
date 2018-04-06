@@ -12,6 +12,9 @@ public class Dataset {
 	
 	private List<ExpressionFormat> expressionFormats = new ArrayList<ExpressionFormat>();
 
+	@JsonProperty("diffusionGradients")
+	private List<DiffusionGradient> diffusionGradients;
+	
 	public String getName() {
 		return name;
 	}
@@ -26,6 +29,17 @@ public class Dataset {
 
 	public void setExpressionFormats(List<ExpressionFormat> expressionFormats) {
 		this.expressionFormats = expressionFormats;
+	}
+
+	public List<DiffusionGradient> getDiffusionGradients() {
+		if (diffusionGradients == null) {
+			diffusionGradients = new ArrayList<DiffusionGradient>();
+		}
+		return diffusionGradients;
+	}
+
+	public void setDiffusionGradients(List<DiffusionGradient> diffusionGradients) {
+		this.diffusionGradients = diffusionGradients;
 	}
 
 }
