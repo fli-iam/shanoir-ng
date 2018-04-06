@@ -3,7 +3,6 @@ package org.shanoir.ng.importer.dicom;
 import java.io.File;
 import java.io.IOException;
 
-
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.dcmr.AcquisitionModality;
@@ -140,7 +139,7 @@ public class DicomDirToJsonReaderService {
 		ObjectNode patient = mapper.createObjectNode();
 		patient.put("patientID", patientRecord.getString(Tag.PatientID));
 		patient.put("patientName", patientRecord.getString(Tag.PatientName));
-		patient.put("patientBirthDate", patientRecord.getString(Tag.PatientBirthDate));
+		patient.put("patientBirthDate", patientRecord.getDate(Tag.PatientBirthDate).getTime());
 		patient.put("patientSex", patientRecord.getString(Tag.PatientSex));
 		return patient;
 	}
@@ -148,7 +147,7 @@ public class DicomDirToJsonReaderService {
 	private ObjectNode createStudyObjectNode(Attributes studyRecord) {
 		ObjectNode study = mapper.createObjectNode();
 		study.put("studyInstanceUID", studyRecord.getString(Tag.StudyInstanceUID));
-		study.put("studyDate", studyRecord.getString(Tag.StudyDate));
+		study.put("studyDate", studyRecord.getDate(Tag.StudyDate).getTime());
 		study.put("studyDescription", studyRecord.getString(Tag.StudyDescription));
 		return study;
 	}
@@ -160,7 +159,7 @@ public class DicomDirToJsonReaderService {
 		serie.put("modality", serieRecord.getString(Tag.Modality));
 		serie.put("protocolName", serieRecord.getString(Tag.ProtocolName));
 		serie.put("seriesDescription", serieRecord.getString(Tag.SeriesDescription));
-		serie.put("seriesDate", serieRecord.getString(Tag.SeriesDate));
+		serie.put("seriesDate", serieRecord.getDate(Tag.SeriesDate).getTime());
 		serie.put("seriesNumber", serieRecord.getString(Tag.SeriesNumber));
 		serie.put("numberOfSeriesRelatedInstances", serieRecord.getString(Tag.NumberOfSeriesRelatedInstances));
 		return serie;

@@ -1,6 +1,8 @@
 package org.shanoir.ng.importer.model;
 
+import java.util.Date;
 import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
@@ -15,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
      private String studyInstanceUID;
 
      @JsonProperty("studyDate")
-     private String studyDate;
+     private Date studyDate;
 
      @JsonProperty("studyDescription")
      private String studyDescription;
@@ -31,11 +33,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 		this.studyInstanceUID = studyInstanceUID;
 	}
 
-	public String getStudyDate() {
+	public Date getStudyDate() {
 		return studyDate;
 	}
 
-	public void setStudyDate(String studyDate) {
+	public void setStudyDate(Date studyDate) {
 		this.studyDate = studyDate;
 	}
 

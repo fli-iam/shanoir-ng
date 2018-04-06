@@ -148,6 +148,9 @@
 #studyModal {
   width: 900px;
 }
-#subjectModal {
-  width: 1200px;
+#subjectCreationModal {
+  width: 800px;
+}
+#subjectDetailsModal {
+  width: 900px;
 }

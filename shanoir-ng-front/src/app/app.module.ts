@@ -49,6 +49,7 @@ import { ManufacturerModelPipe } from './acquisition-equipments/shared/manufactu
 import { ManufacturerModelService } from './acquisition-equipments/shared/manufacturer-model.service';
 import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
 import { MenuItemComponent } from './shared/components/dropdown-menu/menu-item/menu-item.component';
+import { ModalService} from './shared/components/modal/modal.service';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { RoleService } from './roles/role.service';
 import { StudyComponent } from './studies/study/study.component';
@@ -156,6 +157,7 @@ import { StudyNamePipe } from './subjects/shared/study-name.pipe';
         ManufacturerModelService,
         ManufacturerService,
         MatDialog,
+        ModalService,
         RoleService,
         StudyService,
         CoilService,

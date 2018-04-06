@@ -52,6 +52,7 @@
                             <node 
                                 *ngFor="let study of patient.studies" 
                                 [label]="study.studyDescription"
+                                (editedLabel)="changeExamComment($event)"
                                 [editable]="true"
                                 [nodeParams]="study"
                                 (nodeSelected)="selectNode(patient)"
@@ -94,7 +95,7 @@
                         </tr>
                         <tr class="item">
                             <td class="label">Birth date</td>
-                            <td class="value">{{detailedPatient?.patientBirthDate}}</td>
+                            <td class="value">{{detailedPatient?.patientBirthDate | date: 'dd/MM/yyyy'}}</td>
                         </tr>
                     </div>
                 </div>
@@ -116,7 +117,7 @@
                         </tr>
                         <tr class="item">
                             <td class="label">Series date</td>
-                            <td class="value">{{detailedSerie?.seriesDate}}</td>
+                            <td class="value">{{detailedSerie?.seriesDate | date: 'dd/MM/yyyy'}}</td>
                         </tr>
                         <tr class="item">
                             <td class="label">Series number</td>
@@ -201,6 +202,7 @@
                             <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
                         </select>
                         <a i18n="Import|SubjectDetails label" *ngIf="subject != null" target="_blank" [routerLink]="['/subject']" [queryParams]="{mode: 'view', id: subject?.id}">details</a>
+                        <button (click)="test(subject); subjectDetailsModal.show();">details</button>
                     </span>
                 </li>
                 <!-- TODO: Subject Group -->
@@ -245,7 +247,7 @@
                         </div>
                     </div>
                     <div *ngIf="subjectEditionMode == 'create' && study != null">
-                        <button class="right-col" (click)="subjectModal.show(); createSubjectStudy($event);"><img src="/assets/images/icons/add.png"/>create a subject</button>
+                        <button class="right-col" (click)="initializeSubject(subjectFromImport); subjectCreationModal.show(); createSubjectStudy($event);"><img src="/assets/images/icons/add.png"/>Create a subject</button>
                     </div>
                 </li>
             </ol>
@@ -276,15 +278,24 @@
                         <div class="preview-data">
                             <tr class="item">
                                 <td i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</td>
-                                <td class="value">{{study.name}}</td>
+                                <td class="value">
+                                    <select><option selected>{{study?.name}}</option></select>
+                                    <a i18n="Import|StudyDetails label" *ngIf="study != null" target="_blank" [routerLink]="['/study']" [queryParams]="{mode: 'view', id: study?.id}">details</a>
+                                </td>
                             </tr>
                             <tr class="item">
                                 <td i18n="Examination detail|Subject label@@examinationDetailSubject" class="required-label">Subject</td>
-                                <td class="value">{{subject.name}}</td>
+                                <td class="value">
+                                    <select><option selected>{{subject.name}}</option></select>
+                                    <a i18n="Import|SubjectDetails label" *ngIf="subject != null" target="_blank" [routerLink]="['/subject']" [queryParams]="{mode: 'view', id: subject?.id}">details</a>
+                                </td>
                             </tr>
                             <tr class="item">
                                 <td i18n="Examination detail|Center label@@examinationDetailCenter" class="required-label">Center</td>
-                                <td class="value">{{studycard.center.name}}</td>
+                                <td class="value">
+                                    <select><option selected>{{studycard.center.name}}</option></select>
+                                    <a i18n="Import|CenterDetails label" *ngIf="studycard.center != null" target="_blank" [routerLink]="['/center']" [queryParams]="{mode: 'view', id: studycard?.center?.id}">details</a>
+                                </td>
                             </tr>
                             <tr>
                                 <td i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</td>
@@ -298,6 +309,7 @@
                                 <td i18n="Examination detail|Comment label@@examinationDetailComment">Comment</td>
                                 <td class="value">
                                     <input type="text" id="examinationComment" formControlName="examinationComment" [(ngModel)]="examinationComment"/>
+                                    <tool-tip>If possible, initialized with the value of the DICOM tag StudyDescription.</tool-tip>
                                 </td>
                             </tr>
                         </div>
@@ -380,20 +392,20 @@
     
 </form>
 
-<!-- <app-modal modalDialogId="studyModal" #studyModal>
-    <div class="app-modal-body">
-        <study-detail [modeFromImport]="'view'" [idFromImport]="1" (closing)="closePopin()"></study-detail>
-    </div>
-</app-modal> -->
-
 <!-- <div class="overlay" *ngIf="createUser">
     <div class="content">
         <user-detail (closing)="closeEditSubject($event)"></user-detail>
     </div>
 </div> -->
 
-<app-modal modalDialogId="subjectModal" #subjectModal>
+<app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
     <div class="app-modal-body">
       <subject-detail [modeFromImport]="'create'" (closing)="closeSubjectPopin()"></subject-detail>
     </div>
-</app-modal> 
+</app-modal>
+
+<app-modal modalDialogId="subjectDetailsModal" #subjectDetailsModal>
+    <div class="app-modal-body">
+      <subject-detail [modeFromImport]="'view'" (closing)="closeSubjectPopin()"></subject-detail>
+    </div>
+</app-modal>

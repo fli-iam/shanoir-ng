@@ -3,10 +3,12 @@ import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms'
 import { Observable } from 'rxjs/Rx';
 
 import { IdNameObject } from '../shared/models/id-name-object.model';
+import { ImagedObjectCategory } from '../subjects/shared/imaged-object-category.enum';
 import { ImportService } from './import.service';
 import { slideDown } from '../shared/animations/animations';
 import { ImportJob, PatientDicom, SerieDicom, EquipmentDicom } from "./dicom-data.model";
 import { ModalComponent } from '../shared/components/modal/modal.component';
+import { ModalService } from '../shared/components/modal/modal.service';
 import * as AppUtils from '../utils/app.utils';
 import { Study } from '../studies/shared/study.model';
 import { StudyService } from '../studies/shared/study.service';
@@ -62,9 +64,11 @@ export class ImportComponent implements OnInit {
     private subjectTypeEnumValue: String;
     private subjectTypes: Enum[] = [];
     private subjectStudy: SubjectStudy;
+    public subjectFromImport: Subject = new Subject();
     public examinations: SubjectExamination[];
     public examination: SubjectExamination;
     public examinationDate: Date;
+    public examinationComment: string;
     public seriesSelected: boolean = false;
     private selectedSeries: PatientDicom;
     private detailedPatient: Object;
@@ -91,21 +95,20 @@ export class ImportComponent implements OnInit {
     
     constructor(private fb: FormBuilder, private importService: ImportService,
         private studyService: StudyService, private examinationService: ExaminationService,
-        private subjectService: SubjectService) {
+        private subjectService: SubjectService, public modalService: ModalService) {
     }
 
     ngOnInit(): void {
         this.getEnum();
         this.buildForm();
         //TODO: clean json mock import after dev 
-
-        // this.archive = "file uploaded";
-        // this.selectedSeries = mockImport.patients[0];
-        // this.patients = mockImport.patients;
-        // this.validateSeriesSelected();
+        this.archive = "file uploaded";
+        this.selectedSeries = mockImport.patients[0];
+        this.patients = mockImport.patients;
+        this.validateSeriesSelected();
         //TODO: clean json mock study after dev
-        // this.seriesSelected = true;
-        // this.prepareStudyStudycard(mockStudy);
+        this.seriesSelected = true;
+        this.prepareStudyStudycard(mockStudy);
     }
 
     buildForm(): void {
@@ -192,7 +195,7 @@ export class ImportComponent implements OnInit {
         formData.append('file', file[0], file[0].name);
         this.importService.uploadFile(formData)
             .subscribe((patientDicomList: ImportJob) => {
-                let modalityOfDicomDir:any = patientDicomList.patients[0].studies[0].series[0].modality.toString();
+                let modalityOfDicomDir: any = patientDicomList.patients[0].studies[0].series[0].modality.toString();
                 this.modality = modalityOfDicomDir;
                 this.workFolder = patientDicomList.workFolder;
                 this.patients = patientDicomList.patients;
@@ -234,8 +237,16 @@ export class ImportComponent implements OnInit {
         }
     }
 
+    changeExamComment (editedLabel: string): void {
+        this.examinationComment = editedLabel;
+    }
+
     validateSeriesSelected () : void {
         this.findStudiesWithStudyCardsByUserAndEquipment(this.selectedSeries.studies[0].series[0].equipment);
+        if(!this.examinationComment) {
+            // initialize examComment with the studyDescription Dicom value if this Dicom value is not changed by user
+            this.examinationComment = this.selectedSeries.studies[0].studyDescription;
+        }
     }
 
     findStudiesWithStudyCardsByUserAndEquipment(equipment: EquipmentDicom): void {
@@ -322,10 +333,22 @@ export class ImportComponent implements OnInit {
         this.subjectService.updateSubjectStudy(this.subject.subjectStudy);
     }
 
+    initializeSubject (subjectFromImport: Subject): void {
+        subjectFromImport.birthDate = this.selectedSeries.patientBirthDate;
+        subjectFromImport.name = this.selectedSeries.patientName;
+        subjectFromImport.sex = <any> this.selectedSeries.patientSex; 
+        this.modalService.objectPassedByModal.emit(subjectFromImport);
+    }
+    test(subject: Subject) : void {
+        this.modalService.objectPassedByModal.emit(subject);
+    }
+
     createSubjectStudy(subjectStudy: SubjectStudy) {
-        this.subjectStudy.studyId = this.study.id;
-        this.subjectStudy.subjectId = this.subject.id;
-        this.subjectService.createSubjectStudy(this.subjectStudy);
+        if (this.subject) {
+            this.subjectStudy.studyId = this.study.id;
+            this.subjectStudy.subjectId = this.subject.id;
+            this.subjectService.createSubjectStudy(this.subjectStudy);
+        }
     }
 
     getEnum(): void {
@@ -389,6 +412,7 @@ export class ImportComponent implements OnInit {
         examination.subject = this.subject;
         this.setDateFromDatePicker(); 
         examination.examinationDate = this.examinationDate;
+        examination.comment = this.examinationComment;
         this.examinationService.create(examination)
             .subscribe((examination) => {
                 this.examination.examinationDate = this.examinationDate;

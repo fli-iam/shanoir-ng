@@ -8,7 +8,7 @@
     <img class="picto" src="{{pictoUrl}}" />
 </span>
 <input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" (change)="nodeSelected.emit(nodeParams)" class="clickable" />
-<input #editableLabel *ngIf="editable" type="text" [(ngModel)]="label" />
+<input #editableLabel *ngIf="editable" type="text" [(ngModel)]="label" (change)="editedLabel.emit(label)" />
 <tool-tip *ngIf="tooltip">{{tooltip}}</tool-tip>
 <span *ngIf="!editable && !link" class="label" [class.clickable]="isClickable()" (click)="labelClick.emit(nodeParams)">{{label}}</span>
 <a *ngIf="!editable && link" (click)="labelClick.emit(nodeParams)" href="">{{label}}</a>

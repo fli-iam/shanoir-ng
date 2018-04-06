@@ -1,9 +1,7 @@
 package org.shanoir.ng.importer.dto;
 
+import java.util.Date;
 import java.util.List;
-
-import org.shanoir.ng.importer.dto.Study;
-import org.shanoir.ng.importer.dto.Subject;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -24,7 +22,7 @@ public class Patient {
     private String patientName;
 
     @JsonProperty("patientBirthDate")
-    private String patientBirthDate;
+    private Date patientBirthDate;
 
     @JsonProperty("patientSex")
     private String patientSex;
@@ -54,11 +52,11 @@ public class Patient {
 		this.patientName = patientName;
 	}
 
-	public String getPatientBirthDate() {
+	public Date getPatientBirthDate() {
 		return patientBirthDate;
 	}
 
-	public void setPatientBirthDate(String patientBirthDate) {
+	public void setPatientBirthDate(Date patientBirthDate) {	
 		this.patientBirthDate = patientBirthDate;
 	}
 
