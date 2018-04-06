@@ -1,0 +1,12 @@
+.properties { width: 750px; display: inline-block; position: relative; vertical-align: top; }
+    .properties .label { display: inline-block; width: 50%; overflow: hidden; position: relative; }
+        .properties .label::after { content: " "; border-bottom: 1px dotted lightgrey; position: absolute; width: 100%; bottom: 0.3em; }
+    .properties .value { display: inline-block; width: 50%; vertical-align: top; }
+
+.downloads { display: inline-block; position: relative; vertical-align: top; }
+    .downloads li { cursor: pointer; }
+
+.view { width: 750px; display: inline-block; position: relative; }
+    .img { width: 750px; height: 500px; }
+    .commands { margin: 10px 0 }
+        .commands button:not(:first-child) { margin-left: 10px; }
