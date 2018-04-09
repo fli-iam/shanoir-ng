@@ -62,9 +62,9 @@ VALUES
 	(1, 1);
 
 INSERT INTO mr_dataset
-	(id, echo_time_id, flip_angle_id, inversion_time_id, mr_quality_procedure_type, origin_mr_metadata_id, repetition_time_id) 
+	(id, mr_quality_procedure_type, origin_mr_metadata_id) 
 VALUES 
-	(1, null, null, null, 1, 1, null);
+	(1, 1, 1);
 
 INSERT INTO pet_dataset
 	(id) 
