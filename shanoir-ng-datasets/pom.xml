@@ -86,6 +86,17 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+		 	<groupId>org.apache.httpcomponents</groupId>
+		 	<artifactId>httpclient</artifactId>
+		 	<version>4.3.6</version>
+		</dependency> 
+		 <!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime --> 
+		<dependency> 
+			<groupId>org.apache.httpcomponents</groupId> 
+			<artifactId>httpmime</artifactId> 
+			<version>4.3.6</version> 
+		</dependency>
 
 		<!-- Tests -->
 		<dependency>

@@ -94,10 +94,9 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 			ImportJob importJob) {
 		MrDataset mrDataset = new MrDataset();
 
-		mrDataset.setCreationDate(Utils.DateToLocalDate(dicomAttributes.getDate(Tag.SeriesDate)));
-
-		final String serieDescription = dicomAttributes.getString(Tag.SeriesDescription);
-		final String modality = dicomAttributes.getString(Tag.Modality);
+		mrDataset.setCreationDate(Utils.DateToLocalDate(serie.getSeriesDate()));
+		mrDataset.setDiffusionGradients(dataset.getDiffusionGradients());
+		final String serieDescription = serie.getSeriesDescription();
 
 		DatasetMetadata datasetMetadata = new DatasetMetadata();
 		mrDataset.setOriginMetadata(datasetMetadata);
@@ -142,10 +141,18 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
 			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);	
 
-			mrDataset.getEchoTimes().putAll(datasetExpression.getEchoTimes());
-			mrDataset.getRepetitionTimes().putAll(datasetExpression.getRepetitionTimes());
-			mrDataset.getFlipAngles().putAll(datasetExpression.getFlipAngles());
-			mrDataset.getInversionTimes().putAll(datasetExpression.getInversionTimes());
+			if (datasetExpression.getEchoTimes() != null) {
+				mrDataset.getEchoTimes().putAll(datasetExpression.getEchoTimes());
+			}
+			if (datasetExpression.getRepetitionTimes() != null) {
+				mrDataset.getRepetitionTimes().putAll(datasetExpression.getRepetitionTimes());
+			}
+			if (datasetExpression.getFlipAngles() != null) {
+				mrDataset.getFlipAngles().putAll(datasetExpression.getFlipAngles());
+			}
+			if (datasetExpression.getInversionTimes() != null) {
+				mrDataset.getInversionTimes().putAll(datasetExpression.getInversionTimes());
+			}
 			
 			if (datasetExpression.getFirstImageAcquisitionTime() != null) {
 				if (mrDataset.getFirstImageAcquisitionTime() == null) {

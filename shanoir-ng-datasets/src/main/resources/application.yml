@@ -62,12 +62,54 @@ logging:
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
-backup:
+        
+  
+### ================================================================ ###
+##                  Dicom Servers Configuration                    ##
+### ================================================================ ###
+##  Backup Dicom Server  =  PACS where Shanoir stores the dicom data  ##
+##  Lookup Dicom Servers =  PACS from which we can search/import data ##
+##  Local Dicom Server   =  Shanoir                                   ##
+##          =  to receive data from the Lookup Dicom Server           ##
+### ================================================================ ###
+
+dicom:
+  stow:
+    url: http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs/studies
+
+#Backup Dicom Server Configuration                 
+backup: 
   dicom:
     server:
+      # Dicom Server protocol
+      protocol: dicom
+      # Dicom Server called AET
+      calledAET: DCM4CHEE
+      # Dicom Server hostname
       host: localhost
+      # Dicom Server port
+      port: 11112
+      # Activate ciphering and certificate TLS/3DES
+      enableTls3des: false
+      # File path or URL of P12 or JKS keystore
+      keyStoreURL: C:/workspace/Shanoir/resources/config/node1.jks
+      # Password for keystore file, 'dcm4chee' by default
+      keyStorePassword: dcm4chee
+      # File path or URL of JKS truststore
+      trustStoreURL: C:/workspace/Shanoir/resources/config/trust.jks
+      # Password for truststore file, 'dcm4chee' by default
+      trustStorePassword: dcm4chee
+      # Backup PACS administrator email
+      administrator:
+        email : shanoir-dev-admin@lists.gforge.inria.fr
       web:
         port: 8080
+
+# Backup PACS web port
+  pacs:
+    web: 
+      port: 8080
+
 
 ---
 

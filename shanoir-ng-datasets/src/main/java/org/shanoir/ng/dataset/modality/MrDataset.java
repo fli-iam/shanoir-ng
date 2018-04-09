@@ -41,19 +41,19 @@ public class MrDataset extends Dataset {
 	private List<DiffusionGradient> diffusionGradients;
 
 	/** Echo time. */
-	@ManyToOne
-	@JoinColumn(name = "echo_time_id")
-	private EchoTime echoTime;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrDataset", cascade = CascadeType.ALL)
+//	@JoinColumn(name = "echo_time_id")
+	private List<EchoTime> echoTime;
 
 	/** Flip angle. */
-	@ManyToOne
-	@JoinColumn(name = "flip_angle_id")
-	private FlipAngle flipAngle;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrDataset", cascade = CascadeType.ALL)
+//	@JoinColumn(name = "flip_angle_id")
+	private List<FlipAngle> flipAngle;
 
 	/** Inversion time. */
-	@ManyToOne
-	@JoinColumn(name = "inversion_time_id")
-	private InversionTime inversionTime;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrDataset", cascade = CascadeType.ALL)
+//	@JoinColumn(name = "inversion_time_id")
+	private List<InversionTime> inversionTime;
 
 	/** Mr Quality procedure. */
 	private Integer mrQualityProcedureType;
@@ -63,9 +63,9 @@ public class MrDataset extends Dataset {
 	private MrDatasetMetadata originMrMetadata;
 
 	/** Repetition time. */
-	@ManyToOne
-	@JoinColumn(name = "repetition_time_id")
-	private RepetitionTime repetitionTime;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrDataset", cascade = CascadeType.ALL)
+//	@JoinColumn(name = "repetition_time_id")
+	private List<RepetitionTime> repetitionTime;
 
 	/** Metadata updated by study card. */
 	@OneToOne
@@ -109,7 +109,10 @@ public class MrDataset extends Dataset {
 	/**
 	 * @return the echoTime
 	 */
-	public EchoTime getEchoTime() {
+	public List<EchoTime> getEchoTime() {
+		if (echoTime == null) {
+			return new ArrayList<EchoTime>();
+		}
 		return echoTime;
 	}
 
@@ -117,14 +120,17 @@ public class MrDataset extends Dataset {
 	 * @param echoTime
 	 *            the echoTime to set
 	 */
-	public void setEchoTime(EchoTime echoTime) {
-		this.echoTime = echoTime;
+	public void setEchoTime(List<EchoTime> echoTimes) {
+		this.echoTime = echoTimes;
 	}
 
 	/**
 	 * @return the flipAngle
 	 */
-	public FlipAngle getFlipAngle() {
+	public List<FlipAngle> getFlipAngle() {
+		if (flipAngle == null) {
+			return new ArrayList<FlipAngle>();
+		}
 		return flipAngle;
 	}
 
@@ -132,14 +138,17 @@ public class MrDataset extends Dataset {
 	 * @param flipAngle
 	 *            the flipAngle to set
 	 */
-	public void setFlipAngle(FlipAngle flipAngle) {
-		this.flipAngle = flipAngle;
+	public void setFlipAngle(List<FlipAngle> flipAngles) {
+		this.flipAngle = flipAngles;
 	}
 
 	/**
 	 * @return the inversionTime
 	 */
-	public InversionTime getInversionTime() {
+	public List<InversionTime> getInversionTime() {
+		if (inversionTime == null) {
+			return new ArrayList<InversionTime>();
+		}
 		return inversionTime;
 	}
 
@@ -147,8 +156,8 @@ public class MrDataset extends Dataset {
 	 * @param inversionTime
 	 *            the inversionTime to set
 	 */
-	public void setInversionTime(InversionTime inversionTime) {
-		this.inversionTime = inversionTime;
+	public void setInversionTime(List<InversionTime> inversionTimes) {
+		this.inversionTime = inversionTimes;
 	}
 
 	/**
@@ -188,7 +197,10 @@ public class MrDataset extends Dataset {
 	/**
 	 * @return the repetitionTime
 	 */
-	public RepetitionTime getRepetitionTime() {
+	public List<RepetitionTime> getRepetitionTime() {
+		if (repetitionTime == null) {
+			return new ArrayList<RepetitionTime>();
+		}
 		return repetitionTime;
 	}
 
@@ -196,8 +208,8 @@ public class MrDataset extends Dataset {
 	 * @param repetitionTime
 	 *            the repetitionTime to set
 	 */
-	public void setRepetitionTime(RepetitionTime repetitionTime) {
-		this.repetitionTime = repetitionTime;
+	public void setRepetitionTime(List<RepetitionTime> repetitionTimes) {
+		this.repetitionTime = repetitionTimes;
 	}
 
 	@Override

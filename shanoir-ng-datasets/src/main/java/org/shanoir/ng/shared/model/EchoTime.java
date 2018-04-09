@@ -7,6 +7,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.dataset.DatasetExpression;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
 
 /**
@@ -29,6 +30,11 @@ public class EchoTime extends AbstractGenericItem {
 	@JoinColumn(name = "mr_protocol_id")
 	private MrProtocol mrProtocol;
 
+	/** MR dataset. */
+	@ManyToOne
+	@JoinColumn(name = "mr_dataset_id")
+	private MrDataset mrDataset;
+	
 	/**
 	 * The echo number. Comes from dicom tag (0018,0086) VR=IS, VM=1-n Echo
 	 * Number(s).
