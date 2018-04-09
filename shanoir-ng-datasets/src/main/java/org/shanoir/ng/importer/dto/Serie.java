@@ -1,5 +1,6 @@
 package org.shanoir.ng.importer.dto;
 
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,7 +27,7 @@ public class Serie {
 	private String seriesDescription = null;
 
 	@JsonProperty("seriesDate")
-	private String seriesDate = null;
+	private Date seriesDate = null;
 
 	@JsonProperty("seriesNumber")
 	private Integer seriesNumber = null;
@@ -110,11 +111,11 @@ public class Serie {
 		this.seriesDescription = seriesDescription;
 	}
 
-	public String getSeriesDate() {
+	public Date getSeriesDate() {
 		return seriesDate;
 	}
 
-	public void setSeriesDate(String seriesDate) {
+	public void setSeriesDate(Date seriesDate) {
 		this.seriesDate = seriesDate;
 	}
 

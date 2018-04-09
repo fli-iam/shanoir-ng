@@ -33,6 +33,9 @@ public class ImporterService {
 	@Autowired
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
 	
+	@Autowired 
+	private DicomPersisterService dicomPersisterService;
+	
 	private ImportJob importJob;
 	
 	public void setImportJob(ImportJob importJob) {
@@ -63,10 +66,10 @@ public class ImporterService {
 			for (Patient patient : importJob.getPatients()) {
 				for (Study study : patient.getStudies()) {
 					for (Serie serie : study.getSeries() ) {
-						if (serie.getSelected()) {
+//						if (serie.getSelected()) {
 							createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
 							rank++;
-						}
+//						}
 					}
 				}
 			}
@@ -78,7 +81,12 @@ public class ImporterService {
 			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
 			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 			datasetAcquisition.setExamination(examination);
-			datasetAcquisitionRepository.save(datasetAcquisition);
+			// Persist Serie in Shanoir DB
+			DatasetAcquisition persistedDatasetAcquisition = datasetAcquisitionRepository.save(datasetAcquisition);
+			// Persist Dicom images in Shanoir Pacs
+//			if (persistedDatasetAcquisition != null) {
+				dicomPersisterService.persistAllForSerie(serie);
+//			}
 		}
 	}
 

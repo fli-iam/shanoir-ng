@@ -607,7 +607,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         final String geometryOfKSpaceTraversal = dicomAttributes.getString(Tag.GeometryOfKSpaceTraversal);
         final Integer echoTrainLength = getEchoTrainLength(dicomAttributes, isEnhancedMR);
         if (geometryOfKSpaceTraversal != null && !"".equals(geometryOfKSpaceTraversal) && echoTrainLength != null) {
-            /* The defined termes are RECTILINEAR, RADIAL, SPIRAL */
+            /* The defined terms are RECTILINEAR, RADIAL, SPIRAL */
             if (echoTrainLength == 1 && "RECTILINEAR".equalsIgnoreCase(geometryOfKSpaceTraversal)) {
                 return MrSequenceKSpaceFill.CONVENTIONAL_CARTESIAN_SEQUENCE;
             } else if (echoTrainLength > 1 && "RECTILINEAR".equalsIgnoreCase(geometryOfKSpaceTraversal)) {

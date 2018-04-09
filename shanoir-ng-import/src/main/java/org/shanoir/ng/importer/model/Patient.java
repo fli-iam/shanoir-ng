@@ -1,5 +1,6 @@
 package org.shanoir.ng.importer.model;
 
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,7 +22,7 @@ public class Patient {
      private String patientName;
 
      @JsonProperty("patientBirthDate")
-     private String patientBirthDate;
+     private Date patientBirthDate;
 
      @JsonProperty("patientSex")
      private String patientSex;
@@ -45,16 +46,16 @@ public class Patient {
 		this.patientName = patientName;
 	}
 
-	public String getPatientBirthDate() {
+	public Date getPatientBirthDate() {
 		return patientBirthDate;
 	}
 
-	public void setPatientBirthDate(String patientBirthDate) {
+	public void setPatientBirthDate(Date patientBirthDate) {
 		this.patientBirthDate = patientBirthDate;
 	}
 
 	public String getPatientSex() {
-		return patientSex;
+		return patientSex;	
 	}
 
 	public void setPatientSex(String patientSex) {

@@ -17,6 +17,7 @@ import { StudyService } from '../../studies/shared/study.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { SubjectType } from '../shared/subject-type.enum';
 import { SubjectStudy } from '../shared/subject-study.model';
+import { ModalService } from '../../shared/components/modal/modal.service';
 
 @Component({
     selector: 'subject-detail',
@@ -36,17 +37,16 @@ export class SubjectComponent implements OnInit {
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
     private imagedObjectCategories: Enum[] = [];
+    private HemisphericDominances: Enum[] = [];
     private sexes: Enum[] = [];
     private subjectTypes: Enum[] = [];
     public studies: IdNameObject[];
-    private HemisphericDominances: Enum[] = [];
     private isBirthDateValid: boolean = true;
     private selectedBirthDateNormal: IMyDate;
     private isAlreadyAnonymized: boolean;
     private hashLength: number = 14;
     private firstName: string;
     private lastName: string;
-    private items: any[] = [];
 
     private myDatePickerOptions: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
@@ -58,23 +58,29 @@ export class SubjectComponent implements OnInit {
         private subjectService: SubjectService,
         private studyService: StudyService,
         private fb: FormBuilder,
-        private location: Location, private keycloakService: KeycloakService) {
-
+        private location: Location, private keycloakService: KeycloakService,
+        private modalService: ModalService) {
     }
 
     ngOnInit(): void {
-        if (this.modeFromImport) { this.mode = this.modeFromImport; }
+        if (this.modeFromImport) {
+            this.mode = this.modeFromImport; 
+            this.modalService.objectPassedByModal
+                .subscribe((subject) => {
+                    this.computeNameFromDicomTag(subject.name);
+                    this.getSubject();
+                    this.getDateToDatePicker(subject);
+                    this.subject.sex = subject.sex;
+                })
+        }
         this.firstName = "";
         this.lastName = "";
-        this.getSubject();
         this.getImagedObjectCategories();
-        if (this.mode == 'create') {
-            this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
-        }
-        this.getSexes();
         this.getHemisphericDominances();
+        this.getSexes();
         this.getsubjectTypes();
         this.getStudies();
+        this.getSubject();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
@@ -91,12 +97,13 @@ export class SubjectComponent implements OnInit {
                         this.mode = mode;
                     }
                 }
-                if (subjectId && this.mode !== 'create') {
+                if (subjectId) {
                     // view or edit mode
                     this.subjectId = subjectId;
                     return this.subjectService.getSubject(subjectId);
                 } else {
                     // create mode
+                    this.subject.imagedObjectCategory = <any> this.imagedObjectCategories[1].key;
                     return Observable.of<Subject>();
                 }
             })
@@ -256,16 +263,11 @@ export class SubjectComponent implements OnInit {
         this.isNameUnique = true;
     }
 
-
     getDateToDatePicker(subject: Subject): void {
-        if (subject) {
-            if (subject.birthDate && !isNaN(new Date(subject.birthDate).getTime())) {
-                let birthDate: Date = new Date(subject.birthDate);
-                this.selectedBirthDateNormal = {
-                    year: birthDate.getFullYear(), month: birthDate.getMonth() + 1,
-                    day: birthDate.getDate()
-                };;
-            }
+        if (subject && subject.birthDate) {
+            let birthDate: Date = new Date(parseInt(subject.birthDate.toString()));
+            this.selectedBirthDateNormal = {year: birthDate.getFullYear(), month: birthDate.getMonth() + 1, 
+                day: birthDate.getDate()};
         }
     }
 
@@ -341,6 +343,20 @@ export class SubjectComponent implements OnInit {
 
         // I want to do something here for new selectedDevice, but what I
         // got here is always last selection, not the one I just select.
+    }
+
+    computeNameFromDicomTag (patientName: string): void {
+        /* Try to compute patient first name and last name from dicom tags. 
+        eg. TOM^HANKS -> return TOM as first name and HANKS as last name */
+        if (patientName !== null) {
+            let names: string[] = patientName.split("\\^");
+            if (names !== null && names.length == 2) {
+                this.firstName = names[1];
+                this.lastName = names[2];
+            } else {
+                this.firstName = this.lastName = patientName;
+            }
+        }
     }
 
 }

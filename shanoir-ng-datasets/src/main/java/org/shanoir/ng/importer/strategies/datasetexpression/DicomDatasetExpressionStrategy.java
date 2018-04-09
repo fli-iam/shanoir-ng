@@ -1,8 +1,14 @@
 package org.shanoir.ng.importer.strategies.datasetexpression;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -17,15 +23,17 @@ import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.FlipAngle;
 import org.shanoir.ng.shared.model.InversionTime;
 import org.shanoir.ng.shared.model.RepetitionTime;
+import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy {
-	
+
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(DicomDatasetExpressionStrategy.class);
 
@@ -34,8 +42,8 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 
 	@Value("${backup.dicom.server.host}")
 	private String backupDicomServerHost;
-	
-	@Value("${backup.dicom.server.web.port}")
+
+	@Value("${backup.dicom.server.port}")
 	private String backupDicomServerWebPort;
 
 	@Override
@@ -46,7 +54,6 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 		pacsDatasetExpression.setCreationDate(LocalDate.now());
 		pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
 
-		boolean firstDatasetImage = true;
 		if (serie.getIsMultiFrame()) {
 			pacsDatasetExpression.setMultiFrame(true);
 			pacsDatasetExpression.setFrameCount(new Integer(serie.getMultiFrameCount()));
@@ -54,9 +61,9 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 
 		if (expressionFormat != null & expressionFormat.getType().equals("dcm")) {
 
-			Attributes firstDatasetImageAttribute;
-			
+			List<String> dcmFilesToSendToPacs = new ArrayList<String>();
 			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
+				dcmFilesToSendToPacs.add(datasetFile.getPath());
 				Date contentTime = null;
 				Date acquisitionTime = null;
 				Attributes dicomAttributes = null;
@@ -64,10 +71,6 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 					dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile);
 				} catch (IOException e) {
 					LOG.error(e.getMessage());
-				}
-				if (firstDatasetImage) {
-					firstDatasetImageAttribute = dicomAttributes;
-					firstDatasetImage = false;
 				}
 				DatasetFile pacsDatasetFile = new DatasetFile();
 				pacsDatasetFile.setPacs(true);
@@ -80,7 +83,15 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 				// set return type as application/dicom instead of
 				// the standard image/jpeg
 				wadoRequest += "&contentType=application/dicom";
-				pacsDatasetFile.setPath(wadoRequest);
+
+				try {
+					URL wadoURL = new URL(wadoRequest);
+					pacsDatasetFile.setPath(wadoURL.getPath());
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 				pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
 				pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
 

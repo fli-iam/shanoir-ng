@@ -5,6 +5,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
 
 /**
@@ -27,6 +28,11 @@ public class RepetitionTime extends AbstractGenericItem {
 	@JoinColumn(name = "mr_protocol_id")
 	private MrProtocol mrProtocol;
 
+	/** MR dataset. */
+	@ManyToOne
+	@JoinColumn(name = "mr_dataset_id")
+	private MrDataset mrDataset;
+	
 	/**
 	 * Comes from the dicom tag (0018,0080) VR=DS, VM=1 Repetition Time. The
 	 * unit of measure must be in millisec.

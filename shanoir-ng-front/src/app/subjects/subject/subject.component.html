@@ -61,34 +61,27 @@
 							<input type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
 						</span>
 					</li>
-
-					<li *ngIf="(mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[1].key  || subject.imagedObjectCategory == imagedObjectCategories[2].key)) || mode == 'view'">
-						<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Birth date</label>
-
+					<li *ngIf="subject?.imagedObjectCategory == imagedObjectCategories[1].key || subject?.imagedObjectCategory == imagedObjectCategories[2].key">
+						<label *ngIf="mode !== 'edit'" i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Birth date</label>
 						<span [ngSwitch]="mode">
 							<ng-template class="right-col" [ngSwitchCase]="'view'">
 								{{subject.birthDate | date: 'dd/MM/yyyy'}}
 							</ng-template>
-
 							<ng-template class="right-col" [ngSwitchCase]="'create'">
 								<my-date-picker id="birthDate" [options]="myDatePickerOptions" formControlName="birthDate" [(ngModel)]="birthDate" (dateChanged)="onBirthDateChanged($event)"
-								 (inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
+									(inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
 								</my-date-picker>
 								<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
 							</ng-template>
 						</span>
-
 					</li>
-
-					<li *ngIf="mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[0].key  || subject.imagedObjectCategory == imagedObjectCategories[3].key ) ">
+					<li *ngIf="mode == 'create' && (subject?.imagedObjectCategory == imagedObjectCategories[0].key || subject?.imagedObjectCategory == imagedObjectCategories[3].key)">
 						<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
 						<my-date-picker id="birthDate" [options]="myDatePickerOptions" formControlName="birthDate" [(ngModel)]="birthDate" (dateChanged)="onBirthDateChanged($event)"
-						 (inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
+							(inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
 						</my-date-picker>
 						<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
-
 					</li>
-
 					<li>
 						<label i18n="Subject detail|Name label@@subjectDetailName" class="required-label">Common name</label>
 						<span class="right-col" [ngSwitch]="mode">
