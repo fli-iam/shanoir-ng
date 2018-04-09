@@ -78,17 +78,17 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form li > label { display: inline-block; vertical-align: top; width: 180px; }
   form fieldset ol { margin: 0; padding: 0; }
     form fieldset.responsive ol { float: left; padding: 0 50px 0 0; }
-  form fieldset li { list-style: none; padding: 3px 0; margin: 0; height: 21px; }
+  form fieldset li { list-style: none; padding: 3px 0; margin: 0; }
     form fieldset li input,
     form fieldset li select,
-    form fieldset li button { height: 100%; }
+    form fieldset li button { height: 21px; }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { padding: 6px 15px; }
   form .footer { text-align: right; }
   form .header { font-size: 20px; color: var(--color-b); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
   form .required-label:after{ content:" *"; }
-  form .form-validation-alert { color: var(--color-error); }
-  form .right-col label { text-align: right; display: block; }
+  form .form-validation-alert { color: var(--color-error); margin-left: 183px; }
+  form .right-col label { text-align: left; display: block; }
   form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; opacity: 0.8; }
     form .right-col button:active { background-color: var(--color-b-light); }
     form .right-col button img { height: 12px; vertical-align: sub; margin: 0px 5px 2px 0px; }
@@ -126,7 +126,7 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
 
 
 .main-content { padding: 0 20px 10px 20px; position: relative; }
-.max-content { width: intrinsic; width: -moz-max-content; width: -webkit-max-content; }
+.max-content { display: inline-block; }
 .command-zone { background-color: var(--light-grey); }
 
 .error-message label { color: var(--color-error); }
