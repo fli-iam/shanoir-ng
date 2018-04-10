@@ -31,27 +31,27 @@ spring:
           import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
   jooq:
     sql-dialect: Mysql
-  rabbitmq:
-    host: shanoir-ng-rabbitmq
+#  rabbitmq:
+#    host: shanoir-ng-rabbitmq
   session:
     store-type: none
 front.server.url: http://shanoir-ng-nginx
-#keycloak
+# keycloak
 keycloak:
   cors: true
   realm: shanoir-ng
   auth-server-url: http://shanoir-ng-nginx/auth
   ssl-required: external
   resource: shanoir-ng-datasets
-  securityConstraints[0]:
-    securityCollections[0]:
-      name: spring secured api
-      authRoles: 
-        - ROLE_ADMIN
-        - ROLE_EXPERT
-        - ROLE_GUEST
-        - ROLE_USER
-      patterns:
+  securityConstraints:
+    - authRoles: 
+      - ROLE_ADMIN
+      - ROLE_EXPERT
+      - ROLE_GUEST
+      - ROLE_USER
+    - securityCollections:
+      - name: datasets secured api
+      - patterns:
         - /*
 # microservices url
 ms.url:
@@ -83,9 +83,9 @@ dcm4chee-arc:
 spring:
   profiles: dev
   datasource:
-    url: jdbc:mysql://localhost:3306/shanoir_ng_datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
-    username: root
-    password: 
+    url: jdbc:mysql://database:3306/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    username: datasets
+    password: password
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
     data: classpath:/scripts/import.sql
@@ -99,22 +99,24 @@ spring:
     show-sql: true
   jooq:
     sql-dialect: Mysql
-  rabbitmq:
-    host: localhost
+#  rabbitmq:
+#    host: localhost
 server:
-    port: 9906
-front.server.url: http://localhost:8080
+    port: 9904
+front.server:
+  address: http://shanoir-ng-nginx/shanoir-ng/
+  url: http://shanoir-ng-nginx
 #keycloak
 keycloak:
-  auth-server-url: http://localhost/auth
+  auth-server-url: http://shanoir-ng-nginx/auth
   credentials:
-    secret: 3e35c819-aa43-4fd6-a8dc-9dbe75834e40
+    secret: da3af39b-9fd7-44e1-b03d-3ea6f611766a
 # microservices url
 ms.url:
-  shanoir-ng-studies: http://localhost:9902/
+  shanoir-ng-studies: http://studies:9902/
 # logging configuration
 logging:
-  file: c:\\Temp\\shanoir-ng\\shanoir-ng-dataset.log
+  file: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR

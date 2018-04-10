@@ -102,9 +102,9 @@ shanoir:
 spring:
   profiles: dev
   datasource:
-    url: jdbc:mysql://localhost:3306/shanoir_ng_import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
-    username: root
-    password: 
+    url: jdbc:mysql://database:3306/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    username: import
+    password: password
     # The SQL dialect makes Hibernate generate better SQL for the chosen database
     driver-class-name: com.mysql.jdbc.Driver
     data: classpath:/scripts/import.sql
@@ -122,24 +122,26 @@ spring:
     host: localhost
 server:
     port: 9903
-front.server.url: http://localhost:8080
+front.server:
+  address: http://shanoir-ng-nginx/shanoir-ng/
+  url: http://shanoir-ng-nginx
 #keycloak
 keycloak:
-  auth-server-url: http://localhost/auth
-  credentials.secret: 3ab5a06a-9031-47d7-bfc8-ce8cc3027034
+  auth-server-url: http://shanoir-ng-nginx/auth
+  credentials.secret: 4e6a17dd-04f1-4496-87f9-d8fbb219f88a
 # microservices url
 ms.url:
-  shanoir-ng-datasets: http://localhost:9906/datasetacquisition
+  shanoir-ng-datasets: http://datasets:9904/datasetacquisition
 # logging configuration
 logging:
-  file: c:\\Temp\\shanoir-ng\\shanoir-ng-import.log
+  file: /var/log/shanoir-ng-logs/shanoir-ng-import.log
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
 shanoir:
   import:
     upload:
-      folder: c:\Temp\shanoir-ng\import\
+      folder: /tmp
 
 ---
 

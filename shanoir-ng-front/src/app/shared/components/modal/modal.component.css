@@ -1,0 +1,80 @@
+.modal-open {
+  overflow: hidden;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100050;
+  background: var(--color-overlay);
+  text-align: center;
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+
+.out {
+  display: none;
+}
+
+.modal-open .modal {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.modal-dialog {
+  position: relative;
+  width: auto;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.content {
+  display: inline-block;
+  text-align: left;
+  box-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color);
+  animation: createBox .2s;
+}
+
+.preout {
+  animation: shrinkBox .2s;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100040;
+  background-color: #000;
+}
+.modal-backdrop.fade {
+  filter: alpha(opacity=0);
+  opacity: 0;
+}
+.modal-backdrop.in {
+  filter: alpha(opacity=50);
+  opacity: .5;
+}
+
+@keyframes createBox {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes shrinkBox {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0);
+  }
+}
+

@@ -1,24 +1,114 @@
 version: '3'
 services:
+  #
+  # Keycloak: database and service
+  #
   keycloak-database:
-    container_name: shanoir-ng-keycloak-database
+    container_name: keycloak-database
+    image: mysql/mysql-server
     environment:
       - MYSQL_DATABASE=keycloak
       - MYSQL_USER=keycloak
       - MYSQL_PASSWORD=password
-    image: mysql/mysql-server
-    networks:
-      - shanoir_ng_network
     volumes:
       - "keycloak-database-data:/var/lib/mysql"
+    networks:
+      - shanoir_ng_network
   keycloak:
+    container_name: keycloak
     build: ./docker-compose/keycloak
-    container_name: shanoir-ng-keycloak
     networks:
       - shanoir_ng_network
     ports:
      - "8080:8080"
-networks:
-  shanoir_ng_network:
+  #
+  # Database for all other microservices
+  #
+  database:
+    container_name: database
+    image: mysql/mysql-server
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - "database-data:/var/lib/mysql"
+      - "./docker-compose/database:/docker-entrypoint-initdb.d"
+    networks:
+      - shanoir_ng_network
+  #
+  # Users microservice
+  #
+  users:
+    container_name: users
+    build: ./docker-compose/users
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "9901:9901"
+    depends_on:
+      - "keycloak"
+  #
+  # Studies microservice
+  #
+  studies:
+    container_name: studies
+    build: ./docker-compose/studies
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "9902:9902"
+    depends_on:
+      - "keycloak"
+  #
+  # Import microservice
+  #
+  import:
+    container_name: import
+    build: ./docker-compose/import
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "9903:9903"
+    depends_on:
+      - "keycloak"
+  #
+  # Datasets microservice
+  #
+  datasets:
+    container_name: datasets
+    build: ./docker-compose/datasets
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "9904:9904"
+    depends_on:
+      - "keycloak"
+  #
+  # Nginx
+  #
+  nginx:
+    container_name: shanoir-ng-nginx
+    build: ./docker-compose/nginx
+    volumes:
+      - "logs:/var/log/nginx"
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "80:80"
+    depends_on:
+      - "keycloak"
+
 volumes:
   keycloak-database-data:
+  database-data:
+  logs:
+
+networks:
+  shanoir_ng_network:

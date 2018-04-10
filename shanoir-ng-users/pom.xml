@@ -73,6 +73,10 @@
 
 	<build>
 		<plugins>
+			<!--
+				Package shanoir-ng-users.jar as Spring Boot executable:
+				Avoid error: no main manifest attribute, in /shanoir-ng-users.jar
+			-->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -81,6 +85,13 @@
 						<profile>${spring.active.profile}</profile>
 					</profiles>
 				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>com.spotify</groupId>
@@ -97,6 +108,26 @@
 						</resource>
 					</resources>
 				</configuration>
+			</plugin>
+			<!-- Copy shanoir-ng-users.jar for docker-compose up running -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<copy file="target/${project.build.finalName}.jar"
+									tofile="${basedir}/../docker-compose/users/${project.artifactId}.jar" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

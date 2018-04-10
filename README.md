@@ -1,41 +1,32 @@
-# shanoir-ng
-Shanoir, next generation, based on microservices architecture
+Installation on using docker-compose
 
-##MS_ChallengeScores
-Microservice for challenge scores
+* Install docker and docker-compose:
+    * https://docs.docker.com/install/
+    * https://docs.docker.com/compose/install/
+* Install Maven 3 on your machine
+* Get access to GitHub repository and clone the shanoir-ng repository
+* Please change for the moment manually the following file:
+    * shanoir-ng-keycloak-auth/src/main/resources/application.properties
+        * ms.users.server.address=http://users:9901/login
+* Execute Maven build on parent project
+    * cd shanoir-ng-parent/
+    * mvn install -DskipTests
+        * the tests will have to be clean up later
+    * The build creates all .jars and copies them into the /docker-compose structure to be
+used from there for the docker-compose startup
+* configure your local /etc/hosts and add:
+    * 127.0.0.1       shanoir-ng-nginx
+* docker-compose up —build
+* Connect to keycloak admin interface:
+    * http://localhost:8080/auth/admin/
+* Adapt in dev profile in application.yml the credentials of all microservices,
+that you want to connect with your local keycloak instance
+* docker-compose down
+* Rebuild all .jars with new credentials, e.g. on executing Maven build on parent project
+    * cd shanoir-ng-parent/
+    * mvn install -DskipTests
+* docker-compose up —build
+* access to shanoir-ng: http://shanoir-ng-nginx
 
-##MS_templateSC_DW
-Microservice template developed with Dropwizard
-
-##MS_templateSC_SB
-Microservice template developed with SpringBoot
-
-##angular2-quickstart
-Angular2 tutorial: 
-- https://angular.io/docs/ts/latest/quickstart.html
-
-##dropwizard-tutorial
-Dropwizard tutorials:
-- http://www.dropwizard.io/0.9.2/docs/getting-started.html
-- https://dzone.com/articles/getting-started-with-dropwizard-connecting-to-a-da
-- http://www.dropwizard.io/0.7.1/docs/manual/hibernate.html)
-
-##shanoir-ng-main
-First Shanoir NG project (SpringBoot + Angular2) - Main project
-Used with shanoir-ng-resource-server project
-
-##shanoir-ng-nginx
-Nginx configuration
-
-##shanoir-ng-resource-server
-First Shanoir NG project (SpringBoot) - Resource project
-Used with shanoir-ng-resource-server project
-
-##shanoir-ng-scores
-Old project for challenge scores (to remove)
-
-##shanoir-ng
-Shanoir NG project template, composed of three projects:
-- parent pom
-- front project (Angular2)
-- authentication project (SpringBoot)
+* this installation uses Docker named volumes, find more here to handle your local data:
+https://docs.docker.com/storage/volumes/
