@@ -22,6 +22,9 @@ used from there for the docker-compose startup
 * Adapt in dev profile in application.yml the credentials of all microservices,
 that you want to connect with your local keycloak instance
 * docker-compose down
+* Rebuild all .jars with new credentials, e.g. on executing Maven build on parent project
+    * cd shanoir-ng-parent/
+    * mvn install -DskipTests
 * docker-compose up —build
 * access to shanoir-ng: http://shanoir-ng-nginx
 
