@@ -1,0 +1,6 @@
+echo "Creating databases, starting..."
+mysql -uroot -ppassword -e "CREATE DATABASE users"
+mysql -uroot -ppassword -e "CREATE DATABASE studies"
+mysql -uroot -ppassword -e "CREATE DATABASE import"
+mysql -uroot -ppassword -e "CREATE DATABASE datasets"
+echo "Creating databases, finished."
