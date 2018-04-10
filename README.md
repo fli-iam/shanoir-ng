@@ -24,3 +24,6 @@ that you want to connect with your local keycloak instance
 * docker-compose down
 * docker-compose up —build
 * access to shanoir-ng: http://shanoir-ng-nginx
+
+* this installation uses Docker named volumes, find more here to handle your local data:
+https://docs.docker.com/storage/volumes/
