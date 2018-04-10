@@ -2,7 +2,7 @@
 -- Has to be executed manually inside the docker container, command example : mysql -u {db user name} -p{password} < populate.sql
 -- ! But remember to wait for the java web server to have started since the schema is created by hibernate on startup !
 --
-use shanoir_ng_studies;
+use studies;
 
 INSERT INTO study
 	(id, clinical, coordinator_id, downloadable_by_default, end_date, mono_center, name, start_date, study_status, study_type, visible_by_default, with_examination)

@@ -2,7 +2,7 @@
 -- Has to be executed manually inside the docker container, command example : mysql -u {db user name} -p{password} < populate.sql
 -- ! But remember to wait for the java web server to have started since the schema is created by hibernate on startup !
 
-use shanoir_ng_users;
+use users;
 
 INSERT INTO role 
 VALUES 

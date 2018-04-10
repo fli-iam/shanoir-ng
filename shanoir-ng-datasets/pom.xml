@@ -18,7 +18,7 @@
 
 	<properties>
 		<springfox-version>2.5.0</springfox-version>
-		<spring-active-profile></spring-active-profile>
+		<spring.active.profile></spring.active.profile>
 		<keycloak.version>2.5.1.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
@@ -161,21 +161,40 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<!--
+				Package shanoir-ng-datasets.jar as Spring Boot executable:
+				Avoid error: no main manifest attribute, in /shanoir-ng-datasets.jar
+			-->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<profiles>
-						<profile>${spring-active-profile}</profile>
+						<profile>${spring.active.profile}</profile>
 					</profiles>
 				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
+			<!-- Copy shanoir-ng-datasets.jar for docker-compose up running -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
+						<configuration>
+							<target>
+								<copy file="target/${project.build.finalName}.jar"
+									tofile="${basedir}/../docker-compose/datasets/${project.artifactId}.jar" />
+							</target>
+						</configuration>
 						<goals>
 							<goal>run</goal>
 						</goals>
