@@ -1,6 +1,7 @@
 .modal-open {
   overflow: hidden;
 }
+
 .modal {
   position: fixed;
   top: 0;
@@ -13,7 +14,10 @@
   display: table;
   width: 100%;
   height: 100%;
+}
 
+.out {
+  display: none;
 }
 
 .modal-open .modal {
@@ -31,6 +35,12 @@
 .content {
   display: inline-block;
   text-align: left;
+  box-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color);
+  animation: createBox .2s;
+}
+
+.preout {
+  animation: shrinkBox .2s;
 }
 
 .modal-backdrop {
@@ -51,23 +61,20 @@
   opacity: .5;
 }
 
-  /*-webkit-box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color);
-          box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color);*/
+@keyframes createBox {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes shrinkBox {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0);
+  }
+}
 
-.modal-footer .btn + .btn {
-  margin-bottom: 0;
-  margin-left: 5px;
-}
-.modal-footer .btn-group .btn + .btn {
-  margin-left: -1px;
-}
-.modal-footer .btn-block + .btn-block {
-  margin-left: 0;
-}
-.modal-scrollbar-measure {
-  position: absolute;
-  top: -9999px;
-  width: 50px;
-  height: 50px;
-  overflow: scroll;
-}

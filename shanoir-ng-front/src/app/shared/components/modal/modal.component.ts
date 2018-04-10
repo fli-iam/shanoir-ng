@@ -3,10 +3,9 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'app-modal',
   template: `
-  <div class="modal fade" tabindex="-1" [ngClass]="{'in': visibleAnimate}"
-       [ngStyle]="{'display': visible ? 'table' : 'none', 'opacity': visibleAnimate ? 1 : 0}">
+  <div class="modal fade" tabindex="-1" [ngClass]="{'out': !visible}">
     <div id={{modalDialogId}} class="modal-dialog" (click)="onContainerClicked($event)">
-      <div class="content">
+      <div class="content" [ngClass]="{'preout': !visibleAnimate}">
         <ng-content select=".app-modal-body"></ng-content>
       </div>
     </div>
@@ -23,13 +22,13 @@ export class ModalComponent {
   constructor(){}
 
   public show(): void {
+    this.visibleAnimate = true;
     this.visible = true;
-    setTimeout(() => this.visibleAnimate = true, 100);
   }
 
   public hide(): void {
     this.visibleAnimate = false;
-    setTimeout(() => this.visible = false, 300);
+    setTimeout(() => this.visible = false, 190);
   }
 
   public onContainerClicked(event: MouseEvent): void {

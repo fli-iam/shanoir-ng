@@ -36,6 +36,7 @@ input { padding: 1px 5px; }
 option:disabled { color: var(--greyer); }
 ul { padding: 0; }
 li { list-style: none; } 
+form { margin: 0; }
 
 table.layout { border: none; border-collapse: collapse; }
   table.layout td { padding: 0;	vertical-align: top; }
