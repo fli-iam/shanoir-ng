@@ -14,6 +14,8 @@ Installation on using docker-compose
         * the tests will have to be clean up later
     * The build creates all .jars and copies them into the /docker-compose structure to be
 used from there for the docker-compose startup
+* configure your local /etc/hosts and add:
+    * 127.0.0.1       shanoir-ng-nginx
 * docker-compose up —build
 * Connect to keycloak admin interface:
     * http://localhost:8080/auth/admin/
@@ -21,3 +23,4 @@ used from there for the docker-compose startup
 that you want to connect with your local keycloak instance
 * docker-compose down
 * docker-compose up —build
+* access to shanoir-ng: http://shanoir-ng-nginx
