@@ -40,11 +40,14 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 	@Autowired
 	DicomProcessing dicomProcessing;
 
-	@Value("${backup.dicom.server.host}")
-	private String backupDicomServerHost;
+	@Value("${dcm4chee-arc.host}")
+	private String dicomHost;
 
-	@Value("${backup.dicom.server.port}")
-	private String backupDicomServerWebPort;
+	@Value("${dcm4chee-arc.port}")
+	private String dicomPort;
+	
+	@Value("${dcm4chee-arc.rs-url}")
+	private String dicomRsUrl;
 
 	@Override
 	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
@@ -77,15 +80,10 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 				final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);
 				final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
 				final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
-				String wadoRequest = "http://" + backupDicomServerHost + ":" + backupDicomServerWebPort
-						+ "/wado?requestType=WADO&studyUID=" + studyInstanceUID + "&seriesUID=" + seriesInstanceUID
-						+ "&objectUID=" + sOPInstanceUID;
-				// set return type as application/dicom instead of
-				// the standard image/jpeg
-				wadoRequest += "&contentType=application/dicom";
+				String wadoRsRequest = "http://" + dicomHost + ":" + dicomPort + "/" + dicomRsUrl + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID;
 
 				try {
-					URL wadoURL = new URL(wadoRequest);
+					URL wadoURL = new URL(wadoRsRequest);
 					pacsDatasetFile.setPath(wadoURL.getPath());
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
