@@ -66,7 +66,6 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserService } from './users/shared/user.service';
 
 import '../assets/css/common.css';
-import '../assets/css/modal.css';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
 import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 import { UploadExtraDataComponent } from './examinations/attached-files/upload-extra-data.component';
