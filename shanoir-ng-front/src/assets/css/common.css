@@ -145,6 +145,8 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
 .detail .left { float: left; }
 .detail .right { float: right; -webkit-margin-start: 2px; }
 
-md-dialog-container { position: fixed; top: 0; background-color: var(--color-overlay); width: 100%; z-index: 10000; max-width: 100% !important; box-shadow: none !important; display: flex !important; justify-content: center !important; }
-
 .svg-inline--fa { vertical-align: baseline; }
+
+.loading-msg { text-align: center; margin: 0; }
+.cat { text-align: center; width: 100%; }
+    .cat img { display:inline-block; height: 100px; }

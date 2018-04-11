@@ -51,5 +51,5 @@
 			.shanoir-table td span.button img { height: 16px; vertical-align: bottom; }
 		.shanoir-table td.loading,
 		.shanoir-table td.empty { padding: 20px 20px; text-align: center; }
-			.shanoir-table td.loading img { vertical-align: middle; margin: 10px; }
+			.shanoir-table td.loading img { vertical-align: middle; margin: 0; height: 32px; }
 		.shanoir-table td .click-dummy { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 10; }

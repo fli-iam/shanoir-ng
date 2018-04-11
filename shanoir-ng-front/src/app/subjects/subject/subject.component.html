@@ -13,12 +13,8 @@
 				</ng-template>
 			</span>
 			<fieldset>
+				<legend i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
 				<ol>
-					<li *ngIf="mode !== 'view'">
-						<div class="section">
-							<label i18n="Subject detail|Name label@@subjectDetailGeneral">General</label>
-						</div>
-					</li>
 					<li>
 						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory" class="required-label">Imaged object category</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -151,12 +147,11 @@
 										</ng-template>
 									</span> -->
 					</li>
-
-					<li *ngIf="mode !== 'view'">
-						<div class="section">
-							<label i18n="Subject detail|Name label@@subjectDetailGeneral">Studies</label>
-						</div>
-					</li>
+				</ol>
+			</fieldset>
+			<fieldset>
+				<legend i18n="Subject detail|Name label@@subjectDetailGeneral">Studies</legend>
+				<ol>
 					<li *ngIf="mode !== 'view'">
 						<label i18n="Subject detail|List of the studies label@@subjectDetailListOfStudies">List of the studies available</label>
 						<span class="right-col">
