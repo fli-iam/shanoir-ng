@@ -565,8 +565,7 @@
           {
             "name": "Default Resource",
             "uri": "/*",
-            "type": "urn:shanoir-ng-users:resources:default",
-            "typedScopes": []
+            "type": "urn:shanoir-ng-users:resources:default"
           }
         ],
         "policies": [
