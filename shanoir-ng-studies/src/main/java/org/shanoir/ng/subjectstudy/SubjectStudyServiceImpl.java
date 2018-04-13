@@ -30,6 +30,11 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 	public SubjectStudy findById(final Long id) {
 		return subjectStudyRepository.findOne(id);
 	}
+	
+	@Override
+	public void deleteById(final Long id) throws ShanoirStudiesException {
+		subjectStudyRepository.delete(id);
+	}
 
 	@Override
 	public SubjectStudy save(final SubjectStudy subjectStudy) throws ShanoirStudiesException {

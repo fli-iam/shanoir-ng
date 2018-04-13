@@ -73,17 +73,26 @@ export class SubjectService {
             .catch(this.handleErrorService.handleError);
     }
 
-    updateSubjectStudy (subjectStudy: SubjectStudy): Promise<void> {
-        return this.http.put<void>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
-            .toPromise()
-            .catch((error) => {
-                console.error('Error updating relation subject study', error);
-                return Promise.reject(error);
-            });
+    updateSubjectStudy(subjectStudy: SubjectStudy): Observable<SubjectStudy> {
+        return this.http.put<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
+            .map(response => response)
+            .catch(this.handleErrorService.handleError);
     }
 
-    createSubjectStudy (subjectStudy: SubjectStudy): Observable<SubjectStudy> {
+    createSubjectStudy(subjectStudy: SubjectStudy): Observable<SubjectStudy> {
         return this.http.post<void>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL, JSON.stringify(subjectStudy))
+            .map(res => res)
+            .catch(this.handleErrorService.handleError);
+    }
+
+    deleteSubjectStudy(id: number): Observable<SubjectStudy> {
+        return this.http.delete<void>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + id)
+            .map(res => res)
+            .catch(this.handleErrorService.handleError);
+    }
+
+    findSubjectStudyById(id: number): Observable<SubjectStudy> {
+        return this.http.get<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + id)
             .map(res => res)
             .catch(this.handleErrorService.handleError);
     }

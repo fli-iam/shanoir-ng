@@ -333,22 +333,15 @@ export class ImportComponent implements OnInit {
         this.subjectService.updateSubjectStudy(this.subject.subjectStudy);
     }
 
-    initializeSubject (subjectFromImport: Subject): void {
+    initializeSubject (subjectFromImport: any): void {
         subjectFromImport.birthDate = this.selectedSeries.patientBirthDate;
         subjectFromImport.name = this.selectedSeries.patientName;
-        subjectFromImport.sex = <any> this.selectedSeries.patientSex; 
+        subjectFromImport.sex = <any> this.selectedSeries.patientSex;
+        subjectFromImport.study = this.study; 
         this.modalService.objectPassedByModal.emit(subjectFromImport);
     }
     test(subject: Subject) : void {
         this.modalService.objectPassedByModal.emit(subject);
-    }
-
-    createSubjectStudy(subjectStudy: SubjectStudy) {
-        if (this.subject) {
-            this.subjectStudy.studyId = this.study.id;
-            this.subjectStudy.subjectId = this.subject.id;
-            this.subjectService.createSubjectStudy(this.subjectStudy);
-        }
     }
 
     getEnum(): void {

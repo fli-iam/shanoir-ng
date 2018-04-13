@@ -50,5 +50,25 @@ public interface SubjectStudyApi {
 	ResponseEntity<SubjectStudy> saveNewSubjectStudy(
 			@ApiParam(value = "subject study to create", required = true) @RequestBody SubjectStudy subjectStudy,
 			final BindingResult result) throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "If exists, returns the subject study corresponding to the given id", response = SubjectStudy.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subject study", response = SubjectStudy.class),
+			@ApiResponse(code = 204, message = "no subject study found", response = SubjectStudy.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = SubjectStudy.class),
+			@ApiResponse(code = 403, message = "forbidden", response = SubjectStudy.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = SubjectStudy.class) })
+	@RequestMapping(value = "/{subjectStudyId}", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<SubjectStudy> findSubjectStudyById(
+			@ApiParam(value = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId);
+	
+	@ApiOperation(value = "", notes = "Deletes a subject study", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "subject study deleted", response = Void.class),
+			@ApiResponse(code = 204, message = "no subject study found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "/{subjectStudyId}", produces = { "application/json" }, method = RequestMethod.DELETE)
+	ResponseEntity<Void> deleteSubjectStudy(
+			@ApiParam(value = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId);
 
 }

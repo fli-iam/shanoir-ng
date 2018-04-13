@@ -12,6 +12,9 @@
 					<div class="header command-zone" i18n="Create subject|Title@@subjectDetailCreateTitle">Create subject</div>
 				</ng-template>
 			</span>
+			<fieldset *ngIf="mode !== 'view'">
+				<legend i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
+			</fieldset>
 			<fieldset>
 				<legend i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
 				<ol>
@@ -93,9 +96,6 @@
 							</ng-template>
 						</span>
 					</li>
-
-
-
 					<li *ngIf="( mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[1].key  || subject.imagedObjectCategory == imagedObjectCategories[2].key)) || mode == 'view' || mode == 'edit'">
 						<label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -109,7 +109,6 @@
 							</ng-template>
 						</span>
 					</li>
-
 					<li *ngIf="( mode == 'create' && subject.imagedObjectCategory!=null && (subject.imagedObjectCategory == imagedObjectCategories[1].key  || subject.imagedObjectCategory == imagedObjectCategories[2].key)) || mode == 'view' || mode == 'edit'">
 						<label i18n="Subject detail|Manual Hemispheric Dominance label@@subjectDetailManualHemisphericDominance">Manual Hemispheric Dominance</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -149,67 +148,56 @@
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<fieldset *ngIf="mode !== 'view'">
 				<legend i18n="Subject detail|Name label@@subjectDetailGeneral">Studies</legend>
 				<ol>
-					<li *ngIf="mode !== 'view'">
+					<li>
 						<label i18n="Subject detail|List of the studies label@@subjectDetailListOfStudies">List of the studies available</label>
 						<span class="right-col">
-
-							<select id="listOfStudies" formControlName="listOfStudies" required (change)="onStudySelectChange($event.target.value)">
+							<select id="studies" formControlName="studies" required (change)="onStudySelectChange($event.target.value)">
 								<option *ngFor="let study of studies" [value]="study.id">{{study.name}}</option>
 							</select>
-
 						</span>
 					</li>
-					<li *ngIf="mode !== 'view' && subject.subjectStudyList!=null && subject.subjectStudyList.length!=0">
+					<li *ngIf="subject.subjectStudyList != null && subject.subjectStudyList.length != 0">
 						<label i18n="Subject detail|Details on the subject label@@subjectDetailSubjectDetails">Please fill the details on the subject</label>
 						<span class="right-col">
-
 							<table class="table table-striped">
 								<thead>
 									<tr>
-										<th style="width: 20%">Study name</th>
-										<th style="width: 20%">Subject identifier for this research study</th>
-										<th style="width: 20%">Is physically involved</th>
-										<th style="width: 20%">Subject Type</th>
-										<th style="width: 20%">Remove</th>
+										<th>Study name</th>
+										<th>Subject identifier for this research study</th>
+										<th>Is physically involved</th>
+										<th>Subject Type</th>
+										<th>Remove</th>
 									</tr>
 								</thead>
 								<tbody>
 									<tr *ngFor="let relSubjectStudy of subject.subjectStudyList; let in = index">
 										<td align="center">
-
 											<div *ngFor="let study of studies">
 												<span *ngIf="study.id == relSubjectStudy.studyId">
 													{{study.name}}
 												</span>
 											</div>
-
 										</td>
 										<td align="center">
-											<input type="text" id="subjectStudyIdentifier-{{in}}" [(ngModel)]="relSubjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"
-											/>
+											<input type="text" id="subjectStudyIdentifier-{{in}}" [(ngModel)]="relSubjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
 										</td>
 										<td align="center">
-
-											<input type="checkbox" [checked]="relSubjectStudy.physicallyInvolved" (change)="relSubjectStudy.physicallyInvolved = !relSubjectStudy.physicallyInvolved"
-											/>
+											<input type="checkbox" [checked]="relSubjectStudy.physicallyInvolved" (change)="relSubjectStudy.physicallyInvolved = !relSubjectStudy.physicallyInvolved"/>
 										</td>
 										<td align="center">
 											<select id="subjectType-{{in}}" [(ngModel)]="relSubjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
 												<option *ngFor="let subjectType of subjectTypes" [value]="subjectType.key">{{subjectType.value}}</option>
 											</select>
 										</td>
-										<td align="center">Remove</td>
+										<td align="center"><img [src]="deleteIconPath" class="icon icon-clickable" (click)="removeSubjectStudy(relSubjectStudy)" /></td>
 									</tr>
 								</tbody>
 							</table>
-
 						</span>
 					</li>
-					<li>
-
 				</ol>
 			</fieldset>
 			<div class="footer command-zone">
@@ -227,7 +215,6 @@
 				</span>
 			</div>
 		</div>
-
 		<div class="layout right" *ngIf="mode=='view'">
 			<span class="right-col">
 				<div class="subject-data" i18n="Subject data|Title@@subjectDetailDataTitle">Data</div>

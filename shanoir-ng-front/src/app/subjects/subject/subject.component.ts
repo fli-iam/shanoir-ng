@@ -10,6 +10,7 @@ import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
 import { Enum } from "../../shared/utils/enum";
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { Sex } from '../shared/sex.enum';
 import { HemisphericDominance } from '../shared/hemispheric-dominance.enum';
 import * as shajs from 'sha.js';
@@ -27,6 +28,7 @@ import { ModalService } from '../../shared/components/modal/modal.service';
 
 export class SubjectComponent implements OnInit {
 
+    private deleteIconPath: string = ImagesUrlUtil.DELETE_ICON_PATH;
     private subject: Subject = new Subject();
     public subjectForm: FormGroup;
     public subjectStudyForm: FormGroup;
@@ -66,11 +68,15 @@ export class SubjectComponent implements OnInit {
         if (this.modeFromImport) {
             this.mode = this.modeFromImport; 
             this.modalService.objectPassedByModal
-                .subscribe((subject) => {
-                    this.computeNameFromDicomTag(subject.name);
-                    this.getSubject();
-                    this.getDateToDatePicker(subject);
-                    this.subject.sex = subject.sex;
+                .subscribe((subjectFromImport) => {
+                    this.computeNameFromDicomTag(subjectFromImport.name);
+                    this.subject.sex = subjectFromImport.sex;
+                    this.getDateToDatePicker(subjectFromImport);
+                    let study : IdNameObject = new IdNameObject();
+                    study.id = subjectFromImport.study.id;
+                    study.name = subjectFromImport.study.name;
+                    this.studies = [];
+                    this.studies.push(study);
                 })
         }
         this.firstName = "";
@@ -79,7 +85,7 @@ export class SubjectComponent implements OnInit {
         this.getHemisphericDominances();
         this.getSexes();
         this.getsubjectTypes();
-        this.getStudies();
+        if (this.modeFromImport == null) {this.getStudies();}
         this.getSubject();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -177,7 +183,7 @@ export class SubjectComponent implements OnInit {
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
             'personalComments': [],
-            'listOfStudies': [],
+            'studies': [],
         });
 
         this.subjectForm.valueChanges
@@ -235,6 +241,9 @@ export class SubjectComponent implements OnInit {
         this.submit();
         this.setSubjectIdentifier();
         this.setSubjectBirthDateToFirstOfJanuary();
+        for (let subjectStudy of this.subject.subjectStudyList) {
+            this.subjectService.createSubjectStudy(subjectStudy);
+        }
         this.subjectService.create(this.subject)
             .subscribe((subject) => {
                 this.back();
@@ -245,12 +254,27 @@ export class SubjectComponent implements OnInit {
 
     update(): void {
         this.submit();
+        for (let subjectStudy of this.subject.subjectStudyList) {
+            if (this.subjectService.findSubjectStudyById(subjectStudy.id)) {
+                this.subjectService.updateSubjectStudy(subjectStudy);
+            } else {
+                this.subjectService.createSubjectStudy(subjectStudy);
+            }
+        }
         this.subjectService.update(this.subjectId, this.subject)
             .subscribe((subject) => {
                 this.back();
             }, (err: string) => {
                 this.manageRequestErrors(err);
             });
+    }
+
+    removeSubjectStudy(subjectStudy: SubjectStudy):void {
+        const index: number = this.subject.subjectStudyList.indexOf(subjectStudy);
+        if (index !== -1) {
+            this.subject.subjectStudyList.splice(index, 1);
+        }
+        this.subjectService.deleteSubjectStudy(subjectStudy.id);
     }
 
     private manageRequestErrors(err: string): void {
@@ -299,7 +323,6 @@ export class SubjectComponent implements OnInit {
         }
     }
 
-
     setSubjectIdentifier(): void {
         if ((this.subject.imagedObjectCategory.toString() == this.imagedObjectCategories[1].key || this.subject.imagedObjectCategory.toString() == this.imagedObjectCategories[2].key) && !this.isAlreadyAnonymized) {
             var hash = this.firstName + this.lastName + this.subject.birthDate;
@@ -311,35 +334,31 @@ export class SubjectComponent implements OnInit {
         }
     }
 
-
     getHash(stringToBeHashed: string, hashLength: number): string {
-
         var hash = shajs('sha').update(stringToBeHashed).digest('hex');
         var hex = "";
         hex = hash.substring(0, hashLength);
-
         return hex;
     }
-
-
 
     setSubjectBirthDateToFirstOfJanuary(): void {
         var newDate: Date = new Date(this.subject.birthDate.getFullYear(), 0, 1);
         this.subject.birthDate = newDate;
     }
 
-    onStudySelectChange(studyId) {
+    onStudySelectChange(studyId: number) {
         var newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
         newSubjectStudy.studyId = studyId;
+        this.subject.subjectStudyList.push(newSubjectStudy);
 
-        if (this.subject.subjectStudyList != null)
-            this.subject.subjectStudyList.push(newSubjectStudy);
-        else {
-            var newsubjectStudyList: SubjectStudy[] = new Array();
-            newsubjectStudyList.push(newSubjectStudy);
-            this.subject.subjectStudyList = newsubjectStudyList;
-        }
+        // if (this.subject.subjectStudyList != null)
+        //     this.subject.subjectStudyList.push(newSubjectStudy);
+        // else {
+        //     var newsubjectStudyList: SubjectStudy[] = new Array();
+        //     newsubjectStudyList.push(newSubjectStudy);
+        //     this.subject.subjectStudyList = newsubjectStudyList;
+        // }
 
         // I want to do something here for new selectedDevice, but what I
         // got here is always last selection, not the one I just select.

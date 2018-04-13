@@ -17,6 +17,15 @@ public interface SubjectStudyService extends UniqueCheckableService<SubjectStudy
 	 * @return a subject study or null.
 	 */
 	SubjectStudy findById(Long id);
+	
+	/**
+	 * Delete a subject study.
+	 *
+	 * @param id
+	 *            subject study id.
+	 * @throws ShanoirStudiesException
+	 */
+	void deleteById(Long id) throws ShanoirStudiesException;
 
 	/**
 	 * Update subject study.

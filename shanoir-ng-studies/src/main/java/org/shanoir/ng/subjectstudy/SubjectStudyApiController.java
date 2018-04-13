@@ -127,6 +127,30 @@ public class SubjectStudyApiController implements SubjectStudyApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
 	}
+	
+	@Override
+	public ResponseEntity<Void> deleteSubjectStudy(
+			@ApiParam(value = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId) {
+		if (subjectStudyService.findById(subjectStudyId) == null) {
+			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+		}
+		try {
+			subjectStudyService.deleteById(subjectStudyId);
+		} catch (ShanoirStudiesException e) {
+			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
+		}
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+	}
+
+	@Override
+	public ResponseEntity<SubjectStudy> findSubjectStudyById(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectStudyId) {
+		final SubjectStudy subjectStudy = subjectStudyService.findById(subjectStudyId);
+		if (subjectStudy == null) {
+			return new ResponseEntity<SubjectStudy>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(subjectStudy, HttpStatus.OK);
+	}
 
 
 }
