@@ -1,7 +1,7 @@
 <div class="content-component detail">
 	<form [formGroup]="centerForm" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
-			<span class="right-col" [ngSwitch]="mode">
+			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<div class="header command-zone" i18n="View center|Title@@centerDetailViewTitle">Details on center</div>
 				</ng-template>

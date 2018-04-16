@@ -29,7 +29,7 @@
 		.shanoir-table th.col-boolean { width: 20px; }
 		.shanoir-table th.col-button { width: 20px; }
 		.shanoir-table th.pager { padding: 0 5px; overflow: initial;  }
-		.shanoir-table th.pager span:not(.wrapper) { display: inline-block; width: 30px; padding: 3px 0; margin-top: -2px;  }
+		.shanoir-table th.pager span:not(.wrapper) { display: inline-block; width: 30px; padding: 3px 0; height: 16px; }
 			.shanoir-table th.pager span.clickable:not(.disabled):not(.active) { cursor: pointer; }
 			.shanoir-table th.pager span.disabled { color: var(--color-b); }
 		.shanoir-table th.status-bar { text-align: left; padding: 3px 0; color: var(--greyer)}

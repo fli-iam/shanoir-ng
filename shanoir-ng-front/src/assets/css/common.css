@@ -44,8 +44,9 @@ table.layout { border: none; border-collapse: collapse; }
 
 button { background-color: var(--color-b); border: 0px; border-radius: 2px; color: var(--very-light-grey); padding: 5px 10px; transition-property: transform, box-shadow; transition-duration: 0.3s; transition-timing-function: ease-in-out; }
   button:enabled:hover { cursor: pointer; }
-  button:disabled { background-color: var(--grey); border-color: var(--grey); color: var(--dark-black); cursor: auto; } 
-  button:active { background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
+  button:disabled { background-color: var(--grey); border-color: var(--grey); cursor: auto; } 
+  button:active, 
+  button:enabled:hover { background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
 
 input[type='date'] { width: 140px; }
 
@@ -75,7 +76,7 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
     form fieldset fieldset legend { padding: 0 0 5px; font-weight: normal; }
     form fieldset fieldset label { display: block; width: auto; }
     form fieldset fieldset label { margin-left: 183px; }
-  form legend { padding: 0 10px 0 0; color: var(--color-a); font-size: 14px; margin: 10px 0; color: var(--color-c); }
+  form legend { padding: 0 10px 0 0; color: var(--color-a); font-size: 14px; margin: 10px 0; color: var(--color-c); width: 100%; border-bottom: 1px solid var(--color-b-light); }
   form li > label { display: inline-block; vertical-align: top; width: 180px; }
   form fieldset ol { margin: 0; padding: 0; }
     form fieldset.responsive ol { float: left; padding: 0 50px 0 0; }
@@ -88,7 +89,8 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form .footer { text-align: right; }
   form .header { font-size: 20px; color: var(--color-b); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
   form .required-label:after{ content:" *"; }
-  form .form-validation-alert { color: var(--color-error); margin-left: 183px; }
+  form .form-validation-alert { color: var(--color-error); width: 100%; overflow: hidden; }
+  form .right-col { display: inline-block; }
   form .right-col label { text-align: left; display: block; }
   form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; opacity: 0.8; }
     form .right-col button:active { background-color: var(--color-b-light); }

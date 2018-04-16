@@ -38,7 +38,6 @@ export class SubjectComponent implements OnInit {
     @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
-    private imagedObjectCategories: Enum[] = [];
     private HemisphericDominances: Enum[] = [];
     private sexes: Enum[] = [];
     private subjectTypes: Enum[] = [];
@@ -81,7 +80,6 @@ export class SubjectComponent implements OnInit {
         }
         this.firstName = "";
         this.lastName = "";
-        this.getImagedObjectCategories();
         this.getHemisphericDominances();
         this.getSexes();
         this.getsubjectTypes();
@@ -109,7 +107,7 @@ export class SubjectComponent implements OnInit {
                     return this.subjectService.getSubject(subjectId);
                 } else {
                     // create mode
-                    this.subject.imagedObjectCategory = <any> this.imagedObjectCategories[1].key;
+                    this.subject.imagedObjectCategory = ImagedObjectCategory.HUMAN_CADAVER;
                     return Observable.of<Subject>();
                 }
             })
@@ -117,16 +115,6 @@ export class SubjectComponent implements OnInit {
                 this.subject = subject;
                 this.getDateToDatePicker(this.subject);
             });
-    }
-
-    getImagedObjectCategories(): void {
-        var imObjCat = Object.keys(ImagedObjectCategory);
-        for (var i = 0; i < imObjCat.length; i = i + 2) {
-            var newEnum: Enum = new Enum();
-            newEnum.key = imObjCat[i];
-            newEnum.value = ImagedObjectCategory[imObjCat[i]];
-            this.imagedObjectCategories.push(newEnum);
-        }
     }
 
     getSexes(): void {
@@ -324,19 +312,19 @@ export class SubjectComponent implements OnInit {
     }
 
     setSubjectIdentifier(): void {
-        if ((this.subject.imagedObjectCategory.toString() == this.imagedObjectCategories[1].key || this.subject.imagedObjectCategory.toString() == this.imagedObjectCategories[2].key) && !this.isAlreadyAnonymized) {
-            var hash = this.firstName + this.lastName + this.subject.birthDate;
+        if (this.humanSelected() && !this.isAlreadyAnonymized) {
+            let hash = this.firstName + this.lastName + this.subject.birthDate;
             this.subject.identifier = this.getHash(hash, this.hashLength);
         }
         else {
-            var hash = this.subject.name + this.subject.birthDate;
+            let hash = this.subject.name + this.subject.birthDate;
             this.subject.identifier = this.getHash(hash, this.hashLength);
         }
     }
 
     getHash(stringToBeHashed: string, hashLength: number): string {
-        var hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        var hex = "";
+        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        let hex = "";
         hex = hash.substring(0, hashLength);
         return hex;
     }
@@ -376,6 +364,22 @@ export class SubjectComponent implements OnInit {
                 this.firstName = this.lastName = patientName;
             }
         }
+    }
+
+    public humanSelected(): boolean {
+        return this.subject.imagedObjectCategory != null
+            && (this.subject.imagedObjectCategory == ImagedObjectCategory.HUMAN_CADAVER 
+                || this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING);
+    }
+
+    public imagedObjectCategories(): Array<ImagedObjectCategory> {
+        let cats: ImagedObjectCategory[] = [];
+        for (let key in ImagedObjectCategory) {
+            console.log(key);
+            let cat: ImagedObjectCategory =  ImagedObjectCategory.HUMAN_CADAVER;
+            cats.push(cat);
+        }
+        return cats;
     }
 
 }

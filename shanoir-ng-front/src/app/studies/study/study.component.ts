@@ -15,11 +15,13 @@ import { StudyCenter } from '../shared/study-center.model';
 import { StudyService } from '../shared/study.service';
 import { StudyStatus } from "../shared/study-status.enum";
 import { Timepoint } from '../shared/timepoint.model';
+import { slideDown } from '../../shared/animations/animations';
 
 @Component({
     selector: 'study-detail',
     templateUrl: 'study.component.html',
-    styleUrls: ['study.component.css']
+    styleUrls: ['study.component.css'],
+    animations: [slideDown]
 })
 
 export class StudyComponent implements OnInit {

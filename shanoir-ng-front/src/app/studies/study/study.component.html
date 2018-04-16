@@ -1,7 +1,7 @@
 <div class="content-component detail max-content">
 	<div class="layout" [ngClass]="{'left': mode=='view'}">
 		<form [formGroup]="studyForm" novalidate>
-			<span class="right-col" [ngSwitch]="mode">
+			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<div class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</div>
 				</ng-template>
@@ -13,12 +13,8 @@
 				</ng-template>
 			</span>
 			<fieldset>
+				<legend i18n="Study detail|Name label@@studyDetailGeneral">General</legend>
 				<ol>
-					<li *ngIf="mode !== 'view'">
-						<div class="section">
-							<label i18n="Study detail|Name label@@studyDetailGeneral">General</label>
-						</div>
-					</li>
 					<li>
 						<label i18n="Study detail|Name label@@studyDetailName" class="required-label">Name</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -27,8 +23,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="study.name" />
-								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
-								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
+								<label *ngIf="formErrors.name.includes('required')" [@slideDown]="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
+								<label *ngIf="formErrors.name.includes('length')" [@slideDown]="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
 								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Edit study|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
 							</ng-template>
 						</span>
@@ -105,11 +101,11 @@
 							</ng-template>
 						</span>
 					</li>
-					<li *ngIf="mode !== 'view'">
-						<div class="section">
-							<label i18n="Study detail|Name label@@studyDetailDefaultAccessLevel">Default access level</label>
-						</div>
-					</li>
+				</ol>
+			</fieldset>
+			<fieldset>
+				<legend i18n="Study detail|Name label@@studyDetailDefaultAccessLevel">Default access level</legend>
+				<ol>
 					<li>
 						<label i18n="Study detail|Visible by default label@@studyDetailVisibleByDefault">Visible by default</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -140,11 +136,11 @@
 							</ng-template>
 						</span>
 					</li>
-					<li *ngIf="mode !== 'view'">
-						<div class="section">
-							<label i18n="Study detail|Name label@@studyDetailSubjects">Subjects</label>
-						</div>
-					</li>
+				</ol>
+			</fieldset>
+			<fieldset>
+				<legend i18n="Study detail|Name label@@studyDetailSubjects">Subjects</legend>
+				<ol>
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of subjects available label@@studyDetailSubjects">List of subjects available</label>
 						<span class="right-col">
@@ -157,11 +153,11 @@
 							TODO
 						</span>
 					</li>
-					<li *ngIf="mode !== 'view'">
-						<div class="section">
-							<label i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers and principal investigator</label>
-						</div>
-					</li>
+				</ol>
+			</fieldset>
+			<fieldset>
+				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers and principal investigator</legend>
+				<ol>
 					<li>
 						<div *ngIf="mode == 'view' ; then view_mode else edit_mode"></div>
 						<ng-template #view_mode>
@@ -205,22 +201,22 @@
 							<span *ngIf="studyCenterListEmpty()" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">No center is currently associated to the research study!</span>
 						</span>
 					</li>
-					<li *ngIf="mode !== 'view'">
-						<div class="section">
-							<label i18n="Study detail|Protocole files label@@studyDetailProtocoleFiles">Protocole files</label>
-						</div>
-					</li>
+				</ol>
+			</fieldset>
+			<fieldset>
+				<legend i18n="Study detail|Protocole files label@@studyDetailProtocoleFiles">Protocole files</legend>
+				<ol>
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Attach new files</label>
 						<span class="right-col">
 							TODO
 						</span>
 					</li>
-					<li *ngIf="mode !== 'view'">
-						<div class="section">
-							<label i18n="Study detail|Timepoints label@@studyDetailTimepoints">Timepoints</label>
-						</div>
-					</li>
+				</ol>
+			</fieldset>
+			<fieldset>
+				<legend i18n="Study detail|Timepoints label@@studyDetailTimepoints">Timepoints</legend>
+				<ol>
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|Add timepoint to this study label@@studyDetailAddTimepoint">Add timepoint to this study</label>
 						<span class="right-col">
