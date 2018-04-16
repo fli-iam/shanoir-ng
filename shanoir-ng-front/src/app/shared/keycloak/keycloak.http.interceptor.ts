@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 
@@ -25,7 +25,14 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
             authReq = authReq.clone({ headers: authReq.headers.set('Content-Type', 'application/json') });
         }
         // Pass on the cloned request instead of the original request.
-        return next.handle(authReq);
+        return next.handle(authReq).catch((err: any) => {
+            if (err instanceof HttpErrorResponse) {
+                if (err.status === 401) {
+                    window.location.href = process.env.LOGOUT_REDIRECT_URL;
+                }
+                return Observable.throw(err);
+            }
+        });
     }
 
 }
