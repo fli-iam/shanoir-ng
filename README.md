@@ -22,8 +22,7 @@ used from there for the docker-compose startup
 * Add users for the moment manually into keycloak on using the admin interface
 (in a later version the users from ms users will be copied into keycloak)
 * access and use to shanoir-ng: http://shanoir-ng-nginx
-* access to dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/ or on using
-http://shanoir-ng-nginx/pacs/dcm4chee-arc/ui2
+* access to dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/
 
 * this installation uses Docker named volumes, find more here to handle your local data:
 https://docs.docker.com/storage/volumes/
