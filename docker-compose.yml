@@ -99,6 +99,63 @@ services:
       - "keycloak"
       - "database"
   #
+  # Backup PACS microservice: dcm4chee 5 arc-light
+  #
+  dcm4chee-ldap:
+    container_name: dcm4chee-ldap
+    image: dcm4che/slapd-dcm4chee:2.4.44-13.0
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+    networks:
+      - shanoir_ng_network
+    ports:
+      - "389:389"
+    env_file: ./docker-compose/dcm4chee/variables.env
+    volumes:
+      - "dcm4chee-ldap-data:/var/lib/ldap"
+      - "dcm4chee-sldap-data:/etc/ldap/slapd.d"
+  dcm4chee-database:
+    container_name: dcm4chee-database
+    image: dcm4che/postgres-dcm4chee:10.0-13
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+    networks:
+      - shanoir_ng_network
+    ports:
+      - "5432:5432"
+    env_file: ./docker-compose/dcm4chee/variables.env
+    volumes:
+      - "dcm4chee-database-data:/var/lib/postgresql/data"
+  dcm4chee-arc:
+    container_name: dcm4chee-arc
+    image: dcm4che/dcm4chee-arc-psql:5.13.0
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+    networks:
+      - shanoir_ng_network
+    ports:
+      - "8081:8081"
+      - "8443:8443"
+      - "9990:9990"
+      - "11112:11112"
+      - "2575:2575"
+    env_file: ./docker-compose/dcm4chee/variables.env
+    environment:
+      WILDFLY_CHOWN: /opt/wildfly/standalone /storage
+      WILDFLY_WAIT_FOR: dcm4chee-ldap:389 dcm4chee-database:5432
+    depends_on:
+      - "dcm4chee-ldap"
+      - "dcm4chee-database"
+    volumes:
+      - "dcm4chee-arc-wildfly-data:/opt/wildfly/standalone"
+      - "dcm4chee-arc-storage-data:/storage"
+  #
   # Nginx
   #
   nginx:
@@ -116,11 +173,14 @@ services:
       - "studies"
       - "import"
       - "datasets"
+      - "dcm4chee-arc"
 
 volumes:
   keycloak-database-data:
   database-data:
-  dcm4chee-arc-database-data:
+  dcm4chee-ldap-data:
+  dcm4chee-sldap-data:
+  dcm4chee-database-data:
   dcm4chee-arc-wildfly-data:
   dcm4chee-arc-storage-data:
   logs:
