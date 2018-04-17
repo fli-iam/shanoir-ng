@@ -23,7 +23,10 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory">
-									<option *ngFor="let cat of imagedObjectCategories()" [value]="cat">{{cat.valueOf()}}</option>
+									<option *ngFor="let cat of imagedObjectCategories()" [value]="cat.value"
+										i18n="Imaged Object Category {{cat.value}}|Category label@@ImagedObjectCategory{{cat.key}}">
+											{{cat.value}}
+									</option>
 								</select>
 							</ng-template>
 						</span>
@@ -100,7 +103,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="sex" required formControlName="sex" [(ngModel)]="subject.sex">
-									<option *ngFor="let sex of sexes" [value]="sex.key">{{sex.value}}</option>
+									<option [value]="female">Female</option>
+									<option [value]="male">Male</option>
 								</select>
 							</ng-template>
 						</span>
@@ -126,7 +130,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="languageHemisphericDominance" required formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance">
-									<option *ngFor="let hemisphericDominance of HemisphericDominances" [value]="hemisphericDominance.key">{{hemisphericDominance.value}}</option>
+									<option [value]="left">left</option>
+									<option [value]="right">right</option>
 								</select>
 							</ng-template>
 						</span>
@@ -185,7 +190,10 @@
 										</td>
 										<td align="center">
 											<select id="subjectType-{{in}}" [(ngModel)]="relSubjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
-												<option *ngFor="let subjectType of subjectTypes" [value]="subjectType.key">{{subjectType.value}}</option>
+												<option *ngFor="let subjectType of subjectTypes()" [value]="subjectType.value"
+													i18n="Subject Types {{subjectType.value}}|Type label@@SubjectType{{subjectType.key}}">
+														{{subjectType.value}}
+												</option>
 											</select>
 										</td>
 										<td align="center"><img [src]="deleteIconPath" class="icon icon-clickable" (click)="removeSubjectStudy(relSubjectStudy)" /></td>

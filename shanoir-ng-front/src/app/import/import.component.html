@@ -240,7 +240,11 @@
                                 <td class="label">Subject Type</td>
                                 <td class="value">
                                     <select id="subjectType" formControlName="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" (change)="updateSubjectStudy($event)">
-                                        <option *ngFor="let subjectType of subjectTypes" [ngValue]="subjectType.key">{{subjectType?.value}}</option>
+                                        <option *ngFor="let subjectType of subjectTypes()" [value]="subjectType.value"
+                                            i18n="Subject Types {{subjectType.value}}|Type label@@SubjectType{{subjectType.key}}">
+                                                {{subjectType.value}}
+                                        </option>
+
                                     </select>
                                 </td>
                             </tr>

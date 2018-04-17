@@ -1,7 +1,5 @@
 import { Examination } from "../../examinations/shared/examination.model";
 import { SubjectStudy } from "../shared/subject-study.model";
-import { HemisphericDominance } from "../shared/hemispheric-dominance.enum";
-import { Sex } from "../shared/sex.enum";
 import { ImagedObjectCategory } from "../shared/imaged-object-category.enum";
 
 export class Subject {
@@ -10,9 +8,9 @@ export class Subject {
     name: string;
     identifier: string;
     birthDate: Date;
-    languageHemisphericDominance: HemisphericDominance;
-    manualHemisphericDominance: HemisphericDominance;
+    languageHemisphericDominance: "left" | "right";
+    manualHemisphericDominance: "left" | "right";
     imagedObjectCategory: ImagedObjectCategory;
-    sex: Sex;
+    sex: "male" | "female";
     subjectStudyList: SubjectStudy[];
 }

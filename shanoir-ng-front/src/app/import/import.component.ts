@@ -62,7 +62,6 @@ export class ImportComponent implements OnInit {
     private subjects: SubjectWithSubjectStudy[]; 
     public subject: SubjectWithSubjectStudy;
     private subjectTypeEnumValue: String;
-    private subjectTypes: Enum[] = [];
     private subjectStudy: SubjectStudy;
     public subjectFromImport: Subject = new Subject();
     public examinations: SubjectExamination[];
@@ -99,7 +98,6 @@ export class ImportComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.getEnum();
         this.buildForm();
         //TODO: clean json mock import after dev 
         this.archive = "file uploaded";
@@ -344,16 +342,6 @@ export class ImportComponent implements OnInit {
         this.modalService.objectPassedByModal.emit(subject);
     }
 
-    getEnum(): void {
-        var types = Object.keys(SubjectType);
-        for (var i = 0; i < types.length; i = i + 2) {
-            var newEnum: Enum = new Enum();
-            newEnum.key = types[i];
-            newEnum.value = SubjectType[types[i]];
-            this.subjectTypes.push(newEnum);
-        }
-    }
-
     onInputFieldChanged(event: IMyInputFieldChanged) {
         if (event.value !== '') {
             if (!event.valid) {
@@ -446,6 +434,10 @@ export class ImportComponent implements OnInit {
             subject.selected = true;
             this.subjects.push(subject);
         }
+    }
+
+    public subjectTypes() {
+        return SubjectType.keyValues();
     }
 
     // passStudyId (studyId: number) {

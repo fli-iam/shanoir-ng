@@ -8,11 +8,8 @@ import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatep
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { Enum } from "../../shared/utils/enum";
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { Sex } from '../shared/sex.enum';
-import { HemisphericDominance } from '../shared/hemispheric-dominance.enum';
 import * as shajs from 'sha.js';
 import { StudyService } from '../../studies/shared/study.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
@@ -38,16 +35,13 @@ export class SubjectComponent implements OnInit {
     @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
-    private HemisphericDominances: Enum[] = [];
-    private sexes: Enum[] = [];
-    private subjectTypes: Enum[] = [];
     public studies: IdNameObject[];
     private isBirthDateValid: boolean = true;
     private selectedBirthDateNormal: IMyDate;
     private isAlreadyAnonymized: boolean;
     private hashLength: number = 14;
-    private firstName: string;
-    private lastName: string;
+    private firstName: string = "";
+    private lastName: string = "";
 
     private myDatePickerOptions: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
@@ -78,11 +72,6 @@ export class SubjectComponent implements OnInit {
                     this.studies.push(study);
                 })
         }
-        this.firstName = "";
-        this.lastName = "";
-        this.getHemisphericDominances();
-        this.getSexes();
-        this.getsubjectTypes();
         if (this.modeFromImport == null) {this.getStudies();}
         this.getSubject();
         this.buildForm();
@@ -117,26 +106,6 @@ export class SubjectComponent implements OnInit {
             });
     }
 
-    getSexes(): void {
-        var sex = Object.keys(Sex);
-        for (var i = 0; i < sex.length; i = i + 2) {
-            var newEnum: Enum = new Enum();
-            newEnum.key = sex[i];
-            newEnum.value = Sex[sex[i]];
-            this.sexes.push(newEnum);
-        }
-    }
-
-    getsubjectTypes(): void {
-        var type = Object.keys(SubjectType);
-        for (var i = 0; i < type.length; i = i + 2) {
-            var newEnum: Enum = new Enum();
-            newEnum.key = type[i];
-            newEnum.value = SubjectType[type[i]];
-            this.subjectTypes.push(newEnum);
-        }
-    }
-
     getStudies(): void {
         this.studyService
             .getStudiesNames()
@@ -147,16 +116,6 @@ export class SubjectComponent implements OnInit {
                 // TODO: display error
                 console.log("error getting study list!");
             });
-    }
-
-    getHemisphericDominances(): void {
-        var hemisphericDominance = Object.keys(HemisphericDominance);
-        for (var i = 0; i < hemisphericDominance.length; i = i + 1) {
-            var newEnum: Enum = new Enum();
-            newEnum.key = hemisphericDominance[i];
-            newEnum.value = HemisphericDominance[hemisphericDominance[i]];
-            this.HemisphericDominances.push(newEnum);
-        }
     }
 
     buildForm(): void {
@@ -174,8 +133,7 @@ export class SubjectComponent implements OnInit {
             'studies': [],
         });
 
-        this.subjectForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
+        this.subjectForm.valueChanges.subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
 
         this.subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
@@ -372,14 +330,11 @@ export class SubjectComponent implements OnInit {
                 || this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING);
     }
 
-    public imagedObjectCategories(): Array<ImagedObjectCategory> {
-        let cats: ImagedObjectCategory[] = [];
-        for (let key in ImagedObjectCategory) {
-            console.log(key);
-            let cat: ImagedObjectCategory =  ImagedObjectCategory.HUMAN_CADAVER;
-            cats.push(cat);
-        }
-        return cats;
+    public imagedObjectCategories() {
+        return ImagedObjectCategory.keyValues();
     }
 
+    public subjectTypes() {
+        return SubjectType.keyValues();
+    }
 }
