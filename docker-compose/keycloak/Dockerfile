@@ -1,6 +1,4 @@
-FROM jboss/keycloak
-
-ENV KEYCLOAK_USER=admin KEYCLOAK_PASSWORD=&a1A&a1A MYSQL_ADDR=keycloak-database MYSQL_PORT=3306 MYSQL_DATABASE=keycloak MYSQL_USER=keycloak MYSQL_PASSWORD=password
+FROM jboss/keycloak:3.4.3.Final
 
 COPY themes/. /opt/jboss/keycloak/themes
 
