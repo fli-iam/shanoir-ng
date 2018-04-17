@@ -19,14 +19,11 @@ used from there for the docker-compose startup
 * docker-compose up —build
 * Connect to keycloak admin interface:
     * http://localhost:8080/auth/admin/
-* Adapt in dev profile in application.yml the credentials of all microservices,
-that you want to connect with your local keycloak instance
-* docker-compose down
-* Rebuild all .jars with new credentials, e.g. on executing Maven build on parent project
-    * cd shanoir-ng-parent/
-    * mvn install -DskipTests
-* docker-compose up —build
-* access to shanoir-ng: http://shanoir-ng-nginx
+* Add users for the moment manually into keycloak on using the admin interface
+(in a later version the users from ms users will be copied into keycloak)
+* access and use to shanoir-ng: http://shanoir-ng-nginx
+* access to dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/ or on using
+http://shanoir-ng-nginx/pacs/dcm4chee-arc/ui2
 
 * this installation uses Docker named volumes, find more here to handle your local data:
 https://docs.docker.com/storage/volumes/
