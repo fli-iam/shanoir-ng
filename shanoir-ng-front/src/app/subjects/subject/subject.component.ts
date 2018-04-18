@@ -16,11 +16,13 @@ import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { SubjectType } from '../shared/subject-type.enum';
 import { SubjectStudy } from '../shared/subject-study.model';
 import { ModalService } from '../../shared/components/modal/modal.service';
+import { slideDown, preventInitialChildAnimations} from '../../shared/animations/animations';
 
 @Component({
     selector: 'subject-detail',
     templateUrl: 'subject.component.html',
-    styleUrls: ['subject.component.css']
+    styleUrls: ['subject.component.css'],
+    animations: [slideDown, preventInitialChildAnimations]
 })
 
 export class SubjectComponent implements OnInit {
@@ -42,6 +44,8 @@ export class SubjectComponent implements OnInit {
     private hashLength: number = 14;
     private firstName: string = "";
     private lastName: string = "";
+
+    private init: boolean = false;
 
     private myDatePickerOptions: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',

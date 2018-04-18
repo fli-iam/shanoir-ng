@@ -1,16 +1,24 @@
-import { style, state, animate, transition, trigger } from '@angular/core';
+import { query, style, state, animate, transition, trigger } from '@angular/animations';
 
 export const slideDown = trigger('slideDown', [
     transition(
         ':enter', [
-            style({height: '0', 'padding-bottom': '0'}),
-            animate('500ms ease-in-out', style({height: '*', 'padding-bottom': '*'}))
+            style({height: '0', 'padding-bottom': '0', 'padding-top': '0', 'margin-bottom': '0', 'margin-top': '0'}),
+            animate('500ms ease-in-out', style({height: '*', 'padding-bottom': '*', 'padding-top': '*', 'margin-bottom': '*', 'margin-top': '*'}))
         ]
     ),
     transition(
         ':leave', [
-            style({height: '*', 'padding-bottom': '*'}),
-            animate('500ms ease-in-out', style({height: 0, 'padding-bottom': '0'}))
+            style({height: '*', 'padding-bottom': '*', 'padding-top': '*', 'margin-bottom': '*', 'margin-top': '*'}),
+            animate('500ms ease-in-out', style({height: '0', 'padding-bottom': '0', 'padding-top': '0', 'margin-bottom': '0', 'margin-top': '0'}))
+        ]
+    )
+]);
+
+export const preventInitialChildAnimations = trigger('preventInitialChildAnimations', [
+    transition(
+        ':enter', [
+            query(':enter', [], {optional: true})
         ]
     )
 ]);

@@ -84,6 +84,8 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
     form fieldset li input,
     form fieldset li select,
     form fieldset li button { height: 21px; }
+    form li.info { margin: 4px 0 13px; background-color: lightgoldenrodyellow; padding: 10px 15px; overflow: hidden; width: 453px; }
+      form li.info .icon { margin-right: 6px; vertical-align: middle; color: var(--color-b); font-size: 16px; }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { padding: 6px 15px; }
   form .footer { text-align: right; }
@@ -95,7 +97,7 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; opacity: 0.8; }
     form .right-col button:active { background-color: var(--color-b-light); }
     form .right-col button img { height: 12px; vertical-align: sub; margin: 0px 5px 2px 0px; }
-    form .right-col button:hover:enabled { opacity: 1;  }
+    form .right-col button:hover:enabled { opacity: 1; }
 
   /* Date picker style overriding */
   form my-date-picker input { font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; }

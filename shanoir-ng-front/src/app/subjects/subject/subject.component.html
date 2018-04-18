@@ -1,4 +1,4 @@
-<div class="content-component detail">
+<div class="content-component detail" [@slideDown]="preventInitialChildAnimations">
 	<form [formGroup]="subjectForm" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span [ngSwitch]="mode">
@@ -40,11 +40,13 @@
 							/>No
 						</span>
 					</li>
-					<li *ngIf="!isAlreadyAnonymized && mode == 'create' && humanSelected()">
-						A subject global identifier will be automatically generated using the first name, the last name and the birth date of the subject.
-						<br> This can help you to identify a subject that has already been inserted into the database.
-						<br> To ensure anonymity, the first name and the last name will not be saved.
-						<br> Notice that the birth Date will be set to the 1st of January of the birth Year for the same reason.
+					<li class="info" 
+							*ngIf="!isAlreadyAnonymized && mode == 'create' && humanSelected()" 
+							[@slideDown]="!isAlreadyAnonymized && mode == 'create' && humanSelected()">
+						<span class="icon"><i class="fas fa-info-circle"></i></span>A subject global identifier will be automatically generated using the first name, the last name and the birth date of the subject.
+						This can help you to identify a subject that has already been inserted into the database.
+						<br/>To ensure anonymity, the first name and the last name will not be saved.
+						<br/>Notice that the birth Date will be set to the 1st of January of the birth Year for the same reason.
 
 					</li>
 					<li *ngIf="!isAlreadyAnonymized && mode == 'create' && humanSelected()">
