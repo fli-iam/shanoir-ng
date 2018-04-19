@@ -69,8 +69,8 @@ logging:
 ### ============================================================= ###
 
 dcm4chee-arc:
-  host: localhost
-  port: 8080
+  host: dcm4chee-arc
+  port: 8081
   rs-url: dcm4chee-arc/aets/DCM4CHEE/rs/studies
 
 

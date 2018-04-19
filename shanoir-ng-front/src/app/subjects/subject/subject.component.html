@@ -13,7 +13,7 @@
 				</ng-template>
 			</span>
 			<fieldset>
-				<legend i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
+				<legend *ngIf="mode !== 'view'" i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
 				<ol>
 					<li>
 						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory" class="required-label">Imaged object category</label>

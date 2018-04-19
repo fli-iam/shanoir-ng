@@ -132,8 +132,11 @@ export class SubjectComponent implements OnInit {
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
             'personalComments': [],
-            'studies': [],
+            'studies': []
         });
+        this.subjectStudyForm = this.fb.group({
+            'subjectStudyList': [this.subject.subjectStudyList]
+        })
 
         this.subjectForm.valueChanges.subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
@@ -174,11 +177,16 @@ export class SubjectComponent implements OnInit {
 
     submit(): void {
         this.subject = this.subjectForm.value;
+        this.subject.subjectStudyList = this.subjectStudyForm.value;
         this.setDateFromDatePicker();
     }
 
-    back(): void {
+    back(subject?: Subject): void {
+        if (this.closing.observers.length > 0) {
+            this.closing.emit(subject);
+        } else {
         this.location.back();
+        }
     }
 
     edit(): void {
@@ -298,15 +306,14 @@ export class SubjectComponent implements OnInit {
         var newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
         newSubjectStudy.studyId = studyId;
-        this.subject.subjectStudyList.push(newSubjectStudy);
 
-        // if (this.subject.subjectStudyList != null)
-        //     this.subject.subjectStudyList.push(newSubjectStudy);
-        // else {
-        //     var newsubjectStudyList: SubjectStudy[] = new Array();
-        //     newsubjectStudyList.push(newSubjectStudy);
-        //     this.subject.subjectStudyList = newsubjectStudyList;
-        // }
+        if (this.subject.subjectStudyList != null)
+            this.subject.subjectStudyList.push(newSubjectStudy);
+        else {
+            this.subject.subjectStudyList = [];
+            this.subject.subjectStudyList.push(newSubjectStudy);
+        }
+        console.log(this.subject.subjectStudyList);
 
         // I want to do something here for new selectedDevice, but what I
         // got here is always last selection, not the one I just select.

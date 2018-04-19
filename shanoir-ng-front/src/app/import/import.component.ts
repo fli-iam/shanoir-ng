@@ -26,10 +26,6 @@ import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatep
 
 declare var papaya: any;
 
-const mockImport: any = require('../../assets/mock-import.json');
-const mockStudy: any = require('../../assets/mock-study.json');
-
-
 @Component({
     selector: 'import-modality',
     templateUrl: 'import.component.html',
@@ -40,7 +36,7 @@ const mockStudy: any = require('../../assets/mock-study.json');
 export class ImportComponent implements OnInit {
     @ViewChild('papayaModal') papayaModal: ModalComponent;
     // @ViewChild('studyModal') studyModal: ModalComponent;
-    @ViewChild('subjectModal') subjectModal: ModalComponent;
+    @ViewChild('subjectCreationModal') subjectCreationModal: ModalComponent;
     
     public importForm: FormGroup;
     private extensionError: Boolean;
@@ -99,14 +95,6 @@ export class ImportComponent implements OnInit {
 
     ngOnInit(): void {
         this.buildForm();
-        //TODO: clean json mock import after dev 
-        this.archive = "file uploaded";
-        this.selectedSeries = mockImport.patients[0];
-        this.patients = mockImport.patients;
-        this.validateSeriesSelected();
-        //TODO: clean json mock study after dev
-        this.seriesSelected = true;
-        this.prepareStudyStudycard(mockStudy);
     }
 
     buildForm(): void {
@@ -417,73 +405,59 @@ export class ImportComponent implements OnInit {
         }
     }
 
-    // closePopin() {
-    //     this.studyModal.hide();
-    // }
-    
-
-    closeSubjectPopin(): void {
-        this.subjectModal.hide();
-    }
-
-    closeEditSubject(subject: any) {
-        // Add the subject to the select box and select it
+    closeSubjectPopin(subject: any): void {
         console.log(subject);
         if (subject) {
-            subject.name = subject.lastName;
+            // Add the subject to the select box and select it
             subject.selected = true;
             this.subjects.push(subject);
         }
+        this.subjectCreationModal.hide();
     }
 
     public subjectTypes() {
         return SubjectType.keyValues();
     }
 
-    // passStudyId (studyId: number) {
-    //     console.log("param: " + studyId);
-    //     console.log("study id: " + this.study.id);
-    // }
-
-    // startProgressTest() {
-    //     this.pacsStatus = "";
-    //     this.anonymStatus = "";
-    //     this.niftiStatus = "";
-    //     this.studyCardStatus = "";
-    //     this.pacsProgress = 0;
-    //     this.anonymProgress = 0;
-    //     this.niftiProgress = 0;
-    //     this.studyCardProgress = 0;
-    //     let subscription1:any = Observable.timer(0, 10).subscribe(t => {
-    //         this.pacsProgress = t * 0.005;
-    //         if (this.pacsProgress >= 1) {
-    //             this.pacsProgress = 1;
-    //             this.pacsStatus = "ok";
-    //             subscription1.unsubscribe();
-    //             let subscription2 = Observable.timer(0, 10).subscribe(t => {
-    //                 this.anonymProgress = t * 0.002;
-    //                 if (this.anonymProgress >= 1) {
-    //                     this.anonymProgress = 1;
-    //                     this.anonymStatus = "ok";
-    //                     subscription2.unsubscribe();
-    //                     let subscription3 = Observable.timer(0, 10).subscribe(t => {
-    //                         this.niftiProgress = t * 0.01;
-    //                         if (this.niftiProgress >= 1) {
-    //                             this.niftiProgress = 1;
-    //                             this.niftiStatus = "ok";
-    //                             subscription3.unsubscribe();
-    //                             let subscription4 = Observable.timer(0, 10).subscribe(t => {
-    //                                 this.studyCardProgress = t * 0.01;
-    //                                 if (this.studyCardProgress >= 0.3) {
-    //                                     this.studyCardStatus = "error";
-    //                                     subscription4.unsubscribe();
-    //                                 }
-    //                             });
-    //                         }
-    //                     });
-    //                 }
-    //             });
-    //         }
-    //     });
-    // }
+    startProgressTest() {
+        this.pacsStatus = "";
+        this.anonymStatus = "";
+        this.niftiStatus = "";
+        this.studyCardStatus = "";
+        this.pacsProgress = 0;
+        this.anonymProgress = 0;
+        this.niftiProgress = 0;
+        this.studyCardProgress = 0;
+        let subscription1:any = Observable.timer(0, 10).subscribe(t => {
+            this.pacsProgress = t * 0.005;
+            if (this.pacsProgress >= 1) {
+                this.pacsProgress = 1;
+                this.pacsStatus = "ok";
+                subscription1.unsubscribe();
+                let subscription2 = Observable.timer(0, 10).subscribe(t => {
+                    this.anonymProgress = t * 0.002;
+                    if (this.anonymProgress >= 1) {
+                        this.anonymProgress = 1;
+                        this.anonymStatus = "ok";
+                        subscription2.unsubscribe();
+                        let subscription3 = Observable.timer(0, 10).subscribe(t => {
+                            this.niftiProgress = t * 0.01;
+                            if (this.niftiProgress >= 1) {
+                                this.niftiProgress = 1;
+                                this.niftiStatus = "ok";
+                                subscription3.unsubscribe();
+                                let subscription4 = Observable.timer(0, 10).subscribe(t => {
+                                    this.studyCardProgress = t * 0.01;
+                                    if (this.studyCardProgress >= 0.3) {
+                                        this.studyCardStatus = "error";
+                                        subscription4.unsubscribe();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
 }

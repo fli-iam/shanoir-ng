@@ -30,12 +30,9 @@ services:
   #
   database:
     container_name: database
-    image: mysql/mysql-server:5.7
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
+    build: ./docker-compose/database
     volumes:
       - "database-data:/var/lib/mysql"
-      - "./docker-compose/database:/docker-entrypoint-initdb.d"
     networks:
       - shanoir_ng_network
   #
@@ -76,6 +73,7 @@ services:
     build: ./docker-compose/import
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
+      - "tmp:/tmp"
     networks:
       - shanoir_ng_network
     ports:
@@ -91,6 +89,7 @@ services:
     build: ./docker-compose/datasets
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
+      - "tmp:/tmp"
     networks:
       - shanoir_ng_network
     ports:
@@ -183,6 +182,7 @@ volumes:
   dcm4chee-database-data:
   dcm4chee-arc-wildfly-data:
   dcm4chee-arc-storage-data:
+  tmp:
   logs:
 
 networks:
