@@ -251,7 +251,7 @@
                         </div>
                     </div>
                     <div *ngIf="subjectEditionMode == 'create' && study != null">
-                        <button class="right-col" (click)="initializeSubject(subjectFromImport); subjectCreationModal.show(); createSubjectStudy($event);"><img src="/assets/images/icons/add.png"/>Create a subject</button>
+                        <button class="right-col" (click)="initializeSubject(subjectFromImport); subjectCreationModal.show();"><img src="/assets/images/icons/add.png"/>Create a subject</button>
                     </div>
                 </li>
             </ol>
@@ -358,7 +358,7 @@
                 <console-line label="The study card" [progress]="studyCardProgress" [status]="studyCardStatus"></console-line>
             </div>
             <div class="commands">
-                <!-- <button (click)="startProgressTest()">Start</button> -->
+                <button (click)="startProgressTest()">Start</button>
             </div>
         </fieldset>
     </div>
@@ -393,18 +393,11 @@
             </ol>
         </fieldset>
     </div>
-    
 </form>
-
-<!-- <div class="overlay" *ngIf="createUser">
-    <div class="content">
-        <user-detail (closing)="closeEditSubject($event)"></user-detail>
-    </div>
-</div> -->
 
 <app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
     <div class="app-modal-body">
-      <subject-detail [modeFromImport]="'create'" (closing)="closeSubjectPopin()"></subject-detail>
+      <subject-detail [modeFromImport]="'create'" (closing)="closeSubjectPopin($event)"></subject-detail>
     </div>
 </app-modal>
 
