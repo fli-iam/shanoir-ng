@@ -22,6 +22,7 @@ used from there for the docker-compose startup
 	* cd docker-entrypoint-initdb.d
 	* ./1_create_databases.sh
 	* ./2_add_users.sql
+	* Exit the docker and rebuild from your docker-compose file
 * Connect to keycloak admin interface:
     * http://localhost:8080/auth/admin/
 * Add users for the moment manually into keycloak on using the admin interface
