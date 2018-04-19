@@ -26,10 +26,6 @@ import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatep
 
 declare var papaya: any;
 
-const mockImport: any = require('../../assets/mock-import.json');
-const mockStudy: any = require('../../assets/mock-study.json');
-
-
 @Component({
     selector: 'import-modality',
     templateUrl: 'import.component.html',
