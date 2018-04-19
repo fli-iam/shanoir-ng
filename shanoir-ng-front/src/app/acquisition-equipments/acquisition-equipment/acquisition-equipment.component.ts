@@ -24,12 +24,11 @@ import { ModalComponent } from '../../shared/components/modal/modal.component';
 export class AcquisitionEquipmentComponent implements OnInit {
 
     @Output() closing: EventEmitter<any> = new EventEmitter();
-    @Input() modeFromCenterList: "view" | "edit" | "create";
+    @Input() mode: "view" | "edit" | "create";
     @ViewChild('manufModelModal') manufModelModal: ModalComponent;
     private acqEquip: AcquisitionEquipment = new AcquisitionEquipment();
     public acqEquipForm: FormGroup;
     private acqEquipId: number;
-    public mode: "view" | "edit" | "create";
     public isModelNumberUnique: Boolean = true;
     public canModify: Boolean = false;
     private manufModels: ManufacturerModel[];
@@ -47,7 +46,6 @@ export class AcquisitionEquipmentComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        if (this.modeFromCenterList) { this.mode = this.modeFromCenterList; }
         this.getManufModels();
         this.getCenters();
         this.buildForm();

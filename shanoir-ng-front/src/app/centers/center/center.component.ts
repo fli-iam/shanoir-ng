@@ -19,8 +19,7 @@ export class CenterComponent implements OnInit {
     private center: Center = new Center();
     public centerForm: FormGroup;
     private centerId: number;
-    public mode: "view" | "edit" | "create";
-    @Input() modeFromCoil: "view" | "edit" | "create";
+    @Input() mode: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
@@ -33,7 +32,6 @@ export class CenterComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        if (this.modeFromCoil) { this.mode = this.modeFromCoil; }
         this.getCenter();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -45,7 +43,7 @@ export class CenterComponent implements OnInit {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let centerId = queryParams['id'];
-                if (!this.modeFromCoil) {
+                if (!this.mode) {
                     let mode = queryParams['mode'];
                     if (mode) {
                         this.mode = mode;

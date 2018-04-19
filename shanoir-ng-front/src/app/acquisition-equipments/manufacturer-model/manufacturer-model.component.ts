@@ -24,8 +24,7 @@ export class ManufacturerModelComponent implements OnInit {
     private manufModel: ManufacturerModel = new ManufacturerModel();
     public manufModelForm: FormGroup;
     private manufModelId: number;
-    public mode: "view" | "edit" | "create";
-    @Input() modeFromAcqEquip: "view" | "edit" | "create";
+    @Input() mode: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     @ViewChild('manufModal') manufModal: ModalComponent;
     private isNameUnique: Boolean = true;
@@ -44,7 +43,6 @@ export class ManufacturerModelComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        if (this.modeFromAcqEquip) { this.mode = this.modeFromAcqEquip; }
         this.getEnum();
         this.getManufs();
         this.getManufacturerModel();
@@ -88,7 +86,7 @@ export class ManufacturerModelComponent implements OnInit {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let manufModelId = queryParams['id'];
-                if (!this.modeFromAcqEquip) {
+                if (!this.mode) {
                     let mode = queryParams['mode'];
                     if (mode) {
                         this.mode = mode;

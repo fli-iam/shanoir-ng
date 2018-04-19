@@ -1,7 +1,7 @@
 <div class="content-component">
 		<form [formGroup]="coilForm" class="max-content" novalidate>
 			<div class="layout">
-				<span class="right-col" [ngSwitch]="mode">
+				<span [ngSwitch]="mode">
 					<ng-template [ngSwitchCase]="'view'">
 						<div class="header command-zone" i18n="View coil|Title@@coilDetailViewTitle">Details on coil</div>
 					</ng-template>
@@ -18,7 +18,7 @@
 							<label i18n="Coil detail|Coil name label@@examinationDetailName" class="required-label">Name</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'">	
-									{{coil.name}}		
+									{{coil.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<input type="text" id="name" formControlName="name" [(ngModel)]="coil.name" />
@@ -122,13 +122,13 @@
 	
 	<app-modal modalDialogId="manufModelModal" #manufModelModal>
 			<div class="app-modal-body">
-			  <manufacturer-model-detail [modeFromAcqEquip]="'create'" (closing)="closePopin()"></manufacturer-model-detail>
+			  <manufacturer-model-detail [mode]="'create'" (closing)="closePopin()"></manufacturer-model-detail>
 			</div>
 	</app-modal>
 	
 	<app-modal modalDialogId="centerModal" #centerModal>
 			<div class="app-modal-body">
-			  <center-detail [modeFromCoil]="'create'" (closing)="closeCenterPopin()"></center-detail>
+			  <center-detail [mode]="'create'" (closing)="closeCenterPopin()"></center-detail>
 			</div>
 	</app-modal> 
 	

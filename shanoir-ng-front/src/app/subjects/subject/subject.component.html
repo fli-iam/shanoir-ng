@@ -1,4 +1,4 @@
-<div class="content-component detail" [@slideDown]="preventInitialChildAnimations">
+<div class="content-component detail" [@preventInitialChildAnimations]>
 	<form [formGroup]="subjectForm" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span [ngSwitch]="mode">

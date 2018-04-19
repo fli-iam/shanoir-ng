@@ -9,7 +9,7 @@
     <!-- create coil popin -->
     <app-modal modalDialogId="coilModal" #coilModal>
         <div class="app-modal-body">
-            <coil [modeFromAcqEquipList]="'create'" [acqEquip]="selectedAcqEquip"  (closing)="closePopin()"></coil>
+            <coil [mode]="'create'" [acqEquip]="selectedAcqEquip"  (closing)="closePopin()"></coil>
         </div>
     </app-modal>
 </div>

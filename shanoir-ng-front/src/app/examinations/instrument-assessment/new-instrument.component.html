@@ -1,7 +1,7 @@
 <div class="content-component">
     <form [formGroup]="instAssessemntForm" class="max-content" novalidate>
 		<div class="layout">
-			<span class="right-col" [ngSwitch]="mode">
+			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
 					<div class="header command-zone" i18n="View instAssessment|Title@@instAssessmentDetailViewTitle">Details on Instrument Based Assessement</div>
 				</ng-template>

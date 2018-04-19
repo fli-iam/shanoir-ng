@@ -1,5 +1,5 @@
 <h1>Import from DICOM</h1>
-<form [formGroup]="importForm" novalidate>
+<form [formGroup]="importForm" novalidate [@preventInitialChildAnimations]>
     <app-modal modalDialogId="papayaModal" #papayaModal>
         <div class="app-modal-body">
             <div id="papaya" style="width:800px; height:600px;">
@@ -404,12 +404,12 @@
 
 <app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
     <div class="app-modal-body">
-      <subject-detail [modeFromImport]="'create'" (closing)="closeSubjectPopin()"></subject-detail>
+      <subject-detail [mode]="'create'" (closing)="closeSubjectPopin()"></subject-detail>
     </div>
 </app-modal>
 
 <app-modal modalDialogId="subjectDetailsModal" #subjectDetailsModal>
     <div class="app-modal-body">
-      <subject-detail [modeFromImport]="'view'" (closing)="closeSubjectPopin()"></subject-detail>
+      <subject-detail [mode]="'view'" (closing)="closeSubjectPopin()"></subject-detail>
     </div>
 </app-modal>

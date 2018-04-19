@@ -26,7 +26,6 @@ import { slideDown } from '../../shared/animations/animations';
 
 export class StudyComponent implements OnInit {
 
-    // @Input() modeFromImport: "view" | "edit" | "create";
     @Input() idFromImport: number;
 
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
@@ -68,7 +67,6 @@ export class StudyComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        // if (this.modeFromImport) { this.mode = this.modeFromImport; }
         this.getEnum();
         this.getCenters();
         this.getStudy();

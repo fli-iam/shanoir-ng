@@ -27,11 +27,10 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 export class CoilComponent implements OnInit {
     @ViewChild('manufModelModal') manufModelModal: ModalComponent;
     @ViewChild('centerModal') centerModal: ModalComponent;
-    @Input() modeFromAcqEquipList: "view" | "edit" | "create";
+    @Input() mode: "view" | "edit" | "create";
     @Input() acqEquip: AcquisitionEquipment;
     public coil: Coil = new Coil();
     public coilId: number;
-    public mode: "view" | "edit" | "create";
     public coilForm: FormGroup;
     public canModify: Boolean = false;
     public centers: Center[] = [];
@@ -47,8 +46,7 @@ export class CoilComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        if (this.modeFromAcqEquipList) { 
-            this.mode = this.modeFromAcqEquipList; 
+        if (this.acqEquip) {
             this.coil.center = this.acqEquip.center;
             this.coil.manufacturerModel = this.acqEquip.manufacturerModel;
         }
@@ -58,6 +56,7 @@ export class CoilComponent implements OnInit {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
         }
+        this.getCoil();
     }
 
     getCoil(): void {

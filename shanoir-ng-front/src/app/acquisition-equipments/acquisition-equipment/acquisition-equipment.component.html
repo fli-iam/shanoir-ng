@@ -1,7 +1,7 @@
 <div class="content-component">
 	<form [formGroup]="acqEquipForm" class="max-content" novalidate>
 		<div class="layout">
-			<span class="right-col" [ngSwitch]="mode">
+			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
 					<div class="header command-zone" i18n="View acqEquip|Title@@acqEqptDetailViewTitle">Details on acquisition equipment</div>
 				</ng-template>
@@ -102,6 +102,6 @@
 
 <app-modal modalDialogId="manufModelModal" #manufModelModal>
     <div class="app-modal-body">
-      <manufacturer-model-detail [modeFromAcqEquip]="'create'" (closing)="closePopin($event)"></manufacturer-model-detail>
+      <manufacturer-model-detail [mode]="'create'" (closing)="closePopin($event)"></manufacturer-model-detail>
     </div>
 </app-modal>

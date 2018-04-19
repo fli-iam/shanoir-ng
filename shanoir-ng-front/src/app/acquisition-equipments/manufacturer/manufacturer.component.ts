@@ -18,8 +18,7 @@ export class ManufacturerComponent implements OnInit {
     private manuf: Manufacturer = new Manufacturer();
     public manufForm: FormGroup;
     private manufId: number;
-    public mode: "view" | "edit" | "create";
-    @Input() modeFromManufModel: "view" | "edit" | "create";
+    @Input() mode: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
@@ -31,7 +30,6 @@ export class ManufacturerComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        if (this.modeFromManufModel) {this.mode = this.modeFromManufModel;}
         this.getManufacturer();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -43,7 +41,7 @@ export class ManufacturerComponent implements OnInit {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let manufId = queryParams['id'];
-                if (!this.modeFromManufModel) {
+                if (!this.mode) {
                     let mode = queryParams['mode'];
                     if (mode) {
                         this.mode = mode;

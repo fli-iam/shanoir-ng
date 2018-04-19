@@ -32,8 +32,7 @@ export class SubjectComponent implements OnInit {
     public subjectForm: FormGroup;
     public subjectStudyForm: FormGroup;
     private subjectId: number;
-    public mode: "view" | "edit" | "create";
-    @Input() modeFromImport: "view" | "edit" | "create";
+    @Input() mode: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
     public canModify: Boolean = false;
@@ -62,8 +61,7 @@ export class SubjectComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        if (this.modeFromImport) {
-            this.mode = this.modeFromImport; 
+        if (this.mode) {
             this.modalService.objectPassedByModal
                 .subscribe((subjectFromImport) => {
                     this.computeNameFromDicomTag(subjectFromImport.name);
@@ -76,7 +74,7 @@ export class SubjectComponent implements OnInit {
                     this.studies.push(study);
                 })
         }
-        if (this.modeFromImport == null) {this.getStudies();}
+        if (this.mode == null) {this.getStudies();}
         this.getSubject();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -88,7 +86,7 @@ export class SubjectComponent implements OnInit {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let subjectId = queryParams['id'];
-                if (!this.modeFromImport) {
+                if (!this.mode) {
                     let mode = queryParams['mode'];
                     if (mode) {
                         this.mode = mode;

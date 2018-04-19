@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Rx';
 import { IdNameObject } from '../shared/models/id-name-object.model';
 import { ImagedObjectCategory } from '../subjects/shared/imaged-object-category.enum';
 import { ImportService } from './import.service';
-import { slideDown } from '../shared/animations/animations';
+import { slideDown, preventInitialChildAnimations } from '../shared/animations/animations';
 import { ImportJob, PatientDicom, SerieDicom, EquipmentDicom } from "./dicom-data.model";
 import { ModalComponent } from '../shared/components/modal/modal.component';
 import { ModalService } from '../shared/components/modal/modal.service';
@@ -34,7 +34,7 @@ const mockStudy: any = require('../../assets/mock-study.json');
     selector: 'import-modality',
     templateUrl: 'import.component.html',
     styleUrls: ['import.component.css'],
-    animations: [slideDown]
+    animations: [slideDown, preventInitialChildAnimations]
 })
 
 export class ImportComponent implements OnInit {

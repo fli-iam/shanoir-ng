@@ -1,7 +1,7 @@
 <div class="content-component">
 	<form [formGroup]="examinationForm" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
-			<span class="right-col" [ngSwitch]="mode">
+			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<div class="header command-zone" i18n="View examination|Title@@examinationDetailViewTitle">Details on examination</div>
 				</ng-template>
@@ -187,10 +187,10 @@
 			</div>
 		</div>
 		<div class="layout right" *ngIf="mode=='view'">
-				<span class="right-col">
-					<div class="examination-data" i18n="Examination data|Title@@examinationDetailDataTitle">Data</div>
-				</span>
-				 <examination-tree [examination]="examination"></examination-tree> 
+			<span class="right-col">
+				<div class="examination-data" i18n="Examination data|Title@@examinationDetailDataTitle">Data</div>
+			</span>
+			<examination-tree [examination]="examination"></examination-tree> 
 		</div>
 	</form>
 </div>
