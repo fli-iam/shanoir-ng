@@ -15,7 +15,6 @@ import { StudyService } from '../../studies/shared/study.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { SubjectType } from '../shared/subject-type.enum';
 import { SubjectStudy } from '../shared/subject-study.model';
-import { ModalService } from '../../shared/components/modal/modal.service';
 import { slideDown, preventInitialChildAnimations} from '../../shared/animations/animations';
 
 @Component({
@@ -27,22 +26,26 @@ import { slideDown, preventInitialChildAnimations} from '../../shared/animations
 
 export class SubjectComponent implements OnInit {
 
-    private deleteIconPath: string = ImagesUrlUtil.DELETE_ICON_PATH;
-    private subject: Subject = new Subject();
+    private ImagesUrlUtil = ImagesUrlUtil; // Make it visible to the template
+    
+    @Input() mode: "view" | "edit" | "create";
+    @Input() preFillData: any;
+    
+    private subject: Subject;
     public subjectForm: FormGroup;
     public subjectStudyForm: FormGroup;
-    private subjectId: number;
-    @Input() mode: "view" | "edit" | "create";
-    @Output() closing: EventEmitter<any> = new EventEmitter();
-    private isNameUnique: Boolean = true;
+    private formErrors: any = {};
     public canModify: Boolean = false;
+    private firstName: string = "";
+    private lastName: string = "";
+
+    @Output() closing: EventEmitter<any> = new EventEmitter();
+
     public studies: IdNameObject[];
     private isBirthDateValid: boolean = true;
     private selectedBirthDateNormal: IMyDate;
     private isAlreadyAnonymized: boolean;
     private hashLength: number = 14;
-    private firstName: string = "";
-    private lastName: string = "";
 
     private init: boolean = false;
 
@@ -56,51 +59,69 @@ export class SubjectComponent implements OnInit {
         private subjectService: SubjectService,
         private studyService: StudyService,
         private fb: FormBuilder,
-        private location: Location, private keycloakService: KeycloakService,
-        private modalService: ModalService) {
+        private location: Location, 
+        private keycloakService: KeycloakService) {
     }
 
     ngOnInit(): void {
-        if (this.mode) {
-            this.modalService.objectPassedByModal
-                .subscribe((subjectFromImport) => {
-                    this.computeNameFromDicomTag(subjectFromImport.name);
-                    this.subject.sex = subjectFromImport.sex;
-                    this.getDateToDatePicker(subjectFromImport);
-                    let study : IdNameObject = new IdNameObject();
-                    study.id = subjectFromImport.study.id;
-                    study.name = subjectFromImport.study.name;
-                    this.studies = [];
-                    this.studies.push(study);
-                })
+        this.chooseMode(); // Must be on top
+        switch(this.mode) {
+            case 'create': {
+                this.subject = new Subject();
+                this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+                this.prefillData();
+                this.loadAllStudies();
+                break;    
+            }
+            case 'edit': {
+                this.fetchSubject();
+                break;
+            }
+            case 'view': {
+                break;
+            }   
         }
-        if (this.mode == null) {this.getStudies();}
-        this.getSubject();
+        this.canModify = this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert();  
         this.buildForm();
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.canModify = true;
+    }
+
+    chooseMode() {
+        if (this.mode == null) {
+            this.route.queryParams
+                .filter(params => params.mode)
+                .subscribe(params => {
+                    if (!params.mode) {
+                        throw new Error("a mode parameter must be set");
+                    }
+                    this.mode = params.mode;
+                });
         }
     }
 
-    getSubject(): void {
+    prefillData() {
+        if (this.preFillData) {
+            if (this.preFillData.subject) {
+                this.computeNameFromDicomTag(this.preFillData.subject.name);
+                this.subject.sex = this.preFillData.subject.sex;
+                this.getDateToDatePicker(this.preFillData.subject);  
+            }
+            if (this.preFillData.study) {
+                let study : IdNameObject = new IdNameObject();
+                study.id = this.preFillData.study.id;
+                study.name = this.preFillData.study.name;
+                this.studies = [];
+                this.studies.push(study);
+            }
+        }
+    }
+
+    fetchSubject(): void {
+        if (this.mode != 'edit') throw new Error ("A subject can be fetch only in edit mode");
         this.route.queryParams
             .switchMap((queryParams: Params) => {
-                let subjectId = queryParams['id'];
-                if (!this.mode) {
-                    let mode = queryParams['mode'];
-                    if (mode) {
-                        this.mode = mode;
-                    }
-                }
-                if (subjectId) {
-                    // view or edit mode
-                    this.subjectId = subjectId;
-                    return this.subjectService.getSubject(subjectId);
-                } else {
-                    // create mode
-                    this.subject.imagedObjectCategory = ImagedObjectCategory.HUMAN_CADAVER;
-                    return Observable.of<Subject>();
-                }
+                if (queryParams['id']) {
+                    return this.subjectService.getSubject(queryParams['id']);
+                } else throw new Error ("A id must be passed as a parameter in edit mode");
             })
             .subscribe((subject: Subject) => {
                 this.subject = subject;
@@ -108,7 +129,7 @@ export class SubjectComponent implements OnInit {
             });
     }
 
-    getStudies(): void {
+    loadAllStudies(): void {
         this.studyService
             .getStudiesNames()
             .then(studies => {
@@ -143,59 +164,63 @@ export class SubjectComponent implements OnInit {
 
         this.subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
             this.isAlreadyAnonymized = false;
-          });
+        });
     }
-
 
     get users(): FormArray {
         return this.subjectForm.get('subjectStudyList') as FormArray;
     }
+
     addUserField() {
         this.users.push(new FormControl());
     }
+
     deleteUserField(index: number) {
         this.users.removeAt(index);
     }
+
     onValueChanged(data?: any) {
         if (!this.subjectForm) { return; }
-        const form = this.subjectForm;
         for (const field in this.formErrors) {
             // clear previous error message (if any)
             this.formErrors[field] = '';
-            const control = form.get(field);
+            const control = this.subjectForm.get(field);
             if (control && control.dirty && !control.valid) {
                 for (const key in control.errors) {
                     this.formErrors[field] += key;
                 }
             }
         }
+        console.log(this.formErrors);
     }
 
-    formErrors = {
-        'name': ''
-    };
-
-    submit(): void {
+    updateModel(): void {
         this.subject = this.subjectForm.value;
         this.subject.subjectStudyList = this.subjectStudyForm.value;
         this.setDateFromDatePicker();
     }
 
+
+
+
+    // No
     back(subject?: Subject): void {
         if (this.closing.observers.length > 0) {
             this.closing.emit(subject);
         } else {
-        this.location.back();
+            this.location.back();
         }
     }
 
+
+
     edit(): void {
-        this.router.navigate(['/subject'], { queryParams: { id: this.subjectId, mode: "edit" } });
+        this.router.navigate(['/subject'], { queryParams: { id: this.subject.id, mode: "edit" } });
     }
 
     create(): void {
-        this.submit();
-        this.setSubjectIdentifier();
+        this.updateModel();
+        this.generateSubjectIdentifier();
         this.setSubjectBirthDateToFirstOfJanuary();
         for (let subjectStudy of this.subject.subjectStudyList) {
             this.subjectService.createSubjectStudy(subjectStudy);
@@ -209,7 +234,7 @@ export class SubjectComponent implements OnInit {
     }
 
     update(): void {
-        this.submit();
+        this.updateModel();
         for (let subjectStudy of this.subject.subjectStudyList) {
             if (this.subjectService.findSubjectStudyById(subjectStudy.id)) {
                 this.subjectService.updateSubjectStudy(subjectStudy);
@@ -217,7 +242,7 @@ export class SubjectComponent implements OnInit {
                 this.subjectService.createSubjectStudy(subjectStudy);
             }
         }
-        this.subjectService.update(this.subjectId, this.subject)
+        this.subjectService.update(this.subject.id, this.subject)
             .subscribe((subject) => {
                 this.back();
             }, (err: string) => {
@@ -225,22 +250,10 @@ export class SubjectComponent implements OnInit {
             });
     }
 
-    removeSubjectStudy(subjectStudy: SubjectStudy):void {
-        const index: number = this.subject.subjectStudyList.indexOf(subjectStudy);
-        if (index !== -1) {
-            this.subject.subjectStudyList.splice(index, 1);
-        }
-        this.subjectService.deleteSubjectStudy(subjectStudy.id);
-    }
-
     private manageRequestErrors(err: string): void {
         if (err.indexOf("name should be unique") != -1) {
-            this.isNameUnique = false;
+            this.formErrors['name'] = 'unique';
         }
-    }
-
-    resetNameErrorMsg(): void {
-        this.isNameUnique = true;
     }
 
     getDateToDatePicker(subject: Subject): void {
@@ -279,7 +292,7 @@ export class SubjectComponent implements OnInit {
         }
     }
 
-    setSubjectIdentifier(): void {
+    generateSubjectIdentifier(): void {
         if (this.humanSelected() && !this.isAlreadyAnonymized) {
             let hash = this.firstName + this.lastName + this.subject.birthDate;
             this.subject.identifier = this.getHash(hash, this.hashLength);
@@ -319,9 +332,11 @@ export class SubjectComponent implements OnInit {
         // got here is always last selection, not the one I just select.
     }
 
+    /**
+     * Try to compute patient first name and last name from dicom tags. 
+     * eg. TOM^HANKS -> return TOM as first name and HANKS as last name
+     */
     computeNameFromDicomTag (patientName: string): void {
-        /* Try to compute patient first name and last name from dicom tags. 
-        eg. TOM^HANKS -> return TOM as first name and HANKS as last name */
         if (patientName !== null) {
             let names: string[] = patientName.split("\\^");
             if (names !== null && names.length == 2) {
