@@ -31,6 +31,8 @@
 							</ng-template>
 						</span>
 					</li>
+				</ol>
+				<ol *ngIf="humanSelected()" [@slideDown]="humanSelected()">
 					<li *ngIf="(mode == 'create' && humanSelected()) || mode == 'edit'">
 						<label i18n="Subject detail|Subject is already anonymized label@@SubjectDetailSubjectIsAlreadyAnonymized">Is the subject already anonymized?</label>
 						<span class="right-col">
@@ -41,27 +43,27 @@
 						</span>
 					</li>
 					<li class="info" 
-							*ngIf="!isAlreadyAnonymized && mode == 'create' && humanSelected()" 
-							[@slideDown]="!isAlreadyAnonymized && mode == 'create' && humanSelected()">
+							*ngIf="!isAlreadyAnonymized && mode == 'create'" 
+							[@slideDown]="!isAlreadyAnonymized && mode == 'create'">
 						<span class="icon"><i class="fas fa-info-circle"></i></span>A subject global identifier will be automatically generated using the first name, the last name and the birth date of the subject.
 						This can help you to identify a subject that has already been inserted into the database.
 						<br/>To ensure anonymity, the first name and the last name will not be saved.
 						<br/>Notice that the birth Date will be set to the 1st of January of the birth Year for the same reason.
 
 					</li>
-					<li *ngIf="!isAlreadyAnonymized && mode == 'create' && humanSelected()">
+					<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
 						<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName">First Name</label>
 						<span class="right-col">
 							<input type="text" id="firstName" [(ngModel)]="firstName" formControlName="firstName" />
 						</span>
 					</li>
-					<li *ngIf="!isAlreadyAnonymized && mode == 'create' && humanSelected()">
+					<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
 						<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName">Last Name</label>
 						<span class="right-col">
 							<input type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
 						</span>
 					</li>
-					<li *ngIf="humanSelected()">
+					<li>
 						<label *ngIf="mode !== 'edit'" i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Birth date</label>
 						<span [ngSwitch]="mode">
 							<ng-template class="right-col" [ngSwitchCase]="'view'">
@@ -75,29 +77,7 @@
 							</ng-template>
 						</span>
 					</li>
-					<li *ngIf="mode == 'create' && !humanSelected()">
-						<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
-						<my-date-picker id="birthDate" [options]="myDatePickerOptions" formControlName="birthDate" [(ngModel)]="birthDate" (dateChanged)="onBirthDateChanged($event)"
-							(inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
-						</my-date-picker>
-						<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
-					</li>
 					<li>
-						<label i18n="Subject detail|Name label@@subjectDetailName" class="required-label">Common name</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{subject.name}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="subject.name" (change)="resetNameErrorMsg()"
-								/>
-								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit subject|Name required error@@subjectDetailNameRequiredError">Name is required!</label>
-								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit subject|Name length error@@subjectDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Edit subject|Name unique error@@subjectDetailNameUniqueError">Name should be unique!</label>
-							</ng-template>
-						</span>
-					</li>
-					<li *ngIf="( mode == 'create' && humanSelected() ) || mode == 'view' || mode == 'edit'">
 						<label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -111,7 +91,7 @@
 							</ng-template>
 						</span>
 					</li>
-					<li *ngIf="( mode == 'create' && humanSelected() ) || mode == 'view' || mode == 'edit'">
+					<li>
 						<label i18n="Subject detail|Manual Hemispheric Dominance label@@subjectDetailManualHemisphericDominance">Manual Hemispheric Dominance</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -124,7 +104,7 @@
 							</ng-template>
 						</span>
 					</li>
-					<li *ngIf="( mode == 'create' && humanSelected() ) || mode == 'view' || mode == 'edit'">
+					<li>
 						<label i18n="Subject detail|Language Hemispheric Dominance label@@subjectDetailLanguageHemisphericDominance">Language Hemispheric Dominance</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -138,16 +118,41 @@
 							</ng-template>
 						</span>
 					</li>
+				</ol>
+				<ol *ngIf="!humanSelected()" [@slideDown]="!humanSelected()">
+					<li *ngIf="mode == 'create'">
+						<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
+						<my-date-picker id="birthDate" [options]="myDatePickerOptions" formControlName="birthDate" [(ngModel)]="birthDate" (dateChanged)="onBirthDateChanged($event)"
+							(inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
+						</my-date-picker>
+						<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+					</li>
+					<li>
+						<label i18n="Subject detail|Name label@@subjectDetailName" class="required-label">Common name</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{subject.name}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="subject.name" />
+								<label *ngIf="formErrors.name?.required" class="form-validation-alert" i18n="Edit subject|Name required error@@subjectDetailNameRequiredError">Name is required!</label>
+								<label *ngIf="formErrors.name?.includes('length')" class="form-validation-alert" i18n="Edit subject|Name length error@@subjectDetailNameLengthError">Name length must be between 2 and 200!</label>
+								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Edit subject|Name unique error@@subjectDetailNameUniqueError">Name should be unique!</label>
+							</ng-template>
+						</span>
+					</li>
+				</ol>
+				<ol>
 					<li>
 						<label i18n="Subject detail|Personal Comments label@@subjectDetailPersonalComments">Personal Comments</label>
 						<!-- <span class="right-col" [ngSwitch]="mode">
-										<ng-template [ngSwitchCase]="'view'">
-											 {{}} 
-										</ng-template>
-										<ng-template ngSwitchDefault>
-											<input type="text" id="personalComments"  formControlName="personalComments" [(ngModel)]=""  />
-										</ng-template>
-									</span> -->
+							<ng-template [ngSwitchCase]="'view'">
+									{{}} 
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" id="personalComments"  formControlName="personalComments" [(ngModel)]=""  />
+							</ng-template>
+						</span> -->
 					</li>
 				</ol>
 			</fieldset>
@@ -198,7 +203,7 @@
 												</option>
 											</select>
 										</td>
-										<td align="center"><img [src]="deleteIconPath" class="icon icon-clickable" (click)="removeSubjectStudy(relSubjectStudy)" /></td>
+										<td align="center"><img [src]="ImagesUrlUtil.DELETE_ICON_PATH" class="icon icon-clickable" (click)="removeSubjectStudy(relSubjectStudy)" /></td>
 									</tr>
 								</tbody>
 							</table>

@@ -78,7 +78,7 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
     form fieldset fieldset label { margin-left: 183px; }
   form legend { padding: 0 10px 0 0; color: var(--color-a); font-size: 14px; margin: 10px 0; color: var(--color-c); width: 100%; border-bottom: 1px solid var(--color-b-light); }
   form li > label { display: inline-block; vertical-align: top; width: 180px; }
-  form fieldset ol { margin: 0; padding: 0; }
+  form fieldset ol { margin: 0; padding: 0; overflow: hidden; }
     form fieldset.responsive ol { float: left; padding: 0 50px 0 0; }
   form fieldset li { list-style: none; padding: 3px 0; margin: 0; }
     form fieldset li input,

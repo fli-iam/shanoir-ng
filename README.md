@@ -16,7 +16,7 @@ Installation on using docker-compose
 used from there for the docker-compose startup
 * configure your local /etc/hosts and add:
     * 127.0.0.1       shanoir-ng-nginx
-* docker-compose up —build
+* docker-compose up --build
 * If your microservices (studies, users etc.) exit, check if the databases are created. If not, execute the scripts manually in the databases container:
 	* docker-compose exec database sh
 	* cd docker-entrypoint-initdb.d
