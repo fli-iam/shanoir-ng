@@ -64,6 +64,7 @@ import { TreeNodeComponent } from './shared/components/tree/tree-node.component'
 import { UserComponent } from './users/user/user.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserService } from './users/shared/user.service';
+import { DicomArchiveService } from './import/dicom-archive.service';
 
 import '../assets/css/common.css';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
@@ -164,6 +165,7 @@ import { DatasetComponent } from './datasets/dataset/dataset.component';
         CoilService,
         SubjectService,
         UserService,
+        DicomArchiveService,
         {
             provide: HTTP_INTERCEPTORS,
             useClass: KeycloakHttpInterceptor,

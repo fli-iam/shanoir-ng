@@ -32,9 +32,9 @@ export class ModalComponent {
   }
 
   public onContainerClicked(event: MouseEvent): void {
-    /* if ((<HTMLElement>event.target).parentElement.classList.contains('modal')) {
+    if ((<HTMLElement>event.target).parentElement.classList.contains('modal')) {
       this.hide();
     } 
-    TODO (or not): Instead we should at least close only the current popup, not every opened popup */
+ /*   TODO (or not): Instead we should at least close only the current popup, not every opened popup */
   }
 }
