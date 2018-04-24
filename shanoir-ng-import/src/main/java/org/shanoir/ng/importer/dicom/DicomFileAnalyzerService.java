@@ -62,7 +62,7 @@ public class DicomFileAnalyzerService {
 	 * that is why 4 loops have to be used to walk through the tree.
 	 * @throws FileNotFoundException 
 	 */
-	public void analyzeDicomFiles(JsonNode dicomDirJson) throws FileNotFoundException {
+	public void analyzeDicomFiles(JsonNode dicomDirJson,String unzipFolderFileAbsolutePath) throws FileNotFoundException {
 		// patient level
 		JsonNode patients = dicomDirJson.path("patients");
 		if (patients.isArray()) {
@@ -88,7 +88,7 @@ public class DicomFileAnalyzerService {
 											String instanceFilePath = entry.getValue().asText();
 											File instanceFile = new File(instanceFilePath);
 											if (instanceFile.exists()) {
-												processDicomFile(instanceFile, serie, instances, instanceFilePath, nonImages, images);
+												processDicomFile(instanceFile, serie, instances, instanceFilePath, nonImages, images, unzipFolderFileAbsolutePath);
 											} else {
 												throw new FileNotFoundException(
 														"InstanceFilePath in DicomDir: missing file: "
@@ -123,7 +123,7 @@ public class DicomFileAnalyzerService {
 	 * @param nonImages
 	 * @param images
 	 */
-	private void processDicomFile(File dicomFile, JsonNode serie, JsonNode instances, String instanceFilePath, ArrayNode nonImages, ArrayNode images) {
+	private void processDicomFile(File dicomFile, JsonNode serie, JsonNode instances, String instanceFilePath, ArrayNode nonImages, ArrayNode images,String unzipFolderFileAbsolutePath) {
 		DicomInputStream dIS = null;
 		try {
 			dIS = new DicomInputStream(dicomFile);
@@ -142,7 +142,7 @@ public class DicomFileAnalyzerService {
 						|| UID.MRSpectroscopyStorage.equals(sopClassUID)
 						|| checkSerieIsSpectroscopy(seriesDescription)) {
 					ObjectNode nonImage = mapper.createObjectNode();
-					nonImage.put("path", instanceFilePath);
+					nonImage.put("path", instanceFilePath.replace(unzipFolderFileAbsolutePath+"/", ""));
 					nonImages.add(nonImage);
 					((ObjectNode) serie).put("isSpectroscopy", true);
 					LOG.warn("Attention: spectroscopy serie is included in this import!");
@@ -151,7 +151,7 @@ public class DicomFileAnalyzerService {
 					// do not change here: use absolute path all time and find other solution for
 					// image preview
 					ObjectNode image = mapper.createObjectNode();
-					image.put("path", instanceFilePath);
+					image.put("path", instanceFilePath.replace(unzipFolderFileAbsolutePath+"/", ""));
 					addImageSeparateDatasetsInfo(image, datasetAttributes);
 					images.add(image);
 					((ObjectNode) serie).put("isSpectroscopy", false);
