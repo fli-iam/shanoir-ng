@@ -191,7 +191,6 @@ export class SubjectComponent implements OnInit {
                 }
             }
         }
-        console.log(this.formErrors);
     }
 
     updateModel(): void {
@@ -315,6 +314,14 @@ export class SubjectComponent implements OnInit {
         this.subject.birthDate = newDate;
     }
 
+    removeSubjectStudy(subjectStudy: SubjectStudy):void {
+        const index: number = this.subject.subjectStudyList.indexOf(subjectStudy);
+        if (index !== -1) {
+            this.subject.subjectStudyList.splice(index, 1);
+        }
+        this.subjectService.deleteSubjectStudy(subjectStudy.id);
+    }
+
     onStudySelectChange(studyId: number) {
         var newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
@@ -325,8 +332,7 @@ export class SubjectComponent implements OnInit {
         else {
             this.subject.subjectStudyList = [];
             this.subject.subjectStudyList.push(newSubjectStudy);
-        }
-        console.log(this.subject.subjectStudyList);
+        } 
 
         // I want to do something here for new selectedDevice, but what I
         // got here is always last selection, not the one I just select.

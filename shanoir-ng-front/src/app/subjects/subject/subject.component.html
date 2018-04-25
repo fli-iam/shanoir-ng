@@ -168,46 +168,45 @@
 						</span>
 					</li>
 					<li *ngIf="subject.subjectStudyList != null && subject.subjectStudyList.length != 0">
-						<label i18n="Subject detail|Details on the subject label@@subjectDetailSubjectDetails">Please fill the details on the subject</label>
-						<span class="right-col">
-							<table class="table table-striped">
-								<thead>
-									<tr>
-										<th>Study name</th>
-										<th>Subject identifier for this research study</th>
-										<th>Is physically involved</th>
-										<th>Subject Type</th>
-										<th>Remove</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr *ngFor="let relSubjectStudy of subject.subjectStudyList; let in = index">
-										<td align="center">
-											<div *ngFor="let study of studies">
-												<span *ngIf="study.id == relSubjectStudy.studyId">
-													{{study.name}}
-												</span>
-											</div>
-										</td>
-										<td align="center">
-											<input type="text" id="subjectStudyIdentifier-{{in}}" [(ngModel)]="relSubjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
-										</td>
-										<td align="center">
-											<input type="checkbox" [checked]="relSubjectStudy.physicallyInvolved" (change)="relSubjectStudy.physicallyInvolved = !relSubjectStudy.physicallyInvolved"/>
-										</td>
-										<td align="center">
-											<select id="subjectType-{{in}}" [(ngModel)]="relSubjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
-												<option *ngFor="let subjectType of subjectTypes()" [value]="subjectType.value"
-													i18n="Subject Types {{subjectType.value}}|Type label@@SubjectType{{subjectType.key}}">
-														{{subjectType.value}}
-												</option>
-											</select>
-										</td>
-										<td align="center"><img [src]="ImagesUrlUtil.DELETE_ICON_PATH" class="icon icon-clickable" (click)="removeSubjectStudy(relSubjectStudy)" /></td>
-									</tr>
-								</tbody>
-							</table>
-						</span>
+
+						<table class="studies">
+							<thead>
+								<tr>
+									<th class="label-col">Study name</th>
+									<th class="input-col">Subject id for this study</th>
+									<th class="chkbx-col" title="Physically Involved">PI</th>
+									<th class="dropdown-col">Subject Type</th>
+									<th class="buttons-col"></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr *ngFor="let relSubjectStudy of subject.subjectStudyList; let in = index">
+									<td class="label-col">
+										<div *ngFor="let study of studies">
+											<span *ngIf="study.id == relSubjectStudy.studyId">
+												{{study.name}}
+											</span>
+										</div>
+									</td>
+									<td class="input-col">
+										<input type="text" id="subjectStudyIdentifier-{{in}}" [(ngModel)]="relSubjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
+									</td>
+									<td class="chkbx-col">
+										<input type="checkbox" [checked]="relSubjectStudy.physicallyInvolved" (change)="relSubjectStudy.physicallyInvolved = !relSubjectStudy.physicallyInvolved"/>
+									</td>
+									<td class="dropdown-col">
+										<select id="subjectType-{{in}}" [(ngModel)]="relSubjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
+											<option *ngFor="let subjectType of subjectTypes()" [value]="subjectType.value"
+												i18n="Subject Types {{subjectType.value}}|Type label@@SubjectType{{subjectType.key}}">
+													{{subjectType.value}}
+											</option>
+										</select>
+									</td>
+									<td class="buttons-col"><span class="button" (click)="removeSubjectStudy(relSubjectStudy)"><i class="fas fa-ban"></i></span>
+								</tr>
+							</tbody>
+						</table>
+
 					</li>
 				</ol>
 			</fieldset>
