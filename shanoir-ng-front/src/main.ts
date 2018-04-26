@@ -9,7 +9,7 @@ if (process.env.ENV === 'production') {
   enableProdMode();
 }
 
-if (window.location.href.endsWith('/accountRequest')) {
+if (window.location.href.endsWith('/account-request')) {
   // Public URL
   platformBrowserDynamic().bootstrapModule(AppModule);
 } else {

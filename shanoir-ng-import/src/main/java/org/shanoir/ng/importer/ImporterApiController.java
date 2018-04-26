@@ -255,7 +255,7 @@ public class ImporterApiController implements ImporterApi {
 				dicomDirJsonNode = dicomDirToJsonReader.readDicomDirToJsonNode(dicomDirFile);
 			}
 
-			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode);
+			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode,unzipFolderFile.getAbsolutePath());
 
 			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(dicomDirJsonNode);

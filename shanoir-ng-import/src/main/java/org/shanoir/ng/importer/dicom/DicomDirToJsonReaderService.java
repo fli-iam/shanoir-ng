@@ -159,7 +159,9 @@ public class DicomDirToJsonReaderService {
 		serie.put("modality", serieRecord.getString(Tag.Modality));
 		serie.put("protocolName", serieRecord.getString(Tag.ProtocolName));
 		serie.put("seriesDescription", serieRecord.getString(Tag.SeriesDescription));
-		serie.put("seriesDate", serieRecord.getDate(Tag.SeriesDate).getTime());
+		if (serieRecord.getDate(Tag.SeriesDate) != null) {
+			serie.put("seriesDate", serieRecord.getDate(Tag.SeriesDate).getTime());
+		}
 		serie.put("seriesNumber", serieRecord.getString(Tag.SeriesNumber));
 		serie.put("numberOfSeriesRelatedInstances", serieRecord.getString(Tag.NumberOfSeriesRelatedInstances));
 		return serie;

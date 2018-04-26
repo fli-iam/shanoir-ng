@@ -23,6 +23,7 @@ import { SubjectType } from "../subjects/shared/subject-type.enum";
 import { SubjectStudy } from "../subjects/shared/subject-study.model";
 import { Enum } from "../shared/utils/enum";
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
+import { DicomArchiveService } from './dicom-archive.service';
 
 declare var papaya: any;
 
@@ -43,6 +44,7 @@ export class ImportComponent implements OnInit {
     private dicomDirMissingError: Boolean;
     public studycardMissingError: Boolean;
     public studycardNotCompatibleError: Boolean;
+    private status = null; 
     
     public archive: string;
     public modality: string;
@@ -88,13 +90,19 @@ export class ImportComponent implements OnInit {
     private isDateValid: boolean = true;
     private selectedDateNormal: IMyDate;
     
-    constructor(private fb: FormBuilder, private importService: ImportService,
-        private studyService: StudyService, private examinationService: ExaminationService,
-        private subjectService: SubjectService, public modalService: ModalService) {
-    }
+    constructor(
+    	private fb: FormBuilder,
+    	private importService: ImportService,
+        private studyService: StudyService,
+        private examinationService: ExaminationService,
+        private subjectService: SubjectService,
+        public modalService: ModalService, 
+        private dicomArchiveService: DicomArchiveService
+    ) {}
 
     ngOnInit(): void {
         this.buildForm();
+	   	papaya.Container.startPapaya();
     }
 
     buildForm(): void {
@@ -151,20 +159,36 @@ export class ImportComponent implements OnInit {
     };
             
     initPapaya(serie: SerieDicom): void {
-        var params: object[] = [];
-        let imagesList: string[] = [];
-        let dicomImagesList: Array<string[]> = [];
-        for (let image of serie.images) {
-            imagesList.push(AppUtils.BACKEND_API_IMAGE_VIEWER_URL + image["path"]);
-        }
-        dicomImagesList.push(imagesList);
-        params["images"] = dicomImagesList;
-        params["kioskMode"] = true;
-        papaya.Container.startPapaya();
-        papaya.Container.addViewer("papaya", params);
+    	 var _this = this;
+    	 var entries = serie.images.map(function(name) {
+    		 return _this.status.files[name.path];
+    	 });
+    	 var listOfPromises = entries.map(function(a) {
+    	 return a.async("arraybuffer");
+    	 });
+
+    	 var promiseOfList = Promise.all(listOfPromises);
+
+    	 promiseOfList.then(function (values) {
+    
+    		var params: object[] = [];
+            params["kioskMode"] = true;
+    	 	params['binaryImages'] = [values];
+    	 	papaya.Container.resetViewer(0, params);
+    	 	papaya.Container.resetViewer();
+    	 });
     }
     
     uploadArchive(event: any): void {
+    	this.dicomArchiveService.clearFileInMemory();
+    	this.dicomArchiveService.importFromZip(event)
+    	.subscribe(response => {
+    		this.dicomArchiveService.extractFileDirectoryStructure()
+    		.subscribe(response => {
+    			this.status = response;
+    	 	});
+    	 });
+    	 
         let file:any = event.srcElement.files;
         let index:any = file[0].name.lastIndexOf(".");
         let strsubstring: any = file[0].name.substring(index, file[0].name.length);
