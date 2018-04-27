@@ -99,7 +99,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="manualHemisphericDominance" required formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance">
-									<option *ngFor="let hemisphericDominance of HemisphericDominances" [value]="hemisphericDominance.key">{{hemisphericDominance.value}}</option>
+									<option [value]="left">Left</option>
+									<option [value]="right">Right</option>
 								</select>
 							</ng-template>
 						</span>
