@@ -6,6 +6,7 @@ import java.util.List;
 import org.shanoir.ng.acquisitionequipment.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentRepository;
 import org.shanoir.ng.center.CenterRepository;
+import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
@@ -158,12 +159,14 @@ public class StudyServiceImpl implements StudyService {
 			simpleStudy.setCompatible(false);
 			
 			// Request to studycard MS to get cards for the study
-			final HttpEntity<Long> studyIdEntity = new HttpEntity<>(study.getId(), KeycloakUtil.getKeycloakHeader());
+			final IdListDTO studyIds = new IdListDTO();
+			studyIds.getIdList().add(study.getId());
+			final HttpEntity<IdListDTO> studyIdsEntity = new HttpEntity<>(studyIds, KeycloakUtil.getKeycloakHeader());
 			ResponseEntity<List<StudyCardDTO>> studyCardResponse = null;
 			try {
 				studyCardResponse = restTemplate.exchange(
 						microservicesRequestsService.getStudycardsMsUrl() + MicroserviceRequestsService.SEARCH,
-						HttpMethod.POST, studyIdEntity, new ParameterizedTypeReference<List<StudyCardDTO>>() {
+						HttpMethod.POST, studyIdsEntity, new ParameterizedTypeReference<List<StudyCardDTO>>() {
 						});
 				List<StudyCardDTO> studyCards = null;
 				if (HttpStatus.OK.equals(studyCardResponse.getStatusCode())
