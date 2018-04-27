@@ -168,65 +168,65 @@ public class StudyServiceImpl implements StudyService {
 						microservicesRequestsService.getStudycardsMsUrl() + MicroserviceRequestsService.SEARCH,
 						HttpMethod.POST, studyIdsEntity, new ParameterizedTypeReference<List<StudyCardDTO>>() {
 						});
-				List<StudyCardDTO> studyCards = null;
 				if (HttpStatus.OK.equals(studyCardResponse.getStatusCode())
 						|| HttpStatus.NO_CONTENT.equals(studyCardResponse.getStatusCode())) {
-					studyCards = studyCardResponse.getBody();
+					final List<StudyCardDTO> studyCardDTOs = studyCardResponse.getBody();
+					if (studyCardDTOs != null) {
+						for (final StudyCardDTO studyCard : studyCardDTOs) {
+							// Id and name of studycard
+							SimpleStudyCardDTO simpleStudyCard = new SimpleStudyCardDTO(studyCard.getId(), studyCard.getName());
+							// Id and name of the center for studycard
+							simpleStudyCard.setCenter(new IdNameDTO(studyCard.getCenterId(), centerRepository.findOne(studyCard.getCenterId()).getName()));
+							// compatibility of studycard
+							AcquisitionEquipment acquisitionEquipment = acquisitionEquipmentRepository.findOne(studyCard.getAcquisitionEquipmentId());
+							String serialNumber = acquisitionEquipment.getSerialNumber();
+							String manufacturerModel = acquisitionEquipment.getManufacturerModel().getName();
+							String manufacturer = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
+							if (!serialNumber.equals(equipment.getDeviceSerialNumber())
+									|| !manufacturerModel.equals(equipment.getManufacturerModelName())
+									|| !manufacturer.equals(equipment.getManufacturer())) {
+								simpleStudyCard.setCompatible(false);		
+							} else {
+								simpleStudyCard.setCompatible(true);
+								simpleStudy.setCompatible(true);
+							}
+							//Request to import MS to get niftiConverter name for studycard
+							HttpEntity<Long> entity = null;
+							try {
+								entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
+							} catch (ShanoirException e) {
+								throw ((ShanoirStudiesException) e);
+							}
+							ResponseEntity<NIfTIConverterDTO> niftiConverterResponse = null;
+							try {
+								niftiConverterResponse = restTemplate.exchange(
+										microservicesRequestsService.getImportMsUrl() + "/" + studyCard.getNiftiConverterId(),
+										HttpMethod.GET, entity, new ParameterizedTypeReference<NIfTIConverterDTO>() {
+										});
+							} catch (RestClientException e) {
+								LOG.error("Error on import microservice request for getting nifti converter by id", e);
+								throw new ShanoirStudiesException("Error while getting niftiConverter", StudiesErrorModelCode.IMPORT_MS_COMM_FAILURE);
+							}
+							IdNameDTO niftiConverter;
+							if (HttpStatus.OK.equals(studyCardResponse.getStatusCode())
+									|| HttpStatus.NO_CONTENT.equals(studyCardResponse.getStatusCode())) {
+								niftiConverter = new IdNameDTO(niftiConverterResponse.getBody().getId(), niftiConverterResponse.getBody().getName());
+							} else {
+								throw new ShanoirStudiesException(StudiesErrorModelCode.IMPORT_MS_COMM_FAILURE);
+							}
+							simpleStudyCard.setNiftiConverter(niftiConverter);
+							
+							// Construction of Map SimpleStudyDTO to send
+							simpleStudy.getStudyCards().add(simpleStudyCard);
+							for (final StudyCenter studyCenter : study.getStudyCenterList()) {
+								IdNameDTO center = new IdNameDTO(studyCenter.getCenter().getId(), studyCenter.getCenter().getName());
+								simpleStudy.getCenters().add(center);
+							}
+							simpleStudies.add(simpleStudy);
+						}
+					}
 				} else {
 					throw new ShanoirStudiesException(StudiesErrorModelCode.SC_MS_COMM_FAILURE);
-				}
-
-				for (final StudyCardDTO studyCard : studyCards) {
-					// Id and name of studycard
-					SimpleStudyCardDTO simpleStudyCard = new SimpleStudyCardDTO(studyCard.getId(), studyCard.getName());
-					// Id and name of the center for studycard
-					simpleStudyCard.setCenter(new IdNameDTO(studyCard.getCenterId(), centerRepository.findOne(studyCard.getCenterId()).getName()));
-					// compatibility of studycard
-					AcquisitionEquipment acquisitionEquipment = acquisitionEquipmentRepository.findOne(studyCard.getAcquisitionEquipmentId());
-					String serialNumber = acquisitionEquipment.getSerialNumber();
-					String manufacturerModel = acquisitionEquipment.getManufacturerModel().getName();
-					String manufacturer = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
-					if (!serialNumber.equals(equipment.getDeviceSerialNumber())
-							|| !manufacturerModel.equals(equipment.getManufacturerModelName())
-							|| !manufacturer.equals(equipment.getManufacturer())) {
-						simpleStudyCard.setCompatible(false);		
-					} else {
-						simpleStudyCard.setCompatible(true);
-						simpleStudy.setCompatible(true);
-					}
-					//Request to import MS to get niftiConverter name for studycard
-					HttpEntity<Long> entity = null;
-					try {
-						entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
-					} catch (ShanoirException e) {
-						throw ((ShanoirStudiesException) e);
-					}
-					ResponseEntity<NIfTIConverterDTO> niftiConverterResponse = null;
-					try {
-						niftiConverterResponse = restTemplate.exchange(
-								microservicesRequestsService.getImportMsUrl() + "/" + studyCard.getNiftiConverterId(),
-								HttpMethod.GET, entity, new ParameterizedTypeReference<NIfTIConverterDTO>() {
-								});
-					} catch (RestClientException e) {
-						LOG.error("Error on import microservice request for getting nifti converter by id", e);
-						throw new ShanoirStudiesException("Error while getting niftiConverter", StudiesErrorModelCode.IMPORT_MS_COMM_FAILURE);
-					}
-					IdNameDTO niftiConverter;
-					if (HttpStatus.OK.equals(studyCardResponse.getStatusCode())
-							|| HttpStatus.NO_CONTENT.equals(studyCardResponse.getStatusCode())) {
-						niftiConverter = new IdNameDTO(niftiConverterResponse.getBody().getId(), niftiConverterResponse.getBody().getName());
-					} else {
-						throw new ShanoirStudiesException(StudiesErrorModelCode.IMPORT_MS_COMM_FAILURE);
-					}
-					simpleStudyCard.setNiftiConverter(niftiConverter);
-					
-					// Construction of Map SimpleStudyDTO to send
-					simpleStudy.getStudyCards().add(simpleStudyCard);
-					for (final StudyCenter studyCenter : study.getStudyCenterList()) {
-						IdNameDTO center = new IdNameDTO(studyCenter.getCenter().getId(), studyCenter.getCenter().getName());
-						simpleStudy.getCenters().add(center);
-					}
-					simpleStudies.add(simpleStudy);
 				}
 			} catch (RestClientException e) {
 				LOG.error("Error on study card microservice request", e);
