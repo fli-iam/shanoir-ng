@@ -103,12 +103,6 @@ public class Study extends HalEntity {
 	/** Start date. */
 	private Date startDate;
 
-	/** Associated study card lists. */
-	@ElementCollection
-	@CollectionTable(name = "study_study_card")
-	@Column(name = "study_card_id")
-	private List<Long> studyCardIds;
-
 	/** Dataset list. */
 //	@OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
 //	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
@@ -299,21 +293,6 @@ public class Study extends HalEntity {
 	 */
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
-	}
-
-	/**
-	 * @return the studyCardIds
-	 */
-	public List<Long> getStudyCardIds() {
-		return studyCardIds;
-	}
-
-	/**
-	 * @param studyCardIds
-	 *            the studyCardIds to set
-	 */
-	public void setStudyCardIds(List<Long> studyCardIds) {
-		this.studyCardIds = studyCardIds;
 	}
 
 	/**

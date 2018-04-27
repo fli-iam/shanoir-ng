@@ -181,17 +181,6 @@ VALUES
 	(0, 0, 2, 5, 86),
 	(0, 0, 2, 5, 205);
 
-INSERT INTO study_study_card
-	(study_id, study_card_id)
-VALUES
-	(1, 1),
-	(1, 3),
-	(2, 2),
-	(4, 1),
-	(1, 2),
-	(2, 1),
-	(3, 4);
-
 INSERT INTO center(id, country, name, phone_number, postal_code, street, city, website)
 VALUES
 	(1, 'France', 'CHU Rennes', '', '', '', 'Rennes', ''),
