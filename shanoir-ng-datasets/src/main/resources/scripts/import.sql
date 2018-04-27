@@ -34,6 +34,11 @@ INSERT INTO pet_protocol
 	(id, dimensionx, dimensiony, number_of_slices, voxel_sizex, voxel_sizey, voxel_sizez)
 VALUES
 	(1, 10, 10, 5, 2, 2, 2);
+	
+INSERT INTO ct_protocol
+	(id)
+VALUES
+	(1);
 
 INSERT INTO dataset_acquisition
 	(id, acquisition_equipment_id, examination_id, rank, software_release, sorting_index) 
@@ -46,6 +51,16 @@ INSERT INTO mr_dataset_acquisition
 	(id, mr_protocol_id) 
 VALUES 
 	(1, 1);
+	
+INSERT INTO pet_dataset_acquisition
+	(id, pet_protocol_id) 
+VALUES 
+	(2, 1);
+	
+INSERT INTO ct_dataset_acquisition
+	(id, ct_protocol_id) 
+VALUES 
+	(3, 1);
 
 INSERT INTO dataset_metadata
 	(id, cardinality_of_related_subjects, name) 
