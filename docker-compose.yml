@@ -47,6 +47,7 @@ services:
       - shanoir_ng_network
     ports:
      - "9901:9901"
+     - "9911:9911"
     depends_on:
       - "keycloak"
       - "database"
@@ -62,6 +63,7 @@ services:
       - shanoir_ng_network
     ports:
      - "9902:9902"
+     - "9912:9912"
     depends_on:
       - "keycloak"
       - "database"
