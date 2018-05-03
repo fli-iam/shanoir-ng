@@ -40,4 +40,17 @@ export class ImagesUrlUtil {
     public static X_RAY_2_ICON_PATH = 'assets/images/icons/medical/x-ray-2.png'
     public static ZOOM_IN_ICON_PATH = 'assets/images/icons/zoom-in.png';
     public static ZOOM_OUT_ICON_PATH = 'assets/images/icons/zoom-out.png';
+    
+    public static DOWNLOAD_ICON_PATH = 'assets/images/icons/download.png';
+    public static RAT_ICON_PATH = 'assets/images/icons/rat.png';
+    public static AGENDA_ICON_PATH = 'assets/images/icons/agenda.png';
+    public static MICROBE_ICON_PATH = 'assets/images/icons/medical/microbe.png';
+    public static VIRUS_ICON_PATH = 'assets/images/icons/medical/virus.png';
+    public static PILL_ICON_PATH = 'assets/images/icons/medical/pill.png';
+    public static SLEEP_ICON_PATH = 'assets/images/icons/sleep.png';
+    public static EXAMINATION_ICON_PATH = 'assets/images/icons/examination.png';
+    public static CONSTRAST_ICON_PATH = 'assets/images/icons/contrast.png';
+    public static BLOOD_SAMPLE_ICON_PATH = 'assets/images/icons/medical/blood-sample.png';
+    
+    
 }
