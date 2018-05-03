@@ -1,0 +1,23 @@
+<div class="SubjectPathologiesListComponent">
+    <div class="title">
+        <h2 i18n="Manage subjectPathologies|Title">Manage subject pathologies</h2>
+        <!-- hr/ -->
+    </div>
+    
+    <div [ngSwitch]="mode.state">
+		<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
+			<button *ngIf="toggleFormSP==false" (click)="toggleSubjectPathologyForm()">Add a pathology</button>
+		</ng-template>
+		<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify">
+			<button *ngIf="toggleFormSP==false" (click)="toggleSubjectPathologyForm()">Add a pathology</button>
+		</ng-template>
+	</div>
+    
+    <div>
+    	<subject-pathology-form [preclinicalSubject]="preclinicalSubject" [createSPMode]="createSPMode"  [mode]="mode" [canModify]="canModify"
+			[toggleForm]="toggleFormSP" [subjectpathoSelected]="pathoSelected" (onCreated)="refreshList($event)" (onCancel)="refreshDisplay($event)"></subject-pathology-form>
+	</div>
+	
+	<shanoir-table [items]="pathologies" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
+
+</div>

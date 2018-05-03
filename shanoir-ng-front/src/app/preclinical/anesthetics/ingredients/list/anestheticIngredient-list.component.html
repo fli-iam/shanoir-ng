@@ -1,0 +1,23 @@
+<div class="IngredientsListComponent">
+    <div class="title">
+        <h2 i18n="Manage ingredients|Title">Manage ingredients</h2>
+        <!-- hr/ -->
+    </div>
+    
+    <div [ngSwitch]="mode.state">
+		<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
+			<button *ngIf="toggleFormAI==false" (click)="toggleIngredientForm()">Add an ingredient</button>
+		</ng-template>
+		<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify">
+			<button *ngIf="toggleFormAI==false" (click)="toggleIngredientForm()">Add an ingredient</button>
+		</ng-template>
+	</div>
+   
+    <div>
+    	<anesthetic-ingredient-form [anesthetic]="anesthetic" [createAIMode]="createAIMode"  [mode]="mode" [canModify]="canModify" 
+			[toggleForm]="toggleFormAI" [ingredientSelected]="ingredientSelected" (onEvent)="refreshDisplay($event)"></anesthetic-ingredient-form>
+	</div>
+  
+  	<shanoir-table *ngIf="anesthetic.ingredients" [items]="anesthetic.ingredients" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
+    
+</div>

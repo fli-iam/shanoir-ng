@@ -1,0 +1,81 @@
+<div class="TherapyFormComponent content-component">
+    <form [formGroup]="newTherapyForm" class="TherapyFormComponent max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="2">
+				<span class="right-col" [ngSwitch]="mode.state">
+					<ng-template [ngSwitchCase]="Modes.view"> 
+						<div class="header command-zone" i18n="View therapy|Title">View therapy</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.edit"> 
+						<div class="header command-zone" i18n="Edit therapy|Title">Edit therapy</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.create"> 
+						<div class="header command-zone" i18n="Create therapy|Title">Add therapy</div>
+					</ng-template>
+				</span>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<label *ngIf="isTherapyUnique==false" class="form-validation-alert" i18n="Edit therapy|TherapyUniqueError label">This therapy already exists!</label>
+						<li class="required">
+							<label i18n="Edit therapy|Name label" class="required-label">Name</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{therapy?.name}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<input type="text" id="name" formControlName="name" [(ngModel)]="therapy.name"/>
+									<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit therapy|NameRequiredError label">Name is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit therapy|Location label" class="required-label">Type</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view">
+										{{enumUtils.getEnumValue(therapyTypes,therapy.therapyType)}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="therapyType" required formControlName="therapyType" [(ngModel)]="therapy.therapyType">
+										<option *ngFor="let therapyType of therapyTypes" [value]="therapyType.key">{{therapyType.value}}</option>
+									</select>
+									<label *ngIf="formErrors.therapyType.includes('required')" class="form-validation-alert" i18n="Edit therapy|TherapyTypeRequiredError label">Type is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit therapy|Comment label">Comment</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{therapy?.comment}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<textarea rows="4" id="comment" formControlName="comment" [(ngModel)]="therapy.comment"></textarea>
+								</ng-template>
+							</span>
+							
+						</li>
+					</ol>
+					</fieldset>
+				</td>				
+			</tr>
+			
+			<tr><td colspan="2"><div class="footer command-zone">
+				<span [ngSwitch]="mode.state">
+						<button i18n="View therapy|BackButton label" class="Button" (click)="getOut()">Back</button>	
+						<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
+							<button type="button" i18n="View therapy|EditButton label" (click)="goToEditPage()" class="Button">Edit</button>
+						</ng-template>
+						<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
+							<button type="button" i18n="Edit therapy|UpdateButton label" (click)="updateTherapy()" class="Button" [disabled]="!newTherapyForm.valid">Update</button>
+						</ng-template>
+						<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify"> 
+							<button type="button" i18n="Edit therapy|CreateButton label" (click)="addTherapy()" class="Button" [disabled]="!newTherapyForm.valid">Create</button>
+						</ng-template>
+					</span>
+			</div></td></tr>
+		</table>
+    </form>
+</div>

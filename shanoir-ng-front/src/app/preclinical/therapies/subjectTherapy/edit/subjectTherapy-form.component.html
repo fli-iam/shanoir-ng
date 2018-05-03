@@ -1,0 +1,116 @@
+<div *ngIf="toggleForm" class="SubjectTherapyFormComponent content-component">
+    <form [formGroup]="newSubjectTherapyForm" class="SubjectTherapyFormComponent max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="2">
+				<span class="right-col" [ngSwitch]="mode.state">
+					<ng-template [ngSwitchCase]="Modes.view"> 
+						<div class="header command-zone" i18n="View therapy|Title">View therapy details</div>
+					</ng-template>
+					<ng-template ngSwitchDefault> 
+						<div *ngIf="!createSTMode" class="header command-zone" i18n="Edit therapy|Title">Edit therapy</div>
+						<div *ngIf="createSTMode"  class="header command-zone" i18n="Create therapy|Title">Add therapy</div>
+					</ng-template>
+				</span>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<li class="required">
+							<label i18n="Edit subjectTherapy|Therapy label" class="required-label">Therapy</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{subjectTherapy?.therapy?.name}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="therapy" required formControlName="therapy" [(ngModel)]="subjectTherapy.therapy">
+										<option *ngFor="let therapy of therapies" [ngValue]="therapy">{{therapy.name}}</option>
+									</select>
+									<button *ngIf="keycloakService.isUserAdmin() " i18n="Edit subjectTherapy|Add a new therapy" (click)="goToAddTherapy()">
+										<img [src]="addIconPath"/>
+										new therapy
+									</button>
+									<label *ngIf="formErrors.therapy.includes('required')" class="form-validation-alert" i18n="Edit model|TherapyRequiredError label">Therapy is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<div *ngIf="displayDoseFrequency()">
+							<li class="required">
+								<label i18n="Edit subjectTherapy|Dose label" class="required-label">Dose</label>
+								<span class="right-col" [ngSwitch]="mode.state">
+									<ng-template [ngSwitchCase]="Modes.view"> 
+											{{subjectTherapy?.dose}}
+									</ng-template>
+									<ng-template ngSwitchDefault>
+										<input type="text" id="dose" formControlName="dose" [(ngModel)]="subjectTherapy.dose"/>
+									</ng-template>
+								</span>
+							</li>
+							<li class="required">
+								<label i18n="Edit subjectTherapy|DoseUnit label" class="required-label">Dose Unit</label>
+								<span class="right-col" [ngSwitch]="mode.state">
+									<ng-template [ngSwitchCase]="Modes.view"> 
+											{{subjectTherapy?.dose_unit?.value}}
+									</ng-template>
+									<ng-template ngSwitchDefault>
+										<select id="dose_unit" required formControlName="dose_unit" [(ngModel)]="subjectTherapy.dose_unit">
+											<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
+										</select>
+									</ng-template>
+								</span>								
+							</li>
+							<li class="required">
+								<label i18n="Edit subjectTherapy|Frequency label" class="required-label">Frequency</label>
+								<span class="right-col" [ngSwitch]="mode.state">
+									<ng-template [ngSwitchCase]="Modes.view"> 
+											{{enumUtils.getEnumValue(frequencies,subjectTherapy.frequency)}}
+									</ng-template>
+									<ng-template ngSwitchDefault>
+										<select id="frequency" required formControlName="frequency" [(ngModel)]="subjectTherapy.frequency">
+											<option *ngFor="let frequency of frequencies" [value]="frequency.key">{{frequency.value}}</option>
+										</select>
+									</ng-template>
+								</span>
+							</li>
+						</div>
+						<li>
+							<label i18n="Edit subjectTherapy|startDate label">Start date</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{subjectTherapy?.startDate}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<my-date-picker id="subjectTherapyStartDate" [options]="myDatePickerOptions" formControlName="startDate" [(ngModel)]="subjectTherapy.startDate" 
+									(dateChanged)="onDateChanged($event,'start')" (inputFieldChanged)="onInputFieldChanged($event,'start')" [selDate]="selectedStartDate">
+									</my-date-picker>
+									<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: yyyy-mm-dd</label>
+								</ng-template>
+							</span>
+						</li>
+						<li>
+							<label i18n="Edit subjectTherapy|endDate label">End date</label> 
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{subjectTherapy?.startDate}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<my-date-picker id="subjectTherapyEndDate" [options]="myDatePickerOptions" formControlName="endDate" [(ngModel)]="subjectTherapy.endDate" 
+									(dateChanged)="onDateChanged($event,'end')" (inputFieldChanged)="onInputFieldChanged($event,'end')" [selDate]="selectedEndDate">
+									</my-date-picker>
+									<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: yyyy-mm-dd</label>
+								</ng-template>
+							</span>
+						</li>
+					</ol>
+					</fieldset>
+				</td>				
+			</tr>
+			
+			<tr><td colspan="2"><div class="footer command-zone">
+				<button type="button" i18n="Edit therapy|CancelButton label" class="Button" (click)="toggleFormSTAndReset()">Close</button>
+				<button type="button" *ngIf="createSTMode && canModify && !mode.isViewMode()" i18n="Edit therapy|CreateButton label" (click)="addSubjectTherapy()" class="Button" [disabled]="!newSubjectTherapyForm.valid">Add</button>
+				<button type="button" *ngIf="!createSTMode && canModify && !mode.isViewMode()" (click)="updateSubjectTherapy()" i18n="Edit therapy|SaveButton label" class="Button" [disabled]="!newSubjectTherapyForm.valid">Save</button>
+			</div></td></tr>
+		</table>
+    </form>
+</div>

@@ -1,0 +1,61 @@
+<div class="BloodGasDataFormComponent content-component">
+    <form [formGroup]="newBloodGasdataForm" class="BloodGasDataFormComponent max-content" novalidate >
+		<table class="layout">
+			<tr><td colspan="2">
+					<span class="right-col" [ngSwitch]="mode.state">
+						<ng-template [ngSwitchCase]="Modes.view"> 
+							<div class="header command-zone" i18n="View bloodgasdata|Title">View Blood gas data</div>
+						</ng-template>
+						<ng-template ngSwitchDefault> 
+							<div class="header command-zone" i18n="Edit bloodgasdata|Title">Add Blood gas data</div>
+						</ng-template>
+					</span>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol><!-- 
+						<li class="required">
+							<label i18n="Edit bloodgasdata|File label" class="required-label">File</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										<a i18n="Edit bloodgasdata|download" (onClick)="downloadExtraData(bloodgasdata)">{{bloodgasdata?.filename}}</a>
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<file-upload #fu (change)="fu.prepareUploadRequest()" [multiple]="true" (selectedFile)="onFileSelected($event)"></file-upload>
+								</ng-template>
+							</span>	
+						</li>		 -->
+						<li  class="required">
+							<label i18n="Edit bloodgasdata|File label">File</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template  [ngSwitchCase]="Modes.view">
+									{{bloodGasData?.filename}}
+								</ng-template>
+								<ng-template  [ngSwitchCase]="Modes.create">
+									<input type="file" id="bloodgasdataFile" name="bloodgasdataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+								</ng-template>
+								<ng-template  [ngSwitchCase]="Modes.edit">
+									{{bloodGasData?.filename}}
+									<input type="file" id="bloodgasdataFile" name="bloodgasdataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+								</ng-template>
+							</span>
+							
+						</li>				
+					</ol>
+					</fieldset>
+				</td>
+			</tr>
+		</table>
+    </form>
+    
+    <div *ngIf="isStandalone">
+	    <table>
+			<tr><td colspan="2"><div class="footer command-zone">
+				<button type="button" i18n="Edit bloodgasdata|CancelButton label" class="Button" (click)="getOut()">Cancel</button>
+				<button type="button" *ngIf="canModify && mode.isCreateMode()" i18n="Edit bloodgasdata|CreateButton label" (click)="createBloodGasData()" class="Button" [disabled]="!newBloodGasdataForm.valid">Create</button>
+			</div></td></tr>
+	    </table>
+   	</div>
+    
+</div>

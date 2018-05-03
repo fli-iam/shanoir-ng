@@ -1,0 +1,5 @@
+/***********************/
+/* SubjectTherapies list component */
+/***********************/
+.SubjectTherapiesListComponent { float: left; overflow: auto; }
+.title { margin-bottom: 15px; margin-top:15px; }

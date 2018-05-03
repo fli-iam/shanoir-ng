@@ -1,0 +1,55 @@
+<div class="PathologyFormComponent content-component">
+    <form [formGroup]="newPathologyForm" class="PathologyFormComponent max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="2">
+				<span class="right-col" [ngSwitch]="mode.state">
+					<ng-template [ngSwitchCase]="Modes.view"> 
+						<div class="header command-zone" i18n="View pathology|Title">View pathology</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.edit"> 
+						<div class="header command-zone" i18n="Edit pathology|Title">Edit pathology</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.create"> 
+						<div class="header command-zone" i18n="Create pathology|Title">Add pathology</div>
+					</ng-template>
+				</span>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<label *ngIf="isPathologyUnique==false" class="form-validation-alert" i18n="Edit pathology|PathologyUniqueError label">This pathology already exists!</label>
+						<li class="required">
+							<label i18n="Edit pathology|Name label" class="required-label">Name</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{pathology?.name}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<input type="text" id="name" formControlName="name" [(ngModel)]="pathology.name"/>
+									<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit pathology|NameRequiredError label">Name is required!</label>
+								</ng-template>
+							</span>
+						</li>
+					</ol>
+					</fieldset>
+				</td>				
+			</tr>
+			
+			<tr><td colspan="2"><div class="footer command-zone">
+				<span [ngSwitch]="mode.state">
+						<button i18n="View pathology|BackButton label" class="Button" (click)="getOut()">Back</button>	
+						<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
+							<button type="button" i18n="View pathology|EditButton label" (click)="goToEditPage()" class="Button">Edit</button>
+						</ng-template>
+						<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
+							<button type="button" i18n="Edit anesthetic|UpdateButton label" (click)="updatePathology()" class="Button" [disabled]="!newPathologyForm.valid">Update</button>
+						</ng-template>
+						<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify"> 
+							<button type="button" i18n="Edit pathology|CreateButton label" (click)="addPathology()" class="Button" [disabled]="!newPathologyForm.valid">Create</button>
+						</ng-template>
+					</span>
+			</div></td></tr>
+		</table>
+    </form>
+</div>

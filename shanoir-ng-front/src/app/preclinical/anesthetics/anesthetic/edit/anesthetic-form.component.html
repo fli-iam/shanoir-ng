@@ -1,0 +1,82 @@
+<div class="AnestheticFormComponent content-component">
+    <form [formGroup]="newAnestheticForm" class="AnestheticFormComponent max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="2">
+				<span class="right-col" [ngSwitch]="mode.state">
+					<ng-template [ngSwitchCase]="Modes.view"> 
+						<div class="header command-zone" i18n="View anesthetic|Title">View anesthetic</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.edit"> 
+						<div class="header command-zone" i18n="Edit anesthetic|Title">Edit anesthetic</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.create"> 
+						<div class="header command-zone" i18n="Create anesthetic|Title">Add anesthetic</div>
+					</ng-template>
+				</span>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<label *ngIf="isAnestheticUnique==false" class="form-validation-alert" i18n="Edit anesthetic|AnestheticUniqueError label">This anesthetic already exists!</label>
+						<li class="required">
+							<label i18n="Edit anesthetic|Name label" class="required-label">Name</label> 
+							<!-- <input type="text" id="name" formControlName="name" [(ngModel)]="anesthetic.name"/> -->
+							<label class="label_light" *ngIf="anesthetic.name == undefined || anesthetic.name == ''">Name is automatically generated</label>
+							<label id="name" *ngIf="anesthetic.name">{{anesthetic.name}}</label> 
+						</li>
+						<li class="required">
+							<label i18n="Edit anesthetic|AnestheticType label" class="required-label">Type</label> 
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{enumUtils.getEnumValue(anestheticTypes,anesthetic.anestheticType)}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="anestheticType" required formControlName="anestheticType" [(ngModel)]="anesthetic.anestheticType" (change)="onChangeType()">
+										<option *ngFor="let anestheticType of anestheticTypes" [value]="anestheticType.key">{{anestheticType.value}}</option>
+									</select>
+									<label *ngIf="formErrors.anestheticType.includes('required')" class="form-validation-alert" i18n="Edit anestheticType|AnestheticTypeRequiredError label">Type is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit anesthetic|Comment label">Comment</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{anesthetic?.comment}}
+								</ng-template>
+								<ng-template ngSwitchDefault>							
+									<textarea rows="4"  id="comment" formControlName="comment" [(ngModel)]="anesthetic.comment"></textarea>
+								</ng-template>							
+							</span>
+						</li>
+					</ol>
+					</fieldset>
+				</td>
+			</tr>
+		</table>
+    </form>
+    
+    
+    <ingredients-list [anesthetic]="anesthetic" [mode]="mode" [canModify]="canModify" (onIngredientAdded)="addToCreate($event)" (onIngredientDeleted)="addToDelete($event)" ></ingredients-list>
+    
+    <div>
+	    <table class="anesthetics_buttons">
+			<tr><td colspan="2"><div class="footer command-zone">
+				<span [ngSwitch]="mode.state">
+					<button i18n="View anesthetic|BackButton label" class="Button" (click)="getOut()">Back</button>	
+					<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
+						<button type="button" i18n="View anesthetic|EditButton label" (click)="goToEditPage()" class="Button">Edit</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
+						<button type="button" i18n="Edit anesthetic|UpdateButton label" (click)="updateAnesthetic()" class="Button" [disabled]="!newAnestheticForm.valid">Update</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify"> 
+						<button type="button" i18n="Edit anesthetic|CreateButton label" (click)="addAnesthetic()" class="Button" [disabled]="!newAnestheticForm.valid">Create</button>
+					</ng-template>
+				</span>
+				</div></td></tr>
+	    </table>
+   	</div>
+    
+</div>

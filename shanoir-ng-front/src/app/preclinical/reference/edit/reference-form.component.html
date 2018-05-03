@@ -1,0 +1,94 @@
+<div class="RefFormComponent content-component">
+    <form [formGroup]="newRefForm" class="RefFormComponent max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="2">
+				<span class="right-col" [ngSwitch]="mode.state">
+					<ng-template [ngSwitchCase]="Modes.view"> 
+						<div class="header command-zone" i18n="View reference|Title">View Reference</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.edit"> 
+						<div class="header command-zone" i18n="Edit reference|Title">Edit Reference</div>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.create"> 
+						<div class="header command-zone" i18n="Create reference|Title">Add Reference</div>
+					</ng-template>
+				</span>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<li class="required">
+							<label i18n="Edit reference|Category label" class="required-label">Category</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{reference?.category}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<span *ngIf="!isEditableCategory">{{reference?.category}}</span>
+									<input *ngIf="isFreeCategory && isEditableCategory" type="text" id="category" formControlName="category" [(ngModel)]="reference.category"/>
+									<select *ngIf="!isFreeCategory && isEditableCategory"  id="category" required formControlName="category" [(ngModel)]="reference.category" (change)="onChangeCategory()">
+										<option *ngFor="let category of categories" [ngValue]="category">{{category}}</option>
+									</select>
+									<button *ngIf="keycloakService.isUserAdmin() && !isFreeCategory && isEditableCategory" i18n="Edit reference|Create new category" (click)="switchToCreate('category')">
+										<img [src]="addIconPath"/>
+										new category
+									</button>
+									<label *ngIf="formErrors.category.includes('required')" class="form-validation-alert" i18n="Edit reftype|CategoryRequiredError label">Category is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit reference|Type label" class="required-label">Type</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{reference?.reftype}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<span *ngIf="!isEditableRefType">{{reference?.reftype}}</span>
+									<input *ngIf="isFreeRefType && isEditableRefType" type="text" id="reftype" formControlName="reftype" [(ngModel)]="reference.reftype"/>
+									<select *ngIf="!isFreeRefType  && isEditableRefType" id="reftype" required formControlName="reftype" [(ngModel)]="reference.reftype">
+										<option *ngFor="let reftype of reftypes" [ngValue]="reftype">{{reftype}}</option>
+									</select>
+									<a *ngIf="keycloakService.isUserAdmin() && !isFreeRefType && isEditableRefType" i18n="Edit reference|Create new reftype" (click)="switchToCreate('reftype')">
+										<img class="img_16X16" border="0" alt="add" [src]="addIconPath">
+									</a>
+									<label *ngIf="formErrors.reftype.includes('required')" class="form-validation-alert" i18n="Edit reftype|TypeRequiredError label">RefType is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit reference|Value label" class="required-label">Value</label>
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{reference?.value}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<input type="text" id="value" formControlName="value" [(ngModel)]="reference.value"/>
+									<label *ngIf="formErrors.value.includes('required')" class="form-validation-alert" i18n="Edit reference|ValueRequiredError label">Value is required!</label>
+								</ng-template>
+							</span>
+							</li>
+					</ol>
+					</fieldset>
+				</td>
+				
+			</tr>
+			
+			<tr><td colspan="2"><div class="footer command-zone">
+				<span [ngSwitch]="mode.state">
+					<button  type="button" i18n="View reference|BackButton label" class="Button" (click)="getOut()">Back</button>	
+					<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
+						<button type="button" i18n="View reference|EditButton label" (click)="goToEditPage()" class="Button">Edit</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
+						<button type="button" i18n="Edit reference|UpdateButton label" (click)="updateReference()" class="Button" [disabled]="!newRefForm.valid">Update</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify"> 
+						<button type="button" i18n="Edit reference|CreateButton label" (click)="addReference()" class="Button" [disabled]="!newRefForm.valid">Create</button>
+					</ng-template>
+				</span>
+			</div></td></tr>
+		</table>
+    </form>
+</div>

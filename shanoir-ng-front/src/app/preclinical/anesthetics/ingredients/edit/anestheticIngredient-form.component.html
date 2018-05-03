@@ -1,0 +1,70 @@
+<div *ngIf="toggleForm" class="AnestheticIngredientFormComponent content-component">
+    <form [formGroup]="newIngredientForm" class="AnestheticIngredientFormComponent max-content" novalidate>
+		<table class="layout">
+			<tr><td colspan="2">
+				<div class="header command-zone" *ngIf="createAIMode" i18n="Create anestheticingredient|Title">Add ingredient</div>
+				<div class="header command-zone" *ngIf="!createAIMode" i18n="Edit anestheticingredient|Title">Edit ingredient</div>
+			</td></tr>
+			<tr>
+				<td>
+					<fieldset>
+					<ol>
+						<li class="required">
+							<label i18n="Edit anestheticingredient|Name label" class="required-label">Name</label>  
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{ingredient?.name?.value}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="name" required formControlName="name" [(ngModel)]="ingredient.name">
+										<option *ngFor="let name of names" [ngValue]="name">{{name.value}}</option>
+									</select>
+									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit anestheticingredient|Add a new ingredient name" (click)="goToRefPage('anesthetic','ingredient')">
+										<img [src]="addIconPath"/>
+										new ingredient name
+									</button>
+								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit anestheticingredient|NameRequiredError label">Name is required!</label>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit anestheticingredient|Concentration label" class="required-label">Concentration</label> 
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{ingredient?.concentration}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<input type="text" id="concentration" formControlName="concentration" [(ngModel)]="ingredient.concentration"/>
+								</ng-template>
+							</span>
+						</li>
+						<li class="required">
+							<label i18n="Edit anestheticingredient|ConcentrationUnit label" class="required-label">Concentration Unit</label> 
+							<span class="right-col" [ngSwitch]="mode.state">
+								<ng-template [ngSwitchCase]="Modes.view"> 
+										{{ingredient?.concentration_unit?.value}}
+								</ng-template>
+								<ng-template ngSwitchDefault>
+									<select id="concentration_unit" required formControlName="concentration_unit" [(ngModel)]="ingredient.concentration_unit">
+										<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
+									</select>
+									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit anestheticingredient|Add a new concentration unit" (click)="goToRefPage('unit','concentration')">
+										<img [src]="addIconPath"/>
+										new concentration unit
+									</button>
+								</ng-template>
+							</span>
+						</li>
+					</ol>
+					</fieldset>
+				</td>				
+			</tr>
+			
+			<tr><td colspan="2"><div class="footer command-zone">
+				<button type="button" i18n="Edit anestheticingredient|CancelButton label" class="Button" (click)="cancelIngredient()">Cancel</button>
+				<button type="button" *ngIf="createAIMode && !mode.isViewMode()" i18n="Edit anestheticingredient|CreateButton label" (click)="addIngredient()" class="Button" [disabled]="!newIngredientForm.valid">Add</button>
+				<button type="button" *ngIf="!createAIMode && canModify && !mode.isViewMode()" (click)="updateIngredient()" i18n="Edit anestheticingredient|SaveButton label" class="Button" [disabled]="!newIngredientForm.valid">Save</button>
+			</div></td></tr>
+		</table>
+    </form>
+</div>

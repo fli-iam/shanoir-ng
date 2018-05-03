@@ -1,0 +1,5 @@
+/***********************/
+/* Pathologies list component */
+/***********************/
+.PathologiesListComponent { float: left; overflow: auto; }
+.title { margin-bottom: 15px; }
