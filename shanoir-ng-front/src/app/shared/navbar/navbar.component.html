@@ -5,7 +5,9 @@
             <dropdown-menu label="Manage data" *ngIf="!isUserGuest()">
                 <menu-item label="Research study" i18n-label="Manage data menu|Research study@@navbarResearchStudy" link="study-list" [icon]="ImagesUrlUtil.FOLDER_12_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Subject" i18n-label="Manage data menu|Subject@@navbarSubject" link="subject-list" [icon]="ImagesUrlUtil.USER_ICON_PATH"></menu-item>
+                <menu-item label="Preclinical Subjects" link="preclinical/subjects" [icon]="ImagesUrlUtil.RAT_ICON_PATH"></menu-item>
                 <menu-item label="Examination" i18n-label="Manage data menu|Examination@@navbarExamination" link="examination-list" [icon]="ImagesUrlUtil.STETHOSCOPE_ICON_PATH"></menu-item>
+                <menu-item label="Preclinical Examinations" link="preclinical/examinations" [icon]="ImagesUrlUtil.EXAMINATION_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Dataset acquisition" i18n-label="Manage data menu|Dataset acquisition@@navbarDatasetAcquisition" link="" [icon]="ImagesUrlUtil.X_RAY_1_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Dataset" i18n-label="Manage data menu|Dataset@@navbarDataset" link="" [icon]="ImagesUrlUtil.BRAIN_ICON_PATH"></menu-item>
                 <menu-item label="Center" i18n-label="Manage data menu|Center@@navbarCenter" link="center-list" [icon]="ImagesUrlUtil.HOSPITAL_ICON_PATH"></menu-item>   
@@ -14,6 +16,9 @@
                 <menu-item label="Coil" i18n-label="Manage data menu|Coil@@navbarCoil" link="coil-list" [icon]="ImagesUrlUtil.WIFI_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Experimental group of subjects" i18n-label="Manage data menu|Experimental group of subjects@@navbarExperimentalGroupOfSubjects" [icon]="ImagesUrlUtil.USERS_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Score" i18n-label="Manage data menu|Score@@navbarScore" link="" [icon]="ImagesUrlUtil.PODIUM_ICON_PATH"></menu-item>
+               	<menu-item label="Pathology Models" link="preclinical/pathologies/models" [icon]="ImagesUrlUtil.VIRUS_ICON_PATH"></menu-item>
+                <menu-item label="Therapies" link="preclinical/therapies" [icon]="ImagesUrlUtil.PILL_ICON_PATH"></menu-item>
+                <menu-item label="Anesthetics" link="preclinical/anesthetics" [icon]="ImagesUrlUtil.SLEEP_ICON_PATH"></menu-item>   
             </dropdown-menu>
 
             <dropdown-menu label="Import data">
@@ -23,7 +28,7 @@
                 <menu-item label="Processed datasets (NifTi)" i18n-label="Import data menu|Processed datasets (NifTi)@@navbarProcessedDatasets" link="" [icon]="ImagesUrlUtil.NIFTI_ICON_PATH"></menu-item>
                 <menu-item label="From files ..." i18n-label="Import data menu|From files@@navbarFromFiles" link="" [icon]="ImagesUrlUtil.FOLDER_7_ICON_PATH"></menu-item>
             </dropdown-menu>
-
+            
             <dropdown-menu label="Administration" *ngIf="isUserAdmin()">
                 <menu-item label="Manage users" i18n-label="Administration menu|Manage users@@navbarManageUsers" link="user-list" [icon]="ImagesUrlUtil.USERS_1_ICON_PATH"></menu-item>
                 <li *ngIf="dev" class="horizontal-bar"><hr/></li>
@@ -33,7 +38,9 @@
                     <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="this.mode == 'pink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>
                     <menu-item label="Extreme pink mode" (click)="toggleXtremPink()" [boolVar]="this.mode == 'xtremPink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>
                 </menu-item>
-            </dropdown-menu>
+                <menu-item label="Preclinical References" link="preclinical/references" [icon]="ImagesUrlUtil.AGENDA_ICON_PATH"></menu-item>
+                <menu-item label="Pathologies" link="preclinical/pathologies" [icon]="ImagesUrlUtil.MICROBE_ICON_PATH"></menu-item>
+               </dropdown-menu>
 
         </ul>
     </nav>
