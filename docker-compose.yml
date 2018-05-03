@@ -33,6 +33,8 @@ services:
     build: ./docker-compose/database
     volumes:
       - "database-data:/var/lib/mysql"
+    ports:
+     - "3307:3306"
     networks:
       - shanoir_ng_network
   #
