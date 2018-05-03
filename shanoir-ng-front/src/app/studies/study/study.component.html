@@ -36,9 +36,7 @@
 								{{study.startDate | date: 'dd/MM/yyyy'}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<my-date-picker id="startDate" [options]="myDatePickerOptions" formControlName="startDate" [(ngModel)]="startDate" (dateChanged)="onStartDateChanged($event)"
-								 (inputFieldChanged)="onStartDateFieldChanged($event)" [selDate]="selectedStartDateNormal">
-								</my-date-picker>
+								<datepicker [(ngModel)]="study.startDate" formControlName="startDate"></datepicker>
 								<label *ngIf="isStartDateValid==false" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
 							</ng-template>
 						</span>
@@ -50,6 +48,7 @@
 								{{study.endDate | date: 'dd/MM/yyyy'}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
+								<datepicker [(ngModel)]="study.endDate" formControlName="endDate"></datepicker>
 								<my-date-picker id="endDate" [options]="myDatePickerOptions" formControlName="endDate" [(ngModel)]="endDate" (dateChanged)="onEndDateChanged($event)"
 								 (inputFieldChanged)="onEndDateFieldChanged($event)" [selDate]="selectedEndDateNormal">
 								</my-date-picker>

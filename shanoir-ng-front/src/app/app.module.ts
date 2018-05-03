@@ -79,6 +79,9 @@ import { SubjectComponent } from './subjects/subject/subject.component';
 import { SubjectTreeComponent } from './subjects/tree/subject-tree.component';
 import { StudyNamePipe } from './subjects/shared/study-name.pipe';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
+import { DatasetService } from './datasets/shared/dataset.service';
+import { DatepickerComponent } from './shared/date/date.component';
 
 
 @NgModule({
@@ -140,7 +143,9 @@ import { DatasetComponent } from './datasets/dataset/dataset.component';
         SubjectComponent,
         SubjectTreeComponent,
         StudyNamePipe,
-        DatasetComponent
+        DatasetComponent,
+        DatasetListComponent,
+        DatepickerComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -166,6 +171,7 @@ import { DatasetComponent } from './datasets/dataset/dataset.component';
         SubjectService,
         UserService,
         DicomArchiveService,
+        DatasetService,
         {
             provide: HTTP_INTERCEPTORS,
             useClass: KeycloakHttpInterceptor,
