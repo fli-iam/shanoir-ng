@@ -104,7 +104,11 @@ export class AnimalSubjectsListComponent {
         };
         this.columnDefs = [
             {headerName: "Common name", field: "subject.identifier"},
-            {headerName: "Imaged object category", field: "subject.imagedObjectCategory"},
+            {headerName: "Imaged object category", field: "subject.imagedObjectCategory", cellRenderer: function (params: any) {
+                    let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory>params.data.subject.imagedObjectCategory;
+                    return ImagedObjectCategory[imagedObjectCat];
+                }
+            },
             {headerName: "Specie", field: "animalSubject.specie.value"},
             {headerName: "Strain", field: "animalSubject.strain.value"},
             {headerName: "Biological type", field: "animalSubject.biotype.value"},
