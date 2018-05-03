@@ -25,6 +25,7 @@ import { ExtraDataFormComponent }      from './extraData/extraData/edit/extradat
 import { PhysiologicalDataFormComponent }      from './extraData/physiologicalData/add/physiologicalData-form.component';
 import { ExtraDataListComponent }      from './extraData/extraData/list/extradata-list.component';
 import { BloodGasDataFormComponent }      from './extraData/bloodGasData/add/bloodGasData-form.component';
+import { ImportBrukerComponent } from './importBruker/importBruker.component';
 //import { ReferenceCategoryFormComponent } from './reference/category/category-form.component';
 //import { ReferenceTypeFormComponent } from './reference/type/type-form.component';
 
@@ -78,7 +79,11 @@ import { BloodGasDataFormComponent }      from './extraData/bloodGasData/add/blo
     },{ 
         path: 'preclinical/contrastagent', 
         component: ContrastAgentFormComponent 
-    }
+    },
+    {
+    	path: 'importBruker',
+    	component: ImportBrukerComponent
+  	}
     
   ])],
   exports: [RouterModule]

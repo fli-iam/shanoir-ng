@@ -124,6 +124,7 @@ import { PhysiologicalDataFormComponent }      from './preclinical/extraData/phy
 import { BloodGasDataFormComponent }      from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { FileUploadComponent }      from './preclinical/fileupload/fileupload.component';
 import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
+import { ImportBrukerComponent }   from './preclinical/importBruker/importBruker.component';
 
 @NgModule({
     imports: [
@@ -214,7 +215,8 @@ import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
     	ExtraDataFormComponent,
     	PhysiologicalDataFormComponent,
     	ExtraDataListComponent,
-    	BloodGasDataFormComponent
+    	BloodGasDataFormComponent, 
+    	ImportBrukerComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
