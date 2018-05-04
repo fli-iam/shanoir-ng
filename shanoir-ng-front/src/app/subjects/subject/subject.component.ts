@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormBuilder, Validators, FormControl, FormArray } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormControl, FormArray, ValidationErrors } from '@angular/forms';
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
@@ -64,40 +64,55 @@ export class SubjectComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.chooseMode(); // Must be on top
+        this.chooseMode().then(this.initData.bind(this));
+    }
+
+    private initData() {
         switch(this.mode) {
             case 'create': {
-                this.subject = new Subject();
+                this.loadAllStudies();
+                this.setSubject(new Subject());
                 this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
                 this.prefillData();
-                this.loadAllStudies();
                 break;    
             }
             case 'edit': {
+                this.loadAllStudies();
                 this.fetchSubject();
                 break;
             }
             case 'view': {
+                this.fetchSubject();
                 break;
             }   
         }
-        this.canModify = this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert();  
-        this.buildForm();
+        this.canModify = this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert();
     }
-
-    chooseMode() {
-        if (this.mode == null) {
-            this.route.queryParams
+    
+    private chooseMode(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.mode == null) {
+                this.route.queryParams
                 .filter(params => params.mode)
                 .subscribe(params => {
                     if (!params.mode) {
                         throw new Error("a mode parameter must be set");
                     }
                     this.mode = params.mode;
+                    resolve();
                 });
-        }
+            } else {
+                resolve();
+            }
+        });
     }
 
+    public setSubject(subject: Subject) {
+        this.subject = subject;
+        console.log('this.subject : ', this.subject);
+        this.buildForm();
+    }
+    
     prefillData() {
         if (this.preFillData) {
             if (this.preFillData.subject) {
@@ -116,7 +131,7 @@ export class SubjectComponent implements OnInit {
     }
 
     fetchSubject(): void {
-        if (this.mode != 'edit') throw new Error ("A subject can be fetch only in edit mode");
+        if (this.mode == 'create') throw new Error ("A subject cannot be fetch in create mode");
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 if (queryParams['id']) {
@@ -124,7 +139,7 @@ export class SubjectComponent implements OnInit {
                 } else throw new Error ("A id must be passed as a parameter in edit mode");
             })
             .subscribe((subject: Subject) => {
-                this.subject = subject;
+                this.setSubject(subject);
                 this.getDateToDatePicker(this.subject);
             });
     }
@@ -210,7 +225,6 @@ export class SubjectComponent implements OnInit {
             this.location.back();
         }
     }
-
 
 
     edit(): void {
@@ -367,4 +381,5 @@ export class SubjectComponent implements OnInit {
     public subjectTypes() {
         return SubjectType.keyValues();
     }
+    
 }

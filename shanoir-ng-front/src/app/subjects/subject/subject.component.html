@@ -1,5 +1,5 @@
 <div class="content-component detail" [@preventInitialChildAnimations]>
-	<form [formGroup]="subjectForm" class="max-content" novalidate>
+	<form *ngIf="subject" [formGroup]="subjectForm" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
@@ -128,6 +128,8 @@
 						</my-date-picker>
 						<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
 					</li>
+				</ol>
+				<ol>
 					<li>
 						<label i18n="Subject detail|Name label@@subjectDetailName" class="required-label">Common name</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -142,8 +144,6 @@
 							</ng-template>
 						</span>
 					</li>
-				</ol>
-				<ol>
 					<li>
 						<label i18n="Subject detail|Personal Comments label@@subjectDetailPersonalComments">Personal Comments</label>
 						<!-- <span class="right-col" [ngSwitch]="mode">
