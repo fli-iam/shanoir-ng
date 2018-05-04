@@ -7,7 +7,6 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
-import org.shanoir.ng.study.dto.StudyStudyCardDTO;
 
 /**
  * Study service.
@@ -121,15 +120,6 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @throws ShanoirStudiesException
 	 */
 	Study update(Study study) throws ShanoirStudiesException;
-
-	/**
-	 * Manage link between a study and a study card (CUD)
-	 *
-	 * @param studyStudyCardDTO
-	 *            DTO with link between study and study card.
-	 * @throws ShanoirStudiesException
-	 */
-	void updateFromMsStudyCard(StudyStudyCardDTO studyStudyCardDTO) throws ShanoirStudiesException;
 
 	/**
 	 * Update a Study from the old Shanoir

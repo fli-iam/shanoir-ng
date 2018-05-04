@@ -17,7 +17,6 @@ import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.dto.NIfTIConverterDTO;
 import org.shanoir.ng.study.dto.SimpleStudyCardDTO;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
-import org.shanoir.ng.study.dto.StudyStudyCardDTO;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -154,98 +153,127 @@ public class StudyServiceImpl implements StudyService {
 		if (CollectionUtils.isEmpty(studies)) {
 			return new ArrayList<>();
 		}
-
+		
 		final IdListDTO studyIds = new IdListDTO();
-		for (final Study study : studies) {
+		for (final Study study: studies) {
 			studyIds.getIdList().add(study.getId());
 		}
+		
+		// 1. Construction of SimpleStudyCardDTO Map to send 
+		final Map<Long, SimpleStudyCardDTO> studyCardsmap = new HashMap<>();
+		
+		// 2. Construction of SimpleStudyDTO List to send 
+		final List<SimpleStudyDTO> simpleStudies = new ArrayList<>();
+		
+		// 3. Construction of studyCarIdStudyCardIdMap to link the studycard id with the study id
+		final Map<Long, Long> studyCarIdStudyCardIdMap = new HashMap<>();
+		
+		// Request to MS Datasets to get all study cards for the list of all studies for user
 		final HttpEntity<IdListDTO> studyIdsEntity = new HttpEntity<>(studyIds, KeycloakUtil.getKeycloakHeader());
-
-		// Request to studycard MS to get cards for list of studies
 		ResponseEntity<List<StudyCardDTO>> studyCardResponse = null;
+		
 		try {
 			studyCardResponse = restTemplate.exchange(
-					microservicesRequestsService.getStudycardsMsUrl() + MicroserviceRequestsService.SEARCH,
-					HttpMethod.POST, studyIdsEntity, new ParameterizedTypeReference<List<StudyCardDTO>>() {
-					});
+				microservicesRequestsService.getStudycardsMsUrl() + MicroserviceRequestsService.SEARCH,
+				HttpMethod.POST, studyIdsEntity, new ParameterizedTypeReference<List<StudyCardDTO>>() {
+			});
+			if (HttpStatus.OK.equals(studyCardResponse.getStatusCode())
+					|| HttpStatus.NO_CONTENT.equals(studyCardResponse.getStatusCode())) {
+				final List<StudyCardDTO> studyCardDTOs = studyCardResponse.getBody();
+				
+				if (studyCardDTOs != null) {
+					for (final StudyCardDTO studyCard : studyCardDTOs) {
+						
+						// Id and name of studycard
+						SimpleStudyCardDTO simpleStudyCard = new SimpleStudyCardDTO(studyCard.getId(), studyCard.getName());
+						
+						// Id and name of the center for studycard
+						simpleStudyCard.setCenter(new IdNameDTO(studyCard.getCenterId(), centerRepository.findOne(studyCard.getCenterId()).getName()));
+						
+						// compatibility of studycard
+						AcquisitionEquipment acquisitionEquipment = acquisitionEquipmentRepository.findOne(studyCard.getAcquisitionEquipmentId());
+						String serialNumber = acquisitionEquipment.getSerialNumber();
+						String manufacturerModel = acquisitionEquipment.getManufacturerModel().getName();
+						String manufacturer = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
+						if (!serialNumber.equals(equipment.getDeviceSerialNumber())
+								|| !manufacturerModel.equals(equipment.getManufacturerModelName())
+								|| !manufacturer.equals(equipment.getManufacturer())) {
+							simpleStudyCard.setCompatible(false);		
+						} else {
+							simpleStudyCard.setCompatible(true);
+						}
+						
+						//Request to import MS to get niftiConverter name for studycard
+						HttpEntity<Long> entity = null;
+						try {
+							entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
+						} catch (ShanoirException e) {
+							throw ((ShanoirStudiesException) e);
+						}
+						ResponseEntity<NIfTIConverterDTO> niftiConverterResponse = null;
+						try {
+							niftiConverterResponse = restTemplate.exchange(
+									microservicesRequestsService.getImportMsUrl() + "/" + studyCard.getNiftiConverterId(),
+									HttpMethod.GET, entity, new ParameterizedTypeReference<NIfTIConverterDTO>() {
+									});
+						} catch (RestClientException e) {
+							LOG.error("Error on import microservice request for getting nifti converter by id", e);
+							throw new ShanoirStudiesException("Error while getting niftiConverter", StudiesErrorModelCode.IMPORT_MS_COMM_FAILURE);
+						}
+						IdNameDTO niftiConverter;
+						if (HttpStatus.OK.equals(studyCardResponse.getStatusCode())
+								|| HttpStatus.NO_CONTENT.equals(studyCardResponse.getStatusCode())) {
+							niftiConverter = new IdNameDTO(niftiConverterResponse.getBody().getId(), niftiConverterResponse.getBody().getName());
+						} else {
+							throw new ShanoirStudiesException(StudiesErrorModelCode.IMPORT_MS_COMM_FAILURE);
+						}
+						simpleStudyCard.setNiftiConverter(niftiConverter);
+						
+						// simpleStudyCard object is constructed, now we add it to the Map
+						studyCardsmap.put(simpleStudyCard.getId(), simpleStudyCard);
+						
+						// Add the link of studycardId and studyId
+						studyCarIdStudyCardIdMap.put(studyCard.getId(), studyCard.getStudyId());
+					}
+				}
+				
+				// 2. Construction of SimpleStudyDTO list to send
+				for (final Study study : studies) {
+					
+					// Id and name of study
+					final SimpleStudyDTO simpleStudy = new SimpleStudyDTO(study.getId(), study.getName());
+					
+					// Id and name list of the center list for study
+					for (final StudyCenter studyCenter : study.getStudyCenterList()) {
+						IdNameDTO center = new IdNameDTO(studyCenter.getCenter().getId(), studyCenter.getCenter().getName());
+						simpleStudy.getCenters().add(center);
+					}
+					
+					// StudyCard and its compatibility for study
+					// The study is not compatible by default
+					simpleStudy.setCompatible(false);
+					for (Map.Entry<Long, Long> studyCarIdStudyCardIdPair : studyCarIdStudyCardIdMap.entrySet()) {
+						// If studyId of the studyCarIdStudyCardIdPair is ok, add the studyCard to this study
+						if (studyCarIdStudyCardIdPair.getValue() == study.getId()) {
+							simpleStudy.getStudyCards().add(studyCardsmap.get(studyCarIdStudyCardIdPair.getKey()));
+							// If at least one of the studyCards of this study is compatible, then the study is compatible
+							if (studyCardsmap.get(studyCarIdStudyCardIdPair.getKey()).getCompatible()) {
+								simpleStudy.setCompatible(true);
+							}
+						}
+					}
+					
+					// simpleStudy object is constructed, now we add it to the Map
+					simpleStudies.add(simpleStudy);
+				}
+			} else {
+				throw new ShanoirStudiesException(StudiesErrorModelCode.SC_MS_COMM_FAILURE);
+			}
 		} catch (RestClientException e) {
 			LOG.error("Error on study card microservice request", e);
 			throw new ShanoirStudiesException("Error while getting study card list", StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
-
-		List<StudyCardDTO> studyCards = null;
-		if (HttpStatus.OK.equals(studyCardResponse.getStatusCode())
-				|| HttpStatus.NO_CONTENT.equals(studyCardResponse.getStatusCode())) {
-			studyCards = studyCardResponse.getBody();
-		} else {
-			throw new ShanoirStudiesException(StudiesErrorModelCode.SC_MS_COMM_FAILURE);
-		}
-		final Map<Long, SimpleStudyCardDTO> studyCardsmap = new HashMap<>();
-		for (final StudyCardDTO studyCard : studyCards) {
-			// Id and name of studycard
-			SimpleStudyCardDTO simpleStudyCard = new SimpleStudyCardDTO(studyCard.getId(), studyCard.getName());
-			// Id and name of the center for studycard
-			simpleStudyCard.setCenter(new IdNameDTO(studyCard.getCenterId(), centerRepository.findOne(studyCard.getCenterId()).getName()));
-			// compatibility of studycard
-			AcquisitionEquipment acquisitionEquipment = acquisitionEquipmentRepository.findOne(studyCard.getAcquisitionEquipmentId());
-			String serialNumber = acquisitionEquipment.getSerialNumber();
-			String manufacturerModel = acquisitionEquipment.getManufacturerModel().getName();
-			String manufacturer = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
-			if (!serialNumber.equals(equipment.getDeviceSerialNumber())
-					|| !manufacturerModel.equals(equipment.getManufacturerModelName())
-					|| !manufacturer.equals(equipment.getManufacturer())) {
-				simpleStudyCard.setCompatible(false);		
-			} else {
-				simpleStudyCard.setCompatible(true);
-			}
-			//Request to import MS to get niftiConverter name for studycard
-			HttpEntity<Long> entity = null;
-			try {
-				entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
-			} catch (ShanoirException e) {
-				throw ((ShanoirStudiesException) e);
-			}
-			ResponseEntity<NIfTIConverterDTO> niftiConverterResponse = null;
-			try {
-				niftiConverterResponse = restTemplate.exchange(
-						microservicesRequestsService.getImportMsUrl() + "/" + studyCard.getId(),
-						HttpMethod.GET, entity, new ParameterizedTypeReference<NIfTIConverterDTO>() {
-						});
-			} catch (RestClientException e) {
-				LOG.error("Error on import microservice request for getting nifti converter by id", e);
-				throw new ShanoirStudiesException("Error while getting niftiConverter", StudiesErrorModelCode.IMPORT_MS_COMM_FAILURE);
-			}
-			IdNameDTO niftiConverter;
-			if (HttpStatus.OK.equals(studyCardResponse.getStatusCode())
-					|| HttpStatus.NO_CONTENT.equals(studyCardResponse.getStatusCode())) {
-				niftiConverter = new IdNameDTO(niftiConverterResponse.getBody().getId(), niftiConverterResponse.getBody().getName());
-			} else {
-				throw new ShanoirStudiesException(StudiesErrorModelCode.IMPORT_MS_COMM_FAILURE);
-			}
-			simpleStudyCard.setNiftiConverter(niftiConverter);
-			
-			studyCardsmap.put(studyCard.getId(), simpleStudyCard);
-		}
-
-		final List<SimpleStudyDTO> simpleStudies = new ArrayList<>();
-		for (final Study study : studies) {
-			final SimpleStudyDTO simpleStudy = new SimpleStudyDTO(study.getId(), study.getName());
-			
-			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
-				IdNameDTO center = new IdNameDTO(studyCenter.getCenter().getId(), studyCenter.getCenter().getName());
-				simpleStudy.getCenters().add(center);
-			}
-			
-			for (final Long studyCardId : study.getStudyCardIds()) {
-				simpleStudy.getStudyCards().add(studyCardsmap.get(studyCardId));
-				simpleStudy.setCompatible(false);
-				if (studyCardsmap.get(studyCardId).getCompatible()) {
-					simpleStudy.setCompatible(true);
-				}
-			}
-			simpleStudies.add(simpleStudy);
-		}
-
+	
 		return simpleStudies;
 	}
 
@@ -295,32 +323,6 @@ public class StudyServiceImpl implements StudyService {
 		studyRepository.save(studyDb);
 
 		return studyDb;
-	}
-
-	@Override
-	public void updateFromMsStudyCard(StudyStudyCardDTO studyStudyCardDTO) throws ShanoirStudiesException {
-		if (studyStudyCardDTO.getNewStudyId() != null) {
-			// Add link
-			LOG.debug("Create new link between study (id: " + studyStudyCardDTO.getNewStudyId()
-					+ ") and study card (id: " + studyStudyCardDTO.getStudyCardId() + ")");
-			final Study study = studyRepository.findOne(studyStudyCardDTO.getNewStudyId());
-			if (study == null) {
-				LOG.error("Study with id " + studyStudyCardDTO.getNewStudyId() + " not found");
-				throw new ShanoirStudiesException(StudiesErrorModelCode.STUDY_NOT_FOUND);
-			}
-			study.getStudyCardIds().add(studyStudyCardDTO.getStudyCardId());
-		}
-		if (studyStudyCardDTO.getOldStudyId() != null) {
-			// Delete link
-			LOG.debug("Delete link between study (id: " + studyStudyCardDTO.getOldStudyId() + ") and study card (id: "
-					+ studyStudyCardDTO.getStudyCardId() + ")");
-			final Study study = studyRepository.findOne(studyStudyCardDTO.getOldStudyId());
-			if (study == null) {
-				LOG.error("Study with id " + studyStudyCardDTO.getOldStudyId() + " not found");
-				throw new ShanoirStudiesException(StudiesErrorModelCode.STUDY_NOT_FOUND);
-			}
-			study.getStudyCardIds().remove(studyStudyCardDTO.getOldStudyId());
-		}
 	}
 
 	@Override

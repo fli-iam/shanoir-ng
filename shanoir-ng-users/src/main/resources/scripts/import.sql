@@ -4,7 +4,7 @@
 
 use users;
 
-INSERT INTO role 
+INSERT INTO role
 VALUES 
 	(1,1000,'Administrator','ROLE_ADMIN'),
 	(2,0,'Guest','ROLE_GUEST'),
@@ -21,7 +21,7 @@ VALUES
 INSERT INTO users
 	(id, account_request_demand, account_request_info_id, can_access_to_dicom_association, creation_date, email, expiration_date, extension_date, extension_motivation, extension_request_demand, first_name, first_expiration_notification_sent, second_expiration_notification_sent, last_name, username, role_id)
 VALUES
-	(1, 0, null, 0, NOW(), 'admin@shanoir.fr', null, null, null, 0, 'Michael', 0, 0, 'Kain', 'admin', 1),
+	(1, 0, null, 0, NOW(), 'michael.kain@inria.fr', null, null, null, 0, 'Michael', 0, 0, 'Kain', 'mkain', 1),
 	(2, 0, null, 0, NOW(), 'jlouis@shanoir.fr', null, null, null, 0, 'Julien', 0, 0, 'Louis', 'jlouis', 3),
 	(3, 0, null, 0, NOW(), 'yyao@shanoir.fr', null, null, null, 0, 'Yao', 0, 0, 'Yao', 'yyao', 3),
 	(4, 0, null, 0, NOW(), 'jacques.martin@gmail.com', '2016/12/31', null, null, 0, 'Jacques', 0, 0, 'Martin', 'jmartin', 2),

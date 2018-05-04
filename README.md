@@ -14,8 +14,9 @@ Installation on using docker-compose
         * the tests will have to be clean up later
     * The build creates all .jars and copies them into the /docker-compose structure to be
 used from there for the docker-compose startup
-* configure your local /etc/hosts and add:
+* configure your local /etc/hosts (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
     * 127.0.0.1       shanoir-ng-nginx
+* For windows 7, increase your RAM and set the port redirection for the virtual box.
 * docker-compose up --build
 * If your microservices (studies, users etc.) exit, check if the databases are created. If not, execute the scripts manually in the databases container:
 	* docker-compose exec database sh
