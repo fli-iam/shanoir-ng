@@ -1,0 +1,86 @@
+.checkbox-button { background-color: var(--light-grey); color: var(--color-a); }
+    .checkbox-button.selected { background-color: var(--color-a); color: var(--light-grey); }
+
+.navigation { margin: 20px 0 0 0; }
+
+input[type="file"] { padding: 0; }
+input[type="radio"] { vertical-align: sub; }
+
+button { margin: 0; }
+
+.warning { color: red; }
+
+.spacer { width: 20px; display: inline-block; }
+
+.check-mark { color: olivedrab; margin-left: 10px; }
+
+form { border: 0; background-color: transparent !important; }
+
+form li > label { width: 250px !important; }
+
+.header { cursor: pointer; }
+
+.step-block { position: relative; }
+.step-block:not(.active):before { background-color: var(--lighter-grey); opacity: 0.8; content: ""; position: absolute; width: 100%; z-index: 2; height: 100%; }
+    .step-block .header { margin-top: 20px; }
+
+.step { background-color: var(--lighter-grey); border: 1px solid var(--light-grey); margin: 0; padding: 0 15px 15px; }
+    .step h2 { overflow: hidden; white-space: nowrap; }
+        .step h2 span { display: inline-block; }
+        .step h2 .hr { width: 100%; border-bottom: 1px solid var(--grey); margin-left: 10px; vertical-align: middle; }
+
+.middle-content { overflow: auto; }
+.tree { clear: none; float: left; margin: 0 50px 20px 0; min-width: 300px; width: 49%; }
+
+.preview { clear: none; float: left; width:550px; border: 1px solid var(--light-grey); background-color: var(--very-light-grey); margin-bottom: 20px; }
+    .preview .title { background-color: var(--light-grey); padding: 10px; }
+        .preview .title h3 { margin: 0; text-align: center;}
+
+    .preview-data { display: table; width:100%; padding: 10px 0; }
+        .item { display: table-row; }
+            .label { display: table-cell; width:50%; padding: 3px 10px; }
+            .value { display: table-cell; width:50%; padding: 3px 10px; }
+        .picto { height: 14px; margin-left: 50%; }
+
+.float-none { float: none; }
+
+@media (min-width: 768px) {
+    .modal-dialog {
+        width: 800px;
+        margin: 30px auto;
+    }
+}
+
+node.selected { background-color: var(--color-b); color: var(--very-light-grey); }
+
+.dicom input[type='file'], .dicom progress-bar { vertical-align: middle; }
+.dicom progress-bar { margin-left: 20px; }
+
+.modality-test { background-color: lightgoldenrodyellow; padding: 10px; width: 300px; margin-top: 20px; }
+
+.anonymization-table { border-collapse: collapse; border-spacing: 0; border: 1px solid var(--light-grey); table-layout: fixed; width: 100%; }
+    .anonymization-table th { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; overflow: hidden; }
+    .anonymization-table td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .anonymization-table td + td { border-left: 1px dotted var(--grey); }
+    .anonymization-table tr { height: 20px; }
+        .anonymization-table tr.even { background-color: var(--light-grey); }
+		.anonymization-table tr.odd { background-color: var(--lighter-grey); }
+
+.anonymize .console { float: left; margin-top: 15px; width: 70ch; padding: 10px; color: var(--very-light-grey); font-family: monospace; border: 6px outset #555; border-radius: 11px; 
+        background: var(--very-dark-grey); background: -webkit-linear-gradient(left top, #636363, black); background: -o-linear-gradient(bottom right, #636363, black); background: -moz-linear-gradient(bottom right, #636363, black); background: linear-gradient(to bottom right, #636363, black); } 
+.anonymize .commands { float: left; margin: 15px 0 0 20px; }
+    .anonymize .commands button { margin: 0; }
+
+.study-card ol { }
+    .study-card ol p { margin: 5px 0; }
+
+.expandable { cursor: pointer; }
+    .expand-arrow { margin-left: 5px; display: inline-block; }
+    .ds-acq-list { margin-bottom: 5px; }
+    .ds-acq-list li { padding: 0; color: var(--color-b); }
+        .ds-acq img { height: 16px; margin-right: 5px; vertical-align: text-bottom; }
+        .ds-acq button { margin-left: 10px; }
+
+.rotate { -moz-transform: scale(1, -1) translateY(-5px); -webkit-transform: scale(1, -1) translateY(-5px); -o-transform: scale(1, -1) translateY(-5px); -ms-transform: scale(1, -1) translateY(-5px); transform: scale(1, -1) translateY(-5px); }
+
+.commands button + button { margin-left: 10px; }

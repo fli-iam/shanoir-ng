@@ -75,3 +75,7 @@ export const PRECLINICAL_UNIT_TIME = 'time';
 
 export const PRECLINICAL_CAT_CONTRAST_AGENT = 'contrastagent';
 export const PRECLINICAL_CONTRAST_AGENT_NAME = 'name';
+
+//BRUKER api
+export const PRECLINICAL_API_BRUKER_UPLOAD:string = PRECLINICAL_API_ROOT_URL + '/bruker/upload';
+
