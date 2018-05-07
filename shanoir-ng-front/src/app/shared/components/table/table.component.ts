@@ -10,7 +10,7 @@ import { Pageable } from './pageable.model';
 })
 
 export class TableComponent {
-    @Input() backPagination: boolean;
+    @Input() backPagination: boolean = false;
     @Input() columnDefs: any[];
     @Input() items: Object[];
     @Input() nbAllItems: number;

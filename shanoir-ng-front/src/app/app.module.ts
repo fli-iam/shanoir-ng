@@ -80,6 +80,10 @@ import { SubjectComponent } from './subjects/subject/subject.component';
 import { SubjectTreeComponent } from './subjects/tree/subject-tree.component';
 import { StudyNamePipe } from './subjects/shared/study-name.pipe';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
+import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
+import { DatasetService } from './datasets/shared/dataset.service';
+import { DatepickerComponent } from './shared/date/date.component';
 
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
@@ -189,6 +193,9 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         SubjectTreeComponent,
         StudyNamePipe,
         DatasetComponent, 
+        DatasetListComponent,
+        DatepickerComponent,
+        MrDatasetComponent,
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,
@@ -245,6 +252,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         SubjectService,
         UserService,
         DicomArchiveService,
+        DatasetService,
     	PathologyService,
     	AnimalSubjectService,
     	PathologyModelService,

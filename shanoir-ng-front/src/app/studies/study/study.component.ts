@@ -41,8 +41,6 @@ export class StudyComponent implements OnInit {
     private loading: boolean = true;
     public mode: "view" | "edit" | "create";
     private selectedCenter: Center;
-    private selectedEndDateNormal: IMyDate;
-    private selectedStartDateNormal: IMyDate;
     public study: Study = new Study();
     public studyForm: FormGroup;
     private studyId: number;
@@ -52,12 +50,6 @@ export class StudyComponent implements OnInit {
     formErrors = {
         'name': '',
         'studyStatus': ''
-    };
-
-    private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'dd/mm/yyyy',
-        height: '20px',
-        width: '160px'
     };
 
     constructor(private route: ActivatedRoute, private router: Router,
@@ -72,8 +64,10 @@ export class StudyComponent implements OnInit {
         this.getStudy();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.canModify = true;
+            this.canModify = true; 
         }
+        console.log("init");
+        console.log(this.study.startDate);
     }
 
     addCenterToStudy(): void {
@@ -118,7 +112,7 @@ export class StudyComponent implements OnInit {
     }
 
     edit(): void {
-        this.router.navigate(['/study'], { queryParams: { id: this.studyId, mode: "edit" } });
+        this.mode = 'edit';
     }
 
     editTimepoint(timepoint: Timepoint): void {
@@ -146,25 +140,6 @@ export class StudyComponent implements OnInit {
                 // TODO: display error
                 console.log("error getting center list!");
             });
-    }
-
-    getDateToDatePicker(study: Study): void {
-        if (study) {
-            if (study.startDate && !isNaN(new Date(study.startDate).getTime())) {
-                let startDate: Date = new Date(study.startDate);
-                this.selectedStartDateNormal = {
-                    year: startDate.getFullYear(), month: startDate.getMonth() + 1,
-                    day: startDate.getDate()
-                };;
-            }
-            if (study.endDate && !isNaN(new Date(study.endDate).getTime())) {
-                let endDate: Date = new Date(study.endDate);
-                this.selectedEndDateNormal = {
-                    year: endDate.getFullYear(), month: endDate.getMonth() + 1,
-                    day: endDate.getDate()
-                };;
-            }
-        }
     }
 
     getEnum(): void {
@@ -202,7 +177,6 @@ export class StudyComponent implements OnInit {
             })
             .subscribe((study: Study) => {
                 this.study = study;
-                this.getDateToDatePicker(this.study);
                 this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
                 if (this.mode == 'view') {
                     this.getStudyWithData(this.study.id);
@@ -215,7 +189,6 @@ export class StudyComponent implements OnInit {
         this.studyService.getStudy(studyId, true)
             .then((study: Study) => {
                 this.study = study;
-                this.getDateToDatePicker(this.study);
                 this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
                 this.loading = false;
             })
@@ -234,50 +207,13 @@ export class StudyComponent implements OnInit {
     }
 
     isCenterAlreadyLinked(centerId: number): boolean {
+        if (!this.study.studyCenterList) return false;
         for (let studyCenter of this.study.studyCenterList) {
             if (centerId == studyCenter.center.id) {
                 return true;
             }
         }
         return false;
-    }
-
-    onEndDateChanged(event: IMyDateModel) {
-        if (event.formatted !== '') {
-            this.selectedEndDateNormal = event.date;
-        }
-    }
-
-    onEndDateFieldChanged(event: IMyInputFieldChanged) {
-        if (event.value !== '') {
-            if (!event.valid) {
-                this.isEndDateValid = false;
-            } else {
-                this.isEndDateValid = true;
-            }
-        } else {
-            this.isEndDateValid = true;
-            setTimeout(():void => this.selectedEndDateNormal = null);
-        }
-    }
-
-    onStartDateChanged(event: IMyDateModel) {
-        if (event.formatted !== '') {
-            this.selectedStartDateNormal = event.date;
-        }
-    }
-
-    onStartDateFieldChanged(event: IMyInputFieldChanged) {
-        if (event.value !== '') {
-            if (!event.valid) {
-                this.isStartDateValid = false;
-            } else {
-                this.isStartDateValid = true;
-            }
-        } else {
-            this.isStartDateValid = true;
-            setTimeout(():void => this.selectedStartDateNormal = null);
-        }
     }
 
     onValueChanged(data?: any) {
@@ -306,21 +242,6 @@ export class StudyComponent implements OnInit {
         }
     }
 
-    setDateFromDatePicker(): void {
-        if (this.selectedStartDateNormal) {
-            this.study.startDate = new Date(this.selectedStartDateNormal.year, this.selectedStartDateNormal.month - 1,
-                this.selectedStartDateNormal.day);
-        } else {
-            this.study.startDate = null;
-        }
-        if (this.selectedEndDateNormal) {
-            this.study.endDate = new Date(this.selectedEndDateNormal.year, this.selectedEndDateNormal.month - 1,
-                this.selectedEndDateNormal.day);
-        } else {
-            this.study.endDate = null;
-        }
-    }
-
     studyCenterListEmpty(): boolean {
         if (this.study.studyCenterList && this.study.studyCenterList.length > 0) {
             return false;
@@ -332,7 +253,6 @@ export class StudyComponent implements OnInit {
         let studyCenterListBackup: StudyCenter[] = this.study.studyCenterList;
         this.study = this.studyForm.value;
         this.study.studyCenterList = studyCenterListBackup;
-        this.setDateFromDatePicker();
     }
 
     update(): void {

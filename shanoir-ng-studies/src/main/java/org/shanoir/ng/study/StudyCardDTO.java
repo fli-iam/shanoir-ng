@@ -15,6 +15,8 @@ public class StudyCardDTO extends IdNameDTO {
 	private Long centerId;
 	
 	private Long niftiConverterId;
+	
+	private Long studyId;
 
 	/**
 	 * @return the acquisitionEquipmentId
@@ -45,6 +47,20 @@ public class StudyCardDTO extends IdNameDTO {
 
 	public void setNiftiConverterId(Long niftiConverterId) {
 		this.niftiConverterId = niftiConverterId;
+	}
+
+	/**
+	 * @return the studyId
+	 */
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	/**
+	 * @param studyId the studyId to set
+	 */
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
 }

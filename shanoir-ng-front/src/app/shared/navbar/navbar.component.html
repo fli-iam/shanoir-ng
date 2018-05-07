@@ -9,7 +9,7 @@
                 <menu-item label="Examination" i18n-label="Manage data menu|Examination@@navbarExamination" link="examination-list" [icon]="ImagesUrlUtil.STETHOSCOPE_ICON_PATH"></menu-item>
                 <menu-item label="Preclinical Examinations" link="preclinical/examinations" [icon]="ImagesUrlUtil.EXAMINATION_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Dataset acquisition" i18n-label="Manage data menu|Dataset acquisition@@navbarDatasetAcquisition" link="" [icon]="ImagesUrlUtil.X_RAY_1_ICON_PATH"></menu-item>
-                <menu-item *ngIf="dev" label="Dataset" i18n-label="Manage data menu|Dataset@@navbarDataset" link="" [icon]="ImagesUrlUtil.BRAIN_ICON_PATH"></menu-item>
+                <menu-item label="Dataset" i18n-label="Manage data menu|Dataset@@navbarDataset" link="dataset-list" [icon]="ImagesUrlUtil.BRAIN_ICON_PATH"></menu-item>
                 <menu-item label="Center" i18n-label="Manage data menu|Center@@navbarCenter" link="center-list" [icon]="ImagesUrlUtil.HOSPITAL_ICON_PATH"></menu-item>   
                 <menu-item *ngIf="dev" label="Investigator" i18n-label="Manage data menu|Investigator@@navbarInvestigator" link="" [icon]="ImagesUrlUtil.NURSE_ICON_PATH"></menu-item>
                 <menu-item label="Acquisition equipment" i18n-label="Manage data menu|Acquisition equipment@@navbarAcquisitionEquipment" link="acquisition-equipment-list" [icon]="ImagesUrlUtil.CARDIOGRAM_ICON_PATH"></menu-item>
@@ -33,8 +33,6 @@
             <dropdown-menu label="Administration" *ngIf="isUserAdmin()">
                 <menu-item label="Manage users" i18n-label="Administration menu|Manage users@@navbarManageUsers" link="user-list" [icon]="ImagesUrlUtil.USERS_1_ICON_PATH"></menu-item>
                 <li *ngIf="dev" class="horizontal-bar"><hr/></li>
-                <menu-item *ngIf="dev" label="Tree test page" link="tree-test" [icon]="ImagesUrlUtil.SHARE_ICON_PATH"></menu-item>
-                <menu-item *ngIf="dev" label="Dataset test page" link="dataset" [icon]="ImagesUrlUtil.X_RAY_1_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Preferences" i18n-label="Administration menu|Manage user preferences@@navbarUserPreferences" [icon]="ImagesUrlUtil.CONTROLS_ICON_PATH">
                     <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="this.mode == 'pink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>
                     <menu-item label="Extreme pink mode" (click)="toggleXtremPink()" [boolVar]="this.mode == 'xtremPink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>
