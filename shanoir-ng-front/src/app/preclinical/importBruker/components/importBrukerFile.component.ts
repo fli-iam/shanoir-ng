@@ -19,6 +19,7 @@ export class ImportBrukerFileComponent implements OnInit {
     private extensionError: Boolean;
     private uploadError: String;
     fileToUpload: File = null;
+    uploadedBrukerFileComplete: number = 0;
     
     constructor(
     	private fb: FormBuilder,
@@ -61,6 +62,7 @@ export class ImportBrukerFileComponent implements OnInit {
     };
     
     uploadArchive(event: any): void {
+    	this.uploadedBrukerFileComplete = 0;
     	// checkExtension
     	this.extensionError = false;
     	let file:any = event.target.files;
@@ -72,15 +74,18 @@ export class ImportBrukerFileComponent implements OnInit {
         } 
         this.fileToUpload = file.item(0);
     	this.uploadError = '';
+    	this.uploadedBrukerFileComplete = 1;
     	this.importBrukerService.postFile(this.fileToUpload)
         	.subscribe(res => {
             	console.log(res);
     			this.archive = this.fileToUpload.name;
+    			this.uploadedBrukerFileComplete = 2;
                 }, 
                 (err: String) => {
                 	console.log('error in posting File ' + err);
                 	this.archive = '';
                 	this.uploadError = err;
+                	this.uploadedBrukerFileComplete = 0;
                 }
             );
         

@@ -8,7 +8,16 @@
 			</p>
     		<input type="file" formControlName="fu" (change)="uploadArchive($event)" placeholder="Upload file..."/>
     		<label *ngIf="extensionError==true" class="form-validation-alert" i18n="Import|ExtensionError label">A Bruker zip archive  is required!</label>
-    		<label class="form-validation-alert" i18n="Import|UPloadError label">{{uploadError}}</label>
+    		<label class="form-validation-alert" i18n="Import|UploadError label">{{uploadError}}</label>
+    		<br/>
+    		<span [ngSwitch]="uploadedBrukerFileComplete">
+    			<ng-template [ngSwitchCase]="1"> 
+					<label i18n="Import|UploadComplete label">uploading...</label>
+				</ng-template>
+				<ng-template [ngSwitchCase]="2"> 
+					<label class="check-mark" i18n="Import|UploadComplete label">The Bruker archive has been successfully uploaded</label>
+				</ng-template>
+    		</span>
 		</fieldset>
 	</div>
 </form>
