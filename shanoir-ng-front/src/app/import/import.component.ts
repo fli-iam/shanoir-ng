@@ -35,7 +35,6 @@ declare var papaya: any;
 
 export class ImportComponent implements OnInit {
     @ViewChild('papayaModal') papayaModal: ModalComponent;
-    // @ViewChild('studyModal') studyModal: ModalComponent;
     @ViewChild('subjectCreationModal') subjectCreationModal: ModalComponent;
     
     public importForm: FormGroup;
@@ -101,7 +100,7 @@ export class ImportComponent implements OnInit {
 
     ngOnInit(): void {
         this.buildForm();
-	   	papaya.Container.startPapaya();
+        papaya.Container.startPapaya();
     }
 
     buildForm(): void {
@@ -310,17 +309,17 @@ export class ImportComponent implements OnInit {
         if (studycard) {
             if (studycard.compatible) {
                 this.studycardNotCompatibleError = false;
-                this.niftiConverter = studycard.niftiConverter;
-                this.studyService
-                    .findSubjectsByStudyId(this.study.id)
-                    .then(subjects => this.subjects = subjects)
-                    .catch((error) => {
-                        // TODO: display error
-                        console.log("error getting subject list by study id!");
-                });
             } else {
                 this.studycardNotCompatibleError = true;
             }
+            this.niftiConverter = studycard.niftiConverter;
+            this.studyService
+                .findSubjectsByStudyId(this.study.id)
+                .then(subjects => this.subjects = subjects)
+                .catch((error) => {
+                    // TODO: display error
+                    console.log("error getting subject list by study id!");
+            });
         }
     }
 
@@ -342,17 +341,14 @@ export class ImportComponent implements OnInit {
         this.subjectService.updateSubjectStudy(this.subject.subjectStudy);
     }
 
-    initializeSubject (subjectFromImport: any): void {
+    initializeSubject(subjectFromImport: any): void {
         subjectFromImport.birthDate = this.selectedSeries.patientBirthDate;
         subjectFromImport.name = this.selectedSeries.patientName;
         subjectFromImport.sex = <any> this.selectedSeries.patientSex;
         subjectFromImport.study = this.study; 
         this.modalService.objectPassedByModal.emit(subjectFromImport);
     }
-    test(subject: Subject) : void {
-        this.modalService.objectPassedByModal.emit(subject);
-    }
-
+    
     onInputFieldChanged(event: IMyInputFieldChanged) {
         if (event.value !== '') {
             if (!event.valid) {

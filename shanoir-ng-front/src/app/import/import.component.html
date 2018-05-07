@@ -202,7 +202,6 @@
                             <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
                         </select>
                         <a i18n="Import|SubjectDetails label" *ngIf="subject != null" target="_blank" [routerLink]="['/subject']" [queryParams]="{mode: 'view', id: subject?.id}">details</a>
-                        <button (click)="test(subject); subjectDetailsModal.show();">details</button>
                     </span>
                 </li>
                 <!-- TODO: Subject Group -->
@@ -398,11 +397,5 @@
 <app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
     <div class="app-modal-body">
       <subject-detail [mode]="'create'" (closing)="closeSubjectPopin($event)"></subject-detail>
-    </div>
-</app-modal>
-
-<app-modal modalDialogId="subjectDetailsModal" #subjectDetailsModal>
-    <div class="app-modal-body">
-      <subject-detail [mode]="'view'" (closing)="closeSubjectPopin()"></subject-detail>
     </div>
 </app-modal>
