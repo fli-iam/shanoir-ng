@@ -1,0 +1,5 @@
+/***********************/
+/* User list component */
+/***********************/
+:host { float: left; overflow: auto; }
+.title { margin-bottom: 15px; }

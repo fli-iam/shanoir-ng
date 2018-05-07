@@ -1,0 +1,64 @@
+<fieldset *ngIf="dataset">
+	<legend>Mr Dataset Data</legend>
+	<ol>
+		<li>
+			<label i18n="Mr Dataset detail|Mr Dataset echo time@@mrDatasetEchoTime">Echo Time</label>
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">{{dataset.echoTimeId}}</ng-template>
+				<ng-template ngSwitchDefault>
+					<input type="text" [(ngModel)]="dataset.echoTimeId" [ngModelOptions]="{standalone: true}" />
+				</ng-template>
+			</span>
+		</li>
+		<li>
+			<label i18n="Mr Dataset detail|Mr Dataset flip angle@@mrDatasetFlipAngle">Flip Angle</label>
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">{{dataset.flipAngleId}}</ng-template>
+				<ng-template ngSwitchDefault>
+					<input type="text" [(ngModel)]="dataset.flipAngleId" [ngModelOptions]="{standalone: true}" />
+				</ng-template>
+			</span>
+		</li>
+		<li>
+			<label i18n="Mr Dataset detail|Mr Dataset inversion time@@mrDatasetInversionTime">Inversion Time</label>
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">{{dataset.inversionTimeId}}</ng-template>
+				<ng-template ngSwitchDefault>
+					<input type="text" [(ngModel)]="dataset.inversionTimeId" [ngModelOptions]="{standalone: true}" />
+				</ng-template>
+			</span>
+		</li>
+		<li>
+			<label i18n="Mr Dataset detail|Mr Dataset quality procedure type@@mrDatasetQualityProcedureType">Quality Procedure Type</label>
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">{{dataset.mrQualityProcedureType}}</ng-template>
+				<ng-template ngSwitchDefault>
+					<input type="text" [(ngModel)]="dataset.mrQualityProcedureType" [ngModelOptions]="{standalone: true}" />
+				</ng-template>
+			</span>
+		</li>
+		<li>
+			<label i18n="Mr Dataset detail|Mr Dataset repetition time id@@mrDatasetRepetitionTimeId">Repetition Time</label>
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">{{dataset.repetitionTimeId}}</ng-template>
+				<ng-template ngSwitchDefault>
+					<input type="text" [(ngModel)]="dataset.repetitionTimeId" [ngModelOptions]="{standalone: true}" />
+				</ng-template>
+			</span>
+		</li>
+	</ol>
+</fieldset>
+<fieldset>
+	<legend>Mr Dataset Metadata</legend>
+	<ol>
+		<li>
+			<label i18n="Mr Dataset detail|Mr Dataset nature@@mrDatasetNature">Nature</label>
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">{{dataset.nature}}</ng-template>
+				<ng-template ngSwitchDefault>
+					<input type="text" [(ngModel)]="dataset.nature" [ngModelOptions]="{standalone: true}" />
+				</ng-template>
+			</span>
+		</li>
+	</ol>
+</fieldset>
