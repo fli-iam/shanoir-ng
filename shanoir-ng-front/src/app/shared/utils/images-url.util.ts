@@ -51,7 +51,7 @@ export class ImagesUrlUtil {
     public static EXAMINATION_ICON_PATH = 'assets/images/icons/examination.png';
     public static CONSTRAST_ICON_PATH = 'assets/images/icons/contrast.png';
     public static BLOOD_SAMPLE_ICON_PATH = 'assets/images/icons/medical/blood-sample.png';
-    public static PRECLINICAL_ICON_PATH = 'assets/images/preclinicalUp.16x16.png';
+    public static BRUKER_ICON_PATH = 'assets/images/bruker.16x16.png';
     
     
 }
