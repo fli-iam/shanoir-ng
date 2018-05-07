@@ -21,7 +21,6 @@ import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject
 import { SubjectExamination } from '../examinations/shared/subject-examination.model';
 import { SubjectType } from "../subjects/shared/subject-type.enum";
 import { SubjectStudy } from "../subjects/shared/subject-study.model";
-import { Enum } from "../shared/utils/enum";
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 import { DicomArchiveService } from './dicom-archive.service';
 

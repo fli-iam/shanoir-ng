@@ -1,4 +1,4 @@
-.shanoir-table { border-collapse: collapse; border-spacing: 0; border: 1px solid var(--light-grey); table-layout: fixed; width: 100%; border-top: 0; }
+.shanoir-table { border-spacing: 0; border: 1px solid var(--light-grey); table-layout: fixed; width: 100%; border-top: 0; }
 	.shanoir-table .full-row { background-color: var(--color-b); overflow: initial; }
 	.shanoir-table th,
 	.shanoir-table caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; overflow: hidden; }
@@ -8,6 +8,8 @@
 				.shanoir-table .controls button:hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
 				.shanoir-table .controls button span { vertical-align: middle; }
 				.shanoir-table .controls button img { height: 16px; vertical-align: middle; }
+				.shanoir-table .controls .awesome { vertical-align: middle; margin-right: 4px; }
+					.shanoir-table .controls .awesome svg { vertical-align: middle; }
 			.shanoir-table .controls input,
 			.shanoir-table .controls select { border: 1px solid var(--grey); border-radius: 2px;  height: 20px; vertical-align: middle; }
 			.shanoir-table .controls input { padding: 0 5px; width: 150px; }
@@ -49,6 +51,7 @@
 		.shanoir-table td.cell-nofield { text-align: center; }
 		.shanoir-table td span.button { max-height: 20px; max-width: 20px; cursor: pointer; }
 			.shanoir-table td span.button img { height: 16px; vertical-align: bottom; }
+			.shanoir-table td span.button .awesome { color: var(--color-c); }
 		.shanoir-table td.loading,
 		.shanoir-table td.empty { padding: 20px 20px; text-align: center; }
 			.shanoir-table td.loading img { vertical-align: middle; margin: 0; height: 32px; }

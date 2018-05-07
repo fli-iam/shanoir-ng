@@ -49,9 +49,6 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<datepicker [(ngModel)]="study.endDate" formControlName="endDate"></datepicker>
-								<my-date-picker id="endDate" [options]="myDatePickerOptions" formControlName="endDate" [(ngModel)]="endDate" (dateChanged)="onEndDateChanged($event)"
-								 (inputFieldChanged)="onEndDateFieldChanged($event)" [selDate]="selectedEndDateNormal">
-								</my-date-picker>
 								<label *ngIf="isEndDateValid==false" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
 							</ng-template>
 						</span>

@@ -26,6 +26,7 @@ import { CoilComponent } from './coils/coil/coil.component';
 import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
 import { SubjectComponent } from './subjects/subject/subject.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 
 const appRoutes: Routes = [
   {
@@ -115,6 +116,10 @@ const appRoutes: Routes = [
   },{
     path: 'subject',
     component: SubjectComponent,
+    canActivate: [AuthNotGuestGuard]
+  },{
+    path: 'dataset-list',
+    component: DatasetListComponent,
     canActivate: [AuthNotGuestGuard]
   },{
     path: 'dataset',

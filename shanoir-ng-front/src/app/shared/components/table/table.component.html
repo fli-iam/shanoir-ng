@@ -20,11 +20,13 @@
             <!-- User defined buttons -->
             <span *ngFor="let command of customActionDefs">
                 <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams(item) : null" routerLinkActive="active">
-                    <img *ngIf="command.img != undefined" src="{{command.img}}" />
+                    <img *ngIf="command.img" src="{{command.img}}" />
+                    <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
                     <span>{{command.title}}</span>
                 </button>
                 <button *ngIf="command.action != undefined" (click)="command.action()">
-                    <img *ngIf="command.img != undefined" src="{{command.img}}" />
+                    <img *ngIf="command.img" src="{{command.img}}" />
+                    <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
                     <span>{{command.title}}</span>
                 </button>
             </span>
@@ -50,7 +52,7 @@
         </tr>
     </thead>
     <!-- Table ontent -->
-    <tbody *ngIf="!isLoading && items.length > 0">
+    <tbody *ngIf="!isLoading && items?.length > 0">
         <tr 
             *ngFor="let item of getItems(); let i = index" 
             [class.odd]="i%2!=0" 
@@ -75,10 +77,12 @@
                     >{{getFieldRawValue(item, col["field"])}}</a>
                 <span class="button" *ngIf="col.type == 'button'">
                     <a *ngIf="col.target != undefined" [routerLink]="col.target" [queryParams]="col.getParams != undefined ? col.getParams(item) : null" routerLinkActive="active">
-                        <img src="{{col.img}}" />
+                        <img *ngIf="col.img" src="{{col.img}}" />
+                        <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
                     </a>
                     <span *ngIf="col.action != undefined" (click)="col.action(item)">
-                        <img src="{{col.img}}" />
+                        <img *ngIf="col.img" src="{{col.img}}" />
+                        <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
                     </span>
                 </span>
                 <span 
@@ -127,7 +131,7 @@
         </tr>
     </tbody>
     <!-- Empty table msg -->
-    <tbody *ngIf="!isLoading && items.length == 0">
+    <tbody *ngIf="!isLoading && items?.length == 0">
         <tr>
             <td [attr.colspan]="columnDefs?.length + 1" class="empty">
                 No results
