@@ -6,24 +6,21 @@ import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
 import { User } from './user.model';
 import * as AppUtils from '../../utils/app.utils';
-import { HandleErrorService } from '../../shared/utils/handle-error.service';
 
 @Injectable()
 export class UserService {
 
-    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient) { }
 
     confirmAccountRequest(id: number, user: User): Observable<User> {
         return this.http.put<User>(AppUtils.BACKEND_API_USER_URL + '/' + id + AppUtils.BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL,
             JSON.stringify(user))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 
     create(user: User): Observable<User> {
         return this.http.post<User>(AppUtils.BACKEND_API_USER_URL, JSON.stringify(user))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
     }
 
     delete(id: number): Promise<void> {
@@ -65,20 +62,17 @@ export class UserService {
     }
 
     requestAccount(user: User): Observable<User> {
-        return this.http.post<User>(AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL, JSON.stringify(user))
-            .catch(this.handleErrorService.handleError);
+        return this.http.post<User>(AppUtils.BACKEND_API_USER_ACCOUNT_REQUEST_URL, JSON.stringify(user));
     }
 
     requestExtension(extensionRequestInfo: ExtensionRequestInfo): Promise<void | ErrorObservable> {
         return this.http.put<void>(AppUtils.BACKEND_API_USER_EXTENSION_REQUEST_URL, JSON.stringify(extensionRequestInfo))
-            .toPromise()
-            .catch(this.handleErrorService.handleError);
+            .toPromise();
     }
 
     update(id: number, user: User): Observable<User> {
         return this.http.put<User>(AppUtils.BACKEND_API_USER_URL + '/' + id, JSON.stringify(user))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 
 }

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler } from '@angular/core';
 
 import { Autosize } from 'angular2-autosize/angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
@@ -65,6 +65,8 @@ import { UserComponent } from './users/user/user.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserService } from './users/shared/user.service';
 import { DicomArchiveService } from './import/dicom-archive.service';
+import { MsgBoxComponent } from './shared/msg-box/msg-box.component'
+import { MsgBoxService } from './shared/msg-box/msg-box.service'
 
 import '../assets/css/common.css';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
@@ -147,7 +149,8 @@ import { DatepickerComponent } from './shared/date/date.component';
         DatasetComponent,
         DatasetListComponent,
         DatepickerComponent,
-        MrDatasetComponent
+        MrDatasetComponent,
+        MsgBoxComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -160,7 +163,10 @@ import { DatepickerComponent } from './shared/date/date.component';
         CenterService,
         ConfirmDialogService,
         ExaminationService,
-        HandleErrorService,
+        { 
+            provide: ErrorHandler,
+            useClass: HandleErrorService
+        },
         ImportService,
         KeycloakService,
         ManufacturerModelService,
@@ -174,6 +180,7 @@ import { DatepickerComponent } from './shared/date/date.component';
         UserService,
         DicomArchiveService,
         DatasetService,
+        MsgBoxService,
         {
             provide: HTTP_INTERCEPTORS,
             useClass: KeycloakHttpInterceptor,

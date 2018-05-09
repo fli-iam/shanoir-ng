@@ -4,11 +4,10 @@ import { Observable } from 'rxjs/Observable';
 
 import { Manufacturer } from './manufacturer.model';
 import * as AppUtils from '../../utils/app.utils';
-import { HandleErrorService } from '../../shared/utils/handle-error.service';
 
 @Injectable()
 export class ManufacturerService {
-    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient) { }
 
     getManufacturers(): Promise<Manufacturer[]> {
         return this.http.get<Manufacturer[]>(AppUtils.BACKEND_API_MANUF_URL)
@@ -41,13 +40,11 @@ export class ManufacturerService {
 
     create(manuf: Manufacturer): Observable<Manufacturer> {
         return this.http.post<Manufacturer>(AppUtils.BACKEND_API_MANUF_URL, JSON.stringify(manuf))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 
     update(id: number, manuf: Manufacturer): Observable<Manufacturer> {
         return this.http.put<Manufacturer>(AppUtils.BACKEND_API_MANUF_URL + '/' + id, JSON.stringify(manuf))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 }

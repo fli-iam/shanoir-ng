@@ -4,17 +4,15 @@ import { Observable } from 'rxjs/Observable';
 
 import { ImportJob, PatientDicom, SerieDicom } from './dicom-data.model';
 import * as AppUtils from '../utils/app.utils';
-import { HandleErrorService } from '../shared/utils/handle-error.service';
 
 @Injectable()
 export class ImportService {
 
-    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient) { }
 
     uploadFile(formData: FormData): Observable<ImportJob> {
         return this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_DICOM_URL, formData)
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 
     startImportJob(importJob: ImportJob): void {

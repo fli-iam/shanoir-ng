@@ -4,12 +4,11 @@ import { Observable } from 'rxjs/Observable';
 
 import { ManufacturerModel } from './manufacturer-model.model';
 import * as AppUtils from '../../utils/app.utils';
-import { HandleErrorService } from '../../shared/utils/handle-error.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 
 @Injectable()
 export class ManufacturerModelService {
-    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient) { }
 
     getManufacturerModels(): Promise<ManufacturerModel[]> {
         return this.http.get<ManufacturerModel[]>(AppUtils.BACKEND_API_MANUF_MODEL_URL)
@@ -62,13 +61,11 @@ export class ManufacturerModelService {
 
     create(manufModel: ManufacturerModel): Observable<ManufacturerModel> {
         return this.http.post<ManufacturerModel>(AppUtils.BACKEND_API_MANUF_MODEL_URL, JSON.stringify(manufModel))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 
     update(id: number, manufModel: ManufacturerModel): Observable<ManufacturerModel> {
         return this.http.put<ManufacturerModel>(AppUtils.BACKEND_API_MANUF_MODEL_URL + '/' + id, JSON.stringify(manufModel))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 }

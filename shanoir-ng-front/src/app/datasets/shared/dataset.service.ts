@@ -5,17 +5,15 @@ import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 
 import { Dataset } from './dataset.model';
 import * as AppUtils from '../../utils/app.utils';
-import { HandleErrorService } from '../../shared/utils/handle-error.service';
 
 @Injectable()
 export class DatasetService {
 
-    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient) { }
 
     create(dataset: Dataset): Observable<Dataset> {
         return this.http.post<Dataset>(AppUtils.BACKEND_API_DATASET_URL, JSON.stringify(dataset))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
     }
 
     delete(id: number): Promise<void> {
@@ -49,8 +47,7 @@ export class DatasetService {
 
     update(id: number, dataset: Dataset): Observable<Dataset> {
         return this.http.put<Dataset>(AppUtils.BACKEND_API_DATASET_URL + '/' + id, JSON.stringify(dataset))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 
 }
