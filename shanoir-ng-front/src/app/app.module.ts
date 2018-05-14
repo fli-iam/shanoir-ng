@@ -9,6 +9,7 @@ import { Autosize } from 'angular2-autosize/angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
 
 import { routing } from './app.routing';
+import { PreclinicalRoutingModule } from './preclinical/preclinical-routing.module'
 
 import { AccountEventsService } from './users/account/account-events.service';
 import { AccountRequestComponent } from "./users/account-request/account-request.component";
@@ -197,7 +198,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         DatasetListComponent,
         DatepickerComponent,
         MrDatasetComponent,
-        MsgBoxComponent
+        MsgBoxComponent,
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,
