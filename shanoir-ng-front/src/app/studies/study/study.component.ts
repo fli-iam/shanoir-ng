@@ -66,7 +66,6 @@ export class StudyComponent implements OnInit {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true; 
         }
-        console.log("init");
         console.log(this.study.startDate);
     }
 
@@ -191,10 +190,6 @@ export class StudyComponent implements OnInit {
                 this.study = study;
                 this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
                 this.loading = false;
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting study with data!");
             });
     }
 

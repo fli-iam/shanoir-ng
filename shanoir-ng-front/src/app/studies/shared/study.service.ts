@@ -5,13 +5,12 @@ import { Observable } from 'rxjs/Observable';
 import { Study } from './study.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
-import { HandleErrorService } from '../../shared/utils/handle-error.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { EquipmentDicom } from "../../import/dicom-data.model";
 
 @Injectable()
 export class StudyService {
-    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient) { }
 
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
@@ -35,8 +34,7 @@ export class StudyService {
 
     create(study: Study): Observable<Study> {
         return this.http.post<Study>(AppUtils.BACKEND_API_STUDY_URL, JSON.stringify(study))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
     }
 
     delete(id: number): Promise<void> {
@@ -90,7 +88,6 @@ export class StudyService {
 
     update(id: number, study: Study): Observable<Study> {
         return this.http.put<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id, JSON.stringify(study))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 }

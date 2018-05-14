@@ -4,11 +4,10 @@ import { Observable } from 'rxjs/Observable';
 
 import { AcquisitionEquipment } from './acquisition-equipment.model';
 import * as AppUtils from '../../utils/app.utils';
-import { HandleErrorService } from '../../shared/utils/handle-error.service';
 
 @Injectable()
 export class AcquisitionEquipmentService {
-    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient) { }
 
     getAcquisitionEquipments(): Promise<AcquisitionEquipment[]> {
         return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL)
@@ -41,13 +40,11 @@ export class AcquisitionEquipmentService {
 
     create(acqEquip: AcquisitionEquipment): Observable<AcquisitionEquipment> {
         return this.http.post<AcquisitionEquipment>(AppUtils.BACKEND_API_ACQ_EQUIP_URL, JSON.stringify(acqEquip))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
     }
 
     update(id: number, acqEquip: AcquisitionEquipment): Observable<AcquisitionEquipment> {
         return this.http.put<AcquisitionEquipment>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id, JSON.stringify(acqEquip))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 }

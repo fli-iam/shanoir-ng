@@ -57,7 +57,6 @@ export class DatasetComponent implements OnInit {
                 }
             })
             .subscribe((dataset: Dataset) => {
-                console.log(dataset);
                 this.dataset = dataset;
             });
     }

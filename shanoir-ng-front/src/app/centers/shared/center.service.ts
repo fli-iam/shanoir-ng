@@ -4,12 +4,11 @@ import { Observable } from 'rxjs/Observable';
 
 import { Center } from './center.model';
 import * as AppUtils from '../../utils/app.utils';
-import { HandleErrorService } from '../../shared/utils/handle-error.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 
 @Injectable()
 export class CenterService {
-    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient) { }
 
     getCenters(): Promise<Center[]> {
         return this.http.get<Center[]>(AppUtils.BACKEND_API_CENTER_URL)
@@ -62,13 +61,11 @@ export class CenterService {
 
     create(center: Center): Observable<Center> {
         return this.http.post<Center>(AppUtils.BACKEND_API_CENTER_URL, JSON.stringify(center))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
     }
 
     update(id: number, center: Center): Observable<Center> {
         return this.http.put<Center>(AppUtils.BACKEND_API_CENTER_URL + '/' + id, JSON.stringify(center))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 }

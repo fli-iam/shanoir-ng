@@ -3,13 +3,12 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler } from '@angular/core';
 
 import { Autosize } from 'angular2-autosize/angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
 
 import { routing } from './app.routing';
-import { PreclinicalRoutingModule } from './preclinical/preclinical-routing.module'
 
 import { AccountEventsService } from './users/account/account-events.service';
 import { AccountRequestComponent } from "./users/account-request/account-request.component";
@@ -66,6 +65,8 @@ import { UserComponent } from './users/user/user.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserService } from './users/shared/user.service';
 import { DicomArchiveService } from './import/dicom-archive.service';
+import { MsgBoxComponent } from './shared/msg-box/msg-box.component'
+import { MsgBoxService } from './shared/msg-box/msg-box.service'
 
 import '../assets/css/common.css';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
@@ -196,6 +197,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         DatasetListComponent,
         DatepickerComponent,
         MrDatasetComponent,
+        MsgBoxComponent
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,
@@ -239,7 +241,10 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         CenterService,
         ConfirmDialogService,
         ExaminationService,
-        HandleErrorService,
+        { 
+            provide: ErrorHandler,
+            useClass: HandleErrorService
+        },
         ImportService,
         KeycloakService,
         ManufacturerModelService,
@@ -253,6 +258,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         UserService,
         DicomArchiveService,
         DatasetService,
+        MsgBoxService,
     	PathologyService,
     	AnimalSubjectService,
     	PathologyModelService,

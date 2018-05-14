@@ -1,0 +1,16 @@
+.frame { 
+    padding: 0 10px; 
+    background-color: brown; 
+    color: var(--very-light-grey); 
+    display: block; 
+    position: fixed; 
+    top: 0; right: 0; left: 0; 
+    width: 500px; 
+    text-align: center; 
+    border-radius: 0 0 3px 3px;
+    z-index: 1000;
+    margin: auto;
+    box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color);
+    line-height: 18px;
+    overflow: hidden;
+}

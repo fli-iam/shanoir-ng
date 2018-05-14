@@ -1,0 +1,11 @@
+<div class="title">
+    <h2 i18n="Manage users|Title@@userListTitle">Manage users</h2>
+    <!-- hr/ -->
+</div>
+
+<shanoir-table [items]="datasets" 
+        [columnDefs]="columnDefs" 
+        [customActionDefs]="customActionDefs" 
+        [loading]="loading" 
+        [rowClickAction]="rowClickAction">
+</shanoir-table>

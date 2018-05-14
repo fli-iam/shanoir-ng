@@ -1,0 +1,3 @@
+<div *ngIf="msgboxService.isOpened()" [@slideDown]="msgboxService.isOpened()" class="frame">
+    <p>{{msgboxService.getMsg()?.txt}}</p>
+</div>

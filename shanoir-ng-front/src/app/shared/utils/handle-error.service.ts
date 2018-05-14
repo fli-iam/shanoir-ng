@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ErrorHandler } from '@angular/core';
 import { Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
+import { MsgBoxService } from '../msg-box/msg-box.service';
 
 @Injectable()
-export class HandleErrorService {
+export class HandleErrorService implements ErrorHandler {
 
-    constructor () {}
+    constructor (private msgb: MsgBoxService) { }
 
     public extractData(res: Response) {
         let body = res.json();
@@ -31,7 +32,8 @@ export class HandleErrorService {
         } else {
             errMsg = error.message ? error.message : error.toString();
         }
-        console.error(errMsg);
-        return Observable.throw(errMsg);
+        console.log(error.message);
+        this.msgb.log('error', errMsg);
+        throw errMsg;
     }
 }  

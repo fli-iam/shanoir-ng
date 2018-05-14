@@ -4,13 +4,12 @@ import { Observable } from 'rxjs/Observable';
 
 import * as AppUtils from '../../utils/app.utils';
 import { Examination } from './examination.model';
-import { HandleErrorService } from '../../shared/utils/handle-error.service';
 import { SubjectExamination } from '../shared/subject-examination.model';
 import { Pageable } from '../../shared/components/table/pageable.model';
 
 @Injectable()
 export class ExaminationService {
-    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient) { }
 
     countExaminations(): Promise<number> {
         return this.http.get<number>(AppUtils.BACKEND_API_EXAMINATION_COUNT_URL)
@@ -24,8 +23,7 @@ export class ExaminationService {
 
     create(examination: Examination): Observable<Examination> {
         return this.http.post<Examination>(AppUtils.BACKEND_API_EXAMINATION_URL, JSON.stringify(examination))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 
     delete(id: number): Promise<void> {
@@ -67,20 +65,18 @@ export class ExaminationService {
             });
     }
 
-    postFile(fileToUpload: File): Observable<boolean> {
+    postFile(fileToUpload: File): Observable<any> {
         const endpoint = 'your-destination-url';
         const formData: FormData = new FormData();
         formData.append('fileKey', fileToUpload, fileToUpload.name);
         return this.http
             .post(endpoint, formData)
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
     
     update(id: number, examination: Examination): Observable<Examination> {
         return this.http.put<Examination>(AppUtils.BACKEND_API_EXAMINATION_URL + '/' + id, JSON.stringify(examination))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 
 }
