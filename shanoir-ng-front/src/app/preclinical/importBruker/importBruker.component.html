@@ -1,3 +1,6 @@
 <h1>Import from Bruker</h1>
 
-<import-bruker-file [enabled]="true" [active]="true"></import-bruker-file>
+ 
+<import-bruker-file (uploadBrukerFileReady)="onUploadBrukerFile($event)" [enabled]="importBrukerFileEnabled" [tab_open]="importBrukerFileOpen"></import-bruker-file>
+<select-series-bruker (selectSeriesReady)="onSelectSeries($event)" [enabled]="selectSeriesEnabled" [tab_open]="selectSeriesOpen"></select-series-bruker>
+

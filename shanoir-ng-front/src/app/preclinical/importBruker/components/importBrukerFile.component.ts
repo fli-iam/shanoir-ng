@@ -12,9 +12,10 @@ import { ImportBrukerService } from '../importBruker.service';
 
 export class ImportBrukerFileComponent implements OnInit {
 	@Input() enabled :boolean = true;
-	@Input() active :boolean = true;
+	@Input() tab_open :boolean = true;
+	@Output() uploadBrukerFileReady = new EventEmitter();
+	
     public brukerImportFileForm: FormGroup;
-    public tab_open: boolean = true;
     public archive: string;
     private extensionError: Boolean;
     private uploadError: String;
@@ -28,7 +29,6 @@ export class ImportBrukerFileComponent implements OnInit {
     
     
 	ngOnInit(): void {
-		this.tab_open = this.active;
         this.buildForm();
 	}
 	
@@ -81,6 +81,7 @@ export class ImportBrukerFileComponent implements OnInit {
             	let uploadedPath = res;
     			this.archive = this.fileToUpload.name;
     			this.uploadedBrukerFileComplete = 2;
+    			this.uploadBrukerFileReady.emit(uploadedPath);
                 }, 
                 (err: String) => {
                 	console.log('error in posting File ');
