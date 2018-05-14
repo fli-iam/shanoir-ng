@@ -4,12 +4,11 @@ import { Observable } from 'rxjs/Observable';
 
 import { Pathology } from './pathology.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { HandleErrorService } from '../../../../shared/utils/handle-error.service';
 
 @Injectable()
 export class PathologyService {
          
-        constructor(private http: HttpClient,private handleErrorService: HandleErrorService) { }    
+        constructor(private http: HttpClient) { }    
            
     
         getPathologies(): Promise<Pathology[]>{
@@ -36,8 +35,7 @@ export class PathologyService {
           const url = `${PreclinicalUtils.PRECLINICAL_API_PATHOLOGIES_URL}/${pathology.id}`;
           return this.http
             .put<Pathology>(url, JSON.stringify(pathology))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
         }
     
         create(pathology: Pathology): Observable<Pathology> {
@@ -45,8 +43,7 @@ export class PathologyService {
        		
           return this.http
             .post<Pathology>(PreclinicalUtils.PRECLINICAL_API_PATHOLOGIES_URL, JSON.stringify(pathology), { headers })
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
         }
     
                 

@@ -5,12 +5,11 @@ import { Observable } from 'rxjs/Observable';
 import { PathologyModel } from './pathologyModel.model';
 import { Pathology } from '../../pathology/shared/pathology.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { HandleErrorService } from '../../../../shared/utils/handle-error.service';
 
 @Injectable()
 export class PathologyModelService {
 
-    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient) { }
 
     getPathologyModels(): Promise<PathologyModel[]> {
         return this.http.get<PathologyModel[]>(PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_ALL_URL)
@@ -49,15 +48,13 @@ export class PathologyModelService {
         const url = `${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/`+model.id;
         return this.http
             .put<PathologyModel>(url, JSON.stringify(model))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 
     create(model: PathologyModel): Observable<PathologyModel> {
         return this.http
             .post<PathologyModel>(PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL, JSON.stringify(model))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
     }
 
 	delete(id: number): Promise<void> {
@@ -79,14 +76,13 @@ export class PathologyModelService {
     }
     
     
-     postFile(fileToUpload: File,  model: PathologyModel): Observable<boolean> {
+     postFile(fileToUpload: File,  model: PathologyModel): Observable<any> {
         const endpoint = this.getUploadUrl(model);
         const formData: FormData = new FormData();
         formData.append('files', fileToUpload, fileToUpload.name);
         return this.http
             .post(endpoint, formData)
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
     
     

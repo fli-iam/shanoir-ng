@@ -5,12 +5,11 @@ import { Observable } from 'rxjs/Observable';
 
 import { Reference } from './reference.model';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
-import { HandleErrorService } from '../../../shared/utils/handle-error.service';
 
 @Injectable()
 export class ReferenceService {    
     
-        constructor(private http: HttpClient,private handleErrorService: HandleErrorService) { }    
+        constructor(private http: HttpClient) { }    
     
         getReferences(): Promise<Reference[]>{
             return this.http.get<Reference[]>(PreclinicalUtils.PRECLINICAL_API_REFERENCES_ALL_URL)
@@ -78,8 +77,7 @@ export class ReferenceService {
         getReferenceByCategoryTypeAndValue(category: string, reftype: string, value: string): Observable<Reference> {
           return this.http
                .get<Reference>(PreclinicalUtils.PRECLINICAL_API_REFERENCES_URL+"/"+category+"/"+reftype+"/"+value)
-               .map(response => response)
-               .catch(this.handleErrorService.handleError);
+               .map(response => response);
         }
        
         
@@ -88,16 +86,14 @@ export class ReferenceService {
           const url = `${PreclinicalUtils.PRECLINICAL_API_REFERENCES_URL}/reference/${reference.id}`;
           return this.http
             .put<Reference>(url, JSON.stringify(reference))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
         }
     
         create(reference: Reference): Observable<Reference> {
           const url = `${PreclinicalUtils.PRECLINICAL_API_REFERENCES_URL}`;
           return this.http
             .post<Reference>(url, JSON.stringify(reference))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
         }
     
        

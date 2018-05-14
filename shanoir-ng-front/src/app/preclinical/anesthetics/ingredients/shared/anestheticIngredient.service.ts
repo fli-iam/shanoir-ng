@@ -7,12 +7,11 @@ import { AnestheticIngredient } from './anestheticIngredient.model';
 import { Anesthetic } from '../../anesthetic/shared/anesthetic.model';
 
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { HandleErrorService } from '../../../../shared/utils/handle-error.service';
 
 @Injectable()
 export class AnestheticIngredientService {
          
-        constructor(private http: HttpClient,private handleErrorService: HandleErrorService) { }               
+        constructor(private http: HttpClient) { }               
     
         getIngredients(anesthetic:Anesthetic): Promise<AnestheticIngredient[]>{
             const url = `${PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL}/${anesthetic.id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
@@ -40,16 +39,14 @@ export class AnestheticIngredientService {
           const url = `${PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL}/${anesthetic_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT}/${ingredient.id}`;
           return this.http
             .put<AnestheticIngredient>(url, JSON.stringify(ingredient))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
         }
     
         create(anesthetic:Anesthetic, ingredient: AnestheticIngredient): Observable<AnestheticIngredient> {
           const url = `${PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL}/${anesthetic.id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT}`;
           return this.http
             .post<AnestheticIngredient>(url, JSON.stringify(ingredient))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
         }
         
         delete(anesthetic_id:number,ingredient_id: number): Promise<void> {

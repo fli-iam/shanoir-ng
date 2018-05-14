@@ -5,12 +5,11 @@ import { Observable } from 'rxjs/Observable';
 
 import { Therapy } from './therapy.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { HandleErrorService } from '../../../../shared/utils/handle-error.service';
 
 @Injectable()
 export class TherapyService {
          
-        constructor(private http: HttpClient,private handleErrorService: HandleErrorService) { }    
+        constructor(private http: HttpClient) { }    
            
     
         getTherapies(): Promise<Therapy[]>{
@@ -36,15 +35,13 @@ export class TherapyService {
           const url = `${PreclinicalUtils.PRECLINICAL_API_THERAPIES_URL}/`+therapy.id;
           return this.http
             .put<Therapy>(url, JSON.stringify(therapy))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
         }
     
         create(therapy: Therapy): Observable<Therapy> {
           return this.http
             .post<Therapy>(PreclinicalUtils.PRECLINICAL_API_THERAPIES_URL, JSON.stringify(therapy))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
         }
     
         delete(id: number): Promise<void> {

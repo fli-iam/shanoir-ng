@@ -4,12 +4,11 @@ import { Observable } from 'rxjs/Observable';
 
 import { Anesthetic } from './anesthetic.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { HandleErrorService } from '../../../../shared/utils/handle-error.service';
 
 @Injectable()
 export class AnestheticService {
              
-        constructor(private http: HttpClient,private handleErrorService: HandleErrorService) { }    
+        constructor(private http: HttpClient) { }    
         
         getAnesthetics(): Promise<Anesthetic[]>{
             return this.http.get<Anesthetic[]>(PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_ALL_URL)
@@ -36,15 +35,13 @@ export class AnestheticService {
           const url = `${PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL}/`+anesthetic.id;
           return this.http
             .put<Anesthetic>(url, JSON.stringify(anesthetic))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
         }
     
         create(anesthetic: Anesthetic): Observable<Anesthetic> {
           return this.http
             .post<Anesthetic>(PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL, JSON.stringify(anesthetic))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
         }
         
         delete(id: number): Promise<void> {

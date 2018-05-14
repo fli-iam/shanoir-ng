@@ -7,12 +7,11 @@ import { SubjectPathology } from './subjectPathology.model';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
 
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { HandleErrorService } from '../../../../shared/utils/handle-error.service';
 
 @Injectable()
 export class SubjectPathologyService {
 
-    constructor(private http: HttpClient, private handleErrorService: HandleErrorService) { }
+    constructor(private http: HttpClient) { }
 
     getSubjectPathologies(preclinicalSubject: PreclinicalSubject): Promise<SubjectPathology[]> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
@@ -43,30 +42,26 @@ export class SubjectPathologyService {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${subjectPathology.id}`;
         return this.http
             .put<SubjectPathology>(url, JSON.stringify(subjectPathology))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
 
     create(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Observable<SubjectPathology> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}`;
         return this.http
             .post<SubjectPathology>(url, JSON.stringify(subjectPathology))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
     }
 
-    delete(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Observable<void> {
+    delete(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Observable<any> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${subjectPathology.id}`;
         return this.http.delete(url)
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
     }
     
-    deleteAllPathologiesForAnimalSubject(animalSubjectId: number): Observable<void> {
+    deleteAllPathologiesForAnimalSubject(animalSubjectId: number): Observable<any> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${animalSubjectId}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.delete(url)
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
     }
 
     /*This method is to avoid unexpected error if returned object is null*/

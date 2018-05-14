@@ -4,14 +4,13 @@ import { Observable } from 'rxjs/Observable';
 
 import { Examination } from '../shared/examination.model';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
-import { HandleErrorService } from '../../../shared/utils/handle-error.service';
 import { Pageable } from '../../../shared/components/table/pageable.model';
 import * as AppUtils from '../../../utils/app.utils';
 
 @Injectable()
 export class AnimalExaminationService {
              
-    constructor(private http: HttpClient,private handleErrorService: HandleErrorService) { }    
+    constructor(private http: HttpClient) { }    
     
     
     getExaminations(pageable: Pageable): Promise<Examination[]> {
@@ -46,14 +45,12 @@ export class AnimalExaminationService {
     
     create(examination: Examination): Observable<Examination> {
         return this.http.post<Examination>(AppUtils.BACKEND_API_EXAMINATION_URL, JSON.stringify(examination))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
     
     update(id: number, examination: Examination): Observable<Examination> {
         return this.http.put<Examination>(AppUtils.BACKEND_API_EXAMINATION_URL + '/' + id, JSON.stringify(examination))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
     }
     
     

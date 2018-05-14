@@ -4,13 +4,12 @@ import { Observable } from 'rxjs/Observable';
 
 import { ExtraData } from './extradata.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { HandleErrorService } from '../../../../shared/utils/handle-error.service';
 
 @Injectable()
 export class ExaminationExtraDataService {
         
              
-        constructor(private http: HttpClient,private handleErrorService: HandleErrorService) { }    
+        constructor(private http: HttpClient) { }    
         
         getExtraDatas(examId:number): Promise<ExtraData[]>{
             const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examId}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
@@ -38,19 +37,17 @@ export class ExaminationExtraDataService {
           const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${datatype}`;
           return this.http
             .post<ExtraData>(url, JSON.stringify(extradata))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
         }
         
         
-     	postFile(fileToUpload: File,  extraData: ExtraData): Observable<boolean> {
+     	postFile(fileToUpload: File,  extraData: ExtraData): Observable<any> {
         	const endpoint = this.getUploadUrl(extraData);
         	const formData: FormData = new FormData();
         	formData.append('files', fileToUpload, fileToUpload.name);
         	return this.http
             	.post(endpoint, formData)
-            	.map(response => response)
-            	.catch(this.handleErrorService.handleError);
+            	.map(response => response);
     	}
     	
     	getUploadUrl(extraData: ExtraData): string {
@@ -93,9 +90,8 @@ export class ExaminationExtraDataService {
     
         download(extradata:ExtraData): Observable<any>{
           const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/${extradata.id}/download`;
-          return this.http.get<ExtraData>(url)
-            //.map(res => res)
-            .catch(this.handleErrorService.handleError);
+          return this.http.get<ExtraData>(url);
+            //.map(res => res);
         }
     
         /*This method is to avoid unexpected error if returned object is null*/
@@ -113,8 +109,7 @@ export class ExaminationExtraDataService {
           const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/`+datatype+`/`+id;
           return this.http
             .put<ExtraData>(url, JSON.stringify(extradata))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
         }
     
 }

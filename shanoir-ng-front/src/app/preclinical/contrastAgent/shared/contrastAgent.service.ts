@@ -4,12 +4,11 @@ import { Observable } from 'rxjs/Observable';
 
 import { ContrastAgent } from './contrastAgent.model';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
-import { HandleErrorService } from '../../../shared/utils/handle-error.service';
 
 @Injectable()
 export class ContrastAgentService {
              
-        constructor(private http: HttpClient,private handleErrorService: HandleErrorService) { }    
+        constructor(private http: HttpClient) { }    
         
         getContrastAgents(protocolId:number): Promise<ContrastAgent[]>{
             const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA+PreclinicalUtils.PRECLINICAL_ALL_URL;
@@ -38,16 +37,14 @@ export class ContrastAgentService {
           const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA+"/"+agent.id;
           return this.http
             .put<ContrastAgent>(url, JSON.stringify(agent))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
         }
     
         create(protocolId:number,agent: ContrastAgent): Observable<ContrastAgent> {
             const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA;
             return this.http
             .post<ContrastAgent>(url, JSON.stringify(agent))
-            .map(res => res)
-            .catch(this.handleErrorService.handleError);
+            .map(res => res);
         }
         
         delete(protocolId:number,id: number): Promise<void> {

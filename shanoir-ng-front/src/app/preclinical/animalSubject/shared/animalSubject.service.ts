@@ -7,12 +7,11 @@ import { Subject }    from '../shared/subject.model';
 import { PreclinicalSubject } from './preclinicalSubject.model';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import * as AppUtils from '../../../utils/app.utils';
-import { HandleErrorService } from '../../../shared/utils/handle-error.service';
 
 @Injectable()
 export class AnimalSubjectService {
              
-        constructor(private http: HttpClient,private handleErrorService: HandleErrorService) { }    
+        constructor(private http: HttpClient) { }    
     
     
         getAnimalSubjects(): Promise<AnimalSubject[]>{
@@ -60,27 +59,23 @@ export class AnimalSubjectService {
           const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/`+animalSubject.id;
           return this.http
             .put<AnimalSubject>(url, JSON.stringify(animalSubject))
-            .map(response => response)
-            .catch(this.handleErrorService.handleError);
+            .map(response => response);
         }
         
         updateSubject(id: number, subject: Subject): Observable<Subject> {
         	return this.http.put<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id, JSON.stringify(subject))
-            	.map(response => response)
-            	.catch(this.handleErrorService.handleError);
+            	.map(response => response);
     	}
         
     
         create(animalSubject: AnimalSubject): Observable<AnimalSubject> {
         	return this.http.post<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, JSON.stringify(animalSubject))
-            	.map(res => res)
-            	.catch(this.handleErrorService.handleError);
+            	.map(res => res);
     	}
     	
     	createSubject(subject: Subject): Observable<Subject> {
     		return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, JSON.stringify(subject))
-            	.map(res => res)
-            	.catch(this.handleErrorService.handleError);
+            	.map(res => res);
     	}
     
         
