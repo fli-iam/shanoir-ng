@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ApplicationRef, Injector } from '@angular/core';
 import { Subject } from 'rxjs';
 
 type msgType = 'error' | 'warn' | 'info';
@@ -11,9 +11,11 @@ export class MsgBoxService {
 
     private opened: boolean = false;
     private messages: Message[] = [];
-    public changeEvent: Subject<void> = new Subject();
+    private appRef: ApplicationRef;
 
-    constructor() { }
+    constructor(private injector: Injector) {
+        setTimeout(() => this.appRef = this.injector.get(ApplicationRef));
+     }
 
     public log(type: msgType, txt: string) {
         let message = new Message(type, txt);
@@ -38,12 +40,12 @@ export class MsgBoxService {
 
     private open() {
         this.opened = true;
-        this.changeEvent.next();
+        this.appRef.tick();
     }
 
     private close() {
         this.opened = false;
-        this.changeEvent.next();
+        this.appRef.tick();
     }
 
     public isOpened(): boolean {

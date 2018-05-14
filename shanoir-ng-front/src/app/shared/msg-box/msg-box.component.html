@@ -1,3 +1,4 @@
-<div *ngIf="msgboxService.isOpened()" [@slideDown]="msgboxService.isOpened()" class="frame">
-    <p>{{msgboxService.getMsg()?.txt}}</p>
+<div *ngIf="msgboxService.isOpened()" [@slideDown]="msgboxService.isOpened()" class="frame {{msgboxService.getMsg()?.type}}">
+    <div class="icon"><p><i class="fas fa-exclamation-circle"></i></p></div>
+    <div class="msg"><p>{{msgboxService.getMsg()?.txt}}</p></div>
 </div>

@@ -2,11 +2,10 @@
     padding: 0 10px; 
     background-color: brown; 
     color: var(--very-light-grey); 
-    display: block; 
+    display: inline-block;
     position: fixed; 
     top: 0; right: 0; left: 0; 
-    width: 500px; 
-    text-align: center; 
+    width: 500px;
     border-radius: 0 0 3px 3px;
     z-index: 1000;
     margin: auto;
@@ -14,3 +13,12 @@
     line-height: 18px;
     overflow: hidden;
 }
+
+.frame.error { background-color: brown; }
+.frame.warn { background-color: rgba(255, 136, 0, 0.616); }
+.frame.info { background-color: green; }
+
+.icon { float: left; font-size: 30px; width: 50px; }
+    .icon p { padding: 5px 13px 5px 5px; margin: 0; }
+
+.msg { float: left; width: 450px; }

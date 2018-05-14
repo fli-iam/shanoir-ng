@@ -1,5 +1,4 @@
-import { Component, HostBinding, ChangeDetectorRef } from '@angular/core';
-import { Location } from '@angular/common';
+import { Component } from '@angular/core';
 import { slideDown } from '../animations/animations';
 import { MsgBoxService } from './msg-box.service';
 
@@ -12,9 +11,7 @@ import { MsgBoxService } from './msg-box.service';
 export class MsgBoxComponent {
 
 
-    constructor(private msgboxService: MsgBoxService, private ref: ChangeDetectorRef) {
-        this.msgboxService.changeEvent.subscribe( () => {
-            this.ref.detectChanges();
-        });
+    constructor(private msgboxService: MsgBoxService) {
+        
     }    
 }

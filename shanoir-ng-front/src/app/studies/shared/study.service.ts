@@ -7,10 +7,12 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import * as AppUtils from '../../utils/app.utils';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { EquipmentDicom } from "../../import/dicom-data.model";
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { GuiError } from '../../shared/models/error.model';
 
 @Injectable()
 export class StudyService {
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private msgBoxService: MsgBoxService) { }
 
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
@@ -51,8 +53,7 @@ export class StudyService {
             .toPromise()
             .then(response => response)
             .catch((error) => {
-                console.error('Error while getting studies', error);
-                return Promise.reject(error.message || error);
+                return Promise.reject(new GuiError('Sorry, an unexpected error occured while getting studies', error));
             });
     }
 
@@ -61,8 +62,7 @@ export class StudyService {
             .toPromise()
             .then(response => response)
             .catch((error) => {
-                console.error('Error while getting studies', error);
-                return Promise.reject(error.message || error);
+                return Promise.reject(new GuiError('Sorry, an unexpected error occured while getting studies names', error));
             });
     }
 
@@ -71,8 +71,7 @@ export class StudyService {
             .toPromise()
             .then(response => response)
             .catch((error) => {
-                console.error('Error while getting subjects by study id', error);
-                return Promise.reject(error.message || error);
+                return Promise.reject(new GuiError('Sorry, an unexpected error occured while retrieving the study\'s subjects', error));
             });
     }
     
@@ -80,9 +79,8 @@ export class StudyService {
         return this.http.get<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id + '?withdata=' + withData)
             .toPromise()
             .then(res => res)
-            .catch((error) => {
-                console.error('Error while getting study', error);
-                return Promise.reject(error.message || error);
+            .catch((error) => { 
+                return Promise.reject(new GuiError('Sorry, an unexpected error occured while retrieving the study\'s data', error));
             });
     }
 
