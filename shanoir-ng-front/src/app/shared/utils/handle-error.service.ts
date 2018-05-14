@@ -45,7 +45,7 @@ export class HandleErrorService implements ErrorHandler {
             userMsg = error.guiMsg;
         }
 
-        this.msgb.log('error', userMsg);
         console.error(techMsg);
+        this.msgb.log('error', userMsg);
     }
 }  

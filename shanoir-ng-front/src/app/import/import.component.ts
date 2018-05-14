@@ -100,7 +100,7 @@ export class ImportComponent implements OnInit {
 
     ngOnInit(): void {
         this.buildForm();
-        papaya.Container.startPapaya();
+        //papaya.Container.startPapaya();
     }
 
     buildForm(): void {
