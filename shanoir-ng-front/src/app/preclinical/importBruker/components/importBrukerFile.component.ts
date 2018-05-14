@@ -78,11 +78,13 @@ export class ImportBrukerFileComponent implements OnInit {
     	this.importBrukerService.postFile(this.fileToUpload)
         	.subscribe(res => {
             	console.log(res);
+            	let uploadedPath = res;
     			this.archive = this.fileToUpload.name;
     			this.uploadedBrukerFileComplete = 2;
                 }, 
                 (err: String) => {
-                	console.log('error in posting File ' + err);
+                	console.log('error in posting File ');
+                	console.log(JSON.stringify(err));
                 	this.archive = '';
                 	this.uploadError = err;
                 	this.uploadedBrukerFileComplete = 0;

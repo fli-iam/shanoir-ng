@@ -9,12 +9,13 @@ export class ImportBrukerService {
 
     constructor(private http: HttpClient) { }
 
-     postFile(fileToUpload: File): Observable<any> {
+     postFile(fileToUpload: File): Observable<String> {
         const endpoint = PreclinicalUtils.PRECLINICAL_API_BRUKER_UPLOAD;
         const formData: FormData = new FormData();
         formData.append('files', fileToUpload, fileToUpload.name);
+        const options = {responseType: 'text' as 'text'};
         return this.http
-            .post(endpoint, formData)
+            .post(endpoint, formData, options)
             .map(response => response);
     }
     
