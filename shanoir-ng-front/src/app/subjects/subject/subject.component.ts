@@ -375,7 +375,7 @@ export class SubjectComponent implements OnInit {
     }
 
     public imagedObjectCategories() {
-        return ImagedObjectCategory.keyValues();
+        return ImagedObjectCategory.keys();
     }
 
     public subjectTypes() {

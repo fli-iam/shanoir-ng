@@ -23,9 +23,13 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory">
-									<option *ngFor="let cat of imagedObjectCategories()" [value]="cat.key"
-										i18n="Imaged Object Category {{cat.value}}|Category label@@ImagedObjectCategory{{cat.key}}">
-											{{cat.value}}
+									<option *ngFor="let cat of imagedObjectCategories()" [value]="cat" [ngSwitch]="cat"
+										i18n="Imaged Object Category {{cat}}|Category label@@ImagedObjectCategory{{cat}}">
+											<ng-template [ngSwitchCase]="'PHANTOM'">Phantom</ng-template>
+											<ng-template [ngSwitchCase]="'LIVING_HUMAN_BEING'">Living human beign</ng-template>
+											<ng-template [ngSwitchCase]="'HUMAN_CADAVER'">Human cadaver</ng-template>
+											<ng-template [ngSwitchCase]="'ANATOMICAL_PIECE'">Anatomical piece</ng-template>
+											<ng-template ngSwitchDefault>{{cat}}</ng-template>
 									</option>
 								</select>
 							</ng-template>
