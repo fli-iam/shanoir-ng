@@ -23,7 +23,7 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory">
-									<option *ngFor="let cat of imagedObjectCategories()" [value]="cat.value"
+									<option *ngFor="let cat of imagedObjectCategories()" [value]="cat.key"
 										i18n="Imaged Object Category {{cat.value}}|Category label@@ImagedObjectCategory{{cat.key}}">
 											{{cat.value}}
 									</option>
