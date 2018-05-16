@@ -6,5 +6,4 @@
 .picto { height: 14px; vertical-align: sub; }
 input[type="checkbox"] { vertical-align: middle; }
 input[type="text"] { color: var(--very-dark-grey); }
-tool-tip { color: var(--dark-grey); }
 .clickable { cursor: pointer; }

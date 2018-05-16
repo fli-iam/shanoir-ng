@@ -9,13 +9,35 @@ import { Component } from '@angular/core';
 
 export class TooltipComponent {
 
-    public opened: boolean = false;
+    private opened: boolean = false;
+    private opening: boolean = false;
+    private closing: boolean = false;
 
-    public open() {
-        this.opened = true;
+    private onOver() {
+        if (!this.opening) {
+            this.closing = false;
+            this.opening = true;
+            setTimeout(() =>  {
+                if (this.opening)
+                    this.opened = true;
+            }, 500);
+        }
     }
 
-    public close() {
-        this.opened = false;
+    private onLeave() {
+        if (!this.closing) {
+            this.closing = true;
+            this.opening = false;
+            setTimeout(() =>  {
+                if (this.closing)
+                    this.opened = false;
+            }, 500);
+        }
+    }
+
+    private onClick() {
+        this.opened = !this.opened;
+        this.opening = false;
+        this.closing = false;
     }
 } 

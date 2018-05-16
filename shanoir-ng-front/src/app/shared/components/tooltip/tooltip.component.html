@@ -1,4 +1,5 @@
-<span #container class="help" [class.opened]="opened" (mouseover)="open()" (mouseleave)="close()">?
+<span #container class="help" [class.opened]="opened" (click)="onClick()" (mouseleave)="onLeave()" (mouseover)="onOver()">
+    <i class="fas fa-info"></i>
     <div class="content" *ngIf="opened">
         <ng-content></ng-content>
     </div>
