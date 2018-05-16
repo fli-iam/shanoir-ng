@@ -370,8 +370,8 @@ export class SubjectComponent implements OnInit {
 
     public humanSelected(): boolean {
         return this.subject.imagedObjectCategory != null
-            && (this.subject.imagedObjectCategory == ImagedObjectCategory.HUMAN_CADAVER 
-                || this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING);
+            && (this.subject.imagedObjectCategory.toString() == 'HUMAN_CADAVER'
+                || this.subject.imagedObjectCategory.toString() == 'LIVING_HUMAN_BEING');
     }
 
     public imagedObjectCategories() {
