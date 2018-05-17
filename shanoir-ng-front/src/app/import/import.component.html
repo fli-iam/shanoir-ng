@@ -1,13 +1,6 @@
 <h1>Import from DICOM</h1>
 <form [formGroup]="importForm" novalidate [@preventInitialChildAnimations]>
-    <app-modal modalDialogId="papayaModal" #papayaModal>
-        <div class="app-modal-body">
-            <div id="papaya" style="width:800px; height:600px;">
-                <div class="papaya" data-params="params"></div> 
-            </div>
-        </div>
-    </app-modal>
-    
+
     <div class="step-block active" [class.active]="true">
         <div class="header command-zone" (click)="tab_upload_open = !tab_upload_open">1. Select DICOM archive<span *ngIf="archive" class="check-mark">&#x2713;</span></div>
         <fieldset class="step dicom" [@slideDown]="tab_upload_open" *ngIf="tab_upload_open">
@@ -37,10 +30,10 @@
 
     <div class="step-block" [class.active]="archive">
         <div class="header command-zone" (click)="tab_series_open = !tab_series_open">3. Select series<span *ngIf="patients" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step" [@slideDown]="tab_series_open && archive" *ngIf="tab_series_open && archive"> 
-            <p>Please select only the series useful for your study.</p>
+        <fieldset class="step" [@slideDown]="tab_series_open && archive"> 
+            <p *ngIf="tab_series_open && archive">Please select only the series useful for your study.</p>
             <div class="middle-content">
-                <div class="tree">
+                <div *ngIf="tab_series_open && archive" class="tree">
                     <node 
                         *ngFor="let patient of patients" 
                         [label]="patient.patientName" 
@@ -55,7 +48,7 @@
                                 (editedLabel)="changeExamComment($event)"
                                 [editable]="true"
                                 [nodeParams]="study"
-                                (nodeSelected)="selectNode(patient)"
+                                (chkbxChange)="selectNode(patient)"
                                 tooltip="You can change the study description here. The value will then be overwritten in the dicom files."
                                 pictoUrl="/assets/images/icons/medical/x-ray-2.png" 
                                 hasBox="true"
@@ -64,13 +57,11 @@
                                         *ngFor="let serie of study.series" 
                                         [label]="serie.seriesDescription" 
                                         pictoUrl="/assets/images/icons/medical/brain.png" 
-                                        buttonPicto="/assets/images/icons/search.png"
-                                        (buttonClick)="initPapaya(serie);papayaModal.show();"
                                         hasBox="true" 
                                         [(ngModel)]="serie.selected"  
                                         [nodeParams]="serie"
-                                        (nodeSelected)="selectNode(patient)"
-                                        (labelClick)="showSerieDetails($event)"
+                                        (chkbxChange)="selectNode(patient)"
+                                        (labelClick)="showSerieDetails($event); initPapaya(serie);"
                                         [class.selected]="detailedSerie == serie"
                                         [ngModelOptions]="{standalone: true}">
                                     </node>
@@ -78,9 +69,9 @@
                     </node>
                 </div>
 
-                <div class="preview" *ngIf="detailedPatient">
-                    <div class="title"><h3>Patient</h3></div>
-                    <div class="preview-data">
+                <div class="data-preview" *ngIf="detailedPatient">
+                    <h3>Patient</h3>
+                    <table>
                         <tr class="item">
                             <td class="label">Id</td>
                             <td class="value">{{detailedPatient?.patientID}}</td>
@@ -97,12 +88,12 @@
                             <td class="label">Birth date</td>
                             <td class="value">{{detailedPatient?.patientBirthDate | date: 'dd/MM/yyyy'}}</td>
                         </tr>
-                    </div>
+                    </table>
                 </div>
 
-                <div class="preview" *ngIf="detailedSerie">
-                    <div class="title"><h3>Serie</h3></div>
-                    <div class="preview-data">
+                <div class="data-preview" [hidden]="!detailedSerie">
+                    <h3 *ngIf="detailedSerie">Serie</h3>
+                    <table *ngIf="detailedSerie">
                         <tr class="item">
                             <td class="label">Id</td>
                             <td class="value">{{detailedSerie?.seriesInstanceUID}}</td>
@@ -135,11 +126,12 @@
                             <td class="label">Number of non-image objects</td>
                             <td class="value">{{detailedSerie?.nonImagesNumber}}</td>
                         </tr>
-                    </div>
-                </div>
+                    </table>
+                    <papaya [params]="papayaParams"></papaya>
+                </div>     
             </div>
             <div class="commands">
-                 <button i18n="Import|NextButton label" [disabled]="!seriesSelected" (click)="validateSeriesSelected()">Next</button>
+                <button i18n="Import|NextButton label" [disabled]="!seriesSelected" (click)="validateSeriesSelected()">Next</button>
             </div>
         </fieldset>
     </div>
@@ -216,9 +208,9 @@
                     </span>
                 </li> -->
                 <li>
-                    <div class="preview float-none" *ngIf="subjectEditionMode == 'select' && subject != null">
+                    <div *ngIf="subjectEditionMode == 'select' && subject != null">
                         <div class="title"><h3>Please fill the details on the subject:</h3></div>
-                        <div class="preview-data">
+                        <table>
                             <tr class="item">
                                 <td class="label">Common name</td>
                                 <td class="value">{{subject.name}}</td>
@@ -247,7 +239,7 @@
                                     </select>
                                 </td>
                             </tr>
-                        </div>
+                        </table>
                     </div>
                     <div *ngIf="subjectEditionMode == 'create' && study != null">
                         <button class="right-col" (click)="initializeSubject(subjectFromImport); subjectCreationModal.show();"><img src="/assets/images/icons/add.png"/>Create a subject</button>
@@ -277,8 +269,8 @@
                     </span>
                 </li>
                 <li>
-                    <div class="preview float-none" *ngIf="examEditionMode == 'create' && study != null && subject != null">
-                        <div class="preview-data">
+                    <div *ngIf="examEditionMode == 'create' && study != null && subject != null">
+                        <table>
                             <tr class="item">
                                 <td i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</td>
                                 <td class="value">
@@ -315,7 +307,7 @@
                                     <tool-tip>If possible, initialized with the value of the DICOM tag StudyDescription.</tool-tip>
                                 </td>
                             </tr>
-                        </div>
+                        </table>
                         <button i18n="Import|CreateExamButton label" [disabled]="examinationDate == null" (click)="createExam($event)">Create</button>
                     </div>
                 </li>

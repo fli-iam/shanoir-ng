@@ -24,34 +24,18 @@ form li > label { width: 250px !important; }
 .step-block:not(.active):before { background-color: var(--lighter-grey); opacity: 0.8; content: ""; position: absolute; width: 100%; z-index: 2; height: 100%; }
     .step-block .header { margin-top: 20px; }
 
-.step { background-color: var(--lighter-grey); border: 1px solid var(--light-grey); margin: 0; padding: 0 15px 15px; }
+.step { background-color: var(--lighter-grey); border: 1px solid var(--light-grey); margin: 0; padding: 0 15px 15px; overflow: hidden; }
     .step h2 { overflow: hidden; white-space: nowrap; }
         .step h2 span { display: inline-block; }
         .step h2 .hr { width: 100%; border-bottom: 1px solid var(--grey); margin-left: 10px; vertical-align: middle; }
 
-.middle-content { overflow: auto; }
-.tree { clear: none; float: left; margin: 0 50px 20px 0; min-width: 300px; width: 49%; }
+.tree { margin: 0 50px 20px 0; display: inline-block; vertical-align: top; }
 
-.preview { clear: none; float: left; width:550px; border: 1px solid var(--light-grey); background-color: var(--very-light-grey); margin-bottom: 20px; }
-    .preview .title { background-color: var(--light-grey); padding: 10px; }
-        .preview .title h3 { margin: 0; text-align: center;}
-
-    .preview-data { display: table; width:100%; padding: 10px 0; }
-        .item { display: table-row; }
-            .label { display: table-cell; width:50%; padding: 3px 10px; }
-            .value { display: table-cell; width:50%; padding: 3px 10px; }
-        .picto { height: 14px; margin-left: 50%; }
-
-.float-none { float: none; }
-
-@media (min-width: 768px) {
-    .modal-dialog {
-        width: 800px;
-        margin: 30px auto;
-    }
-}
-
-node.selected { background-color: var(--color-b); color: var(--very-light-grey); }
+.data-preview { display: inline-block; vertical-align: top; background-color: var(--light-grey); margin: 0 0 20px 0; overflow: hidden; }
+    .data-preview[hidden] { display: none; }
+    .data-preview td { padding: 3px 10px; }
+    .data-preview table { margin: 10px; }
+    .data-preview h3 { background-color: var(--color-b-light); margin: 0; padding: 7px 20px;font-weight: normal; font-size: 15px;}
 
 .dicom input[type='file'], .dicom progress-bar { vertical-align: middle; }
 .dicom progress-bar { margin-left: 20px; }
@@ -66,9 +50,9 @@ node.selected { background-color: var(--color-b); color: var(--very-light-grey);
         .anonymization-table tr.even { background-color: var(--light-grey); }
 		.anonymization-table tr.odd { background-color: var(--lighter-grey); }
 
-.anonymize .console { float: left; margin-top: 15px; width: 70ch; padding: 10px; color: var(--very-light-grey); font-family: monospace; border: 6px outset #555; border-radius: 11px; 
+.anonymize .console { margin-top: 15px; width: 70ch; padding: 10px; color: var(--very-light-grey); font-family: monospace; border: 6px outset #555; border-radius: 11px; 
         background: var(--very-dark-grey); background: -webkit-linear-gradient(left top, #636363, black); background: -o-linear-gradient(bottom right, #636363, black); background: -moz-linear-gradient(bottom right, #636363, black); background: linear-gradient(to bottom right, #636363, black); } 
-.anonymize .commands { float: left; margin: 15px 0 0 20px; }
+.anonymize .commands { margin: 15px 0 0 20px; }
     .anonymize .commands button { margin: 0; }
 
 .study-card ol { }
@@ -84,3 +68,6 @@ node.selected { background-color: var(--color-b); color: var(--very-light-grey);
 .rotate { -moz-transform: scale(1, -1) translateY(-5px); -webkit-transform: scale(1, -1) translateY(-5px); -o-transform: scale(1, -1) translateY(-5px); -ms-transform: scale(1, -1) translateY(-5px); transform: scale(1, -1) translateY(-5px); }
 
 .commands button + button { margin-left: 10px; }
+
+.preview { margin: 10px 10px !important; text-align: center; display: grid; }
+.preview > div { padding: 0 !important; }
