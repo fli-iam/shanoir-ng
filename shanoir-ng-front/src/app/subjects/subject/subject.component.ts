@@ -3,7 +3,6 @@ import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { FormGroup, FormBuilder, Validators, FormControl, FormArray, ValidationErrors } from '@angular/forms';
-import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { Subject } from '../shared/subject.model';
@@ -34,7 +33,6 @@ export class SubjectComponent implements OnInit {
     private subject: Subject;
     public subjectForm: FormGroup;
     public subjectStudyForm: FormGroup;
-    private formErrors: any = {};
     public canModify: Boolean = false;
     private firstName: string = "";
     private lastName: string = "";
@@ -42,18 +40,12 @@ export class SubjectComponent implements OnInit {
     @Output() closing: EventEmitter<any> = new EventEmitter();
 
     public studies: IdNameObject[];
+    public subjectStudyList: SubjectStudy[] = [];
     private isBirthDateValid: boolean = true;
-    private selectedBirthDateNormal: IMyDate;
     private isAlreadyAnonymized: boolean;
     private hashLength: number = 14;
 
     private init: boolean = false;
-
-    private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'dd/mm/yyyy',
-        height: '20px',
-        width: '160px'
-    };
 
     constructor(private route: ActivatedRoute, private router: Router,
         private subjectService: SubjectService,
@@ -109,7 +101,6 @@ export class SubjectComponent implements OnInit {
 
     public setSubject(subject: Subject) {
         this.subject = subject;
-        console.log('this.subject : ', this.subject);
         this.buildForm();
     }
     
@@ -118,7 +109,6 @@ export class SubjectComponent implements OnInit {
             if (this.preFillData.subject) {
                 this.computeNameFromDicomTag(this.preFillData.subject.name);
                 this.subject.sex = this.preFillData.subject.sex;
-                this.getDateToDatePicker(this.preFillData.subject);  
             }
             if (this.preFillData.study) {
                 let study : IdNameObject = new IdNameObject();
@@ -140,7 +130,6 @@ export class SubjectComponent implements OnInit {
             })
             .subscribe((subject: Subject) => {
                 this.setSubject(subject);
-                this.getDateToDatePicker(this.subject);
             });
     }
 
@@ -152,23 +141,34 @@ export class SubjectComponent implements OnInit {
             })
             .catch((error) => {
                 // TODO: display error
-                console.log("error getting study list!");
+                console.error("error getting study list!");
             });
     }
 
     buildForm(): void {
+        let firstNameFC, lastNameFC, birthDateFC : FormControl;
+        console.log("this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING: " + this.subject.imagedObjectCategory + "+++: " + ImagedObjectCategory.LIVING_HUMAN_BEING);
+        if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING) {
+            firstNameFC = new FormControl(this.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(64)]);
+            lastNameFC = new FormControl(this.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(64)]);
+            birthDateFC = new FormControl(this.subject.birthDate, [Validators.required]);
+        } else {
+            firstNameFC = new FormControl(this.firstName);
+            lastNameFC = new FormControl(this.lastName);
+            birthDateFC = new FormControl(this.subject.birthDate);
+        }
+
         this.subjectForm = this.fb.group({
-            'imagedObjectCategory': [this.subject.imagedObjectCategory],
+            'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': new FormControl('No'),
-            'name': [this.subject.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
-            'firstName': [],
-            'lastName': [],
-            'birthDate': [this.subject.birthDate],
+            'name': [this.subject.name, [Validators.required, Validators.minLength(2), Validators.maxLength(64)]],
+            'firstName': firstNameFC,
+            'lastName': lastNameFC,
+            'birthDate': birthDateFC,
             'sex': [this.subject.sex],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
-            'personalComments': [],
-            'studies': []
+            'personalComments': []
         });
         this.subjectStudyForm = this.fb.group({
             'subjectStudyList': [this.subject.subjectStudyList]
@@ -180,18 +180,6 @@ export class SubjectComponent implements OnInit {
         this.subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
             this.isAlreadyAnonymized = false;
         });
-    }
-
-    get users(): FormArray {
-        return this.subjectForm.get('subjectStudyList') as FormArray;
-    }
-
-    addUserField() {
-        this.users.push(new FormControl());
-    }
-
-    deleteUserField(index: number) {
-        this.users.removeAt(index);
     }
 
     onValueChanged(data?: any) {
@@ -208,14 +196,18 @@ export class SubjectComponent implements OnInit {
         }
     }
 
-    updateModel(): void {
-        this.subject = this.subjectForm.value;
-        this.subject.subjectStudyList = this.subjectStudyForm.value;
-        this.setDateFromDatePicker();
+    formErrors = {
+        'name': '',
+        'imagedObjectCategory': '',
+        'firstName': '',
+        'lastName': '',
+        'birthDate': ''
     }
 
-
-
+    updateModel(): void {
+        this.subject = this.subjectForm.value;
+        this.subject.subjectStudyList = this.subjectStudyList;
+    }
 
     // No
     back(subject?: Subject): void {
@@ -226,7 +218,6 @@ export class SubjectComponent implements OnInit {
         }
     }
 
-
     edit(): void {
         this.router.navigate(['/subject'], { queryParams: { id: this.subject.id, mode: "edit" } });
     }
@@ -236,6 +227,8 @@ export class SubjectComponent implements OnInit {
         this.generateSubjectIdentifier();
         this.setSubjectBirthDateToFirstOfJanuary();
         for (let subjectStudy of this.subject.subjectStudyList) {
+            subjectStudy.subjectId = this.subject.id;
+            console.log("studyId: " + subjectStudy.studyId + ", subjectId: " + subjectStudy.subjectId + ", PI:" + subjectStudy.physicallyInvolved);
             this.subjectService.createSubjectStudy(subjectStudy);
         }
         this.subjectService.create(this.subject)
@@ -243,7 +236,7 @@ export class SubjectComponent implements OnInit {
                 this.back();
             }, (err: string) => {
                 this.manageRequestErrors(err);
-            });
+        });
     }
 
     update(): void {
@@ -260,48 +253,12 @@ export class SubjectComponent implements OnInit {
                 this.back();
             }, (err: string) => {
                 this.manageRequestErrors(err);
-            });
+        });
     }
 
     private manageRequestErrors(err: string): void {
         if (err.indexOf("name should be unique") != -1) {
             this.formErrors['name'] = 'unique';
-        }
-    }
-
-    getDateToDatePicker(subject: Subject): void {
-        if (subject && subject.birthDate) {
-            let birthDate: Date = new Date(parseInt(subject.birthDate.toString()));
-            this.selectedBirthDateNormal = {year: birthDate.getFullYear(), month: birthDate.getMonth() + 1, 
-                day: birthDate.getDate()};
-        }
-    }
-
-    onBirthDateChanged(event: IMyDateModel) {
-        if (event.formatted !== '') {
-            this.selectedBirthDateNormal = event.date;
-        }
-    }
-
-    onBirthDateFieldChanged(event: IMyInputFieldChanged) {
-        if (event.value !== '') {
-            if (!event.valid) {
-                this.isBirthDateValid = false;
-            } else {
-                this.isBirthDateValid = true;
-            }
-        } else {
-            this.isBirthDateValid = true;
-            setTimeout((): void => this.selectedBirthDateNormal = null);
-        }
-    }
-
-    setDateFromDatePicker(): void {
-        if (this.selectedBirthDateNormal) {
-            this.subject.birthDate = new Date(this.selectedBirthDateNormal.year, this.selectedBirthDateNormal.month - 1,
-                this.selectedBirthDateNormal.day);
-        } else {
-            this.subject.birthDate = null;
         }
     }
 
@@ -341,15 +298,7 @@ export class SubjectComponent implements OnInit {
         newSubjectStudy.physicallyInvolved = false;
         newSubjectStudy.studyId = studyId;
 
-        if (this.subject.subjectStudyList != null)
-            this.subject.subjectStudyList.push(newSubjectStudy);
-        else {
-            this.subject.subjectStudyList = [];
-            this.subject.subjectStudyList.push(newSubjectStudy);
-        } 
-
-        // I want to do something here for new selectedDevice, but what I
-        // got here is always last selection, not the one I just select.
+        this.subjectStudyList.push(newSubjectStudy);
     }
 
     /**
