@@ -26,12 +26,13 @@
 									<option *ngFor="let cat of imagedObjectCategories()" [value]="cat" [ngSwitch]="cat"
 										i18n="Imaged Object Category {{cat}}|Category label@@ImagedObjectCategory{{cat}}">
 											<ng-template [ngSwitchCase]="'PHANTOM'">Phantom</ng-template>
-											<ng-template [ngSwitchCase]="'LIVING_HUMAN_BEING'">Living human beign</ng-template>
+											<ng-template [ngSwitchCase]="'LIVING_HUMAN_BEING'">Living human being</ng-template>
 											<ng-template [ngSwitchCase]="'HUMAN_CADAVER'">Human cadaver</ng-template>
 											<ng-template [ngSwitchCase]="'ANATOMICAL_PIECE'">Anatomical piece</ng-template>
 											<ng-template ngSwitchDefault>{{cat}}</ng-template>
 									</option>
 								</select>
+								<label *ngIf="formErrors.imagedObjectCategory.includes('required')" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -46,38 +47,38 @@
 							/>No
 						</span>
 					</li>
-					<li class="info" 
-							*ngIf="!isAlreadyAnonymized && mode == 'create'" 
-							[@slideDown]="!isAlreadyAnonymized && mode == 'create'">
+					<li class="info" *ngIf="!isAlreadyAnonymized && mode == 'create'" [@slideDown]="!isAlreadyAnonymized && mode == 'create'">
 						<span class="icon"><i class="fas fa-info-circle"></i></span>A subject global identifier will be automatically generated using the first name, the last name and the birth date of the subject.
 						This can help you to identify a subject that has already been inserted into the database.
 						<br/>To ensure anonymity, the first name and the last name will not be saved.
 						<br/>Notice that the birth Date will be set to the 1st of January of the birth Year for the same reason.
-
 					</li>
 					<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
-						<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName">First Name</label>
+						<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" class="required-label">First Name</label>
 						<span class="right-col">
 							<input type="text" id="firstName" [(ngModel)]="firstName" formControlName="firstName" />
 						</span>
+						<label *ngIf="formErrors.firstName.includes('required')" class="form-validation-alert" i18n="Subject detail|FirstName required error@@subjectDetailFirstNameRequiredError">First name is required!</label>
+						<label *ngIf="formErrors.firstName.includes('length')" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
 					</li>
 					<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
-						<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName">Last Name</label>
+						<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" class="required-label">Last Name</label>
 						<span class="right-col">
 							<input type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
 						</span>
+						<label *ngIf="formErrors.lastName.includes('required')" class="form-validation-alert" i18n="Subject detail|LastName required error@@subjectDetailLastNameRequiredError">Last name is required!</label>
+						<label *ngIf="formErrors.firstName.includes('length')" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
 					</li>
 					<li>
-						<label *ngIf="mode !== 'edit'" i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Birth date</label>
+						<label *ngIf="mode !== 'edit'" i18n="Subject detail|Birth date label@@subjectDetailBirthDate" class="required-label">Birth date</label>
 						<span [ngSwitch]="mode">
 							<ng-template class="right-col" [ngSwitchCase]="'view'">
 								{{subject.birthDate | date: 'dd/MM/yyyy'}}
 							</ng-template>
 							<ng-template class="right-col" [ngSwitchCase]="'create'">
-								<my-date-picker id="birthDate" [options]="myDatePickerOptions" formControlName="birthDate" [(ngModel)]="birthDate" (dateChanged)="onBirthDateChanged($event)"
-									(inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
-								</my-date-picker>
+								<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
 								<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+								<label *ngIf="formErrors.birthDate.includes('required')" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">You need to enter a birth date for a living humain being!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -88,7 +89,7 @@
 								{{subject.sex}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="sex" required formControlName="sex" [(ngModel)]="subject.sex">
+								<select id="sex" formControlName="sex" [(ngModel)]="subject.sex">
 									<option [value]="female">Female</option>
 									<option [value]="male">Male</option>
 								</select>
@@ -102,7 +103,7 @@
 								{{subject.manualHemisphericDominance}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="manualHemisphericDominance" required formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance">
+								<select id="manualHemisphericDominance" formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance">
 									<option [value]="left">Left</option>
 									<option [value]="right">Right</option>
 								</select>
@@ -116,7 +117,7 @@
 								{{subject.languageHemisphericDominance}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="languageHemisphericDominance" required formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance">
+								<select id="languageHemisphericDominance" formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance">
 									<option [value]="left">left</option>
 									<option [value]="right">right</option>
 								</select>
@@ -127,9 +128,7 @@
 				<ol *ngIf="!humanSelected()" [@slideDown]="!humanSelected()">
 					<li *ngIf="mode == 'create'">
 						<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
-						<my-date-picker id="birthDate" [options]="myDatePickerOptions" formControlName="birthDate" [(ngModel)]="birthDate" (dateChanged)="onBirthDateChanged($event)"
-							(inputFieldChanged)="onBirthDateFieldChanged($event)" [selDate]="selectedBirthDateNormal">
-						</my-date-picker>
+						<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
 						<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
 					</li>
 				</ol>
@@ -142,9 +141,9 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="subject.name" />
-								<label *ngIf="formErrors.name?.required" class="form-validation-alert" i18n="Edit subject|Name required error@@subjectDetailNameRequiredError">Name is required!</label>
-								<label *ngIf="formErrors.name?.includes('length')" class="form-validation-alert" i18n="Edit subject|Name length error@@subjectDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Edit subject|Name unique error@@subjectDetailNameUniqueError">Name should be unique!</label>
+								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required!</label>
+								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
+								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">Name should be unique!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -167,13 +166,13 @@
 					<li>
 						<label i18n="Subject detail|List of the studies label@@subjectDetailListOfStudies">List of the studies available</label>
 						<span class="right-col">
-							<select id="studies" formControlName="studies" required (change)="onStudySelectChange($event.target.value)">
+							<select id="studies" (change)="onStudySelectChange($event.target.value)">
+								<option>Please select...</option>
 								<option *ngFor="let study of studies" [value]="study.id">{{study.name}}</option>
 							</select>
 						</span>
 					</li>
-					<li *ngIf="subject.subjectStudyList != null && subject.subjectStudyList.length != 0">
-
+					<li *ngIf="subjectStudyList != null && subjectStudyList.length != 0">
 						<table class="studies">
 							<thead>
 								<tr>
@@ -185,29 +184,29 @@
 								</tr>
 							</thead>
 							<tbody>
-								<tr *ngFor="let relSubjectStudy of subject.subjectStudyList; let in = index">
+								<tr *ngFor="let subjectStudy of subjectStudyList; let i = index">
 									<td class="label-col">
 										<div *ngFor="let study of studies">
-											<span *ngIf="study.id == relSubjectStudy.studyId">
+											<span *ngIf="study.id == subjectStudy.studyId">
 												{{study.name}}
 											</span>
 										</div>
 									</td>
 									<td class="input-col">
-										<input type="text" id="subjectStudyIdentifier-{{in}}" [(ngModel)]="relSubjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
+										<input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
 									</td>
 									<td class="chkbx-col">
-										<input type="checkbox" [checked]="relSubjectStudy.physicallyInvolved" (change)="relSubjectStudy.physicallyInvolved = !relSubjectStudy.physicallyInvolved"/>
+										<input type="checkbox" [checked]="subjectStudy.physicallyInvolved" (change)="subjectStudy.physicallyInvolved = !subjectStudy.physicallyInvolved"/>
 									</td>
 									<td class="dropdown-col">
-										<select id="subjectType-{{in}}" [(ngModel)]="relSubjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
+										<select id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
 											<option *ngFor="let subjectType of subjectTypes()" [value]="subjectType.value"
 												i18n="Subject Types {{subjectType.value}}|Type label@@SubjectType{{subjectType.key}}">
 													{{subjectType.value}}
 											</option>
 										</select>
 									</td>
-									<td class="buttons-col"><span class="button" (click)="removeSubjectStudy(relSubjectStudy)"><i class="fas fa-ban"></i></span>
+									<td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-ban"></i></span>
 								</tr>
 							</tbody>
 						</table>

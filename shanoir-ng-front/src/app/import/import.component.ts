@@ -245,18 +245,17 @@ export class ImportComponent implements OnInit {
                 } 
             }
         }
+        if (this.seriesSelected) {
+            this.findStudiesWithStudyCardsByUserAndEquipment(this.selectedSeries.studies[0].series[0].equipment);
+            if(!this.examinationComment) {
+                // initialize examComment with the studyDescription Dicom value if this Dicom value is not changed by user
+                this.examinationComment = this.selectedSeries.studies[0].studyDescription;
+            }
+        }
     }
 
     changeExamComment (editedLabel: string): void {
         this.examinationComment = editedLabel;
-    }
-
-    validateSeriesSelected () : void {
-        this.findStudiesWithStudyCardsByUserAndEquipment(this.selectedSeries.studies[0].series[0].equipment);
-        if(!this.examinationComment) {
-            // initialize examComment with the studyDescription Dicom value if this Dicom value is not changed by user
-            this.examinationComment = this.selectedSeries.studies[0].studyDescription;
-        }
     }
 
     findStudiesWithStudyCardsByUserAndEquipment(equipment: EquipmentDicom): void {
