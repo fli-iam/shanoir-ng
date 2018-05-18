@@ -41,6 +41,7 @@ export class SubjectComponent implements OnInit {
     @Output() closing: EventEmitter<any> = new EventEmitter();
 
     public studies: IdNameObject[];
+    public studyIdNameMap: Map<number, String> = new Map<number, String>();
     public subjectStudyList: SubjectStudy[] = [];
     private isBirthDateValid: boolean = true;
     private isAlreadyAnonymized: boolean;
@@ -64,8 +65,9 @@ export class SubjectComponent implements OnInit {
         switch(this.mode) {
             case 'create': {
                 this.loadAllStudies();
-                this.setSubject(new Subject());
+                this.subject = new Subject();
                 this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+                this.buildForm();
                 this.prefillData();
                 break;    
             }
@@ -139,6 +141,9 @@ export class SubjectComponent implements OnInit {
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
+                for (let study of this.studies) {
+                    this.studyIdNameMap.set(study.id, study.name);
+                }
             })
             .catch((error) => {
                 // TODO: display error
@@ -286,21 +291,20 @@ export class SubjectComponent implements OnInit {
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
-        console.log(subjectStudy.studyId);
-        const index: number = this.subject.subjectStudyList.indexOf(subjectStudy);
+        const index: number = this.subjectStudyList.indexOf(subjectStudy);
         if (index !== -1) {
-            this.subject.subjectStudyList.splice(index, 1);
+            this.subjectStudyList.splice(index, 1);
         }
-        this.subjectService.deleteSubjectStudy(subjectStudy.id);
+        // this.subjectService.deleteSubjectStudy(subjectStudy.id);
     }
 
     onStudySelectChange(study: any) {
-        console.log(study.target.disabled);
         var newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
         newSubjectStudy.studyId = study.target.value;
-
+        
         this.subjectStudyList.push(newSubjectStudy);
+
     }
 
     /**
@@ -328,16 +332,4 @@ export class SubjectComponent implements OnInit {
     public subjectTypes() {
         return SubjectType.keyValues();
     }
-
-    getFormValidationErrors() {
-        Object.keys(this.subjectForm.controls).forEach(key => {
-            const controlErrors: ValidationErrors = this.subjectForm.get(key).errors;
-            if (controlErrors != null) {
-                Object.keys(controlErrors).forEach(keyError => {
-                    console.log('Key control: ' + key + ', keyError: ' + keyError + ', err value: ', controlErrors[keyError]);
-                });
-            }
-        });
-    }
-    
 }
