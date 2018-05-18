@@ -36,6 +36,7 @@ export class SubjectComponent implements OnInit {
     public canModify: Boolean = false;
     private firstName: string = "";
     private lastName: string = "";
+    private ImagedObjectCategory = ImagedObjectCategory;
 
     @Output() closing: EventEmitter<any> = new EventEmitter();
 
@@ -319,16 +320,19 @@ export class SubjectComponent implements OnInit {
 
     public humanSelected(): boolean {
         return this.subject.imagedObjectCategory != null
-            && (this.subject.imagedObjectCategory.toString() == 'HUMAN_CADAVER'
-                || this.subject.imagedObjectCategory.toString() == 'LIVING_HUMAN_BEING');
+            && (this.subject.imagedObjectCategory == ImagedObjectCategory.HUMAN_CADAVER
+                || this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING);
     }
 
-    public imagedObjectCategories() {
-        return ImagedObjectCategory.keys();
-    }
-
-    public subjectTypes() {
-        return SubjectType.keyValues();
+    getFormValidationErrors() {
+        Object.keys(this.subjectForm.controls).forEach(key => {
+            const controlErrors: ValidationErrors = this.subjectForm.get(key).errors;
+            if (controlErrors != null) {
+                Object.keys(controlErrors).forEach(keyError => {
+                    console.log('Key control: ' + key + ', keyError: ' + keyError + ', err value: ', controlErrors[keyError]);
+                });
+            }
+        });
     }
     
 }

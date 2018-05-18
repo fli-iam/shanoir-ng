@@ -23,12 +23,12 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory">
-									<option *ngFor="let cat of imagedObjectCategories()" [value]="cat" [ngSwitch]="cat"
+									<option *ngFor="let cat of ImagedObjectCategory.all()" [value]="cat" [ngSwitch]="cat"
 										i18n="Imaged Object Category {{cat}}|Category label@@ImagedObjectCategory{{cat}}">
-											<ng-template [ngSwitchCase]="'PHANTOM'">Phantom</ng-template>
-											<ng-template [ngSwitchCase]="'LIVING_HUMAN_BEING'">Living human being</ng-template>
-											<ng-template [ngSwitchCase]="'HUMAN_CADAVER'">Human cadaver</ng-template>
-											<ng-template [ngSwitchCase]="'ANATOMICAL_PIECE'">Anatomical piece</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_HUMAN_BEING">Living human being</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.HUMAN_CADAVER">Human cadaver</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.ANATOMICAL_PIECE">Anatomical piece</ng-template>
 											<ng-template ngSwitchDefault>{{cat}}</ng-template>
 									</option>
 								</select>
@@ -216,6 +216,7 @@
 			</fieldset>
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
+					<button (click)="getFormValidationErrors()">Validation errors</button>
 					<button i18n="View subject|Back button label@@backButton" class="Button" (click)="back()">Back</button>
 					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
 						<button type="submit" i18n="View subject|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
