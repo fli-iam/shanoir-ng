@@ -230,7 +230,9 @@ export class SubjectComponent implements OnInit {
     create(): void {
         this.updateModel();
         this.generateSubjectIdentifier();
-        this.setSubjectBirthDateToFirstOfJanuary();
+        if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING) {
+            this.setSubjectBirthDateToFirstOfJanuary();
+        }
         for (let subjectStudy of this.subject.subjectStudyList) {
             subjectStudy.subjectId = this.subject.id;
             console.log("studyId: " + subjectStudy.studyId + ", subjectId: " + subjectStudy.subjectId + ", PI:" + subjectStudy.physicallyInvolved);
