@@ -68,6 +68,3 @@ form li > label { width: 250px !important; }
 .rotate { -moz-transform: scale(1, -1) translateY(-5px); -webkit-transform: scale(1, -1) translateY(-5px); -o-transform: scale(1, -1) translateY(-5px); -ms-transform: scale(1, -1) translateY(-5px); transform: scale(1, -1) translateY(-5px); }
 
 .commands button + button { margin-left: 10px; }
-
-.preview { margin: 10px 10px !important; text-align: center; display: grid; }
-.preview > div { padding: 0 !important; }

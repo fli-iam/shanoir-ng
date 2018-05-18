@@ -1,3 +1,4 @@
-<div class="preview" >
-    <div class="papaya" data-params="params"></div> 
+<div class="preview" [hidden]="!params">
+    <button *ngIf="!loaded" (click)="load()">Load preview</button>
+    <div [hidden]="!loaded" class="papaya" data-params="params"></div> 
 </div> 

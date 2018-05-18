@@ -85,7 +85,7 @@ export class ImportComponent implements OnInit {
     private isDateValid: boolean = true;
     private selectedDateNormal: IMyDate;
 
-    private papayaParams: object[] = [];
+    private papayaParams: object[];
     
     constructor(
     	private fb: FormBuilder,

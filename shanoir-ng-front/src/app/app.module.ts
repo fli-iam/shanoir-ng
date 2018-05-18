@@ -86,7 +86,7 @@ import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { DatasetService } from './datasets/shared/dataset.service';
 import { DatepickerComponent } from './shared/date/date.component';
-import { PapayaComponent } from './shared/components/papaya/papaya.component'; 
+import { PapayaComponent } from './shared/components/papaya/papaya.component';
 
 
 @NgModule({
