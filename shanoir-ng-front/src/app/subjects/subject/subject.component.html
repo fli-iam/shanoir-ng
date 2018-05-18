@@ -166,9 +166,9 @@
 					<li>
 						<label i18n="Subject detail|List of the studies label@@subjectDetailListOfStudies">List of the studies available</label>
 						<span class="right-col">
-							<select id="studies" (change)="onStudySelectChange($event.target.value)">
-								<option>Please select...</option>
-								<option *ngFor="let study of studies" [value]="study.id">{{study.name}}</option>
+							<select id="studies" (change)="onStudySelectChange($event)">
+								<option disabled selected>Please select...</option>
+								<option *ngFor="let study of studies" [disabled]="study.disabled" [value]="study.id">{{study.name}}</option>
 							</select>
 						</span>
 					</li>
@@ -210,7 +210,6 @@
 								</tr>
 							</tbody>
 						</table>
-
 					</li>
 				</ol>
 			</fieldset>

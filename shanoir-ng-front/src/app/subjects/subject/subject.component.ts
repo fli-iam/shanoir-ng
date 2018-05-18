@@ -148,7 +148,6 @@ export class SubjectComponent implements OnInit {
 
     buildForm(): void {
         let firstNameFC, lastNameFC, birthDateFC : FormControl;
-        console.log("this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING: " + this.subject.imagedObjectCategory + "+++: " + ImagedObjectCategory.LIVING_HUMAN_BEING);
         if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING) {
             firstNameFC = new FormControl(this.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(64)]);
             lastNameFC = new FormControl(this.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(64)]);
@@ -287,6 +286,7 @@ export class SubjectComponent implements OnInit {
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
+        console.log(subjectStudy.studyId);
         const index: number = this.subject.subjectStudyList.indexOf(subjectStudy);
         if (index !== -1) {
             this.subject.subjectStudyList.splice(index, 1);
@@ -294,10 +294,11 @@ export class SubjectComponent implements OnInit {
         this.subjectService.deleteSubjectStudy(subjectStudy.id);
     }
 
-    onStudySelectChange(studyId: number) {
+    onStudySelectChange(study: any) {
+        console.log(study.target.disabled);
         var newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
-        newSubjectStudy.studyId = studyId;
+        newSubjectStudy.studyId = study.target.value;
 
         this.subjectStudyList.push(newSubjectStudy);
     }
@@ -322,6 +323,10 @@ export class SubjectComponent implements OnInit {
         return this.subject.imagedObjectCategory != null
             && (this.subject.imagedObjectCategory == ImagedObjectCategory.HUMAN_CADAVER
                 || this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING);
+    }
+
+    public subjectTypes() {
+        return SubjectType.keyValues();
     }
 
     getFormValidationErrors() {
