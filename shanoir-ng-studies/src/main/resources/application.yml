@@ -114,6 +114,7 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
+    org.springframework.amqp: OFF
 
 ---
 

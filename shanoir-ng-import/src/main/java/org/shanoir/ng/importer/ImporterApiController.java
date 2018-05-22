@@ -28,6 +28,7 @@ import org.shanoir.ng.shared.exception.ImportErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ImportUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,12 +122,12 @@ public class ImporterApiController implements ImporterApi {
 		try {
 			LOG.info("start import job: " + importJob.toString());
 			
+			File workFolder = new File(importJob.getWorkFolder());
 			List<Patient> patients = importJob.getPatients();
 			for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = (Patient) patientsIt.next();
-				ArrayList<File> dicomFiles = getDicomFilesForPatient(patient);
-				anonymizer.anonymizeForShanoir(dicomFiles, "Neurinfo Profile", patient.getPatientName(), patient.getPatientID());
-				File workFolder = new File(importJob.getWorkFolder());
+				ArrayList<File> dicomFiles = getDicomFilesForPatient(patient, workFolder);
+//				anonymizer.anonymizeForShanoir(dicomFiles, "Neurinfo Profile", patient.getPatientName(), patient.getPatientID());
 				Long converterId = importJob.getFrontConverterId();
 				niftiConverter.prepareAndRunConversion(patient, workFolder, converterId);
 			}
@@ -136,9 +137,7 @@ public class ImporterApiController implements ImporterApi {
 			LOG.info(importJobJsonString);
 			
 			// HttpEntity represents the request
-			// TODO link in prod version to keycloak here
-//			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
-			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob);
+			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
 
 			// Post to dataset MS to finish import
 			ResponseEntity<String> response = null;
@@ -157,6 +156,7 @@ public class ImporterApiController implements ImporterApi {
 			
 			return new ResponseEntity<Void>(HttpStatus.OK);
 		} catch (Exception e) {
+			LOG.error(e.getMessage());
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					e.getMessage(), null));
 		}
@@ -170,7 +170,7 @@ public class ImporterApiController implements ImporterApi {
 	 * @param importJob
 	 * @throws FileNotFoundException 
 	 */
-	private ArrayList<File> getDicomFilesForPatient(final Patient patient) throws FileNotFoundException {
+	private ArrayList<File> getDicomFilesForPatient(final Patient patient, final File workFolder) throws FileNotFoundException {
 		Set<File> pathsSet = new HashSet<File>(2000);
 		List<Study> studies = patient.getStudies();
 		for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
@@ -182,7 +182,7 @@ public class ImporterApiController implements ImporterApi {
 				for (Iterator imagesIt = images.iterator(); imagesIt.hasNext();) {
 					Image image = (Image) imagesIt.next();
 					String path = image.getPath();
-					File file = new File(path);
+					File file = new File(workFolder.getAbsolutePath() + File.separator + path);
 					if(file.exists()) {
 						pathsSet.add(file);
 					} else {
@@ -255,11 +255,12 @@ public class ImporterApiController implements ImporterApi {
 				dicomDirJsonNode = dicomDirToJsonReader.readDicomDirToJsonNode(dicomDirFile);
 			}
 
-			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode,unzipFolderFile.getAbsolutePath());
+			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode, unzipFolderFile.getAbsolutePath());
 
 			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(dicomDirJsonNode);
-			Patients patientsDTO = dicomDirToJsonReader.getMapper().readValue(dicomDirJsonString,Patients.class);
+			LOG.info(dicomDirJsonString);
+			Patients patientsDTO = dicomDirToJsonReader.getMapper().readValue(dicomDirJsonString, Patients.class);
 			ImportJob importJob = new ImportJob();
 			importJob.setWorkFolder(unzipFolderFile.getAbsolutePath());
 			importJob.setPatients(patientsDTO.getPatients());
