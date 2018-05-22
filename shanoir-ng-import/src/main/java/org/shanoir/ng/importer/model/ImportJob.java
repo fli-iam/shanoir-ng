@@ -20,7 +20,7 @@ public class ImportJob {
     private boolean fromPacs;
     
 	@JsonProperty("workFolder")
-	public String workFolder;
+	private String workFolder;
 
 	@JsonProperty("patients")
     private List<Patient> patients;

@@ -98,8 +98,8 @@ public class NIfTIConverterService {
 	/** Output files mapped by series UID. */
 	private HashMap<String, List<String>> outputFiles = new HashMap<String, List<String>>();
 	
-	public void prepareAndRunConversion(Patient patient, File unzipFolderFile, Long converterId) throws RestServiceException {
-		File seriesFolderFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + SERIES);
+	public void prepareAndRunConversion(Patient patient, File workFolder, Long converterId) throws RestServiceException {
+		File seriesFolderFile = new File(workFolder.getAbsolutePath() + File.separator + SERIES);
 		if(!seriesFolderFile.exists()) {
 			seriesFolderFile.mkdirs();
 		} else {
@@ -118,7 +118,7 @@ public class NIfTIConverterService {
 			int numberOfSeries = series.size();
 			for (Iterator seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = (Serie) seriesIt.next();
-				File serieIDFolderFile = createSerieIDFolder(seriesFolderFile, serie);
+				File serieIDFolderFile = createSerieIDFolder(workFolder, seriesFolderFile, serie);
 				boolean serieIdentifiedForNotSeparating;
 				try {
 					serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, doNotSeparateDatasetsInSerie);
@@ -728,7 +728,7 @@ public class NIfTIConverterService {
 	 * @param serie
 	 * @throws RestServiceException
 	 */
-	private File createSerieIDFolder(File seriesFolderFile, Serie serie) throws RestServiceException {
+	private File createSerieIDFolder(File workFolder, File seriesFolderFile, Serie serie) throws RestServiceException {
 		String serieID = serie.getSeriesInstanceUID();
 		File serieIDFolderFile = new File(seriesFolderFile.getAbsolutePath() + File.separator + serieID);
 		if(!serieIDFolderFile.exists()) {
@@ -738,26 +738,28 @@ public class NIfTIConverterService {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating serie id folder: folder already exists.", null));
 		}
 		List<Image> images = serie.getImages();
-		moveFiles(serieIDFolderFile, images);
+		moveFiles(workFolder, serieIDFolderFile, images);
 //		List<Object> nonImages = serie.getNonImages();
 //		moveFiles(serieIDFolderFile, nonImages);
 		return serieIDFolderFile;
 	}
 
 	/**
-	 * @param serieIDFolderFile
+	 * This method moves the files into serie specific folders.
+	 * @param serieIDFolder
 	 * @param images
 	 * @throws RestServiceException
 	 */
-	private void moveFiles(File serieIDFolderFile, List<Image> images) throws RestServiceException {
+	private void moveFiles(File workFolder, File serieIDFolder, List<Image> images) throws RestServiceException {
 		for (Iterator iterator = images.iterator(); iterator.hasNext();) {
 			Image image = (Image) iterator.next();
 			// the path has been set in processDicomFile in DicomFileAnalyzer before
 			String filePath = image.getPath();
-			File oldFile = new File(filePath);
+			File oldFile = new File(workFolder.getAbsolutePath() + File.separator + filePath);
 			if (oldFile.exists()) {
-				File newFile = new File(serieIDFolderFile.getAbsolutePath() + File.separator + oldFile.getName());
+				File newFile = new File(serieIDFolder.getAbsolutePath() + File.separator + oldFile.getName());
 				oldFile.renameTo(newFile);
+				LOG.debug("Moving file: " + oldFile.getAbsolutePath() + " to " + newFile.getAbsolutePath());
 				image.setPath(newFile.getAbsolutePath());
 			} else {
 				throw new RestServiceException(
