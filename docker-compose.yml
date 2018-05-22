@@ -103,6 +103,24 @@ services:
     depends_on:
       - "keycloak"
       - "database"
+      
+  #
+  # Preclinical microservice
+  #
+  preclinical:
+    container_name: preclinical
+    build: ./docker-compose/preclinical
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "9909:9909"
+     - "9915:9915"
+    depends_on:
+      - "keycloak"
+      - "database"
+      
   #
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
