@@ -212,6 +212,8 @@ export class SubjectComponent implements OnInit {
     updateModel(): void {
         this.subject = this.subjectForm.value;
         this.subject.subjectStudyList = this.subjectStudyList;
+        console.log("updateModel - length" + this.subjectStudyList.length);
+        console.log("updateModel - length2 : " + this.subject.subjectStudyList.length);
     }
 
     // No
@@ -233,13 +235,14 @@ export class SubjectComponent implements OnInit {
         if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING) {
             this.setSubjectBirthDateToFirstOfJanuary();
         }
-        for (let subjectStudy of this.subject.subjectStudyList) {
-            subjectStudy.subjectId = this.subject.id;
-            console.log("studyId: " + subjectStudy.studyId + ", subjectId: " + subjectStudy.subjectId + ", PI:" + subjectStudy.physicallyInvolved);
-            this.subjectService.createSubjectStudy(subjectStudy);
-        }
         this.subjectService.create(this.subject)
-            .subscribe((subject) => {
+        .subscribe((subject) => {
+                console.log("size: " + this.subject.subjectStudyList.length);
+                for (let subjectStudy of this.subject.subjectStudyList) {
+                    subjectStudy.subjectId = subject.id;
+                    console.log("studyId: " + subjectStudy.studyId + ", subjectId: " + subjectStudy.subjectId + ", PI:" + subjectStudy.physicallyInvolved);
+                    this.subjectService.createSubjectStudy(subjectStudy);
+                }
                 this.back();
             }, (err: string) => {
                 this.manageRequestErrors(err);
@@ -306,7 +309,6 @@ export class SubjectComponent implements OnInit {
         newSubjectStudy.studyId = study.target.value;
         
         this.subjectStudyList.push(newSubjectStudy);
-
     }
 
     /**
