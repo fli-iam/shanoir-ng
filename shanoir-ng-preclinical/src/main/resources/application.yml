@@ -1,0 +1,182 @@
+# server configuration
+server:
+  port: 9900
+  error:
+    whitelabel:
+      enabled: false
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/shanoir_ng_preclinical?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    username: shanoir
+    password: shanoir
+    # The SQL dialect makes Hibernate generate better SQL for the chosen database
+    driver-class-name: com.mysql.jdbc.Driver
+    initialize: false
+  jackson:
+    mapper:
+      use-getters-as-setters: false
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: validate
+      # Naming strategy
+      naming:
+        strategy: org.hibernate.cfg.ImprovedNamingStrategy
+    properties:
+      hibernate:
+        connection:
+          charset: UTF-8
+        hbm2ddl:
+          import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
+  jooq:
+    sql-dialect: Mysql
+  rabbitmq:
+    host: shanoir-ng-rabbitmq
+  session:
+    store-type: none
+  http:
+    multipart:
+      max-file-size: -1
+      max-request-size: -1
+front.server.url: http://shanoir-ng-nginx
+#keycloak
+# keycloak
+keycloak:
+  cors: true
+  realm: shanoir-ng
+  auth-server-url: http://shanoir-ng-nginx/auth
+  ssl-required: external
+  resource: shanoir-ng-preclinical
+  securityConstraints:
+    - authRoles: 
+      - ROLE_ADMIN
+      - ROLE_EXPERT
+      - ROLE_GUEST
+      - ROLE_USER
+    - securityCollections:
+      - name: studies secured api
+      - patterns:
+        - /*
+# microservices url
+ms.url:
+  shanoir-ng-studies: http://shanoir-ng-studies/
+# logging configuration
+logging:
+  file: /vol/log/ms/shanoir-ng-preclinical.log
+  level:
+    org.springframework.web: ERROR
+    org.hibernate: ERROR
+#Upload Extradata
+preclinical:
+  uploadExtradataFolder: /data/upload/
+  separator: /
+
+---
+
+######################################
+# DO NOT COMMIT VALUES MODIFICATIONS #
+######################################
+spring:
+  profiles: dev
+  datasource:
+    url: jdbc:mysql://database:3306/preclinical?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    username: preclinical
+    password: password
+    # The SQL dialect makes Hibernate generate better SQL for the chosen database
+    driver-class-name: com.mysql.jdbc.Driver
+    data: classpath:/scripts/import.sql
+    initialize: true
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create
+    # Show or not log for each sql query
+    show-sql: true
+  jooq:
+    sql-dialect: Mysql
+  rabbitmq:
+    host: localhost
+server:
+    port: 9909
+front.server:
+  address: http://shanoir-ng-nginx/shanoir-ng/
+  url: http://shanoir-ng-nginx
+#keycloak
+keycloak:
+  auth-server-url: http://shanoir-ng-nginx/auth
+  credentials:
+    secret: a6641eb4-2b8b-4171-b8b1-ccb6cee27b97
+# microservices url
+ms.url:
+  shanoir-ng-users: http://users:9901/users
+  shanoir-ng-import: http://import:9903/niftiConverter
+  shanoir-ng-studycards: http://datasets:9904/studycards
+  shanoir-ng-examinations: http://datasets:9904/examinations
+# logging configuration
+logging:
+  file: /var/log/shanoir-ng-logs/shanoir-ng-preclinical.log
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate: ERROR
+    org.springframework.amqp: OFF
+#Upload Extradata
+preclinical:
+  uploadExtradataFolder: /home/mbodin/Shanoir/upload/
+  separator: /
+  
+---
+
+#################
+# DO NOT CHANGE #
+#################
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:h2:mem:SHANOIR_NG_PRECLINICAL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    data: classpath:/scripts/test-data-preclinical-h2.sql
+    initialize: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+# logging configuration
+logging:
+  file: shanoir-ng-preclinical.log
+  level:
+    org.springframework.web: ERROR
+    org.hibernate: ERROR
+#Upload Extradata
+preclinical:
+  uploadExtradataFolder: /home/mbodin/Documents/FLI-IAM/SHANOIR_NG/upload/
+  separator: /
+---
+
+#################
+# DO NOT CHANGE #
+#################
+spring:
+  profiles: qualif,prod
+  datasource:
+    initialize: false
+  jpa:
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: validate
+  rabbitmq:
+    host: shanoir-ng-rabbitmq
+front.server.url: SHANOIR_SERVER_URL
+#keycloak
+keycloak:
+  auth-server-url: SHANOIR_SERVER_URL/auth
+
+  

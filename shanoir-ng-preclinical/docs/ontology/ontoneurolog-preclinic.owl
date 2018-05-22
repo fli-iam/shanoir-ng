@@ -1,0 +1,2001 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE Ontology [
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY xml "http://www.w3.org/XML/1998/namespace" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-preclinical.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     ontologyIRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-preclinical.owl">
+    <Prefix name="" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Import>http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurologv3.owl</Import>
+    <Annotation>
+        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/contributor"/>
+        <Literal datatypeIRI="&rdf;PlainLiteral">INSERM - U836 - Grenoble Neurosciences Institute - Team 5</Literal>
+    </Annotation>
+    <Annotation>
+        <AnnotationProperty IRI="http://purl.org/dc/elements/1.1/date"/>
+        <Literal datatypeIRI="&rdf;PlainLiteral">2014-07-24</Literal>
+    </Annotation>
+    <Declaration>
+        <Class IRI="#HIFU-therapy-action"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#amount-of-isoflurane"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#amount-of-ketamine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#amount-of-xylamine"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#anatomical-structure"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#anatomical-structure-subject"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#anesthetic-action"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#animal-provider"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#balance"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#biological-type"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#blood-gas-analyzer"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#blood-gas-quality"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#bolus-administration"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#breeding"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#clinical-study-with-examination"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#drug"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#drug-anesthetic"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#drug-concentration"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#drug-therapy-action"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#drug-volume"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#electrocardiogram-monitor"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#flow-rate"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#frequency"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#healthy-non-human-subject"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#heart-rate"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#infusion-administration"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#isoflurane-as-drug-anesthetic"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#ketamine-as-drug-anesthetic"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#laboratory-equipment"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#living-non-human-subject"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#living-status"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#matter-administration-action"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#monkey"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#non-human"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#non-human-subject"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#occurence"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#pCO2-blood-gas"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#pO2-blood-gas"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#pathological-non-human-subject"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#pathology"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#pathology-model"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#pathology-model-information"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#ph-blood-gas"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#phantom"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#phantom-information"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#phantom-subject"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#phase"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#physiological-dataset"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#physiological-dataset-acquisition"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#physiological-examination"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#physiological-monitoring-equipment"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#physiological-quality"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#postal-address"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#preclinical-study"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#preclinical-study-with-examination"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#pulse-oximeter"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#radio-therapy-action"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#radioelement"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#respiratory-rate"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#respiratory-rate-monitor"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#rodent"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#saO2"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#stabulation-centre"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#strain"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#successfully-breeding"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#surgical-action"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#temperature"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#therapy-action"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#thermometer"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#ultrasound-dose"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#weight"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#xylamine-as-drug-anesthetic"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#administers"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#affects"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#concerns"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#follows"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-address"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-biological-type"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-contrast-agent-timing"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-investigator"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-living-status"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-occurence"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-provider"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-rank"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-scalar-quale"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-strain"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-supervisor"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#has-for-time-interval"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#is-a-target-of"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#is-administrated-by"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#is-affected-by"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#is-divided-in-phase"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#is-located-in"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#is-part-of"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#is-treated-by"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#precedes"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#provides"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#targets"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#treats"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#C57/BL6"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Grenoble-Institute-of-Neurosciences"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#HIFU"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#MIRCEN"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Wistar"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#alive"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#alzheimer"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#brain"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#cancer"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#dead"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#drugs"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#epilepsy"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#heart"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#isoflurane"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#kainate"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#ketamine"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#liver"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#mouse"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#no"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#permanent"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#pilocarpine"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#rabbit"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#radiotherapy"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#rat"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#stroke"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#surgery"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#transgenic"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#transient"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#wild"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#xylamine"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#yes"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dataset.owl#MR-dataset"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#is-a-result-of-at"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-dataset-processing.owl#dataset-processing"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dataset.owl#reconstructed-dataset"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#is-a-result-of-at"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-dataset-processing.owl#dataset-processing"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#is-administrated-by"/>
+            <Class IRI="#matter-administration-action"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/human.owl#animal"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/human.owl#has-for-birth-date"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#birth-date"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/human.owl#animal"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/human.owl#has-for-sex"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/human.owl#sex"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/human.owl#animal"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-living-status"/>
+            <Class IRI="#living-status"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#concentration"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#volume"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#MR-dataset-acquisition"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#refers-to"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#MR-examination"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#MR-dataset-acquisition"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-contrast-agent-timing"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#time-interval"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#MR-dataset-acquisition"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-rank"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#positive-integer"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#dataset-acquisition"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#refers-to"/>
+            <Class IRI="#anatomical-structure"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#dataset-acquisition-equipment"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-version-number"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#version-number"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#diffusion-b-value"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#diffusion-gradient-orientation"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#field-of-view-in-x"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#field-of-view-in-y"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#flip-angle"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#HIFU-therapy-action"/>
+        <Class IRI="#therapy-action"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#HIFU-therapy-action"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#has-for-part"/>
+            <Class IRI="#matter-administration-action"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#HIFU-therapy-action"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#administers"/>
+            <Class IRI="#ultrasound-dose"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#amount-of-isoflurane"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#amount-of-ketamine"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#amount-of-xylamine"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#anatomical-structure"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#physical-object"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#anatomical-structure-subject"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#subject"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#anatomical-structure-subject"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#refers-to"/>
+            <Class IRI="#anatomical-structure"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#anesthetic-action"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#physical-action"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#anesthetic-action"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#has-for-part"/>
+            <Class IRI="#matter-administration-action"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#anesthetic-action"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#administers"/>
+            <Class IRI="#drug-anesthetic"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#animal-provider"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#agent"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#animal-provider"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#is-agent-of-at"/>
+            <Class IRI="#breeding"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#animal-provider"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#provides"/>
+            <Class IRI="#living-non-human-subject"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#balance"/>
+        <Class IRI="#physiological-monitoring-equipment"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#balance"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#measures"/>
+            <Class IRI="#weight"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#biological-type"/>
+        <Class IRI="#physiological-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#blood-gas-analyzer"/>
+        <Class IRI="#laboratory-equipment"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#blood-gas-analyzer"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#measures"/>
+            <Class IRI="#blood-gas-quality"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#blood-gas-quality"/>
+        <Class IRI="#physiological-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#blood-gas-quality"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#is-measured-by"/>
+            <Class IRI="#blood-gas-analyzer"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#blood-gas-quality"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-unit"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#unit-of-measure"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#bolus-administration"/>
+        <Class IRI="#matter-administration-action"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#breeding"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#deliberate-producing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#clinical-study-with-examination"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#clinical-study"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#clinical-study-with-examination"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study-with-examination"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#clinical-study-with-examination"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-supervisor"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#medical-doctor"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#drug"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#drug"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#manufactured-object"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#drug"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#technical-artefact"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#drug"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-name"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#name"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#drug-anesthetic"/>
+        <Class IRI="#drug"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#drug-concentration"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#concentration"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#drug-concentration"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#is-a-quality-of"/>
+            <Class IRI="#drug"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#drug-therapy-action"/>
+        <Class IRI="#therapy-action"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#drug-volume"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#volume"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#drug-volume"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#is-a-quality-of"/>
+            <Class IRI="#drug"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#electrocardiogram-monitor"/>
+        <Class IRI="#physiological-monitoring-equipment"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#electrocardiogram-monitor"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#measures"/>
+            <Class IRI="#heart-rate"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#flow-rate"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#physical-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#flow-rate"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#frequency"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#physical-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#frequency"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#healthy-non-human-subject"/>
+        <Class IRI="#living-non-human-subject"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#heart-rate"/>
+        <Class IRI="#physiological-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#heart-rate"/>
+        <ObjectMinCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#is-measured-by"/>
+            <Class IRI="#electrocardiogram-monitor"/>
+        </ObjectMinCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#heart-rate"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-unit"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#unit-of-measure"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#infusion-administration"/>
+        <Class IRI="#matter-administration-action"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#isoflurane-as-drug-anesthetic"/>
+        <Class IRI="#amount-of-isoflurane"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#isoflurane-as-drug-anesthetic"/>
+        <Class IRI="#drug-anesthetic"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#isoflurane-as-drug-anesthetic"/>
+        <ObjectHasValue>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-name"/>
+            <NamedIndividual IRI="#isoflurane"/>
+        </ObjectHasValue>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#ketamine-as-drug-anesthetic"/>
+        <Class IRI="#amount-of-ketamine"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#ketamine-as-drug-anesthetic"/>
+        <Class IRI="#drug-anesthetic"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#ketamine-as-drug-anesthetic"/>
+        <ObjectHasValue>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-name"/>
+            <NamedIndividual IRI="#ketamine"/>
+        </ObjectHasValue>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#laboratory-equipment"/>
+        <Class IRI="#physiological-monitoring-equipment"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#living-non-human-subject"/>
+        <Class IRI="#non-human-subject"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#living-non-human-subject"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-biological-type"/>
+            <Class IRI="#biological-type"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#living-non-human-subject"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-provider"/>
+            <Class IRI="#animal-provider"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#living-non-human-subject"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-strain"/>
+            <Class IRI="#strain"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#living-non-human-subject"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#is-located-in"/>
+            <Class IRI="#stabulation-centre"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#living-status"/>
+        <Class IRI="#physiological-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#matter-administration-action"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#physical-action"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#matter-administration-action"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#administers"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#matter-administration-action"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#is-located-in"/>
+            <Class IRI="#anatomical-structure"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#monkey"/>
+        <Class IRI="#non-human"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#non-human"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/human.owl#animal"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#non-human-subject"/>
+        <Class IRI="#non-human"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#non-human-subject"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#subject"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#occurence"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#time-interval"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#occurence"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-unit"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#unit-of-measure"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pCO2-blood-gas"/>
+        <Class IRI="#blood-gas-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pO2-blood-gas"/>
+        <Class IRI="#blood-gas-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathological-non-human-subject"/>
+        <Class IRI="#living-non-human-subject"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathological-non-human-subject"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#is-affected-by"/>
+            <Class IRI="#pathology-model"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathological-non-human-subject"/>
+        <ObjectMinCardinality cardinality="0">
+            <ObjectProperty IRI="#is-treated-by"/>
+            <Class IRI="#therapy-action"/>
+        </ObjectMinCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#temporal-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#affects"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#patient"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#concerns"/>
+            <Class IRI="#anatomical-structure"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#is-a-target-of"/>
+            <Class IRI="#therapy-action"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-name"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#name"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology-model"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#model"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology-model"/>
+        <ObjectAllValuesFrom>
+            <ObjectProperty IRI="#affects"/>
+            <Class IRI="#pathological-non-human-subject"/>
+        </ObjectAllValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology-model"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-name"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#name"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology-model"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#is-referenced-by-at"/>
+            <Class IRI="#pathology-model-information"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology-model"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#refers-to"/>
+            <Class IRI="#pathology"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology-model-information"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#information"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pathology-model-information"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#refers-to"/>
+            <Class IRI="#pathology-model"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#ph-blood-gas"/>
+        <Class IRI="#blood-gas-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phantom"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#physical-object"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phantom"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#manufactured-object"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phantom"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-model-name"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#model-name"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phantom"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#is-described-by"/>
+            <Class IRI="#phantom-information"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phantom-information"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#information"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phantom-information"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#refers-to"/>
+            <Class IRI="#phantom"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phantom-subject"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#subject"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phantom-subject"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#refers-to"/>
+            <Class IRI="#phantom"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phase"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#accomplishment"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phase"/>
+        <ObjectMinCardinality cardinality="0">
+            <ObjectProperty IRI="#precedes"/>
+            <Class IRI="#phase"/>
+        </ObjectMinCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phase"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-time-interval"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#time-interval"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#phase"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#is-part-of"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#physiological-dataset"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dataset.owl#dataset"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#physiological-dataset"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#is-a-result-of-at"/>
+            <Class IRI="#physiological-examination"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#physiological-dataset-acquisition"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#dataset-acquisition"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#physiological-dataset-acquisition"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-result-at"/>
+            <Class IRI="#physiological-dataset"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#physiological-examination"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#examination"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#physiological-examination"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#has-for-part"/>
+            <Class IRI="#physiological-dataset-acquisition"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#physiological-monitoring-equipment"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#dataset-acquisition-equipment"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#physiological-monitoring-equipment"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#allows-to-carry-out"/>
+            <Class IRI="#physiological-dataset-acquisition"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#physiological-quality"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#postal-address"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#information"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#preclinical-study"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#preclinical-study"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#involves"/>
+            <Class IRI="#non-human-subject"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#preclinical-study-with-examination"/>
+        <Class IRI="#preclinical-study"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#preclinical-study-with-examination"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study-with-examination"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#preclinical-study-with-examination"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-supervisor"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#researcher"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pulse-oximeter"/>
+        <Class IRI="#physiological-monitoring-equipment"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#pulse-oximeter"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#measures"/>
+            <Class IRI="#saO2"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#radio-therapy-action"/>
+        <Class IRI="#therapy-action"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#radio-therapy-action"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#has-for-part"/>
+            <Class IRI="#matter-administration-action"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#radio-therapy-action"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#administers"/>
+            <Class IRI="#radioelement"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#radioelement"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#radioelement"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#manufactured-object"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#radioelement"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#technical-artefact"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#respiratory-rate"/>
+        <Class IRI="#physiological-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#respiratory-rate"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#is-measured-by"/>
+            <Class IRI="#respiratory-rate-monitor"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#respiratory-rate"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-unit"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#unit-of-measure"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#respiratory-rate-monitor"/>
+        <Class IRI="#physiological-monitoring-equipment"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#respiratory-rate-monitor"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#measures"/>
+            <Class IRI="#respiratory-rate"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#rodent"/>
+        <Class IRI="#non-human"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#saO2"/>
+        <Class IRI="#physiological-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#saO2"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#is-measured-by"/>
+            <Class IRI="#pulse-oximeter"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#saO2"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-unit"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#unit-of-measure"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#stabulation-centre"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#centre"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#strain"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#physical-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#successfully-breeding"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#successfully-producing"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#successfully-breeding"/>
+        <Class IRI="#breeding"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#surgical-action"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#physical-action"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#temperature"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#physical-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#temperature"/>
+        <Class IRI="#physiological-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#temperature"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#is-measured-by"/>
+            <Class IRI="#thermometer"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#temperature"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#therapy-action"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#physical-action"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#therapy-action"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#has-for-part"/>
+            <Class IRI="#matter-administration-action"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#therapy-action"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#administers"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#therapy-action"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#has-for-occurence"/>
+            <Class IRI="#occurence"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#therapy-action"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#targets"/>
+            <Class IRI="#pathology"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#therapy-action"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-time-interval"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#time-interval"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#therapy-action"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#treats"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#patient"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#thermometer"/>
+        <Class IRI="#physiological-monitoring-equipment"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#thermometer"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#measures"/>
+            <Class IRI="#temperature"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#ultrasound-dose"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#ultrasound-dose"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#technical-artefact"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#weight"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#physical-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#weight"/>
+        <Class IRI="#physiological-quality"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#weight"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/instrument.owl#is-measured-by"/>
+            <Class IRI="#balance"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#weight"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-scalar-quale"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#xylamine-as-drug-anesthetic"/>
+        <Class IRI="#amount-of-xylamine"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#xylamine-as-drug-anesthetic"/>
+        <Class IRI="#drug-anesthetic"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#xylamine-as-drug-anesthetic"/>
+        <ObjectHasValue>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#has-for-name"/>
+            <NamedIndividual IRI="#xylamine"/>
+        </ObjectHasValue>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#MR-examination"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#has-for-part"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#MR-dataset-acquisition"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#centre"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-address"/>
+            <Class IRI="#postal-address"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#clinical-study"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#involves"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#human-subject"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#investigator"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#is-located-in"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#centre"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#laboratory-examination"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#is-realized-by-at"/>
+            <Class IRI="#laboratory-equipment"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#patient"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#is-affected-by"/>
+            <Class IRI="#pathology"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#patient"/>
+        <ObjectMinCardinality cardinality="0">
+            <ObjectProperty IRI="#is-treated-by"/>
+            <Class IRI="#therapy-action"/>
+        </ObjectMinCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="#has-for-investigator"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#investigator"/>
+        </ObjectSomeValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study"/>
+        <ObjectMinCardinality cardinality="1">
+            <ObjectProperty IRI="#is-divided-in-phase"/>
+            <Class IRI="#phase"/>
+        </ObjectMinCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#follows"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#protocol"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study"/>
+        <ObjectExactCardinality cardinality="1">
+            <ObjectProperty IRI="#has-for-supervisor"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#main-investigator"/>
+        </ObjectExactCardinality>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study-with-examination"/>
+        <ObjectAllValuesFrom>
+            <ObjectProperty IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#physically-involves"/>
+            <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#subject"/>
+        </ObjectAllValuesFrom>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#subject"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#agentive-physical-object"/>
+    </SubClassOf>
+    <DisjointClasses>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/human.owl#human"/>
+        <Class IRI="#non-human"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="#drug-anesthetic"/>
+        <Class IRI="#drug-therapy-action"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="#healthy-non-human-subject"/>
+        <Class IRI="#pathological-non-human-subject"/>
+    </DisjointClasses>
+    <DisjointClasses>
+        <Class IRI="#living-non-human-subject"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#human-subject"/>
+    </DisjointClasses>
+    <ClassAssertion>
+        <Class IRI="#strain"/>
+        <NamedIndividual IRI="#C57/BL6"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#stabulation-centre"/>
+        <NamedIndividual IRI="#Grenoble-Institute-of-Neurosciences"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#stabulation-centre"/>
+        <NamedIndividual IRI="#MIRCEN"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#strain"/>
+        <NamedIndividual IRI="#Wistar"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#living-status"/>
+        <NamedIndividual IRI="#alive"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#living-status"/>
+        <NamedIndividual IRI="#dead"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#pathology-model"/>
+        <NamedIndividual IRI="#kainate"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#rodent"/>
+        <NamedIndividual IRI="#mouse"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#pathology-model"/>
+        <NamedIndividual IRI="#permanent"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#pathology-model"/>
+        <NamedIndividual IRI="#pilocarpine"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#rodent"/>
+        <NamedIndividual IRI="#rabbit"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#rodent"/>
+        <NamedIndividual IRI="#rat"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#biological-type"/>
+        <NamedIndividual IRI="#transgenic"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#pathology-model"/>
+        <NamedIndividual IRI="#transient"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#biological-type"/>
+        <NamedIndividual IRI="#wild"/>
+    </ClassAssertion>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#administers"/>
+        <Class IRI="#therapy-action"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#affects"/>
+        <Class IRI="#pathology"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#affects"/>
+        <Class IRI="#pathology-model"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#concerns"/>
+        <Class IRI="#pathology"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#follows"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-address"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#centre"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-biological-type"/>
+        <Class IRI="#living-non-human-subject"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-contrast-agent-timing"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#MR-dataset-acquisition"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-investigator"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-living-status"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/human.owl#animal"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-occurence"/>
+        <Class IRI="#therapy-action"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-provider"/>
+        <Class IRI="#living-non-human-subject"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-rank"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-mr-dataset-acquisition.owl#MR-dataset-acquisition"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-scalar-quale"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-strain"/>
+        <Class IRI="#living-non-human-subject"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-supervisor"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-time-interval"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#action"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#has-for-time-interval"/>
+        <Class IRI="#phase"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#is-a-target-of"/>
+        <Class IRI="#pathology"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#is-administrated-by"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#is-affected-by"/>
+        <Class IRI="#pathological-non-human-subject"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#is-affected-by"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#patient"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#is-divided-in-phase"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#is-part-of"/>
+        <Class IRI="#phase"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#is-treated-by"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#subject"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#precedes"/>
+        <Class IRI="#phase"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#provides"/>
+        <Class IRI="#animal-provider"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#targets"/>
+        <Class IRI="#therapy-action"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#treats"/>
+        <Class IRI="#therapy-action"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#administers"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#affects"/>
+        <Class IRI="#pathological-non-human-subject"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#affects"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#patient"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#concerns"/>
+        <Class IRI="#anatomical-structure"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#follows"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#protocol"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-address"/>
+        <Class IRI="#postal-address"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-biological-type"/>
+        <Class IRI="#biological-type"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-contrast-agent-timing"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#time-interval"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-investigator"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#investigator"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-living-status"/>
+        <Class IRI="#living-status"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-occurence"/>
+        <Class IRI="#occurence"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-provider"/>
+        <Class IRI="#animal-provider"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-rank"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#positive-integer"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-scalar-quale"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#scalar-quale"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-strain"/>
+        <Class IRI="#strain"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-supervisor"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/human.owl#human"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#has-for-time-interval"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#time-interval"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#is-a-target-of"/>
+        <Class IRI="#therapy-action"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#is-administrated-by"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/ontoneurolog-extension-of-dolce.owl#physical-action"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#is-affected-by"/>
+        <Class IRI="#pathology"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#is-affected-by"/>
+        <Class IRI="#pathology-model"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#is-divided-in-phase"/>
+        <Class IRI="#phase"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#is-part-of"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#study"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#is-treated-by"/>
+        <Class IRI="#therapy-action"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#precedes"/>
+        <Class IRI="#phase"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#provides"/>
+        <Class IRI="#living-non-human-subject"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#targets"/>
+        <Class IRI="#pathology"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#treats"/>
+        <Class IRI="#pathological-non-human-subject"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#treats"/>
+        <Class IRI="http://neurolog.unice.fr/ontoneurolog/v3.0/study-examination-subject.owl#patient"/>
+    </ObjectPropertyRange>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>http://neurolog.unice.fr/ontoneurolog/v3.0/dolce-particular.owl#amount-of-matter</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] Is a given quantity of matter.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#HIFU-therapy-action</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[U836] High Intensity Focalised Ultrasounds</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#anatomical-structure</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - An anatomical-structure represents an organ or a body location (brain,subcutanea...)</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#animal-provider</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - An animal provider breeds and provides non-human-subjects </Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#balance</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] Wikipedia : A balance is an instrument capable of making precise measurements of weight of mass</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#biological-type</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - Biological-type refers for animals to two options: wild or transgenic (having some genetic modifications)</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#blood-gas-analyzer</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] A blood gas analyser is a device used to measure blood gas</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#blood-gas-quality</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] Wikipedia : Blood gas is a laboratory test of blood where the purpose is primarily to measure ventilation and oxygenation. Measured values are pH, PaCO2, PaO2, (HCO3 and BE)</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#breeding</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - Breeding is the animal-provider role.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#drug</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF]  A chemical substance that has known biological effects on humans or other animals.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#electrocardiogram-monitor</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] Is a device used to monitor heart rate.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#healthy-non-human-subject</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - A healthy non-human-subject is a subject that has no pathology</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#heart-rate</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF]  Is the speed of the heartbeat measured by the number of poundings of the heart per unit of time.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#living-non-human-subject</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836  - A living-non-human-subject is a living animal in an preclinical study</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#living-status</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - The living status represents if an animal-subject is alive or dead at the time of the experiment</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#non-human</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - A non-human is an animal entity that is or was alive but is not a human</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#non-human-subject</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] U836 - U836 - A non-human-subject is or was a non-human being used in an preclinical study</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#pCO2-blood-gas</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF]  The partial pressure of carbon dioxide in the blood.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#pO2-blood-gas</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] The partial pressure of oxygen in the blood.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#pathological-non-human-subject</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - A pathological-non-human-subject is a non-human-subject presenting a defined pathology </Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#pathology</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - A pathology is defined by its name and affects some patients during a period of time</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#pathology-model</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">A pathology-model defines caracteristics of a know pathology that can be inoculated to a subject to create a pathological-model non-human subject</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#pathology-model-information</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - A pathology model information is a document defining how a pathology model is created from an existing pathology and implanted in a non-human subject resulting in a pathological-model that can be studied. </Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#ph-blood-gas</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF]  The acidity or basicity of the blood.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#phantom-information</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - Gives information about a phantom</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#phase</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 A phase is a part of study that can be defined by an achievment, a duration...</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#physiological-dataset</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">Refers to a physiological constant measured by a physiological examination.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#preclinical-study</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] A preclinical study is a research investigation involving non-human subjects ( animals, phantoms...) that is designed to answer specific questions about the safety and efficacy of a biomedical intervention (drug, treatment, device) or new ways of using a known drug, treatment, or device.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#pulse-oximeter</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] Is a device used for monitoring oxygen saturation.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#respiratory-rate</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] Is the rate (frequency) of ventilation, the number of breaths (inhalation-exhalation cycles) taken within a set amount of time (typically 60 seconds).</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#respiratory-rate-monitor</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] Is a device used for monitoring respiratory rate. </Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#saO2</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] Oxygen saturation measures the percentage of hemoglobin binding sites in the bloodstream occupied by oxygen.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#stabulation-centre</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - A stabulation location is the physical place where non-human-subject are kept before going through examinations</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#strain</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">U836 - A strain is a group of animals that is genetically uniform.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#therapy-action</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[U836] A therapy is an intended action to prevent or stop a pathology from developing. As a perdurant, it is limited in a period of time.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty IRI="http://www.w3.org/2004/02/skos/core#definition"/>
+        <IRI>#thermometer</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">[DEF] Is a device used to measure temperature.</Literal>
+    </AnnotationAssertion>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        <IRI>#weight</IRI>
+        <Literal datatypeIRI="&rdf;PlainLiteral">The weight entity measures the weight of a subject  at a given time, corresponding to an examination date. </Literal>
+    </AnnotationAssertion>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+
