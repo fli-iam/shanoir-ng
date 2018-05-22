@@ -15,37 +15,44 @@ export class HandleErrorService implements ErrorHandler {
     }
 
     public handleError(error: Response | any) {
-        let techMsg: string = error.message ? error.message : error.toString();
-        let userMsg: string = 'An unexpected error occured';
-
-        if (error instanceof Response) {
-            const body = error.json() || '';
-            techMsg = '';
-            techMsg = "[" + body.code + "]: " + body.message;
-            if (body.details) {
-                let errDetails = body.details.fieldErrors || '';
-                for (var errKey in errDetails) {
-                    techMsg += "; " + errKey + " should be ";
-                    var errDetailsByKey = errDetails[errKey][0];
-                    for (var errDetail in errDetailsByKey) {
-                        if (errDetail === "code")
-                        techMsg += errDetailsByKey[errDetail];
+        try {
+            let techMsg: string = error.message ? error.message : error.toString();
+            let userMsg: string = 'An unexpected error occured';
+    
+            if (error instanceof Response) {
+                const body = error.json() || '';
+                techMsg = '';
+                techMsg = "[" + body.code + "]: " + body.message;
+                if (body.details) {
+                    let errDetails = body.details.fieldErrors || '';
+                    for (var errKey in errDetails) {
+                        techMsg += "; " + errKey + " should be ";
+                        var errDetailsByKey = errDetails[errKey][0];
+                        for (var errDetail in errDetailsByKey) {
+                            if (errDetail === "code")
+                            techMsg += errDetailsByKey[errDetail];
+                        }
                     }
                 }
+                // TODO : userMsg = techMsg;
+            } 
+    
+            if (error.promise && error.rejection) {
+                techMsg = error.rejection;
+                userMsg = error.rejection.guiMsg;
             }
-            // TODO : userMsg = techMsg;
-        } 
+    
+            if (error.guiMsg) {
+                userMsg = error.guiMsg;
+            }
+            
+            console.error(techMsg);
+            console.error(error);
+            this.msgb.log('error', userMsg);
 
-        if (error.promise && error.rejection) {
-            techMsg = error.rejection;
-            userMsg = error.rejection.guiMsg;
+        } catch (error) {
+            console.error('Error handler failed : ');
+            console.error(error);
         }
-
-        if (error.guiMsg) {
-            userMsg = error.guiMsg;
-        }
-
-        console.error(techMsg);
-        this.msgb.log('error', userMsg);
     }
 }  

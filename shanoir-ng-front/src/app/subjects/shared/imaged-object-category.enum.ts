@@ -1,31 +1,17 @@
 export enum ImagedObjectCategory {
-    PHANTOM = "Phantom",
-    LIVING_HUMAN_BEING = "Living human being",
-    HUMAN_CADAVER = "Human cadaver",
-    ANATOMICAL_PIECE = "Anatomical piece"
+    PHANTOM = 'PHANTOM',
+    LIVING_HUMAN_BEING = 'LIVING_HUMAN_BEING',
+    HUMAN_CADAVER = 'HUMAN_CADAVER',
+    ANATOMICAL_PIECE = 'ANATOMICAL_PIECE'
 } 
 export namespace ImagedObjectCategory {
 
-    export function keys(): Array<string> {
-        let keys: Array<string> = [];
+    export function all(): Array<ImagedObjectCategory> {
+        let list: Array<ImagedObjectCategory> = [];
         for (let key in ImagedObjectCategory) {
-            if (key != 'values' && key != 'keys' && key != 'keyValues')
-            keys.push(key);
+            if (key != 'all' && isNaN(Number(key)))
+            list.push(eval('ImagedObjectCategory.'+key));
         }
-        return keys;
-    }
-    
-    export function values(): Array<string> {
-        let values: Array<string> = [];
-        for (let key in keys()) values.push(ImagedObjectCategory[key]);
-        return values;
-    }
-    
-    export function keyValues(): Array<Object> {
-        let items: Array<Object> = [];
-        for (let key of keys()) {
-            items.push({key: key, value: ImagedObjectCategory[key]});
-        }
-        return items;
+        return list;
     }
 }

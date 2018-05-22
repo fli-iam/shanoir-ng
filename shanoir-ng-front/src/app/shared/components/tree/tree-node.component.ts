@@ -47,7 +47,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
     @Output() editedLabel = new EventEmitter();
     @Output() buttonClick = new EventEmitter();
     @Output() labelClick = new EventEmitter();
-    @Output() nodeSelected = new EventEmitter();
+    @Output() chkbxChange = new EventEmitter();
     @Output() openClick = new EventEmitter();
     private onTouchedCallback: () => void = noop;
     private onChangeCallback: (_: any) => void = noop;

@@ -70,6 +70,7 @@ import { MsgBoxComponent } from './shared/msg-box/msg-box.component'
 import { MsgBoxService } from './shared/msg-box/msg-box.service'
 
 import '../assets/css/common.css';
+import '../assets/css/papaya.css';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
 import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 import { UploadExtraDataComponent } from './examinations/attached-files/upload-extra-data.component';
@@ -86,6 +87,7 @@ import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { DatasetService } from './datasets/shared/dataset.service';
 import { DatepickerComponent } from './shared/date/date.component';
+import { PapayaComponent } from './shared/components/papaya/papaya.component';
 
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
@@ -200,6 +202,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         DatepickerComponent,
         MrDatasetComponent,
         MsgBoxComponent,
+        PapayaComponent,
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,

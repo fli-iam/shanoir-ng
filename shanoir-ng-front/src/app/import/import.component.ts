@@ -24,8 +24,6 @@ import { SubjectStudy } from "../subjects/shared/subject-study.model";
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 import { DicomArchiveService } from './dicom-archive.service';
 
-declare var papaya: any;
-
 @Component({
     selector: 'import-modality',
     templateUrl: 'import.component.html',
@@ -34,7 +32,6 @@ declare var papaya: any;
 })
 
 export class ImportComponent implements OnInit {
-    @ViewChild('papayaModal') papayaModal: ModalComponent;
     @ViewChild('subjectCreationModal') subjectCreationModal: ModalComponent;
     
     public importForm: FormGroup;
@@ -87,6 +84,8 @@ export class ImportComponent implements OnInit {
 
     private isDateValid: boolean = true;
     private selectedDateNormal: IMyDate;
+
+    private papayaParams: object[];
     
     constructor(
     	private fb: FormBuilder,
@@ -100,7 +99,6 @@ export class ImportComponent implements OnInit {
 
     ngOnInit(): void {
         this.buildForm();
-        //papaya.Container.startPapaya();
     }
 
     buildForm(): void {
@@ -157,24 +155,26 @@ export class ImportComponent implements OnInit {
     };
             
     initPapaya(serie: SerieDicom): void {
-    	 var _this = this;
-    	 var entries = serie.images.map(function(name) {
-    		 return _this.status.files[name.path];
-    	 });
-    	 var listOfPromises = entries.map(function(a) {
-    	 return a.async("arraybuffer");
-    	 });
+        let _this = this;
+        let entries = serie.images.map(function(name) {
+            return _this.status.files[name.path];
+        });
+        let listOfPromises = entries.map(function(a) {
+            return a.async("arraybuffer");
+        });
 
-    	 var promiseOfList = Promise.all(listOfPromises);
+        let promiseOfList = Promise.all(listOfPromises);
 
-    	 promiseOfList.then(function (values) {
-    
-    		var params: object[] = [];
-            params["kioskMode"] = true;
-    	 	params['binaryImages'] = [values];
-    	 	papaya.Container.resetViewer(0, params);
-    	 	papaya.Container.resetViewer();
-    	 });
+        promiseOfList.then(function (values) {
+            let params: object[] = [];
+            params['kioskMode'] = true;
+            params['binaryImages'] = [values];
+            params['expandable'] = true;
+            params['allowScroll'] = false;
+            params['radiological'] = true;
+            params['showRuler'] = true;
+            _this.papayaParams = params;
+        });
     }
     
     uploadArchive(event: any): void {
@@ -217,7 +217,8 @@ export class ImportComponent implements OnInit {
     }
 
     showSerieDetails(nodeParams: any): void {
-        if (nodeParams && this.detailedSerie && nodeParams.id == this.detailedSerie["id"]) {
+        this.detailedPatient = null;
+        if (nodeParams && this.detailedSerie && nodeParams.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
             this.detailedSerie = null;
         } else {
             this.detailedSerie = nodeParams;
@@ -225,7 +226,8 @@ export class ImportComponent implements OnInit {
     }
 
     showPatientDetails(nodeParams: any): void {
-        if (nodeParams && this.detailedPatient && nodeParams.id == this.detailedPatient["id"]) {
+        this.detailedSerie = null;
+        if (nodeParams && this.detailedPatient && nodeParams.patientID == this.detailedPatient["patientID"]) {
             this.detailedPatient = null;
         } else {
             this.detailedPatient = nodeParams;
@@ -243,18 +245,17 @@ export class ImportComponent implements OnInit {
                 } 
             }
         }
+        if (this.seriesSelected) {
+            this.findStudiesWithStudyCardsByUserAndEquipment(this.selectedSeries.studies[0].series[0].equipment);
+            if(!this.examinationComment) {
+                // initialize examComment with the studyDescription Dicom value if this Dicom value is not changed by user
+                this.examinationComment = this.selectedSeries.studies[0].studyDescription;
+            }
+        }
     }
 
     changeExamComment (editedLabel: string): void {
         this.examinationComment = editedLabel;
-    }
-
-    validateSeriesSelected () : void {
-        this.findStudiesWithStudyCardsByUserAndEquipment(this.selectedSeries.studies[0].series[0].equipment);
-        if(!this.examinationComment) {
-            // initialize examComment with the studyDescription Dicom value if this Dicom value is not changed by user
-            this.examinationComment = this.selectedSeries.studies[0].studyDescription;
-        }
     }
 
     findStudiesWithStudyCardsByUserAndEquipment(equipment: EquipmentDicom): void {
@@ -425,7 +426,6 @@ export class ImportComponent implements OnInit {
     }
 
     closeSubjectPopin(subject: any): void {
-        console.log(subject);
         if (subject) {
             // Add the subject to the select box and select it
             subject.selected = true;

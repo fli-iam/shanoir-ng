@@ -1,20 +1,22 @@
-<span *ngIf="dataLoading">
-    <img class="arrow picto" [src]="loaderImagePath" />
-</span>
-<span *ngIf="hasChildren && isOpen" (click)="close()" class="arrow">&#x25BE;</span>
-<span *ngIf="hasChildren && !isOpen" (click)="open()" class="arrow">&#9656;</span>
-<span *ngIf="!hasChildren && dataRequest && !isOpen && !dataLoading" (click)="openClick.emit(this)" class="arrow">&#9656;</span>
-<span *ngIf="pictoUrl">
-    <img class="picto" src="{{pictoUrl}}" />
-</span>
-<input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" (change)="nodeSelected.emit(nodeParams)" class="clickable" />
-<input #editableLabel *ngIf="editable" type="text" [(ngModel)]="label" (change)="editedLabel.emit(label)" />
-<tool-tip *ngIf="tooltip">{{tooltip}}</tool-tip>
-<span *ngIf="!editable && !link" class="label" [class.clickable]="isClickable()" (click)="labelClick.emit(nodeParams)">{{label}}</span>
-<a *ngIf="!editable && link" (click)="labelClick.emit(nodeParams)" href="">{{label}}</a>
-<span *ngIf="buttonPicto" class="clickable">
-    <img class="picto" src="{{buttonPicto}}" (click)="buttonClick.emit(nodeParams)" />
-</span>
+<div class="node">
+    <span *ngIf="dataLoading">
+        <img class="arrow picto" [src]="loaderImagePath" />
+    </span>
+    <span *ngIf="hasChildren && isOpen" (click)="close()" class="arrow">&#x25BE;</span>
+    <span *ngIf="hasChildren && !isOpen" (click)="open()" class="arrow">&#9656;</span>
+    <span *ngIf="!hasChildren && dataRequest && !isOpen && !dataLoading" (click)="openClick.emit(this)" class="arrow">&#9656;</span>
+    <span *ngIf="pictoUrl" (click)="labelClick.emit(nodeParams)" class="clickable" >
+        <img class="picto" src="{{pictoUrl}}" />
+    </span>
+    <input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" (change)="chkbxChange.emit(nodeParams)" class="clickable" />
+    <input #editableLabel *ngIf="editable" type="text" [(ngModel)]="label" (change)="editedLabel.emit(label)" />
+    <tool-tip *ngIf="tooltip">{{tooltip}}</tool-tip>
+    <span *ngIf="!editable && !link" class="label" [class.clickable]="isClickable()" (click)="labelClick.emit(nodeParams)">{{label}}</span>
+    <span *ngIf="!editable && link" (click)="labelClick.emit(nodeParams)" href="">{{label}}</span>
+    <span *ngIf="buttonPicto" class="clickable">
+        <img class="picto" src="{{buttonPicto}}" (click)="buttonClick.emit(nodeParams)" />
+    </span>
+</div>
 <div #childrentWrapper *ngIf="!loaded || (loaded && isOpen)" [class.hidden]="!loaded" class="content">
     <ng-content></ng-content>
 </div>
