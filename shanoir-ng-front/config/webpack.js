@@ -17,7 +17,7 @@ const METADATA = webpackMerge(commonConfig.metadata, {
     BACKEND_API_STUDIES_MS_URL: BACKEND_API_ROOT_URL + '/studies',
 	BACKEND_API_DATASET_MS_URL: BACKEND_API_ROOT_URL + '/datasets',
 	BACKEND_API_IMPORT_MS_URL: BACKEND_API_ROOT_URL + '/import',
-    BACKEND_API_PRECLINICAL_MS_URL: '/preclinical',
+    BACKEND_API_PRECLINICAL_MS_URL: BACKEND_API_ROOT_URL +'/preclinical',
     KEYCLOAK_BASE_URL: 'http://shanoir-ng-nginx/auth',
     LOGOUT_REDIRECT_URL: 'http://shanoir-ng-nginx/shanoir-ng/index.html',
     port: 8080,
