@@ -82,6 +82,7 @@ services:
       - shanoir_ng_network
     ports:
      - "9903:9903"
+     - "9913:9913"
     depends_on:
       - "keycloak"
       - "database"
@@ -98,14 +99,15 @@ services:
       - shanoir_ng_network
     ports:
      - "9904:9904"
+     - "9914:9914"
     depends_on:
       - "keycloak"
       - "database"
   #
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
-  dcm4chee-ldap:
-    container_name: dcm4chee-ldap
+  ldap:
+    container_name: ldap
     image: dcm4che/slapd-dcm4chee:2.4.44-13.0
     logging:
       driver: json-file
@@ -151,9 +153,9 @@ services:
     env_file: ./docker-compose/dcm4chee/variables.env
     environment:
       WILDFLY_CHOWN: /opt/wildfly/standalone /storage
-      WILDFLY_WAIT_FOR: dcm4chee-ldap:389 dcm4chee-database:5432
+      WILDFLY_WAIT_FOR: ldap:389 dcm4chee-database:5432
     depends_on:
-      - "dcm4chee-ldap"
+      - "ldap"
       - "dcm4chee-database"
     volumes:
       - "dcm4chee-arc-wildfly-data:/opt/wildfly/standalone"
