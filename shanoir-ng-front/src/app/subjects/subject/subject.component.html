@@ -90,8 +90,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="sex" formControlName="sex" [(ngModel)]="subject.sex">
-									<option [value]="female">Female</option>
-									<option [value]="male">Male</option>
+									<option [value]="'F'">Female</option>
+									<option [value]="'M'">Male</option>
 								</select>
 							</ng-template>
 						</span>
@@ -104,8 +104,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="manualHemisphericDominance" formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance">
-									<option [value]="left">Left</option>
-									<option [value]="right">Right</option>
+									<option [value]="'Left'">Left</option>
+									<option [value]="'Right'">Right</option>
 								</select>
 							</ng-template>
 						</span>
@@ -118,8 +118,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="languageHemisphericDominance" formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance">
-									<option [value]="left">Left</option>
-									<option [value]="right">Right</option>
+									<option [value]="'Left'">Left</option>
+									<option [value]="'Right'">Right</option>
 								</select>
 							</ng-template>
 						</span>

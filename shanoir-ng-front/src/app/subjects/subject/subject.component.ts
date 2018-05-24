@@ -219,6 +219,8 @@ export class SubjectComponent implements OnInit, OnChanges {
     updateModel(): void {
         this.subject = this.subjectForm.value;
         this.subject.subjectStudyList = this.subjectStudyList;
+        console.log("updateModel - length" + this.subjectStudyList.length);
+        console.log("updateModel - length2 : " + this.subject.subjectStudyList.length);
     }
 
     // No
@@ -240,12 +242,12 @@ export class SubjectComponent implements OnInit, OnChanges {
         if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING) {
             this.setSubjectBirthDateToFirstOfJanuary();
         }
-        for (let subjectStudy of this.subject.subjectStudyList) {
-            subjectStudy.subject = this.subject;
-            this.subjectService.createSubjectStudy(subjectStudy);
-        }
         this.subjectService.create(this.subject)
-            .subscribe((subject) => {
+        .subscribe((subject) => {
+                for (let subjectStudy of this.subject.subjectStudyList) {
+                    subjectStudy.subject.id = subject.id;console.log("studyId: " + subjectStudy.study.id + ", subjectId: " + subjectStudy.subject.id + ", PI:" + subjectStudy.physicallyInvolved);
+                    this.subjectService.createSubjectStudy(subjectStudy);
+                }
                 this.back();
             }, (err: string) => {
                 this.manageRequestErrors(err);
@@ -312,7 +314,6 @@ export class SubjectComponent implements OnInit, OnChanges {
         newSubjectStudy.study = new Study(); // TODO : maybe use Study objects inside [value] instead of just id
         newSubjectStudy.study.id = study.target.value;
         this.subjectStudyList.push(newSubjectStudy);
-
     }
 
     /**

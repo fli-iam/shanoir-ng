@@ -8,9 +8,9 @@ export class Subject {
     name: string;
     identifier: string;
     birthDate: Date;
-    languageHemisphericDominance: "left" | "right";
-    manualHemisphericDominance: "left" | "right";
+    languageHemisphericDominance: "Left" | "Right";
+    manualHemisphericDominance: "Left" | "Right";
     imagedObjectCategory: ImagedObjectCategory;
-    sex: "male" | "female";
+    sex: "M" | "F";
     subjectStudyList: SubjectStudy[];
 }
