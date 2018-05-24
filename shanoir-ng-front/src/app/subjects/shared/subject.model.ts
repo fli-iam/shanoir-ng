@@ -11,6 +11,6 @@ export class Subject {
     languageHemisphericDominance: "Left" | "Right";
     manualHemisphericDominance: "Left" | "Right";
     imagedObjectCategory: ImagedObjectCategory;
-    sex: "M" | "F";
+    sex: "male" | "female";
     subjectStudyList: SubjectStudy[];
 }
