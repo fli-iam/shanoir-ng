@@ -72,11 +72,11 @@ export class SubjectService {
 
     updateSubjectStudy(subjectStudy: SubjectStudy): Observable<SubjectStudy> {
         return this.http.put<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
-            .map(response => response);
+            .map(res => res);
     }
 
-    createSubjectStudy(subjectStudy: SubjectStudy): Observable<void> {
-        return this.http.post<void>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL, JSON.stringify(subjectStudy))
+    createSubjectStudy(subjectStudy: SubjectStudy): Observable<SubjectStudy> {
+        return this.http.post<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL, JSON.stringify(subjectStudy))
             .map(res => res);
     }
 

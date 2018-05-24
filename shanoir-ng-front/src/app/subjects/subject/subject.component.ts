@@ -216,13 +216,6 @@ export class SubjectComponent implements OnInit, OnChanges {
         'birthDate': ''
     }
 
-    updateModel(): void {
-        this.subject = this.subjectForm.value;
-        this.subject.subjectStudyList = this.subjectStudyList;
-        console.log("updateModel - length" + this.subjectStudyList.length);
-        console.log("updateModel - length2 : " + this.subject.subjectStudyList.length);
-    }
-
     // No
     back(subject?: Subject): void {
         if (this.closing.observers.length > 0) {
@@ -237,25 +230,25 @@ export class SubjectComponent implements OnInit, OnChanges {
     }
 
     create(): void {
-        this.updateModel();
+        this.subject = this.subjectForm.value;
         this.generateSubjectIdentifier();
-        if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING) {
+        // Anonymization only for human subject
+        if (this.humanSelected()) {
             this.setSubjectBirthDateToFirstOfJanuary();
         }
         this.subjectService.create(this.subject)
-        .subscribe((subject) => {
-                for (let subjectStudy of this.subject.subjectStudyList) {
-                    subjectStudy.subject.id = subject.id;console.log("studyId: " + subjectStudy.study.id + ", subjectId: " + subjectStudy.subject.id + ", PI:" + subjectStudy.physicallyInvolved);
-                    this.subjectService.createSubjectStudy(subjectStudy);
-                }
-                this.back();
+        .subscribe((subject: Subject) => {
+            if (this.subjectStudyList.length > 0) {
+                this.createSubjectStudy(subject);
+            }
+            this.back();
             }, (err: string) => {
                 this.manageRequestErrors(err);
         });
     }
 
     update(): void {
-        this.updateModel();
+        this.subject = this.subjectForm.value;
         for (let subjectStudy of this.subject.subjectStudyList) {
             if (this.subjectService.findSubjectStudyById(subjectStudy.id)) {
                 this.subjectService.updateSubjectStudy(subjectStudy);
@@ -269,6 +262,25 @@ export class SubjectComponent implements OnInit, OnChanges {
             }, (err: string) => {
                 this.manageRequestErrors(err);
         });
+    }
+
+    createSubjectStudy(subject : Subject) {
+        for (let subjectStudy of this.subjectStudyList) {
+            subjectStudy.subject = subject;
+            console.log("studyId: " + subjectStudy.study.id + ", subjectId: " + subjectStudy.subject.id + ", PI:" + subjectStudy.physicallyInvolved);
+            this.subjectService.createSubjectStudy(subjectStudy)
+                .subscribe((subjectStudy: SubjectStudy) => {
+                    // Si relSubjectStudy created, update the subject with the list of relSubjectStudy
+                    this.subject.subjectStudyList.push(subjectStudy);
+                    this.subjectService.update(this.subject.id, this.subject)
+                        .subscribe((subject) => {
+                        }, (err: string) => {
+                            this.manageRequestErrors(err);
+                    });
+                }, (err: string) => {
+                    this.manageRequestErrors(err);
+            });
+        }
     }
 
     private manageRequestErrors(err: string): void {
@@ -308,11 +320,12 @@ export class SubjectComponent implements OnInit, OnChanges {
         // this.subjectService.deleteSubjectStudy(subjectStudy.id);
     }
 
-    onStudySelectChange(study: any) {
+    onStudySelectChange(studyId: number) {
         var newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
         newSubjectStudy.study = new Study(); // TODO : maybe use Study objects inside [value] instead of just id
-        newSubjectStudy.study.id = study.target.value;
+        newSubjectStudy.study.id = studyId;
+        
         this.subjectStudyList.push(newSubjectStudy);
     }
 
