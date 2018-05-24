@@ -1,11 +1,13 @@
 import { SubjectType } from "../../subjects/shared/subject-type";
 import { SubjectExamination } from "../../examinations/shared/subject-examination.model";
+import { Subject } from "./subject.model";
+import { Study } from "../../studies/shared/study.model";
 
 export class SubjectStudy {
     id: number;
     examinations: SubjectExamination[];
-    subjectId: number;
-    studyId: number;
+    subject: Subject;
+    study: Study;
     subjectStudyIdentifier: string;
     subjectType: SubjectType;
     physicallyInvolved: boolean;

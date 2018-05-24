@@ -10,7 +10,7 @@ export class StudyNamePipe implements PipeTransform {
     transform(subjectStudy: SubjectStudy, studies: IdNameObject[]) {
         if (subjectStudy && studies) {
             for (let study of studies) {
-                if(subjectStudy.studyId == study.id)
+                if(subjectStudy.study.id == study.id)
                     return study.name;
             }
         }

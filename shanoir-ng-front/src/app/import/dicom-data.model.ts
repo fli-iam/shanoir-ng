@@ -17,7 +17,7 @@ export class PatientDicom {
     patientID: string;
     patientName: string;
     patientBirthDate: Date;
-    patientSex: string;
+    patientSex: 'male' | 'female';
     studies: StudyDicom[];
 }
 

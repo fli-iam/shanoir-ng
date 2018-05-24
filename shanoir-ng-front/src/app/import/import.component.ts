@@ -19,7 +19,6 @@ import { Subject } from '../subjects/shared/subject.model';
 import { SubjectService } from "../subjects/shared/subject.service";
 import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject-study.model';
 import { SubjectExamination } from '../examinations/shared/subject-examination.model';
-import { SubjectType } from "../subjects/shared/subject-type.enum";
 import { SubjectStudy } from "../subjects/shared/subject-study.model";
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 import { DicomArchiveService } from './dicom-archive.service';
@@ -54,7 +53,6 @@ export class ImportComponent implements OnInit {
     public studycard: StudyCard;
     private subjects: SubjectWithSubjectStudy[]; 
     public subject: SubjectWithSubjectStudy;
-    private subjectTypeEnumValue: String;
     private subjectStudy: SubjectStudy;
     public subjectFromImport: Subject = new Subject();
     public examinations: SubjectExamination[];
@@ -327,7 +325,6 @@ export class ImportComponent implements OnInit {
     onSelectSubject(subject: SubjectWithSubjectStudy): void {
         if (subject) {
             this.subject = subject;
-            this.subjectTypeEnumValue = SubjectType[this.subject.subjectStudy.subjectType];
             this.examinationService
                 .findExaminationsBySubjectAndStudy(subject.id, this.study.id)
                 .then(examinations => this.examinations = examinations)
@@ -342,12 +339,24 @@ export class ImportComponent implements OnInit {
         this.subjectService.updateSubjectStudy(this.subject.subjectStudy);
     }
 
-    initializeSubject(subjectFromImport: any): void {
-        subjectFromImport.birthDate = this.selectedSeries.patientBirthDate;
-        subjectFromImport.name = this.selectedSeries.patientName;
-        subjectFromImport.sex = <any> this.selectedSeries.patientSex;
-        subjectFromImport.study = this.study; 
-        this.modalService.objectPassedByModal.emit(subjectFromImport);
+    initializePrefillSubject(): void {
+        let subjectStudy = new SubjectStudy();
+        subjectStudy.study = this.study;
+        subjectStudy.physicallyInvolved = false;
+        subjectStudy.subjectStudyIdentifier = 'TODO : can auto generate smth here if you want'
+        subjectStudy.subjectType = 'PATIENT';
+        
+        console.log('prefilled data : ');
+        console.log(this.selectedSeries.patientBirthDate);
+        console.log(this.selectedSeries.patientSex);
+        console.log(this.selectedSeries.patientName);
+        
+        let newSubject = new Subject();
+        newSubject.birthDate = this.selectedSeries.patientBirthDate;
+        newSubject.name = this.selectedSeries.patientName;
+        newSubject.sex = this.selectedSeries.patientSex; 
+        newSubject.subjectStudyList = [subjectStudy];
+        this.subjectFromImport = newSubject;
     }
     
     onInputFieldChanged(event: IMyInputFieldChanged) {
@@ -432,10 +441,6 @@ export class ImportComponent implements OnInit {
             this.subjects.push(subject);
         }
         this.subjectCreationModal.hide();
-    }
-
-    public subjectTypes() {
-        return SubjectType.keyValues();
     }
 
     startProgressTest() {

@@ -166,7 +166,7 @@
 					<li>
 						<label i18n="Subject detail|List of the studies label@@subjectDetailListOfStudies">List of the studies available</label>
 						<span class="right-col">
-							<select id="studies" (change)="onStudySelectChange($event)">
+							<select id="studies" (change)="onStudySelectChange($event)" [(ngModel)]="selectedStudyId" [ngModelOptions]="{standalone: true}">
 								<option disabled selected>Please select...</option>
 								<option *ngFor="let study of studies" [value]="study.id">{{study.name}}</option>
 							</select>
@@ -187,7 +187,7 @@
 								<tr *ngFor="let subjectStudy of subjectStudyList; let i = index">
 									<td class="label-col">
 										<div *ngFor="let study of studies">
-											<span *ngIf="study.id == subjectStudy.studyId">
+											<span *ngIf="study.id == subjectStudy.study.id">
 												{{study.name}}
 											</span>
 										</div>
@@ -200,10 +200,9 @@
 									</td>
 									<td class="dropdown-col">
 										<select id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
-											<option *ngFor="let subjectType of subjectTypes()" [value]="subjectType.value"
-												i18n="Subject Types {{subjectType.value}}|Type label@@SubjectType{{subjectType.key}}">
-													{{subjectType.value}}
-											</option>
+											<option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
+											<option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
+											<option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
 										</select>
 									</td>
 									<td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-ban"></i></span>

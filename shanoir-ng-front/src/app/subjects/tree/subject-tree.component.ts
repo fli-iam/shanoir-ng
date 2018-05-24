@@ -31,11 +31,11 @@ export class SubjectTreeComponent {
 
     getStudyDetails(component: TreeNodeComponent) {
         component.dataLoading = true;
-        let subject: SubjectStudy = component.nodeParams;
-        this.examinationService.findExaminationsBySubjectAndStudy(subject.subjectId, subject.studyId)
+        let subjectStudy: SubjectStudy = component.nodeParams;
+        this.examinationService.findExaminationsBySubjectAndStudy(subjectStudy.subject.id, subjectStudy.study.id)
             .then(examinations => {
                 if (examinations) {
-                    subject.examinations = examinations;
+                    subjectStudy.examinations = examinations;
                     component.hasChildren = true;
                 }
                 component.open();

@@ -1,5 +1,1 @@
-export enum SubjectType {
-    HEALTHY_VOLUNTEER = <any> "Healthy volunteer",
-    PATIENT = <any> "Patient",
-    PHANTOM = <any> "Phantom"
-}
+export type SubjectType = 'HEALTHY_VOLUNTEER' | 'PATIENT' | 'PHANTOM';

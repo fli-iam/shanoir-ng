@@ -8,7 +8,7 @@ export class SubjectStudyPipe implements PipeTransform {
 
     transform(subjectStudy: SubjectStudy) {
         if (subjectStudy) {
-            return subjectStudy.subjectStudyIdentifier + (subjectStudy.subjectType ? ' (' + SubjectType[subjectStudy.subjectType] + ')' : '');
+            return subjectStudy.subjectStudyIdentifier + (subjectStudy.subjectType ? ' (' + subjectStudy.subjectType + ')' : '');
         }
         return "";
     }

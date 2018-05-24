@@ -1,4 +1,3 @@
 export class IdNameObject {
-    id: number;
-    name: String;
+    constructor(public id: number, public name: String) {}
 }
