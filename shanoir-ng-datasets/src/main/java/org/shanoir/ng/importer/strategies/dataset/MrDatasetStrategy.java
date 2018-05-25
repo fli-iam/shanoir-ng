@@ -9,7 +9,7 @@ import org.shanoir.ng.dataset.ProcessedDatasetType;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.Dataset;
-import org.shanoir.ng.importer.dto.DatasetWrapper;
+import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
@@ -34,10 +34,10 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 	DatasetExpressionContext datasetExpressionContext;
 
 	@Override
-	public DatasetWrapper<MrDataset> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
+	public DatasetsWrapper<MrDataset> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
 			ImportJob importJob) {
 		
-		DatasetWrapper<MrDataset> datasetWrapper = new DatasetWrapper<MrDataset>();
+		DatasetsWrapper<MrDataset> datasetWrapper = new DatasetsWrapper<MrDataset>();
 
 		/**
 		 * retrieve number of dataset in current serie if Number of dataset > 1 then
@@ -77,7 +77,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 				}
 			}
 
-			datasetWrapper.getDataset().add(mrDataset);
+			datasetWrapper.getDatasets().add(mrDataset);
 
 			datasetIndex++;
 		}
@@ -109,9 +109,6 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 
 		// Pre-select the type Reconstructed dataset
 		mrDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
-
-		// TODO ATO : implement when import details are ready.. (json sent by michael to
-		// me)
 
 		// Set the study and the subject
 		mrDataset.setSubjectId(importJob.getPatients().get(0).getFrontSubjectId());
