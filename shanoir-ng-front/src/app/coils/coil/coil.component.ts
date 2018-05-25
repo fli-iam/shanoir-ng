@@ -38,11 +38,14 @@ export class CoilComponent implements OnInit {
     public addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
     public coilTypes: Enum[] = [];
 
-    constructor(private route: ActivatedRoute, private router: Router,
-        private coilService: CoilService, private fb: FormBuilder,
+    constructor(private route: ActivatedRoute, 
+        private router: Router,
+        private coilService: CoilService, 
+        private fb: FormBuilder,
         private centerService: CenterService,
         private manufModelService: ManufacturerModelService,
-        private location: Location, private keycloakService: KeycloakService) {
+        private location: Location, 
+        private keycloakService: KeycloakService) {
     }
 
     ngOnInit(): void {

@@ -113,7 +113,7 @@ export class SubjectComponent implements OnInit, OnChanges {
             if (this.preFillData) {
                 this.computeNameFromDicomTag(this.preFillData.name);
                 this.subject.sex = this.preFillData.sex;
-                this.subject.birthDate = this.preFillData.birthDate;
+                this.subject.birthDate = new Date(this.preFillData.birthDate);
             }
             if (this.preFillData.subjectStudyList && this.preFillData.subjectStudyList.length > 0) {
                 this.subjectStudyList = this.preFillData.subjectStudyList;
@@ -245,7 +245,8 @@ export class SubjectComponent implements OnInit, OnChanges {
         this.subjectService.create(this.subject)
         .subscribe((subject) => {
                 for (let subjectStudy of this.subject.subjectStudyList) {
-                    subjectStudy.subject.id = subject.id;console.log("studyId: " + subjectStudy.study.id + ", subjectId: " + subjectStudy.subject.id + ", PI:" + subjectStudy.physicallyInvolved);
+                    subjectStudy.subject.id = subject.id;
+                    console.log("studyId: " + subjectStudy.study.id + ", subjectId: " + subjectStudy.subject.id + ", PI:" + subjectStudy.physicallyInvolved);
                     this.subjectService.createSubjectStudy(subjectStudy);
                 }
                 this.back();

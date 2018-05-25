@@ -1,13 +1,13 @@
 import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
-import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR, Validator, AbstractControl, FormControl } from '@angular/forms';
+import { IMyOptions } from 'mydatepicker';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
     selector: 'datepicker',
     template: `
         <my-date-picker 
             [options]="options" 
-            [ngModel]="ngModel"
+            [ngModel]="convertedDate"
             (ngModelChange)="onModelChange($event)">
         </my-date-picker>
     `,
@@ -24,6 +24,7 @@ export class DatepickerComponent implements ControlValueAccessor {
     
     @Input() ngModel: Date;
     @Output() ngModelChange = new EventEmitter();
+    private convertedDate: Object;
 
     private options: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
@@ -44,7 +45,9 @@ export class DatepickerComponent implements ControlValueAccessor {
     }
 
     writeValue(obj: any): void {
+        console.log('write');
         this.ngModel = obj;
+        this.convertedDate = {jsdate: this.ngModel};
     }
     
     registerOnChange(fn: any): void {

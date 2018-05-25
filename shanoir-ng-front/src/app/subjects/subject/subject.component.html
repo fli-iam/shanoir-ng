@@ -127,7 +127,7 @@
 				</ol>
 				<ol *ngIf="!humanSelected()" [@slideDown]="!humanSelected()">
 					<li *ngIf="mode == 'create'">
-						<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
+						<label class="date-label" i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
 						<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
 						<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
 					</li>

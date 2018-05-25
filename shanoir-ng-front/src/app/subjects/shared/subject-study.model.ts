@@ -1,4 +1,4 @@
-import { SubjectType } from "../../subjects/shared/subject-type";
+import { SubjectType } from '../../subjects/shared/subject.types';
 import { SubjectExamination } from "../../examinations/shared/subject-examination.model";
 import { Subject } from "./subject.model";
 import { Study } from "../../studies/shared/study.model";

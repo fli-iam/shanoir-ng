@@ -345,12 +345,7 @@ export class ImportComponent implements OnInit {
         subjectStudy.physicallyInvolved = false;
         subjectStudy.subjectStudyIdentifier = 'TODO : can auto generate smth here if you want'
         subjectStudy.subjectType = 'PATIENT';
-        
-        console.log('prefilled data : ');
-        console.log(this.selectedSeries.patientBirthDate);
-        console.log(this.selectedSeries.patientSex);
-        console.log(this.selectedSeries.patientName);
-        
+
         let newSubject = new Subject();
         newSubject.birthDate = this.selectedSeries.patientBirthDate;
         newSubject.name = this.selectedSeries.patientName;

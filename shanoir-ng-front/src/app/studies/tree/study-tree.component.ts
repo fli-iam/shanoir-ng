@@ -7,7 +7,7 @@ import { Study } from '../shared/study.model';
 import { StudyUserType } from '../shared/study-user-type.enum';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import { SubjectType } from '../../subjects/shared/subject-type';
+import { SubjectType } from '../../subjects/shared/subject.types';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 
 @Component({
