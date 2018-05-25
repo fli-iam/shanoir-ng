@@ -2,7 +2,7 @@ package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.importer.dto.Dataset;
-import org.shanoir.ng.importer.dto.DatasetWrapper;
+import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 
@@ -23,7 +23,7 @@ import org.shanoir.ng.importer.dto.Serie;
 
 public interface DatasetStrategy<T> {
 
-	DatasetWrapper<T> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
+	DatasetsWrapper<T> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
 			ImportJob importJob);
 
 	T generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,			ImportJob importJob);
