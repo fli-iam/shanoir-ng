@@ -45,7 +45,6 @@ export class DatepickerComponent implements ControlValueAccessor {
     }
 
     writeValue(obj: any): void {
-        console.log('write');
         this.ngModel = obj;
         this.convertedDate = {jsdate: this.ngModel};
     }
