@@ -1,5 +1,8 @@
 package org.shanoir.ng.dataset;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.CtDatasetRepository;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -7,16 +10,14 @@ import org.shanoir.ng.dataset.modality.MrDatasetRepository;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.modality.PetDatasetRepository;
 import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Dataset service implementation.
@@ -43,9 +44,6 @@ public class DatasetServiceImpl implements DatasetService<Dataset> {
 
 	@Autowired
 	private PetDatasetRepository petDatasetRepository;
-
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirDatasetsException {
@@ -150,6 +148,13 @@ public class DatasetServiceImpl implements DatasetService<Dataset> {
 		datasetDb.setStudyId(dataset.getStudyId());
 		// TODO: to complete
 		return datasetDb;
+	}
+
+	@Override
+	public List<Dataset> findAll() throws ShanoirException {
+		List<Dataset> datasets = new ArrayList<Dataset>();
+		datasetRepository.findAll().forEach(datasets::add);
+		return datasets;
 	}
 
 }

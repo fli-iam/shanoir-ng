@@ -19,6 +19,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.jackson.LocalDateDeserializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -48,6 +49,7 @@ public class Examination extends HalEntity {
 	private String comment;
 
 	/** Dataset acquisitions. */
+	@JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = CascadeType.ALL)
 	private List<DatasetAcquisition> datasetAcquisitions;
 

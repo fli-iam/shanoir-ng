@@ -14,170 +14,13 @@
 			</span>
 
 
-			<fieldset>
-				<ol>
-					<li>
-						<label i18n="Dataset detail|Dataset id@@datasetId">Id</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'create'">
-								<span i18n="Dataset detail|Dataset id generated@@datasetIdGenerated">Automatically generated</span>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								{{dataset.id}}
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset creation date@@datasetDetailCreation" class="required-label">Creation date</label>
-						<span [ngSwitch]="mode" class="right-col">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.creationDate | date: 'dd/MM/yyyy'}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<datepicker [(ngModel)]="dataset.creationDate" [ngModelOptions]="{standalone: true}"></datepicker>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset type@@datasetDetailType" class="required-label">Type</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.type}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<select required [(ngModel)]="dataset.type" [ngModelOptions]="{standalone: true}" >
-									<option *ngFor="let type of getDatasetTypes()" [value]="type.value">{{type.value}}</option>
-								</select>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset acquisition@@datasetDetailAcquisition" class="required-label">Acquisition</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.acquisitionId}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<select required [(ngModel)]="dataset.acquisitionId" [ngModelOptions]="{standalone: true}" >
-									<!--option *ngFor="" [value]="">{{}}</option-->
-								</select>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset processing@@datasetDetailProcessing" class="required-label">Processing</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.processingId}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<select required [(ngModel)]="dataset.processingId" [ngModelOptions]="{standalone: true}" >
-									<!--option *ngFor="" [value]="">{{}}</option-->
-								</select>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset group fo subject@@datasetDetailGroupOfSubject" class="required-label">Group of subjects</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.groupOfSubjectId}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<select required [(ngModel)]="dataset.groupOfSubjectId" [ngModelOptions]="{standalone: true}" >
-									<!--option *ngFor="" [value]="">{{}}</option-->
-								</select>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset referenced for superimposition@@datasetDetailReferencedForSuperimposition" class="required-label">Referenced dataset for superimposition</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.datasetReferencedForSuperimposition}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<select required [(ngModel)]="dataset.datasetReferencedForSuperimposition" [ngModelOptions]="{standalone: true}" >
-									<!--option *ngFor="" [value]="">{{}}</option-->
-								</select>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset study@@datasetDetailStudy" class="required-label">Study</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.studyId}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<select required [(ngModel)]="dataset.studyId" [ngModelOptions]="{standalone: true}" >
-									<option *ngFor="let study of studies" [value]="study.id">{{study.name}}</option>
-								</select>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset subject@@datasetDetailSubject" class="required-label">Subject</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.subjectId}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<select required [(ngModel)]="dataset.subjectId" [ngModelOptions]="{standalone: true}" >
-									<option *ngFor="let subject of subjects" [value]="subject.id">{{subject.name}}</option>
-								</select>
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-
-			<fieldset>
-				<legend>Dataset Metadata</legend>
-				<ol>
-					<li>
-						<label i18n="Dataset detail|Dataset name label@@datasetDetailCreation">Name</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.name}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" [(ngModel)]="dataset.name" [ngModelOptions]="{standalone: true}" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset comments@@datasetComments">Comment</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.originMetadata.comment}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" [(ngModel)]="dataset.originMetadata.comment" [ngModelOptions]="{standalone: true}" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset modality type@@datasetModalityType">Modality type</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.originMetadata.datasetModalityType}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" [(ngModel)]="dataset.originMetadata.datasetModalityType" [ngModelOptions]="{standalone: true}" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset explored entity type@@datasetExploredEntity">Explored entity</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.originMetadata.datasetExploredEntity}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" [(ngModel)]="dataset.originMetadata.datasetExploredEntity" [ngModelOptions]="{standalone: true}" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset cardinality of releted subjects@@datasetCardinalityOfRelatedSubjects">Cardinality of releted subjects</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.originMetadata.datasetCardinalityOfRelatedSubjects}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" [(ngModel)]="dataset.originMetadata.datasetCardinalityOfRelatedSubjects" [ngModelOptions]="{standalone: true}" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Dataset detail|Dataset processed type subjects@@datasetProcessedType">Processed Type</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">{{dataset.originMetadata.datasetProcessedType}}</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" [(ngModel)]="dataset.originMetadata.datasetProcessedType" [ngModelOptions]="{standalone: true}" />
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-
+			<common-dataset-details [mode]="mode" [dataset]="dataset"></common-dataset-details>
 			<mr-dataset-details [mode]="mode" [dataset]="dataset"></mr-dataset-details>
 
+			<fieldset *ngIf="mode=='view'">
+				<span>Download Nifti files</span><br/>
+				<button>Open preview</button>
+			</fieldset>
 
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
@@ -186,7 +29,7 @@
 						<button type="submit" i18n="Buttons|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-						<button type="submit" i18n="Buttons|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="true">Update</button>
+						<button type="submit" i18n="Buttons|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="false">Update</button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
 						<button type="submit" i18n="Buttons|Create button label@@createButton" (click)="create()" class="Button" [disabled]="true">Create</button>

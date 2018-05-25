@@ -23,6 +23,10 @@ public class DatasetDTO {
 	private Long subjectId;
 
 	private DatasetMetadataDTO updatedMetadata;
+	
+	private String name;
+	
+	private String type;
 
 	/**
 	 * @return the creationDate
@@ -128,5 +132,25 @@ public class DatasetDTO {
 	public void setUpdatedMetadata(DatasetMetadataDTO updatedMetadata) {
 		this.updatedMetadata = updatedMetadata;
 	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+	
+	
+	
+	
 
 }

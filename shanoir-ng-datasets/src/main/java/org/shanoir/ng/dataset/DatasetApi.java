@@ -4,11 +4,14 @@
  */
 package org.shanoir.ng.dataset;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,5 +61,15 @@ public interface DatasetApi {
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@ApiParam(value = "study to update", required = true) @Valid @RequestBody Dataset dataset,
 			BindingResult result) throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Returns all the datasets", response = Dataset.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found datasets", response = Dataset.class),
+			@ApiResponse(code = 204, message = "no user found", response = ErrorModel.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
+			@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasRole('ADMIN')")
+	ResponseEntity<List<DatasetDTO>> findDatasets() throws RestServiceException;
 
 }

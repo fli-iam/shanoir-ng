@@ -83,10 +83,14 @@ import { SubjectTreeComponent } from './subjects/tree/subject-tree.component';
 import { StudyNamePipe } from './subjects/shared/study-name.pipe';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
+import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { DatasetService } from './datasets/shared/dataset.service';
 import { DatepickerComponent } from './shared/date/date.component';
 import { PapayaComponent } from './shared/components/papaya/papaya.component';
+import { DatasetTypeComponent } from './datasets/shared/dataset-type/dataset-type.component';
+import { ExploredEntityComponent } from './datasets/shared/explored-entity/explored-entity.component';
+import { ProcessedDatasetTypeComponent } from './datasets/shared/processed-dataset-type/processed-dataset-type.component';
 
 
 @NgModule({
@@ -152,8 +156,12 @@ import { PapayaComponent } from './shared/components/papaya/papaya.component';
         DatasetListComponent,
         DatepickerComponent,
         MrDatasetComponent,
+        CommonDatasetComponent,
         MsgBoxComponent,
-        PapayaComponent
+        PapayaComponent,
+        DatasetTypeComponent,
+        ExploredEntityComponent,
+        ProcessedDatasetTypeComponent
     ],
     entryComponents: [
         ConfirmDialogComponent

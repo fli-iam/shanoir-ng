@@ -325,7 +325,6 @@ export class SubjectComponent implements OnInit, OnChanges {
         newSubjectStudy.physicallyInvolved = false;
         newSubjectStudy.study = new Study(); // TODO : maybe use Study objects inside [value] instead of just id
         newSubjectStudy.study.id = studyId;
-        
         this.subjectStudyList.push(newSubjectStudy);
     }
 

@@ -1,5 +1,7 @@
 package org.shanoir.ng.dataset;
 
+import java.util.List;
+
 import org.shanoir.ng.shared.exception.ShanoirException;
 
 /**
@@ -56,5 +58,13 @@ public interface DatasetService<T extends Dataset> {
 	 * @throws ShanoirException
 	 */
 	void updateFromShanoirOld(T dataset) throws ShanoirException;
+	
+	/**
+	 * Find every dataset
+	 * 
+	 * @return datasets
+	 * @throws ShanoirException
+	 */
+	List<T> findAll() throws ShanoirException;
 
 }

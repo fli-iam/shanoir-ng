@@ -1,12 +1,11 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Location } from '@angular/common';
 import { Observable } from 'rxjs/Observable';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { DatasetService } from '../shared/dataset.service';
 import { Dataset } from '../shared/dataset.model';
-import { DatasetType } from '../shared/dataset-type.enum';
-import { SubjectService } from '../../subjects/shared/subject.service';
-import { Subject } from '../../subjects/shared/subject.model';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 @Component({
     selector: 'dataset-detail',
@@ -18,19 +17,23 @@ export class DatasetComponent implements OnInit {
 
     @Input() private mode: 'create' | 'edit' | 'view';
     private dataset: Dataset;
-    private subjects: Subject[] = [];
+    public canModify: Boolean = false;
     
     constructor(
             private datasetService: DatasetService,
-            private subjectService: SubjectService,
             private route: ActivatedRoute,
-            private location: Location) {}
+            private location: Location,
+            private keycloakService: KeycloakService,
+            private router: Router,
+            private msgService: MsgBoxService) {}
 
     ngOnInit(): void {
+        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+            this.canModify = true;
+        }
         this.fetchMode().then(() => {
             this.fetchDataset();
         });
-        this.fetchSubjects();
     }
 
     private fetchMode(): Promise<void> {
@@ -61,23 +64,22 @@ export class DatasetComponent implements OnInit {
             });
     }
     
-    private fetchSubjects() {
-        this.subjectService.getSubjects().then(subjects => {
-            this.subjects = subjects;
-        })
-        .catch((error) => {
-            // TODO: display error
-        });
-    }
-
-    private getDatasetTypes(): any {
-        return DatasetType.keyValues();
-    }
-    
     private back(): void {
         this.location.back();
     }
 
+    private edit(): void {
+        this.router.navigate([], {
+            relativeTo: this.route, 
+            queryParams: { id: this.dataset.id, mode: "edit" }
+        });
+    }
+
+    private update(): void {
+        this.datasetService.update(this.dataset).subscribe((dataset) => {
+            this.msgService.log('info', 'Dataset updated');
+        });
+    }
 
     // getFormValidationErrors() {
     //     Object.keys(this.subjectForm.controls).forEach(key => {

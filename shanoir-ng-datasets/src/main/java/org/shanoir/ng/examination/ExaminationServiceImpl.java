@@ -3,7 +3,6 @@ package org.shanoir.ng.examination;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -11,8 +10,6 @@ import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
@@ -23,9 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Examination service implementation.
@@ -47,8 +41,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Autowired
 	private MicroserviceRequestsService microservicesRequestsService;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -88,7 +80,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			LOG.error("Error while creating examination", dive);
 			throw new ShanoirDatasetsException("Error while creating examination");
 		}
-		updateShanoirOld(savedExamination);
+		//updateShanoirOld(savedExamination);
 		return savedExamination;
 	}
 
@@ -102,7 +94,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			LOG.error("Error while updating examination", e);
 			throw new ShanoirDatasetsException("Error while updating examination");
 		}
-		updateShanoirOld(examinationDb);
+		//updateShanoirOld(examinationDb);
 		return examinationDb;
 	}
 
@@ -173,21 +165,21 @@ public class ExaminationServiceImpl implements ExaminationService {
 	 * 
 	 * @return false if it fails, true if it succeed.
 	 */
-	private boolean updateShanoirOld(final Examination examination) {
-		try {
-			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.examinationQueueOut().getName(),
-					new ObjectMapper().writeValueAsString(examination));
-			return true;
-		} catch (AmqpException e) {
-			LOG.error("Cannot send examination " + examination.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.examinationQueueOut().getName(), e);
-		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send examination " + examination.getId()
-					+ " save/update because of an error while serializing examination.", e);
-		}
-		return false;
-	}
+//	private boolean updateShanoirOld(final Examination examination) {
+//		try {
+//			LOG.info("Send update to Shanoir Old");
+//			rabbitTemplate.convertAndSend(RabbitMqConfiguration.examinationQueueOut().getName(),
+//					new ObjectMapper().writeValueAsString(examination));
+//			return true;
+//		} catch (AmqpException e) {
+//			LOG.error("Cannot send examination " + examination.getId() + " save/update to Shanoir Old on queue : "
+//					+ RabbitMqConfiguration.examinationQueueOut().getName(), e);
+//		} catch (JsonProcessingException e) {
+//			LOG.error("Cannot send examination " + examination.getId()
+//					+ " save/update because of an error while serializing examination.", e);
+//		}
+//		return false;
+//	}
 
 	/*
 	 * Update some values of examination to save them in database.

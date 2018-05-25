@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Dataset } from '../../shared/dataset.model';
 import { ActivatedRoute, Params } from '@angular/router';
 
@@ -8,14 +8,11 @@ import { ActivatedRoute, Params } from '@angular/router';
     templateUrl: 'dataset.mr.component.html'
 })
 
-export class MrDatasetComponent implements OnInit {
+export class MrDatasetComponent {
 
     @Input() private mode: 'create' | 'edit' | 'view';
     @Input() private dataset: Dataset;
     
     constructor() {}
-
-    ngOnInit(): void {
-    }
 
 }
