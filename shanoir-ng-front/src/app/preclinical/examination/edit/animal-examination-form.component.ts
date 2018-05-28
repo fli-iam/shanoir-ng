@@ -476,7 +476,6 @@ export class AnimalExaminationFormComponent implements OnInit {
             this.isDateValid = true;
             setTimeout(():void => this.selectedDateNormal = null);
         }
-        this.setDateFromDatePicker();
     }
 
     private myDatePickerOptions: IMyOptions = {
@@ -489,7 +488,6 @@ export class AnimalExaminationFormComponent implements OnInit {
         if (event.formatted !== '') {
             this.selectedDateNormal = event.date;
         }
-        this.setDateFromDatePicker();
     }
     
 

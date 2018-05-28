@@ -27,6 +27,7 @@
 			
 			<tr>
 				<td>
+				<fieldset>
 					<ol>
 					<li>
 						<label i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</label>
@@ -73,19 +74,21 @@
 							</ng-template>
 						</span>
 					</li>
+					<!-- 
 					<li>
 						<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
 						<span class="right-col" [ngSwitch]="mode.state">
 							<ng-template [ngSwitchCase]="Modes.view">
 								{{examination.subject?.name}}
 							</ng-template>
-						<!-- 	<ng-template ngSwitchDefault>
+							<ng-template ngSwitchDefault>
 								<select id="subject" required formControlName="Subject" [(ngModel)]=".examination.subject">
 									<option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
 								</select>
-							</ng-template> -->
+							</ng-template>
 						</span>
-					</li>
+					</li> 
+					-->
 					<li>
 						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</label>
 						<span class="right-col" [ngSwitch]="mode.state">
@@ -172,6 +175,7 @@
 							</span>
 						</li>
 				</ol>
+			</fieldset>
 				</td>
 			</tr>
 			
