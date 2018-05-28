@@ -6,6 +6,8 @@ import javax.persistence.OneToOne;
 
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 /**
  * MR dataset acquisition.
  * 
@@ -13,6 +15,7 @@ import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
  *
  */
 @Entity
+@JsonTypeName("Mr")
 public class MrDatasetAcquisition extends DatasetAcquisition {
 
 	/**
@@ -37,6 +40,11 @@ public class MrDatasetAcquisition extends DatasetAcquisition {
 	 */
 	public void setMrProtocol(MrProtocol mrProtocol) {
 		this.mrProtocol = mrProtocol;
+	}
+
+	@Override
+	public String getType() {
+		return "Mr";
 	}
 
 }

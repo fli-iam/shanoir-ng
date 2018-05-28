@@ -1,5 +1,7 @@
 package org.shanoir.ng.dataset;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -106,6 +108,25 @@ public class DatasetApiController implements DatasetApi {
 		final FieldErrorMap accessErrors = new EditableOnlyByValidator<Dataset>().validate(previousStateDataset,
 				dataset);
 		return accessErrors;
+	}
+
+	/**
+	 * @throws RestServiceException 
+	 * 
+	 */
+	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasets() throws RestServiceException {
+		try {
+			List<Dataset> datasets = datasetService.findAll();
+			if (datasets.isEmpty()) {
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			}
+			return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+		} catch (ShanoirException e) {
+			// TODO Auto-generated catch block
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Cant get datasets", null));
+		}
 	}
 
 }

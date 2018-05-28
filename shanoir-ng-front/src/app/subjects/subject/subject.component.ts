@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -12,9 +12,9 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import * as shajs from 'sha.js';
 import { StudyService } from '../../studies/shared/study.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { SubjectType } from '../shared/subject-type.enum';
 import { SubjectStudy } from '../shared/subject-study.model';
 import { slideDown, preventInitialChildAnimations} from '../../shared/animations/animations';
+import { Study } from '../../studies/shared/study.model';
 
 @Component({
     selector: 'subject-detail',
@@ -23,12 +23,12 @@ import { slideDown, preventInitialChildAnimations} from '../../shared/animations
     animations: [slideDown, preventInitialChildAnimations]
 })
 
-export class SubjectComponent implements OnInit {
+export class SubjectComponent implements OnInit, OnChanges {
 
     private ImagesUrlUtil = ImagesUrlUtil; // Make it visible to the template
     
     @Input() mode: "view" | "edit" | "create";
-    @Input() preFillData: any;
+    @Input() preFillData: Subject;
     
     private subject: Subject;
     public subjectForm: FormGroup;
@@ -37,6 +37,7 @@ export class SubjectComponent implements OnInit {
     private firstName: string = "";
     private lastName: string = "";
     private ImagedObjectCategory = ImagedObjectCategory;
+    private selectedStudyId: number; 
 
     @Output() closing: EventEmitter<any> = new EventEmitter();
 
@@ -68,7 +69,7 @@ export class SubjectComponent implements OnInit {
                 this.subject = new Subject();
                 this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
                 this.buildForm();
-                this.prefillData();
+                this.initPrefillData();
                 break;    
             }
             case 'edit': {
@@ -107,18 +108,20 @@ export class SubjectComponent implements OnInit {
         this.buildForm();
     }
     
-    prefillData() {
-        if (this.preFillData) {
-            if (this.preFillData.subject) {
-                this.computeNameFromDicomTag(this.preFillData.subject.name);
-                this.subject.sex = this.preFillData.subject.sex;
+    initPrefillData() {
+        if (this.preFillData && this.subject) {
+            if (this.preFillData) {
+                this.computeNameFromDicomTag(this.preFillData.name);
+                this.subject.sex = this.preFillData.sex;
+                this.subject.birthDate = new Date(this.preFillData.birthDate);
             }
-            if (this.preFillData.study) {
-                let study : IdNameObject = new IdNameObject();
-                study.id = this.preFillData.study.id;
-                study.name = this.preFillData.study.name;
+            if (this.preFillData.subjectStudyList && this.preFillData.subjectStudyList.length > 0) {
+                this.subjectStudyList = this.preFillData.subjectStudyList;
                 this.studies = [];
-                this.studies.push(study);
+                for (let subjectStudy of this.preFillData.subjectStudyList) {
+                    this.studies.push(new IdNameObject(subjectStudy.study.id, subjectStudy.study.name));
+                }
+                this.selectedStudyId = this.preFillData.subjectStudyList[0].study.id;
             }
         }
     }
@@ -149,6 +152,10 @@ export class SubjectComponent implements OnInit {
                 // TODO: display error
                 console.error("error getting study list!");
             });
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['preFillData']) this.initPrefillData();
     }
 
     buildForm(): void {
@@ -209,11 +216,6 @@ export class SubjectComponent implements OnInit {
         'birthDate': ''
     }
 
-    updateModel(): void {
-        this.subject = this.subjectForm.value;
-        this.subject.subjectStudyList = this.subjectStudyList;
-    }
-
     // No
     back(subject?: Subject): void {
         if (this.closing.observers.length > 0) {
@@ -228,26 +230,25 @@ export class SubjectComponent implements OnInit {
     }
 
     create(): void {
-        this.updateModel();
+        this.subject = this.subjectForm.value;
         this.generateSubjectIdentifier();
-        if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING) {
+        // Anonymization only for human subject
+        if (this.humanSelected()) {
             this.setSubjectBirthDateToFirstOfJanuary();
         }
-        for (let subjectStudy of this.subject.subjectStudyList) {
-            subjectStudy.subjectId = this.subject.id;
-            console.log("studyId: " + subjectStudy.studyId + ", subjectId: " + subjectStudy.subjectId + ", PI:" + subjectStudy.physicallyInvolved);
-            this.subjectService.createSubjectStudy(subjectStudy);
-        }
         this.subjectService.create(this.subject)
-            .subscribe((subject) => {
-                this.back();
+        .subscribe((subject: Subject) => {
+            if (this.subjectStudyList.length > 0) {
+                this.createSubjectStudy(subject);
+            }
+            this.back();
             }, (err: string) => {
                 this.manageRequestErrors(err);
         });
     }
 
     update(): void {
-        this.updateModel();
+        this.subject = this.subjectForm.value;
         for (let subjectStudy of this.subject.subjectStudyList) {
             if (this.subjectService.findSubjectStudyById(subjectStudy.id)) {
                 this.subjectService.updateSubjectStudy(subjectStudy);
@@ -261,6 +262,25 @@ export class SubjectComponent implements OnInit {
             }, (err: string) => {
                 this.manageRequestErrors(err);
         });
+    }
+
+    createSubjectStudy(subject : Subject) {
+        for (let subjectStudy of this.subjectStudyList) {
+            subjectStudy.subject = subject;
+            console.log("studyId: " + subjectStudy.study.id + ", subjectId: " + subjectStudy.subject.id + ", PI:" + subjectStudy.physicallyInvolved);
+            this.subjectService.createSubjectStudy(subjectStudy)
+                .subscribe((subjectStudy: SubjectStudy) => {
+                    // Si relSubjectStudy created, update the subject with the list of relSubjectStudy
+                    this.subject.subjectStudyList.push(subjectStudy);
+                    this.subjectService.update(this.subject.id, this.subject)
+                        .subscribe((subject) => {
+                        }, (err: string) => {
+                            this.manageRequestErrors(err);
+                    });
+                }, (err: string) => {
+                    this.manageRequestErrors(err);
+            });
+        }
     }
 
     private manageRequestErrors(err: string): void {
@@ -300,13 +320,12 @@ export class SubjectComponent implements OnInit {
         // this.subjectService.deleteSubjectStudy(subjectStudy.id);
     }
 
-    onStudySelectChange(study: any) {
+    onStudySelectChange(studyId: number) {
         var newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
-        newSubjectStudy.studyId = study.target.value;
-        
+        newSubjectStudy.study = new Study(); // TODO : maybe use Study objects inside [value] instead of just id
+        newSubjectStudy.study.id = studyId;
         this.subjectStudyList.push(newSubjectStudy);
-
     }
 
     /**
@@ -314,7 +333,7 @@ export class SubjectComponent implements OnInit {
      * eg. TOM^HANKS -> return TOM as first name and HANKS as last name
      */
     computeNameFromDicomTag (patientName: string): void {
-        if (patientName !== null) {
+        if (patientName) {
             let names: string[] = patientName.split("\\^");
             if (names !== null && names.length == 2) {
                 this.firstName = names[1];
@@ -329,9 +348,5 @@ export class SubjectComponent implements OnInit {
         return this.subject.imagedObjectCategory != null
             && (this.subject.imagedObjectCategory == ImagedObjectCategory.HUMAN_CADAVER
                 || this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING);
-    }
-
-    public subjectTypes() {
-        return SubjectType.keyValues();
     }
 }

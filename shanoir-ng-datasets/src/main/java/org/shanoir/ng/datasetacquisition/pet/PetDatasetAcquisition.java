@@ -6,6 +6,8 @@ import javax.persistence.OneToOne;
 
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 /**
  * PET dataset acquisition.
  * 
@@ -13,6 +15,7 @@ import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
  *
  */
 @Entity
+@JsonTypeName("Pet")
 public class PetDatasetAcquisition extends DatasetAcquisition {
 
 	/**
@@ -37,6 +40,11 @@ public class PetDatasetAcquisition extends DatasetAcquisition {
 	 */
 	public void setPetProtocol(PetProtocol petProtocol) {
 		this.petProtocol = petProtocol;
+	}
+
+	@Override
+	public String getType() {
+		return "Pet";
 	}
 
 }

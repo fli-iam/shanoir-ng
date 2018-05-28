@@ -5,6 +5,9 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
@@ -34,9 +37,12 @@ public class DatasetProcessing extends AbstractGenericItem {
 	/** Dataset Processing Type. */
 	private Integer datasetProcessingType;
 
-	/** Relations between the dataset porcessings and the datasets. */
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetProcessing")
-	private List<InputOfDatasetProcessing> inputOfDatasetProcessings;
+	/** Input datasets. */
+	@ManyToMany @JoinTable (
+			name = "INPUT_OF_DATASET_PROCESSING",
+			joinColumns = @JoinColumn(name="PROCESSING_ID"),
+			inverseJoinColumns = @JoinColumn(name="DATASET_ID"))
+	private List<Dataset> inputDatasets;
 
 	/** Output Dataset List. */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetProcessing")
@@ -83,19 +89,19 @@ public class DatasetProcessing extends AbstractGenericItem {
 		}
 	}
 
+
 	/**
-	 * @return the inputOfDatasetProcessings
+	 * @return the inputDatasets
 	 */
-	public List<InputOfDatasetProcessing> getInputOfDatasetProcessings() {
-		return inputOfDatasetProcessings;
+	public List<Dataset> getInputDatasets() {
+		return inputDatasets;
 	}
 
 	/**
-	 * @param inputOfDatasetProcessings
-	 *            the inputOfDatasetProcessings to set
+	 * @param inputDatasets the inputDatasets to set
 	 */
-	public void setInputOfDatasetProcessings(List<InputOfDatasetProcessing> inputOfDatasetProcessings) {
-		this.inputOfDatasetProcessings = inputOfDatasetProcessings;
+	public void setInputDatasets(List<Dataset> inputDatasets) {
+		this.inputDatasets = inputDatasets;
 	}
 
 	/**

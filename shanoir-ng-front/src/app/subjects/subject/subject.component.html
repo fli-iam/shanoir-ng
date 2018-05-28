@@ -90,8 +90,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="sex" formControlName="sex" [(ngModel)]="subject.sex">
-									<option [value]="female">Female</option>
-									<option [value]="male">Male</option>
+									<option [value]="'F'">Female</option>
+									<option [value]="'M'">Male</option>
 								</select>
 							</ng-template>
 						</span>
@@ -104,8 +104,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="manualHemisphericDominance" formControlName="manualHemisphericDominance" [(ngModel)]="subject.manualHemisphericDominance">
-									<option [value]="left">Left</option>
-									<option [value]="right">Right</option>
+									<option [value]="'Left'">Left</option>
+									<option [value]="'Right'">Right</option>
 								</select>
 							</ng-template>
 						</span>
@@ -118,8 +118,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="languageHemisphericDominance" formControlName="languageHemisphericDominance" [(ngModel)]="subject.languageHemisphericDominance">
-									<option [value]="left">Left</option>
-									<option [value]="right">Right</option>
+									<option [value]="'Left'">Left</option>
+									<option [value]="'Right'">Right</option>
 								</select>
 							</ng-template>
 						</span>
@@ -127,7 +127,7 @@
 				</ol>
 				<ol *ngIf="!humanSelected()" [@slideDown]="!humanSelected()">
 					<li *ngIf="mode == 'create'">
-						<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
+						<label class="date-label" i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Date of creation</label>
 						<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
 						<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
 					</li>
@@ -166,8 +166,8 @@
 					<li>
 						<label i18n="Subject detail|List of the studies label@@subjectDetailListOfStudies">List of the studies available</label>
 						<span class="right-col">
-							<select id="studies" (change)="onStudySelectChange($event)">
-								<option disabled selected>Please select...</option>
+							<select id="studies" (change)="onStudySelectChange($event.target.value)">
+								<option disabled>Please select...</option>
 								<option *ngFor="let study of studies" [value]="study.id">{{study.name}}</option>
 							</select>
 						</span>
@@ -187,7 +187,7 @@
 								<tr *ngFor="let subjectStudy of subjectStudyList; let i = index">
 									<td class="label-col">
 										<div *ngFor="let study of studies">
-											<span *ngIf="study.id == subjectStudy.studyId">
+											<span *ngIf="study.id == subjectStudy.study.id">
 												{{study.name}}
 											</span>
 										</div>
@@ -200,10 +200,9 @@
 									</td>
 									<td class="dropdown-col">
 										<select id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
-											<option *ngFor="let subjectType of subjectTypes()" [value]="subjectType.value"
-												i18n="Subject Types {{subjectType.value}}|Type label@@SubjectType{{subjectType.key}}">
-													{{subjectType.value}}
-											</option>
+											<option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
+											<option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
+											<option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
 										</select>
 									</td>
 									<td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-ban"></i></span>

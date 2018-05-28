@@ -45,8 +45,9 @@ export class DatasetService {
             });
     }
 
-    update(id: number, dataset: Dataset): Observable<Dataset> {
-        return this.http.put<Dataset>(AppUtils.BACKEND_API_DATASET_URL + '/' + id, JSON.stringify(dataset))
+    update(dataset: Dataset): Observable<Dataset> {
+        if (!dataset.id) throw Error('Cannot update a dataset without an id');
+        return this.http.put<Dataset>(AppUtils.BACKEND_API_DATASET_URL + '/' + dataset.id, JSON.stringify(dataset))
             .map(response => response);
     }
 

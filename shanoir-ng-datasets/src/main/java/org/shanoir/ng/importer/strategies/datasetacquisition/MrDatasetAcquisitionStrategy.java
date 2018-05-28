@@ -13,7 +13,7 @@ import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
 import org.shanoir.ng.dicom.DicomProcessing;
-import org.shanoir.ng.importer.dto.DatasetWrapper;
+import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
@@ -73,14 +73,14 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);
 	
 		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level. 
-		DatasetWrapper<Dataset> datasetWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
-		mrDatasetAcquisition.setDatasets(datasetWrapper.getDataset());		
+		DatasetsWrapper<Dataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+		mrDatasetAcquisition.setDatasets(datasetsWrapper.getDatasets());
 		
 		// total acquisition time
 		if(mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
 			Double totalAcquisitionTime = null;
-			if (datasetWrapper.getFirstImageAcquisitionTime() != null && datasetWrapper.getLastImageAcquisitionTime() != null) {
-				totalAcquisitionTime = new Double(datasetWrapper.getLastImageAcquisitionTime().getTime() - datasetWrapper.getFirstImageAcquisitionTime().getTime());
+			if (datasetsWrapper.getFirstImageAcquisitionTime() != null && datasetsWrapper.getLastImageAcquisitionTime() != null) {
+				totalAcquisitionTime = new Double(datasetsWrapper.getLastImageAcquisitionTime().getTime() - datasetsWrapper.getFirstImageAcquisitionTime().getTime());
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(totalAcquisitionTime);
 			} else {
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);
@@ -93,14 +93,16 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		Map<Double,InversionTime> inversionTimes = new HashMap<>();
 		Map<Double,RepetitionTime> repetitionTimes = new HashMap<>();
 		
-		for (Object dataset : datasetWrapper.getDataset()) {
+		for (Object dataset : datasetsWrapper.getDatasets()) {
 			MrDataset mrDataset = (MrDataset) dataset;
 			echoTimes.putAll(mrDataset.getEchoTimes());
 			flipAngles.putAll(mrDataset.getFlipAngles());
 			inversionTimes.putAll(mrDataset.getInversionTimes());
 			repetitionTimes.putAll(mrDataset.getRepetitionTimes());
-
+			// as all datasets are iterated here, set link to acquisition
+			mrDataset.setDatasetAcquisition(mrDatasetAcquisition);
 		}
+		
 		mrDatasetAcquisition.getMrProtocol().setEchoTimes(new ArrayList<EchoTime>(echoTimes.values()));
 		mrDatasetAcquisition.getMrProtocol().setRepetitionTimeList(new ArrayList<RepetitionTime>(repetitionTimes.values()));
 		mrDatasetAcquisition.getMrProtocol().setFlipAngles(new ArrayList<FlipAngle>(flipAngles.values()));

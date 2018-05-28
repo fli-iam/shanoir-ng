@@ -228,18 +228,16 @@
                                 <td class="label">Subject Type</td>
                                 <td class="value">
                                     <select id="subjectType" formControlName="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" (change)="updateSubjectStudy($event)">
-                                        <option *ngFor="let subjectType of subjectTypes()" [value]="subjectType.value"
-                                            i18n="Subject Types {{subjectType.value}}|Type label@@SubjectType{{subjectType.key}}">
-                                                {{subjectType.value}}
-                                        </option>
-
+                                        <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
+                                        <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
+                                        <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
                                     </select>
                                 </td>
                             </tr>
                         </table>
                     </div>
                     <div *ngIf="subjectEditionMode == 'create' && study != null">
-                        <button class="right-col" (click)="initializeSubject(subjectFromImport); subjectCreationModal.show();"><img src="/assets/images/icons/add.png"/>Create a subject</button>
+                        <button class="right-col" (click)="initializePrefillSubject(); subjectCreationModal.show();"><img src="/assets/images/icons/add.png"/>Create a subject</button>
                     </div>
                 </li>
             </ol>
@@ -385,6 +383,6 @@
 
 <app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
     <div class="app-modal-body">
-      <subject-detail [mode]="'create'" (closing)="closeSubjectPopin($event)"></subject-detail>
+      <subject-detail [mode]="'create'" (closing)="closeSubjectPopin($event)" [preFillData]="subjectFromImport"></subject-detail>
     </div>
 </app-modal>

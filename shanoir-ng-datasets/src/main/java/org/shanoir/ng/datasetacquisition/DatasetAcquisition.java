@@ -10,11 +10,22 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.dataset.Dataset;
+import org.shanoir.ng.datasetacquisition.ct.CtDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.pet.PetDatasetAcquisition;
 import org.shanoir.ng.examination.Examination;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 /**
  * Dataset acquisition.
@@ -23,8 +34,13 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  *
  */
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
 @DatasetsModalityTypeCheck
+@Inheritance(strategy = InheritanceType.JOINED)
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
+@JsonSubTypes({  
+    @Type(value = CtDatasetAcquisition.class, name = "Ct"),  
+    @Type(value = MrDatasetAcquisition.class, name = "Mr"),
+    @Type(value = PetDatasetAcquisition.class, name = "Pet")})
 public abstract class DatasetAcquisition extends AbstractGenericItem {
 
 	/**
@@ -37,6 +53,7 @@ public abstract class DatasetAcquisition extends AbstractGenericItem {
 	private Long acquisitionEquipmentId;
 
 	/** Datasets. */
+	@JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetAcquisition", cascade = CascadeType.ALL)
 	private List<Dataset> datasets;
 
@@ -143,5 +160,14 @@ public abstract class DatasetAcquisition extends AbstractGenericItem {
 	public void setSortingIndex(Integer sortingIndex) {
 		this.sortingIndex = sortingIndex;
 	}
+	
+	/**
+	 * Gets the type.
+	 *
+	 * @return the type
+	 */
+	@Transient
+	public abstract String getType();
+
 
 }

@@ -1,3 +1,5 @@
+import { Sex } from "../subjects/shared/subject.types";
+
 export class ImportJob {
     fromDicomZip: boolean;
     fromShanoirUploader: boolean;
@@ -17,7 +19,7 @@ export class PatientDicom {
     patientID: string;
     patientName: string;
     patientBirthDate: Date;
-    patientSex: string;
+    patientSex: Sex;
     studies: StudyDicom[];
 }
 

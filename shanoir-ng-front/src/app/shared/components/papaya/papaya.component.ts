@@ -10,6 +10,7 @@ declare var papayaContainers: any[];
 })
 export class PapayaComponent implements OnInit {
     @Input() params: Object[];
+    @Input() autoLoading: boolean = false;
     private loaded: boolean = false;
 
     constructor() {
@@ -30,8 +31,11 @@ export class PapayaComponent implements OnInit {
         for (let propName in changes) {
             if (!changes[propName].isFirstChange()) {
                 if (propName == "params") {
-                    this.loaded = false;
-                    //papaya.Container.resetViewer(0, this.params);
+                    if (this.autoLoading) {
+                        this.load();
+                    } else {
+                        this.loaded = false;
+                    }
                 }
             }
         }

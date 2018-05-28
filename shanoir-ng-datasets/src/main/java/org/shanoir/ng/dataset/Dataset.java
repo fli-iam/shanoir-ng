@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -30,7 +31,6 @@ import org.shanoir.ng.dataset.modality.StatisticalDataset;
 import org.shanoir.ng.dataset.modality.TemplateDataset;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.processing.DatasetProcessing;
-import org.shanoir.ng.processing.InputOfDatasetProcessing;
 import org.shanoir.ng.shared.jackson.LocalDateDeserializer;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.springframework.util.StringUtils;
@@ -45,12 +45,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  * Dataset.
  * 
  * @author msimon
- *
+ * @author jlouis
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
-@JsonSubTypes({ @JsonSubTypes.Type(value = CalibrationDataset.class, name = "Calibration"),
+@JsonSubTypes({ 	
+		@JsonSubTypes.Type(value = CalibrationDataset.class, name = "Calibration"),
 		@JsonSubTypes.Type(value = CtDataset.class, name = "Ct"),
 		@JsonSubTypes.Type(value = EegDataset.class, name = "Eeg"),
 		@JsonSubTypes.Type(value = MegDataset.class, name = "Meg"),
@@ -94,9 +95,10 @@ public abstract class Dataset extends AbstractGenericItem {
 	 */
 	private Long groupOfSubjectsId;
 
-	/** Relations between the datasets and the dataset processing (input). */
-	@OneToMany(mappedBy = "dataset", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private List<InputOfDatasetProcessing> inputOfDatasetProcessings;
+	
+	/** Processings for which this dataset is an input. */
+	@ManyToMany(mappedBy="inputDatasets")
+	private List<DatasetProcessing> processings;
 
 	/** Origin metadata. */
 	@OneToOne(cascade = CascadeType.ALL)
@@ -206,18 +208,17 @@ public abstract class Dataset extends AbstractGenericItem {
 	}
 
 	/**
-	 * @return the inputOfDatasetProcessings
+	 * @return the processings
 	 */
-	public List<InputOfDatasetProcessing> getInputOfDatasetProcessings() {
-		return inputOfDatasetProcessings;
+	public List<DatasetProcessing> getProcessings() {
+		return processings;
 	}
 
 	/**
-	 * @param inputOfDatasetProcessings
-	 *            the inputOfDatasetProcessings to set
+	 * @param processings the processings to set
 	 */
-	public void setInputOfDatasetProcessings(List<InputOfDatasetProcessing> inputOfDatasetProcessings) {
-		this.inputOfDatasetProcessings = inputOfDatasetProcessings;
+	public void setProcessings(List<DatasetProcessing> processings) {
+		this.processings = processings;
 	}
 
 	/**
