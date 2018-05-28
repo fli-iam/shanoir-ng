@@ -106,11 +106,15 @@ public class Subject extends HalEntity {
 		return subjectStudyList;
 	}
 
-	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
+	public void setSubjectStudyList(List<SubjectStudy> subjectStudies) {
+		this.subjectStudyList = new ArrayList<SubjectStudy>();
+		for (SubjectStudy subjectStudy : subjectStudies) {
+			addSubjectStudy(subjectStudy);
+		}
 	}
 
 	public void addSubjectStudy(SubjectStudy subjectStudy) {
+		subjectStudy.setSubject(this);
 		this.subjectStudyList.add(subjectStudy);
 	}
 

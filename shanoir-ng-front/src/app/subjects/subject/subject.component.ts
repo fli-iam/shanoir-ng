@@ -15,6 +15,7 @@ import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { SubjectStudy } from '../shared/subject-study.model';
 import { slideDown, preventInitialChildAnimations} from '../../shared/animations/animations';
 import { Study } from '../../studies/shared/study.model';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 @Component({
     selector: 'subject-detail',
@@ -55,7 +56,8 @@ export class SubjectComponent implements OnInit, OnChanges {
         private studyService: StudyService,
         private fb: FormBuilder,
         private location: Location, 
-        private keycloakService: KeycloakService) {
+        private keycloakService: KeycloakService,
+        private msgService: MsgBoxService) {
     }
 
     ngOnInit(): void {
@@ -216,6 +218,11 @@ export class SubjectComponent implements OnInit, OnChanges {
         'birthDate': ''
     }
 
+    updateModel(): void {
+        this.subject = this.subjectForm.value;
+        this.subject.subjectStudyList = this.subjectStudyList;
+    }
+
     // No
     back(subject?: Subject): void {
         if (this.closing.observers.length > 0) {
@@ -230,57 +237,28 @@ export class SubjectComponent implements OnInit, OnChanges {
     }
 
     create(): void {
-        this.subject = this.subjectForm.value;
+        this.updateModel();
         this.generateSubjectIdentifier();
         // Anonymization only for human subject
         if (this.humanSelected()) {
             this.setSubjectBirthDateToFirstOfJanuary();
         }
         this.subjectService.create(this.subject)
-        .subscribe((subject: Subject) => {
-            if (this.subjectStudyList.length > 0) {
-                this.createSubjectStudy(subject);
-            }
-            this.back();
-            }, (err: string) => {
-                this.manageRequestErrors(err);
-        });
-    }
+            .subscribe((subject: Subject) => {
+                this.msgService.log('info', 'Subject successfully created');
+                this.back();
+            });
+        }
 
     update(): void {
-        this.subject = this.subjectForm.value;
-        for (let subjectStudy of this.subject.subjectStudyList) {
-            if (this.subjectService.findSubjectStudyById(subjectStudy.id)) {
-                this.subjectService.updateSubjectStudy(subjectStudy);
-            } else {
-                this.subjectService.createSubjectStudy(subjectStudy);
-            }
-        }
+        this.updateModel();
         this.subjectService.update(this.subject.id, this.subject)
             .subscribe((subject) => {
+                this.msgService.log('info', 'Subject successfully updated');
                 this.back();
             }, (err: string) => {
                 this.manageRequestErrors(err);
         });
-    }
-
-    createSubjectStudy(subject : Subject) {
-        for (let subjectStudy of this.subjectStudyList) {
-            subjectStudy.subject = subject;
-            console.log("studyId: " + subjectStudy.study.id + ", subjectId: " + subjectStudy.subject.id + ", PI:" + subjectStudy.physicallyInvolved);
-            this.subjectService.createSubjectStudy(subjectStudy)
-                .subscribe((subjectStudy: SubjectStudy) => {
-                    // Si relSubjectStudy created, update the subject with the list of relSubjectStudy
-                    this.subject.subjectStudyList.push(subjectStudy);
-                    this.subjectService.update(this.subject.id, this.subject)
-                        .subscribe((subject) => {
-                        }, (err: string) => {
-                            this.manageRequestErrors(err);
-                    });
-                }, (err: string) => {
-                    this.manageRequestErrors(err);
-            });
-        }
     }
 
     private manageRequestErrors(err: string): void {
@@ -317,13 +295,12 @@ export class SubjectComponent implements OnInit, OnChanges {
         if (index !== -1) {
             this.subjectStudyList.splice(index, 1);
         }
-        // this.subjectService.deleteSubjectStudy(subjectStudy.id);
     }
 
     onStudySelectChange(studyId: number) {
         var newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
-        newSubjectStudy.study = new Study(); // TODO : maybe use Study objects inside [value] instead of just id
+        newSubjectStudy.study = new Study();
         newSubjectStudy.study.id = studyId;
         this.subjectStudyList.push(newSubjectStudy);
     }

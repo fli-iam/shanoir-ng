@@ -3,6 +3,7 @@ package org.shanoir.ng.subjectstudy;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
@@ -19,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 @Entity
-@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
+@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class SubjectStudy extends AbstractGenericItem {
 
 	/**
@@ -33,12 +34,14 @@ public class SubjectStudy extends AbstractGenericItem {
 	/** Study. */
 	@ManyToOne
 	@JoinColumn(name = "study_id")
+	@NotNull
 	private Study study;
 
 	/** Subject. */
 	@ManyToOne
 	@JoinColumn(name = "subject_id", updatable = true, insertable = true)
 	@JsonIgnore
+	@NotNull
 	private Subject subject;
 
 	/** Identifier of the subject inside the study. */

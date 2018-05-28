@@ -6,7 +6,6 @@ import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,25 +29,6 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 	public SubjectStudy findById(final Long id) {
 		return subjectStudyRepository.findOne(id);
 	}
-	
-	@Override
-	public void deleteById(final Long id) throws ShanoirStudiesException {
-		subjectStudyRepository.delete(id);
-	}
-
-	@Override
-	public SubjectStudy save(final SubjectStudy subjectStudy) throws ShanoirStudiesException {
-		SubjectStudy savedSubjectStudy = null;
-		try {
-			savedSubjectStudy = subjectStudyRepository.save(subjectStudy);
-		} catch (DataIntegrityViolationException dive) {
-			LOG.error("Error while creating subject study", dive);
-			throw new ShanoirStudiesException("Error while creating subject study");
-		}
-		// updateShanoirOld(savedSubject);
-		return savedSubjectStudy;
-	}
-
 
 	@Override
 	public SubjectStudy update(final SubjectStudy subjectStudy) throws ShanoirStudiesException {

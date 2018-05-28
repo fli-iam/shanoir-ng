@@ -92,7 +92,7 @@ public class SubjectApiController implements SubjectApi {
 			final Subject createdSubject = subjectService.save(subject);
 			subjectService.updateShanoirOld(createdSubject);
 			return new ResponseEntity<Subject>(createdSubject, HttpStatus.OK);
-		} catch (ShanoirStudiesException e) {
+		} catch (Exception e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}

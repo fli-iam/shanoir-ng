@@ -19,15 +19,6 @@ public interface SubjectStudyService extends UniqueCheckableService<SubjectStudy
 	SubjectStudy findById(Long id);
 	
 	/**
-	 * Delete a subject study.
-	 *
-	 * @param id
-	 *            subject study id.
-	 * @throws ShanoirStudiesException
-	 */
-	void deleteById(Long id) throws ShanoirStudiesException;
-
-	/**
 	 * Update subject study.
 	 *
 	 * @param subject study
@@ -36,12 +27,5 @@ public interface SubjectStudyService extends UniqueCheckableService<SubjectStudy
 	 * @throws ShanoirStudiesException
 	 */
 	SubjectStudy update(SubjectStudy subjectStudy) throws ShanoirStudiesException;
-
-	/**
-	 * @param subjectStudy
-	 * @return
-	 * @throws ShanoirStudiesException
-	 */
-	SubjectStudy save(SubjectStudy subjectStudy) throws ShanoirStudiesException;
 
 }
