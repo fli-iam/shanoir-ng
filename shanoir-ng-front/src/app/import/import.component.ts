@@ -335,16 +335,14 @@ export class ImportComponent implements OnInit {
         }
     }
     
-    updateSubjectStudy(subjectStudy: SubjectStudy) {
-        this.subjectService.updateSubjectStudy(this.subject.subjectStudy);
+    updateSubjectStudyValues(subjectStudy: SubjectStudy) {
+        this.subjectService.updateSubjectStudyValues(this.subject.subjectStudy);
     }
 
     initializePrefillSubject(): void {
         let subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
-        subjectStudy.subjectStudyIdentifier = 'TODO : can auto generate smth here if you want'
-        subjectStudy.subjectType = 'PATIENT';
 
         let newSubject = new Subject();
         newSubject.birthDate = this.selectedSeries.patientBirthDate;

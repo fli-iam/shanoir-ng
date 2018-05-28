@@ -208,32 +208,37 @@
                     <div *ngIf="subjectEditionMode == 'select' && subject != null">
                         <div class="title"><h3>Please fill the details on the subject:</h3></div>
                         <table>
-                            <tr class="item">
-                                <td class="label">Common name</td>
-                                <td class="value">{{subject.name}}</td>
-                            </tr>
-                            <tr class="item">
-                                <td class="label">Subject identifier for this research study</td>
-                                <td class="value">
-                                    <input type="text" id="subjectStudyIdentifier" formControlName="subjectStudyIdentifier" 
-                                        [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" (change)="updateSubjectStudy($event)"/>
-                                </td>
-                            </tr>
-                            <tr class="item">
-                                <td class="label">Is physically involved</td>
-                                <td class="value"><input type="checkbox" formControlName="physicallyInvolved" 
-                                    [(ngModel)]="subject.subjectStudy.physicallyInvolved" (change)="updateSubjectStudy($event)"/></td>
-                            </tr>
-                            <tr class="item">
-                                <td class="label">Subject Type</td>
-                                <td class="value">
-                                    <select id="subjectType" formControlName="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" (change)="updateSubjectStudy($event)">
-                                        <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
-                                        <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
-                                        <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
-                                    </select>
-                                </td>
-                            </tr>
+                            <thead>
+                                <tr>
+                                    <th class="label-col">Common name</th>
+                                    <th class="input-col">Subject identifier for this study</th>
+                                    <th class="chkbx-col" title="Physically Involved">PI</th>
+                                    <th class="dropdown-col">Subject Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="label-col">
+                                        {{subject.name}}
+                                    </td>
+                                    <td class="input-col">
+                                        <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
+                                            [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues($event)"/>
+                                    </td>
+                                    <td class="chkbx-col">
+                                        <input type="checkbox" [(ngModel)]="subject.subjectStudy.physicallyInvolved" 
+                                            [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues($event)"/>
+                                    </td>
+                                    <td class="dropdown-col">
+                                        <select id="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" 
+                                            [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues($event)">
+                                                <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
+                                                <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
+                                                <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
                     <div *ngIf="subjectEditionMode == 'create' && study != null">

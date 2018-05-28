@@ -70,7 +70,7 @@ export class SubjectService {
             .map(response => response);
     }
 
-    updateSubjectStudy(subjectStudy: SubjectStudy): Observable<SubjectStudy> {
+    updateSubjectStudyValues(subjectStudy: SubjectStudy): Observable<SubjectStudy> {
         return this.http.put<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
             .map(res => res);
     }

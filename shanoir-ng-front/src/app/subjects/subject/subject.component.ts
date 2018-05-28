@@ -33,7 +33,6 @@ export class SubjectComponent implements OnInit, OnChanges {
     
     private subject: Subject;
     public subjectForm: FormGroup;
-    public subjectStudyForm: FormGroup;
     public canModify: Boolean = false;
     private firstName: string = "";
     private lastName: string = "";
@@ -182,11 +181,9 @@ export class SubjectComponent implements OnInit, OnChanges {
             'sex': [this.subject.sex],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
-            'personalComments': []
-        });
-        this.subjectStudyForm = this.fb.group({
+            'personalComments': [],
             'subjectStudyList': [this.subject.subjectStudyList]
-        })
+        });
 
         this.subjectForm.valueChanges.subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
@@ -221,6 +218,7 @@ export class SubjectComponent implements OnInit, OnChanges {
     updateModel(): void {
         this.subject = this.subjectForm.value;
         this.subject.subjectStudyList = this.subjectStudyList;
+        console.log(this.subject);
     }
 
     // No
