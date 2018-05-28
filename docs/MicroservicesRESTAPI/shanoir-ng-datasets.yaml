@@ -73,6 +73,33 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  '/datasets/download/{datasetId}':
+    get:
+      operationId: downloadDatasetById
+      description: 'If exists, returns a zip file of the dataset corresponding to the given id'
+      parameters:
+        - $ref: '#/parameters/datasetId'
+        - in: query
+          description: 'Decide if you want to download dicom (dcm) or nifti (nii) files.'
+          name: format
+          type: string
+          default: dcm
+          enum: [dcm, nii]
+      responses:
+        '200':
+          description: zip file
+          schema:
+            type: file
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no dataset found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   '/datasetacquisition':
     post:
       operationId: createNewDatasetAcquisition
