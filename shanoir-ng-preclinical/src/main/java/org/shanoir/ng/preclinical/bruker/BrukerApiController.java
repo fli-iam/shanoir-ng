@@ -89,7 +89,7 @@ public class BrukerApiController implements BrukerApi {
 	 * @throws IOException
 	 */
 	private Path createBrukerTempFile(String fileName) throws IOException {
-		String pathFile = preclinicalConfig.getUploadExtradataFolder() + BRUKER_FOLDER + FOLDER_SEP + CONVERT_FOLDER
+		String pathFile = preclinicalConfig.getUploadBrukerFolder() + BRUKER_FOLDER + FOLDER_SEP + CONVERT_FOLDER
 				+ FOLDER_SEP + fileName;
 		Path path = Paths.get(pathFile);
 		// if the folder exists, create a new folder by adding a figure at the end of

@@ -40,7 +40,6 @@ spring:
       max-file-size: -1
       max-request-size: -1
 front.server.url: http://shanoir-ng-nginx
-#keycloak
 # keycloak
 keycloak:
   cors: true
@@ -55,7 +54,7 @@ keycloak:
       - ROLE_GUEST
       - ROLE_USER
     - securityCollections:
-      - name: studies secured api
+      - name: preclinical secured api
       - patterns:
         - /*
 # microservices url
@@ -70,6 +69,7 @@ logging:
 #Upload Extradata
 preclinical:
   uploadExtradataFolder: /data/upload/
+  uploadBrukerFolder: /tmp/
   separator: /
 
 ---
@@ -103,7 +103,7 @@ server:
 front.server:
   address: http://shanoir-ng-nginx/shanoir-ng/
   url: http://shanoir-ng-nginx
-#keycloak
+# keycloak
 keycloak:
   auth-server-url: http://shanoir-ng-nginx/auth
   credentials:
@@ -136,7 +136,7 @@ spring:
   datasource:
     url: jdbc:h2:mem:SHANOIR_NG_PRECLINICAL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
-    password: 
+    password:
     driver-class-name: org.h2.Driver
     data: classpath:/scripts/test-data-preclinical-h2.sql
     initialize: true
@@ -145,20 +145,7 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
-    properties:
-      hibernate:
-        show_sql: false
-        format_sql: false
-# logging configuration
-logging:
-  file: shanoir-ng-preclinical.log
-  level:
-    org.springframework.web: ERROR
-    org.hibernate: ERROR
-#Upload Extradata
-preclinical:
-  uploadExtradataFolder: /home/mbodin/Documents/FLI-IAM/SHANOIR_NG/upload/
-  separator: /
+
 ---
 
 #################
@@ -178,5 +165,7 @@ front.server.url: SHANOIR_SERVER_URL
 #keycloak
 keycloak:
   auth-server-url: SHANOIR_SERVER_URL/auth
-
-  
+# microservices url
+ms.url:
+  shanoir-ng-studycards: http://DOCKER_PREFIX-ng-datasets:9900/
+  shanoir-ng-users: http://DOCKER_PREFIX-ng-users:9900/

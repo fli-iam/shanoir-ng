@@ -18,6 +18,7 @@ public class ShanoirPreclinicalConfiguration {
 
 	private String uploadExtradataFolder;
 	private String separator;
+	private String uploadBrukerFolder;
 
 	public String getUploadExtradataFolder() {
 		if (!uploadExtradataFolder.endsWith(separator))
@@ -35,6 +36,14 @@ public class ShanoirPreclinicalConfiguration {
 
 	public void setSeparator(String separator) {
 		this.separator = separator;
+	}
+
+	public String getUploadBrukerFolder() {
+		return uploadBrukerFolder;
+	}
+
+	public void setUploadBrukerFolder(String uploadBrukerFolder) {
+		this.uploadBrukerFolder = uploadBrukerFolder;
 	}
 
 	@Bean
