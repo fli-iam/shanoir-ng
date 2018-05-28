@@ -112,6 +112,7 @@ services:
     build: ./docker-compose/preclinical
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
+      - "tmp:/tmp"
     networks:
       - shanoir_ng_network
     ports:
