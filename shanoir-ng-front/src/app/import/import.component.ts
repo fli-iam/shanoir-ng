@@ -415,15 +415,16 @@ export class ImportComponent implements OnInit {
     startImportJob (): void {
         if (this.study != null && this.studycard != null && this.subject != null && this.examination != null) {
             this.importJob.patients = new Array<PatientDicom>();
+            this.selectedSeries.subject = new IdNameObject(this.subject.id, this.subject.name);
             this.importJob.patients.push(this.selectedSeries);
             this.importJob.workFolder = this.workFolder;
             this.importJob.fromDicomZip = true;
-            this.importJob.frontSubjectId = this.subject.id;
             this.importJob.examinationId = this.examination.id;
             this.importJob.frontStudyId = this.study.id;
             this.importJob.frontStudyCardId = this.studycard.id;
             this.importJob.frontConverterId = this.studycard.niftiConverter.id;
             this.importService.startImportJob(this.importJob);
+            console.log(this.importJob);
         }
     }
 

@@ -1,4 +1,5 @@
 import { Sex } from "../subjects/shared/subject.types";
+import { IdNameObject } from "../shared/models/id-name-object.model";
 
 export class ImportJob {
     fromDicomZip: boolean;
@@ -6,7 +7,6 @@ export class ImportJob {
     fromPacs: boolean;
     workFolder: string;
     patients: PatientDicom[];
-    frontSubjectId: number;
     frontExperimentalGroupOfSubjectId: number;
     examinationId: number;
     frontStudyId: number;
@@ -15,17 +15,12 @@ export class ImportJob {
 }
 
 export class PatientDicom {
-    subject: SubjectDicom;
+    subject: IdNameObject;
     patientID: string;
     patientName: string;
     patientBirthDate: Date;
     patientSex: Sex;
     studies: StudyDicom[];
-}
-
-export class SubjectDicom {
-    id: string;
-    name: string;
 }
 
 export class StudyDicom {
