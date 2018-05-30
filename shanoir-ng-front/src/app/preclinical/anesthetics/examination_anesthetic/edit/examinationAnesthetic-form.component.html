@@ -18,25 +18,24 @@
 				<td>
 					<fieldset>
 					<ol>
-						<li class="required">
-							<label i18n="Edit examAnesthetic|Anesthetic label" class="required-label">Anesthetic</label>
+						<li >
+							<label i18n="Edit examAnesthetic|Anesthetic label" >Anesthetic</label>
 							<span class="right-col" [ngSwitch]="mode.state">
 								<ng-template [ngSwitchCase]="Modes.view"> 
 										{{examAnesthetic?.anesthetic?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="anesthetic" required formControlName="anesthetic" [(ngModel)]="examAnesthetic.anesthetic" (ngModelChange)="eaChange($event)">
+									<select id="anesthetic"  formControlName="anesthetic" [(ngModel)]="examAnesthetic.anesthetic" (ngModelChange)="eaChange($event)">
 										<option *ngFor="let anesthetic of anesthetics" [ngValue]="anesthetic">{{anesthetic.name}}</option>
 									</select>
 									<button i18n="Edit examAnesthetic|Add a new anesthetic" (click)="goToAddAnesthetic()">
 										<img [src]="addIconPath"/>
 										new anesthetic
 									</button>
-									<label *ngIf="formErrors.anesthetic.includes('required')" class="form-validation-alert" i18n="Edit examAnesthetic|AnestheticRequiredError label">Anesthetic is required!</label>
 								</ng-template>
 							</span>
 						</li>
-						<li class="required">
+						<li >
 							<label i18n="Edit examAnesthetic|InjectionInterval label">Injection interval</label>
 							<span class="right-col" [ngSwitch]="mode.state">
 								<ng-template [ngSwitchCase]="Modes.view"> 
@@ -49,7 +48,7 @@
 								</ng-template>
 							</span>
 						</li>
-						<li class="required">
+						<li >
 							<label i18n="Edit examAnesthetic|InjectionSite label">Injection site</label>
 							<span class="right-col" [ngSwitch]="mode.state">
 								<ng-template [ngSwitchCase]="Modes.view"> 
@@ -62,7 +61,7 @@
 								</ng-template>
 							</span>
 						</li>
-						<li class="required">
+						<li>
 							<label i18n="Edit examAnesthetic|InjectionType label">Injection type</label> 
 							<span class="right-col" [ngSwitch]="mode.state">
 								<ng-template [ngSwitchCase]="Modes.view">
@@ -75,7 +74,7 @@
 								</ng-template>
 							</span>
 						</li>
-						<li class="required">
+						<li>
 							<label i18n="Edit examAnesthetic|Dose label">Dose</label>
 							<span class="right-col" [ngSwitch]="mode.state">
 								<ng-template [ngSwitchCase]="Modes.view"> 
@@ -86,7 +85,7 @@
 								</ng-template>
 							</span> 
 						</li>
-						<li class="required">
+						<li>
 							<label i18n="Edit examAnesthetic|DoseUnit label">Dose Unit</label>
 							<span class="right-col" [ngSwitch]="mode.state">
 								<ng-template [ngSwitchCase]="Modes.view"> 

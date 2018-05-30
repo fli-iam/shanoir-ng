@@ -136,7 +136,7 @@ export class ExaminationAnestheticFormComponent implements OnInit {
 
     buildForm(): void {
         this.newExamAnestheticForm = this.fb.group({
-            'anesthetic': [this.examAnesthetic.anesthetic, Validators.required],
+            'anesthetic': [this.examAnesthetic.anesthetic],
             'injectionInterval': [this.examAnesthetic.injection_interval],
             'injectionSite': [this.examAnesthetic.injection_site],
             'injectionType': [this.examAnesthetic.injection_type],

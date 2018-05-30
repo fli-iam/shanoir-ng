@@ -209,7 +209,7 @@ export class AnimalExaminationFormComponent implements OnInit {
             'subjectWeight': [this.examination.subjectWeight],
             //regarding examination anesthetic
             newExamAnestheticForm: this.fb.group({
-                'anesthetic': [this.examAnesthetic.anesthetic, Validators.required],
+                'anesthetic': [this.examAnesthetic.anesthetic],
                 'injectionInterval': [this.examAnesthetic.injection_interval],
                 'injectionSite': [this.examAnesthetic.injection_site],
                 'injectionType': [this.examAnesthetic.injection_type],
@@ -311,7 +311,7 @@ export class AnimalExaminationFormComponent implements OnInit {
                 this.examAnestheticService.update(this.examination_id, this.examAnesthetic)
                     .subscribe(examAnesthetic => {
                     });
-            } else {
+            } else if (this.examAnesthetic.anesthetic){
                 this.examAnestheticService.create(this.examination_id, this.examAnesthetic)
                     .subscribe(examAnesthetic => {
                     });
