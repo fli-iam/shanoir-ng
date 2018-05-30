@@ -12,6 +12,10 @@ import { KeycloakService } from "./keycloak.service";
 export class KeycloakHttpInterceptor implements HttpInterceptor {
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        if (req.url.endsWith('/accountrequest')) {
+            // Public URL. No bearer needed
+            return next.handle(req);
+        }
         // Get the auth header from the service.
         const authHeader = KeycloakService.auth.authz.token;
         // Clone the request to add the new header.
