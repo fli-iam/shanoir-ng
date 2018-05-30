@@ -70,23 +70,8 @@ export class SubjectService {
             .map(response => response);
     }
 
-    updateSubjectStudy(subjectStudy: SubjectStudy): Observable<SubjectStudy> {
+    updateSubjectStudyValues(subjectStudy: SubjectStudy): Observable<SubjectStudy> {
         return this.http.put<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
-            .map(res => res);
-    }
-
-    createSubjectStudy(subjectStudy: SubjectStudy): Observable<SubjectStudy> {
-        return this.http.post<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL, JSON.stringify(subjectStudy))
-            .map(res => res);
-    }
-
-    deleteSubjectStudy(id: number): Observable<void> {
-        return this.http.delete<void>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + id)
-            .map(res => res);
-    }
-
-    findSubjectStudyById(id: number): Observable<SubjectStudy> {
-        return this.http.get<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + id)
             .map(res => res);
     }
 }

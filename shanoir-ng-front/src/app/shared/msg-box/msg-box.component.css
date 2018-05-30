@@ -15,7 +15,7 @@
 }
 
 .frame.error { background-color: brown; }
-.frame.warn { background-color: rgba(255, 136, 0, 0.616); }
+.frame.warn { background-color: rgba(255, 136, 0); }
 .frame.info { background-color: green; }
 
 .icon { float: left; font-size: 30px; width: 50px; }

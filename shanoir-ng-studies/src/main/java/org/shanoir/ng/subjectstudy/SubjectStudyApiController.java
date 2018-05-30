@@ -42,17 +42,6 @@ public class SubjectStudyApiController implements SubjectStudyApi {
 	}
 
 	/*
-	 * Get access rights errors.
-	 *
-	 * @param SubjectStudy subjectStudy.
-	 *
-	 * @return an error map.
-	 */
-	private FieldErrorMap getCreationRightsErrors(final SubjectStudy subjectStudy) {
-		return new EditableOnlyByValidator<SubjectStudy>().validate(subjectStudy);
-	}
-
-	/*
 	 * Get unique constraint errors
 	 *
 	 * @param SubjectStudy subjectStudy
@@ -98,59 +87,4 @@ public class SubjectStudyApiController implements SubjectStudyApi {
 
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
-	
-	@Override
-	public ResponseEntity<SubjectStudy> saveNewSubjectStudy(
-			@ApiParam(value = "subject study to create", required = true) @RequestBody SubjectStudy subjectStudy,
-			final BindingResult result) throws RestServiceException {
-
-		/* Validation */
-		// A basic template can only update certain fields, check that
-		final FieldErrorMap accessErrors = this.getCreationRightsErrors(subjectStudy);
-		// Check hibernate validation
-		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		// Check unique constrainte
-		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(subjectStudy);
-		/* Merge errors. */
-		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}
-
-		try {
-			final SubjectStudy createdSubjectStudy = subjectStudyService.save(subjectStudy);
-			//subjectStudyService.updateShanoirOld(createdSubject);
-			return new ResponseEntity<SubjectStudy>(createdSubjectStudy, HttpStatus.OK);
-		} catch (ShanoirStudiesException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-		}
-	}
-	
-	@Override
-	public ResponseEntity<Void> deleteSubjectStudy(
-			@ApiParam(value = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId) {
-		if (subjectStudyService.findById(subjectStudyId) == null) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-		}
-		try {
-			subjectStudyService.deleteById(subjectStudyId);
-		} catch (ShanoirStudiesException e) {
-			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
-		}
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-	}
-
-	@Override
-	public ResponseEntity<SubjectStudy> findSubjectStudyById(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectStudyId) {
-		final SubjectStudy subjectStudy = subjectStudyService.findById(subjectStudyId);
-		if (subjectStudy == null) {
-			return new ResponseEntity<SubjectStudy>(HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(subjectStudy, HttpStatus.OK);
-	}
-
-
 }

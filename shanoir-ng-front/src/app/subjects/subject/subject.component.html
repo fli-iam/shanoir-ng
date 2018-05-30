@@ -173,7 +173,7 @@
 						</span>
 					</li>
 					<li *ngIf="subjectStudyList != null && subjectStudyList.length != 0">
-						<table class="studies">
+						<table>
 							<thead>
 								<tr>
 									<th class="label-col">Study name</th>
@@ -196,7 +196,7 @@
 										<input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
 									</td>
 									<td class="chkbx-col">
-										<input type="checkbox" [checked]="subjectStudy.physicallyInvolved" (change)="subjectStudy.physicallyInvolved = !subjectStudy.physicallyInvolved"/>
+										<input type="checkbox" [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"/>
 									</td>
 									<td class="dropdown-col">
 										<select id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">

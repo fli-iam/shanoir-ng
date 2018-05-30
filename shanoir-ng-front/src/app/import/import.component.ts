@@ -335,16 +335,14 @@ export class ImportComponent implements OnInit {
         }
     }
     
-    updateSubjectStudy(subjectStudy: SubjectStudy) {
-        this.subjectService.updateSubjectStudy(this.subject.subjectStudy);
+    updateSubjectStudyValues(subjectStudy: SubjectStudy) {
+        this.subjectService.updateSubjectStudyValues(this.subject.subjectStudy);
     }
 
     initializePrefillSubject(): void {
         let subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
-        subjectStudy.subjectStudyIdentifier = 'TODO : can auto generate smth here if you want'
-        subjectStudy.subjectType = 'PATIENT';
 
         let newSubject = new Subject();
         newSubject.birthDate = this.selectedSeries.patientBirthDate;
@@ -417,15 +415,16 @@ export class ImportComponent implements OnInit {
     startImportJob (): void {
         if (this.study != null && this.studycard != null && this.subject != null && this.examination != null) {
             this.importJob.patients = new Array<PatientDicom>();
+            this.selectedSeries.subject = new IdNameObject(this.subject.id, this.subject.name);
             this.importJob.patients.push(this.selectedSeries);
             this.importJob.workFolder = this.workFolder;
             this.importJob.fromDicomZip = true;
-            this.importJob.frontSubjectId = this.subject.id;
             this.importJob.examinationId = this.examination.id;
             this.importJob.frontStudyId = this.study.id;
             this.importJob.frontStudyCardId = this.studycard.id;
             this.importJob.frontConverterId = this.studycard.niftiConverter.id;
             this.importService.startImportJob(this.importJob);
+            console.log(this.importJob);
         }
     }
 

@@ -37,6 +37,11 @@ form li > label { width: 250px !important; }
     .data-preview table { margin: 10px; }
     .data-preview h3 { background-color: var(--color-b-light); margin: 0; padding: 7px 20px;font-weight: normal; font-size: 15px;}
 
+table { margin-top: 15px; padding: 5px 0; font-weight: normal; border-collapse: collapse; background-color: var(--light-grey); }
+th { color: var(--color-a); padding: 10px 5px; }
+th, td { text-align: left; }
+td { padding: 3px 5px; }
+
 .dicom input[type='file'], .dicom progress-bar { vertical-align: middle; }
 .dicom progress-bar { margin-left: 20px; }
 

@@ -111,7 +111,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		mrDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
 		// Set the study and the subject
-		mrDataset.setSubjectId(importJob.getPatients().get(0).getFrontSubjectId());
+		mrDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
 		mrDataset.setGroupOfSubjectsId(importJob.getPatients().get(0).getFrontExperimentalGroupOfSubjectId());
 		mrDataset.setStudyId(importJob.getFrontStudyId());
 

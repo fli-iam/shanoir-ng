@@ -4,7 +4,7 @@
 form li > label { display: inline-block; vertical-align: top; width: 280px; }
 
 table { margin-top: 15px; padding: 5px 0; width: 100%; font-weight: normal; border-collapse: collapse; background-color: var(--light-grey); }
-th { font-weight: normal; color: var(--color-a); padding: 10px 5px; }
+th { color: var(--color-a); padding: 10px 5px; }
 th, td { text-align: left; }
 td { padding: 3px 5px; }
 td.buttons-col { color: var(--color-error); }
