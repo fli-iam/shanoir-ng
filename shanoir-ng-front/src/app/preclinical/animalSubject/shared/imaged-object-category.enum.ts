@@ -1,6 +1,6 @@
 export enum ImagedObjectCategory {
     PHANTOM = "Phantom",
-    LIVING_HUMAN_BEING = "Living animal being",
+    LIVING_HUMAN_BEING = "Living animal",
     HUMAN_CADAVER = "Animal cadaver",
     ANATOMICAL_PIECE = "Anatomical piece"
 } 
