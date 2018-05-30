@@ -38,7 +38,8 @@ public class AnonymizationTest {
 	 */
 
 	public void readAnonymizationFileTest() {
-		anonymizationService.readAnonymizationFile(PROFILE);
+		AnonymizationRulesSingleton.getInstance().getAnonymizationMAP();
+//		anonymizationService.readAnonymizationFile(PROFILE);
 	}
 
 	/**

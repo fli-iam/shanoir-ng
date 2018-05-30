@@ -139,7 +139,9 @@ public class DicomDirToJsonReaderService {
 		ObjectNode patient = mapper.createObjectNode();
 		patient.put("patientID", patientRecord.getString(Tag.PatientID));
 		patient.put("patientName", patientRecord.getString(Tag.PatientName));
-		patient.put("patientBirthDate", patientRecord.getDate(Tag.PatientBirthDate).getTime());
+		if (patientRecord.getString(Tag.PatientBirthDate) != null) {
+			patient.put("patientBirthDate", patientRecord.getDate(Tag.PatientBirthDate).getTime());
+		}
 		patient.put("patientSex", patientRecord.getString(Tag.PatientSex));
 		return patient;
 	}
