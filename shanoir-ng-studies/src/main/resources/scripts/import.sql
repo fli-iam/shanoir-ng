@@ -524,11 +524,12 @@ VALUES
     'efa0bd9d3793157b8b44cd76814c079e0eb1f8a3a3017dc0a58959f581d7a097');
 
 INSERT INTO subject
-	(id, name, identifier, birth_date, imaged_object_category, language_hemispheric_dominance,  manual_hemispheric_dominance, sex,  pseudonymus_hash_values_id)
+	(id, name, identifier, birth_date, imaged_object_category, language_hemispheric_dominance,  manual_hemispheric_dominance, sex,  pseudonymus_hash_values_id, preclinical)
 VALUES
-	(1,'subject1', 'sub1', '2013/01/01', 2, 1, 1, 2, 1),
-	(2,'subject2', 'sub2', '2001/02/01', 2, 2, 1, 2, 1),
-	(3,'0010001', 'sub3', '2001/02/01', 2, 1, 2, 2, 1);
+	(1,'subject1', 'sub1', '2013/01/01', 2, 1, 1, 2, 1, false),
+	(2,'subject2', 'sub2', '2001/02/01', 2, 2, 1, 2, 1, false),
+	(3,'0010001', 'sub3', '2001/02/01', 2, 1, 2, 2, 1, false),
+    (4,NULL, 'rat2', NULL, 2, 1, 1, 1, 1, true);
 
 
 INSERT INTO subject_study

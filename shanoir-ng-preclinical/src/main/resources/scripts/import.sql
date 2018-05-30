@@ -27,7 +27,8 @@ VALUES (1,'specie','Rat','subject'),
 		(19,'name','Gadolinium','contrastagent'),
 		(20,'name','Uspio','contrastagent'),
 		(21,'concentration','%','unit'),
-		(22,'concentration','mg/ml','unit');
+		(22,'concentration','mg/ml','unit'),
+		(23,'strain','Long Evans','subject');
 		
 INSERT INTO pathology
 	(id, name)
@@ -52,3 +53,6 @@ INSERT INTO anesthetic_ingredient (id, concentration, anesthetic_id, concentrati
 (3, 52, 2, 21, 16), 
 (4, 34, 3, 21, 16);
 
+
+INSERT INTO animal_subject (id, subject_id, biotype_id, provider_id, specie_id, stabulation_id, strain_id) VALUES
+(1, 4, 3, 9, 1, 7, 23);
