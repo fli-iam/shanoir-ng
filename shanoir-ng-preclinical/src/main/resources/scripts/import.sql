@@ -40,4 +40,15 @@ INSERT INTO therapy
 	(id, comment, name, therapy_type)
 VALUES (1,NULL,'Brainectomy', 'SURGERY'),
 		(2,NULL,'Chimiotherapy','DRUG');
+		
+INSERT INTO anesthetic (id, anesthetic_type, comment, name) VALUES 
+(1, 'INJECTION', NULL, 'Injection Iso. 50.0mg/ml'), 
+(2, 'GAS', NULL, 'Gas Iso. 52.0% Xyl. 54.0%'),
+(3, 'GAS', NULL, 'Gas Iso. 34.0%');
+
+INSERT INTO anesthetic_ingredient (id, concentration, anesthetic_id, concentration_unit_id, name_id) VALUES 
+(1, 50, 1, 22, 16), 
+(2, 54, 2, 21, 18), 
+(3, 52, 2, 21, 16), 
+(4, 34, 3, 21, 16);
 
