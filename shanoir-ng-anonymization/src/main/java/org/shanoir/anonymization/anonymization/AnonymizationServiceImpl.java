@@ -8,6 +8,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -44,7 +45,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	private final String curveDataTags = "0x50xxxxxx";
 	private final String overlayCommentsTags = "0x60xx4000";
 	private final String overlayDataTags = "0x60xx3000";
-	Map<String, String> anonymizationMAP;
+	private Map<String, String> anonymizationMAP;
+	private List<String> tagsToKeep = new ArrayList< String>();
+
 
 	private String patientBirthDate;
 
@@ -57,7 +60,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	Map<String, String> studyIds = new HashMap<String, String>();
 
 	public void anonymize(ArrayList<File> dicomFiles, String profile) {
-		anonymizationMAP = readAnonymizationFile(profile);
+		anonymizationMAP = AnonymizationRulesSingleton.getInstance().getAnonymizationMAP();
+		tagsToKeep = AnonymizationRulesSingleton.getInstance().getTagsToKeep();
 		final int totalAmount = dicomFiles.size();
 		LOG.debug("anonymize : totalAmount=" + totalAmount);
 		int current = 0;
@@ -77,7 +81,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	}
 
 	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) {
-		anonymizationMAP = readAnonymizationFile(profile);
+		this.anonymizationMAP = AnonymizationRulesSingleton.getInstance().getAnonymizationMAP();
+		this.tagsToKeep = AnonymizationRulesSingleton.getInstance().getTagsToKeep();
 		final int totalAmount = dicomFiles.size();
 		LOG.debug("anonymize : totalAmount=" + totalAmount);
 		int current = 0;
@@ -126,7 +131,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 			// read the other tags
 			Attributes datasetAttributes = din.readDataset(-1, -1);
-
+			
 			// save the patient birth date if isShanoirAnonymization
 			if (isShanoirAnonymization)
 				patientBirthDate = datasetAttributes.getString(Tag.PatientBirthDate);
@@ -139,7 +144,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				Integer intgggg = Integer.decode("0x" + gggg);
 				if (intgggg % 2 == 1) {
 					final String basicProfile = anonymizationMAP.get(privateTags);
-					anonymizeTag(tagInt, basicProfile, datasetAttributes);
+					
+					if(!this.tagsToKeep.contains(tagString)) {
+						anonymizeTag(tagInt, basicProfile, datasetAttributes);
+					}
 				} else if (anonymizationMAP.containsKey(tagString)) {
 					if (tagInt == Tag.SOPInstanceUID) {
 						anonymizeSOPInstanceUID(tagInt, datasetAttributes);
@@ -183,69 +191,121 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		}
 
 	}
+//	
+//	/**
+//	 * Read the excel document containing the list of private tags to keep 
+//	 * 
+//	 * @param profile
+//	 * @return
+//	 */
+//	public List<String> readPrivateTagToKeepInAnonymizationFile() {
+//		List<String> tagsToKeep = new ArrayList< String>();
+//
+//
+//		try {
+//			ClassLoader classLoader = getClass().getClassLoader();
+//			InputStream in = classLoader.getResourceAsStream(ANONYMIZATION_FILE_PATH);
+//
+//			XSSFWorkbook myWorkBook = new XSSFWorkbook(in);
+//
+//			// Return first sheet from the XLSX workbook
+//			XSSFSheet mySheet = myWorkBook.getSheetAt(1);
+//
+//			// Get iterator to all the rows in current sheet
+//			Iterator<Row> rowIterator = mySheet.iterator();
+//
+//			// Traversing over each row of XLSX file
+//			while (rowIterator.hasNext()) {
+//				Row row = rowIterator.next();
+//				Cell cell = row.getCell(0);
+//				tagsToKeep.add(cell.getStringCellValue());
+//			}
+//		} catch (IOException e) {
+//			LOG.error("Unable to read anonymization file: " + e);
+//		}
+//		return tagsToKeep;
+//	}
 
-	/**
-	 * Read the excel document containing the list of tags to anonymize
-	 * 
-	 * @param profile
-	 * @return
-	 */
-	public Map<String, String> readAnonymizationFile(final String profile) {
-		Map<String, String> anonymizationMAP = new HashMap<String, String>();
-		Integer xtagColumn = null;
-		Integer profileColumn = null;
-
-		try {
-			ClassLoader classLoader = getClass().getClassLoader();
-			InputStream in = classLoader.getResourceAsStream(ANONYMIZATION_FILE_PATH);
-
-			XSSFWorkbook myWorkBook = new XSSFWorkbook(in);
-
-			// Return first sheet from the XLSX workbook
-			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
-
-			// Get iterator to all the rows in current sheet
-			Iterator<Row> rowIterator = mySheet.iterator();
-
-			// Traversing over each row of XLSX file
-			while (rowIterator.hasNext()) {
-				Row row = rowIterator.next();
-				int rowNumber = row.getRowNum();
-				if (rowNumber == 0) {
-					Iterator<Cell> cellIterator = row.cellIterator();
-					while (cellIterator.hasNext() && (xtagColumn == null || profileColumn == null)) {
-
-						Cell cell = cellIterator.next();
-
-						if (cell.getStringCellValue().equals(xTagsColumn)) {
-							xtagColumn = cell.getColumnIndex();
-							LOG.debug("Tags column : " + xtagColumn);
-						} else if (cell.getStringCellValue().equals(profile)) {
-							profileColumn = cell.getColumnIndex();
-						}
-
-					}
-
-				}
-				if (xtagColumn != null && profileColumn != null) {
-					Cell xtagCell = row.getCell(xtagColumn);
-					String tagString = xtagCell.getStringCellValue();
-					if (tagString != null && tagString.length() != 0 && !tagString.equals("0xTag")) {
-						Cell basicProfileCell = row.getCell(profileColumn);
-						LOG.debug("The basic profile of tag " + tagString + " = "
-								+ basicProfileCell.getStringCellValue());
-						anonymizationMAP.put(tagString, basicProfileCell.getStringCellValue());
-					}
-				} else {
-					LOG.error("Unable to read anonymization tags or/and anonymization profile ");
-				}
-			}
-		} catch (IOException e) {
-			LOG.error("Unable to read anonymization file: " + e);
-		}
-
-		return anonymizationMAP;
-	}
+//	/**
+//	 * Read the excel document containing the list of tags to anonymize
+//	 * 
+//	 * @param profile
+//	 * @return
+//	 */
+//	public Map<String, String> readAnonymizationFile(final String profile) {
+//		Map<String, String> anonymizationMAP = new HashMap<String, String>();
+//		List<String> tagsToKeep = new ArrayList< String>();
+//		Integer xtagColumn = null;
+//		Integer profileColumn = null;
+//
+//		try {
+//			ClassLoader classLoader = getClass().getClassLoader();
+//			InputStream in = classLoader.getResourceAsStream(ANONYMIZATION_FILE_PATH);
+//
+//			XSSFWorkbook myWorkBook = new XSSFWorkbook(in);
+//
+//			// Return first sheet from the XLSX workbook
+//			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
+//
+//			// Get iterator to all the rows in current sheet
+//			Iterator<Row> rowIterator = mySheet.iterator();
+//
+//			// Traversing over each row of XLSX file
+//			while (rowIterator.hasNext()) {
+//				Row row = rowIterator.next();
+//				int rowNumber = row.getRowNum();
+//				if (rowNumber == 0) {
+//					Iterator<Cell> cellIterator = row.cellIterator();
+//					while (cellIterator.hasNext() && (xtagColumn == null || profileColumn == null)) {
+//
+//						Cell cell = cellIterator.next();
+//
+//						if (cell.getStringCellValue().equals(xTagsColumn)) {
+//							xtagColumn = cell.getColumnIndex();
+//							LOG.debug("Tags column : " + xtagColumn);
+//						} else if (cell.getStringCellValue().equals(profile)) {
+//							profileColumn = cell.getColumnIndex();
+//						}
+//
+//					}
+//
+//				}
+//				if (xtagColumn != null && profileColumn != null) {
+//					Cell xtagCell = row.getCell(xtagColumn);
+//					if (xtagCell != null) {
+//						String tagString = xtagCell.getStringCellValue();
+//						if (tagString != null && tagString.length() != 0 && !tagString.equals("0xTag")) {
+//							Cell basicProfileCell = row.getCell(profileColumn);
+//							LOG.debug("The basic profile of tag " + tagString + " = "
+//									+ basicProfileCell.getStringCellValue());
+//							anonymizationMAP.put(tagString, basicProfileCell.getStringCellValue());
+//						}
+//					}
+//				} else {
+//					LOG.error("Unable to read anonymization tags or/and anonymization profile ");
+//				}
+//			}
+//			
+//			// Return second sheet from the XLSX workbook
+//			XSSFSheet mySheet2 = myWorkBook.getSheetAt(1);
+//
+//			// Get iterator to all the rows in current sheet
+//			Iterator<Row> rowIterator2 = mySheet2.iterator();
+//
+//			// Traversing over each row of XLSX file
+//			while (rowIterator2.hasNext()) {
+//				Row row = rowIterator2.next();
+//				Cell cell = row.getCell(0);
+//				tagsToKeep.add(cell.getStringCellValue());
+//			}
+//			this.tagsToKeep = tagsToKeep;
+//			
+//		} catch (IOException e) {
+//			LOG.error("Unable to read anonymization file: " + e);
+//		}
+//
+//		return anonymizationMAP;
+//	}
 
 	/**
 	 * Tag Anonymization
