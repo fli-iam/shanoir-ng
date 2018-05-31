@@ -15,8 +15,8 @@ export class ImportService {
             .map(response => response);
     }
 
-    startImportJob(importJob: ImportJob): void {
-        this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
+    startImportJob(importJob: ImportJob): Promise<Object> {
+        return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
             .toPromise()
             .catch((error) => {
                 return Promise.reject(error.message || error);

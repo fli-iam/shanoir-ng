@@ -168,7 +168,6 @@ services:
     build: ./docker-compose/nginx
     volumes:
       - "logs:/var/log/nginx"
-      - "/home/julien/projects/shanoir-ng/shanoir-ng-front/mnt-dist:/etc/nginx/html/"
     networks:
       - shanoir_ng_network
     ports:

@@ -69,13 +69,15 @@ export class ImportComponent  {
             importJob.frontStudyId = this.context.study.id;
             importJob.frontStudyCardId = this.context.studycard.id;
             importJob.frontConverterId = this.context.studycard.niftiConverter.id;
-            this.importService.startImportJob(importJob);
+            let that = this;
+            this.importService.startImportJob(importJob)
+                .then(response => {
+                    setTimeout(function () {
+                        that.msgService.log('info', 'The data has been successfully imported')
+                     }, 0);
+                    this.router.navigate(['/dataset-list']);
+                });
         }
-        let that = this;
-        setTimeout(function () {
-            that.msgService.log('info', 'The data has been successfully imported')
-         }, 0);
-        this.router.navigate(['/dataset-list']);
     }
 
     private isValid(): boolean {

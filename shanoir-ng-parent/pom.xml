@@ -14,6 +14,7 @@
 	<modules>
 		<module>../shanoir-ng-keycloak-auth</module>
 		<module>../shanoir-ng-back</module>
+		<module>../shanoir-ng-front</module>
 	</modules>
 
 	<properties>

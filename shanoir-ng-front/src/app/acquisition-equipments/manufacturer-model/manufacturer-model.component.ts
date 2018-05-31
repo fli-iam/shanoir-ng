@@ -75,10 +75,6 @@ export class ManufacturerModelComponent implements OnInit {
                         }
                     }
                 }
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting manufacturer list!");
             });
     }
 

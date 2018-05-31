@@ -95,10 +95,6 @@ export class AcquisitionEquipmentComponent implements OnInit {
                         }
                     }
                 }
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting manufacturer model list!");
             });
     }
 
@@ -108,10 +104,6 @@ export class AcquisitionEquipmentComponent implements OnInit {
             .then(centers => {
                 this.centers = centers;
                 this.getAcquisitionEquipment();
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting center list!");
             });
     }
 
