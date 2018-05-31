@@ -71,7 +71,7 @@ public class ImporterApiController implements ImporterApi {
 
 	private static final String APPLICATION_ZIP = "application/zip";
 
-	private static final SecureRandom random = new SecureRandom();
+	private static final SecureRandom RANDOM = new SecureRandom();
 
 	private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
@@ -202,7 +202,7 @@ public class ImporterApiController implements ImporterApi {
 	 * @throws IOException
 	 */
 	private File saveTempFile(MultipartFile file) throws IOException {
-		long n = random.nextLong();
+		long n = RANDOM.nextLong();
 		if (n == Long.MIN_VALUE) {
 			n = 0; // corner case
 		} else {

@@ -49,7 +49,7 @@ public class EmailServiceImpl implements EmailService {
 	@Value("${front.server.address}")
 	private String shanoirServerAddress;
 
-	private static final DateFormat shortDateFormatEN = DateFormat.getDateInstance(DateFormat.SHORT,
+	private static final DateFormat SHORT_DATE_FORMAT_EN = DateFormat.getDateInstance(DateFormat.SHORT,
 			new Locale("EN", "en"));
 
 	@Override
@@ -63,7 +63,7 @@ public class EmailServiceImpl implements EmailService {
 			variables.put("firstname", user.getFirstName());
 			variables.put("lastname", user.getLastName());
 			variables.put("serverAddress", shanoirServerAddress);
-			variables.put("expirationDate", shortDateFormatEN.format(user.getExpirationDate()));
+			variables.put("expirationDate", SHORT_DATE_FORMAT_EN.format(user.getExpirationDate()));
 			final String content = build("notifyAccountWillExpire", variables);
 			messageHelper.setText(content, true);
 		};
@@ -309,7 +309,7 @@ public class EmailServiceImpl implements EmailService {
 			variables.put("firstname", user.getFirstName());
 			variables.put("lastname", user.getLastName());
 			variables.put("serverAddress", shanoirServerAddress);
-			variables.put("expirationDate", shortDateFormatEN.format(user.getExpirationDate()));
+			variables.put("expirationDate", SHORT_DATE_FORMAT_EN.format(user.getExpirationDate()));
 			final String content = build("notifyUserExtensionRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
@@ -330,7 +330,7 @@ public class EmailServiceImpl implements EmailService {
 			variables.put("firstname", user.getFirstName());
 			variables.put("lastname", user.getLastName());
 			variables.put("serverAddress", shanoirServerAddress);
-			variables.put("expirationDate", shortDateFormatEN.format(user.getExpirationDate()));
+			variables.put("expirationDate", SHORT_DATE_FORMAT_EN.format(user.getExpirationDate()));
 			final String content = build("notifyUserExtensionRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};
