@@ -121,6 +121,22 @@ services:
     depends_on:
       - "keycloak"
       - "database"
+  #
+  # Bruker2Dicom, Dicom2Nifti microservice
+  #
+  preclinical-bruker2dicom:
+    container_name: preclinical-bruker2dicom
+    image: dicomifier.ws
+    command: ["python3", "/root/run.py"]
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+      - "tmp:/tmp"
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "5000:5000"
+    depends_on:
+      - "preclinical"
       
   #
   # Backup PACS microservice: dcm4chee 5 arc-light

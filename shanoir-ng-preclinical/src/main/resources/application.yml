@@ -60,6 +60,7 @@ keycloak:
 # microservices url
 ms.url:
   shanoir-ng-studies: http://shanoir-ng-studies/
+  bruker2dicom: http://preclinical-bruker2dicom:5000/bruker2dicom
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-preclinical.log

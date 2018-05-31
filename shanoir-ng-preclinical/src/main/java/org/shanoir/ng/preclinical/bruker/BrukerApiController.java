@@ -19,10 +19,17 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
@@ -39,9 +46,15 @@ public class BrukerApiController implements BrukerApi {
 
 	public static final int KB = 1024;
 	public static final int BUFFER_SIZE = 2 * KB;
+	
+	@Value("${ms.url.bruker2dicom}")
+	private String bruker2DicomMsUrl;
 
 	@Autowired
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
+	
+	@Autowired
+	private RestTemplate restTemplate;
 
 	public ResponseEntity<String> uploadBrukerFile(@RequestParam("files") MultipartFile[] uploadfiles)
 			throws RestServiceException {
@@ -69,6 +82,9 @@ public class BrukerApiController implements BrukerApi {
 					Arrays.asList((new File(brukerDirFile.toAbsolutePath().toString())).listFiles()),
 					RECONSTRUCTED_DATA_FILES);
 			LOG.info("isValidBruker for {" + fileName + "}? " + isValidBruker);
+			
+			startBruker2Dicom(brukerDirFile);
+			
 			if (isValidBruker) {
 				return new ResponseEntity<String>(brukerDirFile.toFile().getAbsolutePath(), HttpStatus.OK);
 			} else {
@@ -78,6 +94,39 @@ public class BrukerApiController implements BrukerApi {
 			LOG.error("Error while uploadBrukerFile: issue with file " + (e == null ? "" : e.getMessage()), e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", null));
+		}
+	}
+
+	/**
+	 * This method does a REST http post call to the docker container bruker2dicom
+	 * to start the conversion of bruker2dicom.
+	 * @param brukerDirFile
+	 * @throws RestServiceException
+	 */
+	private void startBruker2Dicom(Path brukerDirFile) throws RestServiceException {
+		String sourceFilePath = brukerDirFile.toAbsolutePath().toString();
+		String destinationFilePath = brukerDirFile.toAbsolutePath().toString() + File.separator + "result";
+		String requestJson = "{\"source\":\"" + sourceFilePath + "\", \"destination\":\"" + destinationFilePath + "\"}";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		// HttpEntity represents the request
+		HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
+
+		// Post to Bruker2Dicom to start conversion
+		ResponseEntity<String> response = null;
+		try {
+			response = restTemplate.exchange(bruker2DicomMsUrl, HttpMethod.POST, entity, String.class);
+		} catch (RestClientException e) {
+			LOG.error("Error on bruker2dicom microservice request", e);
+			throw new RestServiceException(e,
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while converting bruker2dicom.", null));
+		}
+
+		if (HttpStatus.OK.equals(response.getStatusCode())
+				|| HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+		} else {
+			LOG.error("Error on bruker2dicom microservice request");				
 		}
 	}
 
