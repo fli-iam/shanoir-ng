@@ -206,3 +206,6 @@ li .papaya-menu-slider {
   position: relative !important;
   opacity: 1 !important;
 }
+.papaya-toolbar {
+  display: none !important;
+}

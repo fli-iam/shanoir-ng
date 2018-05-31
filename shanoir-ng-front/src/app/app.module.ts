@@ -91,6 +91,9 @@ import { PapayaComponent } from './shared/components/papaya/papaya.component';
 import { DatasetTypeComponent } from './datasets/shared/dataset-type/dataset-type.component';
 import { ExploredEntityComponent } from './datasets/shared/explored-entity/explored-entity.component';
 import { ProcessedDatasetTypeComponent } from './datasets/shared/processed-dataset-type/processed-dataset-type.component';
+import { SelectSeriesComponent } from './import/select-series/select-series.component';
+import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 
 
 @NgModule({
@@ -161,7 +164,10 @@ import { ProcessedDatasetTypeComponent } from './datasets/shared/processed-datas
         PapayaComponent,
         DatasetTypeComponent,
         ExploredEntityComponent,
-        ProcessedDatasetTypeComponent
+        ProcessedDatasetTypeComponent,
+        SelectSeriesComponent,
+        DicomUploadComponent,
+        ClinicalContextComponent
     ],
     entryComponents: [
         ConfirmDialogComponent

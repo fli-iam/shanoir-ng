@@ -25,29 +25,25 @@ import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 })
 
 export class SubjectComponent implements OnInit, OnChanges {
-
-    private ImagesUrlUtil = ImagesUrlUtil; // Make it visible to the template
+    
+    private readonly ImagesUrlUtil = ImagesUrlUtil;
+    private readonly ImagedObjectCategory = ImagedObjectCategory;
+    private readonly HASH_LENGTH: number = 14;
     
     @Input() mode: "view" | "edit" | "create";
     @Input() preFillData: Subject;
+    @Output() closing: EventEmitter<any> = new EventEmitter();
     
     private subject: Subject;
     public subjectForm: FormGroup;
     public canModify: Boolean = false;
     private firstName: string = "";
     private lastName: string = "";
-    private ImagedObjectCategory = ImagedObjectCategory;
     private selectedStudyId: number; 
-
-    @Output() closing: EventEmitter<any> = new EventEmitter();
-
-    public studies: IdNameObject[];
-    public studyIdNameMap: Map<number, String> = new Map<number, String>();
-    public subjectStudyList: SubjectStudy[] = [];
+    private studies: IdNameObject[];
+    private subjectStudyList: SubjectStudy[] = [];
     private isBirthDateValid: boolean = true;
     private isAlreadyAnonymized: boolean;
-    private hashLength: number = 14;
-
     private init: boolean = false;
 
     constructor(private route: ActivatedRoute, private router: Router,
@@ -145,9 +141,6 @@ export class SubjectComponent implements OnInit, OnChanges {
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
-                for (let study of this.studies) {
-                    this.studyIdNameMap.set(study.id, study.name);
-                }
             })
             .catch((error) => {
                 // TODO: display error
@@ -266,20 +259,20 @@ export class SubjectComponent implements OnInit, OnChanges {
     }
 
     generateSubjectIdentifier(): void {
+        let hash;
         if (this.humanSelected() && !this.isAlreadyAnonymized) {
-            let hash = this.firstName + this.lastName + this.subject.birthDate;
-            this.subject.identifier = this.getHash(hash, this.hashLength);
+            hash = this.firstName + this.lastName + this.subject.birthDate;
         }
         else {
-            let hash = this.subject.name + this.subject.birthDate;
-            this.subject.identifier = this.getHash(hash, this.hashLength);
+            hash = this.subject.name + this.subject.birthDate;
         }
+        this.subject.identifier = this.getHash(hash);
     }
 
-    getHash(stringToBeHashed: string, hashLength: number): string {
+    getHash(stringToBeHashed: string): string {
         let hash = shajs('sha').update(stringToBeHashed).digest('hex');
         let hex = "";
-        hex = hash.substring(0, hashLength);
+        hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
 

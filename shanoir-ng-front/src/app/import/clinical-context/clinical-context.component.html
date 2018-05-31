@@ -1,0 +1,115 @@
+
+<div [class.disabled]="disabled" class="header command-zone" (click)="onHeaderClick($event)">3. Set the clinical context</div>
+<fieldset *ngIf="!disabled && open" class="step">
+
+    <ol>
+        <legend>
+            Research study
+            <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
+        </legend>
+        <li class="required">
+            <label class="required-label">Select an existing research study</label> 
+            <span class="right-col">
+                <select [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)">
+                    <option *ngFor="let study of studies" [ngValue]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study?.name}}</option>
+                </select>
+                <button i18n="Import|StudyDetails label" [disabled]="study == null" (click)="showStudyDetails()">details</button>
+            </span>
+        </li>
+        <li class="required">
+            <label class="required-label">Select an existing study card</label> 
+            <span class="right-col">
+                <select [disabled]="!study" [(ngModel)]="studycard" (ngModelChange)="onSelectStudycard($event)">
+                    <option *ngFor="let studycard of studycards" [ngValue]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</option>
+                </select>
+                <button [disabled]="!studycard" (click)="showStudyCardDetails()">details</button>
+            </span>
+            <br/><span>
+                <label *ngIf="studycardMissingError==true" class="form-validation-alert" i18n="Import|StudycardMissingError label"><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Warning :</strong> no study card is defined for this research study. You cannot import data into this research study.</label>
+                <label *ngIf="studycardNotCompatibleError==true" class="form-validation-alert" i18n="Import|StudycardNotCompatibleError label"><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Warning :</strong> The Acquisition Equipment defined in the study card is not compatible with the data that you are importing.</label>
+            </span>
+        </li>
+        <li class="required">
+            <label>Nifti converter</label> 
+            <span class="right-col">{{niftiConverter?.name}}</span>
+        </li>
+    </ol>
+
+    <ol>
+        <legend>
+            Subject
+            <tool-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</tool-tip>
+        </legend>
+        <li class="required">
+            <label class="required-label">Select a subject</label> 
+            <span class="right-col">
+                <select [disabled]="!study || !studycard" [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)">
+                    <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
+                </select>
+                <button [disabled]="!subject" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
+                <button [disabled]="!study || !studycard" (click)="initializePrefillSubject(); subjectCreationModal.show();">add</button>
+            </span>
+        </li>
+        <li *ngIf="subject != null">
+            <div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="label-col">Common name</th>
+                            <th class="input-col">Subject identifier for this study</th>
+                            <th class="chkbx-col" title="Physically Involved">PI</th>
+                            <th class="dropdown-col">Subject Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="label-col">
+                                {{subject.name}}
+                            </td>
+                            <td class="input-col">
+                                <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
+                                    [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues()"/>
+                            </td>
+                            <td class="chkbx-col">
+                                <input type="checkbox" [(ngModel)]="subject.subjectStudy.physicallyInvolved" 
+                                    [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues()"/>
+                            </td>
+                            <td class="dropdown-col">
+                                <select id="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" 
+                                    [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues()">
+                                        <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
+                                        <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
+                                        <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </li>
+    </ol>
+
+    <ol>
+        <legend>
+            Examination
+            <tool-tip>A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent entity: MR Dataset acquisition.</tool-tip>
+        </legend>
+        <li class="required">
+            <label class="required-label">Select an examination</label> 
+            <span class="right-col">
+                <select [disabled]="!subject" [(ngModel)]="examination" (ngModelChange)="onSelectExamination($event)">
+                    <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
+                </select>
+                <button [disabled]="!examination" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
+                <button [disabled]="!subject" (click)="console.log('TODO')">add</button>
+            </span>
+        </li>
+    </ol>
+
+</fieldset>
+
+<app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
+    <div class="app-modal-body">
+        <subject-detail [mode]="'create'" (closing)="onCloseSubjectPopin($event)" [preFillData]="subjectFromImport"></subject-detail>
+    </div>
+</app-modal>

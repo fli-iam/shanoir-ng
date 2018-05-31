@@ -30,13 +30,14 @@ body { margin: 0; background-color: var(--very-light-grey); }
 body, option, table, button, select, input {font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
 h1 { font-size: 28px; }
 h1, h2, h3, h4 { color: var(--color-a); }
-h2 { margin: 0; }
+h2 { margin: 0; font-size: 20px; }
 hr { margin: 7px 0 !important; border-bottom: 1px solid var(--grey) !important; border: 0; }
 input { padding: 1px 5px; }
 option:disabled { color: var(--greyer); }
 ul { padding: 0; }
 li { list-style: none; } 
 form { margin: 0; }
+select:disabled { opacity: 0.5; }
 
 table.layout { border: none; border-collapse: collapse; }
   table.layout td { padding: 0;	vertical-align: top; }
@@ -46,7 +47,8 @@ button { background-color: var(--color-b); border: 0px; border-radius: 2px; colo
   button:enabled:hover { cursor: pointer; }
   button:disabled { background-color: var(--grey); border-color: var(--grey); cursor: auto; } 
   button:active, 
-  button:enabled:hover { background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
+  button:enabled:hover { color: var(--very-light-grey); background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
+  button svg { vertical-align: inherit; }
 
 input[type='date'] { width: 140px; }
 
@@ -89,15 +91,15 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { padding: 6px 15px; }
   form .footer { text-align: right; }
-  form .header { font-size: 20px; color: var(--color-b); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
+  form .header { font-size: 16px; color: var(--color-b); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
   form .required-label:after{ content:" *"; }
   form .form-validation-alert { color: var(--color-error); width: 100%; overflow: hidden; }
-  form .right-col { display: inline-block; vertical-align: top; min-width: 250px; }
+  form .right-col { display: inline-block; vertical-align: top; min-width: 250px; line-height: 20px; }
   form .right-col label { text-align: left; display: block; }
-  form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; opacity: 0.8; }
+  form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; }
     form .right-col button:active { background-color: var(--color-b-light); }
+    form .right-col button:disabled { color: var(--grey); }
     form .right-col button img { height: 12px; vertical-align: sub; margin: 0px 5px 2px 0px; }
-    form .right-col button:hover:enabled { opacity: 1; }
 
   /* Date picker style overriding */
   form my-date-picker input { height: 21px; font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; }
