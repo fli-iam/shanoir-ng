@@ -3,6 +3,7 @@ package org.shanoir.ng.study;
 import java.util.List;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.studyuser.StudyUserType;
 
 /**
  * DTO of list of members by right type.

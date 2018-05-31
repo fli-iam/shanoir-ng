@@ -127,6 +127,51 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
+  '/studies/{studyId}/members':
+    put:
+      operationId: addMemberToStudy
+      description: Adds a member to a study
+      parameters:
+        - $ref: '#/parameters/studyId'
+        - name: studyUser
+          in: body
+          description: relation between the study and an user
+          required: true
+          schema:
+            $ref: '#/definitions/StudyUser'
+      responses:
+        '204':
+          description: member added
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no study found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/studies/{studyId}/members/{memberId}':
+    delete:
+      operationId: removeMember
+      description: Removes a member from a study
+      parameters:
+        - $ref: '#/parameters/studyId'
+        - $ref: '#/parameters/memberId'
+      responses:
+        '204':
+          description: member removed
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+        '404':
+          description: no study found
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
   /studies/listwithcards:
     get:
       operationId: findStudiesWithStudyCardsByUserId
@@ -177,7 +222,18 @@ parameters:
     required: true
     type: integer
     format: int64
+  memberId:
+    name: memberId
+    in: path
+    description: id of the member
+    required: true
+    type: integer
+    format: int64
 definitions:
+  Center:
+    type: object
+  ExperimentalGroupOfSubjects:
+    type: object
   IdNameDTO:
     type: object
     properties:
@@ -193,26 +249,61 @@ definitions:
       - name
       - status
     properties:
+      clinical:
+        type: boolean
+      downloadableByDefault:
+        type: boolean
+      endDate:
+        type: string
+        format: date
+      examinationIds:
+        type: array
+        items:
+          type: integer
+          format: int64
+      experimentalGroupsOfSubjects:
+        type: array
+        items:
+          $ref: '#/definitions/ExperimentalGroupOfSubjects'
       id:
         type: integer
         format: int64
+      monoCenter:
+        type: boolean
       name:
         type: string
+      protocolFilePaths:
+        type: array
+        items:
+          type: string
       status:
         $ref: '#/definitions/Status'
       startDate:
         type: string
         format: date
-      endDate:
-        type: string
-        format: date
-      clinical:
+      studyCenterList:
+        type: array
+        items:
+          $ref: '#/definitions/StudyCenter'
+      studyStatus:
+        type: integer
+      studyType:
+        type: integer
+      studyUserList:
+        type: array
+        items:
+          $ref: '#/definitions/StudyUser'
+      subjectStudyList:
+        type: array
+        items:
+          $ref: '#/definitions/SubjectStudy'
+      timepoints:
+        type: array
+        items:
+          $ref: '#/definitions/Timepoint'
+      visibleByDefault:
         type: boolean
       withExamination:
-        type: boolean
-      isVisibleByDefault:
-        type: boolean
-      isDownloadableByDefault:
         type: boolean
   SimpleStudyDTO:
     type: object
@@ -251,6 +342,76 @@ definitions:
         format: int64
       labelName:
         type: string
+  StudyCenter:
+    type: object
+    properties:
+      center:
+        $ref: '#/definitions/Center'
+      id:
+        type: integer
+        format: int64
+      study:
+        $ref: '#/definitions/Study'
+  StudyUser:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      receiveAnonymizationReport:
+        type: boolean
+      receiveNewImportReport:
+        type: boolean
+      studyId:
+        type: integer
+        format: int64
+      studyUserType:
+        type: integer
+      userId:
+        type: integer
+        format: int64
+  Subject:
+    type: object
+  SubjectStudy:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      physicallyInvolved:
+        type: boolean
+      study:
+        $ref: '#/definitions/Study'
+      subject:
+        $ref: '#/definitions/Subject'
+      subjectStudyIdentifier:
+        type: string
+      subjectType:
+        type: integer
+  Timepoint:
+    type: object
+    required:
+      - id
+    properties:
+      comment:
+        type: string
+      days:
+        type: integer
+        format: int64
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      rank:
+        type: integer
+        format: int64
+      study:
+        $ref: '#/definitions/Study'
   ErrorModel:
     type: object
     properties:

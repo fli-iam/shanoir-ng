@@ -16,6 +16,9 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.studyuser.StudyUser;
+import org.shanoir.ng.studyuser.StudyUserRepository;
+import org.shanoir.ng.studyuser.StudyUserType;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -41,6 +44,9 @@ public class StudyServiceTest {
 	@InjectMocks
 	private StudyServiceImpl studyService;
 
+	@Mock
+	private StudyUserRepository studyUserRepository;
+
 	@Before
 	public void setup() {
 		given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
@@ -50,7 +56,19 @@ public class StudyServiceTest {
 	}
 
 	@Test
-	public void deleteByIdWithAccessRightTest() throws ShanoirStudiesException {
+	public void addUserTest() throws ShanoirStudiesException {
+		final StudyUser studyUser = new StudyUser();
+		studyUser.setUserId(USER_ID);
+		studyUser.setStudyUserType(StudyUserType.RESPONSIBLE);
+
+		studyService.addUser(STUDY_ID, studyUser);
+
+		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
+		Mockito.verify(studyUserRepository, Mockito.times(1)).save(Mockito.any(StudyUser.class));
+	}
+
+	@Test
+	public void deleteByIdTest() {
 		final Study newStudy = ModelsUtil.createStudy();
 		final StudyUser studyUser = new StudyUser();
 		studyUser.setUserId(USER_ID);
@@ -58,14 +76,9 @@ public class StudyServiceTest {
 		newStudy.getStudyUserList().add(studyUser);
 		given(studyRepository.findOne(STUDY_ID)).willReturn(newStudy);
 
-		studyService.deleteById(STUDY_ID, USER_ID);
+		studyService.deleteById(STUDY_ID);
 
 		Mockito.verify(studyRepository, Mockito.times(1)).delete(Mockito.anyLong());
-	}
-
-	@Test(expected = ShanoirStudiesException.class)
-	public void deleteByIdWithoutAccessRightTest() throws ShanoirStudiesException {
-		studyService.deleteById(STUDY_ID, USER_ID);
 	}
 
 	@Test
@@ -114,6 +127,24 @@ public class StudyServiceTest {
 		Assert.assertTrue(studies.size() == 1);
 
 		Mockito.verify(studyRepository, Mockito.times(1)).findIdsAndNames();
+	}
+
+	@Test
+	public void isUserResponsibleTest() throws ShanoirStudiesException {
+		boolean result = studyService.isUserResponsible(STUDY_ID, USER_ID);
+		Assert.assertFalse(result);
+
+		Mockito.verify(studyRepository, Mockito.times(1)).findOne(STUDY_ID);
+	}
+
+	@Test
+	public void removeUserTest() throws ShanoirStudiesException {
+		studyService.removeUser(STUDY_ID, USER_ID);
+
+		Mockito.verify(studyRepository, Mockito.times(1)).findOne(Mockito.anyLong());
+		Mockito.verify(studyUserRepository, Mockito.times(1)).findByStudyIdAndUserId(STUDY_ID, USER_ID);
+		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
+		Mockito.verify(studyUserRepository, Mockito.times(1)).delete(Mockito.any(StudyUser.class));
 	}
 
 	@Test

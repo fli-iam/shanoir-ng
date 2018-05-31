@@ -13,7 +13,10 @@ import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
+import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +29,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class StudyApiController implements StudyApi {
 
+	/**
+	 * Logger
+	 */
+	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
+
 	@Autowired
 	private StudyService studyService;
 
@@ -33,12 +41,34 @@ public class StudyApiController implements StudyApi {
 	private StudyMapper studyMapper;
 
 	@Override
+	public ResponseEntity<Void> addMember(Long studyId, StudyUser studyUser) {
+		try {
+			if (!studyService.isUserResponsible(studyId, KeycloakUtil.getTokenUserId())) {
+				LOG.error("User with id " + KeycloakUtil.getTokenUserId() + " can't add member to study with id "
+						+ studyId);
+				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+			}
+			studyService.addUser(studyId, studyUser);
+		} catch (ShanoirException e) {
+			if (StudiesErrorModelCode.STUDY_NOT_FOUND.equals(e.getErrorCode())) {
+				return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
-			studyService.deleteById(studyId, KeycloakUtil.getTokenUserId());
-		} catch (ShanoirException e) {
-			if (StudiesErrorModelCode.NO_RIGHT_FOR_ACTION.equals(e.getErrorCode())) {
+			if (!studyService.isUserResponsible(studyId, KeycloakUtil.getTokenUserId())) {
+				LOG.error("User with id " + KeycloakUtil.getTokenUserId() + " can't delete study with id " + studyId);
 				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+			}
+			studyService.deleteById(studyId);
+		} catch (ShanoirException e) {
+			if (StudiesErrorModelCode.STUDY_NOT_FOUND.equals(e.getErrorCode())) {
+				return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -74,10 +104,12 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<SimpleStudyDTO>> findStudiesWithStudyCardsByUserAndEquipment(@RequestBody final EquipmentDicom equipment, final BindingResult result) {
+	public ResponseEntity<List<SimpleStudyDTO>> findStudiesWithStudyCardsByUserAndEquipment(
+			@RequestBody final EquipmentDicom equipment, final BindingResult result) {
 		List<SimpleStudyDTO> studies;
 		try {
-			studies = studyService.findStudiesWithStudyCardsByUserAndEquipment(KeycloakUtil.getTokenUserId(), equipment);
+			studies = studyService.findStudiesWithStudyCardsByUserAndEquipment(KeycloakUtil.getTokenUserId(),
+					equipment);
 		} catch (ShanoirException e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -112,6 +144,24 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(studyMapper.studyToSimpleStudyDTO(study), HttpStatus.OK);
 
 		}
+	}
+
+	@Override
+	public ResponseEntity<Void> removeMember(Long studyId, Long memberId) {
+		try {
+			if (!studyService.isUserResponsible(studyId, KeycloakUtil.getTokenUserId())) {
+				LOG.error("User with id " + KeycloakUtil.getTokenUserId() + " can't remove member from study with id "
+						+ studyId);
+				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+			}
+			studyService.removeUser(studyId, memberId);
+		} catch (ShanoirException e) {
+			if (StudiesErrorModelCode.STUDY_NOT_FOUND.equals(e.getErrorCode())) {
+				return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
@@ -155,7 +205,7 @@ public class StudyApiController implements StudyApi {
 		} catch (ShanoirException e) {
 			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
+
 		study.setId(studyId);
 
 		// A basic study can only update certain fields, check that

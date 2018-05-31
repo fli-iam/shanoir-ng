@@ -14,6 +14,8 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
+import org.shanoir.ng.studyuser.StudyUser;
+import org.shanoir.ng.studyuser.StudyUserType;
 import org.shanoir.ng.subjectstudy.SubjectStudyMapper;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;

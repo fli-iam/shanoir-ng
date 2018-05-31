@@ -41,6 +41,8 @@ public class StudyApiControllerTest {
 	private static final String REQUEST_PATH = "/studies";
 	private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+	private static final String REQUEST_PATH_FOR_MEMBERS = REQUEST_PATH_WITH_ID + "/members";
+	private static final String REQUEST_PATH_FOR_MEMBER_WITH_ID = REQUEST_PATH_FOR_MEMBERS + "/1";
 
 	private Gson gson;
 
@@ -61,11 +63,19 @@ public class StudyApiControllerTest {
 				.willReturn(Arrays.asList(new StudyDTO()));
 		given(studyMapperMock.studyToStudyDTO(Mockito.any(Study.class))).willReturn(new StudyDTO());
 
-		doNothing().when(studyServiceMock).deleteById(1L, 1L);
+		doNothing().when(studyServiceMock).deleteById(1L);
 		given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
 		given(studyServiceMock.findById(1L, 1L)).willReturn(new Study());
 		given(studyServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
 		given(studyServiceMock.save(Mockito.mock(Study.class))).willReturn(new Study());
+	}
+
+	// TODO: manage keycloak token
+	// @Test
+	public void addMember() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_FOR_MEMBERS).accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudyUser())))
+				.andExpect(status().isNoContent());
 	}
 
 	// TODO: manage keycloak token
@@ -95,6 +105,13 @@ public class StudyApiControllerTest {
 	public void findStudyByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
+	}
+
+	// TODO: manage keycloak token
+	// @Test
+	public void removeMemberTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_FOR_MEMBER_WITH_ID).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNoContent());
 	}
 
 	@Test

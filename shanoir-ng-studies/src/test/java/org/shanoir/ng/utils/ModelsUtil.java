@@ -11,6 +11,8 @@ import org.shanoir.ng.manufacturermodel.Manufacturer;
 import org.shanoir.ng.manufacturermodel.ManufacturerModel;
 import org.shanoir.ng.shared.common.CommonIdsDTO;
 import org.shanoir.ng.study.Study;
+import org.shanoir.ng.studyuser.StudyUser;
+import org.shanoir.ng.studyuser.StudyUserType;
 import org.shanoir.ng.subject.Subject;
 
 /**
@@ -37,11 +39,15 @@ public final class ModelsUtil {
 	public static final String MANUFACTURER_MODEL_NAME = "manufacturerModel";
 
 	// Study data
+	public static final Long STUDY_ID = 1L;
 	public static final String STUDY_NAME = "study";
 
 	// Subject data
 	public static final String SUBJECT_NAME = "subject";
 
+	// User data
+	public static final Long USER_ID = 1L;
+	
 	/**
 	 * Create a center.
 	 * 
@@ -134,6 +140,19 @@ public final class ModelsUtil {
 		study.setStudyCenterList(new ArrayList<>());
 		study.setStudyUserList(new ArrayList<>());
 		return study;
+	}
+
+	/**
+	 * Create a relation between a study and a user.
+	 * 
+	 * @return relation.
+	 */
+	public static StudyUser createStudyUser() {
+		final StudyUser studyUser = new StudyUser();
+		studyUser.setStudyId(STUDY_ID);
+		studyUser.setStudyUserType(StudyUserType.RESPONSIBLE);
+		studyUser.setUserId(USER_ID);
+		return studyUser;
 	}
 
 	public static Subject createSubject() {
