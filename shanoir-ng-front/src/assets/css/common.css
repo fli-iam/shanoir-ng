@@ -47,6 +47,7 @@ button { background-color: var(--color-b); border: 0px; border-radius: 2px; colo
   button:disabled { background-color: var(--grey); border-color: var(--grey); cursor: auto; } 
   button:active, 
   button:enabled:hover { background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
+  button svg { vertical-align: inherit; }
 
 input[type='date'] { width: 140px; }
 
@@ -94,10 +95,10 @@ form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1
   form .form-validation-alert { color: var(--color-error); width: 100%; overflow: hidden; }
   form .right-col { display: inline-block; vertical-align: top; min-width: 250px; }
   form .right-col label { text-align: left; display: block; }
-  form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; opacity: 0.8; }
+  form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; }
     form .right-col button:active { background-color: var(--color-b-light); }
+    form .right-col button:disabled { color: var(--grey); }
     form .right-col button img { height: 12px; vertical-align: sub; margin: 0px 5px 2px 0px; }
-    form .right-col button:hover:enabled { opacity: 1; }
 
   /* Date picker style overriding */
   form my-date-picker input { height: 21px; font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; }

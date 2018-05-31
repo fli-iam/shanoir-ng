@@ -15,8 +15,6 @@ export class PapayaComponent implements OnInit {
 
     constructor() {
             this.params = [];
-            this.params["kioskMode"] = true;
-            this.params["expandable"] = true;
             this.params["allowScroll"] = false;
             this.params["radiological"] = true;
             this.params["showRuler"] = true;

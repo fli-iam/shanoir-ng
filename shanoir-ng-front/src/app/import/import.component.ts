@@ -22,6 +22,7 @@ import { SubjectExamination } from '../examinations/shared/subject-examination.m
 import { SubjectStudy } from "../subjects/shared/subject-study.model";
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 import { DicomArchiveService } from './dicom-archive.service';
+import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 
 @Component({
     selector: 'import-modality',
@@ -38,12 +39,11 @@ export class ImportComponent implements OnInit {
     private dicomDirMissingError: Boolean;
     public studycardMissingError: Boolean;
     public studycardNotCompatibleError: Boolean;
-    private status = null; 
+    private extracted: any = null;
+    private archiveStatus: 'none' | 'uploading' | 'uploaded' | 'error' = 'none';
+    private ImagesUrlUtil = ImagesUrlUtil;
     
-    public archive: string;
     public modality: string;
-    public subjectEditionMode: "select" | "create" = "select";
-    public examEditionMode: "select" | "create" = "select";
     public patients: PatientDicom[];
     private patientDicom: PatientDicom;
     private workFolder : string;
@@ -70,15 +70,6 @@ export class ImportComponent implements OnInit {
     public tab_modality_open: boolean = true;
     public tab_upload_open: boolean = true;
     public tab_series_open: boolean = true;
-
-    public pacsProgress: number = 0;
-    public pacsStatus: string;
-    public anonymProgress: number = 0;
-    public anonymStatus: string;
-    public niftiProgress: number = 0;
-    public niftiStatus: string;
-    public studyCardProgress: number = 0;
-    public studyCardStatus: string;
 
     private isDateValid: boolean = true;
     private selectedDateNormal: IMyDate;
@@ -155,7 +146,7 @@ export class ImportComponent implements OnInit {
     initPapaya(serie: SerieDicom): void {
         let _this = this;
         let entries = serie.images.map(function(name) {
-            return _this.status.files[name.path];
+            return _this.extracted.files[name.path];
         });
         let listOfPromises = entries.map(function(a) {
             return a.async("arraybuffer");
@@ -165,25 +156,21 @@ export class ImportComponent implements OnInit {
 
         promiseOfList.then(function (values) {
             let params: object[] = [];
-            params['kioskMode'] = true;
             params['binaryImages'] = [values];
-            params['expandable'] = true;
-            params['allowScroll'] = false;
-            params['radiological'] = true;
-            params['showRuler'] = true;
             _this.papayaParams = params;
         });
     }
     
     uploadArchive(event: any): void {
+        this.archiveStatus = 'uploading';
     	this.dicomArchiveService.clearFileInMemory();
     	this.dicomArchiveService.importFromZip(event)
-    	.subscribe(response => {
-    		this.dicomArchiveService.extractFileDirectoryStructure()
-    		.subscribe(response => {
-    			this.status = response;
-    	 	});
-    	 });
+            .subscribe(response => {
+                this.dicomArchiveService.extractFileDirectoryStructure()
+                .subscribe(response => {
+                    this.extracted = response;
+                });
+            });
     	 
         let file:any = event.srcElement.files;
         let index:any = file[0].name.lastIndexOf(".");
@@ -191,11 +178,9 @@ export class ImportComponent implements OnInit {
         if (strsubstring != '.zip') {
             this.extensionError = true;
             this.dicomDirMissingError = false;
-            this.archive = '';
         } else {
             this.extensionError = false;
             this.dicomDirMissingError = false;
-            this.archive = "file uploaded";
         }
         let formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
@@ -205,11 +190,12 @@ export class ImportComponent implements OnInit {
                 this.modality = modalityOfDicomDir;
                 this.workFolder = patientDicomList.workFolder;
                 this.patients = patientDicomList.patients;
+                this.archiveStatus = 'uploaded';
             }, (err: String) => {
+                this.archiveStatus = 'error';
                 if (err.indexOf("DICOMDIR is missing") != -1) {
                     this.dicomDirMissingError = true;
                     this.extensionError = false;
-                    this.archive = '';
                 }
             });
     }
@@ -365,43 +351,11 @@ export class ImportComponent implements OnInit {
         }
     }
 
-    private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'dd/mm/yyyy',
-        height: '20px',
-        width: '160px'
-    };
-
-    onDateChanged(event: IMyDateModel) {
-        if (event.formatted !== '') {
-            this.selectedDateNormal = event.date;
-        }
-    }
-
-    setDateFromDatePicker(): void {
-        if (this.selectedDateNormal) {
-            this.examinationDate = new Date(this.selectedDateNormal.year, this.selectedDateNormal.month - 1,
-                this.selectedDateNormal.day);
-        } else {
-            this.examinationDate = null;
-        }
-    }
-
-    getDateToDatePicker(examination: Examination): void {
-        if (examination && examination.examinationDate && !isNaN(new Date(examination.examinationDate).getTime())) {
-            let examinationDate: Date = new Date(examination.examinationDate);
-            this.selectedDateNormal = {
-                year: examinationDate.getFullYear(), month: examinationDate.getMonth() + 1,
-                day: examinationDate.getDate()
-            };;
-        }
-    }
-
     createExam() : void {
         let examination: Examination = new Examination();
         examination.centerId = this.studycard.center.id;
         examination.studyId = this.study.id;
         examination.subject = this.subject;
-        this.setDateFromDatePicker(); 
         examination.examinationDate = this.examinationDate;
         examination.comment = this.examinationComment;
         this.examinationService.create(examination)
@@ -436,45 +390,17 @@ export class ImportComponent implements OnInit {
         this.subjectCreationModal.hide();
     }
 
-    startProgressTest() {
-        this.pacsStatus = "";
-        this.anonymStatus = "";
-        this.niftiStatus = "";
-        this.studyCardStatus = "";
-        this.pacsProgress = 0;
-        this.anonymProgress = 0;
-        this.niftiProgress = 0;
-        this.studyCardProgress = 0;
-        let subscription1:any = Observable.timer(0, 10).subscribe(t => {
-            this.pacsProgress = t * 0.005;
-            if (this.pacsProgress >= 1) {
-                this.pacsProgress = 1;
-                this.pacsStatus = "ok";
-                subscription1.unsubscribe();
-                let subscription2 = Observable.timer(0, 10).subscribe(t => {
-                    this.anonymProgress = t * 0.002;
-                    if (this.anonymProgress >= 1) {
-                        this.anonymProgress = 1;
-                        this.anonymStatus = "ok";
-                        subscription2.unsubscribe();
-                        let subscription3 = Observable.timer(0, 10).subscribe(t => {
-                            this.niftiProgress = t * 0.01;
-                            if (this.niftiProgress >= 1) {
-                                this.niftiProgress = 1;
-                                this.niftiStatus = "ok";
-                                subscription3.unsubscribe();
-                                let subscription4 = Observable.timer(0, 10).subscribe(t => {
-                                    this.studyCardProgress = t * 0.01;
-                                    if (this.studyCardProgress >= 0.3) {
-                                        this.studyCardStatus = "error";
-                                        subscription4.unsubscribe();
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
+    private showStudyDetails() {
+        window.open('study?id=' + this.study.id + '&mode=view', '_blank');
     }
+
+    private showSubjectDetails() {
+        window.open('subject?id=' + this.subject.id + '&mode=view', '_blank');
+    }
+
+    private showStudyCardDetails() {
+        window.open('studycard?id=' + this.studycard.id + '&mode=view', '_blank');
+    }
+
+
 }
