@@ -49,7 +49,6 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     private examinations: SubjectExamination[];
     private examination: SubjectExamination;
     public niftiConverter: IdNameObject;
-
     
     constructor(
         private studyService: StudyService,
@@ -183,11 +182,17 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
         this.subjectFromImport = newSubject;
     }
     
-    private onCloseSubjectPopin(subject: any): void {
+    private onCloseSubjectPopin(subject?: Subject): void {
         if (subject) {
             // Add the subject to the select box and select it
-            subject.selected = true;
-            this.subjects.push(subject);
+            let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
+            subjectWithSubjectStudy.id = subject.id;
+            subjectWithSubjectStudy.name = subject.name;
+            subjectWithSubjectStudy.identifier = subject.identifier;
+            subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
+            
+            this.subjects.push(subjectWithSubjectStudy);
+            this.subject = subjectWithSubjectStudy;
         }
         this.subjectCreationModal.hide();
     }
