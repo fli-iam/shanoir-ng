@@ -3,11 +3,13 @@ import { PatientDicom, SerieDicom, EquipmentDicom } from "./../dicom-data.model"
 import { Study } from '../../studies/shared/study.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { AbstractImportStepComponent } from '../import-step.abstract';
+import { slideDown } from '../../shared/animations/animations';
 
 @Component({
     selector: 'select-series',
     templateUrl: 'select-series.component.html',
-    styleUrls: ['select-series.component.css', '../import.step.css']
+    styleUrls: ['select-series.component.css', '../import.step.css'],
+    animations: [slideDown]
 })
 export class SelectSeriesComponent extends AbstractImportStepComponent implements OnChanges {
 

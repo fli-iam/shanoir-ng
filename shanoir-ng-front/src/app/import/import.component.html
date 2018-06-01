@@ -35,8 +35,9 @@
 
     <div class="step-block" [class.active]="true">
         <div class="header command-zone" [class.disabled]="!isValid()" (click)="isValid() ? toggle('final') : null">4. Import the data</div>
-        <div *ngIf="isValid() && opened == 'final'" class="step last">
-            <button (click)="startImportJob($event)">Import now</button>
+        <div *ngIf="isValid() && opened == 'final'" class="step last" [@slideDown]>
+            <button [disabled]="importing" (click)="startImportJob($event)">Import now</button>
+            <img *ngIf="importing" [src]="ImagesUrlUtil.LOADER_IMAGE_PATH"/>
         </div>
     </div>
 

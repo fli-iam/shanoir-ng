@@ -13,6 +13,7 @@ import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Router } from '@angular/router';
 import { AbstractImportStepComponent } from '../import-step.abstract';
+import { slideDown } from '../../shared/animations/animations';
 
 export class ContextData {
     constructor(
@@ -26,7 +27,8 @@ export class ContextData {
 @Component({
     selector: 'clinical-context',
     templateUrl: 'clinical-context.component.html',
-    styleUrls: ['clinical-context.component.css', '../import.step.css']
+    styleUrls: ['clinical-context.component.css', '../import.step.css'],
+    animations: [slideDown]
 })
 export class ClinicalContextComponent extends AbstractImportStepComponent implements OnChanges {
     

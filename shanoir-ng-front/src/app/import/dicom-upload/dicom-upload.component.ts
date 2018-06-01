@@ -4,6 +4,7 @@ import { ImportService } from '../import.service';
 import { DicomArchiveService } from '../dicom-archive.service';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { AbstractImportStepComponent } from '../import-step.abstract';
+import { slideDown } from '../../shared/animations/animations';
 
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
@@ -11,7 +12,8 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 @Component({
     selector: 'dicom-upload',
     templateUrl: 'dicom-upload.component.html',
-    styleUrls: ['dicom-upload.component.css', '../import.step.css']
+    styleUrls: ['dicom-upload.component.css', '../import.step.css'],
+    animations: [slideDown]
 })
 export class DicomUploadComponent extends AbstractImportStepComponent {
 

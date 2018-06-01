@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { MsgBoxService } from '../shared/msg-box/msg-box.service';
 import { ContextData } from './clinical-context/clinical-context.component';
 import { IdNameObject } from '../shared/models/id-name-object.model';
+import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 
 type State = 'dicom' | 'series' | 'context' | 'final' | 'none';
 
@@ -22,12 +23,15 @@ export class ImportComponent  {
     private selectedPatients: PatientDicom[];
     private context: ContextData;
     private opened: State = 'dicom';
+    private importing: boolean = false;
 
     private dicomValid: boolean = false;
     private seriesValid: boolean = false;
     private contextValid: boolean = false;
     private seriesEnabled: boolean = false;
     private contextEnabled: boolean = false;
+
+    private ImagesUrlUtil = ImagesUrlUtil;
     
     constructor(
         private importService: ImportService,
@@ -69,12 +73,17 @@ export class ImportComponent  {
             importJob.frontStudyCardId = this.context.studycard.id;
             importJob.frontConverterId = this.context.studycard.niftiConverter.id;
             let that = this;
+            this.importing = true;
             this.importService.startImportJob(importJob)
                 .then(response => {
+                    this.importing = false;
                     setTimeout(function () {
                         that.msgService.log('info', 'The data has been successfully imported')
                      }, 0);
                     this.router.navigate(['/dataset-list']);
+                }).catch(error => {
+                    this.importing = false;
+                    throw error;
                 });
         }
     }

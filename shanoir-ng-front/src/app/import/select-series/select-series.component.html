@@ -1,5 +1,5 @@
 <div [class.disabled]="disabled" class="header command-zone" (click)="onHeaderClick($event)">2. Select series</div>
-<fieldset class="step" [hidden]="disabled || !open" > 
+<fieldset class="step" *ngIf="!disabled && open" [@slideDown]="!disabled && open"> 
     <p>Please select only the series useful for your study</p>
     <div class="tree">
         <node 
@@ -37,7 +37,7 @@
         </node>
     </div>
 
-    <div class="data-preview" *ngIf="detailedPatient && !disabled">
+    <div class="data-preview" *ngIf="detailedPatient">
         <h3>Patient</h3>
         <table>
             <tr class="item">
@@ -59,9 +59,9 @@
         </table>
     </div>
 
-    <div class="data-preview" [hidden]="!detailedSerie || disabled">
-        <h3 *ngIf="detailedSerie">Serie</h3>
-        <table *ngIf="detailedSerie">
+    <div class="data-preview" *ngIf="detailedSerie">
+        <h3>Serie</h3>
+        <table>
             <tr class="item">
                 <td class="label">Id</td>
                 <td class="value">{{detailedSerie?.seriesInstanceUID}}</td>

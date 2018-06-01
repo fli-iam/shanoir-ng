@@ -13,6 +13,7 @@ export class PapayaComponent implements OnInit {
     @Input() params: Object[];
     @Input() autoLoading: boolean = false;
     private loaded: boolean = false;
+    private static loading: boolean = false;
     private ImagesUrlUtil = ImagesUrlUtil;
 
     constructor() {
@@ -42,7 +43,17 @@ export class PapayaComponent implements OnInit {
     }
 
     private load() {
-        papaya.Container.resetViewer(0, this.params);
-        this.loaded = true;
+        if (!PapayaComponent.loading) {
+            this.loaded = true; 
+            PapayaComponent.loading = true;
+            this.params["loadingComplete"] = () => { PapayaComponent.loading = false; };
+            papaya.Container.resetViewer(0, this.params);
+        } else {
+            throw new Error("Don't try to load an image in papaya before the previous loading is finished");
+        }
+    }
+
+    public isLoading(): boolean {
+        return PapayaComponent.loading;
     }
 }

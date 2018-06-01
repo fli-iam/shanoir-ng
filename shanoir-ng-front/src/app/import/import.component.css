@@ -6,5 +6,6 @@ form { border: none !important; background-color: transparent; }
 
 .commands button + button { margin-left: 10px; }
 
-.last.step { padding: 15px; text-align: center; }
+.last.step { padding: 15px; }
     .last.step button { font-size: 16px; }
+    .last.step img { height: 41px; vertical-align: top; margin: 0 20px; }
