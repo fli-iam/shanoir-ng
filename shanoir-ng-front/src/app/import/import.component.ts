@@ -5,6 +5,7 @@ import { ImportJob, PatientDicom, SerieDicom, EquipmentDicom } from "./dicom-dat
 import { Router } from '@angular/router';
 import { MsgBoxService } from '../shared/msg-box/msg-box.service';
 import { ContextData } from './clinical-context/clinical-context.component';
+import { IdNameObject } from '../shared/models/id-name-object.model';
 
 type State = 'dicom' | 'series' | 'context' | 'final' | 'none';
 
@@ -59,7 +60,7 @@ export class ImportComponent  {
         if (true) {
             let importJob = new ImportJob();
             importJob.patients = new Array<PatientDicom>();
-            console.log(this.patient.subject);
+            this.patient.subject = this.context.subject;
             importJob.patients.push(this.patient);
             importJob.workFolder = this.importJob.workFolder;
             importJob.fromDicomZip = true;

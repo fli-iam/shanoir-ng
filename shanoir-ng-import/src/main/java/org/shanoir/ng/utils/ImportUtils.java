@@ -27,10 +27,10 @@ public class ImportUtils {
 	 * @todo: read from application.yml -> Yao
 	 */
 	// dcmdjpeg (from dcmtk) path under linux
-	private static String DCMDJPEG_LINUX_PATH = "/usr/bin/dcmdjpeg";
+	private static final String DCMDJPEG_LINUX_PATH = "/usr/bin/dcmdjpeg";
 
 	// dcmdjpeg (from dcmtk) path under windows
-	private static String DCMDJPEG_WINDOWS_PATH = "dcmdjpeg/windows/dcmdjpeg.exe";
+	private static final String DCMDJPEG_WINDOWS_PATH = "dcmdjpeg/windows/dcmdjpeg.exe";
 
 	/** The Constant KB. */
 	private static final int KB = 1024;
