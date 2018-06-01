@@ -214,10 +214,11 @@ export class SubjectComponent implements OnInit, OnChanges {
         console.log(this.subject);
     }
 
-    // No
     back(subject?: Subject): void {
         if (this.closing.observers.length > 0) {
             this.closing.emit(subject);
+            this.subject = new Subject();
+            this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         } else {
             this.location.back();
         }
@@ -237,7 +238,7 @@ export class SubjectComponent implements OnInit, OnChanges {
         this.subjectService.create(this.subject)
             .subscribe((subject: Subject) => {
                 this.msgService.log('info', 'Subject successfully created');
-                this.back();
+                this.back(subject);
             });
         }
 
