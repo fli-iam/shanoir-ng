@@ -30,11 +30,9 @@ export class ContextData {
 })
 export class ClinicalContextComponent extends AbstractImportStepComponent implements OnChanges {
     
-    @Input() open: boolean;
     @Input() examinationComment: string;
     @Input() patient: PatientDicom;
     @Output() contextChange = new EventEmitter<ContextData>();
-    @Output() headerClick = new EventEmitter<any>();
     
     @ViewChild('subjectCreationModal') subjectCreationModal: ModalComponent;
 
@@ -64,6 +62,10 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
 
     ngOnChanges(changes: SimpleChanges) {
         if(changes['patient'] && changes['patient'].currentValue) {
+            this.studycard = null;
+            this.subject = null;
+            this.examination = null;
+            this.onContextChange();
             this.fetchStudies();
         }
     }
@@ -95,6 +97,12 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     }
     
     private onSelectStudy(): void {
+        this.studycards = null;
+        this.studycard = null;
+        this.subjects = null;
+        this.subject = null;
+        this.examinations = null;
+        this.examination = null;
         if (this.study) {
             if (this.study.studyCards.length == 0) {
                 this.studycardMissingError = true;
@@ -132,6 +140,8 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     }
 
     private onSelectSubject(): void {
+        this.examinations = null;
+        this.examination = null;
         if (this.subject) {
             this.examinationService
                 .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
@@ -145,20 +155,11 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     }
 
     private onContextChange() {
-        if (this.isContextValid()) {
+        this.updateValidity();
+        if (this.getValidity()) {
             this.contextChange.emit(this.getContext());
         }
     }
-
-    private isContextValid(): boolean {
-        let context = this.getContext();
-        return (
-            context.study != undefined && context.study != null
-            && context.studycard != undefined && context.studycard != null
-            && context.subject != undefined && context.subject != null
-            && context.examination != undefined && context.examination != null
-        );
-    } 
     
     private getContext(): ContextData {
         return new ContextData(this.study, this.studycard, this.subject, this.examination);
@@ -208,7 +209,12 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     }
 
     getValidity(): boolean {
-        return this.study && this.studycard && this.subject 
-            && this.examination != undefined && this.examination != null;
+        let context = this.getContext();
+        return (
+            context.study != undefined && context.study != null
+            && context.studycard != undefined && context.studycard != null
+            && context.subject != undefined && context.subject != null
+            && context.examination != undefined && context.examination != null
+        );
     }
 }

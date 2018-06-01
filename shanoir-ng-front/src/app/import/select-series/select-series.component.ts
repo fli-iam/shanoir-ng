@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Output, EventEmitter, Input, SimpleChanges, OnChanges } from '@angular/core';
 import { PatientDicom, SerieDicom, EquipmentDicom } from "./../dicom-data.model";
 import { Study } from '../../studies/shared/study.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
@@ -17,7 +17,6 @@ export class SelectSeriesComponent extends AbstractImportStepComponent implement
     private detailedPatient: Object;
     private detailedSerie: Object;
     private papayaParams: object[];
-    private updatedPatient: PatientDicom;
 
     constructor() {
         super();
@@ -41,10 +40,9 @@ export class SelectSeriesComponent extends AbstractImportStepComponent implement
         }
     }
 
-    private onPatientUpdate(updatedPatient: PatientDicom): void {
-        this.updatedPatient = updatedPatient;
+    private onPatientUpdate(): void {
         this.updateValidity();
-        this.patientsChange.emit([updatedPatient]);
+        this.patientsChange.emit(this.patients);
     }
 
     private initPapaya(serie: SerieDicom): void {
@@ -65,11 +63,20 @@ export class SelectSeriesComponent extends AbstractImportStepComponent implement
         });
     }
 
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['patients']) {
+            this.patientsChange.emit(this.patients);
+        }
+        this.updateValidity();
+    }
+
     getValidity(): boolean {
-        if (!this.updatedPatient) return false;
-        for (let study of this.updatedPatient.studies) {
-            for (let serie of study.series) {
-                if (serie.selected) return true;
+        if (!this.patients) return false;
+        for (let patient of this.patients) {
+            for (let study of patient.studies) {
+                for (let serie of study.series) {
+                    if (serie.selected) return true;
+                }
             }
         }
         return false;

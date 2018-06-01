@@ -1,4 +1,5 @@
 import { Component, OnInit, SimpleChange, Input } from "@angular/core";
+import { ImagesUrlUtil } from "../../utils/images-url.util";
 
 declare var papaya: any;
 declare var papayaContainers: any[];
@@ -12,6 +13,7 @@ export class PapayaComponent implements OnInit {
     @Input() params: Object[];
     @Input() autoLoading: boolean = false;
     private loaded: boolean = false;
+    private ImagesUrlUtil = ImagesUrlUtil;
 
     constructor() {
             this.params = [];

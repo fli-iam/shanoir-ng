@@ -12,7 +12,6 @@ export class ImportJob {
     frontStudyId: number;
     frontStudyCardId: number;
     frontConverterId: number;
-    frontSubjectId: number;
 }
 
 export class PatientDicom {

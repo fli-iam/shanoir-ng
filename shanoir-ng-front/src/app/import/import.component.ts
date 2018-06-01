@@ -18,7 +18,6 @@ export class ImportComponent  {
 
     private extracted: any;
     private importJob: ImportJob;
-    private extractedPatients: PatientDicom[];
     private selectedPatients: PatientDicom[];
     private context: ContextData;
     private opened: State = 'dicom';
@@ -40,31 +39,30 @@ export class ImportComponent  {
     }
     
     private onArchiveUploaded(importJob: ImportJob) {
-        this.extractedPatients = importJob.patients;
         this.importJob = importJob;
     }
 
     private onPatientsChange(patients: PatientDicom[]) {
         this.selectedPatients = patients;
     }
+    
+    private onContextChange(context: ContextData) {
+        this.context = context;
+    }
 
     private get patient(): PatientDicom {
         if (!this.selectedPatients || this.selectedPatients.length <= 0) return null;
         return this.selectedPatients[0];
-    }
-
-    private onContextChange(context: ContextData) {
-        this.context = context;
     }
     
     private startImportJob (): void {
         if (true) {
             let importJob = new ImportJob();
             importJob.patients = new Array<PatientDicom>();
+            console.log(this.patient.subject);
             importJob.patients.push(this.patient);
             importJob.workFolder = this.importJob.workFolder;
             importJob.fromDicomZip = true;
-            importJob.frontSubjectId = this.context.subject.id;
             importJob.examinationId = this.context.examination.id;
             importJob.frontStudyId = this.context.study.id;
             importJob.frontStudyCardId = this.context.studycard.id;
@@ -81,8 +79,7 @@ export class ImportComponent  {
     }
 
     private isValid(): boolean {
-        return this.patient && this.importJob 
-            && this.context != undefined && this.context != null;
+        return this.dicomValid && this.seriesValid && this.contextValid;
     }
 
     private updateState() {

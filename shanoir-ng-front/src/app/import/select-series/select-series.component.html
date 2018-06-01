@@ -16,7 +16,7 @@
                     (editedLabel)="changeExamComment($event)"
                     [editable]="true"
                     [nodeParams]="study"
-                    (chkbxChange)="onPatientUpdate(patient)"
+                    (chkbxChange)="onPatientUpdate()"
                     tooltip="You can change the study description here. The value will then be overwritten in the dicom files."
                     pictoUrl="/assets/images/icons/medical/x-ray-2.png" 
                     hasBox="true"
@@ -28,7 +28,7 @@
                             hasBox="true" 
                             [(ngModel)]="serie.selected"  
                             [nodeParams]="serie"
-                            (chkbxChange)="onPatientUpdate(patient)"
+                            (chkbxChange)="onPatientUpdate()"
                             (labelClick)="showSerieDetails($event); initPapaya(serie);"
                             [class.selected]="detailedSerie == serie"
                             [ngModelOptions]="{standalone: true}">

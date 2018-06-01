@@ -16,7 +16,7 @@
         [open]="opened == 'series'"
         [disabled]="!seriesEnabled"
         (validityChange)="seriesValid=$event; updateState();"
-        [patients]="extractedPatients" 
+        [patients]="importJob?.patients" 
         [dataFiles]="extracted" 
         (patientsChange)="onPatientsChange($event)"
         (headerClick)="toggle('series')">
