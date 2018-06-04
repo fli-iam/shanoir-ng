@@ -1,9 +1,8 @@
-package org.shanoir.ng.study;
-
-import java.io.Serializable;
+package org.shanoir.ng.studyuser;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -15,12 +14,8 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "studyId", "userId" }, name = "study_user_idx") })
-public class StudyUser implements Serializable {
-
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -6816811624812002519L;
+@IdClass(StudyUserId.class)
+public class StudyUser {
 
 	/** is the anonymization report to be sent to the user. */
 	private boolean receiveAnonymizationReport;

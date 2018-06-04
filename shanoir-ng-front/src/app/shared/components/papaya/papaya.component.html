@@ -1,4 +1,7 @@
-<div class="preview" [hidden]="!params">
-    <button *ngIf="!this.autoLoading && !loaded" (click)="load()">Load preview</button>
-    <div [hidden]="!loaded" class="papaya" data-params="params"></div> 
+<div class="preview">
+    <button [disabled]="isLoading() || !params" *ngIf="!this.autoLoading && !loaded" (click)="load()">
+        <span *ngIf="!(isLoading() || !params)">Load preview</span>
+        <span *ngIf="isLoading() || !params">Wait<img class="loader" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH"/></span>
+    </button>
+    <div [hidden]="!loaded || !params" class="papaya" data-params="params"></div> 
 </div> 

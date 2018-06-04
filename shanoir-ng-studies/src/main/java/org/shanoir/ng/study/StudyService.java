@@ -7,6 +7,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
+import org.shanoir.ng.studyuser.StudyUser;
 
 /**
  * Study service.
@@ -15,6 +16,16 @@ import org.shanoir.ng.study.dto.SimpleStudyDTO;
  *
  */
 public interface StudyService extends UniqueCheckableService<Study> {
+
+	/**
+	 * Add an user to a study.
+	 * 
+	 * @param studyId
+	 *            study id.
+	 * @param studyUser
+	 *            relation between a study and an user.
+	 */
+	void addUser(Long studyId, StudyUser studyUser);
 
 	/**
 	 * Check if an user can update a study.
@@ -28,15 +39,12 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	boolean canUserUpdateStudy(Long studyId, Long userId);
 
 	/**
-	 * Delete a study. Check if current user can delete study.
+	 * Delete a study. Do check before if current user can delete study!
 	 *
 	 * @param id
 	 *            study id.
-	 * @param userId
-	 *            user id.
-	 * @throws ShanoirStudiesException
 	 */
-	void deleteById(Long id, Long userId) throws ShanoirStudiesException;
+	void deleteById(Long id);
 
 	/**
 	 * Delete a Study from the old Shanoir.
@@ -96,12 +104,35 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * 
 	 * @param userId
 	 *            user id.
-	 * @param equipment 
-	 *			  equipment used during dicom import
+	 * @param equipment
+	 *            equipment used during dicom import
 	 * @return a list of simple studies.
 	 * @throws ShanoirException
 	 */
-	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(Long userId, EquipmentDicom equipment) throws ShanoirException;
+	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(Long userId, EquipmentDicom equipment)
+			throws ShanoirException;
+
+	/**
+	 * Check if an user is responsible of the study.
+	 * 
+	 * @param studyId
+	 *            study id.
+	 * @param userId
+	 *            user id.
+	 * @return true if user is responsible
+	 * @throws ShanoirStudiesException
+	 */
+	boolean isUserResponsible(Long studyId, Long userId) throws ShanoirStudiesException;
+
+	/**
+	 * Remove an user from a study.
+	 * 
+	 * @param studyId
+	 *            study id.
+	 * @param userId
+	 *            user id.
+	 */
+	void removeUser(Long studyId, Long userId);
 
 	/**
 	 * add new study

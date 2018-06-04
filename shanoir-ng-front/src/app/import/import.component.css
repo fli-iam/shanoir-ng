@@ -1,75 +1,11 @@
-.checkbox-button { background-color: var(--light-grey); color: var(--color-a); }
-    .checkbox-button.selected { background-color: var(--color-a); color: var(--light-grey); }
+:host() { display: block; margin-bottom: 25px; }
 
-.navigation { margin: 20px 0 0 0; }
+form { border: none !important; background-color: transparent; }
 
-input[type="file"] { padding: 0; }
-input[type="radio"] { vertical-align: sub; }
-
-button { margin: 0; }
-
-.warning { color: red; }
-
-.spacer { width: 20px; display: inline-block; }
-
-.check-mark { color: olivedrab; margin-left: 10px; }
-
-form { border: 0; background-color: transparent !important; }
-
-form li > label { width: 250px !important; }
-
-.header { cursor: pointer; }
-
-.step-block { position: relative; }
-.step-block:not(.active):before { background-color: var(--lighter-grey); opacity: 0.8; content: ""; position: absolute; width: 100%; z-index: 2; height: 100%; }
-    .step-block .header { margin-top: 20px; }
-
-.step { background-color: var(--lighter-grey); border: 1px solid var(--light-grey); margin: 0; padding: 0 15px 15px; overflow: hidden; }
-    .step h2 { overflow: hidden; white-space: nowrap; }
-        .step h2 span { display: inline-block; }
-        .step h2 .hr { width: 100%; border-bottom: 1px solid var(--grey); margin-left: 10px; vertical-align: middle; }
-
-.tree { margin: 0 50px 20px 0; display: inline-block; vertical-align: top; }
-
-.data-preview { display: inline-block; vertical-align: top; background-color: var(--light-grey); margin: 0 0 20px 0; overflow: hidden; }
-    .data-preview[hidden] { display: none; }
-    .data-preview td { padding: 3px 10px; }
-    .data-preview table { margin: 10px; }
-    .data-preview h3 { background-color: var(--color-b-light); margin: 0; padding: 7px 20px;font-weight: normal; font-size: 15px;}
-
-table { margin-top: 15px; padding: 5px 0; font-weight: normal; border-collapse: collapse; background-color: var(--light-grey); }
-th { color: var(--color-a); padding: 10px 5px; }
-th, td { text-align: left; }
-td { padding: 3px 5px; }
-
-.dicom input[type='file'], .dicom progress-bar { vertical-align: middle; }
-.dicom progress-bar { margin-left: 20px; }
-
-.modality-test { background-color: lightgoldenrodyellow; padding: 10px; width: 300px; margin-top: 20px; }
-
-.anonymization-table { border-collapse: collapse; border-spacing: 0; border: 1px solid var(--light-grey); table-layout: fixed; width: 100%; }
-    .anonymization-table th { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; overflow: hidden; }
-    .anonymization-table td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .anonymization-table td + td { border-left: 1px dotted var(--grey); }
-    .anonymization-table tr { height: 20px; }
-        .anonymization-table tr.even { background-color: var(--light-grey); }
-		.anonymization-table tr.odd { background-color: var(--lighter-grey); }
-
-.anonymize .console { margin-top: 15px; width: 70ch; padding: 10px; color: var(--very-light-grey); font-family: monospace; border: 6px outset #555; border-radius: 11px; 
-        background: var(--very-dark-grey); background: -webkit-linear-gradient(left top, #636363, black); background: -o-linear-gradient(bottom right, #636363, black); background: -moz-linear-gradient(bottom right, #636363, black); background: linear-gradient(to bottom right, #636363, black); } 
-.anonymize .commands { margin: 15px 0 0 20px; }
-    .anonymize .commands button { margin: 0; }
-
-.study-card ol { }
-    .study-card ol p { margin: 5px 0; }
-
-.expandable { cursor: pointer; }
-    .expand-arrow { margin-left: 5px; display: inline-block; }
-    .ds-acq-list { margin-bottom: 5px; }
-    .ds-acq-list li { padding: 0; color: var(--color-b); }
-        .ds-acq img { height: 16px; margin-right: 5px; vertical-align: text-bottom; }
-        .ds-acq button { margin-left: 10px; }
-
-.rotate { -moz-transform: scale(1, -1) translateY(-5px); -webkit-transform: scale(1, -1) translateY(-5px); -o-transform: scale(1, -1) translateY(-5px); -ms-transform: scale(1, -1) translateY(-5px); transform: scale(1, -1) translateY(-5px); }
+.step-block { position: relative; margin-top: 20px; display: block; }
 
 .commands button + button { margin-left: 10px; }
+
+.last.step { padding: 15px; }
+    .last.step button { font-size: 16px; }
+    .last.step img { height: 41px; vertical-align: top; margin: 0 20px; }

@@ -3,6 +3,7 @@ package org.shanoir.ng.importer.dicom;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -88,7 +89,7 @@ public class DicomFileAnalyzerService {
 											String instanceFilePath = entry.getValue().asText();
 											File instanceFile = new File(instanceFilePath);
 											if (instanceFile.exists()) {
-												processDicomFile(instanceFile, serie, instances, instanceFilePath, nonImages, images, unzipFolderFileAbsolutePath);
+												processDicomFile(instanceFile, patient, serie, instances, instanceFilePath, nonImages, images, unzipFolderFileAbsolutePath);
 											} else {
 												throw new FileNotFoundException(
 														"InstanceFilePath in DicomDir: missing file: "
@@ -123,7 +124,7 @@ public class DicomFileAnalyzerService {
 	 * @param nonImages
 	 * @param images
 	 */
-	private void processDicomFile(File dicomFile, JsonNode serie, JsonNode instances, String instanceFilePath, ArrayNode nonImages, ArrayNode images,String unzipFolderFileAbsolutePath) {
+	private void processDicomFile(File dicomFile, JsonNode patient, JsonNode serie, JsonNode instances, String instanceFilePath, ArrayNode nonImages, ArrayNode images,String unzipFolderFileAbsolutePath) {
 		DicomInputStream dIS = null;
 		try {
 			dIS = new DicomInputStream(dicomFile);
@@ -166,6 +167,7 @@ public class DicomFileAnalyzerService {
 			 * first?) as reference for the serie. The below infos are not contained in the
 			 * dicomdir, that is why we go on the file level.
 			 */
+			checkPatientBirthdate(patient, datasetAttributes);
 			checkIsMultiFrame(serie, datasetAttributes, sopClassUID);
 			checkIsEnhancedMRAndAddSequenceName(serie, datasetAttributes, sopClassUID);
 			checkSeriesDate(serie, datasetAttributes);
@@ -305,6 +307,23 @@ public class DicomFileAnalyzerService {
 			String seriesDateDicomFile = datasetAttributes.getString(Tag.SeriesDate);
 			if (seriesDateDicomFile != null && !seriesDateDicomFile.isEmpty()) {
 				((ObjectNode) serie).put("seriesDate", seriesDateDicomFile);
+			}
+		}
+	}
+	
+	/**
+	 * Normally we get the Patient BirthDate from the DicomDir, if not: null or empty,
+	 * get the Patient BirthDate from the .dcm file, if existing in .dcm file add it in
+	 * JsonNode tree.
+	 * @param serie
+	 * @param datasetAttributes
+	 */
+	private void checkPatientBirthdate(JsonNode patient, Attributes datasetAttributes) {
+		if (patient.path("patientBirthDate").isMissingNode()) {
+			// has not been found in dicomdir, so we get it from .dcm file:
+			Date patientBirthdateDicomFile = datasetAttributes.getDate(Tag.PatientBirthDate);
+			if (patientBirthdateDicomFile != null) {
+				((ObjectNode) patient).put("patientBirthDate", patientBirthdateDicomFile.getTime());
 			}
 		}
 	}

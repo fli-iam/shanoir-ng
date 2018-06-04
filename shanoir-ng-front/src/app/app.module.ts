@@ -92,6 +92,9 @@ import { PapayaComponent } from './shared/components/papaya/papaya.component';
 import { DatasetTypeComponent } from './datasets/shared/dataset-type/dataset-type.component';
 import { ExploredEntityComponent } from './datasets/shared/explored-entity/explored-entity.component';
 import { ProcessedDatasetTypeComponent } from './datasets/shared/processed-dataset-type/processed-dataset-type.component';
+import { SelectSeriesComponent } from './import/select-series/select-series.component';
+import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
@@ -138,7 +141,6 @@ import { FileUploadComponent }      from './preclinical/fileupload/fileupload.co
 import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
 import { ImportBrukerComponent }   from './preclinical/importBruker/importBruker.component';
 import { ImportBrukerFileComponent }   from './preclinical/importBruker/components/importBrukerFile.component';
-import { SelectSeriesComponent }   from './preclinical/importBruker/components/selectSeries.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 
 @NgModule({
@@ -211,6 +213,9 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         DatasetTypeComponent,
         ExploredEntityComponent,
         ProcessedDatasetTypeComponent,
+        SelectSeriesComponent,
+        DicomUploadComponent,
+        ClinicalContextComponent,
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,
@@ -241,8 +246,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     	ExtraDataListComponent,
     	BloodGasDataFormComponent, 
     	ImportBrukerComponent, 
-    	ImportBrukerFileComponent,
-    	SelectSeriesComponent
+    	ImportBrukerFileComponent
     ],
     entryComponents: [
         ConfirmDialogComponent

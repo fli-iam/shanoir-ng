@@ -1,393 +1,44 @@
-<h1>Import from DICOM</h1>
-<form [formGroup]="importForm" novalidate [@preventInitialChildAnimations]>
+<h2>Import from DICOM</h2>
+<form [@preventInitialChildAnimations]>
 
-    <div class="step-block active" [class.active]="true">
-        <div class="header command-zone" (click)="tab_upload_open = !tab_upload_open">1. Select DICOM archive<span *ngIf="archive" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step dicom" [@slideDown]="tab_upload_open" *ngIf="tab_upload_open">
-            <p>
-                Please select a DICOM zip archive to import.<br/>
-                <strong class="warning">&#9888; Important notice:</strong> this archive must contain a DICOMDIR file at its root!
-            </p>
-            <input type="file" formControlName="fu" (change)="uploadArchive($event)" placeholder="Upload file..."/>
-            <label *ngIf="extensionError==true" class="form-validation-alert" i18n="Import|ExtensionError label">A DICOM zip archive is required!</label>
-            <label *ngIf="dicomDirMissingError==true" class="form-validation-alert" i18n="Import|DicomDirMissingError label">DICOMDIR is missing in .zip file!</label>    
-        </fieldset>
-    </div>
+    <dicom-upload
+        class="step-block"
+        [open]="opened == 'dicom'"
+        [disabled]="false"
+        (validityChange)="dicomValid=$event; updateState();"
+        (inMemoryExtracted)="onFilesExtracted($event)" 
+        (archiveUploaded)="onArchiveUploaded($event)"
+        (headerClick)="toggle('dicom')">
+    </dicom-upload>
 
-    <div class="step-block" [class.active]="archive">
-        <div class="header command-zone" (click)="tab_modality_open = !tab_modality_open">2. Modality<span *ngIf="modality" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step" [@slideDown]="tab_modality_open && archive" *ngIf="tab_modality_open && archive"> 
-            <p>The modality of the dataset(s) that you are importing is: </p>
-            <div>
-                <span>
-                    <input type="radio" [(ngModel)]="modality" value="MR" formControlName="modality" (change)="tab_modality_open = false">MRI
-                    <span class="spacer"></span>
-                    <input type="radio" [(ngModel)]="modality" value="PT" formControlName="modality" (change)="tab_modality_open = false">PET
-                </span>
-            </div>
-        </fieldset>
-    </div>
+    <select-series
+        class="step-block"
+        [open]="opened == 'series'"
+        [disabled]="!seriesEnabled"
+        (validityChange)="seriesValid=$event; updateState();"
+        [patients]="importJob?.patients" 
+        [dataFiles]="extracted" 
+        (patientsChange)="onPatientsChange($event)"
+        (headerClick)="toggle('series')">
+    </select-series>
 
-    <div class="step-block" [class.active]="archive">
-        <div class="header command-zone" (click)="tab_series_open = !tab_series_open">3. Select series<span *ngIf="patients" class="check-mark">&#x2713;</span></div>
-        <fieldset class="step" [@slideDown]="tab_series_open && archive"> 
-            <p *ngIf="tab_series_open && archive">Please select only the series useful for your study.</p>
-            <div class="middle-content">
-                <div *ngIf="tab_series_open && archive" class="tree">
-                    <node 
-                        *ngFor="let patient of patients" 
-                        [label]="patient.patientName" 
-                        pictoUrl="/assets/images/icons/user.png" 
-                        (labelClick)="showPatientDetails($event)"
-                        [nodeParams]="patient"
-                        [class.selected]="detailedPatient == patient"
-                        deploy=true>
-                            <node 
-                                *ngFor="let study of patient.studies" 
-                                [label]="study.studyDescription"
-                                (editedLabel)="changeExamComment($event)"
-                                [editable]="true"
-                                [nodeParams]="study"
-                                (chkbxChange)="selectNode(patient)"
-                                tooltip="You can change the study description here. The value will then be overwritten in the dicom files."
-                                pictoUrl="/assets/images/icons/medical/x-ray-2.png" 
-                                hasBox="true"
-                                deploy=true>
-                                    <node 
-                                        *ngFor="let serie of study.series" 
-                                        [label]="serie.seriesDescription" 
-                                        pictoUrl="/assets/images/icons/medical/brain.png" 
-                                        hasBox="true" 
-                                        [(ngModel)]="serie.selected"  
-                                        [nodeParams]="serie"
-                                        (chkbxChange)="selectNode(patient)"
-                                        (labelClick)="showSerieDetails($event); initPapaya(serie);"
-                                        [class.selected]="detailedSerie == serie"
-                                        [ngModelOptions]="{standalone: true}">
-                                    </node>
-                            </node>
-                    </node>
-                </div>
-
-                <div class="data-preview" *ngIf="detailedPatient">
-                    <h3>Patient</h3>
-                    <table>
-                        <tr class="item">
-                            <td class="label">Id</td>
-                            <td class="value">{{detailedPatient?.patientID}}</td>
-                        </tr>
-                        <tr class="item">
-                            <td class="label">Sex</td>
-                            <td class="value">{{detailedPatient?.patientSex}}</td>
-                        </tr>
-                        <tr class="item">
-                            <td class="label">Name</td>
-                            <td class="value">{{detailedPatient?.patientName}}</td>
-                        </tr>
-                        <tr class="item">
-                            <td class="label">Birth date</td>
-                            <td class="value">{{detailedPatient?.patientBirthDate | date: 'dd/MM/yyyy'}}</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div class="data-preview" [hidden]="!detailedSerie">
-                    <h3 *ngIf="detailedSerie">Serie</h3>
-                    <table *ngIf="detailedSerie">
-                        <tr class="item">
-                            <td class="label">Id</td>
-                            <td class="value">{{detailedSerie?.seriesInstanceUID}}</td>
-                        </tr>
-                        <tr class="item">
-                            <td class="label">Protocol</td>
-                            <td class="value">{{detailedSerie?.protocolName}}</td>
-                        </tr>
-                        <tr class="item">
-                            <td class="label">Description</td>
-                            <td class="value">{{detailedSerie?.seriesDescription}}</td>
-                        </tr>
-                        <tr class="item">
-                            <td class="label">Series date</td>
-                            <td class="value">{{detailedSerie?.seriesDate | date: 'dd/MM/yyyy'}}</td>
-                        </tr>
-                        <tr class="item">
-                            <td class="label">Series number</td>
-                            <td class="value">{{detailedSerie?.seriesNumber}}</td>
-                        </tr>
-                        <tr class="item">
-                            <td class="label">Number of images</td>
-                            <td class="value">{{detailedSerie?.imagesNumber}}</td>
-                        </tr>
-                        <tr class="item">
-                            <td class="label">Modality</td>
-                            <td class="value">{{detailedSerie?.modality}}</td>
-                        </tr>
-                        <tr class="item">
-                            <td class="label">Number of non-image objects</td>
-                            <td class="value">{{detailedSerie?.nonImagesNumber}}</td>
-                        </tr>
-                    </table>
-                    <papaya [params]="papayaParams"></papaya>
-                </div>     
-            </div>
-        </fieldset>
-    </div>
-
-    <div class="step-block" [class.active]="seriesSelected">
-        <div class="header command-zone">4. Set the clinical context</div>
-        <fieldset class="step">
-            <ol>
-                <legend>
-                    Research study
-                    <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
-                </legend>
-                <li class="required">
-                    <label class="required-label">Select an existing research study</label> 
-                    <span class="right-col">
-                        <select formControlName="study" required [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)">
-                            <option *ngFor="let study of studies" [ngValue]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study?.name}}</option>
-                        </select>
-                        <a i18n="Import|StudyDetails label" *ngIf="study != null" target="_blank" [routerLink]="['/study']" [queryParams]="{mode: 'view', id: study?.id}">details</a>
-                    </span>
-                </li>
-                <li class="required">
-                    <label class="required-label">Select an existing study card</label> 
-                    <span class="right-col">
-                        <select formControlName="studycard" required [(ngModel)]="studycard" (ngModelChange)="onSelectStudycard($event)">
-                            <option *ngFor="let studycard of studycards" [ngValue]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</option>
-                        </select>
-                        <button disabled>details</button>
-                        <button disabled>edit</button>
-                    </span>
-                </li> 
-                <li>
-                    <span>
-                        <label *ngIf="studycardMissingError==true" class="form-validation-alert" i18n="Import|StudycardMissingError label">Warning: no study card is defined for this research study. You cannot import data into this research study.</label>
-                        <label *ngIf="studycardNotCompatibleError==true" class="form-validation-alert" i18n="Import|StudycardNotCompatibleError label">Warning: The Acquisition Equipment defined in the study card is not compatible with the data that you are importing.</label>
-                    </span>
-                </li>
-                <li class="required">
-                    <label>Nifti converter</label> 
-                    <span class="right-col">{{niftiConverter?.name}}</span>
-                </li>
-            </ol>
-
-            <ol>
-                <legend>
-                    Subject
-                    <tool-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</tool-tip>
-                </legend>
-                <li>
-                    <span>
-                        <input type="radio" [(ngModel)]="subjectEditionMode" formControlName="subjectEditionMode" value="select">Select a subject already in the research study
-                        <span class="spacer"></span>
-                        <input type="radio" [(ngModel)]="subjectEditionMode" formControlName="subjectEditionMode" value="create">Create a new subject
-                    </span>
-                </li>
-                <li class="required" *ngIf="subjectEditionMode == 'select'">
-                    <label class="required-label">Select a subject</label> 
-                    <span class="right-col">
-                        <select formControlName="subject" required [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)">
-                            <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
-                        </select>
-                        <a i18n="Import|SubjectDetails label" *ngIf="subject != null" target="_blank" [routerLink]="['/subject']" [queryParams]="{mode: 'view', id: subject?.id}">details</a>
-                    </span>
-                </li>
-                <!-- TODO: Subject Group -->
-                <!-- <li class="required" *ngIf="subjectMode == 'group'">
-                    <label class="required-label">Select an existing group of subjects</label> 
-                    <span class="right-col">
-                        <select>
-                            <option value="" disabled selected></option>
-                        </select>
-                        <button disabled>details</button>
-                        <button disabled><img src="/assets/images/icons/add.png" />create a group of subjects</button>
-                    </span>
-                </li> -->
-                <li>
-                    <div *ngIf="subjectEditionMode == 'select' && subject != null">
-                        <div class="title"><h3>Please fill the details on the subject:</h3></div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th class="label-col">Common name</th>
-                                    <th class="input-col">Subject identifier for this study</th>
-                                    <th class="chkbx-col" title="Physically Involved">PI</th>
-                                    <th class="dropdown-col">Subject Type</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="label-col">
-                                        {{subject.name}}
-                                    </td>
-                                    <td class="input-col">
-                                        <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
-                                            [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues($event)"/>
-                                    </td>
-                                    <td class="chkbx-col">
-                                        <input type="checkbox" [(ngModel)]="subject.subjectStudy.physicallyInvolved" 
-                                            [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues($event)"/>
-                                    </td>
-                                    <td class="dropdown-col">
-                                        <select id="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" 
-                                            [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues($event)">
-                                                <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
-                                                <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
-                                                <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div *ngIf="subjectEditionMode == 'create' && study != null">
-                        <button class="right-col" (click)="initializePrefillSubject(); subjectCreationModal.show();"><img src="/assets/images/icons/add.png"/>Create a subject</button>
-                    </div>
-                </li>
-            </ol>
-
-            <ol>
-                <legend>
-                    Examination
-                    <tool-tip>A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent entity: MR Dataset acquisition.</tool-tip>
-                </legend>
-                <li>
-                    <span>
-                        <input type="radio" [(ngModel)]="examEditionMode" formControlName="examEditionMode" value="select">Select an existing examination
-                        <span class="spacer"></span>
-                        <input type="radio" [(ngModel)]="examEditionMode" formControlName="examEditionMode" value="create">Create a new examination
-                    </span>
-                </li>
-                <li class="required" *ngIf="examEditionMode == 'select' && subjectEditionMode == 'select'">
-                    <label class="required-label">Select an examination</label> 
-                    <span class="right-col">
-                        <select formControlName="examination" required [(ngModel)]="examination">
-                            <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
-                        </select>
-                        <a i18n="Import|ExaminationDetails label" *ngIf="examination != null" target="_blank" [routerLink]="['/examination']" [queryParams]="{mode: 'view', id: examination?.id}">details</a>
-                    </span>
-                </li>
-                <li>
-                    <div *ngIf="examEditionMode == 'create' && study != null && subject != null">
-                        <table>
-                            <tr class="item">
-                                <td i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</td>
-                                <td class="value">
-                                    <select><option selected>{{study?.name}}</option></select>
-                                    <a i18n="Import|StudyDetails label" *ngIf="study != null" target="_blank" [routerLink]="['/study']" [queryParams]="{mode: 'view', id: study?.id}">details</a>
-                                </td>
-                            </tr>
-                            <tr class="item">
-                                <td i18n="Examination detail|Subject label@@examinationDetailSubject" class="required-label">Subject</td>
-                                <td class="value">
-                                    <select><option selected>{{subject.name}}</option></select>
-                                    <a i18n="Import|SubjectDetails label" *ngIf="subject != null" target="_blank" [routerLink]="['/subject']" [queryParams]="{mode: 'view', id: subject?.id}">details</a>
-                                </td>
-                            </tr>
-                            <tr class="item">
-                                <td i18n="Examination detail|Center label@@examinationDetailCenter" class="required-label">Center</td>
-                                <td class="value">
-                                    <select><option selected>{{studycard.center.name}}</option></select>
-                                    <a i18n="Import|CenterDetails label" *ngIf="studycard.center != null" target="_blank" [routerLink]="['/center']" [queryParams]="{mode: 'view', id: studycard?.center?.id}">details</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</td>
-                                <td class="value">
-                                    <my-date-picker id="examinationDate" [options]="myDatePickerOptions" formControlName="examinationDate" [(ngModel)]="examinationDate"
-                                    (dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
-                                    </my-date-picker>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td i18n="Examination detail|Comment label@@examinationDetailComment">Comment</td>
-                                <td class="value">
-                                    <input type="text" id="examinationComment" formControlName="examinationComment" [(ngModel)]="examinationComment"/>
-                                    <tool-tip>If possible, initialized with the value of the DICOM tag StudyDescription.</tool-tip>
-                                </td>
-                            </tr>
-                        </table>
-                        <button i18n="Import|CreateExamButton label" [disabled]="examinationDate == null" (click)="createExam($event)">Create</button>
-                    </div>
-                </li>
-            </ol>
-            <div class="commands">
-                <button i18n="Import|NextButton label" [disabled]="study == null || studycard == null || subject == null || examination == null"
-                    (click)="startImportJob($event)">Next</button>
-            </div>
-        </fieldset>
-    </div>
+    <clinical-context
+        class="step-block"
+        [open]="opened == 'context'"
+        [disabled]="!contextEnabled"
+        (validityChange)="contextValid=$event; updateState();"
+        [patient]="patient" 
+        (contextChange)="onContextChange($event)" 
+        [examinationComment]="comment"
+        (headerClick)="toggle('context')">
+    </clinical-context>
 
     <div class="step-block" [class.active]="true">
-        <div class="header command-zone">5. Anonymize</div>
-        <fieldset class="step anonymize"> 
-            <p><strong class="warning">&#9888;</strong> Data is now about to be anonymized. That means that some fields will be removed from the dataset. If for any reason you want to keep some information about the dataset before its anonymization, you can download a XML file that contains the complete information from the dataset. </p>
-            <table class="anonymization-table">
-                <thead>
-                    <tr class="item">
-                        <th></th>
-                        <th>Signification</th>
-                        <th>Initial value</th>
-                        <th>Final value</th>
-                    </tr>    
-                </thead>
-                <tbody>
-                    <tr *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]" [class.odd]="i%2!=0" [class.even]="i%2==0" >
-                        <td>(0010,0030)</td>
-                        <td>Patient's Birth Date</td>
-                        <td>19870401</td>
-                        <td>20160101</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p>You can receive a sum up of the data to be anonymized by email (only medical doctors and residents). You can also print the above table.</p>
-            <div class="console">
-                <console-line label="PACS test" [progress]="pacsProgress" [status]="pacsStatus"></console-line>
-                <console-line label="Extraction/Anonymization" [progress]="anonymProgress" [status]="anonymStatus"></console-line>
-                <console-line label="Conversion to Nifti" [progress]="niftiProgress" [status]="niftiStatus"></console-line>
-                <console-line label="The study card" [progress]="studyCardProgress" [status]="studyCardStatus"></console-line>
-            </div>
-            <div class="commands">
-                <button (click)="startProgressTest()">Start</button>
-            </div>
-        </fieldset>
+        <div class="header command-zone" [class.disabled]="!isValid()" (click)="isValid() ? toggle('final') : null">4. Import the data</div>
+        <div *ngIf="isValid() && opened == 'final'" class="step last" [@slideDown]>
+            <button [disabled]="importing" (click)="startImportJob($event)">Import now</button>
+            <img *ngIf="importing" [src]="ImagesUrlUtil.LOADER_IMAGE_PATH"/>
+        </div>
     </div>
 
-    <div class="step-block" [class.active]="true">
-        <div class="header command-zone">6. Select study card</div>
-        <fieldset class="step study-card"> 
-            <ol>
-                <li class="required">
-                    <label class="required-label">Select an existing study card</label> 
-                    <span class="right-col">
-                        <select>
-                            <option>MS Challenge Testing Rennes (SIEMENS - Verio 3.0T (MR) 40296 - CHU Rennes)</option>
-                            <option>MS Challenge Testing Bordeaux (GE Medical Systems - DISCOVERY MR750w 3.0T (MR) 00000000M4166994 - CHU Bordeaux)</option>
-                        </select>
-                        <button>details</button>
-                        <button>edit</button>
-                    </span>
-                </li>
-            </ol>
-            <ol>
-                <p class="expandable" (click)="dsAcqOpened = !dsAcqOpened">Review dataset acquisitions<span class="expand-arrow" [class.rotate]="dsAcqOpened">&#9013;</span></p>
-                <ul *ngIf="dsAcqOpened" class="ds-acq-list right-col">
-                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>localizer (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
-                    <li class="ds-acq"><img src="/assets/images/icons/medical/x-ray-1.png"/>tse_vfl_WIP607 (Mr)<button>review</button></li>
-                </ul>
-            </ol>
-        </fieldset>
-    </div>
 </form>
-
-<app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
-    <div class="app-modal-body">
-      <subject-detail [mode]="'create'" (closing)="closeSubjectPopin($event)" [preFillData]="subjectFromImport"></subject-detail>
-    </div>
-</app-modal>

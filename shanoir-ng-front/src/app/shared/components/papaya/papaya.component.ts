@@ -1,4 +1,5 @@
 import { Component, OnInit, SimpleChange, Input } from "@angular/core";
+import { ImagesUrlUtil } from "../../utils/images-url.util";
 
 declare var papaya: any;
 declare var papayaContainers: any[];
@@ -12,11 +13,11 @@ export class PapayaComponent implements OnInit {
     @Input() params: Object[];
     @Input() autoLoading: boolean = false;
     private loaded: boolean = false;
+    private static loading: boolean = false;
+    private ImagesUrlUtil = ImagesUrlUtil;
 
     constructor() {
             this.params = [];
-            this.params["kioskMode"] = true;
-            this.params["expandable"] = true;
             this.params["allowScroll"] = false;
             this.params["radiological"] = true;
             this.params["showRuler"] = true;
@@ -42,7 +43,17 @@ export class PapayaComponent implements OnInit {
     }
 
     private load() {
-        papaya.Container.resetViewer(0, this.params);
-        this.loaded = true;
+        if (!PapayaComponent.loading) {
+            this.loaded = true; 
+            PapayaComponent.loading = true;
+            this.params["loadingComplete"] = () => { PapayaComponent.loading = false; };
+            papaya.Container.resetViewer(0, this.params);
+        } else {
+            throw new Error("Don't try to load an image in papaya before the previous loading is finished");
+        }
+    }
+
+    public isLoading(): boolean {
+        return PapayaComponent.loading;
     }
 }

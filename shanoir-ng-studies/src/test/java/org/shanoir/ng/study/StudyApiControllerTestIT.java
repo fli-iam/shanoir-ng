@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.center.Center;
 import org.shanoir.ng.studycenter.StudyCenter;
+import org.shanoir.ng.studyuser.StudyUser;
+import org.shanoir.ng.studyuser.StudyUserType;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +39,28 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 	private static final String REQUEST_PATH = "/studies";
 	private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+	private static final String REQUEST_PATH_FOR_MEMBERS = REQUEST_PATH_WITH_ID + "/members";
 
 	@Autowired
 	private TestRestTemplate restTemplate;
+
+	@Test
+	public void addMemberToStudyProtected() {
+		final HttpEntity<StudyUser> entity = new HttpEntity<StudyUser>(ModelsUtil.createStudyUser());
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_MEMBERS, HttpMethod.PUT, entity,
+				String.class);
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+	}
+
+	@Test
+	public void addMemberToStudyWithLogin() throws ClientProtocolException, IOException {
+		final HttpEntity<StudyUser> entity = new HttpEntity<StudyUser>(createStudyUser(), getHeadersWithToken(true));
+
+		final ResponseEntity<String> response = restTemplate.exchange(REQUEST_PATH_FOR_MEMBERS, HttpMethod.PUT, entity,
+				String.class);
+		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+	}
 
 	@Test
 	public void findStudiesProtected() {
@@ -141,6 +162,14 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 		studyCenter.setCenter(center);
 		study.setStudyCenterList(Arrays.asList(studyCenter));
 		return study;
+	}
+
+	private StudyUser createStudyUser() {
+		final StudyUser studyUser = new StudyUser();
+		studyUser.setStudyId(1L);
+		studyUser.setStudyUserType(StudyUserType.RESPONSIBLE);
+		studyUser.setUserId(1L);
+		return studyUser;
 	}
 
 }

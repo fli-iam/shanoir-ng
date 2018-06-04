@@ -27,6 +27,7 @@ import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycenter.StudyCenter;
+import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.subjectstudy.SubjectStudy;
 import org.shanoir.ng.timepoint.Timepoint;
 
@@ -108,14 +109,14 @@ public class Study extends HalEntity {
 //	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
 //	private List<RelStudyDataset> relStudyDatasetList = new ArrayList<RelStudyDataset>(0);
 
-	@NotNull
-	private Integer studyStatus;
-
 	/** Relations between the investigators, the centers and the studies. */
 	@NotEmpty
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<StudyCenter> studyCenterList;
 
+	@NotNull
+	private Integer studyStatus;
+	
 	private Integer studyType;
 
 	/** Users associated to the research study. */
@@ -296,6 +297,21 @@ public class Study extends HalEntity {
 	}
 
 	/**
+	 * @return the studyCenterList
+	 */
+	public List<StudyCenter> getStudyCenterList() {
+		return studyCenterList;
+	}
+
+	/**
+	 * @param studyCenterList
+	 *            the studyCenterList to set
+	 */
+	public void setStudyCenterList(List<StudyCenter> studyCenterList) {
+		this.studyCenterList = studyCenterList;
+	}
+
+	/**
 	 * @return the studyStatus
 	 */
 	public StudyStatus getStudyStatus() {
@@ -310,36 +326,6 @@ public class Study extends HalEntity {
 		if (studyStatus != null) {
 			this.studyStatus = studyStatus.getId();
 		}
-	}
-
-	/**
-	 * @return the subjectStudyList
-	 */
-	public List<SubjectStudy> getSubjectStudyList() {
-		return subjectStudyList;
-	}
-
-	/**
-	 * @param subjectStudyList
-	 *            the subjectStudyList to set
-	 */
-	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
-	}
-
-	/**
-	 * @return the studyCenterList
-	 */
-	public List<StudyCenter> getStudyCenterList() {
-		return studyCenterList;
-	}
-
-	/**
-	 * @param studyCenterList
-	 *            the studyCenterList to set
-	 */
-	public void setStudyCenterList(List<StudyCenter> studyCenterList) {
-		this.studyCenterList = studyCenterList;
 	}
 
 	/**
@@ -374,6 +360,21 @@ public class Study extends HalEntity {
 	 */
 	public void setStudyUserList(List<StudyUser> studyUserList) {
 		this.studyUserList = studyUserList;
+	}
+
+	/**
+	 * @return the subjectStudyList
+	 */
+	public List<SubjectStudy> getSubjectStudyList() {
+		return subjectStudyList;
+	}
+
+	/**
+	 * @param subjectStudyList
+	 *            the subjectStudyList to set
+	 */
+	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
+		this.subjectStudyList = subjectStudyList;
 	}
 
 	/**

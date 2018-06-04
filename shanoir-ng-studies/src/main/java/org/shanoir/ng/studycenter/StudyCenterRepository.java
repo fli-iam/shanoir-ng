@@ -3,7 +3,7 @@ package org.shanoir.ng.studycenter;
 import org.springframework.data.repository.CrudRepository;
 
 /**
- * Repository for Subject.
+ * Repository for relations between a study and a center.
  *
  * @author msimon
  */
