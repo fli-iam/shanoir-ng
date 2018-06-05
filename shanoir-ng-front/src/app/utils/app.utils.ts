@@ -63,3 +63,18 @@ export function getPageableQuery(pageable: Pageable): string {
     }
     return requestUrl;
 }
+
+export function hasUniqueError(error: any, fieldName: string): boolean {
+    let hasUniqueError = false;
+    if (error.error.details) {
+        let fieldErrors = error.error.details.fieldErrors || '';
+        if (fieldErrors[fieldName]) {
+            for (let fieldError of fieldErrors[fieldName]) {
+                if (fieldError.code == 'unique') {
+                    hasUniqueError = true;
+                }
+            }
+        }
+    }
+    return hasUniqueError;
+}
