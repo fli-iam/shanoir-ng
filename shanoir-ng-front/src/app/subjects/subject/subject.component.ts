@@ -35,8 +35,8 @@ export class SubjectComponent implements OnInit, OnChanges {
     @Output() closing: EventEmitter<any> = new EventEmitter();
     
     private subject: Subject;
-    public subjectForm: FormGroup;
-    public canModify: Boolean = false;
+    private subjectForm: FormGroup;
+    private canModify: Boolean = false;
     private firstName: string = "";
     private lastName: string = "";
     private selectedStudyId: number; 
@@ -45,6 +45,7 @@ export class SubjectComponent implements OnInit, OnChanges {
     private isBirthDateValid: boolean = true;
     private isAlreadyAnonymized: boolean;
     private init: boolean = false;
+    private isNameUnique: boolean = true;
 
     constructor(private route: ActivatedRoute, private router: Router,
         private subjectService: SubjectService,
@@ -239,6 +240,10 @@ export class SubjectComponent implements OnInit, OnChanges {
             .subscribe((subject: Subject) => {
                 this.msgService.log('info', 'Subject successfully created');
                 this.back(subject);
+            }, (error) => {
+                if (true) {
+                    this.isNameUnique = false;
+                }
             });
         }
 
