@@ -81,6 +81,10 @@ export class DatasetComponent implements OnInit {
         });
     }
 
+    private download() {
+        this.datasetService.download(this.dataset);
+    }
+
     // getFormValidationErrors() {
     //     Object.keys(this.subjectForm.controls).forEach(key => {
     //         const controlErrors: ValidationErrors = this.subjectForm.get(key).errors;
