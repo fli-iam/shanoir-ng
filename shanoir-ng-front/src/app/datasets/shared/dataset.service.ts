@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 
@@ -54,13 +54,19 @@ export class DatasetService {
     download(dataset: Dataset): void {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
         this.http.get(
-            'assets/images/loader.32x32.gif', 
-            { responseType: 'blob' }
+            AppUtils.BACKEND_API_DATASET_URL + '/download/' + dataset.id, 
+            { observe: 'response' }
         ).subscribe(
             response => {
-                let blob: Blob = new Blob([response], { type: 'application/octet-binary' });
-                AppUtils.downloadFile(blob, 'TODO_SET_FILENAME');
+                let blob: Blob = new Blob([response], { type: 'application/zip' });
+                AppUtils.downloadFile(blob, this.getFilename(response));
             }
         );
+    }
+
+    private getFilename(response: HttpResponse<Object>): string {
+        const prefix = 'attachment; filename="';
+        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length - 1);
     }
 }
