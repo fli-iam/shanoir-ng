@@ -4,18 +4,19 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { FormGroup, FormBuilder, Validators, FormControl, FormArray, ValidationErrors } from '@angular/forms';
 
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-import { Subject } from '../shared/subject.model';
-import { SubjectService } from '../shared/subject.service';
-import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import * as AppUtils from '../../utils/app.utils';
 import * as shajs from 'sha.js';
-import { StudyService } from '../../studies/shared/study.service';
+import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { SubjectStudy } from '../shared/subject-study.model';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { slideDown, preventInitialChildAnimations} from '../../shared/animations/animations';
 import { Study } from '../../studies/shared/study.model';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { Subject } from '../shared/subject.model';
+import { SubjectService } from '../shared/subject.service';
+import { SubjectStudy } from '../shared/subject-study.model';
+import { StudyService } from '../../studies/shared/study.service';
 
 @Component({
     selector: 'subject-detail',
@@ -35,8 +36,8 @@ export class SubjectComponent implements OnInit, OnChanges {
     @Output() closing: EventEmitter<any> = new EventEmitter();
     
     private subject: Subject;
-    public subjectForm: FormGroup;
-    public canModify: Boolean = false;
+    private subjectForm: FormGroup;
+    private canModify: Boolean = false;
     private firstName: string = "";
     private lastName: string = "";
     private selectedStudyId: number; 
@@ -45,6 +46,7 @@ export class SubjectComponent implements OnInit, OnChanges {
     private isBirthDateValid: boolean = true;
     private isAlreadyAnonymized: boolean;
     private init: boolean = false;
+    private hasNameUniqueError: boolean = false;
 
     constructor(private route: ActivatedRoute, private router: Router,
         private subjectService: SubjectService,
@@ -211,7 +213,6 @@ export class SubjectComponent implements OnInit, OnChanges {
     updateModel(): void {
         this.subject = this.subjectForm.value;
         this.subject.subjectStudyList = this.subjectStudyList;
-        console.log(this.subject);
     }
 
     back(subject?: Subject): void {
@@ -239,6 +240,8 @@ export class SubjectComponent implements OnInit, OnChanges {
             .subscribe((subject: Subject) => {
                 this.msgService.log('info', 'Subject successfully created');
                 this.back(subject);
+            }, (error: any) => {
+                this.manageRequestErrors(error);
             });
         }
 
@@ -248,15 +251,13 @@ export class SubjectComponent implements OnInit, OnChanges {
             .subscribe((subject) => {
                 this.msgService.log('info', 'Subject successfully updated');
                 this.back();
-            }, (err: string) => {
-                this.manageRequestErrors(err);
+            }, (error: any) => {
+                this.manageRequestErrors(error);
         });
     }
 
-    private manageRequestErrors(err: string): void {
-        if (err.indexOf("name should be unique") != -1) {
-            this.formErrors['name'] = 'unique';
-        }
+    private manageRequestErrors(error: any): void {
+        this.hasNameUniqueError = AppUtils.hasUniqueError(error, 'name');
     }
 
     generateSubjectIdentifier(): void {

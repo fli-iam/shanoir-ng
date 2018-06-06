@@ -51,4 +51,16 @@ export class DatasetService {
             .map(response => response);
     }
 
+    download(dataset: Dataset): void {
+        if (!dataset.id) throw Error('Cannot download a dataset without an id');
+        this.http.get(
+            'assets/images/loader.32x32.gif', 
+            { responseType: 'blob' }
+        ).subscribe(
+            response => {
+                let blob: Blob = new Blob([response], { type: 'application/octet-binary' });
+                AppUtils.downloadFile(blob, 'TODO_SET_FILENAME');
+            }
+        );
+    }
 }
