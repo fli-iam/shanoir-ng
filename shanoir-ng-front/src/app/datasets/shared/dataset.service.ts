@@ -55,7 +55,7 @@ export class DatasetService {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
         this.http.get(
             AppUtils.BACKEND_API_DATASET_URL + '/download/' + dataset.id, 
-            { observe: 'response' }
+            { observe: 'response', responseType: 'blob' }
         ).subscribe(
             response => {
                 let blob: Blob = new Blob([response], { type: 'application/zip' });
@@ -65,8 +65,8 @@ export class DatasetService {
     }
 
     private getFilename(response: HttpResponse<Object>): string {
-        const prefix = 'attachment; filename="';
+        const prefix = 'attachment;filename=';
         let contentDispHeader: string = response.headers.get('Content-Disposition');
-        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length - 1);
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
     }
 }
