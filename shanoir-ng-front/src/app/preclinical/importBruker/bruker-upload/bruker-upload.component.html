@@ -15,7 +15,7 @@
     <br/>
     <span [ngSwitch]="uploadedBrukerFileComplete">
     	<ng-template [ngSwitchCase]="1"> 
-			<label i18n="Import|UploadComplete label">uploading...</label>
+			<img [src]="ImagesUrlUtil.LOADER_IMAGE_PATH"/>
 		</ng-template>
 		<ng-template [ngSwitchCase]="2"> 
 			<label i18n="Import|UploadComplete label">The Bruker archive has been successfully uploaded</label>
