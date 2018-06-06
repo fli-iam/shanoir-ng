@@ -28,8 +28,6 @@ export class ImportComponent  {
     private dicomValid: boolean = false;
     private seriesValid: boolean = false;
     private contextValid: boolean = false;
-    private seriesEnabled: boolean = false;
-    private contextEnabled: boolean = false;
 
     private ImagesUrlUtil = ImagesUrlUtil;
     
@@ -64,7 +62,7 @@ export class ImportComponent  {
         if (true) {
             let importJob = new ImportJob();
             importJob.patients = new Array<PatientDicom>();
-            this.patient.subject = this.context.subject;
+            this.patient.subject = new IdNameObject(this.context.subject.id, this.context.subject.name);
             importJob.patients.push(this.patient);
             importJob.workFolder = this.importJob.workFolder;
             importJob.fromDicomZip = true;
@@ -92,9 +90,19 @@ export class ImportComponent  {
         return this.dicomValid && this.seriesValid && this.contextValid;
     }
 
-    private updateState() {
-        this.seriesEnabled = this.dicomValid;
-        this.contextEnabled = this.dicomValid && this.seriesValid;
+    private get contextEnabled(): boolean {
+        return this.dicomValid && this.seriesValid;
+    }
+
+    private get seriesEnabled(): boolean {
+        return this.dicomValid;
+    }
+
+    private get lastEnabled(): State {
+        if (this.isValid()) return 'final';
+        else if (this.contextEnabled) return 'context';
+        else if (this.seriesEnabled) return 'series';
+        else return 'dicom';
     }
 
     private toggle(state: State) {

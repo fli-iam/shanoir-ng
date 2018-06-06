@@ -3,14 +3,14 @@ import { query, style, state, animate, transition, trigger } from '@angular/anim
 export const slideDown = trigger('slideDown', [
     transition(
         ':enter', [
-            style({height: '0', 'padding-bottom': '0'}),
-            animate('500ms ease-in-out', style({height: '*', 'padding-bottom': '*'}))
+            style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}),
+            animate('500ms ease-in-out', style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}))
         ]
     ),
     transition(
         ':leave', [
-            style({height: '*', 'padding-bottom': '*'}),
-            animate('500ms ease-in-out', style({height: '0', 'padding-bottom': '0'}))
+            style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}),
+            animate('500ms ease-in-out', style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}))
         ]
     )
 ]);

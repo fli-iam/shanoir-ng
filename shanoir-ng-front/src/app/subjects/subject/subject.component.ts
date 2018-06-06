@@ -279,22 +279,25 @@ export class SubjectComponent implements OnInit, OnChanges {
     }
 
     setSubjectBirthDateToFirstOfJanuary(): void {
-        var newDate: Date = new Date(this.subject.birthDate.getFullYear(), 0, 1);
+        let newDate: Date = new Date(this.subject.birthDate.getFullYear(), 0, 1);
         this.subject.birthDate = newDate;
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
+        for (let study of this.studies) {
+            if (subjectStudy.study.id == study.id) study.selected = false;
+        }
         const index: number = this.subjectStudyList.indexOf(subjectStudy);
         if (index !== -1) {
             this.subjectStudyList.splice(index, 1);
         }
     }
 
-    onStudySelectChange(studyId: number) {
-        var newSubjectStudy: SubjectStudy = new SubjectStudy();
+    onStudySelect(study: IdNameObject) {
+        study.selected = true;
+        let newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
-        newSubjectStudy.study = new Study();
-        newSubjectStudy.study.id = studyId;
+        newSubjectStudy.study = new Study(study);
         this.subjectStudyList.push(newSubjectStudy);
     }
 
