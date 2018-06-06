@@ -49,9 +49,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.annotations.ApiParam;
 
 /**
- * This is the main component of the import of Shanoir-NG.
- * The front-end in Angular only communicates with this service.
- * The import ms itself is calling the ms datasets service.
+ * This is the main component of the import of Shanoir-NG. The front-end in
+ * Angular only communicates with this service. The import ms itself is calling
+ * the ms datasets service.
  * 
  * @author mkain
  *
@@ -77,26 +77,26 @@ public class ImporterApiController implements ImporterApi {
 
 	@Value("${shanoir.import.upload.folder}")
 	private String uploadFolder;
-	
+
 	@Value("${ms.url.shanoir-ng-datasets}")
 	private String datasetsMsUrl;
 
 	@Autowired
 	private DicomDirToJsonReaderService dicomDirToJsonReader;
-	
+
 	@Autowired
 	private DicomFileAnalyzerService dicomFileAnalyzer;
 
 	@Autowired
 	private NIfTIConverterService niftiConverter;
-	
+
 	@Autowired
 	private RestTemplate restTemplate;
-	
+
 	/**
 	 * For the moment Spring is not used here to autowire, as we could keep the
-	 * anonymization project as simple as it is, without Spring annotations.
-	 * Maybe to change and think about deeper afterwards.
+	 * anonymization project as simple as it is, without Spring annotations. Maybe
+	 * to change and think about deeper afterwards.
 	 */
 	private AnonymizationServiceImpl anonymizer = new AnonymizationServiceImpl();
 
@@ -117,25 +117,27 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> startImportJob( @ApiParam(value = "Importjob", required = true) @Valid @RequestBody final ImportJob importJob)
+	public ResponseEntity<Void> startImportJob(
+			@ApiParam(value = "Importjob", required = true) @Valid @RequestBody final ImportJob importJob)
 			throws RestServiceException {
 		try {
 			LOG.info("start import job: " + importJob.toString());
-			
+
 			File workFolder = new File(importJob.getWorkFolder());
 			List<Patient> patients = importJob.getPatients();
 			for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = (Patient) patientsIt.next();
 				ArrayList<File> dicomFiles = getDicomFilesForPatient(patient, workFolder);
-//				anonymizer.anonymizeForShanoir(dicomFiles, "Neurinfo Profile", patient.getPatientName(), patient.getPatientID());
+				// anonymizer.anonymizeForShanoir(dicomFiles, "Neurinfo Profile",
+				// patient.getPatientName(), patient.getPatientID());
 				Long converterId = importJob.getFrontConverterId();
 				niftiConverter.prepareAndRunConversion(patient, workFolder, converterId);
 			}
-			
+
 			String importJobJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(importJob);
 			LOG.info(importJobJsonString);
-			
+
 			// HttpEntity represents the request
 			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
 
@@ -153,24 +155,26 @@ public class ImporterApiController implements ImporterApi {
 			} else {
 				throw new ShanoirException(ImportErrorModelCode.SC_MS_COMM_FAILURE);
 			}
-			
+
 			return new ResponseEntity<Void>(HttpStatus.OK);
 		} catch (Exception e) {
 			LOG.error(e.getMessage());
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-					e.getMessage(), null));
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), null));
 		}
 	}
 
 	/**
-	 * Using Java HashSet here to avoid duplicate files for anonymization.
-	 * For performance reasons already init with 2000 buckets, assuming,
-	 * that we will normally never have more than 2000 files to process.
-	 * Maybe to be evaluated later with more bigger imports.
+	 * Using Java HashSet here to avoid duplicate files for anonymization. For
+	 * performance reasons already init with 2000 buckets, assuming, that we will
+	 * normally never have more than 2000 files to process. Maybe to be evaluated
+	 * later with more bigger imports.
+	 * 
 	 * @param importJob
-	 * @throws FileNotFoundException 
+	 * @throws FileNotFoundException
 	 */
-	private ArrayList<File> getDicomFilesForPatient(final Patient patient, final File workFolder) throws FileNotFoundException {
+	private ArrayList<File> getDicomFilesForPatient(final Patient patient, final File workFolder)
+			throws FileNotFoundException {
 		Set<File> pathsSet = new HashSet<File>(2000);
 		List<Study> studies = patient.getStudies();
 		for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
@@ -183,7 +187,7 @@ public class ImporterApiController implements ImporterApi {
 					Image image = (Image) imagesIt.next();
 					String path = image.getPath();
 					File file = new File(workFolder.getAbsolutePath() + File.separator + path);
-					if(file.exists()) {
+					if (file.exists()) {
 						pathsSet.add(file);
 					} else {
 						throw new FileNotFoundException("File not found: " + path);
@@ -226,20 +230,52 @@ public class ImporterApiController implements ImporterApi {
 		if (!isZipFile(dicomZipFile))
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Wrong content type of file upload, .zip required.", null));
-
 		try {
 			File tempFile = saveTempFile(dicomZipFile);
-			if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile))
+			return importDicomZipFile(tempFile);
+		} catch (IOException e) {
+			LOG.error(e.getMessage());
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+		}
+	}
+
+	/**
+	 * Check if sent file is of type .zip.
+	 *
+	 * @param file
+	 */
+	private boolean isZipFile(MultipartFile file) {
+		if (file.getContentType().equals(APPLICATION_ZIP) || file.getContentType().equals(APPLICATION_OCTET_STREAM)
+				|| file.getOriginalFilename().endsWith(ZIP)) {
+			return true;
+		}
+		return false;
+	}
+
+	public ResponseEntity<ImportJob> importDicomZipFile(
+			@ApiParam(value = "file detail") @RequestBody String dicomZipFilename) throws RestServiceException {
+		if (dicomZipFilename == null)
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+
+		File tempFile = new File(dicomZipFilename);
+		return importDicomZipFile(tempFile);
+	}
+
+	private ResponseEntity<ImportJob> importDicomZipFile(File dicomZipFile) throws RestServiceException {
+		try {
+			if (!ImportUtils.checkZipContainsFile(DICOMDIR, dicomZipFile))
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 						"DICOMDIR is missing in .zip file.", null));
 
-			String fileName = tempFile.getName();
+			String fileName = dicomZipFile.getName();
 			int pos = fileName.lastIndexOf(FILE_POINT);
 			if (pos > 0) {
 				fileName = fileName.substring(0, pos);
 			}
 
-			File unzipFolderFile = new File(tempFile.getParentFile().getAbsolutePath() + File.separator + fileName);
+			File unzipFolderFile = new File(dicomZipFile.getParentFile().getAbsolutePath() + File.separator + fileName);
 			if (!unzipFolderFile.exists()) {
 				unzipFolderFile.mkdirs();
 			} else {
@@ -247,7 +283,7 @@ public class ImporterApiController implements ImporterApi {
 						"Error while unzipping file: folder already exists.", null));
 			}
 
-			ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
+			ImportUtils.unzip(dicomZipFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
 
 			File dicomDirFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + DICOMDIR);
 			JsonNode dicomDirJsonNode = null;
@@ -270,19 +306,6 @@ public class ImporterApiController implements ImporterApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
 		}
-	}
-
-	/**
-	 * Check if sent file is of type .zip.
-	 *
-	 * @param file
-	 */
-	private boolean isZipFile(MultipartFile file) {
-		if (file.getContentType().equals(APPLICATION_ZIP) || file.getContentType().equals(APPLICATION_OCTET_STREAM)
-				|| file.getOriginalFilename().endsWith(ZIP)) {
-			return true;
-		}
-		return false;
 	}
 
 }
