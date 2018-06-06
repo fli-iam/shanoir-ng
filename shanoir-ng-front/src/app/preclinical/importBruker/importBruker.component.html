@@ -1,7 +1,44 @@
-<h1>Import from Bruker</h1>
+<h2>Import from Bruker</h2>
+<form [@preventInitialChildAnimations]>
 
- 
-<import-bruker-file (uploadBrukerFileReady)="onUploadBrukerFile($event)" [enabled]="importBrukerFileEnabled" [tab_open]="importBrukerFileOpen"></import-bruker-file>
-<!--  <select-series-bruker (selectSeriesReady)="onSelectSeries($event)" [enabled]="selectSeriesEnabled" [tab_open]="selectSeriesOpen"></select-series-bruker>
-<set-clinical-context-bruker (setClinicalContextReady)="onSetClinicalContext($event)" [enabled]="setClinicalContextEnabled" [tab_open]="setClinicalContextOpen"></set-clinical-context-bruker>
--->
+    <bruker-upload
+        class="step-block"
+        [open]="opened == 'dicom'"
+        [disabled]="false"
+        (validityChange)="dicomValid=$event; updateState();"
+        (inMemoryExtracted)="onFilesExtracted($event)" 
+        (archiveUploaded)="onArchiveUploaded($event)"
+        (headerClick)="toggle('dicom')">
+    </bruker-upload>
+
+    <select-series
+        class="step-block"
+        [open]="opened == 'series'"
+        [disabled]="!seriesEnabled"
+        (validityChange)="seriesValid=$event; updateState();"
+        [patients]="importJob?.patients" 
+        [dataFiles]="extracted" 
+        (patientsChange)="onPatientsChange($event)"
+        (headerClick)="toggle('series')">
+    </select-series>
+
+    <clinical-context
+        class="step-block"
+        [open]="opened == 'context'"
+        [disabled]="!contextEnabled"
+        (validityChange)="contextValid=$event; updateState();"
+        [patient]="patient" 
+        (contextChange)="onContextChange($event)" 
+        [examinationComment]="comment"
+        (headerClick)="toggle('context')">
+    </clinical-context>
+
+    <div class="step-block" [class.active]="true">
+        <div class="header command-zone" [class.disabled]="!isValid()" (click)="isValid() ? toggle('final') : null">4. Import the data</div>
+        <div *ngIf="isValid() && opened == 'final'" class="step last" [@slideDown]>
+            <button [disabled]="importing" (click)="startImportJob($event)">Import now</button>
+            <img *ngIf="importing" [src]="ImagesUrlUtil.LOADER_IMAGE_PATH"/>
+        </div>
+    </div>
+
+</form>

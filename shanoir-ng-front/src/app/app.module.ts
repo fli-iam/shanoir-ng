@@ -140,7 +140,7 @@ import { BloodGasDataFormComponent }      from './preclinical/extraData/bloodGas
 import { FileUploadComponent }      from './preclinical/fileupload/fileupload.component';
 import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
 import { ImportBrukerComponent }   from './preclinical/importBruker/importBruker.component';
-import { ImportBrukerFileComponent }   from './preclinical/importBruker/components/importBrukerFile.component';
+import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 
 @NgModule({
@@ -246,7 +246,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     	ExtraDataListComponent,
     	BloodGasDataFormComponent, 
     	ImportBrukerComponent, 
-    	ImportBrukerFileComponent
+    	BrukerUploadComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
