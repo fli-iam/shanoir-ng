@@ -27,7 +27,7 @@ export class ContextData {
 @Component({
     selector: 'animal-clinical-context',
     templateUrl: 'animal-clinical-context.component.html',
-    styleUrls: ['clinical-context.component.css', '../../../import/import.step.css'],
+    styleUrls: ['../../../import/clinical-context/clinical-context.component.css', '../../../import/import.step.css'],
     animations: [slideDown]
 })
 export class AnimalClinicalContextComponent extends AbstractImportStepComponent implements OnChanges {

@@ -22,7 +22,7 @@
         (headerClick)="toggle('series')">
     </select-series>
 
-    <clinical-context
+    <animal-clinical-context
         class="step-block"
         [open]="opened == 'context'"
         [disabled]="!contextEnabled"
@@ -31,7 +31,7 @@
         (contextChange)="onContextChange($event)" 
         [examinationComment]="comment"
         (headerClick)="toggle('context')">
-    </clinical-context>
+    </animal-clinical-context>
 
     <div class="step-block" [class.active]="true">
         <div class="header command-zone" [class.disabled]="!isValid()" (click)="isValid() ? toggle('final') : null">4. Import the data</div>
