@@ -5,6 +5,7 @@ import { TableComponent } from "../../shared/components/table/table.component";
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 @Component({
     selector: 'dataset-list',
@@ -23,7 +24,8 @@ export class DatasetListComponent {
             private datasetService: DatasetService, 
             private confirmDialogService: ConfirmDialogService, 
             private viewContainerRef: ViewContainerRef,
-            private keycloakService: KeycloakService) {
+            private keycloakService: KeycloakService,
+            private msgService: MsgBoxService) {
         this.getAll();
         this.createColumnDefs();
     }
@@ -61,14 +63,6 @@ export class DatasetListComponent {
             }},
             {headerName: "Comment", field: "originMetadata.comment"},
         ];
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push(
-                {
-                    headerName: "", type: "button", awesome: "fa-edit", target: "/dataset", getParams: function (item: any): Object {
-                        return { id: item.id, mode: "edit" };
-                    }
-                });
-        }
         if (!this.keycloakService.isUserGuest()) {
             this.columnDefs.push({
                 headerName: "", type: "button", awesome: "fa-eye", target: "/dataset", getParams: function (item: any): Object {
@@ -76,9 +70,27 @@ export class DatasetListComponent {
                 }
             });
         }
+        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+            this.columnDefs.push(
+                {
+                    headerName: "", 
+                    type: "button", 
+                    awesome: "fa-edit", 
+                    target: "/dataset", 
+                    getParams: function (item: any): Object {
+                        return { id: item.id, mode: "edit" };
+                    }
+                }, {
+                    headerName: "", 
+                    type: "button", 
+                    awesome: "fa-trash", 
+                    action: this.openDeleteConfirmDialog
+                }
+            );
+        }
 
         this.customActionDefs = [
-            {title: "new user", awesome: "fa-plus", target: "../user"},
+            {title: "new dataset", awesome: "fa-plus", target: "../user"},
         ];
         this.rowClickAction = {target : "/dataset", getParams: function(item: any): Object {
             return {id: item.id, mode: "view"};
@@ -86,12 +98,17 @@ export class DatasetListComponent {
     }
 
     openDeleteConfirmDialog = (item: Dataset) => {
-         this.confirmDialogService
+        console.log(item);
+        this.confirmDialogService
                 .confirm('Delete dataset', 'Are you sure you want to delete dataset ' + item.id + '?',
                     this.viewContainerRef)
                 .subscribe(res => {
                     if (res) {
-                        this.delete(item.id);
+                        this.datasetService.delete(item.id).then(() => {
+                            let index: number = this.datasets.indexOf(item);
+                            if (index > -1) this.datasets.splice(index, 1);
+                            this.msgService.log('info', 'The dataset has been sucessfully deleted');
+                        });
                     }
                 })
     }

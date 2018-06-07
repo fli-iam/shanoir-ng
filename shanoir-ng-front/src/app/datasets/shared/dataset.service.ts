@@ -18,31 +18,19 @@ export class DatasetService {
 
     delete(id: number): Promise<void> {
         return this.http.delete<void>(AppUtils.BACKEND_API_DATASET_URL + '/' + id)
-            .toPromise()
-            .catch((error) => {
-                console.error('Error deleting dataset', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     get(id: number): Promise<Dataset> {
         return this.http.get<Dataset>(AppUtils.BACKEND_API_DATASET_URL + '/' + id)
             .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting dataset', error);
-                return Promise.reject(error.message || error);
-            });
+            .then(response => response);
     }
 
     getAll(): Promise<Dataset[]> {
         return this.http.get<Dataset[]>(AppUtils.BACKEND_API_DATASET_URL)
             .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting datasets', error);
-                return Promise.reject(error.message || error);
-            });
+            .then(response => response);
     }
 
     update(dataset: Dataset): Observable<Dataset> {

@@ -33,10 +33,6 @@ export class UserListComponent {
                 this.users = users;
             }
             this.loading = false;
-        })
-        .catch((error) => {
-            // TODO: display error
-            this.users = [];
         });
     }
 
@@ -91,16 +87,6 @@ export class UserListComponent {
                         this.deleteUser(item.id);
                     }
                 })
-    }
-
-    deleteAll = () => {
-        let ids: number[] = [];
-        for (let user of this.users) {
-            if (user["isSelectedInTable"]) ids.push(user.id);
-        }
-        if (ids.length > 0) {
-            console.log("TODO : delete those ids : " + ids);
-        }
     }
 
     deleteUser(userId: number) {
