@@ -15,4 +15,3 @@ td.buttons-col { color: var(--color-error); }
 .buttons-col { width: 0px; }
 .buttons-col .button { cursor: pointer; }
 table tr:last-child td { padding-bottom: 13px; }
-.date-label { margin-right: 0.3em; }

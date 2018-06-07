@@ -30,4 +30,11 @@ export class Study {
     timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;
+
+    constructor(study?: IdNameObject) {
+        if (study) {
+            this.id = study.id;
+            this.name = study.name;
+        }
+    }
 }

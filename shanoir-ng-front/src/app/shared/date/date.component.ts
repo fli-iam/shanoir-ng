@@ -11,7 +11,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
             (ngModelChange)="onModelChange($event)">
         </my-date-picker>
     `,
-    styles: ['my-date-picker { position: absolute; }'],
+    styles: ['my-date-picker { }'],
     providers: [
         {
           provide: NG_VALUE_ACCESSOR,

@@ -3,9 +3,7 @@
         .step h2 span { display: inline-block; }
         .step h2 .hr { width: 100%; border-bottom: 1px solid var(--grey); margin-left: 10px; vertical-align: middle; }
 
-.header.disabled:before { background-color: var(--lighter-grey); opacity: 0.8; content: ""; position: absolute; width: 100%; z-index: 2; height: 100%; left: 0; right: 0; top: 0; bottom: 0; }
-
-
-.header { cursor: pointer; }
+.header { cursor: pointer; position: relative; }
+.header.disabled:after { background-color: var(--lighter-grey); opacity: 0.8; content: ""; position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
 
 .warning { color: red; }
