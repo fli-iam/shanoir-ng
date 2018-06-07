@@ -39,9 +39,6 @@ export class DatasetListComponent {
             }
             this.loading = false;
         })
-        .catch((error) => {
-            this.datasets = [];
-        });
     }
 
     // Grid columns definition
