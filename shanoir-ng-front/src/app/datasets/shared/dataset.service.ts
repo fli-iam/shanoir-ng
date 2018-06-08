@@ -46,8 +46,7 @@ export class DatasetService {
             { observe: 'response', responseType: 'blob' }
         ).subscribe(
             response => {
-                let blob: Blob = new Blob([response], { type: 'application/zip' });
-                AppUtils.downloadFile(blob, this.getFilename(response));
+                AppUtils.downloadFile(response.body, this.getFilename(response));
             }
         );
     }

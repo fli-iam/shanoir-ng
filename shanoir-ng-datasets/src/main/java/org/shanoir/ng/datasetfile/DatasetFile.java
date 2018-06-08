@@ -92,11 +92,6 @@ public class DatasetFile extends AbstractGenericItem {
 	 * @return the path
 	 */
 	public String getPath() {
-		if (isPacs()) {
-			if (!path.contains("contentType")) {
-				path += "&contentType=application/dicom";
-			}
-		}
 		return path;
 	}
 
