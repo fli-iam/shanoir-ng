@@ -1,9 +1,24 @@
 package org.shanoir.ng.dataset;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.DatasetsErrorModelCode;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -14,17 +29,27 @@ import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.ApiParam;
 
 @Controller
 public class DatasetApiController implements DatasetApi {
+
+	private static final String ZIP = ".zip";
+
+	private static final String DOWNLOAD = ".download";
+
+	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
 
@@ -34,6 +59,18 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	private DatasetService<Dataset> datasetService;
 
+    private final HttpServletRequest request;
+    
+	@Autowired
+	private WADODownloaderService downloader;
+
+	private static final SecureRandom RANDOM = new SecureRandom();
+	
+    @org.springframework.beans.factory.annotation.Autowired
+    public DatasetApiController(HttpServletRequest request) {
+        this.request = request;
+    }
+	
 	@Override
 	public ResponseEntity<Void> deleteDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
@@ -123,10 +160,108 @@ public class DatasetApiController implements DatasetApi {
 			}
 			return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 		} catch (ShanoirException e) {
-			// TODO Auto-generated catch block
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Cant get datasets", null));
 		}
 	}
 
+	public ResponseEntity<ByteArrayResource> downloadDatasetById(
+			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") 
+			@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format)
+			throws RestServiceException, IOException {
+
+		final Dataset dataset = datasetService.findById(datasetId);
+		if (dataset == null) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
+		}
+
+		List<URL> pacsURLs = new ArrayList<URL>();
+		if ("dcm".equals(format)) {
+			List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
+			for (Iterator iterator = datasetExpressions.iterator(); iterator.hasNext();) {
+				DatasetExpression datasetExpression = (DatasetExpression) iterator.next();
+				if (datasetExpression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
+					List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
+					for (Iterator iterator2 = datasetFiles.iterator(); iterator2.hasNext();) {
+						DatasetFile datasetFile = (DatasetFile) iterator2.next();
+						URL url = new URL(datasetFile.getPath());
+						pacsURLs.add(url);
+					}
+				}
+			}
+		} else if ("nii".equals(format)) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Not implemented yet.", null));
+		} else {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+		}
+
+		/*
+		 * Create folder and file here:
+		 */
+		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+		long n = RANDOM.nextLong();
+		if (n == Long.MIN_VALUE) {
+			n = 0; // corner case
+		} else {
+			n = Math.abs(n);
+		}
+		String tmpFilePath = tmpDir + File.separator + Long.toString(n);
+		File workFolder = new File(tmpFilePath + DOWNLOAD);
+		workFolder.mkdirs();
+		File zipFile = new File(tmpFilePath + ZIP);
+		zipFile.createNewFile();
+
+		try {
+			downloader.downloadDicomFilesForURLs(pacsURLs, workFolder);
+		} catch (IOException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
+		} catch (MessagingException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
+		}
+
+		zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+
+		// Try to determine file's content type
+		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
+
+		byte[] data = Files.readAllBytes(zipFile.toPath());
+		ByteArrayResource resource = new ByteArrayResource(data);
+
+		return ResponseEntity.ok()
+				// Content-Disposition
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+				// Content-Type
+				.contentType(MediaType.parseMediaType(contentType)) //
+				// Content-Length
+				.contentLength(data.length) //
+				.body(resource);
+	}
+	
+	private void zip(String sourceDirPath, String zipFilePath) throws IOException {
+		Path p = Paths.get(zipFilePath);
+		try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
+			Path pp = Paths.get(sourceDirPath);
+			Files.walk(pp)
+				.filter(path -> !Files.isDirectory(path))
+				.forEach(path -> {
+					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+					try {
+						zs.putNextEntry(zipEntry);
+						Files.copy(path, zs);
+						zs.closeEntry();
+					} catch (IOException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				});
+            	zs.finish();
+            zs.close();
+		}
+	}
+    
 }

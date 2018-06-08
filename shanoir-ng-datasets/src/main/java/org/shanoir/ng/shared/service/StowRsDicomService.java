@@ -29,8 +29,11 @@ public class StowRsDicomService implements DicomServiceApi {
 	private static final String CONTENT_TYPE = "application/dicom";
 	private static final String BOUNDARY = "--import_dicom_shanoir--";
 	
-	@Value("${dicom.stow.url}")
-	private String dcm4cheeStowUrl;
+	@Value("${dcm4chee-arc.address}")
+	private String dcm4cheeAddress;
+	
+	@Value("${dcm4chee-arc.wado-rs}")
+	private String dcm4cheeWADORS;
 	
 	@Override
 	public void storeDcmFiles(List<String> dcmFilePathlist) {
@@ -43,10 +46,9 @@ public class StowRsDicomService implements DicomServiceApi {
 		}
 		HttpEntity entity = multipartEntityBuilder.build();
 
-		HttpPost httpPost = new HttpPost(dcm4cheeStowUrl);
+		HttpPost httpPost = new HttpPost(dcm4cheeAddress + dcm4cheeWADORS);
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE+";boundary="+BOUNDARY);
 		httpPost.setEntity(entity);
-
 
 		CloseableHttpResponse response;
 		try {
