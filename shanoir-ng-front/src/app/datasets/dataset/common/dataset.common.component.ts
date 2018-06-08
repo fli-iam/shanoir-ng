@@ -1,6 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Dataset } from '../../shared/dataset.model';
-import { ActivatedRoute, Params } from '@angular/router';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { StudyService } from '../../../studies/shared/study.service';
@@ -12,18 +11,17 @@ import { Study } from '../../../studies/shared/study.model';
     templateUrl: 'dataset.common.component.html'
 })
 
-export class CommonDatasetComponent implements OnInit {
+export class CommonDatasetComponent {
 
     @Input() private mode: 'create' | 'edit' | 'view';
     @Input() private dataset: Dataset;
     private subjects: Subject[] = [];
     private studies: Study[] = [];
     
+
     constructor(
             private studyService: StudyService,
-            private subjectService: SubjectService) {}
-
-    ngOnInit(): void {
+            private subjectService: SubjectService) {
         this.fetchSubjects();
         this.fetchStudies();
     }
@@ -41,8 +39,7 @@ export class CommonDatasetComponent implements OnInit {
     }
 
     private getSubjectName(id: number): string {
-        if (!this.subjects || this.subjects.length == 0) return null;
-        if (!id) throw new Error('a valid id must be given');
+        if (!this.subjects || this.subjects.length == 0 || !id) return null;
         for (let subject of this.subjects) {
             if (subject.id == id) return subject.name;
         }
@@ -50,8 +47,7 @@ export class CommonDatasetComponent implements OnInit {
     }
 
     private getStudyName(id: number): string {
-        if (!this.studies || this.studies.length == 0) return null;
-        if (!id) throw new Error('a valid id must be given');
+        if (!this.studies || this.studies.length == 0 || !id) return null;
         for (let study of this.studies) {
             if (study.id == id) return study.name;
         }
