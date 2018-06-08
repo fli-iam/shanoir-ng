@@ -170,7 +170,6 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
         this.subjectService.updateSubjectStudyValues(this.subject.subjectStudy);
     }
 
-
     private initializePrefillSubject(): void {
         let subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
@@ -195,6 +194,7 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
             
             this.subjects.push(subjectWithSubjectStudy);
             this.subject = subjectWithSubjectStudy;
+            this.onSelectSubject();
         }
         this.subjectCreationModal.hide();
     }

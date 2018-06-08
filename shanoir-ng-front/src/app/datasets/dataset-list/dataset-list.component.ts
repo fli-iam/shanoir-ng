@@ -6,6 +6,10 @@ import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { Subject } from '../../subjects/shared/subject.model';
+import { Study } from '../../studies/shared/study.model';
+import { StudyService } from '../../studies/shared/study.service';
+import { SubjectService } from '../../subjects/shared/subject.service';
 
 @Component({
     selector: 'dataset-list',
@@ -19,15 +23,23 @@ export class DatasetListComponent {
     public customActionDefs: any[];
     public rowClickAction: Object;
     public loading: boolean = false;
-
+    private subjects: Subject[] = [];
+    private studies: Study[] = [];
+    
     constructor(
             private datasetService: DatasetService, 
             private confirmDialogService: ConfirmDialogService, 
             private viewContainerRef: ViewContainerRef,
             private keycloakService: KeycloakService,
-            private msgService: MsgBoxService) {
+            private msgService: MsgBoxService,
+            private studyService: StudyService,
+            private subjectService: SubjectService) {
+        this.fetchStudies();
+        this.fetchSubjects();
         this.getAll();
         this.createColumnDefs();
+        this.fetchSubjects();
+        this.fetchStudies();
     }
 
     // Grid data
@@ -53,11 +65,9 @@ export class DatasetListComponent {
             {headerName: "Id", field: "id", type: "number", width: "30px"},
             {headerName: "Name", field: "name"},
             {headerName: "Type", field: "type", width: "50px"},
-            {headerName: "Subject", field: "subjectId"},
-            {headerName: "Study", field: "studyId"},
-            {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.creationDate);
-            }},
+            {headerName: "Subject", field: "subjectId", cellRenderer: (params: any) => this.getSubjectName(params.data.subjectId)},
+            {headerName: "Study", field: "studyId", cellRenderer: (params: any) => this.getStudyName(params.data.studyId)},
+            {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
             {headerName: "Comment", field: "originMetadata.comment"},
         ];
         if (!this.keycloakService.isUserGuest()) {
@@ -85,10 +95,6 @@ export class DatasetListComponent {
                 }
             );
         }
-
-        this.customActionDefs = [
-            {title: "new dataset", awesome: "fa-plus", target: "../user"},
-        ];
         this.rowClickAction = {target : "/dataset", getParams: function(item: any): Object {
             return {id: item.id, mode: "view"};
         }};
@@ -113,6 +119,34 @@ export class DatasetListComponent {
     delete(id: number) {
         // Delete user and refresh page
         this.datasetService.delete(id).then((res) => this.getAll());
+    }
+
+    private fetchSubjects() {
+        this.subjectService.getSubjects().then(subjects => {
+            this.subjects = subjects;
+        });
+    }
+
+    private fetchStudies() {
+        this.studyService.getStudies().then(studies => {
+            this.studies = studies;
+        });
+    }
+
+    private getSubjectName(id: number): string {
+        if (!this.subjects || this.subjects.length == 0 || !id) return null;
+        for (let subject of this.subjects) {
+            if (subject.id == id) return subject.name;
+        }
+        throw new Error('Cannot find subject for id = ' + id);
+    }
+
+    private getStudyName(id: number): string {
+        if (!this.studies || this.studies.length == 0 || !id) return null;
+        for (let study of this.studies) {
+            if (study.id == id) return study.name;
+        }
+        throw new Error('Cannot find study for id = ' + id);
     }
 
 }
