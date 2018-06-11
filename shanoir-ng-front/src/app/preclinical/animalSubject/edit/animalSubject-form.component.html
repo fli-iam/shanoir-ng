@@ -22,15 +22,27 @@
 						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory" class="required-label">Imaged object category</label>
 						<span class="right-col" [ngSwitch]="mode.state">
 							<ng-template [ngSwitchCase]="Modes.view">
-								{{preclinicalSubject?.subject?.imagedObjectCategory}}
+								<div [ngSwitch]="preclinicalSubject.subject.imagedObjectCategory">
+									<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
+									<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_HUMAN_BEING">Living animal</ng-template>
+									<ng-template [ngSwitchCase]="ImagedObjectCategory.HUMAN_CADAVER">Animal cadaver</ng-template>
+									<ng-template [ngSwitchCase]="ImagedObjectCategory.ANATOMICAL_PIECE">Anatomical piece</ng-template>
+									<ng-template ngSwitchDefault>{{preclinicalSubject?.subject?.imagedObjectCategory}}</ng-template>
+								
+								</div>
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="preclinicalSubject.subject.imagedObjectCategory">
-									<option *ngFor="let cat of imagedObjectCategories()" [value]="cat.key"
-										i18n="Imaged Object Category {{cat.value}}|Category label@@ImagedObjectCategory{{cat.key}}">
-											{{cat.value}}
+									<option *ngFor="let cat of ImagedObjectCategory.all()" [value]="cat" [ngSwitch]="cat" 
+										i18n="Imaged Object Category {{cat}}|Category label@@ImagedObjectCategory{{cat}}">
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_HUMAN_BEING">Living animal</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.HUMAN_CADAVER">Animal cadaver</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.ANATOMICAL_PIECE">Anatomical piece</ng-template>
+											<ng-template ngSwitchDefault>{{cat}}</ng-template>
 									</option>
 								</select>
+								<label *ngIf="formErrors.imagedObjectCategory.includes('required')" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -54,7 +66,8 @@
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<select id="sex" required formControlName="sex" [(ngModel)]="preclinicalSubject.subject.sex">
-										<option *ngFor="let sex of sexes" [value]="sex.key">{{sex.value}}</option>
+										<option [value]="'F'">Female</option>
+										<option [value]="'M'">Male</option>
 									</select>
 								</ng-template>
 							</span>
@@ -150,6 +163,58 @@
 							</span>
 						</li>
 					</ol>
+					</fieldset>
+					<fieldset *ngIf="mode !== Modes.view">
+						<legend i18n="Subject detail|Name label@@subjectDetailGeneral">Studies</legend>
+						<ol>
+							<li>
+								<label i18n="Subject detail|List of the studies label@@subjectDetailListOfStudies">List of the studies available</label>
+								<span class="right-col">
+									<select id="studies" formControlName="studies"  [(ngModel)]="selectedStudy" (change)="onStudySelect()" >
+										<option disabled>Please select...</option>
+										<option *ngFor="let study of studies" [ngValue]="study" [disabled]="study.selected">{{study.name}}</option>
+									</select>
+								</span>
+							</li>
+							<li *ngIf="subjectStudyList != null && subjectStudyList.length != 0">
+								<table>
+									<thead>
+										<tr>
+											<th class="label-col">Study name</th>
+											<th class="input-col">Subject id for this study</th>
+											<th class="chkbx-col" title="Physically Involved">PI</th>
+											<th class="dropdown-col">Subject Type</th>
+											<th class="buttons-col"></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr *ngFor="let subjectStudy of subjectStudyList; let i = index">
+											<td class="label-col">
+												<div *ngFor="let study of studies">
+													<span *ngIf="study.id == subjectStudy.study.id">
+														{{study.name}}
+													</span>
+												</div>
+											</td>
+											<td class="input-col">
+												<input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
+											</td>
+											<td class="chkbx-col">
+												<input type="checkbox" [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"/>
+											</td>
+											<td class="dropdown-col">
+												<select id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
+													<option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
+													<option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
+													<option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
+												</select>
+											</td>
+											<td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-ban"></i></span>
+										</tr>
+									</tbody>
+								</table>
+							</li>
+						</ol>
 					</fieldset>
 				</td>
 			</tr>

@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -6,7 +6,7 @@ import { Location } from '@angular/common';
 
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
 import { AnimalSubject } from '../shared/animalSubject.model';
-import { Subject } from '../shared/subject.model';
+import { Subject } from '../../../subjects/shared/subject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { Reference }   from '../../reference/shared/reference.model';
 import { ReferenceService } from '../../reference/shared/reference.service';
@@ -16,8 +16,8 @@ import { SubjectPathology }   from '../../pathologies/subjectPathology/shared/su
 import { SubjectPathologyService } from '../../pathologies/subjectPathology/shared/subjectPathology.service';
 import { SubjectTherapy }   from '../../therapies/subjectTherapy/shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../../therapies/subjectTherapy/shared/subjectTherapy.service';
-import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
-import { Sex } from '../shared/sex.enum';
+import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
+import { Sex } from '../../../subjects/shared/subject.types';
 
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
@@ -26,6 +26,10 @@ import { Modes } from "../../shared/mode/mode.enum";
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { Enum } from "../../../shared/utils/enum";
+import { Study } from '../../../studies/shared/study.model';
+import { IdNameObject } from '../../../shared/models/id-name-object.model';
+import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
+import { StudyService } from '../../../studies/shared/study.service';
 
 
 @Component({
@@ -39,9 +43,11 @@ import { Enum } from "../../../shared/utils/enum";
 export class AnimalSubjectFormComponent implements OnInit {
 
     public preclinicalSubject: PreclinicalSubject = new PreclinicalSubject();
+    @Input() mode: Mode = new Mode();
+    @Input() preFillData: Subject;
     @Output() closing = new EventEmitter();
+    private readonly ImagedObjectCategory = ImagedObjectCategory;
     newSubjectForm: FormGroup;
-    private mode:Mode = new Mode();
     private subjectId: number;
     private canModify: Boolean = false;
     species: Reference[] = [];
@@ -50,8 +56,10 @@ export class AnimalSubjectFormComponent implements OnInit {
     providers: Reference[] = [];
     stabulations: Reference[] = [];
     references: Reference[] = [];
-    private sexes: Enum[] = [];
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
+    private studies: IdNameObject[];
+    private subjectStudyList: SubjectStudy[] = [];
+    private selectedStudy : IdNameObject;
 
     constructor(
         private animalSubjectService: AnimalSubjectService,
@@ -60,6 +68,7 @@ export class AnimalSubjectFormComponent implements OnInit {
         private subjectPathologyService: SubjectPathologyService,
         private subjectTherapyService: SubjectTherapyService,
         private keycloakService: KeycloakService,
+        private studyService: StudyService,
         private fb: FormBuilder,
         private route: ActivatedRoute,
         private router: Router,
@@ -75,6 +84,19 @@ export class AnimalSubjectFormComponent implements OnInit {
             this.sortReferences();
            
         });
+        this.loadAllStudies();
+    }
+    
+    loadAllStudies(): void {
+        this.studyService
+            .getStudiesNames()
+            .then(studies => {
+                this.studies = studies;
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.error("error getting study list!");
+            });
     }
 
 
@@ -117,27 +139,17 @@ export class AnimalSubjectFormComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadData();
-        this.getSexes();
         this.preclinicalSubject.subject = new Subject();
         this.preclinicalSubject.animalSubject = new AnimalSubject();
         this.getAnimalSubject();
         if (this.mode.isCreateMode()) {
         	this.preclinicalSubject.subject.preclinical = true;
-            this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        	this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         }
         this.buildForm();
+        this.initPrefillData();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
-        }
-    }
-    
-    getSexes(): void {
-        var sex = Object.keys(Sex);
-        for (var i = 0; i < sex.length; i = i + 2) {
-            var newEnum: Enum = new Enum();
-            newEnum.key = sex[i];
-            newEnum.value = Sex[sex[i]];
-            this.sexes.push(newEnum);
         }
     }
     
@@ -167,6 +179,7 @@ export class AnimalSubjectFormComponent implements OnInit {
             'stabulation': [this.preclinicalSubject.animalSubject.stabulation, Validators.required],
             'sex': [this.preclinicalSubject.subject.sex],
             'imagedObjectCategory': [this.preclinicalSubject.subject.imagedObjectCategory],
+            'studies' : [this.selectedStudy]
         });
 
         this.newSubjectForm.valueChanges
@@ -195,7 +208,8 @@ export class AnimalSubjectFormComponent implements OnInit {
         'strain': '',
         'biotype': '',
         'provider': '',
-        'stabulation': ''
+        'stabulation': '',
+        'imagedObjectCategory': ''
     };
 
     getOut(preclinicalSubject: PreclinicalSubject = null): void {
@@ -310,9 +324,50 @@ export class AnimalSubjectFormComponent implements OnInit {
     }
     
     
-    public imagedObjectCategories() {
-        return ImagedObjectCategory.keyValues();
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['preFillData']) this.initPrefillData();
     }
+    
+    
+    
+     initPrefillData() {
+        if (this.preFillData && this.preclinicalSubject && this.preclinicalSubject.subject) {
+            if (this.preFillData) {
+                this.preclinicalSubject.subject.identifier = this.preFillData.name;
+                this.preclinicalSubject.subject.sex = this.preFillData.sex;
+                this.preclinicalSubject.subject.birthDate = new Date(this.preFillData.birthDate);
+            }
+           // if (this.preFillData.subjectStudyList && this.preFillData.subjectStudyList.length > 0) {
+           //     this.subjectStudyList = this.preFillData.subjectStudyList;
+           //     this.studies = [];
+           //     for (let subjectStudy of this.preFillData.subjectStudyList) {
+           //         this.studies.push(new IdNameObject(subjectStudy.study.id, subjectStudy.study.name));
+            //    }
+           //     this.selectedStudyId = this.preFillData.subjectStudyList[0].study.id;
+           // }
+        }
+    }
+    
+    onStudySelect() {
+        this.selectedStudy.selected = true;
+        let newSubjectStudy: SubjectStudy = new SubjectStudy();
+        newSubjectStudy.physicallyInvolved = false;
+        newSubjectStudy.study = new Study(this.selectedStudy);
+        this.subjectStudyList.push(newSubjectStudy);
+        this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
+    }
+    
+    
+    removeSubjectStudy(subjectStudy: SubjectStudy):void {
+        for (let study of this.studies) {
+            if (subjectStudy.study.id == study.id) study.selected = false;
+        }
+        const index: number = this.subjectStudyList.indexOf(subjectStudy);
+        if (index !== -1) {
+            this.subjectStudyList.splice(index, 1);
+        }
+    }
+    
     
 
 }

@@ -6,9 +6,9 @@ import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
 
 
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
-import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
+import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
 import { AnimalSubject } from '../shared/animalSubject.model';
-import { Subject } from '../shared/subject.model';
+import { Subject } from '../../../subjects/shared/subject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 
@@ -106,6 +106,15 @@ export class AnimalSubjectsListComponent {
             {headerName: "Common name", field: "subject.identifier"},
             {headerName: "Imaged object category", field: "subject.imagedObjectCategory", cellRenderer: function (params: any) {
                     let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory>params.data.subject.imagedObjectCategory;
+                    if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.PHANTOM) {
+                    	return 'Phantom';
+                    }else if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.LIVING_HUMAN_BEING) {
+                     	return 'Living animal';
+                    }else if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.HUMAN_CADAVER) {
+                     	return 'Animal cadaver';
+                    }else if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.ANATOMICAL_PIECE) {
+                     	return 'Anatomical piece';
+                    }
                     return ImagedObjectCategory[imagedObjectCat];
                 }
             },

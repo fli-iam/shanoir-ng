@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
 import { AnimalSubject } from './animalSubject.model';
-import { Subject }    from '../shared/subject.model';
+import { Subject }    from '../../../subjects/shared/subject.model';
 import { PreclinicalSubject } from './preclinicalSubject.model';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import * as AppUtils from '../../../utils/app.utils';
