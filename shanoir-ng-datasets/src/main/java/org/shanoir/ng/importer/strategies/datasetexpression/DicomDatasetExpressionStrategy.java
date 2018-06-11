@@ -2,8 +2,6 @@ package org.shanoir.ng.importer.strategies.datasetexpression;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -23,11 +21,9 @@ import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.FlipAngle;
 import org.shanoir.ng.shared.model.InversionTime;
 import org.shanoir.ng.shared.model.RepetitionTime;
-import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -40,14 +36,11 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 	@Autowired
 	DicomProcessing dicomProcessing;
 
-	@Value("${dcm4chee-arc.host}")
-	private String dicomHost;
-
-	@Value("${dcm4chee-arc.port}")
-	private String dicomPort;
+	@Value("${dcm4chee-arc.address}")
+	private String dcm4cheeAddress;
 	
-	@Value("${dcm4chee-arc.rs-url}")
-	private String dicomRsUrl;
+	@Value("${dcm4chee-arc.wado-rs}")
+	private String dcm4cheeWADORS;
 
 	@Override
 	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
@@ -73,21 +66,20 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 				try {
 					dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile);
 				} catch (IOException e) {
-					LOG.error(e.getMessage());
+					LOG.error(e.getMessage(), e);
 				}
 				DatasetFile pacsDatasetFile = new DatasetFile();
 				pacsDatasetFile.setPacs(true);
 				final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);
 				final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
 				final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
-				String wadoRsRequest = "http://" + dicomHost + ":" + dicomPort + "/" + dicomRsUrl + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID;
+				String wadoRsRequest = dcm4cheeAddress + dcm4cheeWADORS + "/" + studyInstanceUID + "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID;
 
 				try {
 					URL wadoURL = new URL(wadoRsRequest);
-					pacsDatasetFile.setPath(wadoURL.getPath());
+					pacsDatasetFile.setPath(wadoURL.toString());
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.error(e.getMessage(), e);
 				}
 
 				pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);

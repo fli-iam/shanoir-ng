@@ -26,7 +26,7 @@
 		.shanoir-table th.active, 
 			.shanoir-table th.pager span.active { z-index: 10; background-color: var(--color-b-light2); }
 		.shanoir-table th.sortable:hover, 
-			.shanoir-table th.pager span.clickable:hover { z-index: 5; background-color: var(--color-b-light2); }
+			.shanoir-table th.pager span.clickable:not(.disabled):hover { z-index: 5; background-color: var(--color-b-light2); }
 		.shanoir-table th.col-date { width: 65px; }
 		.shanoir-table th.col-boolean { width: 20px; }
 		.shanoir-table th.col-button { width: 20px; }
@@ -51,7 +51,7 @@
 		.shanoir-table td.cell-nofield { text-align: center; }
 		.shanoir-table td span.button { max-height: 20px; max-width: 20px; cursor: pointer; }
 			.shanoir-table td span.button img { height: 16px; vertical-align: bottom; }
-			.shanoir-table td span.button .awesome { color: var(--color-c); }
+			.shanoir-table td span.button .awesome { color: var(--color-b); }
 		.shanoir-table td.loading,
 		.shanoir-table td.empty { padding: 20px 20px; text-align: center; }
 			.shanoir-table td.loading img { vertical-align: middle; margin: 0; height: 32px; }

@@ -160,6 +160,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 					}
 				}
 			}
+			
 			if (datasetExpression.getLastImageAcquisitionTime() != null) {
 				if (mrDataset.getLastImageAcquisitionTime() == null) {
 					mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
@@ -169,6 +170,8 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 					}
 				}
 			}
+			
+			datasetExpression.setDataset(mrDataset);
 			
 			mrDataset.getDatasetExpressions().add(datasetExpression);
 			

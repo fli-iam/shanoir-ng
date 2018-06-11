@@ -11,18 +11,13 @@ import { KeycloakService } from "./keycloak.service";
 @Injectable()
 export class KeycloakHttpInterceptor implements HttpInterceptor {
 
+    constructor(private keycloakService: KeycloakService) {}
+
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         let authReq: HttpRequest<any> = req.clone();
         // Bearer needed for private URL only (".../accountrequest" is a public URL)
         if (!req.url.endsWith('/accountrequest')) {
-            // Get the auth header from the service.
-            const authHeader = KeycloakService.auth.authz.token;
-            // Clone the request to add the new header.
-            authReq = authReq.clone({
-                setHeaders: {
-                    Authorization: `Bearer ${authHeader}`
-                }
-            });
+            authReq = this.setAuthHeader(authReq);
         }
         // Do not add Content-Type application/json for Form Data
         if (!(req.body instanceof FormData)) {
@@ -32,9 +27,26 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
         return next.handle(authReq).catch((err: any) => {
             if (err instanceof HttpErrorResponse) {
                 if (err.status === 401) {
-                    window.location.href = process.env.LOGOUT_REDIRECT_URL;
+                    return new Observable((observer) => {
+                        this.keycloakService.getToken().then((token: string) => {
+                            authReq = this.setAuthHeader(authReq);
+                            observer.next();
+                            observer.complete();
+                        });                        
+                    }).switchMap(() => {
+                        return next.handle(authReq);
+                    })
                 }
                 return Observable.throw(err);
+            }
+        });
+    }
+
+    private setAuthHeader(req: HttpRequest<any>): HttpRequest<any> {
+        const authHeader = KeycloakService.auth.authz.token;
+        return req.clone({
+            setHeaders: {
+                Authorization: `Bearer ${authHeader}`
             }
         });
     }
