@@ -68,6 +68,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+				<dependency>
+			<groupId>org.dcm4che</groupId>
+			<artifactId>dcm4che-emf</artifactId>
+			<version>${dcm4che.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.dcm4che</groupId>
 			<artifactId>dcm4che-dcmr</artifactId>

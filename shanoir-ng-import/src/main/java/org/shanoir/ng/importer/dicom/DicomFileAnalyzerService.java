@@ -9,9 +9,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
+import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.emf.*;
 import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,7 +156,7 @@ public class DicomFileAnalyzerService {
 					// image preview
 					ObjectNode image = mapper.createObjectNode();
 					image.put("path", instanceFilePath.replace(unzipFolderFileAbsolutePath+"/", ""));
-					addImageSeparateDatasetsInfo(image, datasetAttributes);
+					addImageSeparateDatasetsInfo(image, datasetAttributes,sopClassUID);
 					images.add(image);
 					((ObjectNode) serie).put("isSpectroscopy", false);
 				}
@@ -167,7 +170,7 @@ public class DicomFileAnalyzerService {
 			 * first?) as reference for the serie. The below infos are not contained in the
 			 * dicomdir, that is why we go on the file level.
 			 */
-			checkPatientBirthdate(patient, datasetAttributes);
+			checkPatientData(patient, datasetAttributes);
 			checkIsMultiFrame(serie, datasetAttributes, sopClassUID);
 			checkIsEnhancedMRAndAddSequenceName(serie, datasetAttributes, sopClassUID);
 			checkSeriesDate(serie, datasetAttributes);
@@ -210,35 +213,78 @@ public class DicomFileAnalyzerService {
 	 * @param image
 	 * @param datasetAttributes
 	 */
-	private void addImageSeparateDatasetsInfo(JsonNode image, Attributes datasetAttributes) {
-		if (image.path("acquisitionNumber").isMissingNode()) {
-			String acquisitionNumber = datasetAttributes.getString(Tag.AcquisitionNumber);
-			if (acquisitionNumber != null && !acquisitionNumber.isEmpty()) {
-				((ObjectNode) image).put("acquisitionNumber", acquisitionNumber);
-			}
-		}
-		if (image.path("echoNumbers").isMissingNode()) {
-			ArrayNode echoNumbers = mapper.createArrayNode();
-			int[] echoNumbersArray = datasetAttributes.getInts(Tag.EchoNumbers);
-			if (echoNumbersArray != null) {
-				for (int i = 0; i < echoNumbersArray.length; i++) {
-					echoNumbers.add(echoNumbersArray[i]);		
+	private void addImageSeparateDatasetsInfo(JsonNode image, Attributes datasetAttributes,String sopClassUID) {
+		
+		if (UID.EnhancedMRImageStorage.equals(sopClassUID)) {
+			MultiframeExtractor emf = new MultiframeExtractor();
+			Attributes firstSequenceAttributes = emf.extract(datasetAttributes, 10);
+			
+			if (image.path("acquisitionNumber").isMissingNode()) {
+				String acquisitionNumber = firstSequenceAttributes.getString(Tag.AcquisitionNumber);
+				if (acquisitionNumber != null && !acquisitionNumber.isEmpty()) {
+					((ObjectNode) image).put("acquisitionNumber", acquisitionNumber);
 				}
-				((ObjectNode) image).set("echoNumbers", echoNumbers);
-			} else {
-				LOG.info("echoNumbersArray in dcm file null: " + image.path("path").asText());
 			}
-		}
-		if (image.path("imageOrientationPatient").isMissingNode()) {
-			ArrayNode imageOrientationPatient = mapper.createArrayNode();
-			double[] imageOrientationPatientArray = datasetAttributes.getDoubles(Tag.ImageOrientationPatient);
-			if (imageOrientationPatientArray != null) {
-				for (int i = 0; i < imageOrientationPatientArray.length; i++) {
-					imageOrientationPatient.add(imageOrientationPatientArray[i]);		
+			
+			if (image.path("echoNumbers").isMissingNode()) {
+				int[] echoNumbersArray = firstSequenceAttributes.getInts(Tag.EchoNumbers);
+				ArrayNode echoNumbers = mapper.createArrayNode();
+				if (echoNumbersArray != null) {
+					for (int i = 0; i < echoNumbersArray.length; i++) {
+						echoNumbers.add(echoNumbersArray[i]);		
+					}
+					((ObjectNode) image).set("echoNumbers", echoNumbers);
+				} else {
+					LOG.info("echoNumbersArray in dcm file null: " + image.path("path").asText());
 				}
-				((ObjectNode) image).set("imageOrientationPatient", imageOrientationPatient);
-			} else {
-				LOG.info("imageOrientationPatientArray in dcm file null: " + image.path("path").asText());
+			}
+			
+			if (image.path("imageOrientationPatient").isMissingNode()) {
+				ArrayNode imageOrientationPatient = mapper.createArrayNode();
+				double[] imageOrientationPatientArray = firstSequenceAttributes.getDoubles(Tag.ImageOrientationPatient);
+				if (imageOrientationPatientArray != null) {
+					for (int i = 0; i < imageOrientationPatientArray.length; i++) {
+						imageOrientationPatient.add(imageOrientationPatientArray[i]);		
+					}
+					((ObjectNode) image).set("imageOrientationPatient", imageOrientationPatient);
+				} else {
+					LOG.info("imageOrientationPatientArray in dcm file null: " + image.path("path").asText());
+				}
+			}
+			
+		} else {
+			if (image.path("acquisitionNumber").isMissingNode()) {
+				String acquisitionNumber = datasetAttributes.getString(Tag.AcquisitionNumber);
+				if (acquisitionNumber != null && !acquisitionNumber.isEmpty()) {
+					((ObjectNode) image).put("acquisitionNumber", acquisitionNumber);
+				}
+			}
+			
+			if (image.path("echoNumbers").isMissingNode()) {
+				ArrayNode echoNumbers = mapper.createArrayNode();
+				String echoNumbersArray;
+				int[] echoNumbersArray2 = datasetAttributes.getInts(Tag.EchoNumbers);
+				if (echoNumbersArray2 != null) {
+					for (int i = 0; i < echoNumbersArray2.length; i++) {
+						echoNumbers.add(echoNumbersArray2[i]);		
+					}
+					((ObjectNode) image).set("echoNumbers", echoNumbers);
+				} else {
+					LOG.info("echoNumbersArray in dcm file null: " + image.path("path").asText());
+				}
+			}
+			
+			if (image.path("imageOrientationPatient").isMissingNode()) {
+				ArrayNode imageOrientationPatient = mapper.createArrayNode();
+				double[] imageOrientationPatientArray = datasetAttributes.getDoubles(Tag.ImageOrientationPatient);
+				if (imageOrientationPatientArray != null) {
+					for (int i = 0; i < imageOrientationPatientArray.length; i++) {
+						imageOrientationPatient.add(imageOrientationPatientArray[i]);		
+					}
+					((ObjectNode) image).set("imageOrientationPatient", imageOrientationPatient);
+				} else {
+					LOG.info("imageOrientationPatientArray in dcm file null: " + image.path("path").asText());
+				}
 			}
 		}
 	}
@@ -318,12 +364,19 @@ public class DicomFileAnalyzerService {
 	 * @param serie
 	 * @param datasetAttributes
 	 */
-	private void checkPatientBirthdate(JsonNode patient, Attributes datasetAttributes) {
+	private void checkPatientData(JsonNode patient, Attributes datasetAttributes) {
 		if (patient.path("patientBirthDate").isMissingNode()) {
 			// has not been found in dicomdir, so we get it from .dcm file:
 			Date patientBirthdateDicomFile = datasetAttributes.getDate(Tag.PatientBirthDate);
 			if (patientBirthdateDicomFile != null) {
 				((ObjectNode) patient).put("patientBirthDate", patientBirthdateDicomFile.getTime());
+			}
+		}
+		if (patient.path("patientSex").isMissingNode() || patient.path("patientSex").isNull()) {
+			// has not been found in dicomdir, so we get it from .dcm file:
+			String patientSex = datasetAttributes.getString(Tag.PatientSex);
+			if (patientSex != null) {
+				((ObjectNode) patient).put("patientSex",patientSex);
 			}
 		}
 	}
