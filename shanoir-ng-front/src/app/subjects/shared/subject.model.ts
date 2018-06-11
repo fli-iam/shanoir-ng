@@ -9,6 +9,7 @@ export class Subject {
     name: string;
     identifier: string;
     birthDate: Date;
+    preclinical: boolean;
     languageHemisphericDominance: "Left" | "Right";
     manualHemisphericDominance: "Left" | "Right";
     imagedObjectCategory: ImagedObjectCategory;
