@@ -6,6 +6,9 @@ import { DatasetService } from '../shared/dataset.service';
 import { Dataset } from '../shared/dataset.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { SerieDicom } from '../../import/dicom-data.model';
+import { DicomArchiveService } from '../../import/dicom-archive.service';
+import { HttpResponse } from '@angular/common/http';
 
 @Component({
     selector: 'dataset-detail',
@@ -17,7 +20,10 @@ export class DatasetComponent implements OnInit {
 
     @Input() private mode: 'create' | 'edit' | 'view';
     private dataset: Dataset;
-    public canModify: Boolean = false;
+    private canModify: Boolean = false;
+    private papayaParams: any;
+    private blob: Blob;
+    private filename: string;
     
     constructor(
             private datasetService: DatasetService,
@@ -25,7 +31,8 @@ export class DatasetComponent implements OnInit {
             private location: Location,
             private keycloakService: KeycloakService,
             private router: Router,
-            private msgService: MsgBoxService) {}
+            private msgService: MsgBoxService,
+            private dicomArchiveService: DicomArchiveService) {}
 
     ngOnInit(): void {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -34,6 +41,7 @@ export class DatasetComponent implements OnInit {
         this.fetchMode().then(() => {
             this.fetchDataset();
         });
+        this.loadDicomInMemory();
     }
 
     private fetchMode(): Promise<void> {
@@ -83,6 +91,38 @@ export class DatasetComponent implements OnInit {
 
     private download() {
         this.datasetService.download(this.dataset);
+    }
+
+    private loadDicomInMemory() {
+        this.route.queryParams
+            .switchMap((queryParams: Params) => {
+                return queryParams['id'];
+            })
+            .subscribe((id: number) => {
+                this.datasetService.downloadToBlob(id).subscribe(blobReponse => {
+                    this.dicomArchiveService.clearFileInMemory();
+                    this.dicomArchiveService.importFromZip(blobReponse.body)
+                        .subscribe(response => {
+                            this.dicomArchiveService.extractFileDirectoryStructure()
+                            .subscribe(response => {
+                                this.initPapaya(response);
+                            });
+                        });
+                });
+            });
+    }
+
+    private initPapaya(dataFiles: any): void {
+        let buffs = [];
+        Object.keys(dataFiles.files).forEach((key) => {
+            buffs.push(dataFiles.files[key].async("arraybuffer"));
+        });
+        let promiseOfList = Promise.all(buffs);
+        promiseOfList.then((values) => {
+            let params: object[] = [];
+            params['binaryImages'] = [values];
+            this.papayaParams = params;
+        });
     }
 
     // getFormValidationErrors() {

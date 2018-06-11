@@ -18,20 +18,22 @@
 			<mr-dataset-details [mode]="mode" [dataset]="dataset"></mr-dataset-details>
 
 			<fieldset *ngIf="mode=='view'">
-				<span (click)="download()" class="link"><i class="fas fa-download"></i>Download Dicom files</span>
+				<legend>Preview</legend>
+				<papaya [params]="papayaParams"></papaya>
 			</fieldset>
 
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
-					<button i18n="Buttons|Back button label@@backButton" class="Button" (click)="back()">Back</button>
+					<button i18n="Buttons|Back button label@@backButton" class="back-button left-icon" (click)="back()"><i class="fas fa-angle-left"></i>Back</button>
 					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
-						<button type="submit" i18n="Buttons|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
+						<button class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download()">Download Dicom<i class="fas fa-download"></i></button>
+						<button class="right-icon" i18n="Buttons|Edit button label@@editButton" (click)="edit()">Edit<i class="far fa-edit"></i></button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-						<button type="submit" i18n="Buttons|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="false">Update</button>
+						<button class="right-icon" i18n="Buttons|Update button label@@updateButton" (click)="update()" [disabled]="false">Update<i class="far fa-save"></i></button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
-						<button type="submit" i18n="Buttons|Create button label@@createButton" (click)="create()" class="Button" [disabled]="true">Create</button>
+						<button class="right-icon" i18n="Buttons|Create button label@@createButton" (click)="create()" [disabled]="true">Create<i class="far fa-save"></i></button>
 					</ng-template>
 				</span>
 			</div>

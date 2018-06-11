@@ -22,7 +22,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export class DatepickerComponent implements ControlValueAccessor {
     
-    @Input() ngModel: Date;
+    @Input() ngModel: Date = null;
     @Output() ngModelChange = new EventEmitter();
     private convertedDate: Object;
 
@@ -45,7 +45,7 @@ export class DatepickerComponent implements ControlValueAccessor {
     }
 
     writeValue(obj: any): void {
-        this.ngModel = obj;
+        this.ngModel = new Date(obj);
         this.convertedDate = {jsdate: this.ngModel};
     }
     

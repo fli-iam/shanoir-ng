@@ -10,18 +10,13 @@ declare var papayaContainers: any[];
     styleUrls: ["papaya.component.css"]
 })
 export class PapayaComponent implements OnInit {
-    @Input() params: Object[];
+    @Input() params: any[];
     @Input() autoLoading: boolean = false;
     private loaded: boolean = false;
     private static loading: boolean = false;
     private ImagesUrlUtil = ImagesUrlUtil;
 
-    constructor() {
-            this.params = [];
-            this.params["allowScroll"] = false;
-            this.params["radiological"] = true;
-            this.params["showRuler"] = true;
-    }
+    constructor() {}
 
     ngOnInit() {
         papayaContainers = [];
@@ -32,6 +27,7 @@ export class PapayaComponent implements OnInit {
         for (let propName in changes) {
             if (!changes[propName].isFirstChange()) {
                 if (propName == "params") {
+                    this.setDefaultParams();
                     if (this.autoLoading) {
                         this.load();
                     } else {
@@ -56,4 +52,9 @@ export class PapayaComponent implements OnInit {
     public isLoading(): boolean {
         return PapayaComponent.loading;
     }
+
+    private setDefaultParams() {
+        if (!this.params["allowScroll"]) this.params["allowScroll"] = false;
+    }
+
 }

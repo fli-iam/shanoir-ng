@@ -205,7 +205,16 @@ li .papaya-menu-slider {
   left: 0 !important;
   position: relative !important;
   opacity: 1 !important;
+  background-color: var(--color-a);
 }
+
+.preview button:hover {
+  opacity: 0.8 !important;
+  background-color: var(--color-a);
+}
+
 .papaya-toolbar {
   display: none !important;
 }
+
+#papayaContainer0 { padding: 0 !important }

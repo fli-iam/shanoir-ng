@@ -6,21 +6,17 @@ declare var JSZip: any;
 @Injectable()
 export class DicomArchiveService {
 
- private fileReader: FileReader;
+ private fileReader: FileReader = new FileReader();
 
  constructor() {}
 
- importFromZip(ev): Observable<any> {
-
-	 if (this.fileReader == null){
-		 this.fileReader = new FileReader();
-	 }
+ importFromZip(blob: Blob): Observable<any> {
 	 
-	 this.fileReader.readAsArrayBuffer((<any>ev.target).files[0]);
+	 this.fileReader.readAsArrayBuffer(blob);
 	
 	 return Observable.create(observer => {
 	 // if success
-		 this.fileReader.onload = ev => {
+		 this.fileReader.onload = () => {
 			 observer.next(this.fileReader);
 		 }
 		 // if failed
@@ -29,7 +25,7 @@ export class DicomArchiveService {
  }
 	
  clearFileInMemory() {
-	 this.fileReader = undefined;
+	 this.fileReader = new FileReader();
  }
 
  extractFileDirectoryStructure(): Observable<any>{

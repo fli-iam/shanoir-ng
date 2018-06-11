@@ -67,7 +67,6 @@ export class UserComponent implements OnInit {
                 if (user.extensionRequestDemand) {
                     this.user.expirationDate = user.extensionRequestInfo.extensionDate;
                 }
-                this.getDateToDatePicker(this.user);
                 this.accountRequestInfo = this.user.accountRequestInfo;
             });
     }
@@ -148,7 +147,6 @@ export class UserComponent implements OnInit {
 
     submit(): void {
         this.user = this.userForm.value;
-        this.setDateFromDatePicker();
         this.user.accountRequestInfo = this.accountRequestInfo;
     }
 
@@ -222,48 +220,6 @@ export class UserComponent implements OnInit {
         'email': '',
         'role': ''
     };
-
-    private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'dd/mm/yyyy',
-        height: '20px',
-        width: '160px'
-    };
-
-    onDateChanged(event: IMyDateModel) {
-        if (event.formatted !== '') {
-            this.selectedDateNormal = event.date;
-        }
-    }
-
-    onInputFieldChanged(event: IMyInputFieldChanged) {
-        if (event.value !== '') {
-            if (!event.valid) {
-                this.isDateValid = false;
-            } else {
-                this.isDateValid = true;
-            }
-        } else {
-            this.isDateValid = true;
-            setTimeout(():void => this.selectedDateNormal = null);
-        }
-    }
-
-    setDateFromDatePicker(): void {
-        if (this.selectedDateNormal) {
-            this.user.expirationDate = new Date(this.selectedDateNormal.year, this.selectedDateNormal.month - 1, 
-                this.selectedDateNormal.day);
-        } else {
-            this.user.expirationDate = null;
-        }
-    }
-
-    getDateToDatePicker(user: User): void {
-        if (user && user.expirationDate && !isNaN(new Date(user.expirationDate).getTime())) {
-            let expirationDate:Date = new Date(user.expirationDate);
-            this.selectedDateNormal = {year: expirationDate.getFullYear(), month: expirationDate.getMonth() + 1, 
-                day: expirationDate.getDate()};;
-        }
-    }
 
     getRoleById(id: number): Role {
         for (let role of this.roles) {
