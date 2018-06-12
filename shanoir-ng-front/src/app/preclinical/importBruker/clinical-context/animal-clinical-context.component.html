@@ -92,8 +92,8 @@
                 <select [disabled]="!subject" [(ngModel)]="examination" (ngModelChange)="onSelectExamination($event)">
                     <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
                 </select>
-                <button [disabled]="!examination" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
-                <button [disabled]="!subject"  (click)="console.log('TODO')">add</button>
+                <button [disabled]="!examination"  (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
+                <button [disabled]="!subject" (click)="initializePrefillExamination();examinationCreationModal.show();">add</button>
             </span>
         </li>
     </ol>
@@ -103,5 +103,11 @@
 <app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
     <div class="app-modal-body">
         <animalSubject-form [mode]="mode"  [preFillData]="subjectFromImport" (closing)="onCloseSubjectPopin($event)"></animalSubject-form>
+    </div>
+</app-modal>
+
+<app-modal modalDialogId="examinationCreationModal" #examinationCreationModal>
+    <div class="app-modal-body">
+        <examination-preclinical-form [mode]="mode"   [preFillData]="examinationFromImport" (closing)="onCloseExaminationPopin($event)"></examination-preclinical-form>
     </div>
 </app-modal>

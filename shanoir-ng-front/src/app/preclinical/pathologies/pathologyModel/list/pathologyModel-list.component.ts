@@ -98,24 +98,24 @@ export class PathologyModelsListComponent {
         }
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeletePathologyModelConfirmDialog},
-            {headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target : "/preclinical/pathologies/model", getParams: function(item: any): Object {
+            {headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target : "/preclinical-pathologies-model", getParams: function(item: any): Object {
                 return {id: item.id, mode: "edit"};
             }});
         }
         if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target : "/preclinical/pathologies/model", getParams: function(item: any): Object {
+            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target : "/preclinical-pathologies-model", getParams: function(item: any): Object {
                 return {id: item.id, mode: "view"};
             }});
         }
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-        this.customActionDefs.push({title: "new pathology model", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/preclinical/pathologies/model", getParams: function(item: any): Object {
+        this.customActionDefs.push({title: "new pathology model", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/preclinical-pathologies-model", getParams: function(item: any): Object {
                 return {mode: "create"};
         }});
         this.customActionDefs.push({title: "delete selected", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.deleteAll });
         }
         if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {target : "/preclinical/pathologies/model", getParams: function(item: any): Object {
+            this.rowClickAction = {target : "/preclinical-pathologies-model", getParams: function(item: any): Object {
                     return {id: item.id, mode: "view"};
             }};
         }

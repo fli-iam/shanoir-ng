@@ -110,13 +110,13 @@ export class SubjectPathologyFormComponent implements OnChanges {
 
     
     goToAddPathology(){
-        this.router.navigate(['/preclinical/pathology'], { queryParams: { mode: "create" } });
+        this.router.navigate(['/preclinical-pathology'], { queryParams: { mode: "create" } });
     }
     goToAddPathologyModel(){
-        this.router.navigate(['/preclinical/pathologies/model'], { queryParams: { mode: "create" } });
+        this.router.navigate(['/preclinical-pathologies-model'], { queryParams: { mode: "create" } });
     }
     goToAddLocation(){
-        this.router.navigate(['/preclinical/reference'], { queryParams: { mode: "create", category:"anatomy", reftype:"location" } });
+        this.router.navigate(['/preclinical-reference'], { queryParams: { mode: "create", category:"anatomy", reftype:"location" } });
     }
 
     ngOnChanges() {

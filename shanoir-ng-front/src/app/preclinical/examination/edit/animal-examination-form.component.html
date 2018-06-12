@@ -234,3 +234,17 @@
    	</div>
     
 </div>
+
+
+
+<app-modal modalDialogId="instAssessmentModal" #instAssessmentModal>
+		<div class="app-modal-body">
+		  <instrument-essessment-detail  (closing)="closePopin($event)"></instrument-essessment-detail>
+		</div>
+</app-modal>
+
+<app-modal modalDialogId="attachNewFilesModal" #attachNewFilesModal>
+		<div class="app-modal-body">
+		  <upload-extra-data  [examinationStudyId]="examination.studyId" [studies]="studies" (closing)="closeAttachedFilePopin($event)"></upload-extra-data>
+		</div>
+</app-modal>

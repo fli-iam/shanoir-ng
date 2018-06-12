@@ -52,7 +52,7 @@ export class ExaminationAnestheticsListComponent {
     }
     
     viewExamAnesthetic = (examAnesthetic: ExaminationAnesthetic) => {
-        this.router.navigate(['/preclinical/examination/edit/', examAnesthetic.id]);
+        this.router.navigate(['/preclinical-examination-edit/', examAnesthetic.id]);
     }
     
     // Grid columns definition
@@ -103,14 +103,14 @@ export class ExaminationAnestheticsListComponent {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push({ headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteExamAnestheticConfirmDialog },
                 {
-                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/preclinical/examination", getParams: function(item: any): Object {
+                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/preclinical-examination", getParams: function(item: any): Object {
                         return { id: item.id, mode: "edit" };
                     }
                 });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.columnDefs.push({
-                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/preclinical/examination", getParams: function(item: any): Object {
+                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/preclinical-examination", getParams: function(item: any): Object {
                     return { id: item.id, mode: "view" };
                 }
             });
@@ -118,7 +118,7 @@ export class ExaminationAnestheticsListComponent {
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new anesthetic", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/preclinical/examination", getParams: function(item: any): Object {
+                title: "new anesthetic", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/preclinical-examination", getParams: function(item: any): Object {
                     return { mode: "create" };
                 }
             });
@@ -126,7 +126,7 @@ export class ExaminationAnestheticsListComponent {
         }
         if (!this.keycloakService.isUserGuest()) {
             this.rowClickAction = {
-                target: "/preclinical/examination", getParams: function(item: any): Object {
+                target: "/preclinical-examination", getParams: function(item: any): Object {
                     return { id: item.id, mode: "view" };
                 }
             };

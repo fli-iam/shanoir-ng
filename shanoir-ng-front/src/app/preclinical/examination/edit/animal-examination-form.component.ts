@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, ViewChild, ElementRef, OnChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input,  Output, EventEmitter, ViewChild, ElementRef, OnChanges, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -45,13 +45,14 @@ export class AnimalExaminationFormComponent implements OnInit {
 	@ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
     
+    @Input() mode: Mode = new Mode();
+    @Input() preFillData: Examination;
     public examination_id: number;
     public examination: Examination = new Examination();
     //TO BE RETRIEVED THROUGH DATASET EXAMINATION
     public protocol_id: number;
     @Output() closing = new EventEmitter();
     newExamForm: FormGroup;
-    private mode: Mode = new Mode();
     private canModify: Boolean = false;
     urlupload: string;
     physioData: PhysiologicalData;
@@ -92,7 +93,7 @@ export class AnimalExaminationFormComponent implements OnInit {
         this.getStudies();
         this.getExamination();
         this.buildForm();
-        
+        this.initPrefillData();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
         }
@@ -257,16 +258,16 @@ export class AnimalExaminationFormComponent implements OnInit {
         'studyId': ''
     };
 
-    back(): void {
+    back(examination?: Examination): void {
         if (this.closing.observers.length > 0) {
-            this.location.back();
+            this.closing.emit(examination);
         } else {
             this.location.back();
         }
     }
 
     edit(): void {
-        this.router.navigate(['/preclinical/examination'], { queryParams: { id: this.examination_id, mode: "edit" } });
+        this.router.navigate(['/preclinical-examination'], { queryParams: { id: this.examination_id, mode: "edit" } });
     }
     
     
@@ -487,6 +488,16 @@ export class AnimalExaminationFormComponent implements OnInit {
     onDateChanged(event: IMyDateModel) {
         if (event.formatted !== '') {
             this.selectedDateNormal = event.date;
+        }
+    }
+    
+    initPrefillData() {
+        if (this.preFillData && this.examination) {
+            this.examination.studyName = this.preFillData.studyName;
+            this.examination.studyId = this.preFillData.studyId;
+            this.examination.centerId = this.preFillData.centerId;
+            this.examination.centerName = this.preFillData.centerName;
+            this.examination.examinationDate = this.preFillData.examinationDate;
         }
     }
     

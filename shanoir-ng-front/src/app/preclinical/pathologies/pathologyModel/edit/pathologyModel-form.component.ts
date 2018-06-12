@@ -56,7 +56,7 @@ export class PathologyModelFormComponent {
     }
     
     goToAddPathology(){
-        this.router.navigate(['/preclinical/pathology'], { queryParams: { mode: "create" } });
+        this.router.navigate(['/preclinical-pathology'], { queryParams: { mode: "create" } });
     }
 
 
@@ -100,7 +100,7 @@ export class PathologyModelFormComponent {
     }
 
     goToEditPage(): void {
-        this.router.navigate(['/preclinical/pathologies/model'], { queryParams: { id: this.modelId, mode: "edit" } });
+        this.router.navigate(['/preclinical-pathologies-model'], { queryParams: { id: this.modelId, mode: "edit" } });
     }
 
     ngOnInit(): void {
@@ -114,7 +114,7 @@ export class PathologyModelFormComponent {
 
     buildForm(): void {
         this.newModelForm = this.fb.group({
-            'name': [this.model.id, Validators.required],
+            'name': [this.model.name, Validators.required],
             'pathology': [this.model.pathology, Validators.required],
             'comment': [this.model.comment],
             'specifications': [this.model.filename]

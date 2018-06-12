@@ -32,52 +32,52 @@ import { ImportBrukerComponent } from './importBruker/importBruker.component';
 @NgModule({
   imports: [RouterModule.forChild([
     { 
-        path: 'preclinical/subjects', 
+        path: 'preclinical-subjects', 
         component: AnimalSubjectsListComponent 
     },{ 
-        path: 'preclinical/subject', 
+        path: 'preclinical-subject', 
         component: AnimalSubjectFormComponent 
     },{ 
-        path: 'preclinical/references', 
+        path: 'preclinical-references', 
         component: ReferencesListComponent 
     },{ 
-        path: 'preclinical/reference', 
+        path: 'preclinical-reference', 
         component: ReferenceFormComponent 
     },{ 
-        path: 'preclinical/pathologies', 
+        path: 'preclinical-pathologies', 
         component: PathologiesListComponent 
     },{ 
-        path: 'preclinical/pathology', 
+        path: 'preclinical-pathology', 
         component: PathologyFormComponent 
     },{ 
-        path: 'preclinical/pathologies/models',
+        path: 'preclinical-pathologies-models',
         component: PathologyModelsListComponent 
     },{ 
-        path: 'preclinical/pathologies/model',
+        path: 'preclinical-pathologies-model',
         component: PathologyModelFormComponent 
     },{ 
-        path: 'preclinical/therapies', 
+        path: 'preclinical-therapies', 
         component: TherapiesListComponent 
     },{ 
-        path: 'preclinical/therapy', 
+        path: 'preclinical-therapy', 
         component: TherapyFormComponent 
     },{ 
-        path: 'preclinical/anesthetics', 
+        path: 'preclinical-anesthetics', 
         component: AnestheticsListComponent 
     },{ 
-        path: 'preclinical/anesthetic', 
+        path: 'preclinical-anesthetic', 
         component: AnestheticFormComponent 
     },{ 
-        path: 'preclinical/examinations', 
+        path: 'preclinical-examinations', 
         component: AnimalExaminationListComponent 
     },{ 
-        path: 'preclinical/examination',
+        path: 'preclinical-examination',
         component: AnimalExaminationFormComponent 
     },{ 
-        path: 'preclinical/contrastagents', 
+        path: 'preclinical-contrastagents', 
         component: ContrastAgentsListComponent 
     },{ 
-        path: 'preclinical/contrastagent', 
+        path: 'preclinical-contrastagent', 
         component: ContrastAgentFormComponent 
     },
     {

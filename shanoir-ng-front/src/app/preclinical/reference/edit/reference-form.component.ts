@@ -120,7 +120,7 @@ export class ReferenceFormComponent {
     }
 
     goToEditPage(): void {
-        this.router.navigate(['/preclinical/reference'], { queryParams: { id: this.refId, mode: "edit" } });
+        this.router.navigate(['/preclinical-reference'], { queryParams: { id: this.refId, mode: "edit" } });
     }
 
     isValueInArray(value: string, array: string[]): boolean {

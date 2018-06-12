@@ -108,14 +108,14 @@ export class AnimalExaminationListComponent {
             this.columnDefs.push(
             	{headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteExaminationConfirmDialog},
                 {
-                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/preclinical/examination", getParams: function (item: any): Object {
+                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/preclinical-examination", getParams: function (item: any): Object {
                         return { id: item.id, mode: "edit" };
                     }
                 });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.columnDefs.push({
-                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/preclinical/examination", getParams: function (item: any): Object {
+                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/preclinical-examination", getParams: function (item: any): Object {
                     return { id: item.id, mode: "view" };
                 }
             });
@@ -124,7 +124,7 @@ export class AnimalExaminationListComponent {
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new examination.", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/preclinical/examination", getParams: function (item: any): Object {
+                title: "new examination.", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/preclinical-examination", getParams: function (item: any): Object {
                     return { mode: "create" };
                 }
             });

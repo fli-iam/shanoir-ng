@@ -151,7 +151,7 @@ export class SubjectTherapyFormComponent {
     }
     
     goToAddTherapy(){
-        this.router.navigate(['/preclinical/therapy'], { queryParams: { mode: "create" } });
+        this.router.navigate(['/preclinical-therapy'], { queryParams: { mode: "create" } });
     }
     
 

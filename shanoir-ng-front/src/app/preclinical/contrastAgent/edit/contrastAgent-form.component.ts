@@ -107,11 +107,11 @@ export class ContrastAgentFormComponent implements OnInit {
 
 
     goToEditPage(): void {
-        this.router.navigate(['/preclinical/contrastagent'], { queryParams: { id: this.agent.id, mode: "edit" } });
+        this.router.navigate(['/preclinical-contrastagent'], { queryParams: { id: this.agent.id, mode: "edit" } });
     }
     
     goToAddContrastAgent(){
-        this.router.navigate(['/preclinical/reference'], { queryParams: { mode: "create", category:"contrastagent", reftype:"name" } });
+        this.router.navigate(['/preclinical-reference'], { queryParams: { mode: "create", category:"contrastagent", reftype:"name" } });
     }
 
     ngOnInit(): void {

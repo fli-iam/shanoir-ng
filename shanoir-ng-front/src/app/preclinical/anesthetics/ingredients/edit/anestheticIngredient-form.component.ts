@@ -189,7 +189,7 @@ export class AnestheticIngredientFormComponent {
         let reftype;
         if (params && params[0]) category = params[0];
         if (params && params[1]) reftype = params[1];
-        if (category && reftype) this.router.navigate(['/preclinical/reference'], { queryParams: { mode: "create", category: category, reftype: reftype} });
+        if (category && reftype) this.router.navigate(['/preclinical-reference'], { queryParams: { mode: "create", category: category, reftype: reftype} });
         
     }
    

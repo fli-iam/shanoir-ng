@@ -188,11 +188,11 @@ export class ExaminationAnestheticFormComponent implements OnInit {
     }
 
     goToEditPage(): void {
-        this.router.navigate(['/preclinical/examination/anesthetic'], { queryParams: { id: this.examAnestheticId, mode: "edit" } });
+        this.router.navigate(['/preclinical-examination-anesthetic'], { queryParams: { id: this.examAnestheticId, mode: "edit" } });
     }
     
     goToAddAnesthetic(){
-        this.router.navigate(['/preclinical/anesthetic'], { queryParams: { mode: "create"} });
+        this.router.navigate(['/preclinical-anesthetic'], { queryParams: { mode: "create"} });
     }
 
 

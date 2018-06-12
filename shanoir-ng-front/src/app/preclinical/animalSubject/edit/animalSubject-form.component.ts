@@ -60,6 +60,7 @@ export class AnimalSubjectFormComponent implements OnInit {
     private studies: IdNameObject[];
     private subjectStudyList: SubjectStudy[] = [];
     private selectedStudy : IdNameObject;
+    private selectedStudyId: number; 
 
     constructor(
         private animalSubjectService: AnimalSubjectService,
@@ -212,7 +213,7 @@ export class AnimalSubjectFormComponent implements OnInit {
         'imagedObjectCategory': ''
     };
 
-    getOut(preclinicalSubject: PreclinicalSubject = null): void {
+    getOut(preclinicalSubject?: PreclinicalSubject): void {
         if (this.closing.observers.length > 0) {
             this.closing.emit(preclinicalSubject);
             this.preclinicalSubject = new PreclinicalSubject();
@@ -231,8 +232,8 @@ export class AnimalSubjectFormComponent implements OnInit {
         let reftype;
         if (params && params[0]) category = params[0];
         if (params && params[1]) reftype = params[1];
-        if (category && !reftype) this.router.navigate(['/preclinical/reference'], { queryParams: { mode: "create", category: category } });
-        if (category && reftype) this.router.navigate(['/preclinical/reference'], { queryParams: { mode: "create", category: category, reftype: reftype } });
+        if (category && !reftype) this.router.navigate(['/preclinical-reference'], { queryParams: { mode: "create", category: category } });
+        if (category && reftype) this.router.navigate(['/preclinical-reference'], { queryParams: { mode: "create", category: category, reftype: reftype } });
     }
 
     addSubject() {
@@ -341,14 +342,14 @@ export class AnimalSubjectFormComponent implements OnInit {
                 this.preclinicalSubject.subject.sex = this.preFillData.sex;
                 this.preclinicalSubject.subject.birthDate = new Date(this.preFillData.birthDate);
             }
-           // if (this.preFillData.subjectStudyList && this.preFillData.subjectStudyList.length > 0) {
-           //     this.subjectStudyList = this.preFillData.subjectStudyList;
-           //     this.studies = [];
-           //     for (let subjectStudy of this.preFillData.subjectStudyList) {
-           //         this.studies.push(new IdNameObject(subjectStudy.study.id, subjectStudy.study.name));
-            //    }
-           //     this.selectedStudyId = this.preFillData.subjectStudyList[0].study.id;
-           // }
+            if (this.preFillData.subjectStudyList && this.preFillData.subjectStudyList.length > 0) {
+                this.subjectStudyList = this.preFillData.subjectStudyList;
+                this.studies = [];
+                for (let subjectStudy of this.preFillData.subjectStudyList) {
+                    this.studies.push(new IdNameObject(subjectStudy.study.id, subjectStudy.study.name));
+                }
+                this.selectedStudyId = this.preFillData.subjectStudyList[0].study.id;
+            }
         }
     }
     

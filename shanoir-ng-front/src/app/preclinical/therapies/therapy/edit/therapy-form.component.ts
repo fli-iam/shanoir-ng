@@ -84,7 +84,7 @@ export class TherapyFormComponent {
     }
 
     goToEditPage(): void {
-        this.router.navigate(['/preclinical/therapy'], { queryParams: { id: this.therapyId, mode: "edit" } });
+        this.router.navigate(['/preclinical-therapy'], { queryParams: { id: this.therapyId, mode: "edit" } });
     }
     
     ngOnInit(): void {

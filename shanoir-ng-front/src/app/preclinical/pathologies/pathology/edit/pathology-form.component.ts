@@ -73,7 +73,7 @@ export class PathologyFormComponent {
 
 
     goToEditPage(): void {
-        this.router.navigate(['/preclinical/pathology'], { queryParams: { id: this.pathoId, mode: "edit" } });
+        this.router.navigate(['/preclinical-pathology'], { queryParams: { id: this.pathoId, mode: "edit" } });
     }
 
     ngOnInit(): void {

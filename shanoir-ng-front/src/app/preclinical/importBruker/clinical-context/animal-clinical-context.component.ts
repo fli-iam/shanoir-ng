@@ -18,6 +18,7 @@ import { Mode } from "../../shared/mode/mode.model";
 import { Modes } from "../../shared/mode/mode.enum";
 import { AnimalSubject } from '../../animalSubject/shared/animalSubject.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
+import { Examination } from '../../examination/shared/examination.model';
 
 export class ContextData {
     constructor(
@@ -41,6 +42,7 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     @Output() contextChange = new EventEmitter<ContextData>();
     
     @ViewChild('subjectCreationModal') subjectCreationModal: ModalComponent;
+    @ViewChild('examinationCreationModal') examinationCreationModal: ModalComponent;
 
     private studycardMissingError: Boolean;
     private studycardNotCompatibleError: Boolean;
@@ -56,8 +58,8 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     private examinations: SubjectExamination[];
     private examination: SubjectExamination;
     public niftiConverter: IdNameObject;
-    
     private mode: Mode = new Mode();
+    private examinationFromImport: Examination = new Examination();
     
     constructor(
         private studyService: StudyService,
@@ -228,7 +230,7 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
 
     private showSubjectDetails() {
     	if (this.animalSubject){
-        	window.open('preclinical/subject?id=' + this.animalSubject.id + '&mode=view', '_blank');
+        	window.open('preclinical-subject?id=' + this.animalSubject.id + '&mode=view', '_blank');
         }
     }
 
@@ -237,7 +239,7 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     }
 
     private showExaminationDetails() {
-        window.open('preclinical/examination?id=' + this.examination.id + '&mode=view', '_blank');
+        window.open('preclinical-examination?id=' + this.examination.id + '&mode=view', '_blank');
     }
 
     getValidity(): boolean {
@@ -248,5 +250,23 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
             && context.subject != undefined && context.subject != null
             && context.examination != undefined && context.examination != null
         );
+    }
+    
+    
+    private onCloseExaminationPopin(examination?: Examination): void {
+        this.examinationCreationModal.hide();
+    }
+    
+    private initializePrefillExamination(): void{
+    	this.mode.createMode();
+        let examination = new Examination();
+        if (this.study){
+        	examination.studyId = this.study.id;
+        	examination.studyName = this.study.name;
+        }
+        //examination.centerId = ;
+        //examination.centerName = ;
+       // examination.examinationDate = ;
+        this.examinationFromImport = examination;
     }
 }

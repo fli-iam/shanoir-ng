@@ -99,7 +99,7 @@ export class AnestheticFormComponent implements OnInit {
     }
 
     goToEditPage(): void {
-        this.router.navigate(['/preclinical/anesthetic'], { queryParams: { id: this.anestheticId, mode: "edit" } });
+        this.router.navigate(['/preclinical-anesthetic'], { queryParams: { id: this.anestheticId, mode: "edit" } });
     }
 
     getEnum(): void {
