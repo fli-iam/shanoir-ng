@@ -4,7 +4,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +49,7 @@ public class AnimalSubjectApiControllerTest {
 	private static final String REQUEST_PATH = "/subject";
 	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+	private static final String REQUEST_PATH_WITH_SUBJECT_ID = REQUEST_PATH + "/find/1";
 
 	private Gson gson;
 
@@ -72,6 +75,9 @@ public class AnimalSubjectApiControllerTest {
 		doNothing().when(subjectsServiceMock).deleteById(1L);
 		given(subjectsServiceMock.findAll()).willReturn(Arrays.asList(new AnimalSubject()));
 		given(subjectsServiceMock.findById(1L)).willReturn(new AnimalSubject());
+		List<AnimalSubject> subjects = new ArrayList<AnimalSubject>();
+		subjects.add(new AnimalSubject());
+		given(subjectsServiceMock.findBy("subjectId", 1L)).willReturn(subjects);
 		given(subjectsServiceMock.save(Mockito.mock(AnimalSubject.class))).willReturn(new AnimalSubject());
 	}
 
@@ -108,6 +114,12 @@ public class AnimalSubjectApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(gson.toJson(AnimalSubjectModelUtil.createAnimalSubject()))).andExpect(status().isOk());
+	}
+
+	@Test
+	public void findSubjectBySubjectIdTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_SUBJECT_ID).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
 	}
 
 }

@@ -152,6 +152,15 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
+	public ResponseEntity<AnimalSubject> getAnimalSubjectBySubjectId(
+			@ApiParam(value = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id) {
+		final List<AnimalSubject> subjects = subjectService.findBy("subjectId", id);
+		if (subjects == null || subjects.isEmpty()) {
+			return new ResponseEntity<AnimalSubject>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<AnimalSubject>(subjects.get(0), HttpStatus.OK);
+	}
+
 	private FieldErrorMap getUpdateRightsErrors(final AnimalSubject subject) {
 		final AnimalSubject previousStateSubject = subjectService.findById(subject.getId());
 		final FieldErrorMap accessErrors = new EditableOnlyByValidator<AnimalSubject>().validate(previousStateSubject,

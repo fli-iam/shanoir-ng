@@ -53,6 +53,16 @@ public interface AnimalSubjectApi {
 	ResponseEntity<AnimalSubject> getAnimalSubjectById(
 			@ApiParam(value = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
+	@ApiOperation(value = "Find animalSubject by SubjectID", notes = "Returns a subject", response = AnimalSubject.class, tags = {
+			"AnimalSubject", })
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = AnimalSubject.class),
+			@ApiResponse(code = 400, message = "Invalid ID supplied", response = AnimalSubject.class),
+			@ApiResponse(code = 404, message = "Subject not found", response = AnimalSubject.class),
+			@ApiResponse(code = 500, message = "Unexpected Error", response = AnimalSubject.class) })
+	@RequestMapping(value = "/find/{id}", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<AnimalSubject> getAnimalSubjectBySubjectId(
+			@ApiParam(value = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id);
+
 	@ApiOperation(value = "List all animalSubjects", notes = "", response = AnimalSubject.class, responseContainer = "List", tags = {
 			"AnimalSubject", })
 	@ApiResponses(value = {
