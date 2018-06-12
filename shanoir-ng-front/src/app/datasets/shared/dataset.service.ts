@@ -41,19 +41,28 @@ export class DatasetService {
 
     download(dataset: Dataset): void {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
-        this.http.get(
-            AppUtils.BACKEND_API_DATASET_URL + '/download/' + dataset.id, 
-            { observe: 'response', responseType: 'blob' }
-        ).subscribe(
+        this.downloadToBlob(dataset.id).subscribe(
             response => {
-                AppUtils.downloadFile(response.body, this.getFilename(response));
+                this.downloadIntoBrowser(response);
             }
         );
     }
 
-    private getFilename(response: HttpResponse<Object>): string {
+    downloadToBlob(id: number): Observable<HttpResponse<Blob>> {
+        if (!id) throw Error('Cannot download a dataset without an id');
+        return this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/download/' + id, 
+            { observe: 'response', responseType: 'blob' }
+        ).map(response => response);
+    }
+
+    private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
         let contentDispHeader: string = response.headers.get('Content-Disposition');
         return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    }
+
+    private downloadIntoBrowser(response: HttpResponse<Blob>){
+        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
     }
 }

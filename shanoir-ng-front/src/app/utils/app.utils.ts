@@ -1,4 +1,5 @@
 import { Pageable } from '../shared/components/table/pageable.model';
+import { HttpResponse } from '@angular/common/http';
 
 // Users http api
 const BACKEND_API_USERS_MS_URL: string = process.env.BACKEND_API_USERS_MS_URL;
@@ -80,7 +81,7 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
     return hasUniqueError;
 }
 
-export function downloadFile(blob: Blob, filename: string){
+export function browserDownloadFile(blob: Blob, filename: string){
     if (navigator.msSaveBlob) { 
         // IE 10+
         navigator.msSaveBlob(blob, filename);

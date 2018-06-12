@@ -62,7 +62,7 @@ const appRoutes: Routes = [
     path: 'home',
     component: HomeComponent
   }, {
-    path: 'import',
+    path: 'imports',
     component: ImportComponent
   }, {
     path: 'manufacturer',

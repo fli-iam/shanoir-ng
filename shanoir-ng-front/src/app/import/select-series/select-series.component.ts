@@ -48,20 +48,14 @@ export class SelectSeriesComponent extends AbstractImportStepComponent implement
     }
 
     private initPapaya(serie: SerieDicom): void {
-        let that = this;
-        let entries = serie.images.map(function(name) {
-            return that.dataFiles.files[name.path];
+        let listOfPromises = serie.images.map((image) => {
+            return this.dataFiles.files[image.path].async("arraybuffer");
         });
-        let listOfPromises = entries.map(function(a) {
-            return a.async("arraybuffer");
-        });
-
         let promiseOfList = Promise.all(listOfPromises);
-
-        promiseOfList.then(function (values) {
+        promiseOfList.then((values) => {
             let params: object[] = [];
             params['binaryImages'] = [values];
-            that.papayaParams = params;
+            this.papayaParams = params;
         });
     }
 

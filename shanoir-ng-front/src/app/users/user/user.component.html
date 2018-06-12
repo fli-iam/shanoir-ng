@@ -51,9 +51,7 @@
 							<li *ngIf="!requestAccountMode">
 								<label i18n="Edit user|Expiration date label@@editUserExpirationDate" [class.important-text]="user.extensionRequestDemand">Expiration Date</label>
 								<span class="right-col">
-									<my-date-picker id="expirationDate" [options]="myDatePickerOptions" formControlName="expirationDate" [(ngModel)]="expirationDate" 
-										(dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
-									</my-date-picker>
+									<datepicker formControlName="expirationDate" [(ngModel)]="user.expirationDate"></datepicker>
 									<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
 								</span>
 							</li>

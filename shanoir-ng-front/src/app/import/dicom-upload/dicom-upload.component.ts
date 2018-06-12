@@ -32,14 +32,14 @@ export class DicomUploadComponent extends AbstractImportStepComponent {
     }
     
     private uploadArchive(fileEvent: any): void {
+        this.setArchiveStatus('uploading');
         this.loadInMemory(fileEvent);   
         this.uploadToServer(fileEvent.srcElement.files);
     }
 
     private loadInMemory(fileEvent: any) {
-        this.setArchiveStatus('uploading');
     	this.dicomArchiveService.clearFileInMemory();
-    	this.dicomArchiveService.importFromZip(fileEvent)
+    	this.dicomArchiveService.importFromZip((fileEvent.target).files[0])
             .subscribe(response => {
                 this.dicomArchiveService.extractFileDirectoryStructure()
                 .subscribe(response => {

@@ -22,14 +22,14 @@
             </dropdown-menu>
 
             <dropdown-menu label="Import data">
-                <menu-item label="From DICOM CD/DVD" i18n-label="Import data menu|From DICOM CD/DVD@@navbarFromDICOMCDDVD" link="import" [icon]="ImagesUrlUtil.COMPACT_DISC_ICON_PATH"></menu-item>
+                <menu-item label="From DICOM CD/DVD" i18n-label="Import data menu|From DICOM CD/DVD@@navbarFromDICOMCDDVD" link="imports" [icon]="ImagesUrlUtil.COMPACT_DISC_ICON_PATH"></menu-item>
                 <menu-item label="From BRUKER" i18n-label="Import data menu|From BRUKER@@navbarFromBRUKER" link="importBruker" [icon]="ImagesUrlUtil.BRUKER_ICON_PATH"></menu-item>
                 <menu-item label="From Neurinfo PACS" i18n-label="Import data menu|From Neurinfo PACS@@navbarFromNeurinfoPACS" link="" [icon]="ImagesUrlUtil.NEURINFO_ICON_PATH"></menu-item>
                 <menu-item label="From ShanoirUploader" i18n-label="Import data menu|From ShanoirUploader@@navbarFromShanoirUploader" link="" [icon]="ImagesUrlUtil.SHANOIR_UP_TRANSP_LOGO_PATH"></menu-item>
                 <menu-item label="Processed datasets (NifTi)" i18n-label="Import data menu|Processed datasets (NifTi)@@navbarProcessedDatasets" link="" [icon]="ImagesUrlUtil.NIFTI_ICON_PATH"></menu-item>
                 <menu-item label="From files ..." i18n-label="Import data menu|From files@@navbarFromFiles" link="" [icon]="ImagesUrlUtil.FOLDER_7_ICON_PATH"></menu-item>
             </dropdown-menu>
-            
+
             <dropdown-menu label="Administration" *ngIf="isUserAdmin()">
                 <menu-item label="Manage users" i18n-label="Administration menu|Manage users@@navbarManageUsers" link="user-list" [icon]="ImagesUrlUtil.USERS_1_ICON_PATH"></menu-item>
                 <li *ngIf="dev" class="horizontal-bar"><hr/></li>
