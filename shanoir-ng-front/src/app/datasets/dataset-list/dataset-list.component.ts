@@ -38,8 +38,6 @@ export class DatasetListComponent {
         this.fetchSubjects();
         this.getAll();
         this.createColumnDefs();
-        this.fetchSubjects();
-        this.fetchStudies();
     }
 
     // Grid data
