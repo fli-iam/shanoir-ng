@@ -106,5 +106,15 @@ export class AnimalSubjectService {
             }
             return body || {};
         }
+        
+        findAnimalSubjectBySubjectId(subjectId: number){
+        	return this.http.get<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECT_FIND_URL+"/"+subjectId)
+                    .toPromise()
+                    .then(response => response)
+                    .catch((error) => {
+                        console.error('Error while getting AnimalSubject by subject', error);
+                        return Promise.reject(error.message || error);
+            });
+        }
     
 }
