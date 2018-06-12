@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, ViewChild, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Output, EventEmitter, ViewChild, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { PatientDicom } from "../../../import/dicom-data.model";
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { Study } from '../../../studies/shared/study.model';
@@ -14,6 +14,10 @@ import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Router } from '@angular/router';
 import { AbstractImportStepComponent } from '../../../import/import-step.abstract';
 import { slideDown } from '../../../shared/animations/animations';
+import { Mode } from "../../shared/mode/mode.model";
+import { Modes } from "../../shared/mode/mode.enum";
+import { AnimalSubject } from '../../animalSubject/shared/animalSubject.model';
+import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 
 export class ContextData {
     constructor(
@@ -30,7 +34,7 @@ export class ContextData {
     styleUrls: ['../../../import/clinical-context/clinical-context.component.css', '../../../import/import.step.css'],
     animations: [slideDown]
 })
-export class AnimalClinicalContextComponent extends AbstractImportStepComponent implements OnChanges {
+export class AnimalClinicalContextComponent extends AbstractImportStepComponent implements OnChanges, OnInit {
     
     @Input() examinationComment: string;
     @Input() patient: PatientDicom;
@@ -48,19 +52,29 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     private subjects: SubjectWithSubjectStudy[]; 
     private subject: SubjectWithSubjectStudy;
     private subjectFromImport: Subject = new Subject();
+    private animalSubject: AnimalSubject = new AnimalSubject();
     private examinations: SubjectExamination[];
     private examination: SubjectExamination;
     public niftiConverter: IdNameObject;
+    
+    private mode: Mode = new Mode();
     
     constructor(
         private studyService: StudyService,
         private examinationService: ExaminationService,
         private subjectService: SubjectService,
+        private animalSubjectService: AnimalSubjectService,
         private router: Router,
     ) {
         super();
     }
 
+	ngOnInit(): void {
+	 	this.mode.createMode();
+	 	this.mode.setModeFromParameter("create");
+	}
+	
+	
     ngOnChanges(changes: SimpleChanges) {
         if(changes['patient'] && changes['patient'].currentValue) {
             this.studycard = null;
@@ -144,6 +158,9 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
         this.examinations = null;
         this.examination = null;
         if (this.subject) {
+        	this.animalSubjectService
+        		.findAnimalSubjectBySubjectId(this.subject.id)
+        		.then(animalSubject => this.animalSubject = animalSubject);
             this.examinationService
                 .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
                 .then(examinations => this.examinations = examinations);
@@ -167,19 +184,24 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     }
 
     private updateSubjectStudyValues() {
-        this.subjectService.updateSubjectStudyValues(this.subject.subjectStudy);
+    	if (this.subject.subjectStudy){
+        	this.subjectService.updateSubjectStudyValues(this.subject.subjectStudy);
+        }
     }
 
 
     private initializePrefillSubject(): void {
+        this.mode.createMode();
         let subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
 
         let newSubject = new Subject();
-        newSubject.birthDate = this.patient.patientBirthDate;
-        newSubject.name = this.patient.patientName;
-        newSubject.sex = this.patient.patientSex; 
+        if (this.patient){
+        	newSubject.birthDate = this.patient.patientBirthDate;
+        	newSubject.identifier = this.patient.patientName;
+        	newSubject.sex = this.patient.patientSex;
+        } 
         newSubject.subjectStudyList = [subjectStudy];
         this.subjectFromImport = newSubject;
     }
@@ -191,8 +213,9 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
             subjectWithSubjectStudy.id = subject.id;
             subjectWithSubjectStudy.name = subject.name;
             subjectWithSubjectStudy.identifier = subject.identifier;
-            subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
-            
+            if (subject.subjectStudyList && subject.subjectStudyList.length > 0){
+            	subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
+            }
             this.subjects.push(subjectWithSubjectStudy);
             this.subject = subjectWithSubjectStudy;
         }
@@ -204,7 +227,9 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     }
 
     private showSubjectDetails() {
-        window.open('subject?id=' + this.subject.id + '&mode=view', '_blank');
+    	if (this.animalSubject){
+        	window.open('preclinical/subject?id=' + this.animalSubject.id + '&mode=view', '_blank');
+        }
     }
 
     private showStudyCardDetails() {
@@ -212,7 +237,7 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     }
 
     private showExaminationDetails() {
-        window.open('examination?id=' + this.studycard.id + '&mode=view', '_blank');
+        window.open('preclinical/examination?id=' + this.examination.id + '&mode=view', '_blank');
     }
 
     getValidity(): boolean {

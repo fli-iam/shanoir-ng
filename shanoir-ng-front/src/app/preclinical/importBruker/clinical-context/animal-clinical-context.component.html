@@ -43,11 +43,11 @@
         <li class="required">
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
-                <select [disabled]="!study || !studycard" [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)">
-                    <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
+                <select [disabled]="!study || !studycard"  [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)">
+                    <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.identifier}}</option>
                 </select>
                 <button [disabled]="!subject" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
-                <button [disabled]="!study || !studycard" (click)="initializePrefillSubject(); subjectCreationModal.show();">add</button>
+                <button [disabled]="!study || !studycard"  (click)="initializePrefillSubject(); subjectCreationModal.show();">add</button>
             </span>
         </li>
         <li *ngIf="subject != null">
@@ -58,13 +58,13 @@
                             <th class="label-col">Common name</th>
                             <th class="input-col">Subject identifier for this study</th>
                             <th class="chkbx-col" title="Physically Involved">PI</th>
-                            <th class="dropdown-col">Subject Type</th>
+						    <th class="buttons-col"></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td class="label-col">
-                                {{subject.name}}
+                                {{subject.identifier}}
                             </td>
                             <td class="input-col">
                                 <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
@@ -73,14 +73,6 @@
                             <td class="chkbx-col">
                                 <input type="checkbox" [(ngModel)]="subject.subjectStudy.physicallyInvolved" 
                                     [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues()"/>
-                            </td>
-                            <td class="dropdown-col">
-                                <select id="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" 
-                                    [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues()">
-                                        <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
-                                        <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
-                                        <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
-                                </select>
                             </td>
                         </tr>
                     </tbody>
@@ -101,7 +93,7 @@
                     <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
                 </select>
                 <button [disabled]="!examination" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
-                <button [disabled]="!subject" (click)="console.log('TODO')">add</button>
+                <button [disabled]="!subject"  (click)="console.log('TODO')">add</button>
             </span>
         </li>
     </ol>
@@ -110,6 +102,6 @@
 
 <app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
     <div class="app-modal-body">
-        <subject-detail [mode]="'create'" (closing)="onCloseSubjectPopin($event)" [preFillData]="subjectFromImport"></subject-detail>
+        <animalSubject-form [mode]="mode"  [preFillData]="subjectFromImport" (closing)="onCloseSubjectPopin($event)"></animalSubject-form>
     </div>
 </app-modal>
