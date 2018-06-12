@@ -166,9 +166,9 @@
 					<li>
 						<label i18n="Subject detail|List of the studies label@@subjectDetailListOfStudies">List of the studies available</label>
 						<span class="right-col">
-							<select id="studies" (change)="onStudySelect($event.target.value)">
+							<select id="studies" (ngModelChange)="onStudySelect($event)" [ngModel]="selectedStudy" [ngModelOptions]="{standalone: true}">
 								<option disabled>Please select...</option>
-								<option *ngFor="let study of studies" [value]="study" [disabled]="study.selected">{{study.name}}</option>
+								<option *ngFor="let study of studies" [ngValue]="study" [disabled]="study?.selected">{{study.name}}</option>
 							</select>
 						</span>
 					</li>

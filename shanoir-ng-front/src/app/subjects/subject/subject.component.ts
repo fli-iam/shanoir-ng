@@ -40,13 +40,13 @@ export class SubjectComponent implements OnInit, OnChanges {
     private canModify: Boolean = false;
     private firstName: string = "";
     private lastName: string = "";
-    private selectedStudyId: number; 
     private studies: IdNameObject[];
     private subjectStudyList: SubjectStudy[] = [];
     private isBirthDateValid: boolean = true;
     private isAlreadyAnonymized: boolean;
     private init: boolean = false;
     private hasNameUniqueError: boolean = false;
+    private selectedStudy: IdNameObject;
 
     constructor(private route: ActivatedRoute, private router: Router,
         private subjectService: SubjectService,
@@ -120,7 +120,6 @@ export class SubjectComponent implements OnInit, OnChanges {
                 for (let subjectStudy of this.preFillData.subjectStudyList) {
                     this.studies.push(new IdNameObject(subjectStudy.study.id, subjectStudy.study.name));
                 }
-                this.selectedStudyId = this.preFillData.subjectStudyList[0].study.id;
             }
         }
     }
