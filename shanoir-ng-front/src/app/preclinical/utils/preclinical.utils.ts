@@ -3,6 +3,7 @@ export const PRECLINICAL_API_ROOT_URL:string = process.env.BACKEND_API_PRECLINIC
 
 //Subjects http api
 export const PRECLINICAL_API_SUBJECTS_URL:string = PRECLINICAL_API_ROOT_URL + '/subject';
+export const PRECLINICAL_API_SUBJECT_FIND_URL:string = PRECLINICAL_API_ROOT_URL + '/subject/find';
 export const PRECLINICAL_API_SUBJECTS_ALL_URL:string = PRECLINICAL_API_SUBJECTS_URL + '/all';
 
 //References http api
