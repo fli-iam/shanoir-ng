@@ -95,9 +95,9 @@ export class DatasetComponent implements OnInit {
 
     private loadDicomInMemory() {
         this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                return queryParams['id'];
-            })
+            .filter(params => 'id' in params)
+            .map(params => params.id)
+            .distinctUntilChanged()
             .subscribe((id: number) => {
                 this.datasetService.downloadToBlob(id).subscribe(blobReponse => {
                     this.dicomArchiveService.clearFileInMemory();
