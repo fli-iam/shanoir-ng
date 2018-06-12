@@ -44,10 +44,9 @@ table.layout { border: none; border-collapse: collapse; }
   table.layout td + td { border-left: 3px dashed var(--light-grey); }
 
 button { background-color: var(--color-b); border: 0px; border-radius: 2px; color: var(--very-light-grey); padding: 5px 10px; transition-property: transform, box-shadow; transition-duration: 0.3s; transition-timing-function: ease-in-out; }
-  button:enabled:hover { cursor: pointer; }
   button:disabled { background-color: var(--grey); border-color: var(--grey); cursor: auto; } 
   button:active, 
-  button:enabled:hover { color: var(--very-light-grey); background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
+  button:enabled:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
   button svg { vertical-align: inherit; }
 
 input[type='date'] { width: 140px; }

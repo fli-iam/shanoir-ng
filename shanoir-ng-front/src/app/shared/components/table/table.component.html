@@ -116,7 +116,7 @@
                 <span class="options">
                     <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
                     <span *ngIf="items != undefined && items != null">Found : {{items.length}}</span>
-                    <span *ngIf="itemsSave != undefined && itemsSave != null">Total : {{nbAllItems}}</span>
+                    <span *ngIf="itemsSave != undefined && itemsSave != null">Total : {{getNbTotal()}}</span>
                     <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
                 </span>
             </th>
