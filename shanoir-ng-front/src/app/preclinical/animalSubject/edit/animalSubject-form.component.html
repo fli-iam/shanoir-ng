@@ -183,7 +183,6 @@
 											<th class="label-col">Study name</th>
 											<th class="input-col">Subject id for this study</th>
 											<th class="chkbx-col" title="Physically Involved">PI</th>
-											<th class="dropdown-col">Subject Type</th>
 											<th class="buttons-col"></th>
 										</tr>
 									</thead>
@@ -201,13 +200,6 @@
 											</td>
 											<td class="chkbx-col">
 												<input type="checkbox" [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"/>
-											</td>
-											<td class="dropdown-col">
-												<select id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
-													<option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
-													<option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
-													<option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
-												</select>
 											</td>
 											<td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-ban"></i></span>
 										</tr>
