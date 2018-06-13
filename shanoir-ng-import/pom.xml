@@ -68,10 +68,10 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-				<dependency>
-			<groupId>org.dcm4che</groupId>
-			<artifactId>dcm4che-emf</artifactId>
-			<version>${dcm4che.version}</version>
+		<dependency>
+		    <groupId>org.dcm4che</groupId>
+		    <artifactId>dcm4che-emf</artifactId>
+		    <version>${dcm4che.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.dcm4che</groupId>
@@ -176,7 +176,7 @@
 		<repository>
 			<id>dcm4che-snapshots</id>
 			<name>Dcm4Che Snapshots</name>
-			<url>http://www.dcm4che.org/maven2/</url>
+			<url>http://maven.dcm4che.org</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
