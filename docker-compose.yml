@@ -203,6 +203,7 @@ services:
     build: ./docker-compose/nginx
     volumes:
       - "logs:/var/log/nginx"
+      - "tmp:/tmp"
     networks:
       - shanoir_ng_network
     ports:
