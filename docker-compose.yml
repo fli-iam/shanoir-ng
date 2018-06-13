@@ -95,6 +95,7 @@ services:
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "tmp:/tmp"
+      - "datasets-data:/var/datasets-data"
     networks:
       - shanoir_ng_network
     ports:
@@ -183,6 +184,7 @@ services:
 volumes:
   keycloak-database-data:
   database-data:
+  datasets-data:
   dcm4chee-ldap-data:
   dcm4chee-sldap-data:
   dcm4chee-database-data:
