@@ -11,7 +11,9 @@ import { KeycloakService } from "./keycloak.service";
 @Injectable()
 export class KeycloakHttpInterceptor implements HttpInterceptor {
 
-    constructor(private keycloakService: KeycloakService) {}
+    constructor(
+        private keycloakService: KeycloakService
+    ) {}
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         let authReq: HttpRequest<any> = req.clone();
@@ -32,6 +34,8 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
                             authReq = this.setAuthHeader(authReq);
                             observer.next();
                             observer.complete();
+                        }).catch(() => {
+                            this.keycloakService.logout();
                         });                        
                     }).switchMap(() => {
                         return next.handle(authReq);

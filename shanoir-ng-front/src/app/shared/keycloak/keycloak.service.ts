@@ -34,10 +34,9 @@ export class KeycloakService {
     }
 
     logout() {
-        KeycloakService.auth.loggedIn = false;
-        KeycloakService.auth.authz = null;
-        window.location.href = KeycloakService.auth.logoutUrl;
+        KeycloakService.auth.authz.logout();
     }
+    
 
     getToken(): Promise<string> {
         if (!this.gettingToken) {
@@ -47,7 +46,9 @@ export class KeycloakService {
                     KeycloakService.auth.authz.updateToken(5).success(() => {
                         this.gettingToken = false;
                         resolve(<string>KeycloakService.auth.authz.token);
-                    })
+                    }).error(() => {
+                        reject();
+                    });
                 }
             });
         }
