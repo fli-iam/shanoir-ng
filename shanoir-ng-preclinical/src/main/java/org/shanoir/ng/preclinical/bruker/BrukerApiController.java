@@ -119,7 +119,9 @@ public class BrukerApiController implements BrukerApi {
 	private void startBruker2Dicom(Path brukerDirFile) throws RestServiceException {
 		String sourceFilePath = brukerDirFile.toAbsolutePath().toString();
 		String destinationFilePath = brukerDirFile.toAbsolutePath().toString() + File.separator + RESULT_FOLDER;
-		String requestJson = "{\"source\":\"" + sourceFilePath + "\", \"destination\":\"" + destinationFilePath + "\"}";
+		String requestJson = "{\"source\":\"" + sourceFilePath 
+				+ "\", \"destination\":\"" + destinationFilePath
+				+ "\", \"dicomdir\": true }";
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
