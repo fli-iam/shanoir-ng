@@ -5,6 +5,8 @@ import { ImportJob } from '../../import/dicom-data.model';
 
 import * as PreclinicalUtils from '../utils/preclinical.utils';
 import * as AppUtils from '../../utils/app.utils';
+//import * as fs from 'fs';
+declare var JSZip: any;
 
 @Injectable()
 export class ImportBrukerService {
@@ -24,6 +26,17 @@ export class ImportBrukerService {
     importDicomFile(filePath: String): Observable<ImportJob> {
         return this.http.post<ImportJob>(AppUtils.BACKEND_API_IMPORT_DICOM_URL, filePath)
             .map(response => response);
+    }
+    
+    
+    loadDicom(dicomZipFile: String): Observable<any>{
+    	return Observable.create(observer => {
+    		/*require("fs").readFile(dicomZipFile, function (err, data) {
+  				if (err) throw err;
+  				var zip = new JSZip();
+  				zip.loadAsync(data);
+			})*/
+	 	});
     }
     
 }

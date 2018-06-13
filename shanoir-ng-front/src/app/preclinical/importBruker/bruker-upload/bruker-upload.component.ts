@@ -57,11 +57,11 @@ export class BrukerUploadComponent extends AbstractImportStepComponent {
     			this.uploadedBrukerFileComplete = 2;
     			this.importBrukerService.importDicomFile(res)
             		.subscribe((patientDicomList: ImportJob) => {
-            			console.log("SUCCESSFULL");
                 		this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
                 		this.archiveUploaded.emit(patientDicomList);
                 		this.setArchiveStatus('uploaded');
                 		this.uploadedBrukerFileComplete = 3;
+                		this.loadInMemory(res);
             		}, (err: String) => {
             			console.log("error in dicom import"+JSON.stringify(err));
                 		this.dicomDirMissingError = (JSON.stringify(err)).indexOf("DICOMDIR is missing") != -1
@@ -79,6 +79,14 @@ export class BrukerUploadComponent extends AbstractImportStepComponent {
                 }
             );
     }
+    
+     private loadInMemory(dicomZipPath: String) {
+    	this.importBrukerService.loadDicom(dicomZipPath)
+                .subscribe(response => {
+                    this.inMemoryExtracted.emit(response);
+        });
+    }
+    
 
     private setArchiveStatus(status: Status) {
         this.archiveStatus = status;
