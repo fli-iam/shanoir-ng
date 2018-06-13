@@ -22,7 +22,7 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  * @author mkain
  */
 public class ImportUtils {
-	
+
 	/**
 	 * @todo: read from application.yml -> Yao
 	 */
@@ -116,8 +116,8 @@ public class ImportUtils {
 	}
 
 	/**
-	 * Extracts a zip file specified by the zipFilePath to a directory specified
-	 * by destDirectory (will be created if does not exists)
+	 * Extracts a zip file specified by the zipFilePath to a directory specified by
+	 * destDirectory (will be created if does not exists)
 	 * 
 	 * @param zipFilePath
 	 * @param destDirectory
@@ -132,11 +132,20 @@ public class ImportUtils {
 		try {
 			zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
 			ZipEntry entry = zipIn.getNextEntry();
+			String directoryFile;
+			String name;
 			// iterates over entries in the .zip file
 			while (entry != null) {
-				String filePath = destDirectory + File.separator + entry.getName();
+				name = entry.getName();
+				String filePath = destDirectory + File.separator + name;
 				if (!entry.isDirectory()) {
 					// if the entry is a file, extracts it
+					// create the dir if necessary, file entry can come before directory entry where
+					// is file located
+					directoryFile = getDirectoryPart(name);
+					if (directoryFile != null) {
+						createDirectory(destDir, directoryFile);
+					}
 					extractFile(zipIn, filePath);
 				} else {
 					// if the entry is a directory, make the directory
@@ -153,6 +162,18 @@ public class ImportUtils {
 				zipIn.close();
 			}
 		}
+	}
+
+	private static void createDirectory(File outdir, String path) {
+		File d = new File(outdir, path);
+		if (!d.exists()) {
+			d.mkdirs();
+		}
+	}
+
+	private static String getDirectoryPart(String name) {
+		int s = name.lastIndexOf(File.separatorChar);
+		return s == -1 ? null : name.substring(0, s);
 	}
 
 	/**
@@ -191,7 +212,7 @@ public class ImportUtils {
 	public static String convertFilePath(final String firstImagePath) {
 		return firstImagePath.replaceAll("\\\\", "/");
 	}
-	
+
 	/**
 	 * List all the folders of the given directory.
 	 *
@@ -213,11 +234,12 @@ public class ImportUtils {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Convert a String with a wildcard to a regular expression.
 	 *
-	 * @param wildcard the wildcard
+	 * @param wildcard
+	 *            the wildcard
 	 *
 	 * @return the string
 	 */
@@ -233,7 +255,7 @@ public class ImportUtils {
 			case '?':
 				s.append(".");
 				break;
-				// escape special regexp-characters
+			// escape special regexp-characters
 			case '(':
 			case ')':
 			case '[':
