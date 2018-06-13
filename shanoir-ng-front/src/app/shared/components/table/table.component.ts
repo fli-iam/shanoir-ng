@@ -50,9 +50,6 @@ export class TableComponent {
             if (this.items != undefined) {
                 this.itemsSave = [];
                 for (let item of this.items) { this.itemsSave.push(item); }
-                if (!this.backPagination) {
-                    this.nbAllItems = this.itemsSave.length;
-                }
                 // Choose default sorting
                 this.lastSortedCol = this.columnDefs[0];
                 for (let col of this.columnDefs) {
@@ -416,5 +413,9 @@ export class TableComponent {
 
     private returnFalse() {
         return false;
+    }
+
+    private getNbTotal() {
+        return this.nbAllItems ? this.nbAllItems : this.itemsSave.length;
     }
 }

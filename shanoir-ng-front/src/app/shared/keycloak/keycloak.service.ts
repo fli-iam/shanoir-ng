@@ -41,7 +41,7 @@ export class KeycloakService {
 
     getToken(): Promise<string> {
         if (!this.gettingToken) {
-            console.log('token refreshing...');
+            this.gettingToken = true;
             this.tokenPromise = new Promise<string>((resolve, reject) => {
                 if (KeycloakService.auth.authz.token) {
                     KeycloakService.auth.authz.updateToken(5).success(() => {
