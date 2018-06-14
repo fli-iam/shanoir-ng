@@ -210,7 +210,7 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     }
     
     private onCloseSubjectPopin(subject?: Subject): void {
-        if (subject) {
+        if (subject && subject.id) {
             // Add the subject to the select box and select it
             let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
             subjectWithSubjectStudy.id = subject.id;
@@ -261,10 +261,11 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     
     
     private onCloseExaminationPopin(examination?: Examination): void {
-    	if (examination) {
+    	if (examination && examination.id) {
      		// Add the examination to the select box and select it
             let subjectExamination = new SubjectExamination();
             subjectExamination.id = examination.id;
+            subjectExamination.comment = examination.comment;
             subjectExamination.examinationDate = examination.examinationDate;
             if (this.examinations == null){
             	this.examinations = new Array<SubjectExamination>();

@@ -215,11 +215,15 @@ export class AnimalSubjectFormComponent implements OnInit {
 
     getOut(preclinicalSubject?: PreclinicalSubject): void {
         if (this.closing.observers.length > 0) {
-            this.closing.emit(preclinicalSubject.subject);
-            this.preclinicalSubject = new PreclinicalSubject();
-            this.preclinicalSubject.subject = new Subject();
-            this.preclinicalSubject.animalSubject = new AnimalSubject();
-            this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        	if (preclinicalSubject && preclinicalSubject.subject){
+            	this.closing.emit(preclinicalSubject.subject);
+            	this.preclinicalSubject = new PreclinicalSubject();
+            	this.preclinicalSubject.subject = new Subject();
+            	this.preclinicalSubject.animalSubject = new AnimalSubject();
+            	this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+            }else{
+            	this.closing.emit(new Subject());
+            }
             //this.location.back();
         } else {
             this.location.back();

@@ -264,8 +264,12 @@ export class AnimalExaminationFormComponent implements OnInit {
 
     back(examination?: Examination): void {
         if (this.closing.observers.length > 0) {
-            this.closing.emit(examination);
-            this.examination = new Examination();
+        	if (examination){
+            	this.closing.emit(examination);
+            	this.examination = new Examination();
+            }else{
+            	this.closing.emit(new Examination());
+            }
         } else {
             this.location.back();
         }
