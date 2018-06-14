@@ -109,7 +109,7 @@ export class SubjectPathologiesListComponent implements OnChanges {
     }
 
     viewSubjectPathology = (pathology: SubjectPathology) => {
-        //this.router.navigate(['/preclinical/pathologies/edit/', pathology.id]);
+        //this.router.navigate(['/preclinical-pathologies-edit/', pathology.id]);
         this.toggleFormSP = true;
         this.createSPMode = false;
         this.pathoSelected = pathology;

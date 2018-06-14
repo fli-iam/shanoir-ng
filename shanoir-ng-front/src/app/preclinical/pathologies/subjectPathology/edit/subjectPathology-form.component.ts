@@ -237,11 +237,13 @@ export class SubjectPathologyFormComponent implements OnChanges {
     loadModelsDisplay(){
         if (this.subjectPathology && this.subjectPathology.pathology) {
             this.modelsDisplay = [];
-            for (let model of this.models) {
-                if (this.subjectPathology.pathology.id == model.pathology.id) {
-                    this.modelsDisplay.push(model);
-                }
-            }            
+            if (this.models){
+            	for (let model of this.models) {
+                	if (this.subjectPathology.pathology.id == model.pathology.id) {
+                    	this.modelsDisplay.push(model);
+                	}
+            	} 
+            }           
         }else{
             this.modelsDisplay = [];   
         }
