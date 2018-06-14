@@ -34,7 +34,7 @@ export class NewExamComponent implements OnInit {
             this.examination.studyId = this.preFillData.studyId;
             this.examination.centerId = this.preFillData.centerId;
             this.examination.subjectId = this.preFillData.subjectId;
-            this.examination.examinationDate = this.preFillData.examinationDate;
+            this.examination.examinationDate = new Date(this.preFillData.examinationDate);
             this.examination.comment = this.preFillData.comment;
         }
     } 

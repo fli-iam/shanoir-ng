@@ -202,9 +202,8 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
         newExam.studyId = this.study.id;
         newExam.centerId = this.studycard.center.id;
         newExam.subjectId = this.subject.id;
-        console.log(this.getContext().examination);
-        newExam.examinationDate = new Date();
-        newExam.comment = this.examinationComment;
+        newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
+        newExam.comment = this.patient.studies[0].studyDescription;
 
         this.examFromImport = newExam;
     }
