@@ -9,50 +9,43 @@ export class HandleErrorService implements ErrorHandler {
 
     constructor (private msgb: MsgBoxService) { }
 
-    public extractData(res: Response) {
-        let body = res.json();
-        return body.data || { };
-    }
-
     public handleError(error: Response | any) {
         try {
-            let techMsg: string = error.message ? error.message : error.toString();
+            let techMsg: string = error.message ? error.message : null;
             let userMsg: string = 'An unexpected error occured';
     
             if (error instanceof Response) {
-                const body = error.json() || '';
-                techMsg = '';
-                techMsg = "[" + body.code + "]: " + body.message;
-                if (body.details) {
-                    let errDetails = body.details.fieldErrors || '';
-                    for (var errKey in errDetails) {
-                        techMsg += "; " + errKey + " should be ";
-                        var errDetailsByKey = errDetails[errKey][0];
-                        for (var errDetail in errDetailsByKey) {
-                            if (errDetail === "code")
-                            techMsg += errDetailsByKey[errDetail];
-                        }
-                    }
-                }
-                // TODO : userMsg = techMsg;
+                techMsg = this.getMsgFromBackendValidation(error);
             } 
-    
-            if (error.promise && error.rejection) {
-                techMsg = error.rejection;
-                userMsg = error.rejection.guiMsg;
-            }
     
             if (error.guiMsg) {
                 userMsg = error.guiMsg;
             }
             
-            console.error(techMsg);
+            if (techMsg) console.error(techMsg);
             console.error(error);
             this.msgb.log('error', userMsg);
 
         } catch (error) {
-            console.error('Error handler failed : ');
-            console.error(error);
+            console.error('Error handler failed : ', error);
         }
+    }
+    
+    private getMsgFromBackendValidation(error: Response | any): string {
+        const body = error.json() || '';
+        let techMsg = '';
+        techMsg = "[" + body.code + "]: " + body.message;
+        if (body.details) {
+            let errDetails = body.details.fieldErrors || '';
+            for (var errKey in errDetails) {
+                techMsg += "; " + errKey + " should be ";
+                var errDetailsByKey = errDetails[errKey][0];
+                for (var errDetail in errDetailsByKey) {
+                    if (errDetail === "code")
+                    techMsg += errDetailsByKey[errDetail];
+                }
+            }
+        }
+        return techMsg;
     }
 }  
