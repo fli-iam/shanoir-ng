@@ -36,6 +36,10 @@ VALUES (1,'Stroke'),
 		(2,'Alzheimer'),
 		(3,'Cancer'),
 		(4,'Bone');
+		
+INSERT INTO pathology_model
+	(id, comment, name,pathology_id,filename, filepath  )
+VALUES (1,NULL,'U836',1,NULL,NULL);
 				
 INSERT INTO therapy 
 	(id, comment, name, therapy_type)
