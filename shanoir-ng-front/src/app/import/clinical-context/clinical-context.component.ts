@@ -33,7 +33,6 @@ export class ContextData {
 })
 export class ClinicalContextComponent extends AbstractImportStepComponent implements OnChanges {
     
-    @Input() examinationComment: string;
     @Input() patient: PatientDicom;
     @Output() contextChange = new EventEmitter<ContextData>();
     
@@ -72,10 +71,6 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
             this.onContextChange();
             this.fetchStudies();
         }
-    }
-
-    private changeExamComment (editedLabel: string): void {
-        this.examinationComment = editedLabel;
     }
 
     private fetchStudies(): void {

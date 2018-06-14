@@ -252,6 +252,13 @@
 					</li>
 				</ol>
 			</fieldset>
+			<fieldset>
+				<legend>Data</legend>
+				<div *ngIf="loading" class="data-loading">
+					Loading... <img [src]="loaderImagePath" />
+				</div>
+				<study-tree *ngIf="!loading" [study]="study"></study-tree>
+			</fieldset>
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
 					<button i18n="View center|Back button label@@backButton" class="Button" (click)="back()">Back</button>
@@ -267,15 +274,5 @@
 				</span>
 			</div>
 		</form>
-	</div>
-	<div class="layout right" *ngIf="mode=='view'">
-		<span class="right-col">
-			<div class="study-data" i18n="Study data|Title@@studyDetailDataTitle">Data</div>
-		</span>
-		<div *ngIf="loading" class="data-loading">
-			<img [src]="loaderImagePath" />
-			<br/>Loading...
-		</div>
-		<study-tree *ngIf="!loading" [study]="study"></study-tree>
 	</div>
 </div>

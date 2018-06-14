@@ -16,22 +16,12 @@ export class StudyService {
 
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting studies by user id', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     findStudiesWithStudyCardsByUserAndEquipment(equipment: EquipmentDicom): Promise<Study[]> {
         return this.http.post<Study[]>(AppUtils.BACKEND_API_STUDY_WITH_CARDS_BY_USER_EQUIPMENT_URL, JSON.stringify(equipment))
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting studies by user and equipment', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     create(study: Study): Observable<Study> {
@@ -41,47 +31,27 @@ export class StudyService {
 
     delete(id: number): Promise<void> {
         return this.http.delete<void>(AppUtils.BACKEND_API_STUDY_URL + '/' + id)
-            .toPromise()
-            .catch((error) => {
-                console.error('Error delete study', error);
-                return Promise.reject(error);
-            });
+            .toPromise();
     }
 
     getStudies(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                return Promise.reject(new GuiError('Sorry, an unexpected error occured while getting studies', error));
-            });
+            .toPromise();
     }
 
     getStudiesNames(): Promise<IdNameObject[]> {
         return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                return Promise.reject(new GuiError('Sorry, an unexpected error occured while getting studies names', error));
-            });
+            .toPromise();
     }
 
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                return Promise.reject(new GuiError('Sorry, an unexpected error occured while retrieving the study\'s subjects', error));
-            });
+            .toPromise();
     }
     
     getStudy(id: number, withData: boolean): Promise<Study> {
         return this.http.get<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id + '?withdata=' + withData)
-            .toPromise()
-            .then(res => res)
-            .catch((error) => { 
-                return Promise.reject(new GuiError('Sorry, an unexpected error occured while retrieving the study\'s data', error));
-            });
+            .toPromise();
     }
 
     update(id: number, study: Study): Observable<Study> {
