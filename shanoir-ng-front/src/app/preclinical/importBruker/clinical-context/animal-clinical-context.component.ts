@@ -19,6 +19,7 @@ import { Modes } from "../../shared/mode/mode.enum";
 import { AnimalSubject } from '../../animalSubject/shared/animalSubject.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 import { Examination } from '../../../examinations/shared/examination.model';
+import { StudyCenter } from '../../../studies/shared/study-center.model';
 
 export class ContextData {
     constructor(
@@ -224,7 +225,7 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
             }
             this.subjects.push(subjectWithSubjectStudy);
             this.subject = subjectWithSubjectStudy;
-            this.onContextChange();
+            this.onSelectSubject();
         }
         this.subjectCreationModal.hide();
     }
@@ -272,7 +273,7 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
             }
             this.examinations.push(subjectExamination);
             this.examination = subjectExamination;
-            this.onContextChange();
+            this.onSelectExamination();
         }
         this.examinationCreationModal.hide();
     }
@@ -283,10 +284,21 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
         if (this.study){
         	examination.studyId = this.study.id;
         	examination.studyName = this.study.name;
+        	
+        	if (this.studycard && this.studycard.center){
+        		examination.centerId = this.studycard.center.id;
+        	}
+        	if (this.study.studyCenterList && this.study.studyCenterList.length > 0){
+        		let studyCenter: StudyCenter = this.study.studyCenterList[0];
+        		if (studyCenter.center){
+        			examination.centerName = studyCenter.center.name;
+        		}
+        	}
+        	if (this.patient && this.patient.studies && this.patient.studies.length > 0){
+        		examination.examinationDate = this.patient.studies[0].studyDate;
+        	}
         }
-        //examination.centerId = ;
-        //examination.centerName = ;
-       // examination.examinationDate = ;
+        examination.examinationDate = new Date();
         this.examinationFromImport = examination;
     }
 }

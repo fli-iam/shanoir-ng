@@ -87,7 +87,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 
 	@Override
 	public List<AnimalSubject> findBy(String fieldName, Object value) {
-		return null;
+		return subjectsRepository.findBy(fieldName, value);
 	}
 
 }

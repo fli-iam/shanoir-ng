@@ -14,4 +14,5 @@ public interface AnimalSubjectRepositoryCustom {
 
 	List<AnimalSubject> findByReference(Reference reference);
 
+	List<AnimalSubject> findBy(String fieldName, Object value);
 }
