@@ -12,8 +12,7 @@
             deploy=true>
                 <node 
                     *ngFor="let study of patient.studies" 
-                    [label]="study.studyDescription"
-                    (editedLabel)="changeExamComment($event)"
+                    [(label)]="study.studyDescription"
                     [editable]="true"
                     [nodeParams]="study"
                     (chkbxChange)="onPatientUpdate()"
