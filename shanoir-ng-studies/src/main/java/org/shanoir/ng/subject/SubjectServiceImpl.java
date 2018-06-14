@@ -69,7 +69,7 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	private MicroserviceRequestsService microservicesRequestsService;
-	
+
 	@Autowired
 	private SubjectStudyDecorator subjectStudyMapper;
 
@@ -102,8 +102,10 @@ public class SubjectServiceImpl implements SubjectService {
 	public Subject save(final Subject subject) throws ShanoirStudiesException {
 		Subject savedSubject = null;
 		try {
-			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-				subjectStudy.setSubject(subject);
+			if (subject.getSubjectStudyList() != null) {
+				for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+					subjectStudy.setSubject(subject);
+				}
 			}
 			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
@@ -223,7 +225,7 @@ public class SubjectServiceImpl implements SubjectService {
 	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) {
 
 		subjectDb.setName(subject.getName());
-		//subjectDb.setBirthDate(subject.getBirthDate());
+		// subjectDb.setBirthDate(subject.getBirthDate());
 		subjectDb.setIdentifier(subject.getIdentifier());
 		subjectDb.setPseudonymusHashValues(subject.getPseudonymusHashValues());
 		subjectDb.setSex(subject.getSex());
@@ -314,7 +316,8 @@ public class SubjectServiceImpl implements SubjectService {
 					+ MicroserviceRequestsService.CENTERID + "/" + studyCardId, HttpMethod.GET, entity, Long.class);
 		} catch (RestClientException e) {
 			LOG.error("Error on study card microservice request", e);
-			throw new ShanoirStudiesException("Error while getting study card list", StudiesErrorModelCode.SC_MS_COMM_FAILURE);
+			throw new ShanoirStudiesException("Error while getting study card list",
+					StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
 
 		Long centerId = null;
@@ -329,8 +332,7 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	/**
-	 * Browse through all subject ofsep using the center code (3 digital
-	 * numbers).
+	 * Browse through all subject ofsep using the center code (3 digital numbers).
 	 *
 	 * @param centerCode
 	 *            the center code
@@ -348,7 +350,8 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
-	public List<ExaminationDTO> findExaminationsForSubjectStudyRel(Long subjectId, Long studyId) throws ShanoirStudiesException {
+	public List<ExaminationDTO> findExaminationsForSubjectStudyRel(Long subjectId, Long studyId)
+			throws ShanoirStudiesException {
 		ResponseEntity<List<ExaminationDTO>> examinationsResponse = null;
 		try {
 			HttpEntity<Long> entity = null;
@@ -358,15 +361,16 @@ public class SubjectServiceImpl implements SubjectService {
 				throw ((ShanoirStudiesException) e);
 			}
 			examinationsResponse = restTemplate.exchange(
-					microservicesRequestsService.getExaminationMsUrl() + MicroserviceRequestsService.SUBJECT + subjectId +
-					MicroserviceRequestsService.STUDY + studyId,
+					microservicesRequestsService.getExaminationMsUrl() + MicroserviceRequestsService.SUBJECT + subjectId
+							+ MicroserviceRequestsService.STUDY + studyId,
 					HttpMethod.GET, entity, new ParameterizedTypeReference<List<ExaminationDTO>>() {
 					});
 		} catch (RestClientException e) {
 			LOG.error("Error on examination microservice request", e);
-			throw new ShanoirStudiesException("Error while getting study card list", StudiesErrorModelCode.SC_MS_COMM_FAILURE);
+			throw new ShanoirStudiesException("Error while getting study card list",
+					StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
-		
+
 		List<ExaminationDTO> examinations = null;
 		if (HttpStatus.OK.equals(examinationsResponse.getStatusCode())
 				|| HttpStatus.NO_CONTENT.equals(examinationsResponse.getStatusCode())) {
@@ -374,10 +378,8 @@ public class SubjectServiceImpl implements SubjectService {
 		} else {
 			throw new ShanoirStudiesException(StudiesErrorModelCode.SC_MS_COMM_FAILURE);
 		}
-		
+
 		return examinations;
 	}
-	
-	
 
 }
