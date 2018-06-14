@@ -137,8 +137,8 @@ VALUES
 	(131, '\0', NULL, '\0', NULL, 1, 'UTE4EEG', '2017-03-21 00:00:00', 1, 1, '\0', 1),
 	(132, '\0', NULL, '\0', NULL, 1, 'FastMicroDiff', NULL, 1, 1, '\0', 1),
 	(133, '\0', 191, '\0', NULL, '\0', 'CaractRF', NULL, 1, 1, '\0', 1),
-	(134, '\0', NULL, '\0', NULL, 1, 'Sharing_SynesthesiaData', NULL, 1, 1, '\0', 1);
-
+	(134, '\0', NULL, '\0', NULL, 1, 'Sharing_SynesthesiaData', NULL, 1, 1, '\0', 1),
+	(135, '\0', NULL, '\0', NULL, 1, 'Appning', NULL, 1, 1, '\0', 1);
 
 
 INSERT INTO center(id, country, name, phone_number, postal_code, street, city, website)
@@ -457,7 +457,8 @@ VALUES
 	(285, 1, 132),
 	(286, 1, 133),
 	(287, 68, 133),
-	(288, 15, 134);
+	(288, 15, 134), 
+    (289, 15, 135);
 
 INSERT INTO study_examination
 	(examination_id, study_id)
@@ -497,7 +498,8 @@ INSERT INTO subject_study
 VALUES
 	(1, 0, 1, 1, 'Subject 1 for study 1', 1),
 	(2, 0, 1, 2, 'Subject 2 for study 1', 2),
-	(3, 0, 2, 1, 'Subject 1 for study 2', 2);
+	(3, 0, 2, 1, 'Subject 1 for study 2', 2),
+    (4, 0, 135, 1, 'rat2 for appning', 2);
 
 INSERT INTO group_of_subjects
 	(id, dtype, group_name, study_id)
@@ -517,7 +519,8 @@ VALUES
 	(2, 'Philips Medical Systems'),
 	(3, 'SIEMENS'),
 	(5, 'Philips Healthcare'),
-	(6, 'AXIOM ARTIS DBA');
+	(6, 'AXIOM ARTIS DBA'),
+    (7, 'Bruker BioSpin MRI GmbH');
 
 INSERT INTO `manufacturer_model`
 	(id, dataset_modality_type, name, magnetic_field, manufacturer_id)
@@ -575,7 +578,8 @@ VALUES
 	(55,1,'Optima CT 660',0,1),
 	(56,1,'Optima CT660',0,1),
 	(57,1,'Revolution EVO',0,1),
-	(58,1,'Integris V',0,2);
+	(58,1,'Integris V',0,2), 
+	(59,1,'Biospec 94/20USR',0,7);
 
 INSERT INTO `acquisition_equipment`
 	(id, serial_number, center_id, manufacturer_model_id)
@@ -734,7 +738,8 @@ VALUES
 	(166,'0',2,44),
 	(167,'0001',2,48),
 	(168,'000010',28,58),
-	(169,'141228',63,6);
+	(169,'141228',63,6),
+	(170, '10100191', 15,59);
 
 INSERT INTO `coil`
 	(id, center_id, coil_type, manufacturer_model_id, name, number_of_channels, serial_number)
