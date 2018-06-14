@@ -158,7 +158,7 @@ public class ImporterApiController implements ImporterApi {
 
 			return new ResponseEntity<Void>(HttpStatus.OK);
 		} catch (Exception e) {
-			LOG.error(e.getMessage());
+			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), null));
 		}
@@ -234,7 +234,7 @@ public class ImporterApiController implements ImporterApi {
 			File tempFile = saveTempFile(dicomZipFile);
 			return importDicomZipFile(tempFile);
 		} catch (IOException e) {
-			LOG.error(e.getMessage());
+			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
 		}
@@ -302,7 +302,7 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setPatients(patientsDTO.getPatients());
 			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
-			LOG.error(e.getMessage());
+			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
 		}
