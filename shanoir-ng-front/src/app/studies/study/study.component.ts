@@ -152,10 +152,6 @@ export class StudyComponent implements OnInit {
     }
 
     getStudy(): void {
-        // if (this.idFromImport != null) {
-        //     console.log("idFromImport: " + this.idFromImport);
-        //     this.getStudyWithData(this.idFromImport);
-        // } else {
         this.route.queryParams
             .switchMap((queryParams: Params) => {
                 let studyId = queryParams['id'];
@@ -179,9 +175,12 @@ export class StudyComponent implements OnInit {
                 this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
                 if (this.mode == 'view') {
                     this.getStudyWithData(this.study.id);
+                } else {
+                    this.loading = false;
                 }
+            }, (error: any) => {
+                this.loading = false;
             });
-        // }
     }
 
     getStudyWithData(studyId: number): void {
@@ -190,6 +189,9 @@ export class StudyComponent implements OnInit {
                 this.study = study;
                 this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
                 this.loading = false;
+            }).catch((reason: any) => {
+                this.loading = false;
+                throw reason;
             });
     }
 
