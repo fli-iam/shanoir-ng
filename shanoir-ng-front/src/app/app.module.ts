@@ -94,6 +94,7 @@ import { ProcessedDatasetTypeComponent } from './datasets/shared/processed-datas
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { NewExamComponent } from './examinations/examination/new-exam.component';
 
 
 @NgModule({
@@ -125,6 +126,7 @@ import { ClinicalContextComponent } from './import/clinical-context/clinical-con
         ExaminationComponent,
         ExaminationPipe,
         ExaminationTreeComponent,
+        NewExamComponent,
         NewInstrumentComponent,
         UploadExtraDataComponent,
         ExtensionRequestComponent,
