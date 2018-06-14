@@ -18,7 +18,7 @@ import { Mode } from "../../shared/mode/mode.model";
 import { Modes } from "../../shared/mode/mode.enum";
 import { AnimalSubject } from '../../animalSubject/shared/animalSubject.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
-import { Examination } from '../../examination/shared/examination.model';
+import { Examination } from '../../../examinations/shared/examination.model';
 
 export class ContextData {
     constructor(

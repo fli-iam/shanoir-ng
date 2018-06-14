@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
-import { Examination } from '../shared/examination.model';
+import { Examination } from '../../../examinations/shared/examination.model';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { Pageable } from '../../../shared/components/table/pageable.model';
 import * as AppUtils from '../../../utils/app.utils';

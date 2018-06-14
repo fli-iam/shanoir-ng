@@ -6,7 +6,7 @@ import { Location } from '@angular/common';
 
 import { ContrastAgent }    from '../../contrastAgent/shared/contrastAgent.model';
 import { ContrastAgentService } from '../../contrastAgent/shared/contrastAgent.service';
-import { Examination } from '../shared/examination.model';
+import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';

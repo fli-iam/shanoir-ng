@@ -9,7 +9,8 @@ export class Examination {
     studyName: string;
     centerId: number;
     centerName: string;
-    comment: String;
-    note: String;
+    comment: string;
+    note: string;
     subjectWeight: number;
+    preclinical: boolean;
 }

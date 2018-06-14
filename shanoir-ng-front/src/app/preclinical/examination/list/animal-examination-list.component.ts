@@ -5,7 +5,7 @@ import { ConfirmDialogService } from "../../../shared/components/confirm-dialog/
 import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
-import { Examination } from '../shared/examination.model';
+import { Examination } from '../../../examinations/shared/examination.model';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { Pageable } from '../../../shared/components/table/pageable.model';
 
