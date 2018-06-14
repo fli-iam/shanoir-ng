@@ -350,9 +350,9 @@ public class DicomFileAnalyzerService {
 	private void checkSeriesDate(JsonNode serie, Attributes datasetAttributes) {
 		if (serie.path("seriesDate").isMissingNode()) {
 			// has not been found in dicomdir, so we get it from .dcm file:
-			String seriesDateDicomFile = datasetAttributes.getString(Tag.SeriesDate);
-			if (seriesDateDicomFile != null && !seriesDateDicomFile.isEmpty()) {
-				((ObjectNode) serie).put("seriesDate", seriesDateDicomFile);
+			Date seriesDateDicomFile = datasetAttributes.getDate(Tag.SeriesDate);
+			if (seriesDateDicomFile != null) {
+				((ObjectNode) serie).put("seriesDate", seriesDateDicomFile.getTime());
 			}
 		}
 	}
