@@ -296,6 +296,7 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
         	}
         	if (this.patient && this.patient.studies && this.patient.studies.length > 0){
         		examination.examinationDate = this.patient.studies[0].studyDate;
+        	    examination.comment = this.patient.studies[0].studyDescription;
         	}
         }
         examination.examinationDate = new Date();

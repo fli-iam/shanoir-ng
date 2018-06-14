@@ -506,7 +506,8 @@ export class AnimalExaminationFormComponent implements OnInit {
             this.examination.studyId = this.preFillData.studyId;
             this.examination.centerId = this.preFillData.centerId;
             this.examination.centerName = this.preFillData.centerName;
-            this.examination.examinationDate = this.preFillData.examinationDate;
+            this.examination.examinationDate = new Date(this.preFillData.examinationDate);
+            this.examination.comment = this.preFillData.comment;
         }
     }
     
