@@ -50,7 +50,7 @@
                 <button [disabled]="!study || !studycard"  (click)="initializePrefillSubject(); subjectCreationModal.show();">add</button>
             </span>
         </li>
-        <li *ngIf="subject != null">
+        <li *ngIf="subject != null && subject.subjectStudy != null">
             <div>
                 <table>
                     <thead>

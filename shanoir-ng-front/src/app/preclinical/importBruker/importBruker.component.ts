@@ -1,5 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { ImportBrukerService } from './importBruker.service';
+import { ImportService } from '../../import/import.service';
 import { slideDown, preventInitialChildAnimations } from '../../shared/animations/animations';
 import { ImportJob, PatientDicom, SerieDicom, EquipmentDicom } from "../../import/dicom-data.model";
 import { Router } from '@angular/router';
@@ -35,6 +36,7 @@ export class ImportBrukerComponent  {
     
     constructor(
         private importBrukerService: ImportBrukerService,
+        private importService: ImportService,
         private msgService: MsgBoxService,
         private router: Router,
     ) {}
@@ -72,5 +74,33 @@ export class ImportBrukerComponent  {
     private toggle(state: State) {
         if (this.opened == state) this.opened = 'none';
         else this.opened = state;
+    }
+    
+    private startImportJob (): void {
+        if (true) {
+            let importJob = new ImportJob();
+            importJob.patients = new Array<PatientDicom>();
+            this.patient.subject = new IdNameObject(this.context.subject.id, this.context.subject.name);
+            importJob.patients.push(this.patient);
+            importJob.workFolder = this.importJob.workFolder;
+            importJob.fromDicomZip = true;
+            importJob.examinationId = this.context.examination.id;
+            importJob.frontStudyId = this.context.study.id;
+            importJob.frontStudyCardId = this.context.studycard.id;
+            importJob.frontConverterId = this.context.studycard.niftiConverter.id;
+            let that = this;
+            this.importing = true;
+            this.importService.startImportJob(importJob)
+                .then(response => {
+                    this.importing = false;
+                    setTimeout(function () {
+                        that.msgService.log('info', 'The data has been successfully imported')
+                     }, 0);
+                    this.router.navigate(['/dataset-list']);
+                }).catch(error => {
+                    this.importing = false;
+                    throw error;
+                });
+        }
     }
 }

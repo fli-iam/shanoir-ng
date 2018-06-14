@@ -215,7 +215,7 @@ export class AnimalSubjectFormComponent implements OnInit {
 
     getOut(preclinicalSubject?: PreclinicalSubject): void {
         if (this.closing.observers.length > 0) {
-            this.closing.emit(preclinicalSubject);
+            this.closing.emit(preclinicalSubject.subject);
             this.preclinicalSubject = new PreclinicalSubject();
             this.preclinicalSubject.subject = new Subject();
             this.preclinicalSubject.animalSubject = new AnimalSubject();
@@ -344,6 +344,7 @@ export class AnimalSubjectFormComponent implements OnInit {
             }
             if (this.preFillData.subjectStudyList && this.preFillData.subjectStudyList.length > 0) {
                 this.subjectStudyList = this.preFillData.subjectStudyList;
+                this.preclinicalSubject.subject.subjectStudyList =this.preFillData.subjectStudyList;
                 this.studies = [];
                 for (let subjectStudy of this.preFillData.subjectStudyList) {
                     this.studies.push(new IdNameObject(subjectStudy.study.id, subjectStudy.study.name));

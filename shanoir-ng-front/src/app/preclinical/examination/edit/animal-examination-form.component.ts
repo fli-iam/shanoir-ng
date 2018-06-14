@@ -1,4 +1,4 @@
-import { Component, OnInit, Input,  Output, EventEmitter, ViewChild, ElementRef, OnChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input,  Output, EventEmitter, ViewChild, ElementRef, OnChanges, ChangeDetectorRef , SimpleChanges} from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -97,6 +97,10 @@ export class AnimalExaminationFormComponent implements OnInit {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true;
         }
+    }
+    
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['preFillData']) this.initPrefillData();
     }
 
     
@@ -261,6 +265,7 @@ export class AnimalExaminationFormComponent implements OnInit {
     back(examination?: Examination): void {
         if (this.closing.observers.length > 0) {
             this.closing.emit(examination);
+            this.examination = new Examination();
         } else {
             this.location.back();
         }
@@ -283,7 +288,7 @@ export class AnimalExaminationFormComponent implements OnInit {
         		//this.manageContrastAgent();
         		this.addExtraDataToExamination(this.examination_id, false);
 
-        		this.back();
+        		this.back(examination);
             }, (err: String) => {
 
        });

@@ -162,7 +162,8 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
         if (this.subject) {
         	this.animalSubjectService
         		.findAnimalSubjectBySubjectId(this.subject.id)
-        		.then(animalSubject => this.animalSubject = animalSubject);
+        		.then(animalSubject => this.animalSubject = animalSubject)
+        		.catch((error) => {});
             this.examinationService
                 .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
                 .then(examinations => this.examinations = examinations);
@@ -186,7 +187,7 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     }
 
     private updateSubjectStudyValues() {
-    	if (this.subject.subjectStudy){
+    	if (this.subject && this.subject.subjectStudy){
         	this.subjectService.updateSubjectStudyValues(this.subject.subjectStudy);
         }
     }
@@ -218,8 +219,12 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
             if (subject.subjectStudyList && subject.subjectStudyList.length > 0){
             	subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
             }
+            if (this.subjects == null){
+            	this.subjects = new Array<SubjectWithSubjectStudy>();
+            }
             this.subjects.push(subjectWithSubjectStudy);
             this.subject = subjectWithSubjectStudy;
+            this.onContextChange();
         }
         this.subjectCreationModal.hide();
     }
@@ -229,8 +234,10 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     }
 
     private showSubjectDetails() {
-    	if (this.animalSubject){
+    	if (this.animalSubject.id){
         	window.open('preclinical-subject?id=' + this.animalSubject.id + '&mode=view', '_blank');
+        }else{
+            window.open('subject?id=' + this.subject.id + '&mode=view', '_blank');
         }
     }
 
@@ -254,6 +261,18 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     
     
     private onCloseExaminationPopin(examination?: Examination): void {
+    	if (examination) {
+     		// Add the examination to the select box and select it
+            let subjectExamination = new SubjectExamination();
+            subjectExamination.id = examination.id;
+            subjectExamination.examinationDate = examination.examinationDate;
+            if (this.examinations == null){
+            	this.examinations = new Array<SubjectExamination>();
+            }
+            this.examinations.push(subjectExamination);
+            this.examination = subjectExamination;
+            this.onContextChange();
+        }
         this.examinationCreationModal.hide();
     }
     
