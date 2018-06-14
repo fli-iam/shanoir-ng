@@ -269,7 +269,7 @@ public class StudyServiceImpl implements StudyService {
 					for (Map.Entry<Long, Long> studyCarIdStudyCardIdPair : studyCarIdStudyCardIdMap.entrySet()) {
 						// If studyId of the studyCarIdStudyCardIdPair is ok, add the studyCard to this
 						// study
-						if (studyCarIdStudyCardIdPair.getValue() == study.getId()) {
+						if (studyCarIdStudyCardIdPair.getValue().equals(study.getId())) {
 							simpleStudy.getStudyCards().add(studyCardsmap.get(studyCarIdStudyCardIdPair.getKey()));
 							// If at least one of the studyCards of this study is compatible, then the study
 							// is compatible
