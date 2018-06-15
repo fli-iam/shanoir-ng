@@ -499,7 +499,7 @@ VALUES
 	(1, 0, 1, 1, 'Subject 1 for study 1', 1),
 	(2, 0, 1, 2, 'Subject 2 for study 1', 2),
 	(3, 0, 2, 1, 'Subject 1 for study 2', 2),
-    (4, 0, 135, 1, 'rat2 for appning', 2);
+    (4, 0, 135, 4, 'rat2 for appning', 2);
 
 INSERT INTO group_of_subjects
 	(id, dtype, group_name, study_id)
