@@ -74,10 +74,9 @@
 							</ng-template>
 						</span>
 					</li>
-					<!-- 
 					<li>
 						<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
-						<span class="right-col" [ngSwitch]="mode.state">
+						<!-- <span class="right-col" [ngSwitch]="mode.state">
 							<ng-template [ngSwitchCase]="Modes.view">
 								{{examination.subject?.name}}
 							</ng-template>
@@ -87,8 +86,9 @@
 								</select>
 							</ng-template>
 						</span>
+						 -->
+						 {{examination.subjectId}}
 					</li> 
-					-->
 					<li>
 						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</label>
 						<span class="right-col" [ngSwitch]="mode.state">
