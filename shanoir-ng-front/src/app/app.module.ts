@@ -95,6 +95,7 @@ import { ProcessedDatasetTypeComponent } from './datasets/shared/processed-datas
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { NewExamComponent } from './examinations/examination/new-exam.component';
 
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
@@ -174,6 +175,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         ExaminationComponent,
         ExaminationPipe,
         ExaminationTreeComponent,
+        NewExamComponent,
         NewInstrumentComponent,
         UploadExtraDataComponent,
         ExtensionRequestComponent,

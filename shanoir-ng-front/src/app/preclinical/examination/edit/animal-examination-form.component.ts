@@ -502,10 +502,8 @@ export class AnimalExaminationFormComponent implements OnInit {
     
     initPrefillData() {
         if (this.preFillData && this.examination) {
-            this.examination.studyName = this.preFillData.studyName;
             this.examination.studyId = this.preFillData.studyId;
             this.examination.centerId = this.preFillData.centerId;
-            this.examination.centerName = this.preFillData.centerName;
             this.examination.examinationDate = new Date(this.preFillData.examinationDate);
             this.examination.comment = this.preFillData.comment;
         }

@@ -14,6 +14,7 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Router } from '@angular/router';
 import { AbstractImportStepComponent } from '../import-step.abstract';
 import { slideDown } from '../../shared/animations/animations';
+import { Examination } from '../../examinations/shared/examination.model';
 
 export class ContextData {
     constructor(
@@ -36,6 +37,7 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     @Output() contextChange = new EventEmitter<ContextData>();
     
     @ViewChild('subjectCreationModal') subjectCreationModal: ModalComponent;
+    @ViewChild('examCreationModal') examCreationModal: ModalComponent;
 
     private studycardMissingError: Boolean;
     private studycardNotCompatibleError: Boolean;
@@ -47,6 +49,7 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     private subjects: SubjectWithSubjectStudy[]; 
     private subject: SubjectWithSubjectStudy;
     private subjectFromImport: Subject = new Subject();
+    private examFromImport: Examination = new Examination();
     private examinations: SubjectExamination[];
     private examination: SubjectExamination;
     public niftiConverter: IdNameObject;
@@ -192,6 +195,31 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
             this.onSelectSubject();
         }
         this.subjectCreationModal.hide();
+    }
+
+    private initializePrefillExam(): void {
+        let newExam = new Examination();
+        newExam.studyId = this.study.id;
+        newExam.centerId = this.studycard.center.id;
+        newExam.subjectId = this.subject.id;
+        newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
+        newExam.comment = this.patient.studies[0].studyDescription;
+
+        this.examFromImport = newExam;
+    }
+    
+    private onCloseExamPopin(examination?: Examination): void {
+        if (examination) {
+            // Add the new created exam to the select box and select it
+            let subjectExam = new SubjectExamination();
+            subjectExam.id = examination.id;
+            subjectExam.examinationDate = examination.examinationDate;
+            subjectExam.comment = examination.comment;
+
+            this.examinations.push(subjectExam);
+            this.onSelectExamination();
+        }
+        this.examCreationModal.hide();
     }
 
     private showStudyDetails() {

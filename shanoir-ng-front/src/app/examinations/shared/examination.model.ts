@@ -4,11 +4,9 @@ export class Examination {
     id: number;
     examinationDate: Date;
     examinationExecutive: IdNameObject;
-    subject: IdNameObject;
+    subjectId: number;
     studyId: number;
-    studyName: string;
     centerId: number;
-    centerName: string;
     comment: string;
     note: string;
     subjectWeight: number;

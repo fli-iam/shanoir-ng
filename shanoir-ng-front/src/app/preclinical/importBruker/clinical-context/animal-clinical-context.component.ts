@@ -283,16 +283,9 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
         let examination = new Examination();
         if (this.study){
         	examination.studyId = this.study.id;
-        	examination.studyName = this.study.name;
         	
         	if (this.studycard && this.studycard.center){
         		examination.centerId = this.studycard.center.id;
-        	}
-        	if (this.study.studyCenterList && this.study.studyCenterList.length > 0){
-        		let studyCenter: StudyCenter = this.study.studyCenterList[0];
-        		if (studyCenter.center){
-        			examination.centerName = studyCenter.center.name;
-        		}
         	}
         	if (this.patient && this.patient.studies && this.patient.studies.length > 0){
         		examination.examinationDate = this.patient.studies[0].studyDate;
