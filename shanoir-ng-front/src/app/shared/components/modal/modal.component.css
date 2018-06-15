@@ -37,6 +37,8 @@
   text-align: left;
   box-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color);
   animation: createBox .2s;
+  max-height: 100vh;
+  overflow-y: auto;
 }
 
 .preout {
