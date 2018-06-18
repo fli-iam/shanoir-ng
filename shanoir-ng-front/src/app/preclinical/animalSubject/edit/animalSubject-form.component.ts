@@ -19,6 +19,7 @@ import { SubjectTherapyService } from '../../therapies/subjectTherapy/shared/sub
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
 import { Sex } from '../../../subjects/shared/subject.types';
 
+import * as shajs from 'sha.js';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
 import { Mode } from "../../shared/mode/mode.model";
@@ -43,6 +44,7 @@ import { StudyService } from '../../../studies/shared/study.service';
 export class AnimalSubjectFormComponent implements OnInit {
 
     public preclinicalSubject: PreclinicalSubject = new PreclinicalSubject();
+    private readonly HASH_LENGTH: number = 14;
     @Input() mode: Mode = new Mode();
     @Input() preFillData: Subject;
     @Input() displayPathologyTherapy: boolean = true;
@@ -174,7 +176,7 @@ export class AnimalSubjectFormComponent implements OnInit {
 
     buildForm(): void {
         this.newSubjectForm = this.fb.group({
-            'identifier': [this.preclinicalSubject.subject.identifier, Validators.required],
+            'name': [this.preclinicalSubject.subject.name, Validators.required],
             'specie': [this.preclinicalSubject.animalSubject.specie, Validators.required],
             'strain': [this.preclinicalSubject.animalSubject.strain, Validators.required],
             'biotype': [this.preclinicalSubject.animalSubject.biotype, Validators.required],
@@ -206,7 +208,7 @@ export class AnimalSubjectFormComponent implements OnInit {
     }
 
     formErrors = {
-        'identifier': '',
+        'name': '',
         'specie': '',
         'strain': '',
         'biotype': '',
@@ -244,6 +246,7 @@ export class AnimalSubjectFormComponent implements OnInit {
 
     addSubject() {
         if (!this.preclinicalSubject ) { return; }
+        this.generateSubjectIdentifier();
         this.animalSubjectService.createSubject(this.preclinicalSubject.subject)
             .subscribe(subject => {
             	this.preclinicalSubject.subject = subject;
@@ -282,6 +285,7 @@ export class AnimalSubjectFormComponent implements OnInit {
 
     updateSubject(): void {
     	if (this.preclinicalSubject && this.preclinicalSubject.subject){	
+    	    this.generateSubjectIdentifier();
         	this.animalSubjectService.updateSubject(this.preclinicalSubject.subject.id, this.preclinicalSubject.subject)
             	.subscribe(subject => {
             		if (this.preclinicalSubject.animalSubject){
@@ -344,7 +348,7 @@ export class AnimalSubjectFormComponent implements OnInit {
      initPrefillData() {
         if (this.preFillData && this.preclinicalSubject && this.preclinicalSubject.subject) {
             if (this.preFillData) {
-                this.preclinicalSubject.subject.identifier = this.preFillData.name;
+                this.preclinicalSubject.subject.name = this.preFillData.name;
                 this.preclinicalSubject.subject.sex = this.preFillData.sex;
                 this.preclinicalSubject.subject.birthDate = new Date(this.preFillData.birthDate);
             }
@@ -378,6 +382,20 @@ export class AnimalSubjectFormComponent implements OnInit {
         if (index !== -1) {
             this.subjectStudyList.splice(index, 1);
         }
+    }
+    
+    generateSubjectIdentifier(): void {
+    	if (this.preclinicalSubject && this.preclinicalSubject.subject){
+        	let hash = this.preclinicalSubject.subject.name ;
+        	this.preclinicalSubject.subject.identifier = this.getHash(hash);
+        }
+    }
+
+    getHash(stringToBeHashed: string): string {
+        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        let hex = "";
+        hex = hash.substring(0, this.HASH_LENGTH);
+        return hex;
     }
     
     

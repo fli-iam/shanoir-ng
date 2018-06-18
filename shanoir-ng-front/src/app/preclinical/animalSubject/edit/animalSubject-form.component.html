@@ -50,11 +50,11 @@
 							<label i18n="Edit subject|Name label" class="required-label">Common name</label>
 							<span class="right-col" [ngSwitch]="mode.state">
 								<ng-template [ngSwitchCase]="Modes.view"> 
-										{{preclinicalSubject?.subject?.identifier}}
+										{{preclinicalSubject?.subject?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<input type="text" id="identifier" formControlName="identifier" [(ngModel)]="preclinicalSubject.subject.identifier"/>
-									<label *ngIf="formErrors.identifier.includes('required')" class="form-validation-alert" i18n="Edit subject|IdentifierRequiredError label">Identifier is required!</label>
+									<input type="text" id="name" formControlName="name" [(ngModel)]="preclinicalSubject.subject.name"/>
+									<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit subject|NameRequiredError label">Name is required!</label>
 								</ng-template>							
 							</span>
 						</li>

@@ -203,7 +203,7 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
         let newSubject = new Subject();
         if (this.patient){
         	newSubject.birthDate = this.patient.patientBirthDate;
-        	newSubject.identifier = this.patient.patientName;
+        	newSubject.name = this.patient.patientName;
         	newSubject.sex = this.patient.patientSex;
         } 
         newSubject.subjectStudyList = [subjectStudy];

@@ -103,7 +103,7 @@ export class AnimalSubjectsListComponent {
             return String(id);
         };
         this.columnDefs = [
-            {headerName: "Common name", field: "subject.identifier"},
+            {headerName: "Common name", field: "subject.name"},
             {headerName: "Imaged object category", field: "subject.imagedObjectCategory", cellRenderer: function (params: any) {
                     let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory>params.data.subject.imagedObjectCategory;
                     if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.PHANTOM) {
