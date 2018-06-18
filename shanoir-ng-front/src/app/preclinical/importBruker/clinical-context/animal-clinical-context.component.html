@@ -102,7 +102,7 @@
 
 <app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
     <div class="app-modal-body">
-        <animalSubject-form [mode]="mode"  [preFillData]="subjectFromImport" (closing)="onCloseSubjectPopin($event)"></animalSubject-form>
+        <animalSubject-form [mode]="mode"  [preFillData]="subjectFromImport" [displayPathologyTherapy]="false" (closing)="onCloseSubjectPopin($event)"></animalSubject-form>
     </div>
 </app-modal>
 

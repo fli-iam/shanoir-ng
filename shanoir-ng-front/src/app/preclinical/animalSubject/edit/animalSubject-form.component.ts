@@ -45,6 +45,7 @@ export class AnimalSubjectFormComponent implements OnInit {
     public preclinicalSubject: PreclinicalSubject = new PreclinicalSubject();
     @Input() mode: Mode = new Mode();
     @Input() preFillData: Subject;
+    @Input() displayPathologyTherapy: boolean = true;
     @Output() closing = new EventEmitter();
     private readonly ImagedObjectCategory = ImagedObjectCategory;
     newSubjectForm: FormGroup;
@@ -61,6 +62,7 @@ export class AnimalSubjectFormComponent implements OnInit {
     private subjectStudyList: SubjectStudy[] = [];
     private selectedStudy : IdNameObject;
     private selectedStudyId: number; 
+    
 
     constructor(
         private animalSubjectService: AnimalSubjectService,

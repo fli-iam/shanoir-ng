@@ -213,9 +213,12 @@
 		</table>
     </form>
     
+    <div *ngIf="displayPathologyTherapy">
     <subject-pathology-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [mode]="mode" [canModify]="canModify"></subject-pathology-list>
     
     <subject-therapy-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [mode]="mode" [canModify]="canModify"></subject-therapy-list>
+     
+    </div>
      
     <div>
 	    <table class="subject_buttons">
