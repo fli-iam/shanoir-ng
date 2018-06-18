@@ -5,8 +5,11 @@ export class Examination {
     examinationDate: Date;
     examinationExecutive: IdNameObject;
     subjectId: number;
+    subjectName: string;
     studyId: number;
+    studyName: string;
     centerId: number;
+    centerName: string;
     comment: string;
     note: string;
     subjectWeight: number;
