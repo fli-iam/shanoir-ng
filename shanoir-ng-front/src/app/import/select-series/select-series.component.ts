@@ -4,6 +4,8 @@ import { Study } from '../../studies/shared/study.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { AbstractImportStepComponent } from '../import-step.abstract';
 import { slideDown } from '../../shared/animations/animations';
+import { ImportService } from '../import.service';
+import * as AppUtils from '../../utils/app.utils';
 
 @Component({
     selector: 'select-series',
@@ -14,13 +16,14 @@ import { slideDown } from '../../shared/animations/animations';
 export class SelectSeriesComponent extends AbstractImportStepComponent implements OnChanges {
 
     @Input() patients: PatientDicom[];
+    @Input() workFolder: string;
     @Input() dataFiles: any;
     @Output() patientsChange = new EventEmitter<PatientDicom[]>();
     private detailedPatient: Object;
     private detailedSerie: Object;
     private papayaParams: object[];
 
-    constructor() {
+    constructor(private importService: ImportService) {
         super();
     }
 
@@ -48,10 +51,18 @@ export class SelectSeriesComponent extends AbstractImportStepComponent implement
     }
 
     private initPapaya(serie: SerieDicom): void {
-        if (!this.dataFiles || !serie) return;
-        let listOfPromises = serie.images.map((image) => {
-            return this.dataFiles.files[image.path].async("arraybuffer");
-        });
+        if (!serie) return;
+        let listOfPromises;
+        if (this.dataFiles) {
+            listOfPromises = serie.images.map((image) => {
+                return this.dataFiles.files[image.path].async("arraybuffer");
+            });
+        } else {
+            listOfPromises = serie.images.map((image) => {
+                let url = AppUtils.BACKEND_API_IMAGE_VIEWER_URL + this.workFolder + '/' + image.path;
+                return this.importService.downloadImage(url);
+            });
+         }
         let promiseOfList = Promise.all(listOfPromises);
         promiseOfList.then((values) => {
             let params: object[] = [];

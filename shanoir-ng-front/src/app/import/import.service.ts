@@ -22,4 +22,17 @@ export class ImportService {
                 return Promise.reject(error.message || error);
             });
     }
+
+    /**
+     * This function has been added as we need to send the keycloak token in the header,
+     * what is not done and easy to do, when we give the entire URL list of the images
+     * to Papaya, as we can not and want not to modify Papaya. So we download for Papaya.
+     * @param url 
+     */
+    downloadImage(url: string): Promise<ArrayBuffer> {
+        if (!url) throw Error('Cannot download a image without an url');
+        return this.http.get(url,
+            { observe: 'response', responseType: 'arraybuffer' }
+            ).map(response => response.body).toPromise();
+    }
 }  
