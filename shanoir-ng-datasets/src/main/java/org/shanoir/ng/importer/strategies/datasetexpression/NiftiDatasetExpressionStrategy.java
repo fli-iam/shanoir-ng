@@ -1,22 +1,92 @@
 package org.shanoir.ng.importer.strategies.datasetexpression;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.DatasetExpression;
 import org.shanoir.ng.dataset.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.processing.DatasetProcessingType;
+import org.shanoir.ng.shared.model.EchoTime;
+import org.shanoir.ng.shared.model.FlipAngle;
+import org.shanoir.ng.shared.model.InversionTime;
+import org.shanoir.ng.shared.model.RepetitionTime;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy {
 
+	
+	@Value("${datasets-data}")
+	private String niftiStorageDir;
+	
 	@Override
 	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
 			ExpressionFormat expressionFormat) {
+		
+		DatasetExpression niftiDatasetExpression = new DatasetExpression();
+		niftiDatasetExpression.setCreationDate(LocalDate.now());
+		niftiDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+		niftiDatasetExpression.setDatasetProcessingType(DatasetProcessingType.FORMAT_CONVERSION);
+		
+		//TODO ATO Specify nifti converter used..
+		niftiDatasetExpression.setNiftiConverterId(4L);
+				
+		niftiDatasetExpression.setOriginalNiftiConversion(true);
+		if (serie.getIsMultiFrame()) {
+			niftiDatasetExpression.setMultiFrame(true);
+			niftiDatasetExpression.setFrameCount(new Integer(serie.getMultiFrameCount()));
+		}
+		
+		if (expressionFormat != null & expressionFormat.getType().equals("nii")) {
 
+			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
+
+				String originalNiftiName  = datasetFile.getPath().substring(datasetFile.getPath().lastIndexOf('/') + 1);
+
+				String storagePath = niftiStorageDir+"/"+importJob.getPatients().get(0).getPatientID()+"/"+importJob.getExaminationId()+"/MR/";
+				File outDir = new File(storagePath);
+				outDir.mkdirs();
+				
+				
+				
+				Path NiftiFinalLocation = null;
+				try {
+					NiftiFinalLocation = Files.copy(Paths.get(datasetFile.getPath().replace("file:","")), Paths.get(storagePath+originalNiftiName), StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				DatasetFile niftiDatasetFile = new DatasetFile();
+				niftiDatasetFile.setPacs(false);
+				niftiDatasetFile.setPath(NiftiFinalLocation.toUri().toString().replaceAll(" ", "%20"));
+				niftiDatasetExpression.getDatasetFiles().add(niftiDatasetFile);
+				niftiDatasetFile.setDatasetExpression(niftiDatasetExpression);
+
+			}
+		}
+		
+		
+		
 //		final DatasetExpression datasetExpressionNifti = createDatasetExpression(mrDataset, datasetExpressionToPacs,
 //				null);
 //		datasetExpressionNifti.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
@@ -76,7 +146,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 //		 * dicom files is tricky.
 //		 */
 //		extractDiffusionGradients(mrDatasetAcquisition.getMrProtocol(), mrDataset, datasetExpressionNifti);
-		return null;
+		return niftiDatasetExpression;
 	}
 
 //	/**

@@ -55,10 +55,11 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) {
 		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
+		LOG.info("Generating DatasetAcquisition for   : " +serie.getSequenceName() + " - " + serie.getProtocolName() + " - Rank:" + rank);
 		Attributes dicomAttributes = null;
 		try {
 			// TODO ATO : should always be a dicom: add check
-			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie());
+			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(),serie.getIsEnhancedMR());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(),e); 
