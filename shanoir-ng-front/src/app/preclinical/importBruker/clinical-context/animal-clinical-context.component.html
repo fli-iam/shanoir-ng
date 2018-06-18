@@ -44,7 +44,7 @@
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
                 <select [disabled]="!study || !studycard"  [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)">
-                    <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.identifier}}</option>
+                    <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
                 </select>
                 <button [disabled]="!subject" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
                 <button [disabled]="!study || !studycard"  (click)="initializePrefillSubject(); subjectCreationModal.show();">add</button>
