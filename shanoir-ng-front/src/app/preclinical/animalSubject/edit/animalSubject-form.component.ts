@@ -36,7 +36,7 @@ import { StudyService } from '../../../studies/shared/study.service';
 @Component({
     selector: 'animalSubject-form',
     templateUrl: 'animalSubject-form.component.html',
-    styleUrls: ['animalSubject-form.component.css'],
+    styleUrls: ['../../../subjects/subject/subject.component.css', 'animalSubject-form.component.css'],
     providers: [AnimalSubjectService, ReferenceService, PathologyService, SubjectPathologyService, SubjectTherapyService]
 })
     

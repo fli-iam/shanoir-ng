@@ -1,24 +1,21 @@
-<div class="SubjectFormComponent content-component">
+<div class="SubjectFormComponent content-component detail">
     <form [formGroup]="newSubjectForm" class="SubjectFormComponent max-content" novalidate>
-		<table class="layout">
-			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
-						<div class="header command-zone" i18n="View subject|Title">View subject</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.edit"> 
-						<div class="header command-zone" i18n="Edit subject|Title">Edit subject</div>
-					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.create"> 
-						<div class="header command-zone" i18n="Create subject|Title">Add subject</div>
-					</ng-template>
-				</span>
-			</td></tr>
-			<tr>
-				<td>
-					<fieldset>
-					<ol>
-						<li>
+		<div class="layout" [ngClass]="{'left': mode.state==Modes.view}">
+			<span [ngSwitch]="mode.state">
+				<ng-template [ngSwitchCase]="Modes.view"> 
+					<div class="header command-zone" i18n="View subject|Title">View subject</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="Modes.edit"> 
+					<div class="header command-zone" i18n="Edit subject|Title">Edit subject</div>
+				</ng-template>
+				<ng-template [ngSwitchCase]="Modes.create"> 
+					<div class="header command-zone" i18n="Create subject|Title">Create subject</div>
+				</ng-template>
+			</span>
+
+			<fieldset>
+				<ol>
+					<li>
 						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory" class="required-label">Imaged object category</label>
 						<span class="right-col" [ngSwitch]="mode.state">
 							<ng-template [ngSwitchCase]="Modes.view">
@@ -46,199 +43,186 @@
 							</ng-template>
 						</span>
 					</li>
-						<li class="required">
-							<label i18n="Edit subject|Name label" class="required-label">Common name</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
-										{{preclinicalSubject?.subject?.name}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<input type="text" id="name" formControlName="name" [(ngModel)]="preclinicalSubject.subject.name"/>
-									<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit subject|NameRequiredError label">Name is required!</label>
-								</ng-template>							
-							</span>
-						</li>
-						<li *ngIf="displaySex()">
-							<label i18n="Subject detail|Sex label@@subjectDetailSex" class="required-label">Sex</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
-									{{preclinicalSubject?.subject?.sex}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="sex" required formControlName="sex" [(ngModel)]="preclinicalSubject.subject.sex">
-										<option [value]="'F'">Female</option>
-										<option [value]="'M'">Male</option>
-									</select>
-								</ng-template>
-							</span>
-						</li>
-						<li class="required">
-							<label i18n="Edit subject|Specie label" class="required-label">Specie</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
-										{{preclinicalSubject?.animalSubject?.specie?.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="specie" required formControlName="specie" [(ngModel)]="preclinicalSubject.animalSubject.specie">
-										<option *ngFor="let specie of species" [ngValue]="specie">{{specie.value}}</option>
-									</select>
-									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new specie" (click)="goToRefPage('subject','specie')">
-										<img [src]="addIconPath"/>
-										new specie
-									</button>
-									<label *ngIf="formErrors.specie.includes('required')" class="form-validation-alert" i18n="Edit specie|SpecieRequiredError label">Specie is required!</label>
-								</ng-template>
-							</span>
-						</li>
-						<li class="required">
-							<label i18n="Edit subject|Strain label" class="required-label">Strain</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
-										{{preclinicalSubject?.animalSubject?.strain?.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="strain" required formControlName="strain" [(ngModel)]="preclinicalSubject.animalSubject.strain">
-										<option *ngFor="let strain of strains" [ngValue]="strain">{{strain.value}}</option>
-									</select>
-									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new strain" (click)="goToRefPage('subject','strain')">
-										<img [src]="addIconPath"/>
-										new strain
-									</button>
-									<label *ngIf="formErrors.strain.includes('required')" class="form-validation-alert" i18n="Edit strain|StrainRequiredError label">Strain is required!</label>
-								</ng-template>
-							</span>
-						</li>
-						<li class="required">
-							<label i18n="Edit subject|Biotype label" class="required-label">Biological type</label> 
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
-										{{preclinicalSubject?.animalSubject?.biotype?.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="biotype" required formControlName="biotype" [(ngModel)]="preclinicalSubject.animalSubject.biotype">
-										<option *ngFor="let biotype of biotypes" [ngValue]="biotype">{{biotype.value}}</option>
-									</select>
-									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new biotype" (click)="goToRefPage('subject','biotype')">
-										<img [src]="addIconPath"/>
-										new biological type
-									</button>
-									<label *ngIf="formErrors.biotype.includes('required')" class="form-validation-alert" i18n="Edit biotype|BiotypeRequiredError label">Biotype is required!</label>
-								</ng-template>
-							</span>							
-						</li>
-						<li class="required">
-							<label i18n="Edit subject|Provider label" class="required-label">Provider</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
-										{{preclinicalSubject?.animalSubject?.provider?.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="provider" required formControlName="provider" [(ngModel)]="preclinicalSubject.animalSubject.provider">
-										<option *ngFor="let provider of providers" [ngValue]="provider">{{provider.value}}</option>
-									</select>
-									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a provider" (click)="goToRefPage('subject','provider')">
-										<img [src]="addIconPath"/>
-										new provider
-									</button>
-									<label *ngIf="formErrors.provider.includes('required')" class="form-validation-alert" i18n="Edit provider|ProviderRequiredError label">Provider is required!</label>
-								</ng-template>
-							</span>
-						</li>
-						<li class="required">
-							<label i18n="Edit subject|Stabulation label" class="required-label">Stabulation</label> 
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
-										{{preclinicalSubject?.animalSubject?.stabulation?.value}}
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<select id="stabulation" required formControlName="stabulation" [(ngModel)]="preclinicalSubject.animalSubject.stabulation">
-										<option *ngFor="let stabulation of stabulations" [ngValue]="stabulation">{{stabulation.value}}</option>
-									</select>
-									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a stabulation" (click)="goToRefPage('subject','stabulation')">
-										<img [src]="addIconPath"/>
-										new stabulation
-									</button>
-									<label *ngIf="formErrors.stabulation.includes('required')" class="form-validation-alert" i18n="Edit stabulation|StabulationRequiredError label">Stabulation is required!</label>
-								</ng-template>
-							</span>
-						</li>
-					</ol>
-					</fieldset>
-					<fieldset *ngIf="mode !== Modes.view">
-						<legend i18n="Subject detail|Name label@@subjectDetailGeneral">Studies</legend>
-						<ol>
-							<li>
-								<label i18n="Subject detail|List of the studies label@@subjectDetailListOfStudies">List of the studies available</label>
-								<span class="right-col">
-									<select id="studies" formControlName="studies"  [(ngModel)]="selectedStudy" (change)="onStudySelect()" >
-										<option disabled>Please select...</option>
-										<option *ngFor="let study of studies" [ngValue]="study" [disabled]="study.selected">{{study.name}}</option>
-									</select>
-								</span>
-							</li>
-							<li *ngIf="subjectStudyList != null && subjectStudyList.length != 0">
-								<table>
-									<thead>
-										<tr>
-											<th class="label-col">Study name</th>
-											<th class="input-col">Subject id for this study</th>
-											<th class="chkbx-col" title="Physically Involved">PI</th>
-											<th class="buttons-col"></th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr *ngFor="let subjectStudy of subjectStudyList; let i = index">
-											<td class="label-col">
-												<div *ngFor="let study of studies">
-													<span *ngIf="study.id == subjectStudy.study.id">
-														{{study.name}}
-													</span>
-												</div>
-											</td>
-											<td class="input-col">
-												<input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
-											</td>
-											<td class="chkbx-col">
-												<input type="checkbox" [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"/>
-											</td>
-											<td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-ban"></i></span>
-										</tr>
-									</tbody>
-								</table>
-							</li>
-						</ol>
-					</fieldset>
-				</td>
-			</tr>
-		</table>
+					<li class="required">
+						<label i18n="Edit subject|Name label" class="required-label">Common name</label>
+						<span class="right-col" [ngSwitch]="mode.state">
+							<ng-template [ngSwitchCase]="Modes.view"> 
+									{{preclinicalSubject?.subject?.name}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" id="name" formControlName="name" [(ngModel)]="preclinicalSubject.subject.name"/>
+								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit subject|NameRequiredError label">Name is required!</label>
+							</ng-template>							
+						</span>
+					</li>
+					<li *ngIf="displaySex()">
+						<label i18n="Subject detail|Sex label@@subjectDetailSex" class="required-label">Sex</label>
+						<span class="right-col" [ngSwitch]="mode.state">
+							<ng-template [ngSwitchCase]="Modes.view"> 
+								{{preclinicalSubject?.subject?.sex}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="sex" required formControlName="sex" [(ngModel)]="preclinicalSubject.subject.sex">
+									<option [value]="'F'">Female</option>
+									<option [value]="'M'">Male</option>
+								</select>
+							</ng-template>
+						</span>
+					</li>
+					<li class="required">
+						<label i18n="Edit subject|Specie label" class="required-label">Specie</label>
+						<span class="right-col" [ngSwitch]="mode.state">
+							<ng-template [ngSwitchCase]="Modes.view"> 
+									{{preclinicalSubject?.animalSubject?.specie?.value}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="specie" required formControlName="specie" [(ngModel)]="preclinicalSubject.animalSubject.specie">
+									<option *ngFor="let specie of species" [ngValue]="specie">{{specie.value}}</option>
+								</select>
+								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new specie" (click)="goToRefPage('subject','specie')">
+									<img [src]="addIconPath"/>
+									new specie
+								</button>
+								<label *ngIf="formErrors.specie.includes('required')" class="form-validation-alert" i18n="Edit specie|SpecieRequiredError label">Specie is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li class="required">
+						<label i18n="Edit subject|Strain label" class="required-label">Strain</label>
+						<span class="right-col" [ngSwitch]="mode.state">
+							<ng-template [ngSwitchCase]="Modes.view"> 
+									{{preclinicalSubject?.animalSubject?.strain?.value}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="strain" required formControlName="strain" [(ngModel)]="preclinicalSubject.animalSubject.strain">
+									<option *ngFor="let strain of strains" [ngValue]="strain">{{strain.value}}</option>
+								</select>
+								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new strain" (click)="goToRefPage('subject','strain')">
+									<img [src]="addIconPath"/>
+									new strain
+								</button>
+								<label *ngIf="formErrors.strain.includes('required')" class="form-validation-alert" i18n="Edit strain|StrainRequiredError label">Strain is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li class="required">
+						<label i18n="Edit subject|Biotype label" class="required-label">Biological type</label> 
+						<span class="right-col" [ngSwitch]="mode.state">
+							<ng-template [ngSwitchCase]="Modes.view"> 
+									{{preclinicalSubject?.animalSubject?.biotype?.value}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="biotype" required formControlName="biotype" [(ngModel)]="preclinicalSubject.animalSubject.biotype">
+									<option *ngFor="let biotype of biotypes" [ngValue]="biotype">{{biotype.value}}</option>
+								</select>
+								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new biotype" (click)="goToRefPage('subject','biotype')">
+									<img [src]="addIconPath"/>
+									new biological type
+								</button>
+								<label *ngIf="formErrors.biotype.includes('required')" class="form-validation-alert" i18n="Edit biotype|BiotypeRequiredError label">Biotype is required!</label>
+							</ng-template>
+						</span>							
+					</li>
+					<li class="required">
+						<label i18n="Edit subject|Provider label" class="required-label">Provider</label>
+						<span class="right-col" [ngSwitch]="mode.state">
+							<ng-template [ngSwitchCase]="Modes.view"> 
+									{{preclinicalSubject?.animalSubject?.provider?.value}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="provider" required formControlName="provider" [(ngModel)]="preclinicalSubject.animalSubject.provider">
+									<option *ngFor="let provider of providers" [ngValue]="provider">{{provider.value}}</option>
+								</select>
+								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a provider" (click)="goToRefPage('subject','provider')">
+									<img [src]="addIconPath"/>
+									new provider
+								</button>
+								<label *ngIf="formErrors.provider.includes('required')" class="form-validation-alert" i18n="Edit provider|ProviderRequiredError label">Provider is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li class="required">
+						<label i18n="Edit subject|Stabulation label" class="required-label">Stabulation</label> 
+						<span class="right-col" [ngSwitch]="mode.state">
+							<ng-template [ngSwitchCase]="Modes.view"> 
+									{{preclinicalSubject?.animalSubject?.stabulation?.value}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="stabulation" required formControlName="stabulation" [(ngModel)]="preclinicalSubject.animalSubject.stabulation">
+									<option *ngFor="let stabulation of stabulations" [ngValue]="stabulation">{{stabulation.value}}</option>
+								</select>
+								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a stabulation" (click)="goToRefPage('subject','stabulation')">
+									<img [src]="addIconPath"/>
+									new stabulation
+								</button>
+								<label *ngIf="formErrors.stabulation.includes('required')" class="form-validation-alert" i18n="Edit stabulation|StabulationRequiredError label">Stabulation is required!</label>
+							</ng-template>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+			<fieldset *ngIf="mode !== Modes.view">
+				<legend i18n="Subject detail|Name label@@subjectDetailGeneral">Studies</legend>
+				<ol>
+					<li>
+						<label i18n="Subject detail|List of the studies label@@subjectDetailListOfStudies">List of the studies available</label>
+						<span class="right-col">
+							<select id="studies" formControlName="studies"  [(ngModel)]="selectedStudy" (change)="onStudySelect()" >
+								<option disabled>Please select...</option>
+								<option *ngFor="let study of studies" [ngValue]="study" [disabled]="study.selected">{{study.name}}</option>
+							</select>
+						</span>
+					</li>
+					<li *ngIf="subjectStudyList != null && subjectStudyList.length != 0">
+						<table>
+							<thead>
+								<tr>
+									<th class="label-col">Study name</th>
+									<th class="input-col">Subject id for this study</th>
+									<th class="chkbx-col" title="Physically Involved">PI</th>
+									<th class="buttons-col"></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr *ngFor="let subjectStudy of subjectStudyList; let i = index">
+									<td class="label-col">
+										<div *ngFor="let study of studies">
+											<span *ngIf="study.id == subjectStudy.study.id">
+												{{study.name}}
+											</span>
+										</div>
+									</td>
+									<td class="input-col">
+										<input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
+									</td>
+									<td class="chkbx-col">
+										<input type="checkbox" [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"/>
+									</td>
+									<td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-ban"></i></span>
+								</tr>
+							</tbody>
+						</table>
+					</li>
+				</ol>
+			</fieldset>
+			<div *ngIf="displayPathologyTherapy">
+				<subject-pathology-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [mode]="mode" [canModify]="canModify"></subject-pathology-list>
+				<subject-therapy-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [mode]="mode" [canModify]="canModify"></subject-therapy-list>
+			</div>
+			<div class="footer command-zone">
+				<span [ngSwitch]="mode.state">
+					<button i18n="View subject|BackButton label" class="Button" (click)="getOut()">Back</button>	
+					<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
+						<button type="button" i18n="View subject|EditButton label" (click)="goToUpdate()" class="Button">Edit</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify"> 
+						<button type="button" i18n="Edit subject|UpdateButton label" (click)="updateSubject()" class="Button" [disabled]="!newSubjectForm.valid">Update</button>
+					</ng-template>
+					<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify"> 
+						<button type="button" i18n="Edit subject|CreateButton label" (click)="addSubject()" class="Button" [disabled]="!newSubjectForm.valid">Create</button>
+					</ng-template>
+				</span>
+			</div>
+		</div>
     </form>
-    
-    <div *ngIf="displayPathologyTherapy">
-    <subject-pathology-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [mode]="mode" [canModify]="canModify"></subject-pathology-list>
-    
-    <subject-therapy-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [mode]="mode" [canModify]="canModify"></subject-therapy-list>
-     
-    </div>
-     
-    <div>
-	    <table class="subject_buttons">
-			<tr><td colspan="2">
-				<div class="footer command-zone">
-					<span [ngSwitch]="mode.state">
-						<button i18n="View subject|BackButton label" class="Button" (click)="getOut()">Back</button>	
-						<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
-							<button type="button" i18n="View subject|EditButton label" (click)="goToUpdate()" class="Button">Edit</button>
-						</ng-template>
-						<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify"> 
-							<button type="button" i18n="Edit subject|UpdateButton label" (click)="updateSubject()" class="Button" [disabled]="!newSubjectForm.valid">Update</button>
-						</ng-template>
-						<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify"> 
-							<button type="button" i18n="Edit subject|CreateButton label" (click)="addSubject()" class="Button" [disabled]="!newSubjectForm.valid">Create</button>
-						</ng-template>
-					</span>
-				</div>
-			</td></tr>
-	    </table>
-   	</div>
-    
 </div>

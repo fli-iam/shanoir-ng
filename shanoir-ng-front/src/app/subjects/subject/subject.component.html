@@ -1,7 +1,7 @@
 <div class="content-component detail" [@preventInitialChildAnimations]>
 	<form *ngIf="subject" [formGroup]="subjectForm" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
-			<span [ngSwitch]="mode">
+			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<div class="header command-zone" i18n="View subject|Title@@subjectDetailViewTitle">Details on subject</div>
 				</ng-template>
