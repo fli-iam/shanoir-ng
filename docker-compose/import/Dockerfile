@@ -33,6 +33,8 @@ RUN cmake -DUSE_OPENJPEG=ON ../ && \
     make && \
     make install
 
+WORKDIR /
+
 RUN mkdir -pv /var/log/shanoir-ng-logs
 
 ADD shanoir-ng-import.jar shanoir-ng-import.jar
