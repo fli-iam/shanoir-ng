@@ -11,7 +11,7 @@ VALUES
 	(2, 1, 1, 0, 'StudyCard2', 1, 1),
 	(3, 3, 1, 0, 'StudyCard3', 1, 2),
 	(4, 4, 3, 0, 'StudyCard4', 1, 3),
-	(5, 4, 15, 0, 'Appning', 5, 135);
+	(5, 4, 15, 0, 'Appning', 1, 135);
 
 INSERT INTO examination
 	(id, center_id, examination_date, investigator_external, investigator_id, note, study_id, subject_id, comment, preclinical)
