@@ -1,5 +1,6 @@
 package org.shanoir.ng.importer.strategies.protocol;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +12,8 @@ import java.util.TreeSet;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.dcm4che3.emf.MultiframeExtractor;
+import org.shanoir.ng.datasetacquisition.mr.AcquisitionContrast;
 import org.shanoir.ng.datasetacquisition.mr.ImagedNucleus;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocolMetadata;
@@ -20,6 +23,7 @@ import org.shanoir.ng.datasetacquisition.mr.PatientPosition;
 import org.shanoir.ng.importer.dto.CoilDTO;
 import org.shanoir.ng.importer.dto.CoilType;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.shared.util.ShanoirConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -30,11 +34,28 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 	
+	// MultiFrameExtractor is only used in case of EnhancedMR MRI.	
+	private MultiframeExtractor emf;
+	
+	/** Returned Default Value when Dicom Tag is not found */
+	private static final int valueNotFoundValue = -999999;
+	
 	@Override
-	public MrProtocol generateMrProtocolForSerie(Attributes dicomAttributes, Serie serie) {
+	public MrProtocol generateMrProtocolForSerie(Attributes dicomAttribute, Serie serie) {
+		
+
+		Attributes dicomAttributes;
+		
+		//	MultiframeExtractor emf = new MultiframeExtractor();
+		if (serie.getIsEnhancedMR()) {
+			emf = new MultiframeExtractor();
+			dicomAttributes = emf.extract(dicomAttribute, 0);
+		} else {
+			dicomAttributes  = dicomAttribute;
+		}
 		
 		MrProtocol mrProtocol = new MrProtocol();
-		MrProtocolMetadata mrProtocolMetadata = createMrProtocolMetadata(dicomAttributes, serie);
+		MrProtocolMetadata mrProtocolMetadata = createOriginMrProtocolMetadata(dicomAttributes, serie);
 		mrProtocol.setOriginMetadata(mrProtocolMetadata);
         
         // Imaged nucleus
@@ -272,7 +293,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 	 * @param serie
 	 * @param mrProtocol
 	 */
-	private MrProtocolMetadata createMrProtocolMetadata(Attributes dicomAttributes, Serie serie) {
+	private MrProtocolMetadata createOriginMrProtocolMetadata(Attributes dicomAttributes, Serie serie) {
 		MrProtocolMetadata mrProtocolMetadata = new MrProtocolMetadata();
 		// Retrieve protocol name and set it as an origin metadata attribute.
 		mrProtocolMetadata.setName(serie.getProtocolName());
@@ -285,15 +306,11 @@ public class MrProtocolStrategy implements ProtocolStrategy {
          * card mechanism
          */
 		
-//        // Receiving coil
-//
-//        // tag (0018,1251)
-//        final String receivingCoilName = dicomAttributes.getString(Tag.ProtocolName);
-//
-//        // tag (0018,9051)
-//        final String receivingCoilType = dicomAttributes.getString(Tag.ReceiveCoilType);
-        
-        // TODO ATO : Implement Coil below ..
+        // Acquisition contrast
+        String acquisitionContrast = dicomAttributes.getString(Tag.AcquisitionContrast);
+        LOG.debug("extractMetadata : injectedVolume=" + acquisitionContrast);
+        mrProtocolMetadata.setAcquisitionContrast(AcquisitionContrast.getIdByType(acquisitionContrast));
+		
 
         // Receiving coil name - tag (0018,1251)
         CoilDTO receivingCoil = null;
@@ -327,12 +344,16 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         }
         		
         // Volume injected of diluted contrast agent
-        final Double injectedVolume = dicomAttributes.getDouble(Tag.ContrastBolusVolume,-1D);
+        String injectedVolumeString = dicomAttributes.getString(Tag.ContrastBolusVolume);
+        Double injectedVolume = null;
+        if (injectedVolumeString != null) {
+        	injectedVolume = Double.parseDouble(injectedVolumeString);
+        }
         LOG.debug("extractMetadata : injectedVolume=" + injectedVolume);
         mrProtocolMetadata.setInjectedVolume(injectedVolume);
 
         // Contrast agent concentration
-        final Double contrastAgentConcentration = dicomAttributes.getDouble(Tag.ContrastBolusIngredientConcentration,-1D);
+        final Double contrastAgentConcentration = dicomAttributes.getDouble(Tag.ContrastBolusIngredientConcentration, 0.0);
         LOG.debug("extractMetadata : contrastAgentConcentration=" + contrastAgentConcentration);
         mrProtocolMetadata.setContrastAgentConcentration(contrastAgentConcentration);
 
@@ -365,16 +386,19 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         mrProtocolMetadata.setTimeReductionFactorForTheOutOfPlaneDirection(timeReductionFactorForTheOutOfPlaneDirection);
 
         // Magnetization transfer. Authorized values : YES, NO
+        
+        // TODO Fix this using either field : (0018,0021) check if MT value in sequence (cf http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0018,0021) )
+        // OR use Tag.MagnetizationTransfer (cf http://dicomlookup.com/lookup.asp?sw=Tnumber&q=(0018,9020) )  possible values: ON_RESONANCE OFF_RESONANCE NONE 
+        // 
         final String magnetizationTransferExtracted = dicomAttributes.getString(Tag.MagnetizationTransfer);
         LOG.debug("extractMetadata : magnetizationTransferExtracted=" + magnetizationTransferExtracted);
         if (magnetizationTransferExtracted != null) {
-	        	if (!magnetizationTransferExtracted.equals("NO")) {
-	        		mrProtocolMetadata.setMagnetizationTransfer(true);
-	        	} else {
+	        	if (magnetizationTransferExtracted.equals("NONE")) {
 	        		mrProtocolMetadata.setMagnetizationTransfer(false);
+	        	} else {
+	        		mrProtocolMetadata.setMagnetizationTransfer(true);
 	        	}
 		}
-
         return mrProtocolMetadata;
 	}
 	
@@ -386,7 +410,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
             int[] tagPath = new int[3];
             tagPath[0] = Tag.MRReceiveCoilSequence;
             tagPath[2] = Tag.ReceiveCoilName;
-            final Object obj = getValueInSharedAndThenPerFrame(tagPath, dicomAttributes);
+            final Object obj = getValueInSharedAndThenPerFrame(ShanoirConstants.DICOM_RETURNED_TYPES.STRING, Tag.ReceiveCoilName, dicomAttributes);
             if (obj != null) {
                 return (String) obj;
             } else {
@@ -405,7 +429,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
             int[] tagPath = new int[3];
             tagPath[0] = Tag.MRReceiveCoilSequence;
             tagPath[2] = Tag.ReceiveCoilType;
-            final Object obj = getValueInSharedAndThenPerFrame(tagPath, dicomAttributes);
+            final Object obj = getValueInSharedAndThenPerFrame(ShanoirConstants.DICOM_RETURNED_TYPES.STRING, Tag.ReceiveCoilType, dicomAttributes);
             if (obj != null) {
                 return (String) obj;
             } else {
@@ -424,7 +448,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
             int[] tagPath = new int[3];
             tagPath[0] = Tag.MRTransmitCoilSequence;
             tagPath[2] = Tag.TransmitCoilName;
-            final Object obj = getValueInSharedAndThenPerFrame(tagPath, dicomAttributes);
+            final Object obj = getValueInSharedAndThenPerFrame(ShanoirConstants.DICOM_RETURNED_TYPES.STRING, Tag.TransmitCoilName, dicomAttributes);
             if (obj != null) {
                 return (String) obj;
             } else {
@@ -437,13 +461,14 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 
     public String getTransmitCoilType(final Attributes dicomAttributes, final boolean isEnhancedMR) {
         final String result = dicomAttributes.getString(Tag.TransmitCoilType);
+       // dicomAttributes.getSequence(tag)
         if (result != null && !"".equals(result)) {
             return result;
         } else if (isEnhancedMR) {
             int[] tagPath = new int[3];
             tagPath[0] = Tag.MRTransmitCoilSequence;
             tagPath[2] = Tag.TransmitCoilType;
-            final Object obj = getValueInSharedAndThenPerFrame(tagPath,dicomAttributes);
+            final Object obj = getValueInSharedAndThenPerFrame(ShanoirConstants.DICOM_RETURNED_TYPES.STRING, Tag.TransmitCoilType,dicomAttributes);
             if (obj != null) {
                 return (String) obj;
             } else {
@@ -454,23 +479,87 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         }
     }
 
+	/**
+	 * Depending on the type given in parameter, call the correct method to get
+	 * the value of the dicom tag.
+	 *
+	 * @param type
+	 *            Type of the value to be returned
+	 * @param dicomTag
+	 *            the dicom tag
+	 * @param dcmObj
+	 *            the object that represents the dicom image
+	 *
+	 * @return the value for the given tag with the wanted return type
+	 */
+	public static Object getValue(final ShanoirConstants.DICOM_RETURNED_TYPES type, final int dicomTag,	final Attributes attributes) {
+		if (ShanoirConstants.DICOM_RETURNED_TYPES.INT == type) {
+			int result = attributes.getInt(dicomTag, valueNotFoundValue);
+			if (result != valueNotFoundValue) {
+				return result;
+			} else {
+				return null;
+			}
+		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.DATE == type) {
+			return attributes.getDate(dicomTag);
+		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.FLOAT == type) {
+			double result = attributes.getDouble(dicomTag, valueNotFoundValue);
+			if (((int) result) != valueNotFoundValue) {
+				return result;
+			} else {
+				return null;
+			}
+		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.INT_ARRAY == type) {
+			return attributes.getInts(dicomTag);
+		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.FLOAT_ARRAY == type) {
+			return attributes.getDoubles(dicomTag);
+		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.DATE_ARRAY == type) {
+			return attributes.getDates(dicomTag);
+		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.STRING_ARRAY == type) {
+			return attributes.getStrings(dicomTag);
+		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.STRING == type) {
+			return attributes.getString(dicomTag);
+		//} else if (ShanoirConstants.DICOM_RETURNED_TYPES.SHORT_ARRAY == type) {
+			//return attributes.getShorts(dicomTag);
+		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.DOUBLE_ARRAY == type) {
+			return attributes.getDoubles(dicomTag);
+		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.DOUBLE == type) {
+			double result = attributes.getDouble(dicomTag, valueNotFoundValue);
+			if (((int) result) != valueNotFoundValue) {
+				return result;
+			} else {
+				return null;
+			}
+		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.DATE_RANGE == type) {
+			return attributes.getDateRange(dicomTag);
+		} else if (ShanoirConstants.DICOM_RETURNED_TYPES.BYTE_ARRAY == type) {
+			try {
+				return attributes.getBytes(dicomTag);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				LOG.error("Error during import, fail to convert attribute to byte array",e);
+			}
+		}
+		return null;
+	}
+    
     //TODO ATO fix getString() method...
-    public Object getValueInSharedAndThenPerFrame(final int[] dicomTagPath, final Attributes dicomAttributes) {
-//        Object result;
-//        int[] newTagPath = new int[dicomTagPath.length + 2];
-//        System.arraycopy(dicomTagPath, 0, newTagPath, 2, dicomTagPath.length);
-//        newTagPath[0] = Tag.SharedFunctionalGroupsSequence;
-//        
+    public Object getValueInSharedAndThenPerFrame(final ShanoirConstants.DICOM_RETURNED_TYPES type, final int dicomTag, final Attributes dicomAttributes) {
+    	//Attributes firstSequenceAttributes = emf.extract(dicomAttributes, 0);
+        Object result;
+        result = getValue(type,dicomTag,dicomAttributes);
+
+
 //        for (int o : newTagPath) {
-//        	result = dicomAttributes.getString(newTagPath);
+//        	result = dicomAttributes.getString(o);
 //        }
-//        if (result != null) {
-//            return result;
-//        } else {
-//            newTagPath[0] = Tag.PerFrameFunctionalGroupsSequence;
-//            result = dicomAttributes.getValue(type, newTagPath, dicomAttributes);
-//            return result;
-//        }
+////        if (result != null) {
+////            return result;
+////        } else {
+////            newTagPath[0] = Tag.PerFrameFunctionalGroupsSequence;
+//           result = getValue(type, newTagPath, dicomAttributes);
+////            return result;
+////        }
         return null;
     }
 
@@ -540,7 +629,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
             int[] tagPath = new int[3];
             tagPath[0] = Tag.MRFOVGeometrySequence;
             tagPath[2] = Tag.InPlanePhaseEncodingDirection;
-            final Object obj = getValueInSharedAndThenPerFrame(tagPath,dicomAttributes);
+            final Object obj = getValueInSharedAndThenPerFrame(ShanoirConstants.DICOM_RETURNED_TYPES.STRING, Tag.InPlanePhaseEncodingDirection ,dicomAttributes);
             if (obj != null) {
                 return (String) obj;
             } else {
@@ -626,7 +715,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
             int[] tagPath = new int[3];
             tagPath[0] = Tag.MRTimingAndRelatedParametersSequence;
             tagPath[2] = Tag.EchoTrainLength;
-            final Object obj = getValueInSharedAndThenPerFrame(tagPath,dicomAttributes);
+            final Object obj = getValueInSharedAndThenPerFrame(ShanoirConstants.DICOM_RETURNED_TYPES.STRING,Tag.EchoTrainLength,dicomAttributes);
             if (obj != null) {
                 final Double objDouble = Double.valueOf((String) obj);
                 return objDouble.intValue();
@@ -643,7 +732,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
             int[] tagPath = new int[3];
             tagPath[0] = Tag.MRFOVGeometrySequence;
             tagPath[2] = Tag.MRAcquisitionFrequencyEncodingSteps;
-            final Object obj = getValueInSharedAndThenPerFrame(tagPath,dicomAttributes);
+            final Object obj = getValueInSharedAndThenPerFrame(ShanoirConstants.DICOM_RETURNED_TYPES.STRING,Tag.MRAcquisitionFrequencyEncodingSteps,dicomAttributes);
             if (obj != null) {
                 return Integer.valueOf((String) obj);
             } else {
