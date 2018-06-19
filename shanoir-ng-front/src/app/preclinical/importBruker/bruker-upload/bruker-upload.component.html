@@ -1,8 +1,7 @@
 <div [class.disabled]="disabled" class="header command-zone" (click)="onHeaderClick($event)">1. Select BRUKER archive</div>
 <fieldset *ngIf="!disabled && open" [@slideDown]="!disabled && open" class="step dicom">
-    <p>Please select a BRUKER zip archive to import.<br/>
-    When uploaded, Bruker archive will be automatically converted to DICOM.<br/>
- 	</p>
+    <p>Please select a BRUKER zip archive to import.</p>
+    <p>When uploaded, Bruker archive will be automatically converted to DICOM.</p>
     <p><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Important notice :</strong> this archive must contain at least one 2dseq file!</p>
     <input type="file" (change)="uploadArchive($event)"/>
     <img class="loader" *ngIf="archiveStatus == 'uploading'" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH" />
@@ -13,18 +12,27 @@
         DICOMDIR is missing after conversion!
     </label>  
     <br/>
-    <span [ngSwitch]="uploadedBrukerFileComplete">
-    	<ng-template [ngSwitchCase]="1"> 
-			<img [src]="ImagesUrlUtil.LOADER_IMAGE_PATH"/>
-		</ng-template>
-		<ng-template [ngSwitchCase]="2"> 
-			<label i18n="Import|UploadComplete label">The Bruker archive has been successfully uploaded</label>
-		</ng-template>
-		<ng-template [ngSwitchCase]="3">
-			<label i18n="Import|UploadComplete label">The Bruker archive has been successfully uploaded</label> <br/>
-			<label  i18n="Import|UploadComplete label">Conversion to Dicom successfully completed!</label>
-		</ng-template>
-    </span>
+    <ul class="progress" [ngSwitch]="uploadProgress">
+        <li *ngIf="uploadProgress >= 1"><i class="fas fa-angle-right"></i>
+            Uploading bruker archive
+            <span *ngIf="uploadProgress >= 1">.............</span>
+            <span><img *ngIf="uploadProgress == 1" class="loader" [src]="ImagesUrlUtil.LOADER_IMAGE_PATH"/></span>
+            <span class="done" [class.error]="archiveStatus == 'error'">
+                <span *ngIf="uploadProgress >= 3"><i class="fas fa-check"></i></span>
+                <span *ngIf="uploadProgress == 2"><i class="fas fa-times"></i> error !</span>
+            </span>
+        </li>
+
+        <li *ngIf="uploadProgress >= 1"><i class="fas fa-angle-right"></i>
+            Converting to Dicom
+            <span *ngIf="uploadProgress >= 3">....................</span>
+            <span><img *ngIf="uploadProgress == 3" class="loader" [src]="ImagesUrlUtil.LOADER_IMAGE_PATH"/></span>
+            <span class="done" [class.error]="archiveStatus == 'error'">
+                <span *ngIf="uploadProgress >= 5"><i class="fas fa-check"></i></span>
+                <span *ngIf="uploadProgress == 4"><i class="fas fa-times"></i> error !</span>
+            </span>
+        </li>
+    </ul>
     <p *ngIf="modality" class="modality">
         The modality of the dataset(s) that you are importing is
         <span *ngIf="modality=='MR'">MRI</span>
