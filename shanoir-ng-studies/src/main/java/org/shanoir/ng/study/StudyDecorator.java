@@ -76,7 +76,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		}
 		return studyDTOs;
 	}
-	
+
 	@Override
 	public StudyDTO studyToSimpleStudyDTO(Study study) {
 		return convertStudyToStudyDTO(study, false);
@@ -99,8 +99,7 @@ public abstract class StudyDecorator implements StudyMapper {
 	private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
 		final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
 
-		studyDTO.setStudyCenterList(
-				studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
+		studyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 		if (withData) {
 			studyDTO.setSubjects(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
@@ -139,8 +138,10 @@ public abstract class StudyDecorator implements StudyMapper {
 		}
 
 		final Map<Long, IdNameDTO> usersMap = new HashMap<>();
-		for (IdNameDTO user : usersResponse.getBody()) {
-			usersMap.put(user.getId(), user);
+		if (usersResponse != null && usersResponse.getBody() != null) {
+			for (IdNameDTO user : usersResponse.getBody()) {
+				usersMap.put(user.getId(), user);
+			}
 		}
 
 		// Sort members by category (studyUserType)
