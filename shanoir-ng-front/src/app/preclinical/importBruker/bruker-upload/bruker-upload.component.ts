@@ -27,9 +27,8 @@ export class BrukerUploadComponent extends AbstractImportStepComponent {
     private readonly ImagesUrlUtil = ImagesUrlUtil;
     
     public archive: string;
-    private uploadError: String;
     fileToUpload: File = null;
-    uploadedBrukerFileComplete: number = 0;
+    uploadProgress: number = 0;
 
 
     constructor(private importBrukerService: ImportBrukerService, private dicomArchiveService: DicomArchiveService) {
@@ -37,8 +36,9 @@ export class BrukerUploadComponent extends AbstractImportStepComponent {
     }
     
     private uploadArchive(fileEvent: any): void {
+        this.setArchiveStatus('none');
         this.dicomDirMissingError = false;
-        this.uploadedBrukerFileComplete = 0;
+        this.uploadProgress = 0;
     	// checkExtension
     	this.extensionError = false;
     	let file:any = fileEvent.target.files;
@@ -49,32 +49,31 @@ export class BrukerUploadComponent extends AbstractImportStepComponent {
             return;
         } 
         this.fileToUpload = file.item(0);
-    	this.uploadError = '';
-    	this.uploadedBrukerFileComplete = 1;
+    	this.uploadProgress = 1;
     	this.importBrukerService.postFile(this.fileToUpload)
         	.subscribe(res => {
     			this.archive = this.fileToUpload.name;
-    			this.uploadedBrukerFileComplete = 2;
+    			this.uploadProgress = 3;
     			this.importBrukerService.importDicomFile(res)
             		.subscribe((patientDicomList: ImportJob) => {
                 		this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
                 		this.archiveUploaded.emit(patientDicomList);
                 		this.setArchiveStatus('uploaded');
-                		this.uploadedBrukerFileComplete = 3;
+                		this.uploadProgress = 5;
             		}, (err: String) => {
             			console.log("error in dicom import"+JSON.stringify(err));
-                		this.dicomDirMissingError = (JSON.stringify(err)).indexOf("DICOMDIR is missing") != -1
-                		this.setArchiveStatus('error');
+                        this.dicomDirMissingError = (JSON.stringify(err)).indexOf("DICOMDIR is missing") != -1
+                        this.uploadProgress = 4;
+                        this.setArchiveStatus('error');
             	});
             
                 }, 
                 (err: String) => {
                 	console.log('error in posting File ');
                 	console.log(JSON.stringify(err));
-                	this.archive = '';
+                    this.archive = '';
+                    this.uploadProgress = 2;
                 	this.setArchiveStatus('error');
-                	this.uploadError = err;
-                	this.uploadedBrukerFileComplete = 0;
                 }
             );
     }
