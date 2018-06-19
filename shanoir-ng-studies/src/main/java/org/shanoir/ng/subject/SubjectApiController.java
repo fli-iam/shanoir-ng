@@ -12,6 +12,7 @@ import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
+import org.shanoir.ng.subjectstudy.SubjectStudy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Autowired
 	private SubjectMapper subjectMapper;
-	
+
 	@Autowired
 	private SubjectService subjectService;
 
@@ -62,7 +63,7 @@ public class SubjectApiController implements SubjectApi {
 	@Override
 	public ResponseEntity<List<SubjectDTO>> findSubjects() {
 		final List<Subject> subjects = subjectService.findAll();
-		
+
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -138,7 +139,17 @@ public class SubjectApiController implements SubjectApi {
 
 		// IMPORTANT : avoid any confusion that could lead to security breach
 		subject.setId(subjectId);
-
+		if (subject.getSubjectStudyList() != null) {
+			List<SubjectStudy> studies = subject.getSubjectStudyList();
+			for (SubjectStudy subjectStudy : studies) {
+				if (subjectStudy.getSubject() == null) {
+					LOG.info("SUBJECT STUDY SUBJECT NULL");
+					Subject subjectLight = new Subject();
+					subjectLight.setId(subjectId);
+					subjectStudy.setSubject(subjectLight);
+				}
+			}
+		}
 		// A basic template can only update certain fields, check that
 		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(subject);
 		// Check hibernate validation
