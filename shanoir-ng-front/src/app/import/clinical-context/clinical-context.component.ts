@@ -190,6 +190,7 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
             subjectWithSubjectStudy.identifier = subject.identifier;
             subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
             
+            if (!this.subjects) {this.subjects = new Array<SubjectWithSubjectStudy>();}
             this.subjects.push(subjectWithSubjectStudy);
             this.subject = subjectWithSubjectStudy;
             this.onSelectSubject();
@@ -200,8 +201,11 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     private initializePrefillExam(): void {
         let newExam = new Examination();
         newExam.studyId = this.study.id;
+        newExam.studyName = this.study.name;
         newExam.centerId = this.studycard.center.id;
+        newExam.centerName = this.studycard.center.name;
         newExam.subjectId = this.subject.id;
+        newExam.subjectName = this.subject.name;
         newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
         newExam.comment = this.patient.studies[0].studyDescription;
 
@@ -216,7 +220,9 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
             subjectExam.examinationDate = examination.examinationDate;
             subjectExam.comment = examination.comment;
 
+            if (!this.examinations) {this.examinations = new Array<SubjectExamination>();}
             this.examinations.push(subjectExam);
+            this.examination = subjectExam;
             this.onSelectExamination();
         }
         this.examCreationModal.hide();

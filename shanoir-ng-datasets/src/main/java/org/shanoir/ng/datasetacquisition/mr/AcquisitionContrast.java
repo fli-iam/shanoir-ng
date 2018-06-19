@@ -18,7 +18,28 @@ public enum AcquisitionContrast {
 	T2STAR(3),
 
 	// Spin density
-	SPIN_DENSITY(4);
+	SPIN_DENSITY(4),
+	
+	// Diffusion
+	DIFFUSION(5),
+	
+	FLOW_ENCODED(6),
+	
+	FLUID_ATTENUATED(7),
+	
+	PERFUSION(8),
+	
+	PROTON_DENSITY(9),
+	
+	STIR(10),
+	
+	TAGGING(11),
+	
+	TOF(12),
+	
+	UNKNOWN(13),
+	
+	MIXED(14);
 
 	private int id;
 
@@ -50,7 +71,21 @@ public enum AcquisitionContrast {
 		}
 		throw new IllegalArgumentException("No matching acquisition contrast for id " + id);
 	}
-
+	
+	/**
+	 * Get an acquisition contrast by its name.
+	 * 
+	 * @param type
+	 *            technique id.
+	 * @return parallel acquisition technique.
+	 */
+	public static AcquisitionContrast getIdByType(final String type) {
+		if (type == null) {
+			return null;
+		}
+		return AcquisitionContrast.valueOf(type);
+	}
+	
 	/**
 	 * @return the id
 	 */

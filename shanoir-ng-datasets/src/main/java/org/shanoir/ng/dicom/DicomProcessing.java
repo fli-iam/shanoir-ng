@@ -47,10 +47,18 @@ public class DicomProcessing {
 //		return null;
 //	}
 	
-	public Attributes getDicomObjectAttributes(DatasetFile image) throws IOException {
+	public Attributes getDicomObjectAttributes(DatasetFile image,boolean isEnhancedMR) throws IOException {
 		File dicomFile = new File(image.getPath());
 		DicomInputStream dIS = new DicomInputStream(dicomFile);
-		Attributes datasetAttributes = dIS.readDataset(-1, Tag.PixelData);
+		Attributes datasetAttributes;
+		if (isEnhancedMR) {
+			// In case of Enhanced MR, we need to the pixel data in order to use Dcm4chee emf extract method.
+			datasetAttributes = dIS.readDataset(-1, -1);
+		} else {
+			// Else we do not load the picture in Ram for faster performance.
+			datasetAttributes = dIS.readDataset(-1, Tag.PixelData);	
+		}
+		
 		return datasetAttributes;
 	}
 
