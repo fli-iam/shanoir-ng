@@ -136,12 +136,57 @@ export class AnimalSubjectFormComponent implements OnInit {
                 		this.preclinicalSubject.id = animalSubject.id;
                     	this.preclinicalSubject.animalSubject = animalSubject;
                     	this.preclinicalSubject.subject = subject;
+                    	
+                    	// subjectStudy
+                    	if (this.preclinicalSubject.subject.subjectStudyList && this.preclinicalSubject.subject.subjectStudyList.length > 0){
+                    		this.subjectStudyList = [];
+                    		for (let study of this.preclinicalSubject.subject.subjectStudyList) {
+                    			let newSubjectStudy: SubjectStudy = this.getSubjectStudy(study);
+                    			this.subjectStudyList.push(newSubjectStudy);
+                    		}
+                    		this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
+                    	}
                 	});
                 }
             });
 
     }
+    
+    getSubjectStudy(subjectStudy: SubjectStudy): SubjectStudy{
+    	let fixedSubjectStudy = new SubjectStudy();
+    	fixedSubjectStudy.id = subjectStudy.id;
+    	fixedSubjectStudy.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
+    	fixedSubjectStudy.subjectType = subjectStudy.subjectType;
+    	fixedSubjectStudy.physicallyInvolved = subjectStudy.physicallyInvolved;
+    	fixedSubjectStudy.subject = this.getSubject();
+    	fixedSubjectStudy.study = this.getStudyById(subjectStudy.studyId);
+    	fixedSubjectStudy.subjectId = this.preclinicalSubject.subject.id;
+    	fixedSubjectStudy.studyId = subjectStudy.studyId;
+    	return fixedSubjectStudy;
+    }
+    
+    getStudyById(id: number): Study{
+    	if (this.studies && this.studies.length > 0){
+    		for (let s of this.studies){
+    			if (s.id === id){
+    				let study: Study = new Study();
+    				study.id = s.id;
+    				study.name = s.name;
+    				return study;
+    			}
+    		}
+    	}
+    	return null;
+    }
 
+	getSubject(): Subject{
+		let subject = new Subject();
+		subject.id = this.preclinicalSubject.subject.id;
+		subject.name = this.preclinicalSubject.subject.name;
+		return subject;
+	}
+	
+	
     ngOnInit(): void {
         this.loadData();
         this.preclinicalSubject.subject = new Subject();
@@ -286,6 +331,7 @@ export class AnimalSubjectFormComponent implements OnInit {
     updateSubject(): void {
     	if (this.preclinicalSubject && this.preclinicalSubject.subject){	
     	    this.generateSubjectIdentifier();
+    	    this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
         	this.animalSubjectService.updateSubject(this.preclinicalSubject.subject.id, this.preclinicalSubject.subject)
             	.subscribe(subject => {
             		if (this.preclinicalSubject.animalSubject){
@@ -396,6 +442,10 @@ export class AnimalSubjectFormComponent implements OnInit {
         let hex = "";
         hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
+    }
+    
+    goToUpdate(): void{
+    	this.router.navigate(['/preclinical-subject'], { queryParams: { id: this.subjectId, mode: "edit" } });
     }
     
     
