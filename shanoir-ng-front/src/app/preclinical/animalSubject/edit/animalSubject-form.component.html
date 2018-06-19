@@ -1,7 +1,7 @@
 <div class="SubjectFormComponent content-component detail">
     <form [formGroup]="newSubjectForm" class="SubjectFormComponent max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode.state==Modes.view}">
-			<span [ngSwitch]="mode.state">
+			<span class="commands" [ngSwitch]="mode.state">
 				<ng-template [ngSwitchCase]="Modes.view"> 
 					<div class="header command-zone" i18n="View subject|Title">View subject</div>
 				</ng-template>
