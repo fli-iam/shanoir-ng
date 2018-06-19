@@ -54,7 +54,7 @@ keycloak:
       - ROLE_GUEST
       - ROLE_USER
     - securityCollections:
-      - name: studies secured api
+      - name: import secured api
       - patterns:
         - /*
 # microservices url
