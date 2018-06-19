@@ -34,7 +34,7 @@ public class DatasetExpressionContext implements DatasetExpressionStrategy {
 	public void setDatasetExpressionStrategy(String format) {
 		if ("dcm".equals(format)) {
 			this.datasetExpressionStrategy = dicomDatasetExpressionStrategy;
-		} else if ("nii".equals(format)) {
+		} else if ("nifti".equals(format)) {
 			this.datasetExpressionStrategy = niftiDatasetExpressionStrategy;
 		}
 		// else... add other format strategies here

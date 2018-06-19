@@ -10,18 +10,9 @@
 						<label i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</label>
 						<span class="right-col">
                             <!-- <select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
-                                <option *ngFor="let study of studies" [ngValue]="study">{{study.name}}</option>
-							</select> -->
-							{{examination.studyName}}
-						</span>
-					</li>
-					<li>
-						<label i18n="Examination detail|Subject label@@examinationDetailSubject" class="required-label">Subject</label>
-						<span class="right-col">
-							<!-- <select id="subject" required formControlName="subjectId" [(ngModel)]="examination.subject">
-								<option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
-							</select> -->
-							{{examination.subjectName}}
+                                <option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
+                            </select> -->
+                            {{examination?.studyId}}
 						</span>
 					</li>
 					<li>
@@ -29,8 +20,17 @@
 						<span class="right-col">
                             <!-- <select id="centerId" required formControlName="centerId" [(ngModel)]="examination.centerId">
                                 <option *ngFor="let center of centers" [ngValue]="center.id">{{center.name}}</option>
-							</select> -->
-							{{examination.centerName}}
+                            </select> -->
+                            {{examination?.centerId}}
+						</span>
+					</li>
+					<li>
+						<label i18n="Examination detail|Subject label@@examinationDetailSubject" class="required-label">Subject</label>
+						<span class="right-col">
+                            <!-- <select id="subject" required formControlName="Subject" [(ngModel)]="examination.subject">
+                                <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
+                            </select> -->
+                            {{examination?.subjectId}}
 						</span>
 					</li>
 					<li>

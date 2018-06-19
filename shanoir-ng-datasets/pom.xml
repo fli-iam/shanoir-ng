@@ -19,6 +19,7 @@
 	<properties>
 		<springfox-version>2.5.0</springfox-version>
 		<spring.active.profile></spring.active.profile>
+		<keycloak.version>3.1.0.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
 		<dcm4che.version>5.10.6</dcm4che.version> 
@@ -72,11 +73,6 @@
 		<dependency>
 			<groupId>org.dcm4che</groupId>
 			<artifactId>dcm4che-dcmr</artifactId>
-			<version>${dcm4che.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.dcm4che</groupId>
-			<artifactId>dcm4che-emf</artifactId>
 			<version>${dcm4che.version}</version>
 		</dependency>
 		<dependency>

@@ -217,7 +217,7 @@ public class DicomFileAnalyzerService {
 		
 		if (UID.EnhancedMRImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
-			Attributes firstSequenceAttributes = emf.extract(datasetAttributes, 0);
+			Attributes firstSequenceAttributes = emf.extract(datasetAttributes, 10);
 			
 			if (image.path("acquisitionNumber").isMissingNode()) {
 				String acquisitionNumber = firstSequenceAttributes.getString(Tag.AcquisitionNumber);

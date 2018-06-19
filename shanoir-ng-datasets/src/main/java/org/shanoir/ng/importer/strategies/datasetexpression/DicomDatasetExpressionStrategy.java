@@ -57,14 +57,14 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 
 		if (expressionFormat != null & expressionFormat.getType().equals("dcm")) {
 
-			//List<String> dcmFilesToSendToPacs = new ArrayList<String>();
+			List<String> dcmFilesToSendToPacs = new ArrayList<String>();
 			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
-				//dcmFilesToSendToPacs.add(datasetFile.getPath());
+				dcmFilesToSendToPacs.add(datasetFile.getPath());
 				Date contentTime = null;
 				Date acquisitionTime = null;
 				Attributes dicomAttributes = null;
 				try {
-					dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile,serie.getIsEnhancedMR());
+					dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile);
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 				}

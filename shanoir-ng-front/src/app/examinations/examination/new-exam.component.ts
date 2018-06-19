@@ -4,9 +4,6 @@ import { FormGroup, FormBuilder, Validators } from "@angular/forms";
 import { Examination } from "../shared/examination.model";
 import { ExaminationService } from "../shared/examination.service";
 import { MsgBoxService } from "../../shared/msg-box/msg-box.service";
-import { IdNameObject } from "../../shared/models/id-name-object.model";
-import { StudyService } from "../../studies/shared/study.service";
-import { CenterService } from "../../centers/shared/center.service";
 
 @Component({
     selector: 'new-exam',
@@ -21,43 +18,22 @@ export class NewExamComponent implements OnInit {
     private examination: Examination = new Examination();
     private examinationForm: FormGroup;
     private isExaminationDateValid: boolean = true;
-    private studies: IdNameObject[];
-    private centers: IdNameObject[];
 
     constructor (private fb: FormBuilder, private examinationService: ExaminationService,
-        private location: Location, private msgService: MsgBoxService,
-        private studyService: StudyService, private centerService: CenterService) {
+        private location: Location, private msgService: MsgBoxService) {
     }
 
     ngOnInit(): void {
         this.examination = new Examination();
-        // this.getStudies();
-        // this.getCenters();
         this.initPrefillData();
         this.buildForm();
     }
 
     initPrefillData(): void {
         if (this.preFillData && this.examination) {
-            // for (let study of this.studies) {
-            //     if (this.preFillData.studyId == study.id) {
-            //         this.studies = [];
-            //         this.studies.push(study);
-            //     }
-            // }
             this.examination.studyId = this.preFillData.studyId;
-            this.examination.studyName = this.preFillData.studyName;
-
-            // for (let center of this.centers) {
-            //     if (this.preFillData.centerId == center.id) {
-            //         this.centers = [];
-            //         this.centers.push(center);
-            //     }
-            // }
             this.examination.centerId = this.preFillData.centerId;
-            this.examination.centerName = this.preFillData.centerName;
             this.examination.subjectId = this.preFillData.subjectId;
-            this.examination.subjectName = this.preFillData.subjectName;
             this.examination.examinationDate = new Date(this.preFillData.examinationDate);
             this.examination.comment = this.preFillData.comment;
         }
@@ -65,28 +41,6 @@ export class NewExamComponent implements OnInit {
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes['preFillData']) this.initPrefillData();
-    }
-
-    getStudies(): void {
-        this.studyService
-            .getStudiesNames()
-            .then(studies => {
-                this.studies = studies;
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    }
-
-    getCenters(): void {
-        this.centerService
-            .getCentersNamesForExamination()
-            .then(centers => {
-                this.centers = centers;
-            })
-            .catch((error) => {
-                console.error(error);
-            });
     }
 
     create(): void {
@@ -111,10 +65,7 @@ export class NewExamComponent implements OnInit {
 
     buildForm(): void {
         this.examinationForm = this.fb.group({
-            'examinationDate': [this.examination.examinationDate, Validators.required],
-            // 'studyId': [this.examination.studyId, Validators.required],
-            // 'centerId': [this.examination.centerId, Validators.required],
-            // 'subjectId': [this.examination.subjectId, Validators.required]
+            'examinationDate': [this.examination.examinationDate, Validators.required]
         });
 
         this.examinationForm.valueChanges.subscribe(data => this.onValueChanged(data));
@@ -136,9 +87,6 @@ export class NewExamComponent implements OnInit {
     }
 
     formErrors = {
-        'examinationDate': '',
-        // 'studyId': '',
-        // 'centerId': '',
-        // 'subjectId': ''
+        'examinationDate': ''
     }
 }

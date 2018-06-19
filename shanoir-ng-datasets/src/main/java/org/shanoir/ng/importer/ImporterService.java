@@ -78,21 +78,15 @@ public class ImporterService {
 	
 	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) {
 		if (serie.getModality() != null) {
-			// Added Temporary check on serie in order not to generate dataset acquisition for series without images.
-			if (serie.getDatasets() != null && !serie.getDatasets().isEmpty()) {
-				if (serie.getDatasets().get(0).getExpressionFormats() != null) {
-					if (serie.getDatasets().get(0).getExpressionFormats().size() > 0) {
-						datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
-						DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
-						datasetAcquisition.setExamination(examination);
-						// Persist Serie in Shanoir DB
-						DatasetAcquisition persistedDatasetAcquisition = datasetAcquisitionRepository.save(datasetAcquisition);
-						// Persist Dicom images in Shanoir Pacs
-			//			if (persistedDatasetAcquisition != null) {
-							dicomPersisterService.persistAllForSerie(serie);
-					}
-				}
-			}
+			datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
+			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
+			datasetAcquisition.setExamination(examination);
+			// Persist Serie in Shanoir DB
+			DatasetAcquisition persistedDatasetAcquisition = datasetAcquisitionRepository.save(datasetAcquisition);
+			// Persist Dicom images in Shanoir Pacs
+//			if (persistedDatasetAcquisition != null) {
+				dicomPersisterService.persistAllForSerie(serie);
+//			}
 		}
 	}
 
