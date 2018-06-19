@@ -19,6 +19,7 @@
 	<properties>
 		<springfox-version>2.5.0</springfox-version>
 		<spring-active-profile></spring-active-profile>
+		<keycloak.version>2.5.1.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<dcm4che.version>5.10.6</dcm4che.version> 
 		<docker.image.name>shanoir-ng/template</docker.image.name>
