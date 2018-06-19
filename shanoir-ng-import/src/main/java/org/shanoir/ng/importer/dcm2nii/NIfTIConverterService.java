@@ -497,7 +497,7 @@ public class NIfTIConverterService {
 
 				NIfTIConverter converter;
 				if(isConvertWithClidcm) {
-					 converter = findById(4L);					
+					 converter = findById(5L);					
 				} else {
 					converter = findById(converterId);
 				}

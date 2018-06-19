@@ -138,9 +138,7 @@ public class ImporterApiController implements ImporterApi {
 			LOG.info(importJobJsonString);
 			
 			// HttpEntity represents the request
-			HttpHeaders headers = new HttpHeaders();
-
-			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, headers);
+			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
 
 			// Post to dataset MS to finish import
 			ResponseEntity<String> response = null;

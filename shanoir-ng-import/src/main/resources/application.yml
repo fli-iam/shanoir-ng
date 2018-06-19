@@ -81,9 +81,9 @@ shanoir:
     dcm2nii:
       converters:
         path:
-          linux: /opt/nifti-converters/
+          linux: /usr/local/dcm2niix-efd36a02e2a8e21acfbc62f41beeacf6731d67ac/build/bin/
           windows: 
-        default: dcm2nii
+        default: dcm2niix
         # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then use clidcm instead of dcmnii to convert from dicom to nifti
         convertwithclidcm: seriesDescription==*Diff*;seriesDescription==*DIFF*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*; 
         # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then output niftii file will be reconstructed as 4D volumes
