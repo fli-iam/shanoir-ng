@@ -47,15 +47,15 @@ keycloak:
   auth-server-url: http://localhost/auth
   ssl-required: external
   resource: shanoir-ng-import
-  securityConstraints[0]:
-    securityCollections[0]:
-      name: spring secured api
-      authRoles: 
-        - ROLE_ADMIN
-        - ROLE_EXPERT
-        - ROLE_GUEST
-        - ROLE_USER
-      patterns:
+  securityConstraints:
+    - authRoles: 
+      - ROLE_ADMIN
+      - ROLE_EXPERT
+      - ROLE_GUEST
+      - ROLE_USER
+    - securityCollections:
+      - name: studies secured api
+      - patterns:
         - /*
 # microservices url
 ms.url:
