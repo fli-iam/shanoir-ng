@@ -2,6 +2,7 @@ package org.shanoir.ng.dataset;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -176,29 +177,7 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
 		}
-
-		List<URL> pacsURLs = new ArrayList<URL>();
-		if ("dcm".equals(format)) {
-			List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
-			for (Iterator iterator = datasetExpressions.iterator(); iterator.hasNext();) {
-				DatasetExpression datasetExpression = (DatasetExpression) iterator.next();
-				if (datasetExpression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
-					List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
-					for (Iterator iterator2 = datasetFiles.iterator(); iterator2.hasNext();) {
-						DatasetFile datasetFile = (DatasetFile) iterator2.next();
-						URL url = new URL(datasetFile.getPath());
-						pacsURLs.add(url);
-					}
-				}
-			}
-		} else if ("nii".equals(format)) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Not implemented yet.", null));
-		} else {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-		}
-
+		
 		/*
 		 * Create folder and file here:
 		 */
@@ -216,7 +195,17 @@ public class DatasetApiController implements DatasetApi {
 		zipFile.createNewFile();
 
 		try {
-			downloader.downloadDicomFilesForURLs(pacsURLs, workFolder);
+			List<URL> pathURLs = new ArrayList<URL>();
+			if ("dcm".equals(format)) {
+				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+				downloader.downloadDicomFilesForURLs(pathURLs, workFolder);
+			} else if ("nii".equals(format)) {
+				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+				copyNiftiFilesForURLs(pathURLs, workFolder);
+			} else {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+			}
 		} catch (IOException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
@@ -241,6 +230,43 @@ public class DatasetApiController implements DatasetApi {
 				// Content-Length
 				.contentLength(data.length) //
 				.body(resource);
+	}
+	
+	/**
+	 * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
+	 * @param urls
+	 * @param workFolder
+	 * @throws IOException
+	 * @throws MessagingException
+	 */
+	public void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder) throws IOException {
+		for (Iterator iterator = urls.iterator(); iterator.hasNext();) {
+			URL url =  (URL) iterator.next();
+			File srcFile = new File(url.getPath());
+			File destFile = new File(workFolder.getAbsolutePath() + File.separator + srcFile.getName());
+			Files.copy(srcFile.toPath(), destFile.toPath());
+		}
+	}
+
+	/**
+	 * This method reads all dataset files depending on the format attached to one dataset.
+	 * @param dataset
+	 * @param pathURLs
+	 * @throws MalformedURLException
+	 */
+	private void getDatasetFilePathURLs(final Dataset dataset, List<URL> pathURLs, DatasetExpressionFormat format) throws MalformedURLException {
+		List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
+		for (Iterator itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
+			DatasetExpression datasetExpression = (DatasetExpression) itExpressions.next();
+			if (datasetExpression.getDatasetExpressionFormat().equals(format)) {
+				List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
+				for (Iterator itFiles = datasetFiles.iterator(); itFiles.hasNext();) {
+					DatasetFile datasetFile = (DatasetFile) itFiles.next();
+					URL url = new URL(datasetFile.getPath());
+					pathURLs.add(url);
+				}
+			}
+		}
 	}
 	
 	private void zip(String sourceDirPath, String zipFilePath) throws IOException {

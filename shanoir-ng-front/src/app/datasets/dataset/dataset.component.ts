@@ -89,8 +89,8 @@ export class DatasetComponent implements OnInit {
         });
     }
 
-    private download() {
-        this.datasetService.download(this.dataset);
+    private download(format: string) {
+        this.datasetService.download(this.dataset, format);
     }
 
     private loadDicomInMemory() {
@@ -99,7 +99,7 @@ export class DatasetComponent implements OnInit {
             .map(params => params.id)
             .distinctUntilChanged()
             .subscribe((id: number) => {
-                this.datasetService.downloadToBlob(id).subscribe(blobReponse => {
+                this.datasetService.downloadToBlob(id, 'dcm').subscribe(blobReponse => {
                     this.dicomArchiveService.clearFileInMemory();
                     this.dicomArchiveService.importFromZip(blobReponse.body)
                         .subscribe(response => {
