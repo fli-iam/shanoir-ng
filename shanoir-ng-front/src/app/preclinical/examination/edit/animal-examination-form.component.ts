@@ -70,6 +70,7 @@ export class AnimalExaminationFormComponent implements OnInit {
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
     isDateValid: boolean = true;
     selectedDateNormal: IMyDate;
+    hasStudyCenterData : boolean = false;
     
 
     constructor(
@@ -502,12 +503,16 @@ export class AnimalExaminationFormComponent implements OnInit {
     
     initPrefillData() {
         if (this.preFillData && this.examination) {
+        	this.hasStudyCenterData = true;
             this.examination.studyId = this.preFillData.studyId;
+            this.examination.studyName = this.preFillData.studyName;
             this.examination.centerId = this.preFillData.centerId;
+            this.examination.centerName = this.preFillData.centerName;
             this.examination.examinationDate = this.preFillData.examinationDate;
             this.examination.comment = this.preFillData.comment;
             this.examination.subjectId = this.preFillData.subjectId;
             this.examination.subjectName = this.preFillData.subjectName;
+            this.buildForm();
             this.getDateToDatePicker(this.examination);
         }
     }

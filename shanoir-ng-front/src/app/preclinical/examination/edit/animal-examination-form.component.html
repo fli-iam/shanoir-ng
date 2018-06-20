@@ -24,10 +24,17 @@
 							</a>		
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
-								<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
-							</select>
-							<label *ngIf="formErrors.studyId.includes('required')" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
+							<div [ngSwitch]="hasStudyCenterData">
+								<ng-template [ngSwitchCase]="true">
+								   {{examination.studyName}}
+								</ng-template>
+								<ng-template [ngSwitchCase]="false">
+									<select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
+										<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
+									</select>
+									<label *ngIf="formErrors.studyId.includes('required')" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
+								</ng-template>
+							</div>
 						</ng-template>
 					</span>
 				</li>
@@ -55,10 +62,17 @@
 							</a>
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="centerId" required formControlName="centerId" [(ngModel)]="examination.centerId">
-								<option *ngFor="let center of centers" [ngValue]="center.id">{{center.name}}</option>
-							</select>
-							<label *ngIf="formErrors.centerId.includes('required')" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
+							<div [ngSwitch]="hasStudyCenterData">
+								<ng-template [ngSwitchCase]="true">
+									{{examination.centerName}}
+								</ng-template>
+								<ng-template [ngSwitchCase]="false">
+									<select id="centerId" required formControlName="centerId" [(ngModel)]="examination.centerId">
+										<option *ngFor="let center of centers" [ngValue]="center.id">{{center.name}}</option>
+									</select>
+									<label *ngIf="formErrors.centerId.includes('required')" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
+								</ng-template>
+							</div>
 						</ng-template>
 					</span>
 				</li>
@@ -206,7 +220,7 @@
 			<span [ngSwitch]="mode.state">
 				<button i18n="View examination|BackButton label" class="Button" (click)="back()">Back</button>	
 				<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
-					<button type="button" i18n="View examination|EditButton label" (click)="goToEditPage()" class="Button">Edit</button>
+					<button type="button" i18n="View examination|EditButton label" (click)="edit()" class="Button">Edit</button>
 				</ng-template>
 				<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
 					<button type="button" i18n="Edit examination|UpdateButton label" (click)="update()" class="Button" [disabled]="!newExamForm.valid">Update</button>
