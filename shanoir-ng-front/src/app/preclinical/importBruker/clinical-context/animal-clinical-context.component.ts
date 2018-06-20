@@ -283,9 +283,11 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
         let examination = new Examination();
         if (this.study){
         	examination.studyId = this.study.id;
+        	examination.studyName = this.study.name;
         }
         if (this.studycard && this.studycard.center){
         	examination.centerId = this.studycard.center.id;
+        	examination.centerName = this.studycard.center.name;
         }
         if (this.patient && this.patient.studies && this.patient.studies.length > 0){
         	examination.comment = this.patient.studies[0].studyDescription;
@@ -295,7 +297,9 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
         }
         if (this.subject){
         	 examination.subjectId = this.subject.id;
+        	 examination.subjectName = this.subject.name;
         }
         this.examinationFromImport = examination;
+        
     }
 }
