@@ -495,12 +495,14 @@ public class NIfTIConverterService {
 					conversionLogs = "";
 				}
 
+				// TODO ATO : Fix this once nifti conversion process is defined.
+				
 				NIfTIConverter converter;
-				if(isConvertWithClidcm) {
+//				if(isConvertWithClidcm) {
 					 converter = findById(5L);					
-				} else {
-					converter = findById(converterId);
-				}
+//				} else {
+//					converter = findById(converterId);
+//				}
 				convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D);
 				LOG.info("conversionLogs : " + conversionLogs);
 				return converter;
