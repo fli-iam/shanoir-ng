@@ -118,7 +118,7 @@ export class AnimalSubjectsListComponent {
                     return ImagedObjectCategory[imagedObjectCat];
                 }
             },
-            {headerName: "Specie", field: "animalSubject.specie.value"},
+            {headerName: "Species", field: "animalSubject.specie.value"},
             {headerName: "Strain", field: "animalSubject.strain.value"},
             {headerName: "Biological type", field: "animalSubject.biotype.value"},
             {headerName: "Provider", field: "animalSubject.provider.value"},

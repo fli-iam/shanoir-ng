@@ -74,7 +74,7 @@
 						</span>
 					</li>
 					<li class="required">
-						<label i18n="Edit subject|Specie label" class="required-label">Specie</label>
+						<label i18n="Edit subject|Specie label" class="required-label">Species</label>
 						<span class="right-col" [ngSwitch]="mode.state">
 							<ng-template [ngSwitchCase]="Modes.view"> 
 									{{preclinicalSubject?.animalSubject?.specie?.value}}
@@ -83,11 +83,11 @@
 								<select id="specie" required formControlName="specie" [(ngModel)]="preclinicalSubject.animalSubject.specie">
 									<option *ngFor="let specie of species" [ngValue]="specie">{{specie.value}}</option>
 								</select>
-								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new specie" (click)="goToRefPage('subject','specie')">
+								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new species" (click)="goToRefPage('subject','specie')">
 									<img [src]="addIconPath"/>
-									new specie
+									new species
 								</button>
-								<label *ngIf="formErrors.specie.includes('required')" class="form-validation-alert" i18n="Edit specie|SpecieRequiredError label">Specie is required!</label>
+								<label *ngIf="formErrors.specie.includes('required')" class="form-validation-alert" i18n="Edit species|SpecieRequiredError label">Species is required!</label>
 							</ng-template>
 						</span>
 					</li>
