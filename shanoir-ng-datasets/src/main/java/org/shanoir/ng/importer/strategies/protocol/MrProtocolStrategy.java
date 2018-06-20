@@ -11,9 +11,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.shanoir.ng.datasetacquisition.mr.AcquisitionContrast;
+import org.shanoir.ng.datasetacquisition.mr.ContrastAgentUsed;
 import org.shanoir.ng.datasetacquisition.mr.ImagedNucleus;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocolMetadata;
@@ -206,36 +208,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         // Patient position
         final PatientPosition patientPosition = getPatientPosition(dicomAttributes);
         mrProtocol.setPatientPosition(patientPosition);
-        
-        /*** TODO
-         * Check if is study card managed
-        //Contrast agent Used
-        final String contrastAgentUsed = DicomMetadataExtractor.getString(Tag.ContrastBolusIngredient, dcmObj);
-        if (log.isDebugEnabled()) {
-            log.debug("extractMetadata : contrastAgentUsed=" + contrastAgentUsed);
-        }
-        //Get RefEntity
-        IRefContrastAgentUsedHome contrastAgentUsedHome = (IRefContrastAgentUsedHome) Component.getInstance("refContrastAgentUsedHome");
-        RefContrastAgentUsed refContrastAgentUsed = contrastAgentUsedHome.getRefEntity(contrastAgentUsed);
-        mrProtocol.setRefContrastAgentUsed(refContrastAgentUsed);
 
-        //Contrast agent Product
-        final String contrastAgentProduct = DicomMetadataExtractor.getString(Tag.ContrastBolusAgent, dcmObj);
-        if (log.isDebugEnabled()) {
-            log.debug("extractMetadata : contrastAgentProduct=" + contrastAgentProduct);
-        }
-        mrProtocol.setContrastAgentProduct(contrastAgentProduct);
-        **/
-
-        /*
-         * K-space fill - the calculation may not be relevant for multi-echo
-         * sequences
-         */
-//        if (mrProtocol.getEchoTimes().size() < 2) {
-//            final MrSequenceKSpaceFill refMrSequenceKSpaceFill = getKSpaceFill(dicomAttributes, serie.getIsEnhancedMR());
-//            mrProtocol.getOriginMetadata().setMrSequenceKSpaceFill(refMrSequenceKSpaceFill);
-//        }
-        
         // TODO ATO : Add preclinical mode condition. if preclinical then implement  DicomMetadataExtractor.extractMetadataCompletingMrProtocol(..) method in shanoir old
         // This method is called by method extractMetadata in same class.
         
@@ -308,7 +281,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 		
         // Acquisition contrast
         String acquisitionContrast = dicomAttributes.getString(Tag.AcquisitionContrast);
-        LOG.debug("extractMetadata : injectedVolume=" + acquisitionContrast);
+        LOG.debug("extractMetadata : Acquisition Contrast=" + acquisitionContrast);
         mrProtocolMetadata.setAcquisitionContrast(AcquisitionContrast.getIdByType(acquisitionContrast));
 		
 
@@ -344,11 +317,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         }
         		
         // Volume injected of diluted contrast agent
-        String injectedVolumeString = dicomAttributes.getString(Tag.ContrastBolusVolume);
-        Double injectedVolume = null;
-        if (injectedVolumeString != null) {
-        	injectedVolume = Double.parseDouble(injectedVolumeString);
-        }
+        final Double injectedVolume = dicomAttributes.getDouble(Tag.ContrastBolusVolume,0.0);
         LOG.debug("extractMetadata : injectedVolume=" + injectedVolume);
         mrProtocolMetadata.setInjectedVolume(injectedVolume);
 
@@ -376,12 +345,12 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         }
 
         // Time reduction factor for the in-plane direction
-        final Double timeReductionFactorForTheInPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorInPlane,-1D);
+        final Double timeReductionFactorForTheInPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorInPlane,0.0);
         LOG.debug("extractMetadata : timeReductionFactorForTheInPlaneDirection=" + timeReductionFactorForTheInPlaneDirection);
         mrProtocolMetadata.setTimeReductionFactorForTheInPlaneDirection(timeReductionFactorForTheInPlaneDirection);
         
         // Time reduction factor for the out-of-plane direction
-        final Double timeReductionFactorForTheOutOfPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorOutOfPlane,-1D);
+        final Double timeReductionFactorForTheOutOfPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorOutOfPlane,0.0);
         LOG.debug("extractMetadata : timeReductionFactorForTheOutOfPlaneDirection=" + timeReductionFactorForTheOutOfPlaneDirection);
         mrProtocolMetadata.setTimeReductionFactorForTheOutOfPlaneDirection(timeReductionFactorForTheOutOfPlaneDirection);
 
@@ -399,8 +368,30 @@ public class MrProtocolStrategy implements ProtocolStrategy {
 	        		mrProtocolMetadata.setMagnetizationTransfer(true);
 	        	}
 		}
+        
+        final String contractAgentUsed = dicomAttributes.getString(Tag.ContrastBolusIngredient);
+        LOG.debug("extractMetadata : contractAgentUsed=" + contractAgentUsed);
+        if (contractAgentUsed != null) {
+        	mrProtocolMetadata.setContrastAgentUsed(ContrastAgentUsed.getIdByType(contractAgentUsed));
+        }
+        
+        final String[] sequenceVariant = dicomAttributes.getStrings(Tag.SequenceVariant);
+        LOG.debug("extractMetadata : sequenceVariant=" + Arrays.toString(sequenceVariant));
+        if (sequenceVariant != null) {
+        	mrProtocolMetadata.setMrSequenceVariant(Arrays.asList(sequenceVariant));
+        }
+
+        final String[] scanningSequence = dicomAttributes.getStrings(Tag.ScanningSequence);
+        LOG.debug("extractMetadata : scanningSequence=" + Arrays.toString(scanningSequence));
+        if (scanningSequence != null) {
+        	mrProtocolMetadata.setMrScanningSequence(Arrays.asList(scanningSequence));
+        }
+        
+        // K-Space fill
+        mrProtocolMetadata.setMrSequenceKSpaceFill(getKSpaceFill(dicomAttributes, serie.getIsEnhancedMR()));
+        
         return mrProtocolMetadata;
-	}
+	}	
 	
     public String getReceiveCoilName(final Attributes dicomAttributes, final boolean isEnhancedMR) {
         final String result = dicomAttributes.getString(Tag.ReceiveCoilName);

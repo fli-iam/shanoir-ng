@@ -1,6 +1,11 @@
 package org.shanoir.ng.datasetacquisition.mr;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 
@@ -25,22 +30,10 @@ public class MrProtocolMetadata extends AbstractGenericItem {
 	private Integer acquisitionContrast;
 
 	/**
-	 * The axis orientation at acquisition. To be entered with the study card
-	 * mechanism.
-	 */
-	private Integer axisOrientationAtAcquisition;
-
-	/** A comment for adding other detais. */
-	private String comment;
-
-	/**
 	 * (0018,1049) Contrast/Bolus Ingredient Concentration. The unit of measure
 	 * of injected volume must be in ml.
 	 */
 	private Double contrastAgentConcentration;
-
-	/** The manufactured name for the contrast agent. */
-	private String contrastAgentProduct;
 
 	/**
 	 * From (0018,0010) Contrast or bolus agent and (0018,1048) Contrast/bolus
@@ -61,12 +54,6 @@ public class MrProtocolMetadata extends AbstractGenericItem {
 	private Boolean magnetizationTransfer;
 
 	/**
-	 * Corresponds to the third semantic axis of ontoNeurolog (ontology of MR
-	 * sequences).
-	 */
-	private Integer mrSequenceApplication;
-
-	/**
 	 * Derived from (0018,0091) Echo train length (Number of lines in k- space
 	 * acquired per excitation per image) and from the (0018,9032) Geometry
 	 * category of k-Space traversal.
@@ -75,13 +62,14 @@ public class MrProtocolMetadata extends AbstractGenericItem {
 
 	/** Corresponding Dicom information : (0018,0024) Sequence name. */
 	private String mrSequenceName;
-
-	/**
-	 * Derived from (0018, 0020) Scanning sequence Description of the type of
-	 * data taken and (0018, 0021) Sequence Variant of the scanning sequence. To
-	 * be entered using the "study card" mechanism.
-	 */
-	private Integer mrSequencePhysics;
+	
+	/** (0018, 0020) Scanning sequence Description  */
+	@ElementCollection
+	private List<Integer> mrScanningSequence;
+	
+	/** (0018, 0021) Sequence Variant of the scanning sequence */
+	@ElementCollection
+	private List<Integer> mrSequenceVariant;
 
 	/** Corresponding Dicom information : (0018,1030) Protocol name. */
 	private String name;
@@ -137,39 +125,6 @@ public class MrProtocolMetadata extends AbstractGenericItem {
 		}
 	}
 
-	/**
-	 * @return the axisOrientationAtAcquisition
-	 */
-	public AxisOrientationAtAcquisition getAxisOrientationAtAcquisition() {
-		return AxisOrientationAtAcquisition.getAxisOrientation(axisOrientationAtAcquisition);
-	}
-
-	/**
-	 * @param axisOrientationAtAcquisition
-	 *            the axisOrientationAtAcquisition to set
-	 */
-	public void setAxisOrientationAtAcquisition(AxisOrientationAtAcquisition axisOrientationAtAcquisition) {
-		if (axisOrientationAtAcquisition == null) {
-			this.axisOrientationAtAcquisition = null;
-		} else {
-			this.axisOrientationAtAcquisition = axisOrientationAtAcquisition.getId();
-		}
-	}
-
-	/**
-	 * @return the comment
-	 */
-	public String getComment() {
-		return comment;
-	}
-
-	/**
-	 * @param comment
-	 *            the comment to set
-	 */
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
 
 	/**
 	 * @return the contrastAgentConcentration
@@ -184,21 +139,6 @@ public class MrProtocolMetadata extends AbstractGenericItem {
 	 */
 	public void setContrastAgentConcentration(Double contrastAgentConcentration) {
 		this.contrastAgentConcentration = contrastAgentConcentration;
-	}
-
-	/**
-	 * @return the contrastAgentProduct
-	 */
-	public String getContrastAgentProduct() {
-		return contrastAgentProduct;
-	}
-
-	/**
-	 * @param contrastAgentProduct
-	 *            the contrastAgentProduct to set
-	 */
-	public void setContrastAgentProduct(String contrastAgentProduct) {
-		this.contrastAgentProduct = contrastAgentProduct;
 	}
 
 	/**
@@ -251,25 +191,6 @@ public class MrProtocolMetadata extends AbstractGenericItem {
 	}
 
 	/**
-	 * @return the mrSequenceApplication
-	 */
-	public MrSequenceApplication getMrSequenceApplication() {
-		return MrSequenceApplication.getApplication(mrSequenceApplication);
-	}
-
-	/**
-	 * @param mrSequenceApplication
-	 *            the mrSequenceApplication to set
-	 */
-	public void setMrSequenceApplication(MrSequenceApplication mrSequenceApplication) {
-		if (mrSequenceApplication == null) {
-			this.mrSequenceApplication = null;
-		} else {
-			this.mrSequenceApplication = mrSequenceApplication.getId();
-		}
-	}
-
-	/**
 	 * @return the mrSequenceKSpaceFill
 	 */
 	public MrSequenceKSpaceFill getMrSequenceKSpaceFill() {
@@ -303,22 +224,42 @@ public class MrProtocolMetadata extends AbstractGenericItem {
 		this.mrSequenceName = mrSequenceName;
 	}
 
-	/**
-	 * @return the mrSequencePhysics
-	 */
-	public MrSequencePhysics getMrSequencePhysics() {
-		return MrSequencePhysics.getPhysics(mrSequencePhysics);
+	public List<MrScanningSequence> getMrScanningSequence() {
+		List<MrScanningSequence> mrScanningSequenceList = new ArrayList<MrScanningSequence>();
+		if (mrScanningSequence != null) {
+			for (Integer mrScanningSequenceId : mrScanningSequence) {
+				mrScanningSequenceList.add(MrScanningSequence.getScanningSequence(mrScanningSequenceId));
+			}
+		}
+		return mrScanningSequenceList;
 	}
 
-	/**
-	 * @param mrSequencePhysics
-	 *            the mrSequencePhysics to set
-	 */
-	public void setMrSequencePhysics(MrSequencePhysics mrSequencePhysics) {
-		if (mrSequencePhysics == null) {
-			this.mrSequencePhysics = null;
-		} else {
-			this.mrSequencePhysics = mrSequencePhysics.getId();
+	public void setMrScanningSequence(List<String> mrScanningSequenceList) {
+		if (mrScanningSequenceList != null && mrScanningSequenceList.size() > 0) {
+			mrScanningSequence = new ArrayList<Integer>();
+			for (String scanningSequence : mrScanningSequenceList) {
+				mrScanningSequence.add(MrScanningSequence.getIdByType(scanningSequence).getId());
+			}
+		}
+	}
+
+	
+	public List<MrSequenceVariant> getMrSequenceVariant() {
+		List<MrSequenceVariant> mrSequenceVariantList = new ArrayList<MrSequenceVariant>();
+		if (mrSequenceVariant != null) {
+			for (Integer mrScanningSequenceId : mrSequenceVariant) {
+				mrSequenceVariantList.add(MrSequenceVariant.getSequenceVariant(mrScanningSequenceId));
+			}
+		}
+		return mrSequenceVariantList;
+	}
+
+	public void setMrSequenceVariant(List<String> mrSequenceVariantList) {
+		if (mrSequenceVariantList != null && mrSequenceVariantList.size() > 0) {
+			mrSequenceVariant = new ArrayList<Integer>();
+			for (String sequenceVariant : mrSequenceVariantList) {
+				mrSequenceVariant.add(MrSequenceVariant.getIdByType(sequenceVariant).getId());
+			}
 		}
 	}
 
@@ -468,5 +409,7 @@ public class MrProtocolMetadata extends AbstractGenericItem {
 	public void setTransmittingCoilId(Long transmittingCoilId) {
 		this.transmittingCoilId = transmittingCoilId;
 	}
+	
+	
 
 }
