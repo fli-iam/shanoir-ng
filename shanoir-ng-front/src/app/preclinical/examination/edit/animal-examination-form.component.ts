@@ -472,7 +472,8 @@ export class AnimalExaminationFormComponent implements OnInit {
             this.selectedDateNormal = {
                 year: expirationDate.getFullYear(), month: expirationDate.getMonth() + 1,
                 day: expirationDate.getDate()
-            };;
+            };
+            
         }
     }
     
@@ -485,7 +486,7 @@ export class AnimalExaminationFormComponent implements OnInit {
             }
         } else {
             this.isDateValid = true;
-            setTimeout(():void => this.selectedDateNormal = null);
+            //setTimeout(():void => this.selectedDateNormal = null);
         }
     }
 
