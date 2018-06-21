@@ -56,6 +56,21 @@ public enum ContrastAgentUsed {
 		}
 		throw new IllegalArgumentException("No matching contrast agent used for id " + id);
 	}
+	
+	/**
+	 * Get an contrast agent Id by its name.
+	 * 
+	 * @param type
+	 *            constrast Agent
+	 * @return contrast Agent Id.
+	 */
+	public static ContrastAgentUsed getIdByType(final String type) {
+		if (type == null) {
+			return null;
+		}
+		return ContrastAgentUsed.valueOf(type);
+	}
+	
 
 	/**
 	 * @return the id

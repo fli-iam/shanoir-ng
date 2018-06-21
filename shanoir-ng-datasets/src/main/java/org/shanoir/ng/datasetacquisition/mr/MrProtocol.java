@@ -198,7 +198,7 @@ public class MrProtocol extends AbstractGenericItem {
 
 	/** Metadata updated by study card. */
 	@OneToOne
-	private MrProtocolMetadata updatedMetadata;
+	private MrProtocolSCMetadata updatedMetadata;
 
 	/**
 	 * @return the acquisitionDuration
@@ -631,7 +631,7 @@ public class MrProtocol extends AbstractGenericItem {
 	/**
 	 * @return the updatedMetadata
 	 */
-	public MrProtocolMetadata getUpdatedMetadata() {
+	public MrProtocolSCMetadata getUpdatedMetadata() {
 		return updatedMetadata;
 	}
 
@@ -639,7 +639,7 @@ public class MrProtocol extends AbstractGenericItem {
 	 * @param updatedMetadata
 	 *            the updatedMetadata to set
 	 */
-	public void setUpdatedMetadata(MrProtocolMetadata updatedMetadata) {
+	public void setUpdatedMetadata(MrProtocolSCMetadata updatedMetadata) {
 		this.updatedMetadata = updatedMetadata;
 	}
 
