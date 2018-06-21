@@ -2,7 +2,7 @@
 -- Has to be executed manually inside the docker container, command example : mysql -u {db user name} -p{password} < populate.sql
 -- ! But remember to wait for the java web server to have started since the schema is created by hibernate on startup !
 
-use datasets;
+use new_schema;
 
 INSERT INTO study_cards 
 	(id, acquisition_equipment_id, center_id, disabled, name, nifti_converter_id, study_id)
@@ -23,9 +23,9 @@ VALUES
 	(5, 15, now(), false, 1, 'examination5', 2, 15, 'examination5', true);
 
 INSERT INTO mr_protocol_metadata
-	(id, name)
+	(dtype, id, name)
 VALUES
-	(1, 'MRProtocol1');
+	(1,1, 'MRProtocol1');
 
 INSERT INTO mr_protocol
 	(id, echo_train_length, origin_metadata_id)

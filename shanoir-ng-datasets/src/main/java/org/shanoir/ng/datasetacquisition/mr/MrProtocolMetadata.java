@@ -3,9 +3,15 @@ package org.shanoir.ng.datasetacquisition.mr;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
+
 
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 
@@ -16,6 +22,10 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  *
  */
 @Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="dtype", 
+discriminatorType = DiscriminatorType.INTEGER)
+@DiscriminatorValue("1")
 public class MrProtocolMetadata extends AbstractGenericItem {
 
 	/**

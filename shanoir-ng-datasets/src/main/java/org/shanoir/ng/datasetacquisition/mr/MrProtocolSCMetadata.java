@@ -1,8 +1,14 @@
 package org.shanoir.ng.datasetacquisition.mr;
 
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 
 @Entity
+@DiscriminatorValue("2")
 public class MrProtocolSCMetadata extends MrProtocolMetadata {
 
 
