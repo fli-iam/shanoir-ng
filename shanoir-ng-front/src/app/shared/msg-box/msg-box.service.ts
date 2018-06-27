@@ -39,13 +39,17 @@ export class MsgBoxService {
     }
 
     private open() {
-        this.opened = true;
-        this.appRef.tick();
+        if (!this.opened) {
+            this.opened = true;
+            this.appRef.tick();
+        }
     }
 
     private close() {
-        this.opened = false;
-        this.appRef.tick();
+        if (this.opened) {
+            this.opened = false;
+            this.appRef.tick();
+        }
     }
 
     public isOpened(): boolean {
