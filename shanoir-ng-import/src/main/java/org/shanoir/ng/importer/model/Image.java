@@ -1,6 +1,7 @@
 package org.shanoir.ng.importer.model;
 
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -12,9 +13,18 @@ public class Image {
 	@JsonProperty("acquisitionNumber")
 	public int acquisitionNumber;
 
-	@JsonProperty("echoNumbers")
-	public List<Integer> echoNumbers;
+	@JsonProperty("echoTimes")
+	public Set<EchoTime> echoTimes;
+	
+	@JsonProperty("repetitionTime")
+	public Double repetitionTime;
+	
+	@JsonProperty("inversionTime")
+	public Double inversionTime;
 
+	@JsonProperty("flipAngle")
+	public String flipAngle;
+	
 	@JsonProperty("imageOrientationPatient")
 	public List<Double> imageOrientationPatient;
 
@@ -34,20 +44,44 @@ public class Image {
 		this.acquisitionNumber = acquisitionNumber;
 	}
 
-	public List<Integer> getEchoNumbers() {
-		return echoNumbers;
-	}
-
-	public void setEchoNumbers(List<Integer> echoNumbers) {
-		this.echoNumbers = echoNumbers;
-	}
-
 	public List<Double> getImageOrientationPatient() {
 		return imageOrientationPatient;
 	}
 
+	public Set<EchoTime> getEchoTimes() {
+		return echoTimes;
+	}
+
+	public void setEchoTimes(Set<EchoTime> echoTimes) {
+		this.echoTimes = echoTimes;
+	}
+
 	public void setImageOrientationPatient(List<Double> imageOrientationPatient) {
 		this.imageOrientationPatient = imageOrientationPatient;
+	}
+
+	public Double getRepetitionTime() {
+		return repetitionTime;
+	}
+
+	public void setRepetitionTime(Double repetitionTime) {
+		this.repetitionTime = repetitionTime;
+	}
+
+	public Double getInversionTime() {
+		return inversionTime;
+	}
+
+	public void setInversionTime(Double inversionTime) {
+		this.inversionTime = inversionTime;
+	}
+
+	public String getFlipAngle() {
+		return flipAngle;
+	}
+
+	public void setFlipAngle(String flipAngle) {
+		this.flipAngle = flipAngle;
 	}
 
 }

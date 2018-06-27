@@ -23,11 +23,6 @@ public class InversionTime extends AbstractGenericItem {
 	 */
 	private static final long serialVersionUID = -4243060486957154039L;
 
-	/** MR protocol. */
-	@ManyToOne
-	@JoinColumn(name = "mr_protocol_id")
-	private MrProtocol mrProtocol;
-
 	/** MR dataset. */
 	@ManyToOne
 	@JoinColumn(name = "mr_dataset_id")
@@ -39,21 +34,6 @@ public class InversionTime extends AbstractGenericItem {
 	 */
 	@NotNull
 	private Double inversionTimeValue;
-
-	/**
-	 * @return the mrProtocol
-	 */
-	public MrProtocol getMrProtocol() {
-		return mrProtocol;
-	}
-
-	/**
-	 * @param mrProtocol
-	 *            the mrProtocol to set
-	 */
-	public void setMrProtocol(MrProtocol mrProtocol) {
-		this.mrProtocol = mrProtocol;
-	}
 
 	/**
 	 * @return the inversionTimeValue
@@ -68,6 +48,14 @@ public class InversionTime extends AbstractGenericItem {
 	 */
 	public void setInversionTimeValue(Double inversionTimeValue) {
 		this.inversionTimeValue = inversionTimeValue;
+	}
+
+	public MrDataset getMrDataset() {
+		return mrDataset;
+	}
+
+	public void setMrDataset(MrDataset mrDataset) {
+		this.mrDataset = mrDataset;
 	}
 
 }

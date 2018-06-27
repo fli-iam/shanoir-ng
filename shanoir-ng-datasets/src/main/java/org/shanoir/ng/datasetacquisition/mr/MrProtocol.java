@@ -58,9 +58,9 @@ public class MrProtocol extends AbstractGenericItem {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<DiffusionGradient> diffusionGradients;
 
-	/** (0018,0081) VR=DS, VM=1 Echo Time In millisec. */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<EchoTime> echoTimes;
+//	/** (0018,0081) VR=DS, VM=1 Echo Time In millisec. */
+//	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
+//	private List<EchoTime> echoTimes;
 
 	/**
 	 * (0018,0091) Number of lines in k-space acquired per excitation per image.
@@ -70,9 +70,9 @@ public class MrProtocol extends AbstractGenericItem {
 	/** filters : private Siemens field (0051,1016). */
 	private String filters;
 
-	/** (0018,1314) Flip Angle In degrees. */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<FlipAngle> flipAngles;
+//	/** (0018,1314) Flip Angle In degrees. */
+//	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
+//	private List<FlipAngle> flipAngles;
 
 	/**
 	 * Rows (0028,0010) and first value of Pixel Spacing (0028,0030). The unit
@@ -95,12 +95,12 @@ public class MrProtocol extends AbstractGenericItem {
 	 */
 	private Double imagingFrequency;
 
-	/**
-	 * (0018,0082) Inversion time For IR sequences only. Ordered by rank of
-	 * arrival.
-	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<InversionTime> inversionTimeList;
+//	/**
+//	 * (0018,0082) Inversion time For IR sequences only. Ordered by rank of
+//	 * arrival.
+//	 */
+//	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
+//	private List<InversionTime> inversionTimeList;
 
 	/** The MR Dataset acquisition. */
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "mrProtocol")
@@ -168,12 +168,12 @@ public class MrProtocol extends AbstractGenericItem {
 	 */
 	private Double pixelSpacingY;
 
-	/**
-	 * (0018,0080) Repetition time In millisec. Not available for all seq.
-	 * Ordered by rank of arrival.
-	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<RepetitionTime> repetitionTimeList;
+//	/**
+//	 * (0018,0080) Repetition time In millisec. Not available for all seq.
+//	 * Ordered by rank of arrival.
+//	 */
+//	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
+//	private List<RepetitionTime> repetitionTimeList;
 
 	/**
 	 * (0018,0088) Spacing between slices Value of the prescribed spacing to be
@@ -259,21 +259,21 @@ public class MrProtocol extends AbstractGenericItem {
 	public void setDiffusionGradients(List<DiffusionGradient> diffusionGradients) {
 		this.diffusionGradients = diffusionGradients;
 	}
-
-	/**
-	 * @return the echoTimes
-	 */
-	public List<EchoTime> getEchoTimes() {
-		return echoTimes;
-	}
-
-	/**
-	 * @param echoTimes
-	 *            the echoTimes to set
-	 */
-	public void setEchoTimes(List<EchoTime> echoTimes) {
-		this.echoTimes = echoTimes;
-	}
+//
+//	/**
+//	 * @return the echoTimes
+//	 */
+//	public List<EchoTime> getEchoTimes() {
+//		return echoTimes;
+//	}
+//
+//	/**
+//	 * @param echoTimes
+//	 *            the echoTimes to set
+//	 */
+//	public void setEchoTimes(List<EchoTime> echoTimes) {
+//		this.echoTimes = echoTimes;
+//	}
 
 	/**
 	 * @return the echoTrainLength
@@ -305,20 +305,20 @@ public class MrProtocol extends AbstractGenericItem {
 		this.filters = filters;
 	}
 
-	/**
-	 * @return the flipAngles
-	 */
-	public List<FlipAngle> getFlipAngles() {
-		return flipAngles;
-	}
-
-	/**
-	 * @param flipAngles
-	 *            the flipAngles to set
-	 */
-	public void setFlipAngles(List<FlipAngle> flipAngles) {
-		this.flipAngles = flipAngles;
-	}
+//	/**
+//	 * @return the flipAngles
+//	 */
+//	public List<FlipAngle> getFlipAngles() {
+//		return flipAngles;
+//	}
+//
+//	/**
+//	 * @param flipAngles
+//	 *            the flipAngles to set
+//	 */
+//	public void setFlipAngles(List<FlipAngle> flipAngles) {
+//		this.flipAngles = flipAngles;
+//	}
 
 	/**
 	 * @return the fovX
@@ -384,20 +384,20 @@ public class MrProtocol extends AbstractGenericItem {
 		this.imagingFrequency = imagingFrequency;
 	}
 
-	/**
-	 * @return the inversionTimeList
-	 */
-	public List<InversionTime> getInversionTimeList() {
-		return inversionTimeList;
-	}
-
-	/**
-	 * @param inversionTimeList
-	 *            the inversionTimeList to set
-	 */
-	public void setInversionTimeList(List<InversionTime> inversionTimeList) {
-		this.inversionTimeList = inversionTimeList;
-	}
+//	/**
+//	 * @return the inversionTimeList
+//	 */
+//	public List<InversionTime> getInversionTimeList() {
+//		return inversionTimeList;
+//	}
+//
+//	/**
+//	 * @param inversionTimeList
+//	 *            the inversionTimeList to set
+//	 */
+//	public void setInversionTimeList(List<InversionTime> inversionTimeList) {
+//		this.inversionTimeList = inversionTimeList;
+//	}
 
 	/**
 	 * @return the mrDatasetAcquisition
@@ -568,20 +568,20 @@ public class MrProtocol extends AbstractGenericItem {
 		this.pixelSpacingY = pixelSpacingY;
 	}
 
-	/**
-	 * @return the repetitionTimeList
-	 */
-	public List<RepetitionTime> getRepetitionTimeList() {
-		return repetitionTimeList;
-	}
-
-	/**
-	 * @param repetitionTimeList
-	 *            the repetitionTimeList to set
-	 */
-	public void setRepetitionTimeList(List<RepetitionTime> repetitionTimeList) {
-		this.repetitionTimeList = repetitionTimeList;
-	}
+//	/**
+//	 * @return the repetitionTimeList
+//	 */
+//	public List<RepetitionTime> getRepetitionTimeList() {
+//		return repetitionTimeList;
+//	}
+//
+//	/**
+//	 * @param repetitionTimeList
+//	 *            the repetitionTimeList to set
+//	 */
+//	public void setRepetitionTimeList(List<RepetitionTime> repetitionTimeList) {
+//		this.repetitionTimeList = repetitionTimeList;
+//	}
 
 	/**
 	 * @return the sliceSpacing

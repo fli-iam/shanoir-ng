@@ -23,10 +23,6 @@ public class RepetitionTime extends AbstractGenericItem {
 	 */
 	private static final long serialVersionUID = -2253233141136120628L;
 
-	/** MR protocol. */
-	@ManyToOne
-	@JoinColumn(name = "mr_protocol_id")
-	private MrProtocol mrProtocol;
 
 	/** MR dataset. */
 	@ManyToOne
@@ -41,20 +37,6 @@ public class RepetitionTime extends AbstractGenericItem {
 	private Double repetitionTimeValue;
 
 	/**
-	 * @return the mrProtocol
-	 */
-	public MrProtocol getMrProtocol() {
-		return mrProtocol;
-	}
-
-	/**
-	 * @param mrProtocol the mrProtocol to set
-	 */
-	public void setMrProtocol(MrProtocol mrProtocol) {
-		this.mrProtocol = mrProtocol;
-	}
-
-	/**
 	 * @return the repetitionTimeValue
 	 */
 	public Double getRepetitionTimeValue() {
@@ -66,6 +48,10 @@ public class RepetitionTime extends AbstractGenericItem {
 	 */
 	public void setRepetitionTimeValue(Double repetitionTimeValue) {
 		this.repetitionTimeValue = repetitionTimeValue;
+	}
+
+	public void setMrDataset(MrDataset mrDataset) {
+		this.mrDataset = mrDataset;
 	}
 
 }

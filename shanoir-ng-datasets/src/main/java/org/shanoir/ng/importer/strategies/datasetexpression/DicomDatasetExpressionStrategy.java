@@ -114,45 +114,6 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 						pacsDatasetExpression.setFirstImageAcquisitionTime(contentTime);
 					}
 				}
-
-				/**
-				 * 
-				 * Retrieve EchoTime list that will be added to the MrProtocol..
-				 * 
-				 */
-				final Double echoTime = dicomAttributes.getDouble(Tag.EchoTime, -1D);
-				final int[] echoNumbers = dicomAttributes.getInts(Tag.EchoNumbers);
-				final Double flipAngle = dicomAttributes.getDouble(Tag.FlipAngle, -1D);
-				final Double inversionTime = dicomAttributes.getDouble(Tag.InversionTime, -1D);
-				final Double repetitionTime = dicomAttributes.getDouble(Tag.RepetitionTime, -1D);
-				// Echo time
-				if (echoTime != null && echoNumbers != null && echoNumbers.length == 1 && echoTime.doubleValue() != 0) {
-					final EchoTime echoTimeObject = new EchoTime();
-					echoTimeObject.setEchoNumber(echoNumbers[0]);
-					echoTimeObject.setEchoTimeValue(echoTime);
-					pacsDatasetExpression.addEchoTimeToMap(echoTimeObject.hashCode(), echoTimeObject);
-
-				}
-				// Flip angle
-				if (flipAngle != null && flipAngle.doubleValue() != 0) {
-					final FlipAngle flipAngleObject = new FlipAngle();
-					flipAngleObject.setFlipAngleValue(flipAngle);
-					pacsDatasetExpression.addFlipAngleToMap(flipAngle, flipAngleObject);
-				}
-				// Inversion time
-				if (inversionTime != null && inversionTime.doubleValue() != 0) {
-					final InversionTime inversionTimeObject = new InversionTime();
-					inversionTimeObject.setInversionTimeValue(inversionTime);
-					pacsDatasetExpression.addInversionTimeToMap(inversionTime, inversionTimeObject);
-
-				}
-				// Repetition time
-				if (repetitionTime != null && repetitionTime.doubleValue() != 0) {
-					final RepetitionTime repetitionTimeObject = new RepetitionTime();
-					repetitionTimeObject.setRepetitionTimeValue(repetitionTime);
-					pacsDatasetExpression.addRepetitionTimeToMap(repetitionTime, repetitionTimeObject);
-
-				}
 			}
 		}
 		return pacsDatasetExpression;

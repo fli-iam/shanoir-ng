@@ -25,10 +25,6 @@ public class EchoTime extends AbstractGenericItem {
 	 */
 	private static final long serialVersionUID = -6515796982839794497L;
 
-	/** MR protocol. */
-	@ManyToOne
-	@JoinColumn(name = "mr_protocol_id")
-	private MrProtocol mrProtocol;
 
 	/** MR dataset. */
 	@ManyToOne
@@ -48,21 +44,6 @@ public class EchoTime extends AbstractGenericItem {
 	 */
 	@NotNull
 	private Double echoTimeValue;
-
-	/**
-	 * @return the mrProtocol
-	 */
-	public MrProtocol getMrProtocol() {
-		return mrProtocol;
-	}
-
-	/**
-	 * @param mrProtocol
-	 *            the mrProtocol to set
-	 */
-	public void setMrProtocol(MrProtocol mrProtocol) {
-		this.mrProtocol = mrProtocol;
-	}
 
 	/**
 	 * @return the echoNumber
@@ -95,7 +76,11 @@ public class EchoTime extends AbstractGenericItem {
 	}
 	
 	
-	  @Override
+	public void setMrDataset(MrDataset mrDataset) {
+		this.mrDataset = mrDataset;
+	}
+
+	@Override
 	  public boolean equals(Object v) {
 	        boolean retVal = false;
 	        boolean retVal1 = false;

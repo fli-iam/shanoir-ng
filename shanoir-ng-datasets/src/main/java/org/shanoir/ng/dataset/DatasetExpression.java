@@ -88,17 +88,17 @@ public class DatasetExpression extends AbstractGenericItem {
 	@Transient	
 	private Date lastImageAcquisitionTime;
 	
-	@Transient 
-	private Map<Integer,EchoTime> echoTimes;
-
-	@Transient 
-	private Map<Double,FlipAngle> flipAngles;
-	
-	@Transient 
-	private Map<Double,InversionTime> inversionTimes;
-
-	@Transient 
-	private Map<Double,RepetitionTime> repetitionTimes;
+//	@Transient 
+//	private Map<Integer,EchoTime> echoTimes;
+//
+//	@Transient 
+//	private Map<Double,FlipAngle> flipAngles;
+//	
+//	@Transient 
+//	private Map<Double,InversionTime> inversionTimes;
+//
+//	@Transient 
+//	private Map<Double,RepetitionTime> repetitionTimes;
 	
 	/**
 	 * The converter version used for NIFTI conversion Must keep here so even if
@@ -321,74 +321,74 @@ public class DatasetExpression extends AbstractGenericItem {
 		this.lastImageAcquisitionTime = lastImageAcquisitionTime;
 	}
 
-	public Map<Integer, EchoTime> getEchoTimes() {
-		return echoTimes;
-	}
-	
-	public synchronized void addEchoTimeToMap(Integer mapKey, EchoTime echoTime) {
-		if (echoTimes == null) {
-			this.echoTimes = new HashMap<Integer,EchoTime>();
-		}
-		
-	    EchoTime anEchoTime = echoTimes.get(mapKey);
-	    if(anEchoTime == null) {
-	    	echoTimes.put(mapKey, echoTime);
-	    }
-	    
-	}
-
-	public Map<Double, FlipAngle> getFlipAngles() {
-		return flipAngles;
-	}
-
-	public synchronized void addFlipAngleToMap(Double mapKey,FlipAngle flipAngle) {
-		if (getFlipAngles() ==null) {
-			this.flipAngles = new HashMap<Double,FlipAngle>();
-			
-		}
-	
-	    FlipAngle aflipAngle = flipAngles.get(mapKey);
-
-	    if(aflipAngle == null) {
-	    	flipAngles.put(mapKey, flipAngle);
-	    } 
-
-	}
-
-	public Map<Double, InversionTime> getInversionTimes() {
-		return inversionTimes;
-	}
-
-	public synchronized void addInversionTimeToMap(Double mapKey,InversionTime inversionTime) {
-		if (getInversionTimes() == null) {
-			this.inversionTimes = new HashMap<Double,InversionTime>();
-			
-		}
-	
-		InversionTime inversionTimesList = inversionTimes.get(mapKey);
-
-	    if(inversionTimesList == null) {
-	    	inversionTimes.put(mapKey, inversionTime);
-	    }
-	    
-	}
-	
-	public Map<Double, RepetitionTime> getRepetitionTimes() {
-		return repetitionTimes;
-	}
-
-	public synchronized void addRepetitionTimeToMap(Double mapKey,RepetitionTime repetitionTime) {
-		if (getRepetitionTimes() ==null) {
-			this.repetitionTimes = new HashMap<Double,RepetitionTime>();
-			
-		}
-	
-		RepetitionTime repetitionsTimesList = repetitionTimes.get(mapKey);
-
-	    if(repetitionsTimesList == null) {
-	    	repetitionTimes.put(mapKey, repetitionTime);
-	    }
-	    
-	}
+//	public Map<Integer, EchoTime> getEchoTimes() {
+//		return echoTimes;
+//	}
+//	
+//	public synchronized void addEchoTimeToMap(Integer mapKey, EchoTime echoTime) {
+//		if (echoTimes == null) {
+//			this.echoTimes = new HashMap<Integer,EchoTime>();
+//		}
+//		
+//	    EchoTime anEchoTime = echoTimes.get(mapKey);
+//	    if(anEchoTime == null) {
+//	    	echoTimes.put(mapKey, echoTime);
+//	    }
+//	    
+//	}
+//
+//	public Map<Double, FlipAngle> getFlipAngles() {
+//		return flipAngles;
+//	}
+//
+//	public synchronized void addFlipAngleToMap(Double mapKey,FlipAngle flipAngle) {
+//		if (getFlipAngles() ==null) {
+//			this.flipAngles = new HashMap<Double,FlipAngle>();
+//			
+//		}
+//	
+//	    FlipAngle aflipAngle = flipAngles.get(mapKey);
+//
+//	    if(aflipAngle == null) {
+//	    	flipAngles.put(mapKey, flipAngle);
+//	    } 
+//
+//	}
+//
+//	public Map<Double, InversionTime> getInversionTimes() {
+//		return inversionTimes;
+//	}
+//
+//	public synchronized void addInversionTimeToMap(Double mapKey,InversionTime inversionTime) {
+//		if (getInversionTimes() == null) {
+//			this.inversionTimes = new HashMap<Double,InversionTime>();
+//			
+//		}
+//	
+//		InversionTime inversionTimesList = inversionTimes.get(mapKey);
+//
+//	    if(inversionTimesList == null) {
+//	    	inversionTimes.put(mapKey, inversionTime);
+//	    }
+//	    
+//	}
+//	
+//	public Map<Double, RepetitionTime> getRepetitionTimes() {
+//		return repetitionTimes;
+//	}
+//
+//	public synchronized void addRepetitionTimeToMap(Double mapKey,RepetitionTime repetitionTime) {
+//		if (getRepetitionTimes() ==null) {
+//			this.repetitionTimes = new HashMap<Double,RepetitionTime>();
+//			
+//		}
+//	
+//		RepetitionTime repetitionsTimesList = repetitionTimes.get(mapKey);
+//
+//	    if(repetitionsTimesList == null) {
+//	    	repetitionTimes.put(mapKey, repetitionTime);
+//	    }
+//	    
+//	}
 
 }

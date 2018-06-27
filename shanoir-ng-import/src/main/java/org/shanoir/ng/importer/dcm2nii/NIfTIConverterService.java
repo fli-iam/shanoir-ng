@@ -22,6 +22,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.DatasetFile;
 import org.shanoir.ng.importer.model.DiffusionGradient;
+import org.shanoir.ng.importer.model.EchoTime;
 import org.shanoir.ng.importer.model.ExpressionFormat;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.Patient;
@@ -641,10 +642,10 @@ public class NIfTIConverterService {
 			final HashMap<SerieToDatasetsSeparator, Dataset> datasetMap = new HashMap<SerieToDatasetsSeparator, Dataset>();
 			for (Image image : serie.getImages()) {
 				final int acquisitionNumber = image.getAcquisitionNumber();
-				int[] echoNumbersIntArray = convertIntegers(image.getEchoNumbers());
+				Set<EchoTime> echoTimes = image.getEchoTimes();
 				double[] imageOrientationPatientsDoubleArray = convertDoubles(image.getImageOrientationPatient());
 				SerieToDatasetsSeparator seriesToDatasetsSeparator =
-						new SerieToDatasetsSeparator(acquisitionNumber, echoNumbersIntArray, imageOrientationPatientsDoubleArray);
+						new SerieToDatasetsSeparator(acquisitionNumber, echoTimes, imageOrientationPatientsDoubleArray);
 				boolean found = false;
 				for (SerieToDatasetsSeparator seriesToDatasetsComparatorIterate : datasetMap.keySet()) {
 					if (seriesToDatasetsComparatorIterate.equals(seriesToDatasetsSeparator)) {
@@ -657,6 +658,10 @@ public class NIfTIConverterService {
 				if (found) {
 					DatasetFile datasetFile = createDatasetFile(image);
 					datasetMap.get(seriesToDatasetsSeparator).getExpressionFormats().get(0).getDatasetFiles().add(datasetFile);
+					datasetMap.get(seriesToDatasetsSeparator).getFlipAngles().add(new Double(image.getFlipAngle()));
+					datasetMap.get(seriesToDatasetsSeparator).getRepetitionTimes().add(new Double(image.getRepetitionTime()));
+					datasetMap.get(seriesToDatasetsSeparator).getInversionTimes().add(new Double(image.getInversionTime()));
+					datasetMap.get(seriesToDatasetsSeparator).setEchoTimes(image.getEchoTimes());
 				// new dataset has to be created, new expression format and add image/datasetfile
 				} else {
 					Dataset dataset = new Dataset();
@@ -664,6 +669,10 @@ public class NIfTIConverterService {
 					expressionFormat.setType("dcm");
 					dataset.getExpressionFormats().add(expressionFormat);
 					DatasetFile datasetFile = createDatasetFile(image);
+					dataset.getFlipAngles().add(new Double(image.getFlipAngle()));
+					dataset.getRepetitionTimes().add(new Double(image.getRepetitionTime()));
+					dataset.getInversionTimes().add(new Double(image.getInversionTime()));
+					dataset.setEchoTimes(image.getEchoTimes());
 					expressionFormat.getDatasetFiles().add(datasetFile);
 					datasetMap.put(seriesToDatasetsSeparator, dataset);
 					serie.getDatasets().add(dataset);
@@ -703,6 +712,10 @@ public class NIfTIConverterService {
 			Dataset dataset = new Dataset();
 			dataset.setName(serie.getSeriesDescription());
 			for (Image image : serie.getImages()) {
+				dataset.getFlipAngles().add(new Double(image.getFlipAngle()));
+				dataset.getRepetitionTimes().add(new Double(image.getRepetitionTime()));
+				dataset.getInversionTimes().add(new Double(image.getInversionTime()));
+				dataset.setEchoTimes(image.getEchoTimes());
 				ExpressionFormat expressionFormat = new ExpressionFormat();
 				expressionFormat.setType("dcm");
 				dataset.getExpressionFormats().add(expressionFormat);
@@ -722,7 +735,7 @@ public class NIfTIConverterService {
 		DatasetFile datasetFile = new DatasetFile();
 		datasetFile.setPath(image.getPath());
 		datasetFile.setAcquisitionNumber(image.getAcquisitionNumber());
-		datasetFile.setEchoNumbers(image.getEchoNumbers());
+//		datasetFile.setEchoTime(image.getEchoTimes());
 		datasetFile.setImageOrientationPatient(image.getImageOrientationPatient());
 		return datasetFile;
 	}
