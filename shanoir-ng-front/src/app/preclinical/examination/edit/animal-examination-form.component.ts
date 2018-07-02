@@ -21,6 +21,8 @@ import { CenterService } from '../../../centers/shared/center.service';
 import { StudyService } from '../../../studies/shared/study.service';
 import { IdNameObject } from '../../../shared/models/id-name-object.model';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { Subject } from '../../../subjects/shared/subject.model';
+import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { ImagesUrlUtil } from "../../../shared/utils/images-url.util";
@@ -67,10 +69,13 @@ export class AnimalExaminationFormComponent implements OnInit {
     examinationExtradatas: ExtraData[] = [];
     centers: IdNameObject[] = [];
     studies: IdNameObject[] = [];
+    subjects: Subject[] = [];
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
     isDateValid: boolean = true;
     selectedDateNormal: IMyDate;
     hasStudyCenterData : boolean = false;
+    animalSubjectId: number;
+    selectedSubjectId: number;
     
 
     constructor(
@@ -80,6 +85,7 @@ export class AnimalExaminationFormComponent implements OnInit {
         private centerService: CenterService,
         private studyService: StudyService,
         private animalExaminationService: AnimalExaminationService,
+        private animalSubjectService: AnimalSubjectService,
         private keycloakService: KeycloakService,
         public router: Router,
         private fb: FormBuilder,
@@ -92,6 +98,7 @@ export class AnimalExaminationFormComponent implements OnInit {
     ngOnInit(): void {
     	this.getCenters();
         this.getStudies();
+        this.getSubjects();
         this.getExamination();
         this.buildForm();
         this.initPrefillData();
@@ -131,6 +138,18 @@ export class AnimalExaminationFormComponent implements OnInit {
                 console.log("error getting study list!");
             });
     }
+    
+    getSubjects(): void{
+    	this.subjects = [];
+    	this.animalSubjectService.getPreclinicalSubjects(true)
+    		.then(subjects => {
+    			this.subjects = subjects;
+    		})
+    		.catch((error) => {
+                // TODO: display error
+                console.log("error getting subjects list!");
+            });
+    }
 
 
 	getExamination(): void {
@@ -156,9 +175,43 @@ export class AnimalExaminationFormComponent implements OnInit {
                 if (!this.mode.isCreateMode()) {
 					this.examination = examination;
                 	this.getDateToDatePicker(this.examination);
+                    this.setSelectedSubject();
+                	if(this.examination && this.examination.subject && this.examination.subject.id){
+                		this.animalSubjectService
+        					.findAnimalSubjectBySubjectId(this.examination.subject.id)
+        					.then(animalSubject => this.animalSubjectId = animalSubject.id)
+        					.catch((error) => {});
+        			}
                 }
                 
             });
+    }
+    
+    setSelectedSubject(){
+    	if (this.examination && this.examination.subject && this.examination.subject.id){
+    		this.selectedSubjectId = this.examination.subject.id;
+    	}
+    }
+    
+    getSubjectById(id: number): Subject{
+    	if (this.subjects){
+    		for (let s of this.subjects) {
+    			if (s.id === id){
+    				return s;
+    			}
+    		}
+    	}
+    	return null;
+    }
+    
+    updateSubject(){
+    	if (this.selectedSubjectId){
+    		let subject : Subject = this.getSubjectById(this.selectedSubjectId);
+    		this.examination.subject = new IdNameObject(this.selectedSubjectId, subject.name);
+    		this.examination.subjectName = subject.name;
+    		this.examination.subjectId = this.selectedSubjectId;
+    		
+    	}
     }
     
     
@@ -209,6 +262,7 @@ export class AnimalExaminationFormComponent implements OnInit {
             // 'Examination executive': [this.examination.examinationExecutive],
             'centerId': [this.examination.centerId, Validators.required],
             // 'Subject': [this.examination.subject],
+            'subject': [this.selectedSubjectId, Validators.required],
             'examinationDate': [this.examination.examinationDate],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
@@ -260,7 +314,8 @@ export class AnimalExaminationFormComponent implements OnInit {
 
     formErrors = {
         'centerId': '',
-        'studyId': ''
+        'studyId': '', 
+        'subject': ''
     };
 
     back(examination?: Examination): void {
@@ -285,6 +340,7 @@ export class AnimalExaminationFormComponent implements OnInit {
     create() {
         this.setDateFromDatePicker();
         this.examination.preclinical = true;
+        this.updateSubject();
         this.animalExaminationService.create(this.examination)
             .subscribe((examination) => {
             	this.examination_id = examination.id;
@@ -303,6 +359,7 @@ export class AnimalExaminationFormComponent implements OnInit {
     update() {
     	this.setDateFromDatePicker();
         this.examination.preclinical = true;
+        this.updateSubject();
         this.animalExaminationService.update(this.examination_id, this.examination)
             .subscribe((examination) => {
         		this.manageExaminationAnesthetic();
@@ -513,11 +570,12 @@ export class AnimalExaminationFormComponent implements OnInit {
             this.examination.comment = this.preFillData.comment;
             this.examination.subjectId = this.preFillData.subjectId;
             this.examination.subjectName = this.preFillData.subjectName;
+            this.examination.subject = new IdNameObject(this.preFillData.subjectId, this.preFillData.subjectName);
+            this.setSelectedSubject();
             this.buildForm();
             this.getDateToDatePicker(this.examination);
         }
     }
     
-
 
 }

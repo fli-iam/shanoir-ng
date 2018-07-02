@@ -78,18 +78,26 @@
 				</li>
 				<li>
 					<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
-					<!-- <span class="right-col" [ngSwitch]="mode.state">
+					<span class="right-col" [ngSwitch]="mode.state">
 						<ng-template [ngSwitchCase]="Modes.view">
-							{{examination.subject?.name}}
+							<a [routerLink]="['/preclinical-subject']" [queryParams]="{mode: 'view', id: animalSubjectId}">
+								{{examination.subject?.name}}
+							</a>
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="subject" required formControlName="Subject" [(ngModel)]=".examination.subject">
-								<option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
-							</select>
+							<div [ngSwitch]="hasStudyCenterData">
+								<ng-template [ngSwitchCase]="true">
+									{{examination.subjectName}}
+								</ng-template>
+								<ng-template [ngSwitchCase]="false">
+									<select id="subject" required formControlName="subject" [(ngModel)]="selectedSubjectId" >
+										<option *ngFor="let subject of subjects" [ngValue]="subject.id">{{subject.name}}</option>
+									</select>
+									<label *ngIf="formErrors.subject.includes('required')" class="form-validation-alert" i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">Subject is required!</label>
+								</ng-template>
+							</div>
 						</ng-template>
 					</span>
-						-->
-						{{examination.subjectName}}
 				</li> 
 				<li>
 					<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</label>
