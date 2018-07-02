@@ -6,6 +6,7 @@ export class Examination {
     examinationExecutive: IdNameObject;
     subjectId: number;
     subjectName: string;
+    subject: IdNameObject;
     studyId: number;
     studyName: string;
     centerId: number;
