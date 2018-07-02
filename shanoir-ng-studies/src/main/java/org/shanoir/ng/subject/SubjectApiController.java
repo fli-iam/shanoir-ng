@@ -71,6 +71,17 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
+	public ResponseEntity<List<SubjectDTO>> findSubjectsByPreclinical(
+			@ApiParam(value = "preclinical value", required = true) @PathVariable("preclinical") Boolean preclinical) {
+		final List<Subject> subjects = subjectService.findBy("preclinical", preclinical);
+
+		if (subjects.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
+	}
+
+	@Override
 	public ResponseEntity<Subject> saveNewSubject(
 			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException {
