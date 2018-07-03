@@ -7,10 +7,15 @@ import { SubjectType } from '../../subjects/shared/subject.types';
 export class SubjectStudyPipe implements PipeTransform {
 
     transform(subjectStudy: SubjectStudy) {
+        let displayedIdentifier: string = "";
         if (subjectStudy) {
-            return subjectStudy.subjectStudyIdentifier + (subjectStudy.subjectType ? ' (' + subjectStudy.subjectType + ')' : '');
+            if (subjectStudy.subjectStudyIdentifier) {
+                displayedIdentifier = subjectStudy.subjectStudyIdentifier;
+            } else {
+                displayedIdentifier = subjectStudy.subject.name;
+            }
+            displayedIdentifier += (subjectStudy.subjectType ? ' (' + subjectStudy.subjectType + ')' : '')
         }
-        return "";
+        return displayedIdentifier;
     }
-
 }
