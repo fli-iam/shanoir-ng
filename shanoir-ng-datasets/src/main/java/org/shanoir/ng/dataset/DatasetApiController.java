@@ -18,6 +18,8 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -56,6 +58,9 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private DatasetMapper datasetMapper;
+
+	@Autowired
+	private MrDatasetMapper mrDatasetMapper;
 	
 	@Autowired
 	private DatasetService<Dataset> datasetService;
@@ -99,6 +104,10 @@ public class DatasetApiController implements DatasetApi {
 		final Dataset dataset = datasetService.findById(datasetId);
 		if (dataset == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		
+		if (dataset instanceof MrDataset) {
+			return new ResponseEntity<>(mrDatasetMapper.datasetToDatasetDTO((MrDataset) dataset), HttpStatus.OK);
 		}
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(dataset), HttpStatus.OK);
 	}
