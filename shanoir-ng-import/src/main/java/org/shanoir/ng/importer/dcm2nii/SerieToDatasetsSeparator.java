@@ -57,7 +57,7 @@ public class SerieToDatasetsSeparator {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + acquisitionNumber;
-		result = prime * result + (echoTime.hashCode());
+		result = prime * result + echoTime.hashCode();
 		result = prime * result + Arrays.hashCode(imageOrientationPatient);
 		return result;
 	}
@@ -81,7 +81,7 @@ public class SerieToDatasetsSeparator {
 		if (acquisitionNumber != other.acquisitionNumber) {
 			return false;
 		}
-		if (echoTime != other.echoTime) {
+		if (echoTime.hashCode() != other.echoTime.hashCode()) {
 			return false;
 		}
 		if (!imageOrientationEquals(imageOrientationPatient, other.imageOrientationPatient)) {
