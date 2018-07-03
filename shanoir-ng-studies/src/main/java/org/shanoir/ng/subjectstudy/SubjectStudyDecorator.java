@@ -29,9 +29,7 @@ public class SubjectStudyDecorator implements SubjectStudyMapper {
 	@Override
 	public SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy) {
 		final SubjectStudyDTO subjectStudyDTO = delegate.subjectStudyToSubjectStudyDTO(subjectStudy);
-		if (StringUtils.isEmpty(subjectStudy.getSubjectStudyIdentifier())) {
-			subjectStudyDTO.setSubjectStudyIdentifier(subjectStudy.getSubject().getIdentifier());
-		} else {
+		if (!StringUtils.isEmpty(subjectStudy.getSubjectStudyIdentifier())) {
 			subjectStudyDTO.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
 		}
 		return subjectStudyDTO;
