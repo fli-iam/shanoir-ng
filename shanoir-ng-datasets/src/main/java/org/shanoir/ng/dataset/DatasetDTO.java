@@ -1,6 +1,12 @@
 package org.shanoir.ng.dataset;
 
 import java.time.LocalDate;
+import java.util.List;
+import org.shanoir.ng.shared.model.EchoTime;
+import org.shanoir.ng.shared.model.FlipAngle;
+import org.shanoir.ng.shared.model.InversionTime;
+import org.shanoir.ng.shared.model.RepetitionTime;
+
 
 /**
  * DTO for dataset.
@@ -27,6 +33,15 @@ public class DatasetDTO {
 	private String name;
 	
 	private String type;
+
+	private List<EchoTime> echoTime;
+
+	private List<FlipAngle> flipAngle;
+
+	private List<InversionTime> inversionTime;
+	
+	private List<RepetitionTime> repetitionTime;
+
 
 	/**
 	 * @return the creationDate
@@ -149,6 +164,38 @@ public class DatasetDTO {
 		this.type = type;
 	}
 	
+
+	public List<EchoTime> getEchoTime() {
+		return echoTime;
+	}
+
+	public void setEchoTime(List<EchoTime> echoTime) {
+		this.echoTime = echoTime;
+	}
+
+	public List<FlipAngle> getFlipAngle() {
+		return flipAngle;
+	}
+
+	public void setFlipAngle(List<FlipAngle> flipAngle) {
+		this.flipAngle = flipAngle;
+	}
+
+	public List<InversionTime> getInversionTime() {
+		return inversionTime;
+	}
+
+	public void setInversionTime(List<InversionTime> inversionTime) {
+		this.inversionTime = inversionTime;
+	}
+
+	public List<RepetitionTime> getRepetitionTime() {
+		return repetitionTime;
+	}
+
+	public void setRepetitionTime(List<RepetitionTime> repetitionTime) {
+		this.repetitionTime = repetitionTime;
+	}
 	
 	
 	

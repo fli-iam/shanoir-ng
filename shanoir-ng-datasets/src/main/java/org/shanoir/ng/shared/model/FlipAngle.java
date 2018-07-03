@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * This class represents a flip angle. It is used in the MR protocol to list and
@@ -26,6 +27,7 @@ public class FlipAngle extends AbstractGenericItem {
 	/** MR dataset. */
 	@ManyToOne
 	@JoinColumn(name = "mr_dataset_id")
+	@JsonIgnore
 	private MrDataset mrDataset;
 	
 	/**
