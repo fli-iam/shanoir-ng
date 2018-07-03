@@ -265,7 +265,7 @@ public class DicomFileAnalyzerService {
 		}
 
 		if (image.path("inversionTime").isMissingNode()) {
-			Double inversionTime = attributes.getDouble(Tag.InversionTimes, 0);
+			Double inversionTime = attributes.getDouble(Tag.InversionTime, 0);
 			((ObjectNode) image).put("inversionTime", inversionTime);
 		}
 
