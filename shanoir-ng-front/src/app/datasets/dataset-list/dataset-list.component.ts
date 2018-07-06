@@ -105,16 +105,11 @@ export class DatasetListComponent {
                     this.viewContainerRef)
                 .subscribe(res => {
                     if (res) {
-                        this.loading = true;
-                        console.log('8===>');
                         this.datasetService.delete(item.id).then(() => {
                             let index: number = this.datasets.indexOf(item);
                             if (index > -1) this.datasets.splice(index, 1);
-                            this.loading = false;
-                            console.log('(°)');
                             this.msgService.log('info', 'The dataset has been sucessfully deleted');
-                        }, 
-                        () => this.loading = false );
+                        });
                     }
                 })
     }
