@@ -8,6 +8,7 @@ import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
 import { PathologyModel } from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
+import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
 
 
 @Component({
@@ -28,6 +29,7 @@ export class PathologyModelsListComponent {
         public router: Router,
         private keycloakService: KeycloakService,
         public confirmDialogService: ConfirmDialogService, 
+        public subjectPathologyService: SubjectPathologyService,
         private viewContainerRef: ViewContainerRef) {
             this.getPathologyModels();
             this.createColumnDefs();
@@ -97,7 +99,7 @@ export class PathologyModelsListComponent {
             this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.DOWNLOAD_ICON_PATH, action: this.downloadModelSpecifications,component:this});
         }
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeletePathologyModelConfirmDialog},
+            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.checkSubjectsForPathologyModel},
             {headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target : "/preclinical-pathologies-model", getParams: function(item: any): Object {
                 return {id: item.id, mode: "edit"};
             }});
@@ -132,6 +134,29 @@ export class PathologyModelsListComponent {
                 });
     }
  
+ 
+ 	checkSubjectsForPathologyModel= (item: PathologyModel) => {
+ 		 this.subjectPathologyService.getAllSubjectForPathologyModel(item.id).then(subjectPathologies => {
+    		if (subjectPathologies){
+    			let hasSubjects: boolean  = false;
+    			hasSubjects = subjectPathologies.length > 0;
+    			if (hasSubjects){
+    				this.confirmDialogService
+                		.confirm('Delete pathology model', 'This pathology model is linked to subjects, it can not be deleted', 
+                    		this.viewContainerRef)
+    			}else{
+    				this.openDeletePathologyModelConfirmDialog(item);
+    			}
+    		}else{
+    			this.openDeletePathologyModelConfirmDialog(item);
+    		}
+    	}).catch((error) => {
+    		console.log(error);
+    		this.openDeletePathologyModelConfirmDialog(item);
+    	});    
+ 	}
+ 
+
     deleteAll = () => {
         let ids: number[] = [];
         for (let model of this.models) {
