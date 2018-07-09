@@ -2,6 +2,7 @@ package org.shanoir.ng.preclinical.anesthetics.examination_anesthetics;
 
 import java.util.List;
 
+import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -10,7 +11,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
 
 /**
  * Examination anesthetic service implementation.
@@ -41,7 +41,7 @@ public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticSe
 	public List<ExaminationAnesthetic> findAll() {
 		return Utils.toList(examAnestheticsRepository.findAll());
 	}
-	
+
 	@Override
 	public List<ExaminationAnesthetic> findByExaminationId(Long examinationId) {
 		return Utils.toList(examAnestheticsRepository.findByExaminationId(examinationId));
@@ -51,7 +51,7 @@ public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticSe
 	public List<ExaminationAnesthetic> findBy(final String fieldName, final Object value) {
 		return examAnestheticsRepository.findBy(fieldName, value);
 	}
-	
+
 	@Override
 	public ExaminationAnesthetic findById(final Long id) {
 		return examAnestheticsRepository.findOne(id);
@@ -59,11 +59,12 @@ public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticSe
 
 	@Override
 	public ExaminationAnesthetic save(final ExaminationAnesthetic examAnesthetic) throws ShanoirPreclinicalException {
-		ExaminationAnesthetic savedExamAnesthetic= null;
+		ExaminationAnesthetic savedExamAnesthetic = null;
 		try {
 			savedExamAnesthetic = examAnestheticsRepository.save(examAnesthetic);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while creating examination anesthetic: " + dive.getMessage());
+			ShanoirPreclinicalException.logAndThrow(LOG,
+					"Error while creating examination anesthetic: " + dive.getMessage());
 		}
 		return savedExamAnesthetic;
 	}
@@ -75,13 +76,19 @@ public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticSe
 		try {
 			examAnestheticsRepository.save(examAnestheticDb);
 		} catch (Exception e) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while updating an  examination anesthetic: " + e.getMessage());
+			ShanoirPreclinicalException.logAndThrow(LOG,
+					"Error while updating an  examination anesthetic: " + e.getMessage());
 		}
 		return examAnestheticDb;
 	}
 
+	@Override
+	public List<ExaminationAnesthetic> findByAnesthetic(Anesthetic anesthetic) {
+		return Utils.toList(examAnestheticsRepository.findByAnesthetic(anesthetic));
+	}
 
-	private ExaminationAnesthetic updateModelValues(final ExaminationAnesthetic examAnestheticDb, final ExaminationAnesthetic examAnesthetic) {
+	private ExaminationAnesthetic updateModelValues(final ExaminationAnesthetic examAnestheticDb,
+			final ExaminationAnesthetic examAnesthetic) {
 		examAnestheticDb.setAnesthetic(examAnesthetic.getAnesthetic());
 		examAnestheticDb.setDose(examAnesthetic.getDose());
 		examAnestheticDb.setDoseUnit(examAnesthetic.getDoseUnit());

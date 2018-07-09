@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
+import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticService;
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
@@ -49,6 +50,8 @@ public class ExaminationAnestheticApiControllerTest {
 	private static final String REQUEST_PATH = REQUEST_PATH_EXAMINATION + EXAMINATION_ID + REQUEST_PATH_ANESTHETIC;
 	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+	private static final String REQUEST_PATH_EXAMINATION_BY_ANESTHETIC = REQUEST_PATH_EXAMINATION + "/all"
+			+ REQUEST_PATH_ANESTHETIC + "/1";
 
 	private Gson gson;
 
@@ -68,11 +71,14 @@ public class ExaminationAnestheticApiControllerTest {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(examAnestheticServiceMock).deleteById(1L);
+		given(anestheticsServiceMock.findById(1L)).willReturn(new Anesthetic());
 		given(examAnestheticServiceMock.findAll()).willReturn(Arrays.asList(new ExaminationAnesthetic()));
 		given(examAnestheticServiceMock.findByExaminationId(1L)).willReturn(Arrays.asList(new ExaminationAnesthetic()));
 		given(examAnestheticServiceMock.findById(1L)).willReturn(new ExaminationAnesthetic());
 		given(examAnestheticServiceMock.save(Mockito.mock(ExaminationAnesthetic.class)))
 				.willReturn(new ExaminationAnesthetic());
+		given(examAnestheticServiceMock.findByAnesthetic(new Anesthetic()))
+				.willReturn(Arrays.asList(new ExaminationAnesthetic()));
 	}
 
 	@Test
@@ -108,6 +114,13 @@ public class ExaminationAnestheticApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(gson.toJson(AnestheticModelUtil.createExaminationAnesthetic()))).andExpect(status().isOk());
+	}
+
+	@Test
+	public void findExaminationsByAnestheticTest() throws Exception {
+		mvc.perform(
+				MockMvcRequestBuilders.get(REQUEST_PATH_EXAMINATION_BY_ANESTHETIC).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
 	}
 
 }

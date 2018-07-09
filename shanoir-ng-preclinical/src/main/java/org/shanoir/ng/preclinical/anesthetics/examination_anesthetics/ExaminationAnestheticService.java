@@ -2,10 +2,9 @@ package org.shanoir.ng.preclinical.anesthetics.examination_anesthetics;
 
 import java.util.List;
 
+import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
-
-
 
 /**
  * Examination anesthetic service.
@@ -30,8 +29,7 @@ public interface ExaminationAnestheticService extends UniqueCheckableService<Exa
 	 * @return a list of examination anesthetics
 	 */
 	List<ExaminationAnesthetic> findAll();
-	
-	
+
 	/**
 	 * Get all the examination anesthetics by examination id
 	 * 
@@ -39,7 +37,6 @@ public interface ExaminationAnestheticService extends UniqueCheckableService<Exa
 	 */
 	List<ExaminationAnesthetic> findByExaminationId(Long examinationId);
 
-	
 	/**
 	 * Find examination anesthetic by its id.
 	 *
@@ -52,8 +49,8 @@ public interface ExaminationAnestheticService extends UniqueCheckableService<Exa
 	/**
 	 * Save an examination anesthetic
 	 *
-	 * @param examination anesthetic
-	 *            examination anesthetic to create.
+	 * @param examination
+	 *            anesthetic examination anesthetic to create.
 	 * @return created ExaminationAnesthetic.
 	 * @throws ShanoirPreclinicalException
 	 */
@@ -62,13 +59,18 @@ public interface ExaminationAnestheticService extends UniqueCheckableService<Exa
 	/**
 	 * Update a examination anesthetic
 	 *
-	 * @param examination anesthetic
-	 *            examination anesthetic to update.
+	 * @param examination
+	 *            anesthetic examination anesthetic to update.
 	 * @return updated ExaminationAnesthetic.
 	 * @throws ShanoirPreclinicalException
 	 */
 	ExaminationAnesthetic update(ExaminationAnesthetic examAnesthetic) throws ShanoirPreclinicalException;
 
-	
+	/**
+	 * Get all the examination anesthetics by anesthetic
+	 * 
+	 * @return a list of examination anesthetics
+	 */
+	List<ExaminationAnesthetic> findByAnesthetic(Anesthetic anesthetic);
 
 }

@@ -2,6 +2,8 @@ package org.shanoir.ng.preclinical.anesthetics.examination_anesthetics;
 
 import java.util.List;
 
+import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
+import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -28,6 +30,9 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 
 	@Autowired
 	private ExaminationAnestheticService examAnestheticsService;
+
+	@Autowired
+	private AnestheticService anestheticsService;
 
 	public ResponseEntity<ExaminationAnesthetic> addExaminationAnesthetic(
 			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
@@ -122,6 +127,21 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
 		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+
+	public ResponseEntity<List<ExaminationAnesthetic>> getExaminationAnestheticsByAnesthetic(
+			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id)
+			throws RestServiceException {
+		Anesthetic anesthetic = anestheticsService.findById(id);
+		if (anesthetic == null) {
+			return new ResponseEntity<List<ExaminationAnesthetic>>(HttpStatus.NOT_FOUND);
+		} else {
+			final List<ExaminationAnesthetic> subexaminations = examAnestheticsService.findByAnesthetic(anesthetic);
+			if (subexaminations.isEmpty()) {
+				return new ResponseEntity<List<ExaminationAnesthetic>>(HttpStatus.NO_CONTENT);
+			}
+			return new ResponseEntity<List<ExaminationAnesthetic>>(subexaminations, HttpStatus.OK);
+		}
 	}
 
 	private FieldErrorMap getUpdateRightsErrors(final ExaminationAnesthetic examAnesthetic) {
