@@ -9,6 +9,7 @@ import { TherapyService } from '../shared/therapy.service';
 import { TherapyType } from "../../../shared/enum/therapyType";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
+import { SubjectTherapyService } from '../../subjectTherapy/shared/subjectTherapy.service';
 
 @Component({
   selector: 'therapy-list',
@@ -27,7 +28,9 @@ export class TherapiesListComponent {
         public therapyService: TherapyService,
         public router: Router,
         private keycloakService: KeycloakService,
-        public confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
+        public confirmDialogService: ConfirmDialogService,
+        public subjectTherapyService: SubjectTherapyService, 
+        private viewContainerRef: ViewContainerRef) {
             this.getTherapies();
             this.createColumnDefs();
      }   
@@ -67,7 +70,7 @@ export class TherapiesListComponent {
             {headerName: "Comment", field: "comment"}
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteTherapyConfirmDialog},
+            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.checkSubjectsForTherapy},
             {headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target : "/preclinical-therapy", getParams: function(item: any): Object {
                 return {id: item.id, mode: "edit"};
             }});
@@ -111,4 +114,25 @@ export class TherapiesListComponent {
             console.log("TODO : delete those ids : " + ids);
         }
     }
+    
+    checkSubjectsForTherapy= (item: Therapy) => {
+ 		 this.subjectTherapyService.getAllSubjectForTherapy(item.id).then(subjectTherapies => {
+    		if (subjectTherapies){
+    			let hasSubjects: boolean  = false;
+    			hasSubjects = subjectTherapies.length > 0;
+    			if (hasSubjects){
+    				this.confirmDialogService
+                		.confirm('Delete therapy', 'This therapy is linked to subjects, it can not be deleted', 
+                    		this.viewContainerRef)
+    			}else{
+    				this.openDeleteTherapyConfirmDialog(item);
+    			}
+    		}else{
+    			this.openDeleteTherapyConfirmDialog(item);
+    		}
+    	}).catch((error) => {
+    		console.log(error);
+    		this.openDeleteTherapyConfirmDialog(item);
+    	});    
+ 	}
 }

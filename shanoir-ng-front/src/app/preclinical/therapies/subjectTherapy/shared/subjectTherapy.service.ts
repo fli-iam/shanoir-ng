@@ -65,14 +65,15 @@ export class SubjectTherapyService {
             .map(res => res);
     }
 
-    /*This method is to avoid unexpected error if returned object is null*/
-    private extractData(res: Response) {
-        let body;
-        // check if empty, before call json
-        if (res.text()) {
-            body = res.json();
-        }
-        return body || {};
+     getAllSubjectForTherapy(tid: number): Promise<SubjectTherapy[]> {
+    	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}${PreclinicalUtils.PRECLINICAL_ALL_URL}/${PreclinicalUtils.PRECLINICAL_THERAPY}/${tid}`;
+    	return this.http.get<SubjectTherapy[]>(url)
+                    .toPromise()
+                    .then(response => response)
+                    .catch((error) => {
+                        console.error('Error while getting SubjectTherapy for a Therapy', error);
+                        return Promise.reject(error.message || error);
+         			});
     }
 
 }
