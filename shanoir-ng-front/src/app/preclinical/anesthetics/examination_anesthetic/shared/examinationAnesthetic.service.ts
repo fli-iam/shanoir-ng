@@ -56,14 +56,15 @@ export class ExaminationAnestheticService {
             	});
     	}
 
-        /*This method is to avoid unexpected error if returned object is null*/
-        private extractData(res: Response) {
-            let body;        
-            // check if empty, before call json
-            if (res.text()) {
-                body = res.json();
-            }
-            return body || {};
-        }
+        getAllExaminationForAnesthetic(aid: number): Promise<ExaminationAnesthetic[]> {
+    		const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}${PreclinicalUtils.PRECLINICAL_ALL_URL}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}/${aid}`;
+    		return this.http.get<ExaminationAnesthetic[]>(url)
+                    .toPromise()
+                    .then(response => response)
+                    .catch((error) => {
+                        console.error('Error while getting ExaminationAnesthetic for an Anesthetic', error);
+                        return Promise.reject(error.message || error);
+         			});
+    	}
     
 }

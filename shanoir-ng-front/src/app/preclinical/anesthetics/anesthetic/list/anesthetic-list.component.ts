@@ -8,6 +8,7 @@ import { Anesthetic } from '../shared/anesthetic.model';
 import { AnestheticService } from '../shared/anesthetic.service';
 import { AnestheticType } from "../../../shared/enum/anestheticType";
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
+import { ExaminationAnestheticService } from '../../examination_anesthetic/shared/examinationAnesthetic.service';
 
 @Component({
   selector: 'anesthetic-list',
@@ -26,7 +27,9 @@ export class AnestheticsListComponent {
         public anestheticsService: AnestheticService,
         public router: Router,
         private keycloakService: KeycloakService,
-        public confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
+        public confirmDialogService: ConfirmDialogService,
+        public examinationAnestheticService: ExaminationAnestheticService,
+        private viewContainerRef: ViewContainerRef) {
             this.getAnesthetics(); 
             this.createColumnDefs();
      }
@@ -86,7 +89,7 @@ export class AnestheticsListComponent {
             }}
         ];        
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteAnestheticConfirmDialog},
+            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.checkExaminationsForAnesthetics},
             {headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target : "/preclinical-anesthetic", getParams: function(item: any): Object {
                 return {id: item.id, mode: "edit"};
             }});
@@ -131,5 +134,27 @@ export class AnestheticsListComponent {
             console.log("TODO : delete those ids : " + ids);
         }
     }
+    
+    
+ 	checkExaminationsForAnesthetics= (item: Anesthetic) => {
+ 		 this.examinationAnestheticService.getAllExaminationForAnesthetic(item.id).then(examinationAnesthetics => {
+    		if (examinationAnesthetics){
+    			let hasExams: boolean  = false;
+    			hasExams = examinationAnesthetics.length > 0;
+    			if (hasExams){
+    				this.confirmDialogService
+                		.confirm('Delete anesthetic', 'This anesthetic is linked to preclinical examinations, it can not be deleted', 
+                    		this.viewContainerRef)
+    			}else{
+    				this.openDeleteAnestheticConfirmDialog(item);
+    			}
+    		}else{
+    			this.openDeleteAnestheticConfirmDialog(item);
+    		}
+    	}).catch((error) => {
+    		console.log(error);
+    		this.openDeleteAnestheticConfirmDialog(item);
+    	});    
+ 	}
 
 }
