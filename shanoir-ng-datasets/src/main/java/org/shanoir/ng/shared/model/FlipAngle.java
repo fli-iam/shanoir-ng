@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * This class represents a flip angle. It is used in the MR protocol to list and
@@ -23,15 +24,10 @@ public class FlipAngle extends AbstractGenericItem {
 	 */
 	private static final long serialVersionUID = 7894925972778553896L;
 
-	/** MR protocol. */
-	@ManyToOne
-	@JoinColumn(name = "mr_protocol_id")
-	private MrProtocol mrProtocol;
-
-
 	/** MR dataset. */
 	@ManyToOne
 	@JoinColumn(name = "mr_dataset_id")
+	@JsonIgnore
 	private MrDataset mrDataset;
 	
 	/**
@@ -39,27 +35,12 @@ public class FlipAngle extends AbstractGenericItem {
 	 * measure must be in millisec.
 	 */
 	@NotNull
-	private Double flipAngleValue;
-
-	/**
-	 * @return the mrProtocol
-	 */
-	public MrProtocol getMrProtocol() {
-		return mrProtocol;
-	}
-
-	/**
-	 * @param mrProtocol
-	 *            the mrProtocol to set
-	 */
-	public void setMrProtocol(MrProtocol mrProtocol) {
-		this.mrProtocol = mrProtocol;
-	}
+	private String flipAngleValue;
 
 	/**
 	 * @return the flipAngleValue
 	 */
-	public Double getFlipAngleValue() {
+	public String getFlipAngleValue() {
 		return flipAngleValue;
 	}
 
@@ -67,8 +48,16 @@ public class FlipAngle extends AbstractGenericItem {
 	 * @param flipAngleValue
 	 *            the flipAngleValue to set
 	 */
-	public void setFlipAngleValue(Double flipAngleValue) {
+	public void setFlipAngleValue(String flipAngleValue) {
 		this.flipAngleValue = flipAngleValue;
+	}
+
+	public MrDataset getMrDataset() {
+		return mrDataset;
+	}
+
+	public void setMrDataset(MrDataset mrDataset) {
+		this.mrDataset = mrDataset;
 	}
 
 }

@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * This class represents an inversion time. It is used in the MR protocol to
@@ -23,14 +24,10 @@ public class InversionTime extends AbstractGenericItem {
 	 */
 	private static final long serialVersionUID = -4243060486957154039L;
 
-	/** MR protocol. */
-	@ManyToOne
-	@JoinColumn(name = "mr_protocol_id")
-	private MrProtocol mrProtocol;
-
 	/** MR dataset. */
 	@ManyToOne
 	@JoinColumn(name = "mr_dataset_id")
+	@JsonIgnore
 	private MrDataset mrDataset;
 	
 	/**
@@ -39,21 +36,6 @@ public class InversionTime extends AbstractGenericItem {
 	 */
 	@NotNull
 	private Double inversionTimeValue;
-
-	/**
-	 * @return the mrProtocol
-	 */
-	public MrProtocol getMrProtocol() {
-		return mrProtocol;
-	}
-
-	/**
-	 * @param mrProtocol
-	 *            the mrProtocol to set
-	 */
-	public void setMrProtocol(MrProtocol mrProtocol) {
-		this.mrProtocol = mrProtocol;
-	}
 
 	/**
 	 * @return the inversionTimeValue
@@ -68,6 +50,14 @@ public class InversionTime extends AbstractGenericItem {
 	 */
 	public void setInversionTimeValue(Double inversionTimeValue) {
 		this.inversionTimeValue = inversionTimeValue;
+	}
+
+	public MrDataset getMrDataset() {
+		return mrDataset;
+	}
+
+	public void setMrDataset(MrDataset mrDataset) {
+		this.mrDataset = mrDataset;
 	}
 
 }

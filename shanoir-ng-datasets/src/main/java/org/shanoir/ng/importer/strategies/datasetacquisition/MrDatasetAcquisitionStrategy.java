@@ -75,6 +75,9 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	
 		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level. 
 		DatasetsWrapper<Dataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+		for (Dataset dataset : datasetsWrapper.getDatasets()) {
+			dataset.setDatasetAcquisition(mrDatasetAcquisition);
+		}
 		mrDatasetAcquisition.setDatasets(datasetsWrapper.getDatasets());
 		
 		// total acquisition time
@@ -87,27 +90,6 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);
 			}
 		}
-		
-		// building EchoTime, InversionTime, FlipAngle, RepetitionTime for MrProcotol based on dataset
-		Map<Integer,EchoTime> echoTimes = new HashMap<>(); 
-		Map<Double,FlipAngle> flipAngles = new HashMap<>();  
-		Map<Double,InversionTime> inversionTimes = new HashMap<>();
-		Map<Double,RepetitionTime> repetitionTimes = new HashMap<>();
-		
-		for (Object dataset : datasetsWrapper.getDatasets()) {
-			MrDataset mrDataset = (MrDataset) dataset;
-			echoTimes.putAll(mrDataset.getEchoTimes());
-			flipAngles.putAll(mrDataset.getFlipAngles());
-			inversionTimes.putAll(mrDataset.getInversionTimes());
-			repetitionTimes.putAll(mrDataset.getRepetitionTimes());
-			// as all datasets are iterated here, set link to acquisition
-			mrDataset.setDatasetAcquisition(mrDatasetAcquisition);
-		}
-		
-		mrDatasetAcquisition.getMrProtocol().setEchoTimes(new ArrayList<EchoTime>(echoTimes.values()));
-		mrDatasetAcquisition.getMrProtocol().setRepetitionTimeList(new ArrayList<RepetitionTime>(repetitionTimes.values()));
-		mrDatasetAcquisition.getMrProtocol().setFlipAngles(new ArrayList<FlipAngle>(flipAngles.values()));
-		mrDatasetAcquisition.getMrProtocol().setInversionTimeList(new ArrayList<InversionTime>(inversionTimes.values()));
 		
 		return mrDatasetAcquisition;
 	}

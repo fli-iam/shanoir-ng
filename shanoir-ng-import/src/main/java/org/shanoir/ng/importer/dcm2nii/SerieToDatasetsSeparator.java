@@ -1,7 +1,10 @@
 package org.shanoir.ng.importer.dcm2nii;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
+import org.shanoir.ng.importer.model.EchoTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +25,7 @@ public class SerieToDatasetsSeparator {
 	protected int acquisitionNumber = 0;
 
 	/** corresponding dicom tag. */
-	protected int[] echoNumbers = null;
+	protected Set<EchoTime> echoTime = null;
 
 	/** corresponding dicom tag. */
 	protected double[] imageOrientationPatient = null;
@@ -37,10 +40,10 @@ public class SerieToDatasetsSeparator {
 	 * @param imageOrientationPatient
 	 *            the image orientation patient
 	 */
-	public SerieToDatasetsSeparator(final int acquisitionNumber, final int[] echoNumbers,
+	public SerieToDatasetsSeparator(final int acquisitionNumber, final Set<EchoTime> echoTime,
 			final double[] imageOrientationPatient) {
 		this.acquisitionNumber = acquisitionNumber;
-		this.echoNumbers = echoNumbers;
+		this.echoTime = echoTime;
 		this.imageOrientationPatient = imageOrientationPatient;
 	}
 
@@ -54,7 +57,7 @@ public class SerieToDatasetsSeparator {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + acquisitionNumber;
-		result = prime * result + Arrays.hashCode(echoNumbers);
+		result = prime * result + echoTime.hashCode();
 		result = prime * result + Arrays.hashCode(imageOrientationPatient);
 		return result;
 	}
@@ -78,7 +81,7 @@ public class SerieToDatasetsSeparator {
 		if (acquisitionNumber != other.acquisitionNumber) {
 			return false;
 		}
-		if (!Arrays.equals(echoNumbers, other.echoNumbers)) {
+		if (echoTime.hashCode() != other.echoTime.hashCode()) {
 			return false;
 		}
 		if (!imageOrientationEquals(imageOrientationPatient, other.imageOrientationPatient)) {

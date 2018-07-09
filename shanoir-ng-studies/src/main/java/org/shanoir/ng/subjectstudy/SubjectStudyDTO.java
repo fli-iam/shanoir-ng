@@ -2,6 +2,7 @@ package org.shanoir.ng.subjectstudy;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.subject.SubjectType;
 
 /**
@@ -14,9 +15,9 @@ public class SubjectStudyDTO {
 	
 	private Long id;
 
-	private Long subjectId;
+	private IdNameDTO subject;
 	
-	private Long studyId;
+	private IdNameDTO study;
 
 	private String subjectStudyIdentifier;
 
@@ -36,26 +37,20 @@ public class SubjectStudyDTO {
 		this.id = id;
 	}
 
-	/**
-	 * @return the subjectId
-	 */
-	public Long getSubjectId() {
-		return subjectId;
+	public IdNameDTO getSubject() {
+		return subject;
 	}
 
-	/**
-	 * @param subjectId the subjectId to set
-	 */
-	public void setSubjectId(Long subjectId) {
-		this.subjectId = subjectId;
+	public void setSubject(IdNameDTO subject) {
+		this.subject = subject;
 	}
 
-	public Long getStudyId() {
-		return studyId;
+	public IdNameDTO getStudy() {
+		return study;
 	}
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
+	public void setStudy(IdNameDTO study) {
+		this.study = study;
 	}
 
 	/**

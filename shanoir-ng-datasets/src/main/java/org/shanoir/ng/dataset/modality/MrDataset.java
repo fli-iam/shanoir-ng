@@ -42,17 +42,14 @@ public class MrDataset extends Dataset {
 
 	/** Echo time. */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrDataset", cascade = CascadeType.ALL)
-//	@JoinColumn(name = "echo_time_id")
 	private List<EchoTime> echoTime;
 
 	/** Flip angle. */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrDataset", cascade = CascadeType.ALL)
-//	@JoinColumn(name = "flip_angle_id")
 	private List<FlipAngle> flipAngle;
 
 	/** Inversion time. */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrDataset", cascade = CascadeType.ALL)
-//	@JoinColumn(name = "inversion_time_id")
 	private List<InversionTime> inversionTime;
 
 	/** Mr Quality procedure. */
@@ -64,7 +61,6 @@ public class MrDataset extends Dataset {
 
 	/** Repetition time. */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrDataset", cascade = CascadeType.ALL)
-//	@JoinColumn(name = "repetition_time_id")
 	private List<RepetitionTime> repetitionTime;
 
 	/** Metadata updated by study card. */
@@ -78,18 +74,6 @@ public class MrDataset extends Dataset {
 	/** Store temporarily the last image acquisition time until all images are processed */
 	@Transient	
 	private Date lastImageAcquisitionTime;
-	
-	@Transient 
-	private Map<Integer,EchoTime> echoTimes;
-
-	@Transient 
-	private Map<Double,FlipAngle> flipAngles;
-	
-	@Transient 
-	private Map<Double,InversionTime> inversionTimes;
-
-	@Transient 
-	private Map<Double,RepetitionTime> repetitionTimes;
 	
 	/**
 	 * @return the diffusionGradients
@@ -111,7 +95,7 @@ public class MrDataset extends Dataset {
 	 */
 	public List<EchoTime> getEchoTime() {
 		if (echoTime == null) {
-			return new ArrayList<EchoTime>();
+			this.echoTime =  new ArrayList<EchoTime>();
 		}
 		return echoTime;
 	}
@@ -129,7 +113,7 @@ public class MrDataset extends Dataset {
 	 */
 	public List<FlipAngle> getFlipAngle() {
 		if (flipAngle == null) {
-			return new ArrayList<FlipAngle>();
+			this.flipAngle = new ArrayList<FlipAngle>();
 		}
 		return flipAngle;
 	}
@@ -147,7 +131,7 @@ public class MrDataset extends Dataset {
 	 */
 	public List<InversionTime> getInversionTime() {
 		if (inversionTime == null) {
-			return new ArrayList<InversionTime>();
+			this.inversionTime =  new ArrayList<InversionTime>();
 		}
 		return inversionTime;
 	}
@@ -160,6 +144,8 @@ public class MrDataset extends Dataset {
 		this.inversionTime = inversionTimes;
 	}
 
+	
+	
 	/**
 	 * @return the mrQualityProcedureType
 	 */
@@ -199,7 +185,7 @@ public class MrDataset extends Dataset {
 	 */
 	public List<RepetitionTime> getRepetitionTime() {
 		if (repetitionTime == null) {
-			return new ArrayList<RepetitionTime>();
+			this.repetitionTime = new ArrayList<RepetitionTime>();
 		}
 		return repetitionTime;
 	}
@@ -230,34 +216,6 @@ public class MrDataset extends Dataset {
 	 */
 	public void setUpdatedMrMetadata(MrDatasetMetadata updatedMrMetadata) {
 		this.updatedMrMetadata = updatedMrMetadata;
-	}
-	
-	public Map<Integer, EchoTime> getEchoTimes() {
-		if (echoTimes == null) {
-				return new HashMap<Integer,EchoTime>();
-		}
-		return echoTimes;
-	}
-
-	public Map<Double, FlipAngle> getFlipAngles() {
-		if (flipAngles == null) {
-		return new HashMap<Double,FlipAngle>();
-		}
-		return flipAngles;
-	}
-
-	public Map<Double, InversionTime> getInversionTimes() {
-		if (inversionTimes == null) {
-			return new HashMap<Double,InversionTime>();
-		}		
-		return inversionTimes;
-	}
-
-	public Map<Double, RepetitionTime> getRepetitionTimes() {
-		if (repetitionTimes == null) {
-			return new HashMap<Double,RepetitionTime>();
-		}
-		return repetitionTimes;
 	}
 
 	public Date getFirstImageAcquisitionTime() {

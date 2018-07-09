@@ -40,14 +40,14 @@ public class SubjectStudyMapperTest {
 				.subjectStudyListToSubjectStudyDTOList(Arrays.asList(createSubjectStudy()));
 		Assert.assertNotNull(subjectStudyDTOs);
 		Assert.assertTrue(subjectStudyDTOs.size() == 1);
-		Assert.assertTrue(subjectStudyDTOs.get(0).getSubjectId().equals(SUBJECT_ID));
+		Assert.assertTrue(subjectStudyDTOs.get(0).getSubject().getId().equals(SUBJECT_ID));
 	}
 
 	@Test
 	public void subjectStudyToSubjectStudyDTOTest() {
 		final SubjectStudyDTO subjectStudyDTO = subjectStudyMapper.subjectStudyToSubjectStudyDTO(createSubjectStudy());
 		Assert.assertNotNull(subjectStudyDTO);
-		Assert.assertTrue(subjectStudyDTO.getSubjectId().equals(SUBJECT_ID));
+		Assert.assertTrue(subjectStudyDTO.getSubject().getId().equals(SUBJECT_ID));
 	}
 
 	private SubjectStudy createSubjectStudy() {

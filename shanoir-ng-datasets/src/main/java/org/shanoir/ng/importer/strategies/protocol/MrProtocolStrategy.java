@@ -71,27 +71,27 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         mrProtocol.setFilters(filters);
 
         // Imaging Frequency
-        final Double imagingFrequency = dicomAttributes.getDouble(Tag.ImagingFrequency,-1D);
+        final Double imagingFrequency = dicomAttributes.getDouble(Tag.ImagingFrequency,0);
         LOG.debug("extractMetadata : imagingFrequency=" + imagingFrequency);
         mrProtocol.setImagingFrequency(imagingFrequency);
 
         // Acquisition duration
-        final Double acquisitionDuration = dicomAttributes.getDouble(Tag.AcquisitionDuration,-1D);
+        final Double acquisitionDuration = dicomAttributes.getDouble(Tag.AcquisitionDuration,0);
         LOG.debug("extractMetadata : acquisitionDuration=" + acquisitionDuration);
         mrProtocol.setAcquisitionDuration(acquisitionDuration);
 
         // Echo Train Length
-        final Integer echoTrainLength = dicomAttributes.getInt(Tag.EchoTrainLength,-1);
+        final Integer echoTrainLength = dicomAttributes.getInt(Tag.EchoTrainLength,0);
         LOG.debug("extractMetadata : echoTrainLength=" + echoTrainLength);
         mrProtocol.setEchoTrainLength(echoTrainLength);
 
         // Number of averages
-        final Integer numberOfAverages = dicomAttributes.getInt(Tag.NumberOfAverages,-1);
+        final Integer numberOfAverages = dicomAttributes.getInt(Tag.NumberOfAverages,0);
         LOG.debug("extractMetadata : numberOfAverages=" + numberOfAverages);
         mrProtocol.setNumberOfAverages(numberOfAverages);
 
         // Number of Phase Encoding Steps
-        final Integer numberOfPhaseEncodingSteps = dicomAttributes.getInt(Tag.NumberOfPhaseEncodingSteps,-1);
+        final Integer numberOfPhaseEncodingSteps = dicomAttributes.getInt(Tag.NumberOfPhaseEncodingSteps,0);
         LOG.debug("extractMetadata : numberOfPhaseEncodingSteps=" + numberOfPhaseEncodingSteps);
         mrProtocol.setNumberOfPhaseEncodingSteps(numberOfPhaseEncodingSteps);
 
@@ -107,12 +107,12 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         }
 
         // Slice thickness
-        final Double sliceThickness = dicomAttributes.getDouble(Tag.SliceThickness,-1D);
+        final Double sliceThickness = dicomAttributes.getDouble(Tag.SliceThickness,0);
         LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
         mrProtocol.setSliceThickness(sliceThickness);
 
         // Spacing between slices
-        final Double sliceSpacing = dicomAttributes.getDouble(Tag.SpacingBetweenSlices,-1D);
+        final Double sliceSpacing = dicomAttributes.getDouble(Tag.SpacingBetweenSlices,0);
         LOG.debug("extractMetadata : sliceSpacing=" + sliceSpacing);
         mrProtocol.setSliceSpacing(sliceSpacing);
         
@@ -127,7 +127,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         
         // Fov X
         /* FOV_x = Rows (0028,0010) x first value of Pixel Spacing (0028,0030) */
-        final Integer rows = dicomAttributes.getInt(Tag.Rows,-1);
+        final Integer rows = dicomAttributes.getInt(Tag.Rows,0);
         if (rows != null && mrProtocol.getPixelSpacingX() != null) {
             final Double fovX = rows * mrProtocol.getPixelSpacingX();
             LOG.debug("extractMetadata : fovX=" + fovX);
@@ -139,7 +139,7 @@ public class MrProtocolStrategy implements ProtocolStrategy {
          * FOV_Y = Columns (0028,0011) x second value of Pixel Spacing
          * (0028,0030)
          */
-        final Integer columns = dicomAttributes.getInt(Tag.Columns,-1);
+        final Integer columns = dicomAttributes.getInt(Tag.Columns,0);
         if (columns != null && mrProtocol.getPixelSpacingY() != null) {
             final Double fovY = columns * mrProtocol.getPixelSpacingY();
             LOG.debug("extractMetadata : fovY=" + fovY);
@@ -181,27 +181,27 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         }
 
         // Number of Temporal Positions
-        final Integer numberOfTemporalPositions = dicomAttributes.getInt(Tag.NumberOfTemporalPositions,-1);
+        final Integer numberOfTemporalPositions = dicomAttributes.getInt(Tag.NumberOfTemporalPositions,0);
         LOG.debug("extractMetadata : numberOfTemporalPositions=" + numberOfTemporalPositions);
         mrProtocol.setNumberOfTemporalPositions(numberOfTemporalPositions);
 
         // Temporal resolution
-        final Double temporalResolution = dicomAttributes.getDouble(Tag.TemporalResolution,-1D);
+        final Double temporalResolution = dicomAttributes.getDouble(Tag.TemporalResolution,0);
         LOG.debug("extractMetadata : temporalResolution=" + temporalResolution);
         mrProtocol.setTemporalResolution(temporalResolution);
 
         // Percent sampling
-        final Double percentSampling = dicomAttributes.getDouble(Tag.PercentSampling,-1D);
+        final Double percentSampling = dicomAttributes.getDouble(Tag.PercentSampling,0);
         LOG.debug("extractMetadata : percentSampling=" + percentSampling);
         mrProtocol.setPercentSampling(percentSampling);
 
         // Percent phase field of view
-        final Double percentPhaseFieldOfView = dicomAttributes.getDouble(Tag.PercentPhaseFieldOfView,-1D);
+        final Double percentPhaseFieldOfView = dicomAttributes.getDouble(Tag.PercentPhaseFieldOfView,0);
         LOG.debug("extractMetadata : percentPhaseFieldOfView=" + percentPhaseFieldOfView);
         mrProtocol.setPercentPhaseFov(percentPhaseFieldOfView);
 
         // Pixel bandwidth
-        final Double pixelBandwidth = dicomAttributes.getDouble(Tag.PixelBandwidth,-1D);
+        final Double pixelBandwidth = dicomAttributes.getDouble(Tag.PixelBandwidth,0);
         LOG.debug("extractMetadata : pixelBandwidth=" + pixelBandwidth);
         mrProtocol.setPixelBandwidth(pixelBandwidth);
         
@@ -317,12 +317,12 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         }
         		
         // Volume injected of diluted contrast agent
-        final Double injectedVolume = dicomAttributes.getDouble(Tag.ContrastBolusVolume,0.0);
+        final Double injectedVolume = dicomAttributes.getDouble(Tag.ContrastBolusVolume,0);
         LOG.debug("extractMetadata : injectedVolume=" + injectedVolume);
         mrProtocolMetadata.setInjectedVolume(injectedVolume);
 
         // Contrast agent concentration
-        final Double contrastAgentConcentration = dicomAttributes.getDouble(Tag.ContrastBolusIngredientConcentration, 0.0);
+        final Double contrastAgentConcentration = dicomAttributes.getDouble(Tag.ContrastBolusIngredientConcentration, 0);
         LOG.debug("extractMetadata : contrastAgentConcentration=" + contrastAgentConcentration);
         mrProtocolMetadata.setContrastAgentConcentration(contrastAgentConcentration);
 
@@ -345,12 +345,12 @@ public class MrProtocolStrategy implements ProtocolStrategy {
         }
 
         // Time reduction factor for the in-plane direction
-        final Double timeReductionFactorForTheInPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorInPlane,0.0);
+        final Double timeReductionFactorForTheInPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorInPlane,0);
         LOG.debug("extractMetadata : timeReductionFactorForTheInPlaneDirection=" + timeReductionFactorForTheInPlaneDirection);
         mrProtocolMetadata.setTimeReductionFactorForTheInPlaneDirection(timeReductionFactorForTheInPlaneDirection);
         
         // Time reduction factor for the out-of-plane direction
-        final Double timeReductionFactorForTheOutOfPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorOutOfPlane,0.0);
+        final Double timeReductionFactorForTheOutOfPlaneDirection = dicomAttributes.getDouble(Tag.ParallelReductionFactorOutOfPlane,0);
         LOG.debug("extractMetadata : timeReductionFactorForTheOutOfPlaneDirection=" + timeReductionFactorForTheOutOfPlaneDirection);
         mrProtocolMetadata.setTimeReductionFactorForTheOutOfPlaneDirection(timeReductionFactorForTheOutOfPlaneDirection);
 

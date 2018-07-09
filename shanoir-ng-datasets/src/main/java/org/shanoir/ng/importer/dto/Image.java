@@ -12,8 +12,17 @@ public class Image {
 	@JsonProperty("acquisitionNumber")
 	public String acquisitionNumber;
 
-	@JsonProperty("echoNumbers")
-	public List<Integer> echoNumbers;
+	@JsonProperty("echoTimes")
+	public List<EchoTime> echoTimes;
+	
+	@JsonProperty("repetitionTime")
+	public Double repetitionTime;
+	
+	@JsonProperty("inversionTime")
+	public Double inversionTime;
+
+	@JsonProperty("flipAngle")
+	public String flipAngle;
 
 	@JsonProperty("imageOrientationPatient")
 	public List<Double> imageOrientationPatient;
@@ -34,14 +43,6 @@ public class Image {
 		this.acquisitionNumber = acquisitionNumber;
 	}
 
-	public List<Integer> getEchoNumbers() {
-		return echoNumbers;
-	}
-
-	public void setEchoNumbers(List<Integer> echoNumbers) {
-		this.echoNumbers = echoNumbers;
-	}
-
 	public List<Double> getImageOrientationPatient() {
 		return imageOrientationPatient;
 	}
@@ -49,5 +50,39 @@ public class Image {
 	public void setImageOrientationPatient(List<Double> imageOrientationPatient) {
 		this.imageOrientationPatient = imageOrientationPatient;
 	}
+
+	public List<EchoTime> getEchoTimes() {
+		return echoTimes;
+	}
+
+	public void setEchoTimes(List<EchoTime> echoTimes) {
+		this.echoTimes = echoTimes;
+	}
+
+	public Double getRepetitionTime() {
+		return repetitionTime;
+	}
+
+	public void setRepetitionTime(Double repetitionTime) {
+		this.repetitionTime = repetitionTime;
+	}
+
+	public Double getInversionTime() {
+		return inversionTime;
+	}
+
+	public void setInversionTime(Double inversionTime) {
+		this.inversionTime = inversionTime;
+	}
+
+	public String getFlipAngle() {
+		return flipAngle;
+	}
+
+	public void setFlipAngle(String flipAngle) {
+		this.flipAngle = flipAngle;
+	}
+	
+	
 
 }

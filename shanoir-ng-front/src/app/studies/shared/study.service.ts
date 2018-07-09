@@ -21,6 +21,7 @@ export class StudyService {
 
     findStudiesWithStudyCardsByUserAndEquipment(equipment: EquipmentDicom): Promise<Study[]> {
         return this.http.post<Study[]>(AppUtils.BACKEND_API_STUDY_WITH_CARDS_BY_USER_EQUIPMENT_URL, JSON.stringify(equipment))
+            .map(studies => { return studies ? studies : []; })
             .toPromise();
     }
 

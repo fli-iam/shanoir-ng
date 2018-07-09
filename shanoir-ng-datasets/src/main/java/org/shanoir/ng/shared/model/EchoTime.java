@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.DatasetExpression;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * This class represents an echo time. It is used in the MR protocol to list and
@@ -25,14 +26,11 @@ public class EchoTime extends AbstractGenericItem {
 	 */
 	private static final long serialVersionUID = -6515796982839794497L;
 
-	/** MR protocol. */
-	@ManyToOne
-	@JoinColumn(name = "mr_protocol_id")
-	private MrProtocol mrProtocol;
 
 	/** MR dataset. */
 	@ManyToOne
 	@JoinColumn(name = "mr_dataset_id")
+	@JsonIgnore
 	private MrDataset mrDataset;
 	
 	/**
@@ -48,21 +46,6 @@ public class EchoTime extends AbstractGenericItem {
 	 */
 	@NotNull
 	private Double echoTimeValue;
-
-	/**
-	 * @return the mrProtocol
-	 */
-	public MrProtocol getMrProtocol() {
-		return mrProtocol;
-	}
-
-	/**
-	 * @param mrProtocol
-	 *            the mrProtocol to set
-	 */
-	public void setMrProtocol(MrProtocol mrProtocol) {
-		this.mrProtocol = mrProtocol;
-	}
 
 	/**
 	 * @return the echoNumber
@@ -95,7 +78,11 @@ public class EchoTime extends AbstractGenericItem {
 	}
 	
 	
-	  @Override
+	public void setMrDataset(MrDataset mrDataset) {
+		this.mrDataset = mrDataset;
+	}
+
+	@Override
 	  public boolean equals(Object v) {
 	        boolean retVal = false;
 	        boolean retVal1 = false;

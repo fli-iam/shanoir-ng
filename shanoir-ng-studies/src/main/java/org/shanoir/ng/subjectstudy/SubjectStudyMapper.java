@@ -33,8 +33,10 @@ public interface SubjectStudyMapper {
 	 *            link between a subject and a study.
 	 * @return DTO.
 	 */
-	@Mappings({ @Mapping(target = "subjectId", source = "subject.id"),
-			@Mapping(target = "studyId", source = "study.id"),
+	@Mappings({ @Mapping(target = "subject.id", source = "subject.id"),
+			@Mapping(target = "subject.name", source = "subject.name"),	
+			@Mapping(target = "study.id", source = "study.id"),
+			@Mapping(target = "study.name", source = "study.name"),	
 			@Mapping(target = "subjectStudyIdentifier", ignore = true) })
 	SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy);
 

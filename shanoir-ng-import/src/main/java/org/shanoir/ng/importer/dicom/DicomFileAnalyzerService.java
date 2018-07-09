@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,6 +16,7 @@ import org.dcm4che3.data.UID;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.emf.*;
+import org.shanoir.ng.importer.model.EchoTime;
 import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,17 +29,17 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
- * This class walks through the JsonNode tree and reads all instances.
- * A FileInputStream in form of a DicomInputStream is opened to all files
- * to read additional informations, e.g. missing in the DicomDir, into the
- * JsonNode tree. This class splits the instances array nodes into two
- * different array nodes: non-images and images on using the sop instance uid.
- * Before the instances are number with their instance number and added like
- * this by DicomDirToJsonReader. DicomFileAnalyzer removes/deletes the instances
- * node and splits into two nodes: images and nonImages. As this class is reading
- * the content of each dicom file already it adds as well the informations, which
- * are later necessary to separate datasets inside each serie: acquisitionNumber,
- * echoNumbers and imageOrientationsPatient.
+ * This class walks through the JsonNode tree and reads all instances. A
+ * FileInputStream in form of a DicomInputStream is opened to all files to read
+ * additional informations, e.g. missing in the DicomDir, into the JsonNode
+ * tree. This class splits the instances array nodes into two different array
+ * nodes: non-images and images on using the sop instance uid. Before the
+ * instances are number with their instance number and added like this by
+ * DicomDirToJsonReader. DicomFileAnalyzer removes/deletes the instances node
+ * and splits into two nodes: images and nonImages. As this class is reading the
+ * content of each dicom file already it adds as well the informations, which
+ * are later necessary to separate datasets inside each serie:
+ * acquisitionNumber, echoNumbers and imageOrientationsPatient.
  * 
  * @author mkain
  *
@@ -46,27 +48,29 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class DicomFileAnalyzerService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DicomFileAnalyzerService.class);
-	
+
 	private static final String DOUBLE_EQUAL = "==";
 
 	private static final String SEMI_COLON = ";";
-	
+
 	@Value("${shanoir.import.upload.folder}")
 	private String uploadFolder;
-	
+
 	@Value("${shanoir.import.series.isspectroscopy}")
 	private String isSpectroscopy;
 
 	private ObjectMapper mapper = new ObjectMapper();
-	
+
 	/**
-	 * This method walks through the JsonNode tree and accesses to files
-	 * on using the instanceFilePath from the instances. Jackson 2.8.3
-	 * at time of this development does not support JsonPath expressions,
-	 * that is why 4 loops have to be used to walk through the tree.
-	 * @throws FileNotFoundException 
+	 * This method walks through the JsonNode tree and accesses to files on using
+	 * the instanceFilePath from the instances. Jackson 2.8.3 at time of this
+	 * development does not support JsonPath expressions, that is why 4 loops have
+	 * to be used to walk through the tree.
+	 * 
+	 * @throws FileNotFoundException
 	 */
-	public void analyzeDicomFiles(JsonNode dicomDirJson,String unzipFolderFileAbsolutePath) throws FileNotFoundException {
+	public void analyzeDicomFiles(JsonNode dicomDirJson, String unzipFolderFileAbsolutePath)
+			throws FileNotFoundException {
 		// patient level
 		JsonNode patients = dicomDirJson.path("patients");
 		if (patients.isArray()) {
@@ -87,12 +91,14 @@ public class DicomFileAnalyzerService {
 									for (JsonNode instance : instances) {
 										Iterator<Entry<String, JsonNode>> children = instance.fields();
 										while (children.hasNext()) {
-											Map.Entry<String, JsonNode> entry =
-													(Map.Entry<String, JsonNode>) children.next();
+											Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) children
+													.next();
 											String instanceFilePath = entry.getValue().asText();
 											File instanceFile = new File(instanceFilePath);
 											if (instanceFile.exists()) {
-												processDicomFile(instanceFile, patient, serie, instances, instanceFilePath, nonImages, images, unzipFolderFileAbsolutePath);
+												processDicomFile(instanceFile, patient, serie, instances,
+														instanceFilePath, nonImages, images,
+														unzipFolderFileAbsolutePath);
 											} else {
 												throw new FileNotFoundException(
 														"InstanceFilePath in DicomDir: missing file: "
@@ -119,6 +125,7 @@ public class DicomFileAnalyzerService {
 	/**
 	 * This method opens the connection to each dcm file and reads its attributes
 	 * and extracts meta-data from the dicom, that will be used later.
+	 * 
 	 * @param dicomFile
 	 * @param serie
 	 * @param instances
@@ -127,7 +134,8 @@ public class DicomFileAnalyzerService {
 	 * @param nonImages
 	 * @param images
 	 */
-	private void processDicomFile(File dicomFile, JsonNode patient, JsonNode serie, JsonNode instances, String instanceFilePath, ArrayNode nonImages, ArrayNode images,String unzipFolderFileAbsolutePath) {
+	private void processDicomFile(File dicomFile, JsonNode patient, JsonNode serie, JsonNode instances,
+			String instanceFilePath, ArrayNode nonImages, ArrayNode images, String unzipFolderFileAbsolutePath) {
 		DicomInputStream dIS = null;
 		try {
 			dIS = new DicomInputStream(dicomFile);
@@ -135,7 +143,8 @@ public class DicomFileAnalyzerService {
 			String sopClassUID = datasetAttributes.getString(Tag.SOPClassUID);
 			((ObjectNode) serie).put("sopClassUID", sopClassUID);
 			checkSeriesDescription(serie, datasetAttributes);
-			// Some DICOM files with a particular SOP Class UID are to be ignored: such as Raw Data Storage
+			// Some DICOM files with a particular SOP Class UID are to be ignored: such as
+			// Raw Data Storage
 			if (sopClassUID.startsWith("1.2.840.10008.5.1.4.1.1.66")) {
 				// ((ArrayNode) instances).remove(index);
 				// do nothing here as instances array will be deleted after split
@@ -146,7 +155,7 @@ public class DicomFileAnalyzerService {
 						|| UID.MRSpectroscopyStorage.equals(sopClassUID)
 						|| checkSerieIsSpectroscopy(seriesDescription)) {
 					ObjectNode nonImage = mapper.createObjectNode();
-					nonImage.put("path", instanceFilePath.replace(unzipFolderFileAbsolutePath+"/", ""));
+					nonImage.put("path", instanceFilePath.replace(unzipFolderFileAbsolutePath + "/", ""));
 					nonImages.add(nonImage);
 					((ObjectNode) serie).put("isSpectroscopy", true);
 					LOG.warn("Attention: spectroscopy serie is included in this import!");
@@ -155,8 +164,8 @@ public class DicomFileAnalyzerService {
 					// do not change here: use absolute path all time and find other solution for
 					// image preview
 					ObjectNode image = mapper.createObjectNode();
-					image.put("path", instanceFilePath.replace(unzipFolderFileAbsolutePath+"/", ""));
-					addImageSeparateDatasetsInfo(image, datasetAttributes,sopClassUID);
+					image.put("path", instanceFilePath.replace(unzipFolderFileAbsolutePath + "/", ""));
+					addImageSeparateDatasetsInfo(image, datasetAttributes, sopClassUID);
 					images.add(image);
 					((ObjectNode) serie).put("isSpectroscopy", false);
 				}
@@ -191,8 +200,8 @@ public class DicomFileAnalyzerService {
 	}
 
 	/**
-	 * This method uses the properties string isspectroscopy to check
-	 * if a serie contains spectroscopy.
+	 * This method uses the properties string isspectroscopy to check if a serie
+	 * contains spectroscopy.
 	 */
 	private boolean checkSerieIsSpectroscopy(final String seriesDescription) {
 		final String[] seriesDescriptionsToIdentifySpectroscopyInSerie = isSpectroscopy.split(SEMI_COLON);
@@ -207,89 +216,116 @@ public class DicomFileAnalyzerService {
 		}
 		return false;
 	}
-	
+
 	/**
-	 * This method adds all required infos to separate datasets within series for each image.
+	 * This method adds all required infos to separate datasets within series for
+	 * each image.
+	 * 
 	 * @param image
 	 * @param datasetAttributes
 	 */
-	private void addImageSeparateDatasetsInfo(JsonNode image, Attributes datasetAttributes,String sopClassUID) {
-		
+	private void addImageSeparateDatasetsInfo(JsonNode image, Attributes datasetAttributes, String sopClassUID) {
+		double echoTime;
+		int echoNumber;
+		Attributes attributes = null;
 		if (UID.EnhancedMRImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
-			Attributes firstSequenceAttributes = emf.extract(datasetAttributes, 0);
-			
-			if (image.path("acquisitionNumber").isMissingNode()) {
-				String acquisitionNumber = firstSequenceAttributes.getString(Tag.AcquisitionNumber);
-				if (acquisitionNumber != null && !acquisitionNumber.isEmpty()) {
-					((ObjectNode) image).put("acquisitionNumber", acquisitionNumber);
-				}
-			}
-			
-			if (image.path("echoNumbers").isMissingNode()) {
-				int[] echoNumbersArray = firstSequenceAttributes.getInts(Tag.EchoNumbers);
-				ArrayNode echoNumbers = mapper.createArrayNode();
-				if (echoNumbersArray != null) {
-					for (int i = 0; i < echoNumbersArray.length; i++) {
-						echoNumbers.add(echoNumbersArray[i]);		
-					}
-					((ObjectNode) image).set("echoNumbers", echoNumbers);
-				} else {
-					LOG.info("echoNumbersArray in dcm file null: " + image.path("path").asText());
-				}
-			}
-			
-			if (image.path("imageOrientationPatient").isMissingNode()) {
-				ArrayNode imageOrientationPatient = mapper.createArrayNode();
-				double[] imageOrientationPatientArray = firstSequenceAttributes.getDoubles(Tag.ImageOrientationPatient);
-				if (imageOrientationPatientArray != null) {
-					for (int i = 0; i < imageOrientationPatientArray.length; i++) {
-						imageOrientationPatient.add(imageOrientationPatientArray[i]);		
-					}
-					((ObjectNode) image).set("imageOrientationPatient", imageOrientationPatient);
-				} else {
-					LOG.info("imageOrientationPatientArray in dcm file null: " + image.path("path").asText());
-				}
-			}
-			
+//			Attributes sequenceAttributes = null;
+//			sequenceAttributes = 
+			attributes = emf.extract(datasetAttributes, 0);
 		} else {
-			if (image.path("acquisitionNumber").isMissingNode()) {
-				String acquisitionNumber = datasetAttributes.getString(Tag.AcquisitionNumber);
-				if (acquisitionNumber != null && !acquisitionNumber.isEmpty()) {
-					((ObjectNode) image).put("acquisitionNumber", acquisitionNumber);
-				}
-			}
-			
-			if (image.path("echoNumbers").isMissingNode()) {
-				ArrayNode echoNumbers = mapper.createArrayNode();
-				int[] echoNumbersArray = datasetAttributes.getInts(Tag.EchoNumbers);
-				if (echoNumbersArray != null) {
-					for (int i = 0; i < echoNumbersArray.length; i++) {
-						echoNumbers.add(echoNumbersArray[i]);		
-					}
-					((ObjectNode) image).set("echoNumbers", echoNumbers);
-				} else {
-					LOG.info("echoNumbersArray in dcm file null: " + image.path("path").asText());
-				}
-			}
-			
-			if (image.path("imageOrientationPatient").isMissingNode()) {
-				ArrayNode imageOrientationPatient = mapper.createArrayNode();
-				double[] imageOrientationPatientArray = datasetAttributes.getDoubles(Tag.ImageOrientationPatient);
-				if (imageOrientationPatientArray != null) {
-					for (int i = 0; i < imageOrientationPatientArray.length; i++) {
-						imageOrientationPatient.add(imageOrientationPatientArray[i]);		
-					}
-					((ObjectNode) image).set("imageOrientationPatient", imageOrientationPatient);
-				} else {
-					LOG.info("imageOrientationPatientArray in dcm file null: " + image.path("path").asText());
-				}
+			attributes = datasetAttributes;
+		}
+
+		if (image.path("acquisitionNumber").isMissingNode()) {
+			String acquisitionNumber = attributes.getString(Tag.AcquisitionNumber);
+			if (acquisitionNumber != null && !acquisitionNumber.isEmpty()) {
+				((ObjectNode) image).put("acquisitionNumber", acquisitionNumber);
 			}
 		}
+
+		if (image.path("imageOrientationPatient").isMissingNode()) {
+			ArrayNode imageOrientationPatient = mapper.createArrayNode();
+			double[] imageOrientationPatientArray = attributes.getDoubles(Tag.ImageOrientationPatient);
+
+			if (imageOrientationPatientArray != null) {
+				for (int i = 0; i < imageOrientationPatientArray.length; i++) {
+					imageOrientationPatient.add(imageOrientationPatientArray[i]);
+				}
+				((ObjectNode) image).set("imageOrientationPatient", imageOrientationPatient);
+			} else {
+				LOG.info("imageOrientationPatientArray in dcm file null: " + image.path("path").asText());
+			}
+
+		}
+
+		if (image.path("repetitionTime").isMissingNode()) {
+			Double repetitionTime = attributes.getDouble(Tag.RepetitionTime, 0);
+			((ObjectNode) image).put("repetitionTime", repetitionTime);
+		}
+
+		if (image.path("inversionTime").isMissingNode()) {
+			Double inversionTime = attributes.getDouble(Tag.InversionTime, 0);
+			((ObjectNode) image).put("inversionTime", inversionTime);
+		}
+
+		if (image.path("flipAngle").isMissingNode()) {
+			String flipAngle = attributes.getString(Tag.FlipAngle);
+			if (flipAngle == null) {
+				flipAngle = "0";
+			}
+			((ObjectNode) image).put("flipAngle", flipAngle);
+		}
+
+		if (image.path("echoTimes").isMissingNode()) {
+			ArrayNode echoTimeArrayNode = mapper.createArrayNode();
+			ObjectNode echoTimeNode = mapper.createObjectNode();
+			echoNumber = attributes.getInt(Tag.EchoNumbers, 0);
+			echoTime = attributes.getDouble(Tag.EchoTime, 0.0);
+			echoTimeNode.put("echoNumber", echoNumber);
+			echoTimeNode.put("echoTime", echoTime);
+			echoTimeArrayNode.add(echoTimeNode);
+			((ObjectNode) image).set("echoTimes", echoTimeArrayNode);
+		}
+
+//		} else {
+//
+//			if (image.path("acquisitionNumber").isMissingNode()) {
+//				String acquisitionNumber = datasetAttributes.getString(Tag.AcquisitionNumber);
+//				if (acquisitionNumber != null && !acquisitionNumber.isEmpty()) {
+//					((ObjectNode) image).put("acquisitionNumber", acquisitionNumber);
+//				}
+//			}
+//
+//			if (image.path("echoTimes").isMissingNode()) {
+//				ArrayNode echoTimeArrayNode = mapper.createArrayNode();
+//				ObjectNode echoTimeNode = mapper.createObjectNode();
+//				echoNumber = datasetAttributes.getInt(Tag.EchoNumbers, 0);
+//				echoTime = datasetAttributes.getDouble(Tag.EchoTime, 0.0);
+//				echoTimeNode.put("echoNumber", echoNumber);
+//				echoTimeNode.put("echoTime", echoTime);
+//				echoTimeArrayNode.add(echoTimeNode);
+//				((ObjectNode) image).set("echoTimes", echoTimeArrayNode);
+//			}
+//
+//			if (image.path("imageOrientationPatient").isMissingNode()) {
+//				ArrayNode imageOrientationPatient = mapper.createArrayNode();
+//				double[] imageOrientationPatientArray = datasetAttributes.getDoubles(Tag.ImageOrientationPatient);
+//				if (imageOrientationPatientArray != null) {
+//					for (int i = 0; i < imageOrientationPatientArray.length; i++) {
+//						imageOrientationPatient.add(imageOrientationPatientArray[i]);
+//					}
+//					((ObjectNode) image).set("imageOrientationPatient", imageOrientationPatient);
+//				} else {
+//					LOG.info("imageOrientationPatientArray in dcm file null: " + image.path("path").asText());
+//				}
+//			}
+//		}
 	}
-	
+
 	/**
 	 * Adds on analyzing the transfersyntaxuid if serie is compressed or not.
+	 * 
 	 * @param serie
 	 * @param datasetAttributes
 	 */
@@ -303,9 +339,10 @@ public class DicomFileAnalyzerService {
 			}
 		}
 	}
-	
+
 	/**
 	 * Adds the equipment information.
+	 * 
 	 * @param serie
 	 * @param datasetAttributes
 	 */
@@ -323,9 +360,10 @@ public class DicomFileAnalyzerService {
 	}
 
 	/**
-	 * Normally we get the seriesDescription from the DicomDir, if not: null or empty,
-	 * get the seriesDescription from the .dcm file, if existing in .dcm file add it in
-	 * JsonNode tree.
+	 * Normally we get the seriesDescription from the DicomDir, if not: null or
+	 * empty, get the seriesDescription from the .dcm file, if existing in .dcm file
+	 * add it in JsonNode tree.
+	 * 
 	 * @param serie
 	 * @param datasetAttributes
 	 */
@@ -338,11 +376,12 @@ public class DicomFileAnalyzerService {
 			}
 		}
 	}
-	
+
 	/**
-	 * Normally we get the seriesDate from the DicomDir, if not: null or empty,
-	 * get the seriesDate from the .dcm file, if existing in .dcm file add it in
+	 * Normally we get the seriesDate from the DicomDir, if not: null or empty, get
+	 * the seriesDate from the .dcm file, if existing in .dcm file add it in
 	 * JsonNode tree.
+	 * 
 	 * @param serie
 	 * @param datasetAttributes
 	 */
@@ -355,11 +394,12 @@ public class DicomFileAnalyzerService {
 			}
 		}
 	}
-	
+
 	/**
-	 * Normally we get the Patient BirthDate from the DicomDir, if not: null or empty,
-	 * get the Patient BirthDate from the .dcm file, if existing in .dcm file add it in
-	 * JsonNode tree.
+	 * Normally we get the Patient BirthDate from the DicomDir, if not: null or
+	 * empty, get the Patient BirthDate from the .dcm file, if existing in .dcm file
+	 * add it in JsonNode tree.
+	 * 
 	 * @param serie
 	 * @param datasetAttributes
 	 */
@@ -375,15 +415,16 @@ public class DicomFileAnalyzerService {
 			// has not been found in dicomdir, so we get it from .dcm file:
 			String patientSex = datasetAttributes.getString(Tag.PatientSex);
 			if (patientSex != null) {
-				((ObjectNode) patient).put("patientSex",patientSex);
+				((ObjectNode) patient).put("patientSex", patientSex);
 			}
 		}
 	}
-	
+
 	/**
 	 * Normally we get the protocolName from the DicomDir, if not: null or empty,
 	 * get the protocolName from the .dcm file, if existing in .dcm file add it in
 	 * JsonNode tree.
+	 * 
 	 * @param serie
 	 * @param datasetAttributes
 	 */
@@ -396,9 +437,10 @@ public class DicomFileAnalyzerService {
 			}
 		}
 	}
-	
+
 	/**
 	 * Checks for multi-frame dicom files.
+	 * 
 	 * @param serie
 	 * @param datasetAttributes
 	 * @param sopClassUID
@@ -408,7 +450,7 @@ public class DicomFileAnalyzerService {
 			if (UID.EnhancedMRImageStorage.equals(sopClassUID)) {
 				((ObjectNode) serie).put("isMultiFrame", "true");
 				String frameCount = new Integer(getFrameCount(datasetAttributes)).toString();
-				((ObjectNode) serie).put("multiFrameCount", frameCount);				
+				((ObjectNode) serie).put("multiFrameCount", frameCount);
 			} else {
 				((ObjectNode) serie).put("isMultiFrame", "false");
 			}
@@ -437,6 +479,7 @@ public class DicomFileAnalyzerService {
 
 	/**
 	 * Checks for enhanced Dicom and sequence name.
+	 * 
 	 * @param serie
 	 * @param sopClassUID
 	 */
@@ -453,5 +496,5 @@ public class DicomFileAnalyzerService {
 			}
 		}
 	}
-	
+
 }

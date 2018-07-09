@@ -12,9 +12,6 @@ public class DatasetFile {
 	@JsonProperty("acquisitionNumber")
 	private int acquisitionNumber;
 	
-	@JsonProperty("echoNumbers")
-	private List<Integer> echoNumbers;
-	
 	@JsonProperty("imageOrientationPatient")
 	private List<Double> imageOrientationPatient;
 
@@ -32,14 +29,6 @@ public class DatasetFile {
 
 	public void setAcquisitionNumber(int acquisitionNumber) {
 		this.acquisitionNumber = acquisitionNumber;
-	}
-
-	public List<Integer> getEchoNumbers() {
-		return echoNumbers;
-	}
-
-	public void setEchoNumbers(List<Integer> echoNumbers) {
-		this.echoNumbers = echoNumbers;
 	}
 
 	public List<Double> getImageOrientationPatient() {
