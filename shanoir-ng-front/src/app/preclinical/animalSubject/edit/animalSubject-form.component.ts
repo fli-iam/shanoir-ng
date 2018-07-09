@@ -159,9 +159,9 @@ export class AnimalSubjectFormComponent implements OnInit {
     	fixedSubjectStudy.subjectType = subjectStudy.subjectType;
     	fixedSubjectStudy.physicallyInvolved = subjectStudy.physicallyInvolved;
     	fixedSubjectStudy.subject = this.getSubject();
-    	fixedSubjectStudy.study = this.getStudyById(subjectStudy.studyId);
+    	fixedSubjectStudy.study = subjectStudy.study;
     	fixedSubjectStudy.subjectId = this.preclinicalSubject.subject.id;
-    	fixedSubjectStudy.studyId = subjectStudy.studyId;
+    	fixedSubjectStudy.studyId = subjectStudy.study.id;
     	return fixedSubjectStudy;
     }
     
