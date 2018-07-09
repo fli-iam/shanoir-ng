@@ -8,6 +8,8 @@ import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthet
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { Pageable } from '../../../shared/components/table/pageable.model';
+import { ExaminationAnestheticService } from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
+import { ExaminationExtraDataService } from '../../extraData/extraData/shared/extradata.service';
 
 @Component({
     selector: 'animal-examination-list',
@@ -24,18 +26,23 @@ export class AnimalExaminationListComponent {
     private pageable: Pageable;
     public nbExaminations: number = 0;
 
-    constructor(private annimalExaminationService: AnimalExaminationService, private confirmDialogService: ConfirmDialogService,
-        private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
-        this.countExaminations();
-        this.getExaminations();
-        this.createColumnDefs();
+    constructor(
+    	private animalExaminationService: AnimalExaminationService, 
+    	private confirmDialogService: ConfirmDialogService,
+    	private examAnestheticsService: ExaminationAnestheticService,
+    	private extradataService: ExaminationExtraDataService,
+    	private viewContainerRef: ViewContainerRef, 
+        private keycloakService: KeycloakService) {
+        	this.countExaminations();
+        	this.getExaminations();
+        	this.createColumnDefs();
     }
 
     // Grid data
     getExaminations(): void {
         this.loading = true;
         this.examinations = [];
-        this.annimalExaminationService.getExaminations(this.pageable).then(examinations => {
+        this.animalExaminationService.getExaminations(this.pageable).then(examinations => {
             if (examinations) {
             	this.examinations = this.filterPreclinicalExaminations(examinations);
             }
@@ -59,7 +66,7 @@ export class AnimalExaminationListComponent {
 
     countExaminations(): void {
         this.loading = true;
-        this.annimalExaminationService.countExaminations().then(nbExaminations => {
+        this.animalExaminationService.countExaminations().then(nbExaminations => {
             this.nbExaminations = nbExaminations;
         })
             .catch((error) => {
@@ -151,7 +158,25 @@ export class AnimalExaminationListComponent {
 
     deleteExamination(examinationId: number) {
         // Delete examination and refresh page
-        this.annimalExaminationService.delete(examinationId).then((res) => this.getExaminations());
+        this.examAnestheticsService.getExaminationAnesthetics(examinationId)
+               .then(examAnesthetics => {
+               if (examAnesthetics && examAnesthetics.length > 0) {
+               	//Should be only one
+                let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
+                this.examAnestheticsService.delete(examAnesthetic).then((res) => {
+                	
+                });
+               }
+        });
+        this.extradataService.getExtraDatas(examinationId).then(extradatas => {
+            if(extradatas && extradatas.length > 0){
+            	for (let data of extradatas) {
+            		this.extradataService.delete(data).then((res) => {});
+            	}
+            }
+        });
+       
+        this.animalExaminationService.delete(examinationId).then((res) => this.getExaminations());
     }
 
     deleteAll = () => {
