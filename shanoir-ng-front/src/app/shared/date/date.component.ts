@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, OnChanges, SimpleChanges } from '@angular/core';
 import { IMyOptions } from 'mydatepicker';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { pad } from '../../utils/app.utils';
 
 @Component({
     selector: 'datepicker',
@@ -20,10 +21,10 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
         }]   
 })
 
-export class DatepickerComponent implements ControlValueAccessor {
+export class DatepickerComponent implements ControlValueAccessor, OnChanges {
     
     @Input() ngModel: Date = null;
-    @Output() ngModelChange = new EventEmitter();
+    @Output() ngModelChange = new EventEmitter<Date>();
     private convertedDate: Object;
 
     private options: IMyOptions = {
@@ -37,20 +38,23 @@ export class DatepickerComponent implements ControlValueAccessor {
     }
 
     onModelChange(event) {
-        let newDate: Date = null;
         if (event) {
-            newDate = new Date(event.date.year, event.date.month - 1, event.date.day, 0, 0, 0, 0);
+            const chosenDate: Date = new Date([event.date.year, pad(event.date.month, 2), pad(event.date.day, 2)].join('-') + 'T00:00:00Z');
+            this.ngModelChange.emit(chosenDate);
         }
-        this.ngModelChange.emit(newDate);
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['ngModel']) {
+            if (this.ngModel) {
+                this.convertedDate = {jsdate: new Date(this.ngModel)};
+            } else {
+                this.convertedDate = null;
+            }
+        }
     }
 
     writeValue(obj: any): void {
-        if (!obj) {
-            this.ngModel = null;
-        } else {
-            this.ngModel = new Date(obj);
-        }
-        this.convertedDate = {jsdate: this.ngModel};
     }
     
     registerOnChange(fn: any): void {

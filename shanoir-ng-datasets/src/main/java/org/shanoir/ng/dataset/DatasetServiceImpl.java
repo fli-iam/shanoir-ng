@@ -15,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -75,21 +73,18 @@ public class DatasetServiceImpl implements DatasetService<Dataset> {
 	}
 
 	@Override
-	public Dataset update(final Dataset dataset) throws ShanoirDatasetsException {
+	public Dataset update(final Dataset dataset) {
 		final Dataset datasetDb = datasetRepository.findOne(dataset.getId());
+
 		updateDatasetValues(datasetDb, dataset);
-		try {
-			if (datasetDb instanceof CtDataset) {
-				ctDatasetRepository.save((CtDataset) datasetDb);
-			} else if (datasetDb instanceof MrDataset) {
-				mrDatasetRepository.save((MrDataset) datasetDb);
-			} else if (datasetDb instanceof PetDataset) {
-				petDatasetRepository.save((PetDataset) datasetDb);
-			}
-		} catch (Exception e) {
-			LOG.error("Error while updating dataset", e);
-			throw new ShanoirDatasetsException("Error while updating dataset");
+		if (datasetDb instanceof CtDataset) {
+			ctDatasetRepository.save((CtDataset) datasetDb);
+		} else if (datasetDb instanceof MrDataset) {
+			mrDatasetRepository.save((MrDataset) datasetDb);
+		} else if (datasetDb instanceof PetDataset) {
+			petDatasetRepository.save((PetDataset) datasetDb);
 		}
+
 		// updateShanoirOld(datasetDb);
 		return datasetDb;
 	}
@@ -145,8 +140,19 @@ public class DatasetServiceImpl implements DatasetService<Dataset> {
 	 * @return database dataset with new values.
 	 */
 	private Dataset updateDatasetValues(final Dataset datasetDb, final Dataset dataset) {
+		datasetDb.setCreationDate(dataset.getCreationDate());
+		//datasetDb.setDatasetAcquisition(dataset.getDatasetAcquisition());
+		//datasetDb.setDatasetExpressions(dataset.getDatasetExpressions());
+		//datasetDb.setDatasetProcessing(dataset.getDatasetProcessing());
+		//datasetDb.setGroupOfSubjectsId(dataset.getGroupOfSubjectsId());
+		datasetDb.setId(dataset.getId());
+		//datasetDb.setOriginMetadata(dataset.getOriginMetadata());
+		//datasetDb.setProcessings(dataset.getProcessings());
+		//datasetDb.setReferencedDatasetForSuperimposition(dataset.getReferencedDatasetForSuperimposition());
+		//datasetDb.setReferencedDatasetForSuperimpositionChildrenList(dataset.getReferencedDatasetForSuperimpositionChildrenList());
 		datasetDb.setStudyId(dataset.getStudyId());
-		// TODO: to complete
+		datasetDb.setSubjectId(dataset.getSubjectId());
+		datasetDb.setUpdatedMetadata(dataset.getUpdatedMetadata());
 		return datasetDb;
 	}
 

@@ -15,6 +15,9 @@ spring:
   jackson:
     mapper:
       use-getters-as-setters: false
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:

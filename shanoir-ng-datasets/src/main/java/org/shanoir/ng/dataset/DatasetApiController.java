@@ -117,14 +117,10 @@ public class DatasetApiController implements DatasetApi {
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@ApiParam(value = "study to update", required = true) @Valid @RequestBody Dataset dataset,
 			final BindingResult result) throws RestServiceException {
-		// IMPORTANT : avoid any confusion that could lead to security breach
-		dataset.setId(datasetId);
-
-		// A basic dataset can only update certain fields, check that
+		
+		dataset.setId(datasetId); // IMPORTANT : avoid any confusion that could lead to security breach
 		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(dataset);
-		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(

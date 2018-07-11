@@ -3,12 +3,10 @@ import { Location } from '@angular/common';
 import { Observable } from 'rxjs/Observable';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { DatasetService } from '../shared/dataset.service';
-import { Dataset } from '../shared/dataset.model';
+import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
-import { SerieDicom } from '../../import/dicom-data.model';
 import { DicomArchiveService } from '../../import/dicom-archive.service';
-import { HttpResponse } from '@angular/common/http';
 
 @Component({
     selector: 'dataset-detail',
@@ -68,6 +66,7 @@ export class DatasetComponent implements OnInit {
                 }
             })
             .subscribe((dataset: Dataset) => {
+                if (!dataset.updatedMetadata) dataset.updatedMetadata = new DatasetMetadata();
                 this.dataset = dataset;
             });
     }
