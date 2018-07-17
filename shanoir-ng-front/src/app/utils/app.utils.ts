@@ -22,6 +22,7 @@ export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '
 
 // Subjects http api
 export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjects';
+export const BACKEND_API_SUBJECT_FILTER_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjects/filter';
 
 // Subject Study http api
 export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjectStudy';
