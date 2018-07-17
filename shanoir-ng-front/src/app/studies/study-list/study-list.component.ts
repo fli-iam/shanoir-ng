@@ -69,10 +69,10 @@ export class StudyListComponent {
                 }
             },
             {
-                headerName: "Subjects", field: "nbSujects", type: "number"
+                headerName: "Subjects", field: "nbSujects", type: "number", width: '30px'
             },
             {
-                headerName: "Examinations", field: "nbExaminations", type: "number"
+                headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'
             },
             {
                 headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/study", getParams: function (item: any): Object {
