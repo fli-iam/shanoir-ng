@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Dataset } from '../../shared/dataset.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
@@ -13,7 +13,7 @@ import { NgForm, ControlContainer } from '@angular/forms';
     viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
 })
 
-export class CommonDatasetComponent {
+export class CommonDatasetComponent implements OnChanges {
 
     @Input() private mode: 'create' | 'edit' | 'view';
     @Input() private dataset: Dataset;
@@ -23,18 +23,48 @@ export class CommonDatasetComponent {
 
     constructor(
             private studyService: StudyService,
-            private subjectService: SubjectService) {
-        this.fetchSubjects();
-        this.fetchStudies();
+            private subjectService: SubjectService) {}
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['mode']) {
+            if (this.mode != 'view')  {
+                this.fetchAllSubjects();
+                this.fetchAllStudies();
+            } else if (this.dataset) {
+                this.fetchOneSubject();
+                this.fetchOneStudy();
+            }
+        }
+        if (changes['dataset'] && this.mode == 'view') {
+            if (changes['dataset'].previousValue.subjectId != changes['dataset'].currentValue.subjectId) {
+                this.fetchOneSubject();
+            }
+            if (changes['dataset'].previousValue.studyId != changes['dataset'].currentValue.studyId) {
+                this.fetchOneStudy();
+            }
+
+        }
     }
 
-    private fetchSubjects() {
+    private fetchOneSubject() {
+        this.subjectService.getSubject(this.dataset.subjectId).then(subject => {
+            this.subjects = [subject];
+        });
+    }
+
+    private fetchOneStudy() {
+        this.studyService.getStudy(this.dataset.studyId, false).then(study => {
+            this.studies = [study];
+        });
+    }
+
+    private fetchAllSubjects() {
         this.subjectService.getSubjects().then(subjects => {
             this.subjects = subjects;
         });
     }
 
-    private fetchStudies() {
+    private fetchAllStudies() {
         this.studyService.getStudies().then(studies => {
             this.studies = studies;
         });
