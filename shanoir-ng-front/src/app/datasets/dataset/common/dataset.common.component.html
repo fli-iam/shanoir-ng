@@ -1,4 +1,4 @@
-<fieldset>
+<fieldset ngModelGroup="common">
 	<ol>
 		<li>
 			<label i18n="Dataset detail|Dataset id@@datasetId">Id</label>
@@ -38,13 +38,14 @@
 			<span [ngSwitch]="mode" class="right-col">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.creationDate | date: 'dd/MM/yyyy'}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<datepicker [(ngModel)]="dataset.creationDate" [ngModelOptions]="{standalone: true}"></datepicker>
+					<datepicker [(ngModel)]="dataset.creationDate" required validDate name="dataset.creationDate"></datepicker>
 				</ng-template>
 			</span>
 		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset type@@datasetDetailType" class="required-label">Modality type</label>
-			<select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="dataset.type"></select-dataset-type>
+			{{dataset.type}}
+			<!-- <select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="dataset.type" [ngModelOptions]="{standalone: true}" ></select-dataset-type> -->
 		</li>
 		<!-- <li>
 			<label i18n="Dataset detail|Dataset acquisition@@datasetDetailAcquisition" class="required-label">Acquisition</label>
@@ -116,7 +117,8 @@
 			<select-explored-entity class="right-col" 
 				[mode]="mode" 
 				[ngModel]="dataset.updatedMetadata.exploredEntity ? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity" 
-				(ngModelChange)="dataset.updatedMetadata.exploredEntity = $event">
+				(ngModelChange)="dataset.updatedMetadata.exploredEntity = $event"
+				[ngModelOptions]="{standalone: true}" >
 			</select-explored-entity>
 		</li>
 		<li>
@@ -142,7 +144,8 @@
 			<select-processed-dataset-type class="right-col" 
 				[mode]="mode" 
 				[ngModel]="dataset.updatedMetadata.datasetProcessedType ? dataset.updatedMetadata.datasetProcessedType : dataset.originMetadata.datasetProcessedType" 
-				(ngModelChange)="dataset.updatedMetadata.datasetProcessedType = $event">
+				(ngModelChange)="dataset.updatedMetadata.datasetProcessedType = $event"
+				[ngModelOptions]="{standalone: true}" >
 			</select-processed-dataset-type>
 		</li>
 	</ol>
