@@ -2,11 +2,10 @@ import { DatasetType } from "./dataset-type.model";
 import { DatasetProcessing } from "./dataset-processing.model";
 
 declare type ExploredEntity = 'ANATOMICAL_DATASET' | 'FUNCTIONAL_DATASET' | 'HEMODYNAMIC_DATASET' | 'METABOLIC_DATASET' | 'CALIBRATION';
-declare type DatasetModalityType = 'PET' | 'MR';
 declare type ProcessedDatasetType = 'RECONSTRUCTEDDATASET' | 'NONRECONSTRUCTEDDATASET';
 declare type CardinalityOfRelatedSubjects = 'SINGLE_SUBJECT_DATASET' | 'MULTIPLE_SUBJECTS_DATASET';
 
-export class Dataset {
+export abstract class Dataset {
     id: number;
     creationDate: Date;
     name: string;
@@ -25,7 +24,7 @@ export class Dataset {
 
 export class DatasetMetadata {
     comment: string;
-    datasetModalityType: DatasetModalityType;
+    datasetModalityType: string;
     exploredEntity: ExploredEntity;
     name: string;
     processedDatasetType: ProcessedDatasetType;

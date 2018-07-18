@@ -34,11 +34,11 @@
 			</span>
 		</li>
 		<li>
-			<label i18n="Dataset detail|Dataset creation date@@datasetDetailCreation" class="required-label">Creation date</label>
+			<label i18n="Dataset detail|Dataset creation date@@datasetDetailCreation">Creation date</label>
 			<span [ngSwitch]="mode" class="right-col">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.creationDate | date: 'dd/MM/yyyy'}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<datepicker [(ngModel)]="dataset.creationDate" required validDate name="dataset.creationDate"></datepicker>
+					<datepicker [(ngModel)]="dataset.creationDate" validDate name="dataset.creationDate"></datepicker>
 				</ng-template>
 			</span>
 		</li>

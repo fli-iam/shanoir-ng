@@ -4,11 +4,13 @@ import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { StudyService } from '../../../studies/shared/study.service';
 import { Study } from '../../../studies/shared/study.model';
+import { NgForm, ControlContainer } from '@angular/forms';
 
 
 @Component({
     selector: 'common-dataset-details',
-    templateUrl: 'dataset.common.component.html'
+    templateUrl: 'dataset.common.component.html',
+    viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
 })
 
 export class CommonDatasetComponent {

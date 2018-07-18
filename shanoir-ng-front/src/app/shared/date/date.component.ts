@@ -9,6 +9,7 @@ import { pad } from '../../utils/app.utils';
         <my-date-picker 
             [options]="options" 
             [ngModel]="convertedDate"
+            (dateChanged)="onDateChange($event)"
             (ngModelChange)="onModelChange($event)">
         </my-date-picker>
     `,
@@ -23,9 +24,10 @@ import { pad } from '../../utils/app.utils';
 
 export class DatepickerComponent implements ControlValueAccessor, OnChanges {
     
-    @Input() ngModel: Date = null;
-    @Output() ngModelChange = new EventEmitter<Date>();
+    @Input() ngModel: Date | 'invalid' = null;
+    @Output() ngModelChange = new EventEmitter<Date | 'invalid'>();
     private convertedDate: Object;
+    private emptySemaphore: boolean = false;
 
     private options: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
@@ -37,15 +39,26 @@ export class DatepickerComponent implements ControlValueAccessor, OnChanges {
 
     }
 
-    onModelChange(event) {
-        if (event) {
+    onDateChange(event) {
+        if (event && event.jsdate) {
             const chosenDate: Date = new Date([event.date.year, pad(event.date.month, 2), pad(event.date.day, 2)].join('-') + 'T00:00:00Z');
             this.ngModelChange.emit(chosenDate);
+        } else {
+            this.emptySemaphore = true;
+            this.ngModelChange.emit(null);
+        }
+    }
+
+    onModelChange(event) {
+        if (this.emptySemaphore) {
+            this.emptySemaphore = false;
+        } else if (!event) {
+            this.ngModelChange.emit('invalid');
         }
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes['ngModel']) {
+        if (changes['ngModel'] && this.ngModel != 'invalid') {
             if (this.ngModel) {
                 this.convertedDate = {jsdate: new Date(this.ngModel)};
             } else {
@@ -62,5 +75,6 @@ export class DatepickerComponent implements ControlValueAccessor, OnChanges {
 
     registerOnTouched(fn: any): void {
     }
+    
 
 }

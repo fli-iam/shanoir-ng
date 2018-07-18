@@ -4,31 +4,31 @@
 		<li>
 			<label i18n="Mr Dataset detail|Mr Dataset echo time@@mrDatasetEchoTime">Echo Time</label>
 			<span class="right-col">
-				<ng-template>{{dataset.echoTimeId}}</ng-template>
+				<span class="multi" *ngFor="let echoTime of dataset.echoTime">{{echoTime.echoTimeValue}}</span>
 			</span>
 		</li>
 		<li>
 			<label i18n="Mr Dataset detail|Mr Dataset flip angle@@mrDatasetFlipAngle">Flip Angle</label>
 			<span class="right-col">
-				<ng-template>{{dataset.flipAngleId}}</ng-template>
+				<span class="multi" *ngFor="let flipAngle of dataset.flipAngle">{{flipAngle.flipAngleValue}}</span>
 			</span>
 		</li>
 		<li>
 			<label i18n="Mr Dataset detail|Mr Dataset inversion time@@mrDatasetInversionTime">Inversion Time</label>
 			<span class="right-col">
-				<ng-template>{{dataset.inversionTimeId}}</ng-template>
+				<span class="multi" *ngFor="let inversionTime of dataset.inversionTime">{{inversionTime.inversionTimeValue}}</span>
 			</span>
 		</li>
 		<li>
 			<label i18n="Mr Dataset detail|Mr Dataset quality procedure type@@mrDatasetQualityProcedureType">Quality Procedure Type</label>
 			<span class="right-col">
-				<ng-template>{{dataset.mrQualityProcedureType}}</ng-template>
+				{{dataset.mrQualityProcedureType}}<!-- TODO : 'enum' -->
 			</span>
 		</li>
 		<li>
 			<label i18n="Mr Dataset detail|Mr Dataset repetition time id@@mrDatasetRepetitionTimeId">Repetition Time</label>
 			<span class="right-col">
-				<ng-template>{{dataset.repetitionTimeId}}</ng-template>
+				<span class="multi" *ngFor="let repetitionTime of dataset.repetitionTime">{{repetitionTime.repetitionTimeValue}}</span>
 			</span>
 		</li>
 	</ol>
@@ -39,7 +39,7 @@
 		<li>
 			<label i18n="Mr Dataset detail|Mr Dataset nature@@mrDatasetNature">Nature</label>
 			<span class="right-col">
-				<ng-template>{{dataset.nature}}</ng-template>
+				<ng-template>{{dataset.nature}}</ng-template><!-- TODO -->
 			</span>
 		</li>
 	</ol>
