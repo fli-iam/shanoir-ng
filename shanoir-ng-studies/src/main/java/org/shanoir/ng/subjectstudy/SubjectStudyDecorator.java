@@ -20,8 +20,10 @@ public class SubjectStudyDecorator implements SubjectStudyMapper {
 	@Override
 	public List<SubjectStudyDTO> subjectStudyListToSubjectStudyDTOList(List<SubjectStudy> subjectStudies) {
 		final List<SubjectStudyDTO> subjectStudyDTOs = new ArrayList<>();
-		for (SubjectStudy subjectStudy : subjectStudies) {
-			subjectStudyDTOs.add(subjectStudyToSubjectStudyDTO(subjectStudy));
+		if (subjectStudies != null) {
+			for (SubjectStudy subjectStudy : subjectStudies) {
+				subjectStudyDTOs.add(subjectStudyToSubjectStudyDTO(subjectStudy));
+			}
 		}
 		return subjectStudyDTOs;
 	}
