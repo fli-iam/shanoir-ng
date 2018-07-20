@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
@@ -33,6 +34,13 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 */
 	List<Subject> findAll();
 
+	/**
+	 * Find id and name for all subjects.
+	 * 
+	 * @return list of subjects.
+	 */
+	List<IdNameDTO> findIdsAndNames();
+	
 	/**
 	 * Find subject by data.
 	 *

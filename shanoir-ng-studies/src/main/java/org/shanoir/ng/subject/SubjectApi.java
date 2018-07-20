@@ -2,6 +2,8 @@ package org.shanoir.ng.subject;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
@@ -42,6 +44,15 @@ public interface SubjectApi {
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<SubjectDTO>> findSubjects();
 	
+	@ApiOperation(value = "", notes = "Returns id and name for all the subjects", response = IdNameDTO.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found subjects", response = IdNameDTO.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no subject found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<List<IdNameDTO>> findSubjectsNames();	
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given id", response = Subject.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found bubject", response = Subject.class),

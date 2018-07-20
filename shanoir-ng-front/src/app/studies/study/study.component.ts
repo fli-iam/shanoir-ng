@@ -16,6 +16,9 @@ import { StudyService } from '../shared/study.service';
 import { StudyStatus } from "../shared/study-status.enum";
 import { Timepoint } from '../shared/timepoint.model';
 import { slideDown } from '../../shared/animations/animations';
+import { SubjectStudy } from '../../subjects/shared/subject-study.model';
+import { SubjectService } from '../../subjects/shared/subject.service';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
 
 @Component({
     selector: 'study-detail',
@@ -25,8 +28,6 @@ import { slideDown } from '../../shared/animations/animations';
 })
 
 export class StudyComponent implements OnInit {
-
-    @Input() idFromImport: number;
 
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
     private addDisabledIconPath: string = ImagesUrlUtil.ADD_DISABLED_ICON_PATH;
@@ -46,6 +47,8 @@ export class StudyComponent implements OnInit {
     private studyId: number;
     private studyStatusEnumValue: string;
     private studyStatuses: Enum[] = [];
+    private subjectStudyList: SubjectStudy[] = [];
+    private subjects: IdNameObject[];
 
     formErrors = {
         'name': '',
@@ -54,13 +57,14 @@ export class StudyComponent implements OnInit {
 
     constructor(private route: ActivatedRoute, private router: Router,
         private centerService: CenterService, private studyService: StudyService, private fb: FormBuilder,
-        private location: Location, private keycloakService: KeycloakService) {
+        private location: Location, private keycloakService: KeycloakService, private subjectService: SubjectService) {
 
     }
 
     ngOnInit(): void {
         this.getEnum();
         this.getCenters();
+        this.getSubjects();
         this.getStudy();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -138,6 +142,18 @@ export class StudyComponent implements OnInit {
             .catch((error) => {
                 // TODO: display error
                 console.log("error getting center list!");
+            });
+    }
+
+    getSubjects(): void {
+        this.subjectService
+            .getSubjectsNames()
+            .then(subjects => {
+                this.subjects = subjects;
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting subjects list!");
             });
     }
 
@@ -250,6 +266,7 @@ export class StudyComponent implements OnInit {
         let studyCenterListBackup: StudyCenter[] = this.study.studyCenterList;
         this.study = this.studyForm.value;
         this.study.studyCenterList = studyCenterListBackup;
+        this.study.subjectStudyList = this.subjectStudyList;
     }
 
     update(): void {
@@ -262,6 +279,10 @@ export class StudyComponent implements OnInit {
                     this.isNameUnique = false;
                 }
             });
+    }
+
+    private onChangeSubjectStudyList(subjectStudyList: SubjectStudy[]) {
+        this.subjectStudyList = subjectStudyList;
     }
 
 }

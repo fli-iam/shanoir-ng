@@ -95,6 +95,7 @@ import { SelectSeriesComponent } from './import/select-series/select-series.comp
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { NewExamComponent } from './examinations/examination/new-exam.component';
+import { SubjectStudyListComponent } from "./shared/components/subject-study-list/subject-study-list.component";
 
 
 @NgModule({
@@ -169,7 +170,8 @@ import { NewExamComponent } from './examinations/examination/new-exam.component'
         ProcessedDatasetTypeComponent,
         SelectSeriesComponent,
         DicomUploadComponent,
-        ClinicalContextComponent
+        ClinicalContextComponent,
+        SubjectStudyListComponent
     ],
     entryComponents: [
         ConfirmDialogComponent

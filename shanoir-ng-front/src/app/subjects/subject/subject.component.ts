@@ -46,7 +46,6 @@ export class SubjectComponent implements OnInit, OnChanges {
     private isAlreadyAnonymized: boolean;
     private init: boolean = false;
     private hasNameUniqueError: boolean = false;
-    private selectedStudy: IdNameObject;
 
     constructor(private route: ActivatedRoute, private router: Router,
         private subjectService: SubjectService,
@@ -282,22 +281,8 @@ export class SubjectComponent implements OnInit, OnChanges {
         this.subject.birthDate = newDate;
     }
 
-    removeSubjectStudy(subjectStudy: SubjectStudy):void {
-        for (let study of this.studies) {
-            if (subjectStudy.study.id == study.id) study.selected = false;
-        }
-        const index: number = this.subjectStudyList.indexOf(subjectStudy);
-        if (index !== -1) {
-            this.subjectStudyList.splice(index, 1);
-        }
-    }
-
-    onStudySelect(study: IdNameObject) {
-        study.selected = true;
-        let newSubjectStudy: SubjectStudy = new SubjectStudy();
-        newSubjectStudy.physicallyInvolved = false;
-        newSubjectStudy.study = new Study(study);
-        this.subjectStudyList.push(newSubjectStudy);
+    private onChangeSubjectStudyList(subjectStudyList: SubjectStudy[]) {
+        this.subjectStudyList = subjectStudyList;
     }
 
     /**

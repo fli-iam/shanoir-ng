@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
@@ -81,6 +82,11 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<Subject> findAll() {
 		return Utils.toList(subjectRepository.findAll());
+	}
+	
+	@Override
+	public List<IdNameDTO> findIdsAndNames() {
+		return subjectRepository.findIdsAndNames();
 	}
 
 	@Override

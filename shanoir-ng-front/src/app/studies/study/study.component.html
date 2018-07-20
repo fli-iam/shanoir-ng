@@ -134,22 +134,8 @@
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
-				<legend i18n="Study detail|Name label@@studyDetailSubjects">Subjects</legend>
-				<ol>
-					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|List of subjects available label@@studyDetailSubjects">List of subjects available</label>
-						<span class="right-col">
-							TODO
-						</span>
-					</li>
-					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|List of the subjects associated label@@studyDetailAssociatedSubjects" class="required-label">List of the subjects associated</label>
-						<span class="right-col">
-							TODO
-						</span>
-					</li>
-				</ol>
+			<fieldset *ngIf="mode !== 'view'">
+				<subject-study-list mode="subject" [list]="subjects" (ssl)="onChangeSubjectStudyList($event)"></subject-study-list>
 			</fieldset>
 			<fieldset>
 				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers and principal investigator</legend>
@@ -210,7 +196,7 @@
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<!-- <fieldset>
 				<legend i18n="Study detail|Timepoints label@@studyDetailTimepoints">Timepoints</legend>
 				<ol>
 					<li *ngIf="mode != 'view'">
@@ -251,8 +237,8 @@
 						</span>
 					</li>
 				</ol>
-			</fieldset>
-			<fieldset>
+			</fieldset> -->
+			<fieldset *ngIf="mode == 'view'">
 				<legend>Data</legend>
 				<div *ngIf="loading" class="data-loading">
 					Loading... <img [src]="loaderImagePath" />

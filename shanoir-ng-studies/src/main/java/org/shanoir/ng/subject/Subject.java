@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
+import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -13,9 +15,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
-import javax.persistence.Table;
+import javax.persistence.SqlResultSetMapping;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
@@ -23,13 +26,14 @@ import org.shanoir.ng.subjectstudy.SubjectStudy;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@Entity
-@Table(name = "subject")
-@JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
-		"preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
-		"userPersonalCommentList" })
 
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
+@Entity
+@JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
+	"preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
+"userPersonalCommentList" })
+@SqlResultSetMapping(name = "subjectNameResult", classes = { @ConstructorResult(targetClass = IdNameDTO.class, columns = {
+		@ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name") }) })
 public class Subject extends HalEntity {
 
 	private static final long serialVersionUID = 6844259659282875507L;

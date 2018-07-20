@@ -1,0 +1,57 @@
+<legend>{{legend}}</legend>
+<ol>
+    <li>
+        <label>List of the {{legend | lowercase}} available</label>
+        <span class="right-col">
+            <select id="title" (ngModelChange)="onObjectSelect($event)" [ngModel]="selectedStudy" [ngModelOptions]="{standalone: true}">
+                <option disabled>Please select...</option>
+                <option *ngFor="let object of list" [ngValue]="object" [disabled]="object?.selected">{{object.name}}</option>
+            </select>
+        </span>
+    </li>
+    <li *ngIf="subjectStudyList != null && subjectStudyList.length != 0">
+        <table>
+            <thead>
+                <tr>
+                    <th class="label-col">{{columnName}}</th>
+                    <th class="input-col">Subject id for this study</th>
+                    <th class="chkbx-col" title="Physically Involved">PI</th>
+                    <th class="dropdown-col">Subject Type</th>
+                    <th class="buttons-col"></th>
+                </tr>
+            </thead>  
+            <tbody>
+                <tr *ngFor="let subjectStudy of subjectStudyList; let i = index">
+                    <td class="label-col">
+                        <div *ngFor="let object of list">
+                            <div *ngIf="mode == 'study'; else subject_mode">
+                                <span *ngIf="object.id == subjectStudy.study.id">
+                                    {{object.name}}
+                                </span>
+                            </div>
+                            <ng-template #subject_mode>
+                                <span *ngIf="object.id == subjectStudy.subject.id">
+                                    {{object.name}}
+                                </span>
+                            </ng-template>
+                        </div>
+                    </td>
+                    <td class="input-col">
+                        <input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
+                    </td>
+                    <td class="chkbx-col">
+                        <input type="checkbox" [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"/>
+                    </td>
+                    <td class="dropdown-col">
+                        <select id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
+                            <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
+                            <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
+                            <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
+                        </select>
+                    </td>
+                    <td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-ban"></i></span>
+                </tr>
+            </tbody>
+        </table>
+    </li>
+</ol>

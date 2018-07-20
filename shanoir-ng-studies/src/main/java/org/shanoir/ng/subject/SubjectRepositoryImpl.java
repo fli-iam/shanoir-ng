@@ -5,8 +5,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.shanoir.ng.shared.model.ItemRepositoryCustom;
-import org.springframework.stereotype.Repository;
+import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.springframework.stereotype.Component;
 
 /**
  * Implementation of custom repository for templates.
@@ -14,8 +14,8 @@ import org.springframework.stereotype.Repository;
  * @author msimon
  *
  */
-@Repository
-public class SubjectRepositoryImpl implements ItemRepositoryCustom<Subject> {
+@Component
+public class SubjectRepositoryImpl implements SubjectRepositoryCustom {
 
 	@PersistenceContext
 	private EntityManager em;
@@ -26,6 +26,12 @@ public class SubjectRepositoryImpl implements ItemRepositoryCustom<Subject> {
 		final StringBuilder sqlQuery = new StringBuilder();
 		sqlQuery.append("SELECT s FROM Subject s WHERE s.").append(fieldName).append(" LIKE :value");
 		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<IdNameDTO> findIdsAndNames() {
+		return em.createNativeQuery("SELECT id, name FROM subject", "subjectNameResult").getResultList();
 	}
 
 }
