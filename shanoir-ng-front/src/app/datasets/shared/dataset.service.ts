@@ -23,14 +23,12 @@ export class DatasetService {
 
     get(id: number): Promise<Dataset> {
         return this.http.get<Dataset>(AppUtils.BACKEND_API_DATASET_URL + '/' + id)
-            .toPromise()
-            .then(response => response);
+            .toPromise();
     }
 
     getAll(): Promise<Dataset[]> {
         return this.http.get<Dataset[]>(AppUtils.BACKEND_API_DATASET_URL)
-            .toPromise()
-            .then(response => response);
+            .toPromise();
     }
 
     update(dataset: Dataset): Observable<Dataset> {

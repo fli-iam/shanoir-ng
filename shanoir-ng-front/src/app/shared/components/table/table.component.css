@@ -27,7 +27,7 @@
 			.shanoir-table th.pager span.active { z-index: 10; background-color: var(--color-b-light2); }
 		.shanoir-table th.sortable:hover, 
 			.shanoir-table th.pager span.clickable:not(.disabled):hover { z-index: 5; background-color: var(--color-b-light2); }
-		.shanoir-table th.col-date { width: 65px; }
+		.shanoir-table th.col-date { width: 70px; }
 		.shanoir-table th.col-boolean { width: 20px; }
 		.shanoir-table th.col-button { width: 20px; }
 		.shanoir-table th.pager { padding: 0 5px; overflow: initial;  }

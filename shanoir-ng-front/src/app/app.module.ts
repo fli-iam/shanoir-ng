@@ -96,6 +96,7 @@ import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.compone
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { NewExamComponent } from './examinations/examination/new-exam.component';
 import { SubjectStudyListComponent } from "./shared/components/subject-study-list/subject-study-list.component";
+import { DateValidator } from './shared/date/date.validator';
 
 
 @NgModule({
@@ -171,7 +172,8 @@ import { SubjectStudyListComponent } from "./shared/components/subject-study-lis
         SelectSeriesComponent,
         DicomUploadComponent,
         ClinicalContextComponent,
-        SubjectStudyListComponent
+        SubjectStudyListComponent,
+        DateValidator
     ],
     entryComponents: [
         ConfirmDialogComponent

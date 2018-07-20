@@ -197,15 +197,18 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
 			final BindingResult result) throws RestServiceException {
+		
 		try {
-			// Check if user can update study
-			if (!studyService.canUserUpdateStudy(studyId, KeycloakUtil.getTokenUserId())) {
-				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+			if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+				// Check if user can update study, if he is not admin
+				if (!studyService.canUserUpdateStudy(studyId, KeycloakUtil.getTokenUserId())) {
+					return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+				}
 			}
 		} catch (ShanoirException e) {
 			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
+		
 		study.setId(studyId);
 
 		// A basic study can only update certain fields, check that

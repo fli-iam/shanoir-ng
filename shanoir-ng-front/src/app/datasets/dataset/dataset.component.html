@@ -1,5 +1,5 @@
 <div class="content-component">
-	<form *ngIf="dataset" class="max-content" novalidate>
+	<form *ngIf="dataset" class="max-content" #form="ngForm">
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
@@ -13,9 +13,9 @@
 				</ng-template>
 			</span>
 
-
 			<common-dataset-details [mode]="mode" [dataset]="dataset"></common-dataset-details>
-			<mr-dataset-details [mode]="mode" [dataset]="dataset"></mr-dataset-details>
+			<mr-dataset-details *ngIf="dataset.type == 'Mr'" [mode]="mode" [dataset]="dataset"></mr-dataset-details>
+			<!-- TODO : other types -->
 
 			<fieldset *ngIf="mode=='view'">
 				<legend>Preview</legend>
@@ -24,17 +24,17 @@
 
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
-					<button i18n="Buttons|Back button label@@backButton" class="back-button left-icon" (click)="back()"><i class="fas fa-angle-left"></i>Back</button>
+					<button type="button" i18n="Buttons|Back button label@@backButton" class="back-button left-icon" (click)="back()"><i class="fas fa-angle-left"></i>Back</button>
 					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
-						<button class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
-						<button class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
-						<button class="right-icon" i18n="Buttons|Edit button label@@editButton" (click)="edit()">Edit<i class="far fa-edit"></i></button>
+						<button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
+						<button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
+						<button type="button" class="right-icon" i18n="Buttons|Edit button label@@editButton" (click)="edit()">Edit<i class="far fa-edit"></i></button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-						<button class="right-icon" i18n="Buttons|Update button label@@updateButton" (click)="update()" [disabled]="false">Update<i class="far fa-save"></i></button>
+						<button type="submit" class="right-icon" i18n="Buttons|Update button label@@updateButton" (click)="update()" [disabled]="form.invalid">Update<i class="far fa-save"></i></button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
-						<button class="right-icon" i18n="Buttons|Create button label@@createButton" (click)="create()" [disabled]="true">Create<i class="far fa-save"></i></button>
+						<button type="submit" class="right-icon" i18n="Buttons|Create button label@@createButton" (click)="create()" [disabled]="form.invalid">Create<i class="far fa-save"></i></button>
 					</ng-template>
 				</span>
 			</div>
