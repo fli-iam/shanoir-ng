@@ -76,6 +76,7 @@ export class StudyComponent implements OnInit {
     addCenterToStudy(): void {
         let studyCenter: StudyCenter = new StudyCenter();
         studyCenter.center = this.selectedCenter;
+
         this.study.studyCenterList.push(studyCenter);
     }
 
@@ -244,8 +245,11 @@ export class StudyComponent implements OnInit {
         }
     }
 
-    removeCenterFromStudy(studyCenterId: number): void {
-        this.study.studyCenterList = this.study.studyCenterList.filter(item => item.id !== studyCenterId);
+    removeCenterFromStudy(centerId: number): void {
+        this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
+        if (this.study.studyCenterList.length < 2) {
+            this.study.monoCenter = true;
+        }
     }
 
     removeTimepoint(timepoint: Timepoint): void {
@@ -260,6 +264,10 @@ export class StudyComponent implements OnInit {
             return false;
         }
         return true;
+    }
+
+    studyCenterListHasMultipleElements(): boolean {
+        return this.study.studyCenterList.length > 1;
     }
 
     submit(): void {
