@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { IdNameObject } from '../../models/id-name-object.model';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Study } from '../../../studies/shared/study.model';
@@ -10,17 +10,22 @@ import { Subject } from '../../../subjects/shared/subject.model';
   styleUrls: ['subject-study-list.component.css'],
 })
 
-export class SubjectStudyListComponent{
-    @Input() mode: string = "study | subject";
+export class SubjectStudyListComponent implements OnInit{
+    @Input() mode: "study" | "subject";
     @Input() list: any[];
     @Output() ssl = new EventEmitter<SubjectStudy[]>();
     
-    private legend: string = this.mode == 'study' ? 'Studies' : 'Subjects';
-    private columnName: string = this.mode == 'study' ? 'Common Name' : 'Study Name';
+    private legend: "Studies" | "Subjects";
+    private columnName: "Common Name" | "Study Name";
     private subjectStudyList: SubjectStudy[] = [];
 
     private onChangeSubjectStudyList() {
         this.ssl.emit(this.subjectStudyList);
+    }
+
+    ngOnInit () {
+        this.legend = this.mode == 'study' ? 'Studies' : 'Subjects';
+        this.columnName = this.mode == 'study' ? 'Study Name' : 'Common Name';
     }
 
     onObjectSelect(object: IdNameObject) {
