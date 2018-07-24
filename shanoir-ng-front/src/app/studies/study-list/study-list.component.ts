@@ -78,8 +78,8 @@ export class StudyListComponent {
                 headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/study", getParams: function (item: any): Object {
                     return { id: item.id };
                 }
-            },
-            { headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteStudyConfirmDialog }
+            }
+            // ,{ headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteStudyConfirmDialog }
         ];
 
         this.customActionDefs = [];
