@@ -13,8 +13,6 @@ import org.shanoir.ng.study.Study;
 import org.shanoir.ng.subject.Subject;
 import org.shanoir.ng.subject.SubjectType;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * Relation between the subjects and the studies.
  * 
@@ -43,7 +41,6 @@ public class SubjectStudy extends AbstractGenericItem {
 	/** Subject. */
 	@ManyToOne
 	@JoinColumn(name = "subject_id", updatable = true, insertable = true)
-	@JsonIgnore
 	@NotNull
 	private Subject subject;
 
