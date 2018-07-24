@@ -1,10 +1,10 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
+import * as AppUtils from '../../utils/app.utils';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { Enum } from "../../shared/utils/enum";
@@ -50,6 +50,7 @@ export class StudyComponent implements OnInit {
     private studyStatuses: Enum[] = [];
     private subjectStudyList: SubjectStudy[] = [];
     private subjects: IdNameObject[];
+    private hasNameUniqueError: boolean = false;
 
     formErrors = {
         'name': '',
@@ -78,7 +79,6 @@ export class StudyComponent implements OnInit {
     addCenterToStudy(): void {
         let studyCenter: StudyCenter = new StudyCenter();
         studyCenter.center = this.selectedCenter;
-
         this.study.studyCenterList.push(studyCenter);
     }
 
@@ -102,19 +102,6 @@ export class StudyComponent implements OnInit {
         this.studyForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged();
-    }
-
-    create(): void {
-        this.submit();
-        this.studyService.create(this.study)
-            .subscribe((study: Study) => {
-                this.back();
-                this.msgService.log('info', 'Study successfully created');
-            }, (err: String) => {
-                if (err.indexOf("name should be unique") != -1) {
-                    this.isNameUnique = false;
-                }
-            });
     }
 
     edit(): void {
@@ -272,11 +259,26 @@ export class StudyComponent implements OnInit {
         return this.study.studyCenterList.length > 1;
     }
 
+    private manageRequestErrors(error: any): void {
+        this.hasNameUniqueError = AppUtils.hasUniqueError(error, 'name');
+    }
+
     submit(): void {
         let studyCenterListBackup: StudyCenter[] = this.study.studyCenterList;
         this.study = this.studyForm.value;
         this.study.studyCenterList = studyCenterListBackup;
         this.study.subjectStudyList = this.subjectStudyList;
+    }
+
+    create(): void {
+        this.submit();
+        this.studyService.create(this.study)
+            .subscribe((study: Study) => {
+                this.back();
+                this.msgService.log('info', 'Study successfully created');
+            }, (error: any) => {
+                this.manageRequestErrors(error);
+            });
     }
 
     update(): void {
@@ -285,10 +287,8 @@ export class StudyComponent implements OnInit {
             .subscribe((study: Study) => {
                 this.back();
                 this.msgService.log('info', 'Study successfully updated');
-            }, (err: String) => {
-                if (err.indexOf("name should be unique") != -1) {
-                    this.isNameUnique = false;
-                }
+            }, (error: any) => {
+                this.manageRequestErrors(error);
             });
     }
 
