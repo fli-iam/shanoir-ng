@@ -19,6 +19,7 @@ import { slideDown } from '../../shared/animations/animations';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 @Component({
     selector: 'study-detail',
@@ -52,12 +53,14 @@ export class StudyComponent implements OnInit {
 
     formErrors = {
         'name': '',
-        'studyStatus': ''
+        'studyStatus': '',
+        'studyCenterList': ''
     };
 
     constructor(private route: ActivatedRoute, private router: Router,
         private centerService: CenterService, private studyService: StudyService, private fb: FormBuilder,
-        private location: Location, private keycloakService: KeycloakService, private subjectService: SubjectService) {
+        private location: Location, private keycloakService: KeycloakService, private subjectService: SubjectService,
+        private msgService: MsgBoxService) {
 
     }
 
@@ -70,7 +73,6 @@ export class StudyComponent implements OnInit {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true; 
         }
-        console.log(this.study.startDate);
     }
 
     addCenterToStudy(): void {
@@ -95,8 +97,7 @@ export class StudyComponent implements OnInit {
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [this.study.monoCenter, [Validators.required]],
-            'studyCenterList': [this.study.studyCenterList],
-            'nbSujects': [this.study.nbSujects]
+            'studyCenterList': [this.study.studyCenterList]
         });
         this.studyForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
@@ -106,8 +107,9 @@ export class StudyComponent implements OnInit {
     create(): void {
         this.submit();
         this.studyService.create(this.study)
-            .subscribe((study) => {
+            .subscribe((study: Study) => {
                 this.back();
+                this.msgService.log('info', 'Study successfully created');
             }, (err: String) => {
                 if (err.indexOf("name should be unique") != -1) {
                     this.isNameUnique = false;
@@ -280,8 +282,9 @@ export class StudyComponent implements OnInit {
     update(): void {
         this.submit();
         this.studyService.update(this.studyId, this.study)
-            .subscribe((study) => {
+            .subscribe((study: Study) => {
                 this.back();
+                this.msgService.log('info', 'Study successfully updated');
             }, (err: String) => {
                 if (err.indexOf("name should be unique") != -1) {
                     this.isNameUnique = false;

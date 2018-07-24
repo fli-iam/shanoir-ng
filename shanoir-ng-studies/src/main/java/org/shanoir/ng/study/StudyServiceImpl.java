@@ -22,6 +22,7 @@ import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.studyuser.StudyUserRepository;
 import org.shanoir.ng.studyuser.StudyUserType;
+import org.shanoir.ng.subjectstudy.SubjectStudy;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -325,6 +326,9 @@ public class StudyServiceImpl implements StudyService {
 	public Study save(final Study study) throws ShanoirStudiesException {
 		for (final StudyCenter studyCenter : study.getStudyCenterList()) {
 			studyCenter.setStudy(study);
+		} 
+		for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+			subjectStudy.setStudy(study);
 		}
 		return studyRepository.save(study);
 	}
