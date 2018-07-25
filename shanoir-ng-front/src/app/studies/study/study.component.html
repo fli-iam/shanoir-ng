@@ -25,7 +25,7 @@
 								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="study.name" />
 								<label *ngIf="formErrors.name.includes('required')" [@slideDown]="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
 								<label *ngIf="formErrors.name.includes('length')" [@slideDown]="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Edit study|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
+								<label *ngIf="hasNameUniqueError" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
 							</ng-template>
 						</span>
 					</li>

@@ -1,10 +1,10 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
+import * as AppUtils from '../../utils/app.utils';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { Enum } from "../../shared/utils/enum";
@@ -19,6 +19,7 @@ import { slideDown } from '../../shared/animations/animations';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 @Component({
     selector: 'study-detail',
@@ -49,15 +50,18 @@ export class StudyComponent implements OnInit {
     private studyStatuses: Enum[] = [];
     private subjectStudyList: SubjectStudy[] = [];
     private subjects: IdNameObject[];
+    private hasNameUniqueError: boolean = false;
 
     formErrors = {
         'name': '',
-        'studyStatus': ''
+        'studyStatus': '',
+        'studyCenterList': ''
     };
 
     constructor(private route: ActivatedRoute, private router: Router,
         private centerService: CenterService, private studyService: StudyService, private fb: FormBuilder,
-        private location: Location, private keycloakService: KeycloakService, private subjectService: SubjectService) {
+        private location: Location, private keycloakService: KeycloakService, private subjectService: SubjectService,
+        private msgService: MsgBoxService) {
 
     }
 
@@ -70,13 +74,11 @@ export class StudyComponent implements OnInit {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true; 
         }
-        console.log(this.study.startDate);
     }
 
     addCenterToStudy(): void {
         let studyCenter: StudyCenter = new StudyCenter();
         studyCenter.center = this.selectedCenter;
-
         this.study.studyCenterList.push(studyCenter);
     }
 
@@ -95,24 +97,11 @@ export class StudyComponent implements OnInit {
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [this.study.monoCenter, [Validators.required]],
-            'studyCenterList': [this.study.studyCenterList],
-            'nbSujects': [this.study.nbSujects]
+            'studyCenterList': [this.study.studyCenterList]
         });
         this.studyForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged();
-    }
-
-    create(): void {
-        this.submit();
-        this.studyService.create(this.study)
-            .subscribe((study) => {
-                this.back();
-            }, (err: String) => {
-                if (err.indexOf("name should be unique") != -1) {
-                    this.isNameUnique = false;
-                }
-            });
     }
 
     edit(): void {
@@ -270,6 +259,10 @@ export class StudyComponent implements OnInit {
         return this.study.studyCenterList.length > 1;
     }
 
+    private manageRequestErrors(error: any): void {
+        this.hasNameUniqueError = AppUtils.hasUniqueError(error, 'name');
+    }
+
     submit(): void {
         let studyCenterListBackup: StudyCenter[] = this.study.studyCenterList;
         this.study = this.studyForm.value;
@@ -277,15 +270,25 @@ export class StudyComponent implements OnInit {
         this.study.subjectStudyList = this.subjectStudyList;
     }
 
+    create(): void {
+        this.submit();
+        this.studyService.create(this.study)
+            .subscribe((study: Study) => {
+                this.back();
+                this.msgService.log('info', 'Study successfully created');
+            }, (error: any) => {
+                this.manageRequestErrors(error);
+            });
+    }
+
     update(): void {
         this.submit();
         this.studyService.update(this.studyId, this.study)
-            .subscribe((study) => {
+            .subscribe((study: Study) => {
                 this.back();
-            }, (err: String) => {
-                if (err.indexOf("name should be unique") != -1) {
-                    this.isNameUnique = false;
-                }
+                this.msgService.log('info', 'Study successfully updated');
+            }, (error: any) => {
+                this.manageRequestErrors(error);
             });
     }
 

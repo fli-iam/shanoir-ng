@@ -174,8 +174,7 @@ export class SubjectComponent implements OnInit, OnChanges {
             'sex': [this.subject.sex],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
             'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
-            'personalComments': [],
-            'subjectStudyList': [this.subject.subjectStudyList]
+            'personalComments': []
         });
 
         this.subjectForm.valueChanges.subscribe(data => this.onValueChanged(data));
