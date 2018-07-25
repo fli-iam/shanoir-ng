@@ -71,7 +71,6 @@ public abstract class StudyDecorator implements StudyMapper {
 			if (study.getExaminationIds() != null) {
 				studyDTO.setNbExaminations(study.getExaminationIds().size());
 			}
-
 			studyDTOs.add(studyDTO);
 		}
 		return studyDTOs;
@@ -98,10 +97,9 @@ public abstract class StudyDecorator implements StudyMapper {
 	 */
 	private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
 		final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
-
-		studyDTO.setStudyCenterList(
-				studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 		if (withData) {
+			studyDTO.setStudyCenterList(
+					studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 			studyDTO.setSubjects(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
 					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
@@ -110,7 +108,6 @@ public abstract class StudyDecorator implements StudyMapper {
 				getMembers(study, studyDTO);
 			}
 		}
-
 		return studyDTO;
 	}
 

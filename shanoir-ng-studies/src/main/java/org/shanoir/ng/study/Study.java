@@ -128,7 +128,7 @@ public class Study extends HalEntity {
 	private List<SubjectStudy> subjectStudyList;
 
 	/** List of Timepoints dividing the study **/
-	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("rank asc")
 	private List<Timepoint> timepoints;
 	
