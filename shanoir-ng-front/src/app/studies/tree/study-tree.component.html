@@ -1,5 +1,5 @@
 <node label="Subjects" [pictoUrl]="folderIconPath" deploy="true">
-    <ng-template ngFor let-subject [ngForOf]="study.subjects">
+    <ng-template ngFor let-subject [ngForOf]="study.subjectStudyList">
         <node [label]="subject | subjectStudyLabel" [pictoUrl]="userIconPath" [nodeParams]="subject" [dataRequest]="true"
             (openClick)="getSubjectDetails($event)">
             <ng-template ngFor let-examination [ngForOf]="subject.examinations">
