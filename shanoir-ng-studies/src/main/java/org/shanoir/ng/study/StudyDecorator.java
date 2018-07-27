@@ -75,11 +75,6 @@ public abstract class StudyDecorator implements StudyMapper {
 		}
 		return studyDTOs;
 	}
-	
-	@Override
-	public StudyDTO studyToSimpleStudyDTO(Study study) {
-		return convertStudyToStudyDTO(study, false);
-	}
 
 	@Override
 	public StudyDTO studyToStudyDTO(final Study study) {

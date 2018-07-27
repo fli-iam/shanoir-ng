@@ -6,10 +6,10 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class StudyApiController implements StudyApi {
@@ -120,8 +119,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId,
-			@RequestParam(value = "withdata", required = false) Boolean withdata) {
+	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId) {
 		Study study;
 		try {
 			if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -138,12 +136,7 @@ public class StudyApiController implements StudyApi {
 		if (study == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		if (withdata != null && withdata) {
-			return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(studyMapper.studyToSimpleStudyDTO(study), HttpStatus.OK);
-
-		}
+		return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
 	}
 
 	@Override

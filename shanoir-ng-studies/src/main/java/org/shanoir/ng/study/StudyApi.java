@@ -90,8 +90,7 @@ public interface StudyApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
 	@RequestMapping(value = "/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<StudyDTO> findStudyById(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "Get study with all data or not.") @RequestParam(value = "withdata", required = false) Boolean withdata);
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@ApiOperation(value = "", notes = "Removes a membre from a study", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "member removed", response = Void.class),
