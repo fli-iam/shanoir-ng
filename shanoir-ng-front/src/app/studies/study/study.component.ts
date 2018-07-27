@@ -295,5 +295,4 @@ export class StudyComponent implements OnInit {
     private onChangeSubjectStudyList(subjectStudyList: SubjectStudy[]) {
         this.subjectStudyList = subjectStudyList;
     }
-
 }

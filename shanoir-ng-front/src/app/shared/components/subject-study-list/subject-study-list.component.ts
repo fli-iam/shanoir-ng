@@ -13,11 +13,12 @@ import { Subject } from '../../../subjects/shared/subject.model';
 export class SubjectStudyListComponent implements OnInit{
     @Input() mode: "study" | "subject";
     @Input() list: any[];
+    @Input () subjectStudyList : SubjectStudy[] = [];
     @Output() ssl = new EventEmitter<SubjectStudy[]>();
     
     private legend: "Studies" | "Subjects";
     private columnName: "Common Name" | "Study Name";
-    private subjectStudyList: SubjectStudy[] = [];
+    // private subjectStudyList: SubjectStudy[] = [];
 
     private onChangeSubjectStudyList() {
         this.ssl.emit(this.subjectStudyList);
