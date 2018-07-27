@@ -18,7 +18,6 @@ export class SubjectStudyListComponent implements OnInit{
     
     private legend: "Studies" | "Subjects";
     private columnName: "Common Name" | "Study Name";
-    // private subjectStudyList: SubjectStudy[] = [];
 
     private onChangeSubjectStudyList() {
         this.ssl.emit(this.subjectStudyList);

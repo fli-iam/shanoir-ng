@@ -50,8 +50,8 @@ export class StudyService {
             .toPromise();
     }
     
-    getStudy(id: number, withData: boolean): Promise<Study> {
-        return this.http.get<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id + '?withdata=' + withData)
+    getStudy(id: number): Promise<Study> {
+        return this.http.get<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id)
             .toPromise();
     }
 

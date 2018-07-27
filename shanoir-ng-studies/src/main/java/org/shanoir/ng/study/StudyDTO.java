@@ -48,7 +48,7 @@ public class StudyDTO {
 
 	private StudyType studyType;
 
-	private List<SubjectStudyDTO> subjects;
+	private List<SubjectStudyDTO> subjectStudyList;
 
 	private List<TimepointDTO> timepoints;
 
@@ -303,18 +303,18 @@ public class StudyDTO {
 	}
 
 	/**
-	 * @return the subjects
+	 * @return the subjectStudyList
 	 */
-	public List<SubjectStudyDTO> getSubjects() {
-		return subjects;
+	public List<SubjectStudyDTO> getSubjectStudyList() {
+		return subjectStudyList;
 	}
 
 	/**
-	 * @param subjects
-	 *            the subjects to set
+	 * @param subjectStudyList
+	 *            the subjectStudyList to set
 	 */
-	public void setSubjects(List<SubjectStudyDTO> subjects) {
-		this.subjects = subjects;
+	public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
+		this.subjectStudyList = subjectStudyList;
 	}
 
 	/**

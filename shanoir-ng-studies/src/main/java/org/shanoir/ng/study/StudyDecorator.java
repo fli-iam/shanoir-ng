@@ -95,7 +95,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		if (withData) {
 			studyDTO.setStudyCenterList(
 					studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
-			studyDTO.setSubjects(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
+			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
 					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
 			getStudyCards(studyDTO);

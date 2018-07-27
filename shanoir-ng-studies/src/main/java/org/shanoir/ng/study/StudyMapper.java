@@ -39,7 +39,7 @@ public interface StudyMapper {
 	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true),
 			@Mapping(target = "membersCategories", ignore = true), @Mapping(target = "nbExaminations", ignore = true),
 			@Mapping(target = "nbSujects", ignore = true), @Mapping(target = "studyCards", ignore = true),
-			@Mapping(target = "studyCenterList", ignore = true), @Mapping(target = "subjects", ignore = true) })
+			@Mapping(target = "studyCenterList", ignore = true), @Mapping(target = "subjectStudyList", ignore = true) })
 	StudyDTO studyToStudyDTO(Study study);
 
 }
