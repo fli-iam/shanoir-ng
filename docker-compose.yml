@@ -105,6 +105,22 @@ services:
       - "keycloak"
       - "database"
   #
+  # Solr microservice for Shanoir-NG search
+  #
+  solr:
+    container_name: solr
+    image: solr
+    volumes:
+      - "solr-data:/opt/solr/server/solr/mycores"
+    networks:
+      - shanoir_ng_network
+    ports:
+      - "8983:8983"
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - mycore
+  #
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
   ldap:
@@ -190,6 +206,7 @@ volumes:
   dcm4chee-database-data:
   dcm4chee-arc-wildfly-data:
   dcm4chee-arc-storage-data:
+  solr-data:
   tmp:
   logs:
 
