@@ -106,7 +106,6 @@ export class StudyComponent implements OnInit {
 
     edit(): void {
         this.mode = 'edit';
-        console.log(this.study.subjectStudyList.length)
     }
 
     editTimepoint(timepoint: Timepoint): void {
@@ -179,30 +178,12 @@ export class StudyComponent implements OnInit {
             })
             .subscribe((study: Study) => {
                 this.study = study;
-                console.log(this.study)
                 this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
-                // if (this.mode == 'view' || this.mode == 'edit') {
-                //     // this.getStudyWithData(this.study.id);
-                // } else {
-                    this.loading = false;
-                // }
+                this.loading = false;
             }, (error: any) => {
                 this.loading = false;
             });
     }
-
-    // getStudyWithData(studyId: number): void {
-    //     this.studyService.getStudy(studyId, true)
-    //         .then((study: Study) => {
-    //             this.study = study;
-    //             console.log(this.study.subjectStudyList.length)
-    //             this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
-    //             this.loading = false;
-    //         }).catch((reason: any) => {
-    //             this.loading = false;
-    //             throw reason;
-    //         });
-    // }
 
     initializeStudyData(): void {
         this.study.clinical = false;
