@@ -3,6 +3,7 @@ package org.shanoir.ng.dataset;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Dataset service.
@@ -65,6 +66,6 @@ public interface DatasetService<T extends Dataset> {
 	 * @return datasets
 	 * @throws ShanoirException
 	 */
-	List<T> findAll() throws ShanoirException;
+	List<T> findAll(final Pageable pageable) throws ShanoirException;
 
 }

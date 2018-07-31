@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -157,10 +158,9 @@ public class DatasetApiController implements DatasetApi {
 	 * @throws RestServiceException 
 	 * 
 	 */
-	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasets() throws RestServiceException {
+	public ResponseEntity<List<DatasetDTO>> findDatasets(final Pageable pageable) throws RestServiceException {
 		try {
-			List<Dataset> datasets = datasetService.findAll();
+			List<Dataset> datasets = datasetService.findAll(pageable);
 			if (datasets.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}

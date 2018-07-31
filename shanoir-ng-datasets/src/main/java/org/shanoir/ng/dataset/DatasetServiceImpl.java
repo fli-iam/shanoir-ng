@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -157,9 +158,9 @@ public class DatasetServiceImpl implements DatasetService<Dataset> {
 	}
 
 	@Override
-	public List<Dataset> findAll() throws ShanoirException {
+	public List<Dataset> findAll(final Pageable pageable) throws ShanoirException {
 		List<Dataset> datasets = new ArrayList<Dataset>();
-		datasetRepository.findAll().forEach(datasets::add);
+		datasetRepository.findAll(pageable).forEach(datasets::add);
 		return datasets;
 	}
 

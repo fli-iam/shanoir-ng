@@ -1,7 +1,7 @@
 package org.shanoir.ng.dataset;
 
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
  * Repository for datasets.
@@ -9,6 +9,6 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @author msimon
  */
 @NoRepositoryBean
-public interface DatasetBaseRepository<T extends Dataset> extends CrudRepository<T, Long> {
+public interface DatasetBaseRepository<T extends Dataset> extends PagingAndSortingRepository<T, Long> {
 
 }
