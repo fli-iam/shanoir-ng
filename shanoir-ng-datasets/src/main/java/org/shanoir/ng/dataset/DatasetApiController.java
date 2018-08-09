@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -156,15 +157,15 @@ public class DatasetApiController implements DatasetApi {
 
 	/**
 	 * @throws RestServiceException 
-	 * 
+	 *
 	 */
-	public ResponseEntity<List<DatasetDTO>> findDatasets(final Pageable pageable) throws RestServiceException {
+	public ResponseEntity<Page<DatasetDTO>> findDatasets(final Pageable pageable) throws RestServiceException {
 		try {
-			List<Dataset> datasets = datasetService.findAll(pageable);
-			if (datasets.isEmpty()) {
+			Page<Dataset> datasets = datasetService.findPage(pageable);
+			if (!datasets.hasContent()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
-			return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+			return new ResponseEntity<Page<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Cant get datasets", null));
