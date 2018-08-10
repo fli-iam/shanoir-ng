@@ -151,6 +151,11 @@ public class StudyServiceImpl implements StudyService {
 	public List<Study> findStudiesByUserId(final Long userId) {
 		return studyRepository.findByStudyUserList_UserIdOrderByNameAsc(userId);
 	}
+	
+	@Override
+	public List<StudyUser> findStudyUsersByStudyId(final Long studyId) {
+		return studyUserRepository.findByStudyId(studyId);
+	}
 
 	@Override
 	public List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(final Long userId,

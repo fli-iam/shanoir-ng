@@ -1,5 +1,6 @@
 package org.shanoir.ng.studyuser;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
@@ -7,10 +8,22 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.NotBlank;
+import org.shanoir.ng.shared.validation.Unique;
+
 /**
  * Relation between the study and the users.
+ * 
+ * For performance reasons in microservices architectures and as the user name
+ * is an information entity that changes nearly never, we duplicate the info here:
+ * we have a user name as well in study_user. The master record is managed in the
+ * ms users. If the user name is changed there for an user id, the ms studies will
+ * pull for events of this change and apply the change on this object to remain
+ * synchronized: usage of asynchronous REST here to increase the independence and
+ * resilience between the microservices.
  *
  * @author ifakhfak
+ * @author mkain
  */
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "studyId", "userId" }, name = "study_user_idx") })
@@ -34,6 +47,12 @@ public class StudyUser {
 	/** User id. */
 	@Id
 	private Long userId;
+	
+	/** User name. Duplicate: master record in ms users. */
+	@NotBlank
+	@Column(unique = true)
+	@Unique
+	private String userName;
 
 	/**
 	 * @return the receiveAnonymizationReport
@@ -110,6 +129,14 @@ public class StudyUser {
 	 */
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 }
