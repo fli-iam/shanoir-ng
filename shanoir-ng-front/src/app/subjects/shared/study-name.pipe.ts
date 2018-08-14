@@ -1,7 +1,6 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
 import { SubjectStudy } from "./subject-study.model";
-import { SubjectType } from '../../subjects/shared/subject.types';
 import { IdNameObject } from "../../shared/models/id-name-object.model";
 
 @Pipe({ name: "studyNamePipe" })

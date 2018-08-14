@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter, ViewChild, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { PatientDicom } from "./../dicom-data.model";
+import { PatientDicom } from "../dicom-data.model";
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';

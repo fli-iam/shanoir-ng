@@ -8,55 +8,60 @@ import * as AppUtils from '../../utils/app.utils';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { EquipmentDicom } from "../../import/dicom-data.model";
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
-import { GuiError } from '../../shared/models/error.model';
+import { StudyUser } from './study-user.model';
 
 @Injectable()
 export class StudyService {
     constructor(private http: HttpClient, private msgBoxService: MsgBoxService) { }
-
+    
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
-            .toPromise();
+        .toPromise();
     }
-
+    
     findStudiesWithStudyCardsByUserAndEquipment(equipment: EquipmentDicom): Promise<Study[]> {
         return this.http.post<Study[]>(AppUtils.BACKEND_API_STUDY_WITH_CARDS_BY_USER_EQUIPMENT_URL, JSON.stringify(equipment))
-            .map(studies => { return studies ? studies : []; })
-            .toPromise();
+        .map(studies => { return studies ? studies : []; })
+        .toPromise();
     }
 
     create(study: Study): Observable<Study> {
         return this.http.post<Study>(AppUtils.BACKEND_API_STUDY_URL, JSON.stringify(study))
-            .map(res => res);
+        .map(res => res);
     }
-
+    
     delete(id: number): Promise<void> {
         return this.http.delete<void>(AppUtils.BACKEND_API_STUDY_URL + '/' + id)
-            .toPromise();
+        .toPromise();
     }
-
+    
     getStudies(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
-            .toPromise();
+        .toPromise();
     }
-
+    
     getStudiesNames(): Promise<IdNameObject[]> {
         return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
-            .toPromise();
+        .toPromise();
     }
-
+    
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
-            .toPromise();
+        .toPromise();
     }
     
     getStudy(id: number): Promise<Study> {
         return this.http.get<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id)
-            .toPromise();
+        .toPromise();
     }
-
+    
     update(id: number, study: Study): Observable<Study> {
         return this.http.put<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id, JSON.stringify(study))
-            .map(response => response);
+        .map(response => response);
+    }
+    
+    findMembers(studyId: number): Promise<StudyUser[]> {
+        return this.http.get<StudyUser[]>(AppUtils.BACKEND_API_STUDY_URL + '/' + studyId + AppUtils.BACKEND_API_STUDY_FIND_MEMBERS_URL)
+        .toPromise();
     }
 }

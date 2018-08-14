@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
-import { Examination } from "../shared/examination.model";
+import { Examination } from "./examination.model";
 
 @Pipe({ name: "examinationLabel" })
 export class ExaminationPipe implements PipeTransform {
