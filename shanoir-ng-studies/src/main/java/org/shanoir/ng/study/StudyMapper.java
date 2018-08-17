@@ -7,7 +7,6 @@ import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import org.mapstruct.Named;
 import org.shanoir.ng.timepoint.TimepointMapper;
 
 /**
@@ -31,20 +30,6 @@ public interface StudyMapper {
 	List<StudyDTO> studiesToStudyDTOs(List<Study> studies);
 
 	/**
-	 * Map a @Study to a simple @StudyDTO.
-	 * 
-	 * @param study
-	 *            study to map.
-	 * @return simple study DTO.
-	 */
-	@Named("studyToSimpleStudyDTO")
-	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true),
-			@Mapping(target = "membersCategories", ignore = true), @Mapping(target = "nbExaminations", ignore = true),
-			@Mapping(target = "nbSujects", ignore = true), @Mapping(target = "studyCards", ignore = true),
-			@Mapping(target = "studyCenterList", ignore = true), @Mapping(target = "subjects", ignore = true) })
-	StudyDTO studyToSimpleStudyDTO(Study study);
-
-	/**
 	 * Map a @Study to a @StudyDTO.
 	 * 
 	 * @param study
@@ -54,7 +39,7 @@ public interface StudyMapper {
 	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true),
 			@Mapping(target = "membersCategories", ignore = true), @Mapping(target = "nbExaminations", ignore = true),
 			@Mapping(target = "nbSujects", ignore = true), @Mapping(target = "studyCards", ignore = true),
-			@Mapping(target = "studyCenterList", ignore = true), @Mapping(target = "subjects", ignore = true) })
+			@Mapping(target = "studyCenterList", ignore = true), @Mapping(target = "subjectStudyList", ignore = true) })
 	StudyDTO studyToStudyDTO(Study study);
 
 }

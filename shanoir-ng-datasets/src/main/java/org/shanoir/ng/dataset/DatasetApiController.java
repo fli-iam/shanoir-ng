@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -117,14 +118,10 @@ public class DatasetApiController implements DatasetApi {
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@ApiParam(value = "study to update", required = true) @Valid @RequestBody Dataset dataset,
 			final BindingResult result) throws RestServiceException {
-		// IMPORTANT : avoid any confusion that could lead to security breach
-		dataset.setId(datasetId);
-
-		// A basic dataset can only update certain fields, check that
+		
+		dataset.setId(datasetId); // IMPORTANT : avoid any confusion that could lead to security breach
 		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(dataset);
-		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
-		/* Merge errors. */
 		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors);
 		if (!errors.isEmpty()) {
 			throw new RestServiceException(
@@ -161,10 +158,9 @@ public class DatasetApiController implements DatasetApi {
 	 * @throws RestServiceException 
 	 * 
 	 */
-	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasets() throws RestServiceException {
+	public ResponseEntity<List<DatasetDTO>> findDatasets(final Pageable pageable) throws RestServiceException {
 		try {
-			List<Dataset> datasets = datasetService.findAll();
+			List<Dataset> datasets = datasetService.findAll(pageable);
 			if (datasets.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}

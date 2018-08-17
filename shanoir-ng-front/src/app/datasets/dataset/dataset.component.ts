@@ -1,14 +1,12 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectorRef } from '@angular/core';
 import { Location } from '@angular/common';
 import { Observable } from 'rxjs/Observable';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { DatasetService } from '../shared/dataset.service';
-import { Dataset } from '../shared/dataset.model';
+import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
-import { SerieDicom } from '../../import/dicom-data.model';
 import { DicomArchiveService } from '../../import/dicom-archive.service';
-import { HttpResponse } from '@angular/common/http';
 
 @Component({
     selector: 'dataset-detail',
@@ -44,6 +42,7 @@ export class DatasetComponent implements OnInit {
         this.loadDicomInMemory();
     }
 
+
     private fetchMode(): Promise<void> {
         return new Promise((resolve) => { 
             this.route.queryParams
@@ -55,21 +54,25 @@ export class DatasetComponent implements OnInit {
         });
     }
 
-    private fetchDataset(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                let id = queryParams['id'];
-                if (id) {
-                    if (this.mode == 'create') throw Error('Cannot be in create mode and have an id');
-                    return this.datasetService.get(id);
-                } else {
-                    if (this.mode != 'create') throw Error('Cannot be in '+this.mode+' mode without an id');
-                    return Observable.of<Dataset>();
-                }
-            })
-            .subscribe((dataset: Dataset) => {
-                this.dataset = dataset;
-            });
+    private fetchDataset(): Promise<Dataset> {
+        return new Promise((resolve) => { 
+            this.route.queryParams
+                .switchMap((queryParams: Params) => {
+                    let id = queryParams['id'];
+                    if (id) {
+                        if (this.mode == 'create') throw Error('Cannot be in create mode and have an id');
+                        return this.datasetService.get(id);
+                    } else {
+                        if (this.mode != 'create') throw Error('Cannot be in '+this.mode+' mode without an id');
+                        return Observable.of<Dataset>();
+                    }
+                })
+                .subscribe((dataset: Dataset) => {
+                    if (!dataset.updatedMetadata) dataset.updatedMetadata = new DatasetMetadata();
+                    this.dataset = dataset;
+                    resolve();
+                });
+        });
     }
     
     private back(): void {
@@ -85,7 +88,12 @@ export class DatasetComponent implements OnInit {
 
     private update(): void {
         this.datasetService.update(this.dataset).subscribe((dataset) => {
-            this.msgService.log('info', 'Dataset updated');
+            this.router.navigate([], {
+                relativeTo: this.route, 
+                queryParams: { id: this.dataset.id, mode: "view" }
+            }).then(() => {
+                this.msgService.log('info', 'Dataset n°' + this.dataset.id + ' has been updated');
+            });
         });
     }
 
@@ -124,16 +132,5 @@ export class DatasetComponent implements OnInit {
             this.papayaParams = params;
         });
     }
-
-    // getFormValidationErrors() {
-    //     Object.keys(this.subjectForm.controls).forEach(key => {
-    //         const controlErrors: ValidationErrors = this.subjectForm.get(key).errors;
-    //         if (controlErrors != null) {
-    //             Object.keys(controlErrors).forEach(keyError => {
-    //                 console.log('Key control: ' + key + ', keyError: ' + keyError + ', err value: ', controlErrors[keyError]);
-    //             });
-    //         }
-    //     });
-    // }
 
 }

@@ -1,4 +1,4 @@
-<fieldset>
+<fieldset ngModelGroup="common">
 	<ol>
 		<li>
 			<label i18n="Dataset detail|Dataset id@@datasetId">Id</label>
@@ -34,17 +34,18 @@
 			</span>
 		</li>
 		<li>
-			<label i18n="Dataset detail|Dataset creation date@@datasetDetailCreation" class="required-label">Creation date</label>
+			<label i18n="Dataset detail|Dataset creation date@@datasetDetailCreation">Creation date</label>
 			<span [ngSwitch]="mode" class="right-col">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.creationDate | date: 'dd/MM/yyyy'}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<datepicker [(ngModel)]="dataset.creationDate" [ngModelOptions]="{standalone: true}"></datepicker>
+					<datepicker [(ngModel)]="dataset.creationDate" validDate name="dataset.creationDate"></datepicker>
 				</ng-template>
 			</span>
 		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset type@@datasetDetailType" class="required-label">Modality type</label>
-			<select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="dataset.type"></select-dataset-type>
+			{{dataset.type}}
+			<!-- <select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="dataset.type" [ngModelOptions]="{standalone: true}" ></select-dataset-type> -->
 		</li>
 		<!-- <li>
 			<label i18n="Dataset detail|Dataset acquisition@@datasetDetailAcquisition" class="required-label">Acquisition</label>
@@ -92,35 +93,60 @@
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.name}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<input type="text" [(ngModel)]="dataset.name" [ngModelOptions]="{standalone: true}" />
+					<input type="text" 
+						[ngModel]="dataset.updatedMetadata.name ? dataset.updatedMetadata.name : dataset.originMetadata.name"
+						(ngModelChange)="dataset.updatedMetadata.name = $event" 
+						[ngModelOptions]="{standalone: true}" />
 				</ng-template>
 			</span>
 		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset comments@@datasetComments">Comment</label>
 			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">{{dataset.originMetadata.comment}}</ng-template>
+				<ng-template [ngSwitchCase]="'view'">{{dataset.updatedMetadata.comment ? dataset.updatedMetadata.comment : dataset.originMetadata.comment}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<input type="text" [(ngModel)]="dataset.originMetadata.comment" [ngModelOptions]="{standalone: true}" />
+					<input type="text" 
+						[ngModel]="dataset.updatedMetadata.comment ? dataset.updatedMetadata.comment : dataset.originMetadata.comment"
+						(ngModelChange)="dataset.updatedMetadata.comment = $event"
+						[ngModelOptions]="{standalone: true}" />
 				</ng-template>
 			</span>
 		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset explored entity type@@datasetExploredEntity">Explored entity</label>
-			<select-explored-entity class="right-col" [mode]="mode" [(ngModel)]="dataset.originMetadata.exploredEntity"></select-explored-entity>
+			<select-explored-entity class="right-col" 
+				[mode]="mode" 
+				[ngModel]="dataset.updatedMetadata.exploredEntity ? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity" 
+				(ngModelChange)="dataset.updatedMetadata.exploredEntity = $event"
+				[ngModelOptions]="{standalone: true}" >
+			</select-explored-entity>
 		</li>
-		<!-- <li>
+		<li>
 			<label i18n="Dataset detail|Dataset cardinality of releted subjects@@datasetCardinalityOfRelatedSubjects">Cardinality of releted subjects</label>
 			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">{{dataset.originMetadata.datasetCardinalityOfRelatedSubjects}}</ng-template>
+				<ng-template [ngSwitchCase]="'view'">{{dataset.updatedMetadata.cardinalityOfRelatedSubjects ? dataset.updatedMetadata.cardinalityOfRelatedSubjects : dataset.originMetadata.cardinalityOfRelatedSubjects}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<input type="text" [(ngModel)]="dataset.originMetadata.datasetCardinalityOfRelatedSubjects" [ngModelOptions]="{standalone: true}" />
+					<input type="radio" name="card" id="card_single"
+						[ngModel]="dataset.updatedMetadata.cardinalityOfRelatedSubjects ? dataset.updatedMetadata.cardinalityOfRelatedSubjects : dataset.originMetadata.cardinalityOfRelatedSubjects"
+						(ngModelChange)="dataset.updatedMetadata.cardinalityOfRelatedSubjects = $event"
+						value="SINGLE_SUBJECT_DATASET"
+						[ngModelOptions]="{standalone: true}" />Single subject
+					<input type="radio" name="card" id="card_multiple"
+						[ngModel]="dataset.updatedMetadata.cardinalityOfRelatedSubjects ? dataset.updatedMetadata.cardinalityOfRelatedSubjects : dataset.originMetadata.cardinalityOfRelatedSubjects"
+						(ngModelChange)="dataset.updatedMetadata.cardinalityOfRelatedSubjects = $event"
+						value="MULTIPLE_SUBJECTS_DATASET"
+						[ngModelOptions]="{standalone: true}" />Multiple subjects
 				</ng-template>
 			</span>
-		</li> -->
+		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset processed type subjects@@datasetProcessedType">Processed Type</label>
-			<select-processed-dataset-type class="right-col" [mode]="mode" [(ngModel)]="dataset.originMetadata.datasetProcessedType"></select-processed-dataset-type>
+			<select-processed-dataset-type class="right-col" 
+				[mode]="mode" 
+				[ngModel]="dataset.updatedMetadata.datasetProcessedType ? dataset.updatedMetadata.datasetProcessedType : dataset.originMetadata.datasetProcessedType" 
+				(ngModelChange)="dataset.updatedMetadata.datasetProcessedType = $event"
+				[ngModelOptions]="{standalone: true}" >
+			</select-processed-dataset-type>
 		</li>
 	</ol>
 </fieldset>

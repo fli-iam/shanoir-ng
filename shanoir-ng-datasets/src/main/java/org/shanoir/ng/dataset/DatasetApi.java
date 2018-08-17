@@ -15,6 +15,7 @@ import javax.validation.Valid;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -76,7 +77,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasRole('ADMIN')")
-	ResponseEntity<List<DatasetDTO>> findDatasets() throws RestServiceException;
+	ResponseEntity<List<DatasetDTO>> findDatasets(Pageable pageable) throws RestServiceException;
 
     @ApiOperation(value = "", nickname = "downloadDatasetById", notes = "If exists, returns a zip file of the dataset corresponding to the given id", response = Resource.class, tags={  })
     @ApiResponses(value = { 

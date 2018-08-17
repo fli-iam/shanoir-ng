@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
  *
  * @author msimon
  */
-public interface SubjectRepository extends CrudRepository<Subject, Long>, ItemRepositoryCustom<Subject> {
+public interface SubjectRepository extends CrudRepository<Subject, Long>, ItemRepositoryCustom<Subject>, SubjectRepositoryCustom {
 
 	/**
 	 * Find subject by name.
@@ -34,5 +34,4 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, ItemRe
 	
 	@Query("SELECT MAX(s.name)  FROM Subject s WHERE s.name LIKE CONCAT(:centerCode,'%','%','%','%')")
 	public String find(@Param("centerCode") String centerCode);
-
 }

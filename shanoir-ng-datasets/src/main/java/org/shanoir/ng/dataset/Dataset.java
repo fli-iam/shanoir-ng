@@ -1,6 +1,7 @@
 package org.shanoir.ng.dataset;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 /**
  * Dataset.
@@ -72,7 +75,8 @@ public abstract class Dataset extends AbstractGenericItem {
 	private static final long serialVersionUID = -6712556010816448026L;
 
 	/** Creation date of the dataset. */
-	@JsonDeserialize(using = LocalDateDeserializer.class)
+	//@JsonDeserialize(using = LocalDateDeserializer.class)
+	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate creationDate;
 
 	/** Dataset Acquisition. */

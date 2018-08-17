@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import { KeycloakService } from "../keycloak/keycloak.service";
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { ImagesUrlUtil } from '../utils/images-url.util';
 
 @Component({
     selector: 'header',

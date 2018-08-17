@@ -2,6 +2,7 @@ package org.shanoir.ng.subject;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -79,6 +80,15 @@ public class SubjectApiController implements SubjectApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
+	}
+		
+	@Override
+	public ResponseEntity<List<IdNameDTO>> findSubjectsNames() {
+		final List<IdNameDTO> subjectsNames = subjectService.findIdsAndNames();
+		if (subjectsNames.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(subjectsNames, HttpStatus.OK);
 	}
 
 	@Override
@@ -247,5 +257,4 @@ public class SubjectApiController implements SubjectApi {
 		return new ResponseEntity<Subject>(subject, HttpStatus.OK);
 
 	}
-
 }

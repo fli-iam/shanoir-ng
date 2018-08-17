@@ -3,7 +3,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 
-import { Dataset } from './dataset.model';
+import { Dataset, DatasetMetadata } from './dataset.model';
 import * as AppUtils from '../../utils/app.utils';
 
 @Injectable()
@@ -23,20 +23,17 @@ export class DatasetService {
 
     get(id: number): Promise<Dataset> {
         return this.http.get<Dataset>(AppUtils.BACKEND_API_DATASET_URL + '/' + id)
-            .toPromise()
-            .then(response => response);
+            .toPromise();
     }
 
     getAll(): Promise<Dataset[]> {
         return this.http.get<Dataset[]>(AppUtils.BACKEND_API_DATASET_URL)
-            .toPromise()
-            .then(response => response);
+            .toPromise();
     }
 
     update(dataset: Dataset): Observable<Dataset> {
         if (!dataset.id) throw Error('Cannot update a dataset without an id');
-        return this.http.put<Dataset>(AppUtils.BACKEND_API_DATASET_URL + '/' + dataset.id, JSON.stringify(dataset))
-            .map(response => response);
+        return this.http.put<Dataset>(AppUtils.BACKEND_API_DATASET_URL + '/' + dataset.id, JSON.stringify(dataset));
     }
 
     download(dataset: Dataset, format: string): void {

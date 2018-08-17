@@ -25,7 +25,7 @@
 								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="study.name" />
 								<label *ngIf="formErrors.name.includes('required')" [@slideDown]="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
 								<label *ngIf="formErrors.name.includes('length')" [@slideDown]="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Edit study|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
+								<label *ngIf="hasNameUniqueError" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -134,49 +134,32 @@
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
-				<legend i18n="Study detail|Name label@@studyDetailSubjects">Subjects</legend>
-				<ol>
-					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|List of subjects available label@@studyDetailSubjects">List of subjects available</label>
-						<span class="right-col">
-							TODO
-						</span>
-					</li>
-					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|List of the subjects associated label@@studyDetailAssociatedSubjects" class="required-label">List of the subjects associated</label>
-						<span class="right-col">
-							TODO
-						</span>
-					</li>
-				</ol>
+			<fieldset *ngIf="mode !== 'view'">
+				<subject-study-list mode="subject" [list]="subjects" [(subjectStudyList)]="study.subjectStudyList" (ssl)="onChangeSubjectStudyList($event)"></subject-study-list>
 			</fieldset>
 			<fieldset>
-				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers and principal investigator</legend>
+				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers and principal investigators</legend>
 				<ol>
 					<li>
 						<div *ngIf="mode == 'view' ; then view_mode else edit_mode"></div>
-						<ng-template #view_mode>
-							<label i18n="Study detail|Mono or multicenter label@@studyDetailViewMonoCenter" class="required-label">Multi-centers</label>
-						</ng-template>
-						<ng-template #edit_mode>
-							<label i18n="Study detail|Mono or multicenter label@@studyDetailEditMonoCenter" class="required-label">Mono or multicenter</label>
-						</ng-template>
+						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter" class="required-label">Multicenter</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<span *ngIf="!study.monoCenter" class="bool-true">&#x2713;</span>
 								<span *ngIf="study.monoCenter" class="bool-false">&#x2717;</span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="true" i18n="Study detail|Yes label@@noLabel"
-								 [checked]="study.monoCenter" />Mono-center
+								<ng-template [ngIf]="!studyCenterListHasMultipleElements()">
+									<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="true" i18n="Study detail|Yes label@@noLabel"
+										[checked]="study.monoCenter" />Single center
+								</ng-template>
 								<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="false" i18n="Study detail|No label@@yesLabel"
-								 [checked]="!study.monoCenter" />Multi-centers
+									[checked]="!study.monoCenter" />Multicenter
 							</ng-template>
 						</span>
 					</li>
 					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigator</label>
+						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigators</label>
 						<span class="right-col">
 							<select [(ngModel)]="selectedCenter" [ngModelOptions]="{standalone: true}">
 								<option *ngFor="let center of centers" [ngValue]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</option>
@@ -185,14 +168,14 @@
 							<img [hidden]="enableAddIcon()" [src]="addDisabledIconPath" class="icon" />
 						</span>
 					</li>
-					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|Current centers and Investigators label@@studyDetailCurrentCentersAndPI" class="required-label">Current centers and Investigators</label>
+					<li>
+						<label i18n="Study detail|Current centers and investigators label@@studyDetailCurrentCentersAndPI" class="required-label">Current centers and investigators</label>
 						<span class="right-col study-center-list">
 							<div *ngFor="let studyCenter of study.studyCenterList">
 								<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: studyCenter.center.id}">
 									{{studyCenter.center.name}}
 								</a>
-								<img [src]="deleteIconPath" class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.id)" />
+								<img [src]="deleteIconPath" class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.center.id)" *ngIf="mode != 'view'"/>
 							</div>
 							<span *ngIf="studyCenterListEmpty()" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">No center is currently associated to the research study!</span>
 						</span>
@@ -200,7 +183,7 @@
 				</ol>
 			</fieldset>
 			<fieldset>
-				<legend i18n="Study detail|Protocole files label@@studyDetailProtocoleFiles">Protocole files</legend>
+				<legend i18n="Study detail|Protocol files label@@studyDetailProtocolFiles">Protocol files</legend>
 				<ol>
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|Attach new files label@@studyDetailAttachNewFiles">Attach new files</label>
@@ -210,7 +193,7 @@
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<!-- <fieldset>
 				<legend i18n="Study detail|Timepoints label@@studyDetailTimepoints">Timepoints</legend>
 				<ol>
 					<li *ngIf="mode != 'view'">
@@ -251,8 +234,12 @@
 						</span>
 					</li>
 				</ol>
+			</fieldset> -->
+			<fieldset *ngIf="mode != 'view'">
+				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
+				<shanoir-table [items]="studyUserList" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs"></shanoir-table>
 			</fieldset>
-			<fieldset>
+			<fieldset *ngIf="mode == 'view'">
 				<legend>Data</legend>
 				<div *ngIf="loading" class="data-loading">
 					Loading... <img [src]="loaderImagePath" />

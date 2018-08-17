@@ -1,11 +1,11 @@
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { NgModule, ErrorHandler } from '@angular/core';
 
-import { Autosize } from 'angular2-autosize/angular2-autosize';
+import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
 
 import { routing } from './app.routing';
@@ -96,6 +96,8 @@ import { SelectSeriesComponent } from './import/select-series/select-series.comp
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { NewExamComponent } from './examinations/examination/new-exam.component';
+import { SubjectStudyListComponent } from "./shared/components/subject-study-list/subject-study-list.component";
+import { DateValidator } from './shared/date/date.validator';
 
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
@@ -219,6 +221,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         SelectSeriesComponent,
         DicomUploadComponent,
         ClinicalContextComponent,
+        SubjectStudyListComponent,
+        DateValidator,
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,

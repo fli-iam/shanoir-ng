@@ -1,10 +1,10 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
+import * as AppUtils from '../../utils/app.utils';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { Enum } from "../../shared/utils/enum";
@@ -16,6 +16,11 @@ import { StudyService } from '../shared/study.service';
 import { StudyStatus } from "../shared/study-status.enum";
 import { Timepoint } from '../shared/timepoint.model';
 import { slideDown } from '../../shared/animations/animations';
+import { SubjectStudy } from '../../subjects/shared/subject-study.model';
+import { SubjectService } from '../../subjects/shared/subject.service';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { StudyUser } from '../shared/study-user.model';
 
 @Component({
     selector: 'study-detail',
@@ -25,8 +30,6 @@ import { slideDown } from '../../shared/animations/animations';
 })
 
 export class StudyComponent implements OnInit {
-
-    @Input() idFromImport: number;
 
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
     private addDisabledIconPath: string = ImagesUrlUtil.ADD_DISABLED_ICON_PATH;
@@ -46,27 +49,36 @@ export class StudyComponent implements OnInit {
     private studyId: number;
     private studyStatusEnumValue: string;
     private studyStatuses: Enum[] = [];
+    private subjectStudyList: SubjectStudy[] = [];
+    private subjects: IdNameObject[];
+    private hasNameUniqueError: boolean = false;
+    public columnDefs: any[];
+    public customActionDefs: any[];
+    public rowClickAction: Object;
+    private studyUserList: StudyUser[] = [];
 
     formErrors = {
         'name': '',
-        'studyStatus': ''
+        'studyStatus': '',
+        'studyCenterList': ''
     };
 
     constructor(private route: ActivatedRoute, private router: Router,
         private centerService: CenterService, private studyService: StudyService, private fb: FormBuilder,
-        private location: Location, private keycloakService: KeycloakService) {
+        private location: Location, private keycloakService: KeycloakService, private subjectService: SubjectService,
+        private msgService: MsgBoxService) {
 
     }
 
     ngOnInit(): void {
         this.getEnum();
         this.getCenters();
+        this.getSubjects();
         this.getStudy();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true; 
         }
-        console.log(this.study.startDate);
     }
 
     addCenterToStudy(): void {
@@ -90,31 +102,20 @@ export class StudyComponent implements OnInit {
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [this.study.monoCenter, [Validators.required]],
-            'studyCenterList': [this.study.studyCenterList],
-            'nbSujects': [this.study.nbSujects]
+            'studyCenterList': [this.study.studyCenterList]
         });
         this.studyForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged();
     }
 
-    create(): void {
-        this.submit();
-        this.studyService.create(this.study)
-            .subscribe((study) => {
-                this.back();
-            }, (err: String) => {
-                if (err.indexOf("name should be unique") != -1) {
-                    this.isNameUnique = false;
-                }
-            });
-    }
-
     edit(): void {
         this.mode = 'edit';
+        this.getMembers(this.study.id);
+        this.createColumnDefs();
     }
 
-    editTimepoint(timepoint: Timepoint): void {
+    editTimepoint(timepoint: Timepoint): void {  
         // TODO
     }
 
@@ -141,6 +142,18 @@ export class StudyComponent implements OnInit {
             });
     }
 
+    getSubjects(): void {
+        this.subjectService
+            .getSubjectsNames()
+            .then(subjects => {
+                this.subjects = subjects;
+            })
+            .catch((error) => {
+                // TODO: display error
+                console.log("error getting subjects list!");
+            });
+    }
+
     getEnum(): void {
         var types = Object.keys(StudyStatus);
         for (var i = 0; i < types.length; i = i + 2) {
@@ -163,7 +176,7 @@ export class StudyComponent implements OnInit {
                     // view or edit mode
                     this.studyId = studyId;
                     this.loading = true;
-                    return this.studyService.getStudy(studyId, false);
+                    return this.studyService.getStudy(studyId);
                 } else {
                     // create mode
                     this.initializeStudyData();
@@ -173,25 +186,9 @@ export class StudyComponent implements OnInit {
             .subscribe((study: Study) => {
                 this.study = study;
                 this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
-                if (this.mode == 'view') {
-                    this.getStudyWithData(this.study.id);
-                } else {
-                    this.loading = false;
-                }
+                this.loading = false;
             }, (error: any) => {
                 this.loading = false;
-            });
-    }
-
-    getStudyWithData(studyId: number): void {
-        this.studyService.getStudy(studyId, true)
-            .then((study: Study) => {
-                this.study = study;
-                this.studyStatusEnumValue = StudyStatus[this.study.studyStatus];
-                this.loading = false;
-            }).catch((reason: any) => {
-                this.loading = false;
-                throw reason;
             });
     }
 
@@ -228,8 +225,11 @@ export class StudyComponent implements OnInit {
         }
     }
 
-    removeCenterFromStudy(studyCenterId: number): void {
-        this.study.studyCenterList = this.study.studyCenterList.filter(item => item.id !== studyCenterId);
+    removeCenterFromStudy(centerId: number): void {
+        this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
+        if (this.study.studyCenterList.length < 2) {
+            this.study.monoCenter = true;
+        }
     }
 
     removeTimepoint(timepoint: Timepoint): void {
@@ -246,22 +246,71 @@ export class StudyComponent implements OnInit {
         return true;
     }
 
+    studyCenterListHasMultipleElements(): boolean {
+        return this.study.studyCenterList.length > 1;
+    }
+
+    private manageRequestErrors(error: any): void {
+        this.hasNameUniqueError = AppUtils.hasUniqueError(error, 'name');
+    }
+
     submit(): void {
         let studyCenterListBackup: StudyCenter[] = this.study.studyCenterList;
         this.study = this.studyForm.value;
         this.study.studyCenterList = studyCenterListBackup;
+        this.study.subjectStudyList = this.subjectStudyList;
+    }
+
+    create(): void {
+        this.submit();
+        this.studyService.create(this.study)
+            .subscribe((study: Study) => {
+                this.back();
+                this.msgService.log('info', 'Study successfully created');
+            }, (error: any) => {
+                this.manageRequestErrors(error);
+            });
     }
 
     update(): void {
         this.submit();
         this.studyService.update(this.studyId, this.study)
-            .subscribe((study) => {
+            .subscribe((study: Study) => {
                 this.back();
-            }, (err: String) => {
-                if (err.indexOf("name should be unique") != -1) {
-                    this.isNameUnique = false;
-                }
+                this.msgService.log('info', 'Study successfully updated');
+            }, (error: any) => {
+                this.manageRequestErrors(error);
             });
     }
 
+    private onChangeSubjectStudyList(subjectStudyList: SubjectStudy[]) {
+        this.subjectStudyList = subjectStudyList;
+    }
+
+    private getMembers(studyId: number) {
+        this.studyService.findMembers(this.studyId)
+            .then((studyUserList: StudyUser[]) => {
+                this.studyUserList = studyUserList;
+            });
+    }
+
+    // Grid columns definition
+    private createColumnDefs() {
+        this.columnDefs = [
+            {headerName: "Username", field: "userName", width: "100%"},
+            // {headerName: "First Name", field: ""},
+            // {headerName: "Last Name", field: ""},
+            // {headerName: "Email", field: "", width: "200%"},
+            // {headerName: "Role", field: "", width: "63px"},
+            {headerName: "Role/Position", field: "studyUserType", width: "100%"},
+            {headerName: "Receive Import Mail", field: "receiveNewImportReport", type: "boolean", width: "100%"},
+            {headerName: "Receive Anonymization Mail", field: "receiveAnonymizationReport", type: "boolean", width: "100%"},
+            {headerName: "Delete", type: "button", img: ImagesUrlUtil.DELETE_ICON_PATH, target : "/user", getParams: function(item: any): Object {
+                return {id: item.id};
+            }}
+        ];
+        this.customActionDefs = [
+            {title: "Add member", img: ImagesUrlUtil.ADD_ICON_PATH, target: "../user"},
+        ];
+    }
 }

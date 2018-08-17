@@ -111,7 +111,9 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 */
 	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(Long userId, EquipmentDicom equipment)
 			throws ShanoirException;
-
+	
+	List<StudyUser> findStudyUsersByStudyId(final Long studyId);
+	
 	/**
 	 * Check if an user is responsible of the study.
 	 * 

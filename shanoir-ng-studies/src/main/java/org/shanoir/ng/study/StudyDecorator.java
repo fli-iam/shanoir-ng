@@ -71,15 +71,9 @@ public abstract class StudyDecorator implements StudyMapper {
 			if (study.getExaminationIds() != null) {
 				studyDTO.setNbExaminations(study.getExaminationIds().size());
 			}
-
 			studyDTOs.add(studyDTO);
 		}
 		return studyDTOs;
-	}
-
-	@Override
-	public StudyDTO studyToSimpleStudyDTO(Study study) {
-		return convertStudyToStudyDTO(study, false);
 	}
 
 	@Override
@@ -98,73 +92,38 @@ public abstract class StudyDecorator implements StudyMapper {
 	 */
 	private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
 		final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
-
-		studyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 		if (withData) {
-			studyDTO.setSubjects(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
+			studyDTO.setStudyCenterList(
+					studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
+			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
 					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
 			getStudyCards(studyDTO);
-			getMembers(study, studyDTO);
+			if (study.getStudyUserList() != null && !study.getStudyUserList().isEmpty()) {
+				prepareMembersCategories(study, studyDTO);
+			}
 		}
-
 		return studyDTO;
 	}
 
-	private void getMembers(final Study study, final StudyDTO studyDTO) {
-		final IdListDTO userIds = new IdListDTO();
-		for (StudyUser studyUser : study.getStudyUserList()) {
-			userIds.getIdList().add(studyUser.getUserId());
-		}
-
-		HttpEntity<IdListDTO> entity = null;
-		try {
-			entity = new HttpEntity<>(userIds, KeycloakUtil.getKeycloakHeader());
-		} catch (ShanoirException e) {
-			LOG.error("Error while getting users for study " + studyDTO.getId(), e);
-			return;
-		}
-
-		// Request to users MS to get users for current study
-		ResponseEntity<List<IdNameDTO>> usersResponse = null;
-		try {
-			usersResponse = restTemplate.exchange(
-					microservicesRequestsService.getUsersMsUrl() + MicroserviceRequestsService.SEARCH, HttpMethod.POST,
-					entity, new ParameterizedTypeReference<List<IdNameDTO>>() {
-					});
-		} catch (RestClientException e) {
-			LOG.error("Error while getting users for study " + studyDTO.getId(), e);
-			return;
-		}
-
-		final Map<Long, IdNameDTO> usersMap = new HashMap<>();
-		if (usersResponse != null && usersResponse.getBody() != null) {
-			for (IdNameDTO user : usersResponse.getBody()) {
-				usersMap.put(user.getId(), user);
-			}
-		}
-
+	private void prepareMembersCategories(final Study study, final StudyDTO studyDTO) {
 		// Sort members by category (studyUserType)
 		final Map<StudyUserType, List<IdNameDTO>> membersMap = new HashMap<>();
-		for (StudyUser user : study.getStudyUserList()) {
-			if (usersMap.containsKey(user.getUserId())) {
-				final IdNameDTO member = usersMap.get(user.getUserId());
-				if (membersMap.containsKey(user.getStudyUserType())) {
-					membersMap.get(user.getStudyUserType()).add(member);
-				} else {
-					final List<IdNameDTO> users = new ArrayList<>();
-					users.add(member);
-					membersMap.put(user.getStudyUserType(), users);
-				}
+		for (StudyUser studyUser : study.getStudyUserList()) {
+			final IdNameDTO member = new IdNameDTO(studyUser.getUserId(), studyUser.getUserName());
+			if (membersMap.containsKey(studyUser.getStudyUserType())) {
+				membersMap.get(studyUser.getStudyUserType()).add(member);
+			} else {
+				final List<IdNameDTO> studyUsers = new ArrayList<>();
+				studyUsers.add(member);
+				membersMap.put(studyUser.getStudyUserType(), studyUsers);
 			}
 		}
-
 		// Transform map into list
 		studyDTO.setMembersCategories(new ArrayList<>());
 		for (StudyUserType type : membersMap.keySet()) {
 			studyDTO.getMembersCategories().add(new MembersCategoryDTO(type, membersMap.get(type)));
 		}
-
 		// Sort categories by importance
 		Collections.sort(studyDTO.getMembersCategories(), new MembersCategoryComparator());
 	}
