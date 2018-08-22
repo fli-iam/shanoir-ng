@@ -1,11 +1,11 @@
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { NgModule, ErrorHandler } from '@angular/core';
 
-import { Autosize } from 'angular2-autosize/angular2-autosize';
+import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
 
 import { routing } from './app.routing';

@@ -1,7 +1,5 @@
 import { Component, Output, EventEmitter, Input, SimpleChanges, OnChanges } from '@angular/core';
-import { PatientDicom, SerieDicom, EquipmentDicom } from "./../dicom-data.model";
-import { Study } from '../../studies/shared/study.model';
-import { StudyCard } from '../../study-cards/shared/study-card.model';
+import { PatientDicom, SerieDicom } from "../dicom-data.model";
 import { AbstractImportStepComponent } from '../import-step.abstract';
 import { slideDown } from '../../shared/animations/animations';
 import { ImportService } from '../import.service';

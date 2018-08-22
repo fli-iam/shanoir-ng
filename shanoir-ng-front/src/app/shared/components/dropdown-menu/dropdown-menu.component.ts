@@ -1,7 +1,7 @@
 import { Component, Input, ContentChildren, forwardRef, QueryList, ViewChild, ElementRef, HostBinding, Renderer } from '@angular/core';
-import { style, state, animate, transition, trigger } from '@angular/core';
-import { MenuItemComponent } from '../dropdown-menu/menu-item/menu-item.component'
-import { Observable } from 'rxjs/Rx';
+import { style, animate, transition, trigger } from '@angular/core';
+import { MenuItemComponent } from './menu-item/menu-item.component'
+import { Observable } from 'rxjs';
 
 
 export const animDur: number = 100;

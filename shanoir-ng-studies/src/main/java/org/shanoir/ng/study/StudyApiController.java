@@ -73,6 +73,15 @@ public class StudyApiController implements StudyApi {
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
+	
+	@Override
+	public ResponseEntity<List<StudyUser>> findMembers(@PathVariable("studyId") Long studyId) {
+		List<StudyUser> members = studyService.findStudyUsersByStudyId(studyId);
+		if (members.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(members, HttpStatus.OK);
+	}
 
 	@Override
 	public ResponseEntity<List<StudyDTO>> findStudies() {

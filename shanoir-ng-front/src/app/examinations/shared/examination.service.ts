@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import * as AppUtils from '../../utils/app.utils';
 import { Examination } from './examination.model';
-import { SubjectExamination } from '../shared/subject-examination.model';
+import { SubjectExamination } from './subject-examination.model';
 import { Pageable, Page } from '../../shared/components/table/pageable.model';
 
 @Injectable()

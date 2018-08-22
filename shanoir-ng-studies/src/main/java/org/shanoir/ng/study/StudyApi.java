@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,6 +49,15 @@ public interface StudyApi {
 	ResponseEntity<Void> deleteStudy(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
+	@ApiOperation(value = "", notes = "Find all members (study_user) of a study", response = StudyUser.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found members", response = StudyUser.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/{studyId}/members", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<List<StudyUser>> findMembers(@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+	
 	@ApiOperation(value = "", notes = "If exists, returns the studies that the user is allowed to see", response = Study.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = StudyDTO.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Study.class),

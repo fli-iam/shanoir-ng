@@ -20,6 +20,7 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { StudyUser } from '../shared/study-user.model';
 
 @Component({
     selector: 'study-detail',
@@ -51,6 +52,10 @@ export class StudyComponent implements OnInit {
     private subjectStudyList: SubjectStudy[] = [];
     private subjects: IdNameObject[];
     private hasNameUniqueError: boolean = false;
+    public columnDefs: any[];
+    public customActionDefs: any[];
+    public rowClickAction: Object;
+    private studyUserList: StudyUser[] = [];
 
     formErrors = {
         'name': '',
@@ -106,9 +111,11 @@ export class StudyComponent implements OnInit {
 
     edit(): void {
         this.mode = 'edit';
+        this.getMembers(this.study.id);
+        this.createColumnDefs();
     }
 
-    editTimepoint(timepoint: Timepoint): void {
+    editTimepoint(timepoint: Timepoint): void {  
         // TODO
     }
 
@@ -278,5 +285,32 @@ export class StudyComponent implements OnInit {
 
     private onChangeSubjectStudyList(subjectStudyList: SubjectStudy[]) {
         this.subjectStudyList = subjectStudyList;
+    }
+
+    private getMembers(studyId: number) {
+        this.studyService.findMembers(this.studyId)
+            .then((studyUserList: StudyUser[]) => {
+                this.studyUserList = studyUserList;
+            });
+    }
+
+    // Grid columns definition
+    private createColumnDefs() {
+        this.columnDefs = [
+            {headerName: "Username", field: "userName", width: "100%"},
+            // {headerName: "First Name", field: ""},
+            // {headerName: "Last Name", field: ""},
+            // {headerName: "Email", field: "", width: "200%"},
+            // {headerName: "Role", field: "", width: "63px"},
+            {headerName: "Role/Position", field: "studyUserType", width: "100%"},
+            {headerName: "Receive Import Mail", field: "receiveNewImportReport", type: "boolean", width: "100%"},
+            {headerName: "Receive Anonymization Mail", field: "receiveAnonymizationReport", type: "boolean", width: "100%"},
+            {headerName: "Delete", type: "button", img: ImagesUrlUtil.DELETE_ICON_PATH, target : "/user", getParams: function(item: any): Object {
+                return {id: item.id};
+            }}
+        ];
+        this.customActionDefs = [
+            {title: "Add member", img: ImagesUrlUtil.ADD_ICON_PATH, target: "../user"},
+        ];
     }
 }
