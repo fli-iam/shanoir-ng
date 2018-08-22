@@ -62,6 +62,7 @@ export class StudyService {
     
     findMembers(studyId: number): Promise<StudyUser[]> {
         return this.http.get<StudyUser[]>(AppUtils.BACKEND_API_STUDY_URL + '/' + studyId + AppUtils.BACKEND_API_STUDY_FIND_MEMBERS_URL)
+        .map(studyUserList => studyUserList ? studyUserList : [])
         .toPromise();
     }
 }

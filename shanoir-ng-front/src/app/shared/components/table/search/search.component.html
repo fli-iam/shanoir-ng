@@ -1,6 +1,6 @@
 <button (click)="resetSearch()" title="clear search">&#x2716;</button>
 <input class="search-txt" [(ngModel)]="searchStr" (change)="search()" type="text" placeholder="search..."/> 
-in
+to filter
 <select class="search-field" [(ngModel)]="searchField" (change)="search()"> 
     <option value="">*</option>
     <option *ngFor="let col of getSearchableColumns()" value="{{col.field}}">

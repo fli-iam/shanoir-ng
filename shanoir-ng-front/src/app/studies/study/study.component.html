@@ -237,7 +237,11 @@
 			</fieldset> -->
 			<fieldset *ngIf="mode != 'view'">
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
-				<shanoir-table [items]="studyUserList" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs"></shanoir-table>
+				<shanoir-table
+					[getPage]="getPage.bind(this)" 
+					[columnDefs]="columnDefs" 
+					[customActionDefs]="customActionDefs">
+				</shanoir-table>
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'">
 				<legend>Data</legend>

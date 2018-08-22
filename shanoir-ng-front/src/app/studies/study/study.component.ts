@@ -21,6 +21,8 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { StudyUser } from '../shared/study-user.model';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 
 @Component({
     selector: 'study-detail',
@@ -52,10 +54,11 @@ export class StudyComponent implements OnInit {
     private subjectStudyList: SubjectStudy[] = [];
     private subjects: IdNameObject[];
     private hasNameUniqueError: boolean = false;
-    public columnDefs: any[];
-    public customActionDefs: any[];
-    public rowClickAction: Object;
-    private studyUserList: StudyUser[] = [];
+
+    private studyUsersPromise: Promise<void>;
+    private browserPaging: BrowserPaging<StudyUser>;
+    private columnDefs: any[];
+    private customActionDefs: any[];
 
     formErrors = {
         'name': '',
@@ -111,8 +114,8 @@ export class StudyComponent implements OnInit {
 
     edit(): void {
         this.mode = 'edit';
-        this.getMembers(this.study.id);
         this.createColumnDefs();
+        this.studyUsersPromise = this.getMembers(this.study.id);
     }
 
     editTimepoint(timepoint: Timepoint): void {  
@@ -287,11 +290,20 @@ export class StudyComponent implements OnInit {
         this.subjectStudyList = subjectStudyList;
     }
 
-    private getMembers(studyId: number) {
-        this.studyService.findMembers(this.studyId)
+
+    private getMembers(studyId: number): Promise<void> {
+        return this.studyService.findMembers(this.studyId)
             .then((studyUserList: StudyUser[]) => {
-                this.studyUserList = studyUserList;
+                this.browserPaging = new BrowserPaging(studyUserList, this.columnDefs);
             });
+    }
+
+    getPage(pageable: FilterablePageable): Promise<Page<StudyUser>> {
+        return new Promise((resolve) => {
+            this.studyUsersPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
     }
 
     // Grid columns definition

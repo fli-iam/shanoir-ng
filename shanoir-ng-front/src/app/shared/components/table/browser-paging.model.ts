@@ -6,9 +6,10 @@ export class BrowserPaging<T> {
     private lastSort: Sort;
 
     constructor(
-        private items: T[],
-        private columnDefs: any[]
-    ) {}
+            private items: T[],
+            private columnDefs: any[]) {
+        if (!this.items) throw Error('items cannot be null !');
+    }
 
     public getPage(pageable: FilterablePageable): Page<T> {
 
@@ -31,6 +32,7 @@ export class BrowserPaging<T> {
     }
 
     private slice(items: T[], pageable: Pageable): T[] {
+        if (items.length == 0) return items;
         let start: number = (pageable.pageNumber-1) * pageable.pageSize;
         let end: number = +start + +pageable.pageSize;
         return items.slice(start, end);
