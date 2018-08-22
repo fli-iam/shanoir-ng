@@ -164,7 +164,8 @@ public class DatasetServiceImpl implements DatasetService<Dataset> {
 
 	@Override
 	public Page<Dataset> findPage(final Pageable pageable) throws ShanoirException {
-		return  datasetRepository.findAll(pageable);
+		Page<Dataset> page = datasetRepository.findAll(pageable);
+		return page;
 	}
 
 }

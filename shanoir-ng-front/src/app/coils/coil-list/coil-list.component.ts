@@ -7,6 +7,9 @@ import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { Router } from '@angular/router';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 
 @Component({
     selector: 'coil-list',
@@ -14,32 +17,36 @@ import { KeycloakService } from "../../shared/keycloak/keycloak.service";
     styleUrls: ['coil-list.component.css'],
 })
 export class CoilListComponent {
-    public coils: Coil[];
-    public columnDefs: any[];
-    public customActionDefs: any[];
-    public rowClickAction: Object;
-    public loading: boolean = false;
-   // private createAcqEquip = false;
+    private coils: Coil[];
+    private coilsPromise: Promise<void> = this.getCoils();
+    private browserPaging: BrowserPaging<Coil>;
+    private columnDefs: any[];
+    private customActionDefs: any[];
 
-    constructor(private coilService: CoilService, private confirmDialogService: ConfirmDialogService,
-        private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
-        this.getCoils();
+    constructor(
+            private coilService: CoilService, 
+            private confirmDialogService: ConfirmDialogService,
+            private viewContainerRef: ViewContainerRef, 
+            private keycloakService: KeycloakService,
+            private router: Router) {
         this.createColumnDefs();
     }
 
-    // Grid data
-    getCoils(): void {
-        this.loading = true;
-        this.coilService.getCoils().then(coils => {
+    getPage(pageable: FilterablePageable): Promise<Page<Coil>> {
+        return new Promise((resolve) => {
+            this.coilsPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
+
+    getCoils(): Promise<void> {
+        return this.coilService.getCoils().then(coils => {
             if (coils) {
                 this.coils = coils;
+                this.browserPaging = new BrowserPaging(coils, this.columnDefs);
             }
-            this.loading = false;
         })
-            .catch((error) => {
-                // TODO: display error
-                this.coils = [];
-            });
     }
 
     // Grid columns definition
@@ -89,12 +96,11 @@ export class CoilListComponent {
                 }
             });
         }
+    }
+
+    private onRowClick(coil: Coil) {
         if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {
-                target: "/coil", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
-            };
+            this.router.navigate(['/coil'], { queryParams: { id: coil.id, mode: "view" } });
         }
     }
 

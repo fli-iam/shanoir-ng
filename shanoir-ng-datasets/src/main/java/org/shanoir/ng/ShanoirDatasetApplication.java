@@ -32,5 +32,4 @@ public class ShanoirDatasetApplication {
 		module.addSerializer(PageImpl.class, new PageSerializer());
 		return module;
 	}
-
 }

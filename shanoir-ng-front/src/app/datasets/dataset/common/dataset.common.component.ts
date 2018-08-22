@@ -36,10 +36,10 @@ export class CommonDatasetComponent implements OnChanges {
             }
         }
         if (changes['dataset'] && this.mode == 'view') {
-            if (changes['dataset'].previousValue.subjectId != changes['dataset'].currentValue.subjectId) {
+            if (changes['dataset'].firstChange || changes['dataset'].previousValue.subjectId != changes['dataset'].currentValue.subjectId) {
                 this.fetchOneSubject();
             }
-            if (changes['dataset'].previousValue.studyId != changes['dataset'].currentValue.studyId) {
+            if (changes['dataset'].firstChange || changes['dataset'].previousValue.studyId != changes['dataset'].currentValue.studyId) {
                 this.fetchOneStudy();
             }
 

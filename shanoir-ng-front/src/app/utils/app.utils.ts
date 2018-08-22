@@ -1,5 +1,6 @@
 import { Pageable } from '../shared/components/table/pageable.model';
 import { HttpResponse } from '@angular/common/http';
+import { Pipe, PipeTransform } from '@angular/core';
 
 // Users http api
 const BACKEND_API_USERS_MS_URL: string = process.env.BACKEND_API_USERS_MS_URL;
@@ -55,16 +56,6 @@ export const BACKEND_API_UPLOAD_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + 
 export const BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/start_import_job/';
 export const BACKEND_API_IMAGE_VIEWER_URL: string = BACKEND_API_IMPORT_MS_URL + '/viewer/ImageViewerServlet';
 
-export function getPageableQuery(pageable: Pageable): string {
-    let requestUrl: string = '';
-    if (pageable != null) {
-        requestUrl += '?page=' + pageable.page + '&size=' + pageable.size
-        if (pageable.sortProperty != null) {
-            requestUrl += '&sort=' + pageable.sortProperty + ',' + (pageable.asc ? 'asc' : 'desc');
-        }
-    }
-    return requestUrl;
-}
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
@@ -105,4 +96,19 @@ export function pad(n, width, z?): string {
     z = z || '0';
     n = n + '';
     return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+
+@Pipe({name: 'times'})
+export class TimesPipe implements PipeTransform {
+  transform(value: number): any {
+    const iterable = {};
+    iterable[Symbol.iterator] = function* () {
+      let n = 0;
+      while (n < value) {
+        yield ++n;
+      }
+    };
+    return iterable;
+  }
 }

@@ -68,18 +68,18 @@ public class ExaminationRepositoryTest {
 		assertThat(nbTemplates).isEqualTo(3);
 	}
 
-	@Test
-	public void findByStudyIdIn() throws Exception {
-		List<Examination> examinationsDb = repository.findByStudyIdIn(Arrays.asList(STUDY_TEST_1_ID), null);
-		assertThat(examinationsDb.size()).isEqualTo(3);
-	}
+	// @Test
+	// public void findByStudyIdIn() throws Exception {
+	// 	List<Examination> examinationsDb = repository.findByStudyIdIn(Arrays.asList(STUDY_TEST_1_ID), null);
+	// 	assertThat(examinationsDb.size()).isEqualTo(3);
+	// }
 
-	@Test
-	public void findByStudyIdInPageable() throws Exception {
-		Pageable pageable = new PageRequest(0, 2);
-		List<Examination> examinationsDb = repository.findByStudyIdIn(Arrays.asList(STUDY_TEST_1_ID), pageable);
-		assertThat(examinationsDb.size()).isEqualTo(2);
-	}
+	// @Test
+	// public void findByStudyIdInPageable() throws Exception {
+	// 	Pageable pageable = new PageRequest(0, 2);
+	// 	List<Examination> examinationsDb = repository.findByStudyIdIn(Arrays.asList(STUDY_TEST_1_ID), pageable);
+	// 	assertThat(examinationsDb.size()).isEqualTo(2);
+	// }
 
 	@Test
 	public void findBySubjectId() throws Exception {

@@ -1,15 +1,15 @@
 package org.shanoir.ng.examination;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -40,12 +40,15 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 	private RestTemplate restTemplate;
 
 	@Override
-	public List<ExaminationDTO> examinationsToExaminationDTOs(List<Examination> examinations) {
-		final List<ExaminationDTO> examinationDTOs = new ArrayList<>();
-		for (Examination examination : examinations) {
-			examinationDTOs.add(examinationToExaminationDTO(examination));
-		}
-		return examinationDTOs;
+	public PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> page) {
+
+		Page<ExaminationDTO> mappedPage = page.map(new Converter<Examination, ExaminationDTO>() {
+			@Override
+			public ExaminationDTO convert(Examination entity) {
+				return examinationToExaminationDTO(entity);
+			}
+		});
+		return new PageImpl<ExaminationDTO>(mappedPage);
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 
 import { Dataset, DatasetMetadata } from './dataset.model';
 import * as AppUtils from '../../utils/app.utils';
+import { Pageable } from '../../shared/components/table/pageable.model';
 
 @Injectable()
 export class DatasetService {
@@ -26,8 +27,8 @@ export class DatasetService {
             .toPromise();
     }
 
-    getAll(): Promise<Dataset[]> {
-        return this.http.get<Dataset[]>(AppUtils.BACKEND_API_DATASET_URL)
+    getPage(pageable: Pageable): Promise<any> {
+        return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL, { 'params': pageable.toParams() })
             .toPromise();
     }
 

@@ -1,15 +1,17 @@
-import { Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ViewContainerRef, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 
-import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
-import { TableComponent } from "../../shared/components/table/table.component";
-import { Dataset } from '../shared/dataset.model';
-import { DatasetService } from '../shared/dataset.service';
+import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
+import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
-import { Subject } from '../../subjects/shared/subject.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
+import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
+import { Dataset } from '../shared/dataset.model';
+import { DatasetService } from '../shared/dataset.service';
+import { TableComponent } from '../../shared/components/table/table.component';
 
 @Component({
     selector: 'dataset-list',
@@ -18,14 +20,13 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 })
 
 export class DatasetListComponent {
-    public datasets: Dataset[];
-    public columnDefs: any[];
-    public customActionDefs: any[];
-    public rowClickAction: Object;
-    public loading: boolean = false;
+    private columnDefs: any[];
+    private customActionDefs: any[];
+    private rowClickAction: Object;
     private subjects: Subject[] = [];
     private studies: Study[] = [];
-    
+    @ViewChild('dsTable') datasetTable: TableComponent;
+
     constructor(
             private datasetService: DatasetService, 
             private confirmDialogService: ConfirmDialogService, 
@@ -33,22 +34,18 @@ export class DatasetListComponent {
             private keycloakService: KeycloakService,
             private msgService: MsgBoxService,
             private studyService: StudyService,
-            private subjectService: SubjectService) {
+            private subjectService: SubjectService, 
+            private router: Router) {
+
         this.fetchStudies();
         this.fetchSubjects();
-        this.getAll();
         this.createColumnDefs();
     }
 
-    // Grid data
-    getAll(): void {
-        this.loading = true;
-        this.datasetService.getAll().then(datasets => {
-            if (datasets) {
-                this.datasets = datasets;
-            }
-            this.loading = false;
-        })
+    getPage(pageable: Pageable): Promise<Page<Dataset>> {
+        return this.datasetService.getPage(pageable).then(page => {
+            return page;
+        });
     }
 
     // Grid columns definition
@@ -61,20 +58,18 @@ export class DatasetListComponent {
         };
         this.columnDefs = [
             {headerName: "Id", field: "id", type: "number", width: "30px"},
-            {headerName: "Name", field: "name"},
-            {headerName: "Type", field: "type", width: "50px"},
+            {headerName: "Name", field: "name", orderBy: ["updatedMetadata.name", "originMetadata.name", "id"]},
+            {headerName: "Type", field: "type", width: "50px", suppressSorting: true},
             {headerName: "Subject", field: "subjectId", cellRenderer: (params: any) => this.getSubjectName(params.data.subjectId)},
             {headerName: "Study", field: "studyId", cellRenderer: (params: any) => this.getStudyName(params.data.studyId)},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
             {headerName: "Comment", field: "originMetadata.comment"},
         ];
-        if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({
-                headerName: "", type: "button", awesome: "fa-eye", target: "/dataset", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
-            });
-        }
+        this.columnDefs.push({
+            headerName: "", type: "button", awesome: "fa-eye", target: "/dataset", getParams: function (item: any): Object {
+                return { id: item.id, mode: "view" };
+            }
+        });
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push(
                 {
@@ -93,25 +88,24 @@ export class DatasetListComponent {
                 }
             );
         }
-        this.rowClickAction = {target : "/dataset", getParams: function(item: any): Object {
-            return {id: item.id, mode: "view"};
-        }};
+    }
+    
+    private onRowClick(dataset: Dataset) {
+        this.router.navigate(['/dataset'], { queryParams: { id: dataset.id, mode: "view" } });
     }
 
     openDeleteConfirmDialog = (item: Dataset) => {
-        console.log(item);
         this.confirmDialogService
                 .confirm('Delete dataset', 'Are you sure you want to delete dataset ' + item.id + '?',
                     this.viewContainerRef)
                 .subscribe(res => {
                     if (res) {
                         this.datasetService.delete(item.id).then(() => {
-                            let index: number = this.datasets.indexOf(item);
-                            if (index > -1) this.datasets.splice(index, 1);
+                            this.datasetTable.refresh();
                             this.msgService.log('info', 'The dataset has been sucessfully deleted');
                         });
                     }
-                })
+                });
     }
 
     private fetchSubjects() {
@@ -127,7 +121,7 @@ export class DatasetListComponent {
     }
 
     private getSubjectName(id: number): string {
-        if (!this.subjects || this.subjects.length == 0 || !id) return null;
+        if (!this.subjects || this.subjects.length == 0 || !id) return id+'';
         for (let subject of this.subjects) {
             if (subject.id == id) return subject.name;
         }
@@ -135,7 +129,7 @@ export class DatasetListComponent {
     }
 
     private getStudyName(id: number): string {
-        if (!this.studies || this.studies.length == 0 || !id) return null;
+        if (!this.studies || this.studies.length == 0 || !id) return id+'';
         for (let study of this.studies) {
             if (study.id == id) return study.name;
         }

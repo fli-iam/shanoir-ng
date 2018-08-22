@@ -11,12 +11,7 @@ export class AcquisitionEquipmentService {
 
     getAcquisitionEquipments(): Promise<AcquisitionEquipment[]> {
         return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting acqEquips', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     delete(id: number): Promise<void> {

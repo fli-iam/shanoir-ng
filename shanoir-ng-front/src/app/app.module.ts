@@ -97,6 +97,9 @@ import { ClinicalContextComponent } from './import/clinical-context/clinical-con
 import { NewExamComponent } from './examinations/examination/new-exam.component';
 import { SubjectStudyListComponent } from "./shared/components/subject-study-list/subject-study-list.component";
 import { DateValidator } from './shared/date/date.validator';
+import { PagerComponent } from './shared/components/table/pager/pager.component';
+import { TableSearchComponent } from './shared/components/table/search/search.component';
+import { TimesPipe } from './utils/app.utils';
 
 
 @NgModule({
@@ -149,6 +152,7 @@ import { DateValidator } from './shared/date/date.validator';
         SubjectExaminationPipe,
         SubjectStudyPipe,
         TableComponent,
+        PagerComponent,
         TreeNodeComponent,
         TooltipComponent,
         UserListComponent,
@@ -173,7 +177,9 @@ import { DateValidator } from './shared/date/date.validator';
         DicomUploadComponent,
         ClinicalContextComponent,
         SubjectStudyListComponent,
-        DateValidator
+        DateValidator,
+        TableSearchComponent,
+        TimesPipe
     ],
     entryComponents: [
         ConfirmDialogComponent

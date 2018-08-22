@@ -1,11 +1,9 @@
-<div class="title">
-    <h2 i18n="Manage datasets|Title@@datasetListTitle">Manage datasets</h2>
-    <!-- hr/ -->
-</div>
+<h2 i18n="Manage datasets|Title@@datasetListTitle">Manage datasets</h2>
 
-<shanoir-table [items]="datasets" 
+<shanoir-table #dsTable
+        [getPage]="getPage.bind(this)" 
         [columnDefs]="columnDefs" 
         [customActionDefs]="customActionDefs" 
-        [loading]="loading" 
-        [rowClickAction]="rowClickAction">
+        (rowClick)="onRowClick($event)"
+        [browserSearch]="false">
 </shanoir-table>

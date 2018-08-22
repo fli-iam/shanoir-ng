@@ -1,0 +1,7 @@
+input, select { border: 1px solid var(--grey); border-radius: 2px;  height: 20px; vertical-align: middle; }
+input { padding: 0 5px; width: 150px; }
+select { width: 150px; margin-right: 5px; }
+
+button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 0; border: 1px solid transparent; color: var(--dark-grey); }
+button:hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
+button span { vertical-align: middle; }

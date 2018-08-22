@@ -58,7 +58,7 @@ public class ExaminationApiControllerTest {
 
 		doNothing().when(examinationServiceMock).deleteById(1L);
 		given(examinationServiceMock.countExaminationsByUserId()).willReturn(2L);
-		given(examinationServiceMock.findAll(Mockito.any(Pageable.class))).willReturn(Arrays.asList(new Examination()));
+		// given(examinationServiceMock.findAll(Mockito.any(Pageable.class))).willReturn(Arrays.asList(new Examination()));
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 		given(examinationServiceMock.save(Mockito.mock(Examination.class))).willReturn(new Examination());
 	}

@@ -29,16 +29,16 @@ public class ExaminationMapperTest {
 	@Autowired
 	private ExaminationMapper examinationMapper;
 
-	@Test
-	public void examinationsToExaminationDTOsTest() {
-		SecurityContextTestUtil.initAuthenticationContext();
+	// @Test
+	// public void examinationsToExaminationDTOsTest() {
+	// 	SecurityContextTestUtil.initAuthenticationContext();
 
-		final List<ExaminationDTO> examinationDTOs = examinationMapper
-				.examinationsToExaminationDTOs(Arrays.asList(createExamination()));
-		Assert.assertNotNull(examinationDTOs);
-		Assert.assertTrue(examinationDTOs.size() == 1);
-		Assert.assertTrue(EXAMINATION_ID.equals(examinationDTOs.get(0).getId()));
-	}
+	// 	final List<ExaminationDTO> examinationDTOs = examinationMapper
+	// 			.examinationsToExaminationDTOs(Arrays.asList(createExamination()));
+	// 	Assert.assertNotNull(examinationDTOs);
+	// 	Assert.assertTrue(examinationDTOs.size() == 1);
+	// 	Assert.assertTrue(EXAMINATION_ID.equals(examinationDTOs.get(0).getId()));
+	// }
 
 	@Test
 	public void examinationsToSubjectExaminationDTOsTest() {

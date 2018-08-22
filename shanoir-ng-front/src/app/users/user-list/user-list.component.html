@@ -1,9 +1,8 @@
-<div class="UserListComponent">
-    <div class="title">
-        <h2 i18n="Manage users|Title@@userListTitle">Manage users</h2>
-        <!-- hr/ -->
-    </div>
-  
-    <shanoir-table [items]="users" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
-    
-</div>
+<h2 i18n="Manage users|Title@@userListTitle">Manage users</h2>
+
+<shanoir-table 
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table>

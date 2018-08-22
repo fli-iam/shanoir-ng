@@ -2,4 +2,4 @@
     .modality span { color: var(--color-a); font-weight: bold; }
 
 input[type="file"] { padding: 0; }
-.loader { height: 20px; vertical-align: middle; }
+.loader { height: 10px; vertical-align: middle; }

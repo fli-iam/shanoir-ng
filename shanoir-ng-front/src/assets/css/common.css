@@ -50,8 +50,8 @@ button { background-color: var(--color-b); border: 0px; border-radius: 2px; colo
   button svg { vertical-align: inherit; }
 
 input[type='date'] { width: 140px; }
-
 .hidden { display: none !important; }
+h2 + shanoir-table { margin-top: 20px; }
 
 form { color: var(--dark-grey); background-color: var(--lighter-grey); border: 1px solid var(--light-grey); }
   form input:not([type='file']),

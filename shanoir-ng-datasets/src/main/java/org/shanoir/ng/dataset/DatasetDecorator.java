@@ -53,7 +53,7 @@ public abstract class DatasetDecorator implements DatasetMapper {
 				}
 			}
 		});
-		return new PageImpl<DatasetDTO>(mappedPage.getContent());
+		return new PageImpl<DatasetDTO>(mappedPage);
 	}
 
 	@Override

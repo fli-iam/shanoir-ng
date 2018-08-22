@@ -40,7 +40,7 @@
         <div class="header command-zone" [class.disabled]="!isValid()" [class.last-enabled]="lastEnabled == 'final'" (click)="isValid() ? toggle('final') : null">4. Import the data</div>
         <div *ngIf="isValid() && opened == 'final'" class="step last" [@slideDown]>
             <button [disabled]="importing" (click)="startImportJob($event)">Import now</button>
-            <img *ngIf="importing" [src]="ImagesUrlUtil.LOADER_IMAGE_PATH"/>
+            <span class="progress" *ngIf="importing">Importing in progress<img [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH"/></span>
         </div>
     </div>
 

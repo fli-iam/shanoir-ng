@@ -1,9 +1,10 @@
-import { Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ViewContainerRef } from '@angular/core';
+import { Router } from '@angular/router';
 
-import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
-import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
+import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { TableComponent } from "../../shared/components/table/table.component";
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 
@@ -14,26 +15,41 @@ import { UserService } from '../shared/user.service';
 })
 
 export class UserListComponent {
-    public users: User[];
-    public columnDefs: any[];
-    public customActionDefs: any[];
-    public rowClickAction: Object;
-    public loading: boolean = false;
+    private users: User[];
+    private usersPromise: Promise<void> = this.getUsers();
+    private browserPaging: BrowserPaging<User>;
 
-    constructor(private userService: UserService, private confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
-        this.getUsers();
+    private columnDefs: any[];
+    private customActionDefs: any[];
+
+    constructor(
+            private userService: UserService, 
+            private confirmDialogService: ConfirmDialogService, 
+            private viewContainerRef: ViewContainerRef,
+            private router: Router) {
+
         this.createColumnDefs();
     }
 
-    // Grid data
-    getUsers(): void {
-        this.loading = true;
-        this.userService.getUsers().then(users => {
+    getUsers(): Promise<void> {
+        return this.userService.getUsers().then(users => {
             if (users) {
                 this.users = users;
+                this.browserPaging = new BrowserPaging(users, this.columnDefs);
             }
-            this.loading = false;
         });
+    }
+
+    getPage(pageable: FilterablePageable): Promise<Page<User>> {
+        return new Promise((resolve) => {
+            this.usersPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
+
+    private onRowClick(user: User) {
+        this.router.navigate(['/dataset'], { queryParams: { id: user.id, mode: "view" } });
     }
 
     // Grid columns definition
@@ -73,9 +89,6 @@ export class UserListComponent {
         this.customActionDefs = [
             {title: "new user", img: ImagesUrlUtil.ADD_ICON_PATH, target: "../user"},
         ];
-        this.rowClickAction = {target : "/user", getParams: function(item: any): Object {
-                return {id: item.id};
-        }};
     }
 
     openDeleteUserConfirmDialog = (item: User) => {

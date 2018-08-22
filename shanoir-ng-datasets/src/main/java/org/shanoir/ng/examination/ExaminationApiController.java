@@ -14,6 +14,7 @@ import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,18 +75,18 @@ public class ExaminationApiController implements ExaminationApi {
 	}
 
 	@Override
-	public ResponseEntity<List<ExaminationDTO>> findExaminations(final Pageable pageable) {
-		List<Examination> examinations;
+	public ResponseEntity<Page<ExaminationDTO>> findExaminations(final Pageable pageable) {
+		Page<Examination> examinations;
 		try {
 			// Get examinations reachable by connected user
-			examinations = examinationService.findAll(pageable);
+			examinations = examinationService.findPage(pageable);
 		} catch (ShanoirDatasetsException e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		if (examinations.isEmpty()) {
+		if (examinations.getContent().size() == 0) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+		return new ResponseEntity<Page<ExaminationDTO>>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
 
 	@Override

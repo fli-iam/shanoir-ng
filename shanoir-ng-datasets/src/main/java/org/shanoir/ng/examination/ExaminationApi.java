@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,7 +65,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<ExaminationDTO>> findExaminations(Pageable pageable);
+	ResponseEntity<Page<ExaminationDTO>> findExaminations(Pageable pageable);
 
 	@ApiOperation(value = "", notes = "Returns the list of examinations by subject id and study id", response = Examination.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
