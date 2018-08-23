@@ -30,7 +30,7 @@ body { margin: 0; background-color: var(--very-light-grey); }
 body, option, table, button, select, input {font-family: "Open Sans", Arial, sans-serif; font-size: 12px; color: var(--very-dark-black); }
 h1 { font-size: 28px; }
 h1, h2, h3, h4 { color: var(--color-a); }
-h2 { margin: 0; font-size: 20px; }
+h2 { margin: 0; font-size: 25px; }
 hr { margin: 7px 0 !important; border-bottom: 1px solid var(--grey) !important; border: 0; }
 input { padding: 1px 5px; }
 option:disabled { color: var(--greyer); }

@@ -1,10 +1,14 @@
 /******************/
 /* Header component */
 /******************/
-:host { z-index: 1000; position: relative; }
+:host { z-index: 1000; position: relative; overflow: hidden; }
 .header-component { background-color: var(--color-a); height: 54px; }
 	.header-component .logo { margin: 10px; float: left; }
-		.header-component .logo img { height: 32px; }
+		.header-component .logo img { height: 108px; position: absolute; top: -17px; opacity: 0.3; 
+			-webkit-filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9)); 
+			filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9)); 
+		}
+
 	.header-component .right { float: right; margin-top: 3px; }
 	
 	.header-component .welcome { color: var(--very-light-grey); }

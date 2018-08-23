@@ -10,7 +10,7 @@ import { ImagesUrlUtil } from '../utils/images-url.util';
 })
 
 export class HeaderComponent {
-    shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_SMALL_LOGO_PATH;
+    shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
     userLogoUrl: string;
     username: string = "";
 

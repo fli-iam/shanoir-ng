@@ -93,7 +93,7 @@
             <!-- Nb results per page input -->
             <span class="options">
                 <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
-                <span *ngIf="page">Found : {{page?.numberOfElements}}</span>
+                <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
                 <span *ngIf="page">Total : {{page?.totalElements}}</span>
                 <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
                 <span class="loader" *ngIf="isLoading">Loading
