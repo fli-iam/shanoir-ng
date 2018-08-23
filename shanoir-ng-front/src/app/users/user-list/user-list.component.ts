@@ -49,7 +49,7 @@ export class UserListComponent {
     }
 
     private onRowClick(user: User) {
-        this.router.navigate(['/dataset'], { queryParams: { id: user.id, mode: "view" } });
+        this.router.navigate(['/user'], { queryParams: { id: user.id, mode: "view" } });
     }
 
     // Grid columns definition
