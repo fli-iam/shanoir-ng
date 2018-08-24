@@ -1,4 +1,4 @@
-import { Component, ViewContainerRef } from '@angular/core';
+import { Component, ViewContainerRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
@@ -7,6 +7,8 @@ import { FilterablePageable, Page } from '../../shared/components/table/pageable
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 @Component({
     selector: 'user-list',
@@ -15,26 +17,25 @@ import { UserService } from '../shared/user.service';
 })
 
 export class UserListComponent {
-    private users: User[];
-    private usersPromise: Promise<void> = this.getUsers();
+    private usersPromise: Promise<void> = this.getUsersPromise();
     private browserPaging: BrowserPaging<User>;
-
     private columnDefs: any[];
     private customActionDefs: any[];
+    @ViewChild('userTable') table: TableComponent;
 
     constructor(
             private userService: UserService, 
             private confirmDialogService: ConfirmDialogService, 
             private viewContainerRef: ViewContainerRef,
-            private router: Router) {
+            private router: Router,
+            private msgService: MsgBoxService) {
 
         this.createColumnDefs();
     }
 
-    getUsers(): Promise<void> {
+    getUsersPromise(): Promise<void> {
         return this.userService.getUsers().then(users => {
             if (users) {
-                this.users = users;
                 this.browserPaging = new BrowserPaging(users, this.columnDefs);
             }
         });
@@ -104,7 +105,13 @@ export class UserListComponent {
 
     deleteUser(userId: number) {
         // Delete user and refresh page
-        this.userService.delete(userId).then((res) => this.getUsers());
+        this.userService.delete(userId).then(() => {
+            this.userService.getUsers().then(users => {
+                this.browserPaging.setItems(users);
+                this.table.refresh();
+                this.msgService.log('info', 'The user has been sucessfully deleted');
+            });
+        });
     }
 
 }

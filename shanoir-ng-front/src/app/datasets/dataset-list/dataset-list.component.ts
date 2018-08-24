@@ -25,7 +25,7 @@ export class DatasetListComponent {
     private rowClickAction: Object;
     private subjects: Subject[] = [];
     private studies: Study[] = [];
-    @ViewChild('dsTable') datasetTable: TableComponent;
+    @ViewChild('dsTable') table: TableComponent;
 
     constructor(
             private datasetService: DatasetService, 
@@ -101,7 +101,7 @@ export class DatasetListComponent {
                 .subscribe(res => {
                     if (res) {
                         this.datasetService.delete(item.id).then(() => {
-                            this.datasetTable.refresh();
+                            this.table.refresh();
                             this.msgService.log('info', 'The dataset has been sucessfully deleted');
                         });
                     }

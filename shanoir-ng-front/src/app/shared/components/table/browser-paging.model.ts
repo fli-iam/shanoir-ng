@@ -11,6 +11,10 @@ export class BrowserPaging<T> {
         if (!this.items) throw Error('items cannot be null !');
     }
 
+    public setItems(items: T[]) {
+        this.items = items;
+    }
+
     public getPage(pageable: FilterablePageable): Page<T> {
 
         if ((!this.lastSort || !this.lastSort.equals(pageable.sort)) 
