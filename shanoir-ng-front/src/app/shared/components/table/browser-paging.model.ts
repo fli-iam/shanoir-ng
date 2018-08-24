@@ -127,6 +127,7 @@ export class BrowserPaging<T> {
         let searchStr: string = filter.searchStr;
         let searchField: string = filter.searchField;
         if (!searchStr) return items;
+        if (typeof searchStr != 'string') searchStr = searchStr + "";
         searchStr = searchStr.toLowerCase().trim();
         if (searchStr.length == 0) return items;
         // Inspect every field and save the item if one field matches
@@ -137,7 +138,8 @@ export class BrowserPaging<T> {
                 if (value && typeof value != 'boolean' && col["type"] != "button") {
                     let valueStr: string = TableComponent.getCellValue(item, col);
                     if (!searchField || searchField == "" || col.field == searchField) {
-                        if (value != undefined && value != null) {
+                        if (value && valueStr) {
+                            if (typeof valueStr != 'string') valueStr = valueStr + "";
                             valueStr = valueStr.toLowerCase().trim();
                             if (valueStr.indexOf(searchStr) >= 0) {
                                 result.push(item);
