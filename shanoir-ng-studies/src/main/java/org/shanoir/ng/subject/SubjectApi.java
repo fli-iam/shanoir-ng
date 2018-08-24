@@ -72,7 +72,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<Subject> saveNewSubject(
+	ResponseEntity<SubjectDTO> saveNewSubject(
 			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException;
 
