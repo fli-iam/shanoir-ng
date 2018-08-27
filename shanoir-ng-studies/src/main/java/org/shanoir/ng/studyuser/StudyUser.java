@@ -51,7 +51,6 @@ public class StudyUser {
 	/** User name. Duplicate: master record in ms users. */
 	@NotBlank
 	@Column(unique = true)
-	@Unique
 	private String userName;
 
 	/**
