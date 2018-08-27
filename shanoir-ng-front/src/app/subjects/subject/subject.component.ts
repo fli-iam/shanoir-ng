@@ -141,10 +141,6 @@ export class SubjectComponent implements OnInit, OnChanges {
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.error("error getting study list!");
             });
     }
 
@@ -234,7 +230,7 @@ export class SubjectComponent implements OnInit, OnChanges {
             this.setSubjectBirthDateToFirstOfJanuary();
         }
         this.subjectService.create(this.subject)
-            .subscribe((subject: Subject) => {
+            .then((subject: Subject) => {
                 this.msgService.log('info', 'Subject successfully created');
                 this.back(subject);
             }, (error: any) => {

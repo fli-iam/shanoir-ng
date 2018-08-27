@@ -1,12 +1,14 @@
-import { Component, ViewChild } from '@angular/core';
-import { ImportService } from './import.service';
-import { slideDown, preventInitialChildAnimations } from '../shared/animations/animations';
-import { ImportJob, PatientDicom, SerieDicom, EquipmentDicom } from "./dicom-data.model";
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+
+import { preventInitialChildAnimations, slideDown } from '../shared/animations/animations';
 import { MsgBoxService } from '../shared/msg-box/msg-box.service';
-import { ContextData } from './clinical-context/clinical-context.component';
-import { IdNameObject } from '../shared/models/id-name-object.model';
 import { ImagesUrlUtil } from '../shared/utils/images-url.util';
+import { Subject } from '../subjects/shared/subject.model';
+import { ContextData } from './clinical-context/clinical-context.component';
+import { ImportJob, PatientDicom } from './dicom-data.model';
+import { ImportService } from './import.service';
+import { SubjectService } from '../subjects/shared/subject.service';
 
 type State = 'dicom' | 'series' | 'context' | 'final' | 'none';
 
@@ -33,6 +35,7 @@ export class ImportComponent  {
     
     constructor(
         private importService: ImportService,
+        private subjectService: SubjectService,
         private msgService: MsgBoxService,
         private router: Router,
     ) {}
@@ -58,11 +61,38 @@ export class ImportComponent  {
         return this.selectedPatients[0];
     }
     
-    private startImportJob (): void {
+    private startImportJob(): void {
+        this.subjectService
+            .updateSubjectStudyValues(this.context.subject.subjectStudy)
+            .then(() => {
+                let that = this;
+                this.importing = true;
+                this.importData()
+                    .then(() => {
+                        this.importing = false;
+                        setTimeout(function () {
+                            that.msgService.log('info', 'The data has been successfully imported')
+                        }, 0);
+                        this.router.navigate(['/dataset-list']);
+                    }).catch(error => {
+                        this.importing = false;
+                        throw error;
+                    });
+            }).catch(error => {
+                throw new Error('Could not save the subjectStudy object, the import job has been stopped. Cause : ' + error);
+            });
+    }
+
+    private importData (): Promise<any> {
         if (true) {
             let importJob = new ImportJob();
             importJob.patients = new Array<PatientDicom>();
-            this.patient.subject = new IdNameObject(this.context.subject.id, this.context.subject.name);
+            // this.patient.subject = new IdNameObject(this.context.subject.id, this.context.subject.name);
+            this.patient.subject = Subject.makeSubject(
+                    this.context.subject.id, 
+                    this.context.subject.name, 
+                    this.context.subject.identifier, 
+                    this.context.subject.subjectStudy);
             importJob.patients.push(this.patient);
             importJob.workFolder = this.importJob.workFolder;
             importJob.fromDicomZip = true;
@@ -70,19 +100,7 @@ export class ImportComponent  {
             importJob.frontStudyId = this.context.study.id;
             importJob.frontStudyCardId = this.context.studycard.id;
             importJob.frontConverterId = this.context.studycard.niftiConverter.id;
-            let that = this;
-            this.importing = true;
-            this.importService.startImportJob(importJob)
-                .then(response => {
-                    this.importing = false;
-                    setTimeout(function () {
-                        that.msgService.log('info', 'The data has been successfully imported')
-                     }, 0);
-                    this.router.navigate(['/dataset-list']);
-                }).catch(error => {
-                    this.importing = false;
-                    throw error;
-                });
+            return this.importService.startImportJob(importJob);
         }
     }
 
