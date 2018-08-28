@@ -241,7 +241,7 @@ export class StudyComponent implements OnInit {
     }
 
     studyCenterListHasMultipleElements(): boolean {
-        return this.study.studyCenterList.length > 1;
+        return this.study.studyCenterList && this.study.studyCenterList.length > 1;
     }
 
     private manageRequestErrors(error: any): void {
