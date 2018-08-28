@@ -4,9 +4,10 @@ import java.util.List;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.dataset.DatasetMetadataMapper;
-import org.shanoir.ng.dataset.DatasetDTO;
+import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.paging.PageImpl;
+import org.springframework.data.domain.Page;
 
 /**
  * Mapper for datasets.
@@ -18,6 +19,7 @@ import org.shanoir.ng.dataset.DatasetDTO;
 @DecoratedWith(MrDatasetDecorator.class)
 public interface MrDatasetMapper {
 
+	
 	/**
 	 * Map list of @Dataset to list of @IdNameDTO.
 	 * 
@@ -34,7 +36,7 @@ public interface MrDatasetMapper {
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
-	DatasetDTO datasetToDatasetDTO(MrDataset dataset);
+	MrDatasetDTO datasetToDatasetDTO(MrDataset dataset);
 	
 	/**
 	 * Map a @Dataset to a @DatasetDTO.
@@ -43,7 +45,16 @@ public interface MrDatasetMapper {
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
-	List<DatasetDTO> datasetToDatasetDTO(List<MrDataset> datasets);
+	List<MrDatasetDTO> datasetToDatasetDTO(List<MrDataset> datasets);
+
+	/**
+	 * Map a @Dataset to a @DatasetDTO.
+	 * 
+	 * @param datasets
+	 *            dataset.
+	 * @return dataset DTO.
+	 */
+	PageImpl<MrDatasetDTO> datasetToDatasetDTO(Page<MrDataset> page);
 
 	/**
 	 * Map a @Dataset to a @IdNameDTO.
@@ -53,5 +64,6 @@ public interface MrDatasetMapper {
 	 * @return dataset DTO.
 	 */
 	IdNameDTO datasetToIdNameDTO(MrDataset dataset);
+	
 
 }

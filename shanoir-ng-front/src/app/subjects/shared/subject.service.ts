@@ -70,9 +70,9 @@ export class SubjectService {
             });
     }
 
-    create(subject: Subject): Observable<Subject> {
+    create(subject: Subject): Promise<Subject> {
         return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, JSON.stringify(subject))
-            .map(res => res);
+            .toPromise();
     }
 
     update(id: number, subject: Subject): Observable<Subject> {
@@ -80,8 +80,8 @@ export class SubjectService {
             .map(response => response);
     }
 
-    updateSubjectStudyValues(subjectStudy: SubjectStudy): Observable<SubjectStudy> {
+    updateSubjectStudyValues(subjectStudy: SubjectStudy): Promise<SubjectStudy> {
         return this.http.put<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
-            .map(res => res);
+            .toPromise();
     }
 }

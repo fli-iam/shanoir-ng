@@ -14,13 +14,13 @@ export class SubjectStudyListComponent implements OnInit{
     @Input() mode: "study" | "subject";
     @Input() list: any[];
     @Input () subjectStudyList : SubjectStudy[] = [];
-    @Output() ssl = new EventEmitter<SubjectStudy[]>();
+    @Output() subjectStudyListChange = new EventEmitter<SubjectStudy[]>();
     
     private legend: "Studies" | "Subjects";
     private columnName: "Common Name" | "Study Name";
 
     private onChangeSubjectStudyList() {
-        this.ssl.emit(this.subjectStudyList);
+        this.subjectStudyListChange.emit(this.subjectStudyList);
     }
 
     ngOnInit () {

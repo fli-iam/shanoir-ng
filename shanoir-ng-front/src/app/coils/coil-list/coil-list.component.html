@@ -1,8 +1,8 @@
-<div class="CoilListComponent">
-    <div class="title">
-        <h2 i18n="Manage coils|Title@@coilListTitle">Manage coils</h2>
-        <!-- hr/ -->
-    </div>
+<h2 i18n="Manage coils|Title@@coilListTitle">Manage coils</h2>
   
-    <shanoir-table [items]="coils" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
-</div>
+<shanoir-table 
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table>

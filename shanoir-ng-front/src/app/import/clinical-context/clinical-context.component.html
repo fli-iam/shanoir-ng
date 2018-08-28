@@ -68,15 +68,15 @@
                             </td>
                             <td class="input-col">
                                 <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
-                                    [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues()"/>
+                                    [ngModelOptions]="{standalone: true}"/>
                             </td>
                             <td class="chkbx-col">
                                 <input type="checkbox" [(ngModel)]="subject.subjectStudy.physicallyInvolved" 
-                                    [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues()"/>
+                                    [ngModelOptions]="{standalone: true}"/>
                             </td>
                             <td class="dropdown-col">
                                 <select id="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" 
-                                    [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues()">
+                                    [ngModelOptions]="{standalone: true}">
                                         <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
                                         <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
                                         <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>

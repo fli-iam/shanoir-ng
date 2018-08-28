@@ -98,6 +98,9 @@ import { ClinicalContextComponent } from './import/clinical-context/clinical-con
 import { NewExamComponent } from './examinations/examination/new-exam.component';
 import { SubjectStudyListComponent } from "./shared/components/subject-study-list/subject-study-list.component";
 import { DateValidator } from './shared/date/date.validator';
+import { PagerComponent } from './shared/components/table/pager/pager.component';
+import { TableSearchComponent } from './shared/components/table/search/search.component';
+import { TimesPipe } from './utils/app.utils';
 
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
@@ -198,6 +201,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         SubjectExaminationPipe,
         SubjectStudyPipe,
         TableComponent,
+        PagerComponent,
         TreeNodeComponent,
         TooltipComponent,
         UserListComponent,
@@ -223,6 +227,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         ClinicalContextComponent,
         SubjectStudyListComponent,
         DateValidator,
+        TableSearchComponent,
+        TimesPipe,
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,

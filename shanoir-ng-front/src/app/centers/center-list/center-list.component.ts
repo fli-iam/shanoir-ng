@@ -1,13 +1,14 @@
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { Router } from '@angular/router';
 
+import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
-import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
-import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { TableComponent } from "../../shared/components/table/table.component";
 
 @Component({
     selector: 'center-list',
@@ -17,37 +18,42 @@ import { TableComponent } from "../../shared/components/table/table.component";
 
 export class CenterListComponent {
     @ViewChild('acqEqptModal') acqEqptModal: ModalComponent;
-    public centers: Center[];
-    public createAcqEquip = false;
-    public columnDefs: any[];
-    public customActionDefs: any[];
-    public deletionInternalError: boolean = false;
-    public isLinkedWithEqpts: boolean = false;
-    public isLinkedWithStudies: boolean = false;
-    public loading: boolean = false;
-    public rowClickAction: Object;
-    public visible = false;
+    private centers: Center[];
+    private centersPromise: Promise<void> = this.getCenters();
+    private browserPaging: BrowserPaging<Center>;
+
+    private createAcqEquip = false;
+    private columnDefs: any[];
+    private customActionDefs: any[];
+    private deletionInternalError: boolean = false;
+    private isLinkedWithEqpts: boolean = false;
+    private isLinkedWithStudies: boolean = false;
+    private visible = false;
     private visibleAnimate = false;
     
-    constructor(private centerService: CenterService, private confirmDialogService: ConfirmDialogService,
-        private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
-        this.getCenters();
+    constructor(private centerService: CenterService, 
+            private confirmDialogService: ConfirmDialogService,
+            private viewContainerRef: ViewContainerRef, 
+            private keycloakService: KeycloakService,
+            private router: Router) {
         this.createColumnDefs();
     }
 
-    // Grid data
-    getCenters(): void {
-        this.loading = true;
-        this.centerService.getCenters().then(centers => {
+    getCenters(): Promise<void> {
+        return this.centerService.getCenters().then(centers => {
             if (centers) {
                 this.centers = centers;
+                this.browserPaging = new BrowserPaging(centers, this.columnDefs);
             }
-            this.loading = false;
-        })
-            .catch((error) => {
-                // TODO: display error
-                this.centers = [];
+        });
+    }
+
+    getPage(pageable: FilterablePageable): Promise<Page<Center>> {
+        return new Promise((resolve) => {
+            this.centersPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
             });
+        });
     }
 
     // Grid columns definition
@@ -87,12 +93,11 @@ export class CenterListComponent {
                 }
             });
         }
+    }
+
+    private onRowClick(center: Center) {
         if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {
-                target: "/center", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
-            };
+            this.router.navigate(['/center'], { queryParams: { id: center.id, mode: "view" } });
         }
     }
 

@@ -34,7 +34,7 @@ export class DicomUploadComponent extends AbstractImportStepComponent {
     private uploadArchive(fileEvent: any): void {
         this.setArchiveStatus('uploading');
         this.loadInMemory(fileEvent);   
-        this.uploadToServer(fileEvent.srcElement.files);
+        this.uploadToServer(fileEvent.target.files);
     }
 
     private loadInMemory(fileEvent: any) {

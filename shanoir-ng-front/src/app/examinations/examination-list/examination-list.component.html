@@ -1,10 +1,9 @@
-<div class="ExaminationListComponent">
-    <div class="title">
-        <h2 i18n="Manage examinations|Title@@examinationListTitle">Manage examinations</h2>
-        <!-- hr/ -->
-    </div>
+<h2 i18n="Manage examinations|Title@@examinationListTitle">Manage examinations</h2>
 
-    <shanoir-table [items]="examinations" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs"
-        [loading]="loading" [rowClickAction]="rowClickAction" [backPagination]="true" (queryListEvent)="reloadExaminations($event)">
-    </shanoir-table>
-</div>
+<shanoir-table #examTable
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)"
+    [browserSearch]="false">
+</shanoir-table>

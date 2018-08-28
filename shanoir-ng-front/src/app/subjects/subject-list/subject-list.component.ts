@@ -1,12 +1,13 @@
-import { Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ViewContainerRef } from '@angular/core';
+import { Router } from '@angular/router';
 
-import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
-import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
+import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-import { TableComponent } from "../../shared/components/table/table.component";
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 
 @Component({
     selector: 'subject-list',
@@ -16,33 +17,36 @@ import { SubjectService } from '../shared/subject.service';
 
 export class SubjectListComponent {
     public subjects: Subject[];
+    private subjectsPromise: Promise<void> = this.getSubjects();
+    private browserPaging: BrowserPaging<Subject>;
     public columnDefs: any[];
     public customActionDefs: any[];
-    public deletionInternalError: boolean = false;
-    public loading: boolean = false;
-    public rowClickAction: Object;
-    public visible = false;
-    private visibleAnimate = false;
     
-    constructor(private subjectService: SubjectService, private confirmDialogService: ConfirmDialogService,
-        private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
-        this.getSubjects();
+    constructor(
+            private subjectService: SubjectService, 
+            private confirmDialogService: ConfirmDialogService,
+            private viewContainerRef: ViewContainerRef, 
+            private keycloakService: KeycloakService,
+            private router: Router) {
         this.createColumnDefs();
     }
 
     // Grid data
-    getSubjects(): void {
-        this.loading = true;
-        this.subjectService.getSubjects().then(subjects => {
+    getSubjects(): Promise<void> {
+        return this.subjectService.getSubjects().then(subjects => {
             if (subjects) {
                 this.subjects = subjects;
+                this.browserPaging = new BrowserPaging(subjects, this.columnDefs);
             }
-            this.loading = false;
         })
-            .catch((error) => {
-                // TODO: display error
-                this.subjects = [];
+    }
+
+    getPage(pageable: FilterablePageable): Promise<Page<Subject>> {
+        return new Promise((resolve) => {
+            this.subjectsPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
             });
+        });
     }
 
     // Grid columns definition
@@ -93,30 +97,11 @@ export class SubjectListComponent {
                 }
             });
         }
+    }
+
+    private onRowClick(subject: Subject) {
         if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {
-                target: "/subject", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
-            };
+            this.router.navigate(['/subject'], { queryParams: { id: subject.id, mode: "view" } });
         }
     }
-
-
-    public show(): void {
-        this.visible = true;
-        setTimeout(() => this.visibleAnimate = true, 100);
-    }
-
-    public hide(): void {
-        this.visibleAnimate = false;
-        setTimeout(() => this.visible = false, 300);
-    }
-
-    public onContainerClicked(event: MouseEvent): void {
-        if ((<HTMLElement>event.target).classList.contains('modal')) {
-            this.hide();
-        }
-    }
-
 }

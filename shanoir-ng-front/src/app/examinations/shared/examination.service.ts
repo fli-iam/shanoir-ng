@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import * as AppUtils from '../../utils/app.utils';
 import { Examination } from './examination.model';
 import { SubjectExamination } from './subject-examination.model';
-import { Pageable } from '../../shared/components/table/pageable.model';
+import { Pageable, Page } from '../../shared/components/table/pageable.model';
 
 @Injectable()
 export class ExaminationService {
@@ -55,14 +55,11 @@ export class ExaminationService {
             });
     }
 
-    getExaminations(pageable: Pageable): Promise<Examination[]> {
-        return this.http.get<Examination[]>(AppUtils.BACKEND_API_EXAMINATION_URL + AppUtils.getPageableQuery(pageable))
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting examinations', error);
-                return Promise.reject(error.message || error);
-            });
+    getPage(pageable: Pageable): Promise<Page<Examination>> {
+        return this.http.get<Page<Examination>>(
+            AppUtils.BACKEND_API_EXAMINATION_URL, 
+            { 'params': pageable.toParams() }
+        ).toPromise();
     }
 
     postFile(fileToUpload: File): Observable<any> {

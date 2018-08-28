@@ -1,13 +1,14 @@
-import { Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ViewContainerRef, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 
-import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
-import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
-import { TableComponent } from "../../shared/components/table/table.component";
+import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
+import { Page, Pageable } from '../../shared/components/table/pageable.model';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-import { Pageable } from '../../shared/components/table/pageable.model';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 
 @Component({
     selector: 'examination-list',
@@ -15,46 +16,27 @@ import { Pageable } from '../../shared/components/table/pageable.model';
     styleUrls: ['examination-list.component.css'],
 })
 export class ExaminationListComponent {
-    public examinations: Examination[];
-    public columnDefs: any[];
-    public customActionDefs: any[];
-    public rowClickAction: Object;
-    public loading: boolean = false;
+    private examinations: Examination[];
+    private columnDefs: any[];
+    private customActionDefs: any[];
     private createAcqEquip = false;
-    private pageable: Pageable;
-    public nbExaminations: number = 0;
+    private nbExaminations: number = 0;
+    @ViewChild('examTable') examTable: TableComponent;
 
-    constructor(private examinationService: ExaminationService, private confirmDialogService: ConfirmDialogService,
-        private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
-        this.countExaminations();
-        this.getExaminations();
+    constructor(
+            private examinationService: ExaminationService, 
+            private confirmDialogService: ConfirmDialogService,
+            private viewContainerRef: ViewContainerRef, 
+            private keycloakService: KeycloakService,
+            private msgService: MsgBoxService,
+            private router: Router) {
         this.createColumnDefs();
     }
 
-    // Grid data
-    getExaminations(): void {
-        this.loading = true;
-        this.examinationService.getExaminations(this.pageable).then(examinations => {
-            if (examinations) {
-                this.examinations = examinations;
-            }
-            this.loading = false;
-        })
-            .catch((error) => {
-                // TODO: display error
-                this.examinations = [];
-            });
-    }
-
-    countExaminations(): void {
-        this.loading = true;
-        this.examinationService.countExaminations().then(nbExaminations => {
-            this.nbExaminations = nbExaminations;
-        })
-            .catch((error) => {
-                // TODO: display error
-                this.examinations = [];
-            });
+    getPage(pageable: Pageable): Promise<Page<Examination>> {
+        return this.examinationService.getPage(pageable).then(page => {
+            return page;
+        });
     }
 
     // Grid columns definition
@@ -118,29 +100,26 @@ export class ExaminationListComponent {
                 }
             });
         }
+    }
+
+    private onRowClick(exam: Examination) {
         if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {
-                target: "/examination", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
-            };
+            this.router.navigate(['/examination'], { queryParams: { id: exam.id, mode: "view" } });
         }
     }
 
-    openDeleteExaminationConfirmDialog = (item: Examination) => {
+    openDeleteExaminationConfirmDialog(item: Examination) {
         this.confirmDialogService
-            .confirm('Delete examination', 'Are you sure you want to delete the following entity?',
-            this.viewContainerRef)
-            .subscribe(res => {
-                if (res) {
-                    this.deleteExamination(item.id);
-                }
-            })
-    }
-
-    deleteExamination(examinationId: number) {
-        // Delete examination and refresh page
-        this.examinationService.delete(examinationId).then((res) => this.getExaminations());
+                .confirm('Delete examination', 'Are you sure you want to delete examination ' + item.id + '?',
+                    this.viewContainerRef)
+                .subscribe(res => {
+                    if (res) {
+                        this.examinationService.delete(item.id).then(() => {
+                            this.examTable.refresh();
+                            this.msgService.log('info', 'The examination has been sucessfully deleted');
+                        });
+                    }
+                });
     }
 
     deleteAll = () => {
@@ -151,11 +130,6 @@ export class ExaminationListComponent {
         if (ids.length > 0) {
             console.log("TODO : delete those ids : " + ids);
         }
-    }
-
-    public reloadExaminations(pageable: Pageable): void {
-        this.pageable = pageable;
-        this.getExaminations();
     }
 
 }

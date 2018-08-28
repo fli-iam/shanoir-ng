@@ -1,7 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
-import { ImagesUrlUtil } from '../../utils/images-url.util';
-import { Pageable } from './pageable.model';
+import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pageable.model';
 
 @Component({
     selector: 'shanoir-table',
@@ -9,224 +8,64 @@ import { Pageable } from './pageable.model';
     styleUrls: ['table.component.css'],
 })
 
-export class TableComponent {
-    @Input() backPagination: boolean = false;
+export class TableComponent implements OnInit {
+    @Input() getPage: (pageable: Pageable) => Promise<Page<any>>;
     @Input() columnDefs: any[];
-    @Input() items: Object[];
-    @Input() nbAllItems: number;
     @Input() customActionDefs: any[];
-    @Input() rowClickAction: Object;
-    @Input() selectionAllowed: boolean = false;
-    @Output() queryListEvent = new EventEmitter();
-    private itemsSave: Object[];
-    private itemsLoaded: boolean = false;
+    @Input() selectionAllowed: boolean = false; // TODO : selectable
+    @Input() browserSearch: boolean = true;
+    @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
+    
+    private page: Page<Object>;
+    private isLoading: boolean = false;
     private maxResultsField: number;
-
-    private checkAllImageUrl: string = ImagesUrlUtil.CHECK_ALL_ICON_PATH;
-    private loaderImageUrl: string = ImagesUrlUtil.LOADER_IMAGE_PATH;
-    private uncheckAllImageUrl: string = ImagesUrlUtil.UNCHECK_ALL_ICON_PATH;
-
-    public isLoading: boolean = false;
-    public maxResults: number = 20;
-    public lastSortedCol: Object = null;
-    public lastSortedAsc: boolean = true;
-    public searchField: String = "";
-    public searchStr: String;
-    public currentPage: number = 1;
+    private maxResults: number = 20;
+    private lastSortedCol: Object = null;
+    private lastSortedAsc: boolean = true;
+    private currentPage: number = 1;
+    private filter: Filter;
+    private loaderImageUrl: string = "assets/images/loader.gif";
+    
 
     constructor() {
         this.maxResultsField = this.maxResults;
     }
 
-    /**
-     * The parent must bind a loading boolean to tell the table that the item list is loading, then loaded.
-     * Setting it to true then false must be repeated every time the item list is updated by the parent.
-     * 
-     * DONT'T MODIFY this.loading IN THE TABLE COMPONENT! Instead use this.isLoading to display and hide the loader.
-     */
-    @Input()
-    set loading(loading: boolean) {
-        if (this.isLoading && !loading) {
-            if (this.items != undefined) {
-                this.itemsSave = [];
-                for (let item of this.items) { this.itemsSave.push(item); }
-                // Choose default sorting
-                this.lastSortedCol = this.columnDefs[0];
-                for (let col of this.columnDefs) {
-                    if (col.defaultSortCol != undefined) {
-                        this.lastSortedCol = col;
-                        this.lastSortedAsc = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
-                        break;
-                    }
-                }
-                this.itemsLoaded = true;
-                this.refreshSorting();
-            } else {
-                this.itemsLoaded = false;
-            }
-        } else if (!this.isLoading && loading) {
-            this.itemsLoaded = false;
-        }
-        this.isLoading = loading;
-    }
 
-    /**
-     * Do a search and display results
-     */
-    public search(): void {
-        if (!this.itemsLoaded) { return; }
-        if (this.searchStr == undefined) { return; }
-        this.isLoading = true;
+    ngOnInit() {
         this.goToPage(1);
-        this.filter();
-        this.refreshSorting();
-        this.isLoading = false;
     }
 
-    /**
-     * Sort items by col, then by id
-     */
-    public sortBy(col: Object): void {
+    
+    private get items(): Object[] {
+        return this.page ? this.page.content : [];
+    }
+    
+
+    private sortBy(col: Object): void {
+        if (col['suppressSorting'] || col["type"] == "button") return;
         let defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
         let asc: boolean = col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
-        this.sortByOrderBy(col, asc);
-        this.goToPage(1);
-    }
-
-    /**
-     * Re-sort with last terms
-     */
-    private refreshSorting(): void {
-        this.sortByOrderBy(this.lastSortedCol, this.lastSortedAsc);
-    }
-
-    /**
-     * Reset the search
-     */
-    public resetSearch(): void {
-        // If seacrh string empty, reset the filter
-        if (this.itemsLoaded) {
-            this.items = [];
-            let itemsTmp = [];
-            for (let item of this.itemsSave) {
-                this.items.push(item);
-            }
-        }
-        this.searchStr = "";
-        this.searchField = "";
-        this.refreshSorting();
-        this.goToPage(1);
-    }
-
-    /**
-     * Sort items by col, then by id
-     */
-    public sortByOrderBy(col: Object, asc: boolean) {
-        if (!this.itemsLoaded) { return; }
-        // Some columns are incompatible with sorting
-        if (col["suppressSorting"] || col["type"] == "button") {
-            return;
-        }
         this.lastSortedCol = col;
         this.lastSortedAsc = asc;
-
-        // Regarding the data type, we set a neg infinity because unless this, 
-        // null values can't be compared
-        let negInf: any;
-        switch (col["type"]) {
-            case "number":
-                negInf = -1 * Infinity;
-                break;
-            case "date":
-                negInf = new Date();
-                break;
-            default:
-                negInf = "";
-        }
-        /* Sort function */
-        this.items.sort((n1, n2) => {
-            let cell1 = this.getCellValue(n1, col);
-            let cell2 = this.getCellValue(n2, col);
-            if (col["type"] == "date") {
-                // Real value for date
-                cell1 = this.getFieldRawValue(n1, col["field"])
-                cell2 = this.getFieldRawValue(n2, col["field"])
-            }
-            // If equality, test the id so the order is always the same
-            if (cell1 == cell2) {
-                if (n1["id"] != undefined) {
-                    if (n1["id"] > n2["id"]) {
-                        return 1;
-                    } else if (n1["id"] < n2["id"]) {
-                        return -1;
-                    }
-                }
-                return 0;
-            }
-
-            if (cell1 == null) {
-                cell1 = negInf;
-            } else {
-                if (col["type"] == null || col["type"] == "sting") {
-                    // Sort insensitive
-                    // cell1 = cell1.toLowerCase();
-                }
-            }
-            if (cell2 == null) {
-                cell2 = negInf;
-            } else {
-                if (col["type"] == null || col["type"] == "string") {
-                    // Sort insensitive
-                    // cell2 = cell2.toLowerCase();
-                }
-            }
-
-            // Comparison
-            if (cell1 > cell2) {
-                return asc ? 1 : -1;
-            } else {
-                return asc ? -1 : 1;
-            }
-        });
+        this.goToPage(1);
     }
 
-    /**
-     * Filter items by a search string
-     */
-    private filter(): void {
-        let searchStr: string = this.searchStr.toLowerCase().trim();
-        this.items = [];
-        // If seacrh string empty, reset the filter
-        if (searchStr.length == 0) {
-            for (let item of this.itemsSave) { this.items.push(item); }
-            return;
-        }
-        // Inspect every field and same the item if one field matches
-        for (let item of this.itemsSave) {
-            for (let col of this.columnDefs) {
-                let value: any = this.getCellValue(item, col);
-                if (!this.isValueBoolean(value) && col["type"] != "button") {
-                    let valueStr: string = this.renderCell(item, col);
-                    if (this.searchField == "" || col.field == this.searchField) {
-                        if (value != undefined && value != null) {
-                            valueStr = valueStr.toLowerCase().trim();
-                            if (valueStr.indexOf(searchStr) >= 0) {
-                                this.items.push(item);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+
+    private onSearchChange(filter: Filter) {
+        this.filter = filter;
+        this.goToPage(1);
     }
 
-    /**
-     * Get a cell content, resolving a rendrer if necessary
-     */
-    public getCellValue(item: Object, col: any): any {
+
+    private onRowClick(item: Object) {
+        this.rowClick.emit(item);
+    }
+
+
+    public static getCellValue(item: Object, col: any): any {
         let result: any;
-        if (col.field == undefined || col.type == 'link') {
+        if (col.field == undefined) {
             return null;
         } if (col.hasOwnProperty("cellRenderer")) {
             let params = new Object();
@@ -237,19 +76,30 @@ export class TableComponent {
         }
     }
 
-    /**
-     * Just get the field value, but not using any renderer!
-     */
-    private getFieldRawValue(obj: Object, path: string): any {
+    public static getFieldRawValue(obj: Object, path: string): any {
         function index(robj: any, i: string) { return robj[i] };
         return path.split('.').reduce(index, obj);
     }
 
     /**
+     * Get a cell content, resolving a renderer if necessary
+     */
+    private getCellValue(item: Object, col: any): any {
+        TableComponent.getCellValue(item, col);
+    }
+
+    /**
+     * Just get the field value, but not using any renderer!
+     */
+    private getFieldRawValue(obj: Object, path: string): any {
+        TableComponent.getFieldRawValue(obj, path);
+    }
+
+    /**
      * Convert a cell content to a displayable string
      */
-    public renderCell(item: Object, col: any): string {
-        let result: any = this.getCellValue(item, col);
+    private renderCell(item: Object, col: any): string {
+        let result: any = TableComponent.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
         } else {
@@ -261,7 +111,7 @@ export class TableComponent {
      * Test if a cell content is a boolean
      */
     private isFieldBoolean(obj: Object, col: any): boolean {
-        let val = this.getCellValue(obj, col);
+        let val = TableComponent.getCellValue(obj, col);
         return this.isValueBoolean(val);
     }
 
@@ -301,95 +151,56 @@ export class TableComponent {
         return type != null ? "cell-" + type : "";
     }
 
-    public getItems(): Object[] {
-        if (this.backPagination) {
-            return this.items;
-        } else {
-            return this.items.slice((this.currentPage - 1) * this.maxResults, this.currentPage * this.maxResults);
-        }
+    private goToPage(p: number): void {
+        this.currentPage = p;
+        this.isLoading = true;
+        this.getPage(this.getPageable()).then(page => {
+            this.page = page;  
+            setTimeout(() => this.isLoading = false, 200);
+        });
     }
 
     /**
-     * Get the columns that can be used for searching
+     * Call to refresh from outsilde
      */
-    public getSearchableColumns(): any[] {
-        let cols: any[] = [];
-        for (let col of this.columnDefs) {
-            if (col.type != "boolean" && col.type != "button") {
-                cols.push(col);
-            }
-        }
-        return cols;
+    public refresh() {
+        this.goToPage(this.currentPage);
     }
 
-    public getMaxPage(): number {
-        if (this.nbAllItems) {
-            return Math.ceil(this.nbAllItems / this.maxResults);
-        } else if (this.items == undefined || this.items == null) {
-            return 0;
-        } else {
-            return Math.ceil(this.items.length / this.maxResults);
-        }
-    }
-
-
-    public getPagerList(): number[] {
-        let nbLinks = 7; // Must be odd
-        let half = (Math.floor(nbLinks / 2));
-        let list: number[] = [];
-        if (this.currentPage <= half + 2) {
-            if (this.getMaxPage() <= nbLinks) {
-                for (let i = 1; i <= nbLinks + 1 && i <= this.getMaxPage(); i++) {
-                    list.push(i);
+    private getPageable(): Pageable {
+        let orders: Order[] = [];
+        if (this.lastSortedCol) {
+            if (this.lastSortedCol['orderBy']) {
+                for (let orderBy of this.lastSortedCol['orderBy']) {
+                    orders.push(new Order(this.lastSortedAsc ? 'ASC' : 'DESC', orderBy));
                 }
             } else {
-                for (let i = 1; i <= nbLinks; i++) {
-                    list.push(i);
-                }
-                list.push(null);
-                list.push(this.getMaxPage());
+                orders.push((new Order(this.lastSortedAsc ? 'ASC' : 'DESC', this.lastSortedCol["field"])));
             }
+        }
+        if (this.filter) {
+            return new FilterablePageable(
+                this.currentPage, 
+                this.maxResults,
+                new Sort(orders),
+                this.filter
+            );
         } else {
-            list.push(1);
-            list.push(null);
-            if (this.getMaxPage() <= this.currentPage + half) {
-                for (let i = this.getMaxPage() - nbLinks + 1; i <= this.getMaxPage(); i++) {
-                    list.push(i);
-                }
-            } else {
-                for (let i = this.currentPage - half + 1; i <= this.currentPage + half - 1; i++) {
-                    list.push(i);
-                }
-                list.push(null);
-                list.push(this.getMaxPage());
-            }
-        }
-        return list;
-    }
-
-
-    public goToPage(p: number): void {
-        this.currentPage = p;
-        if (this.backPagination) {
-            // Paging from the database.
-            let pageable: Pageable = {
-                page: this.currentPage - 1,
-                size: this.maxResults,
-                sortProperty: this.lastSortedCol["field"],
-                asc: this.lastSortedAsc
-            };
-            this.queryListEvent.emit(pageable);
+            return new Pageable(
+                this.currentPage, 
+                this.maxResults,
+                new Sort(orders)
+            );
         }
     }
 
-
-    public updateMaxResults(): void {
+    private updateMaxResults(): void {
         this.maxResults = this.maxResultsField;
         this.goToPage(1);
     }
 
-    public getNbSelected(): number {
-        if (!this.itemsLoaded) return 0;
+    private getNbSelected(): number {
+        if (!this.items) return 0;
         let nb: number = 0;
         for (let item of this.items) {
             if (item["isSelectedInTable"]) nb++;
@@ -397,25 +208,18 @@ export class TableComponent {
         return nb;
     }
 
-    public selectAll() {
-        if (!this.itemsLoaded) return;
+    private selectAll() {
+        if (!this.items) return;
         for (let item of this.items) {
             item["isSelectedInTable"] = true;
         }
     }
 
-    public unSelectAll() {
-        if (!this.itemsLoaded) return;
+    private unSelectAll() {
+        if (!this.items) return;
         for (let item of this.items) {
             item["isSelectedInTable"] = false;
         }
     }
 
-    private returnFalse() {
-        return false;
-    }
-
-    private getNbTotal() {
-        return this.nbAllItems ? this.nbAllItems : this.itemsSave.length;
-    }
 }

@@ -92,7 +92,7 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<Subject> saveNewSubject(
+	public ResponseEntity<SubjectDTO> saveNewSubject(
 			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException {
 
@@ -113,7 +113,7 @@ public class SubjectApiController implements SubjectApi {
 		try {
 			final Subject createdSubject = subjectService.save(subject);
 			subjectService.updateShanoirOld(createdSubject);
-			return new ResponseEntity<Subject>(createdSubject, HttpStatus.OK);
+			return new ResponseEntity<SubjectDTO>(subjectMapper.subjectToSubjectDTO(createdSubject), HttpStatus.OK);
 		} catch (ShanoirStudiesException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));

@@ -8,6 +8,9 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { StudyStatus } from '../shared/study-status.enum';
 import { TableComponent } from "../../shared/components/table/table.component";
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { Router } from '@angular/router';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 
 @Component({
     selector: 'study-list',
@@ -16,31 +19,37 @@ import { TableComponent } from "../../shared/components/table/table.component";
 })
 
 export class StudyListComponent {
+    public studies: Study[];
+    private studiesPromise: Promise<void> = this.getStudies();
+    private browserPaging: BrowserPaging<Study>;
+
     public columnDefs: any[];
     public customActionDefs: any[];
-    public loading: boolean = false;
-    public rowClickAction: Object;
-    public studies: Study[];
 
-    constructor(private confirmDialogService: ConfirmDialogService, private keycloakService: KeycloakService,
-        private studyService: StudyService, private viewContainerRef: ViewContainerRef) {
-        this.getStudies();
+    constructor(
+            private confirmDialogService: ConfirmDialogService, 
+            private keycloakService: KeycloakService,
+            private studyService: StudyService, 
+            private viewContainerRef: ViewContainerRef,
+            private router: Router) {
         this.createColumnDefs();
     }
 
-    // Grid data
-    getStudies(): void {
-        this.loading = true;
-        this.studyService.getStudies().then(studies => {
+    getPage(pageable: FilterablePageable): Promise<Page<Study>> {
+        return new Promise((resolve) => {
+            this.studiesPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
+
+    getStudies(): Promise<void> {
+        return this.studyService.getStudies().then(studies => {
             if (studies) {
                 this.studies = studies;
+                this.browserPaging = new BrowserPaging(studies, this.columnDefs);
             }
-            this.loading = false;
         })
-            .catch((error) => {
-                // TODO: display error
-                this.studies = [];
-            });
     }
 
     // Grid columns definition
@@ -90,13 +99,11 @@ export class StudyListComponent {
                 }
             });
         }
+    }
 
+    private onRowClick(study: Study) {
         if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {
-                target: "/study", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
-            };
+            this.router.navigate(['/study'], { queryParams: { id: study.id, mode: "view" } });
         }
     }
 

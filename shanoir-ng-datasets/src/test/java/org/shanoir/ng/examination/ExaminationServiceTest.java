@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -64,8 +65,8 @@ public class ExaminationServiceTest {
 	@Before
 	public void setup() throws ShanoirException {
 		given(examinationRepository.countByStudyIdIn(Mockito.anyListOf(Long.class))).willReturn(2L);
-		given(examinationRepository.findByStudyIdIn(Mockito.anyListOf(Long.class), Mockito.any(Pageable.class)))
-				.willReturn(Arrays.asList(ModelsUtil.createExamination()));
+		// given(examinationRepository.findByStudyIdIn(Mockito.anyListOf(Long.class), Mockito.any(Pageable.class)))
+		// 		.willReturn(Arrays.asList(ModelsUtil.createExamination()));
 		given(examinationRepository.findOne(EXAMINATION_ID)).willReturn(ModelsUtil.createExamination());
 		given(examinationRepository.save(Mockito.any(Examination.class))).willReturn(ModelsUtil.createExamination());
 
@@ -95,10 +96,9 @@ public class ExaminationServiceTest {
 		IdNameDTO[] tab = { idNameDTO };
 		given(restTemplate.exchange(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class),
 				Matchers.<Class<IdNameDTO[]>>any())).willReturn(new ResponseEntity<>(tab, HttpStatus.OK));
-
-		final List<Examination> examinations = examinationService.findAll(null);
+		final Page<Examination> examinations = examinationService.findPage(null);
 		Assert.assertNotNull(examinations);
-		Assert.assertTrue(examinations.size() == 1);
+		Assert.assertTrue(examinations.getContent().size() == 1);
 
 		Mockito.verify(examinationRepository, Mockito.times(1)).findByStudyIdIn(Arrays.asList(STUDY_ID), null);
 	}

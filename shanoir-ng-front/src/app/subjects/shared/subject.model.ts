@@ -17,11 +17,19 @@ export class Subject {
     sex: Sex;
     subjectStudyList: SubjectStudy[];
 
-    
     constructor(subject?: IdNameObject) {
         if (subject) {
             this.id = subject.id;
             this.name = subject.name;
         }
+    }
+
+    public static makeSubject(id: number, name: string, identifier: string, subjectStudy: SubjectStudy): Subject {
+        let subject = new Subject();
+        subject.id = id;
+        subject.name = name;
+        subject.identifier = identifier;
+        subject.subjectStudyList = [subjectStudy];
+        return subject;
     }
 }

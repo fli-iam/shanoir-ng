@@ -41,7 +41,6 @@ export class SubjectComponent implements OnInit, OnChanges {
     private firstName: string = "";
     private lastName: string = "";
     private studies: IdNameObject[];
-    private subjectStudyList: SubjectStudy[] = [];
     private isBirthDateValid: boolean = true;
     private isAlreadyAnonymized: boolean;
     private init: boolean = false;
@@ -114,7 +113,7 @@ export class SubjectComponent implements OnInit, OnChanges {
                 this.subject.birthDate = new Date(this.preFillData.birthDate);
             }
             if (this.preFillData.subjectStudyList && this.preFillData.subjectStudyList.length > 0) {
-                this.subjectStudyList = this.preFillData.subjectStudyList;
+                this.subject.subjectStudyList = this.preFillData.subjectStudyList;
                 this.studies = [];
                 for (let subjectStudy of this.preFillData.subjectStudyList) {
                     this.studies.push(new IdNameObject(subjectStudy.study.id, subjectStudy.study.name));
@@ -141,10 +140,6 @@ export class SubjectComponent implements OnInit, OnChanges {
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.error("error getting study list!");
             });
     }
 
@@ -209,7 +204,6 @@ export class SubjectComponent implements OnInit, OnChanges {
 
     updateModel(): void {
         this.subject = this.subjectForm.value;
-        this.subject.subjectStudyList = this.subjectStudyList;
     }
 
     back(subject?: Subject): void {
@@ -234,7 +228,7 @@ export class SubjectComponent implements OnInit, OnChanges {
             this.setSubjectBirthDateToFirstOfJanuary();
         }
         this.subjectService.create(this.subject)
-            .subscribe((subject: Subject) => {
+            .then((subject: Subject) => {
                 this.msgService.log('info', 'Subject successfully created');
                 this.back(subject);
             }, (error: any) => {
@@ -278,10 +272,6 @@ export class SubjectComponent implements OnInit, OnChanges {
     setSubjectBirthDateToFirstOfJanuary(): void {
         let newDate: Date = new Date(this.subject.birthDate.getFullYear(), 0, 1);
         this.subject.birthDate = newDate;
-    }
-
-    private onChangeSubjectStudyList(subjectStudyList: SubjectStudy[]) {
-        this.subjectStudyList = subjectStudyList;
     }
 
     /**

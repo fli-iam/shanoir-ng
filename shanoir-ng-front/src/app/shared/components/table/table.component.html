@@ -1,141 +1,113 @@
-<table class="shanoir-table">
-    <!-- Control bar -->
-    <caption class="controls">
-            <span *ngIf="selectionAllowed" class="select-ctrl">
-                <button (click)="selectAll()" title="select all"><img [src]="checkAllImageUrl"/></button>
-                <button (click)="unSelectAll()" title="unselect all"><img [src]="uncheckAllImageUrl"/></button>
-            </span>
-            <!-- Text search -->
-            <span class="text-search">
-                <button (click)="resetSearch()" title="clear search">&#x2716;</button>
-                <input class="search-txt" [(ngModel)]="searchStr" (change)="search()" type="text" placeholder="search..."/> 
-                in
-                <select class="search-field" [(ngModel)]="searchField" (change)="search()"> 
-                    <option value="">*</option>
-                    <option *ngFor="let col of getSearchableColumns()" value="{{col.field}}">
-                        {{col.headerName}}
-                    </option>
-                </select>
-            </span>
-            <!-- User defined buttons -->
-            <span *ngFor="let command of customActionDefs">
-                <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams(item) : null" routerLinkActive="active">
-                    <img *ngIf="command.img" src="{{command.img}}" />
-                    <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
-                    <span>{{command.title}}</span>
-                </button>
-                <button *ngIf="command.action != undefined" (click)="command.action()">
-                    <img *ngIf="command.img" src="{{command.img}}" />
-                    <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
-                    <span>{{command.title}}</span>
-                </button>
-            </span>
-    </caption>
-    <!-- Headers -->
-    <thead>
-        <tr class="full-row">
-            <th *ngIf="selectionAllowed" class="checkbox-col"></th>
-            <th 
-                *ngFor="let col of columnDefs" 
-                (click)="sortBy(col)"
-                class="{{getColTypeStr(col)}}"
-                [class.sortable]="!col.suppressSorting && col.type!='button'"
-                [class.active]="lastSortedCol==col"
-                [attr.title]="col.tip != undefined ? col.tip : null"
-                [style.width]="col.width"
-                >{{col.headerName}}
-                    <span class="sort-arrow" *ngIf="!col.suppressSorting && col.type!='button'">
-                        <span *ngIf="lastSortedCol==col && !lastSortedAsc" class="arrow arrowUp">&#9652;</span>   
-                        <span *ngIf="lastSortedCol==col && lastSortedAsc" class="arrow arrowDown">&#9662;</span>
-                    </span>
-            </th>
-        </tr>
-    </thead>
-    <!-- Table ontent -->
-    <tbody *ngIf="!isLoading && items?.length > 0">
-        <tr 
-            *ngFor="let item of getItems(); let i = index" 
-            [class.odd]="i%2!=0" 
-            [class.even]="i%2==0" 
-            >
-            <td *ngIf="selectionAllowed" class="checkbox-cell"><input type="checkbox" [(ngModel)]="item.isSelectedInTable" /></td>
-            <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
-            <td 
-                *ngFor="let col of columnDefs" 
-                class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" 
-                [class.bool]="isFieldBoolean(item, col)"
-                [attr.title]="col.tip != undefined ? col.tip : null"
-                >{{renderCell(item, col)}}
-                <span *ngIf="isFieldBoolean(item, col)">
-                    <span *ngIf="getCellValue(item, col)" class="bool-true">&#x2713;</span>
-                    <span *ngIf="!getCellValue(item, col)" class="bool-false">&#x2717;</span>
+<!-- Control bar -->
+<caption class="controls">
+        <span *ngIf="selectionAllowed" class="select-ctrl">
+            <button (click)="selectAll()" title="select all"><img [src]="checkAllImageUrl"/></button>
+            <button (click)="unSelectAll()" title="unselect all"><img [src]="uncheckAllImageUrl"/></button>
+        </span>
+        <!-- Text search -->
+        <span *ngIf="browserSearch" class="text-search">
+            <shanoir-table-search [columnDefs]="columnDefs" (onChange)="onSearchChange($event)"></shanoir-table-search>
+        </span>
+        <!-- User defined buttons -->
+        <span *ngFor="let command of customActionDefs">
+            <button *ngIf="command.target != undefined" [routerLink]="command.target" [queryParams]="command.getParams != undefined ? command.getParams(item) : null" routerLinkActive="active">
+                <img *ngIf="command.img" src="{{command.img}}" />
+                <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
+                <span>{{command.title}}</span>
+            </button>
+            <button *ngIf="command.action != undefined" (click)="command.action()">
+                <img *ngIf="command.img" src="{{command.img}}" />
+                <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
+                <span>{{command.title}}</span>
+            </button>
+        </span>
+</caption>
+<!-- Headers -->
+<thead>
+    <tr class="full-row">
+        <th *ngIf="selectionAllowed" class="checkbox-col"></th>
+        <th 
+            *ngFor="let col of columnDefs" 
+            (click)="sortBy(col)"
+            class="{{getColTypeStr(col)}}"
+            [class.sortable]="!col.suppressSorting && col.type!='button'"
+            [class.active]="lastSortedCol==col"
+            [attr.title]="col.tip != undefined ? col.tip : null"
+            [style.width]="col.width"
+            >{{col.headerName}}
+                <span class="sort-arrow" *ngIf="!col.suppressSorting && col.type!='button'">
+                    <span *ngIf="lastSortedCol==col && !lastSortedAsc" class="arrow arrowUp">&#9652;</span>   
+                    <span *ngIf="lastSortedCol==col && lastSortedAsc" class="arrow arrowDown">&#9662;</span>
                 </span>
-                <a 
-                    *ngIf="col.type == 'link'"
-                    [routerLink]="col.clickAction.target" 
-                    [queryParams]="col.clickAction.getParams != undefined ? col.clickAction.getParams(item) : null" 
-                    >{{getFieldRawValue(item, col["field"])}}</a>
-                <span class="button" *ngIf="col.type == 'button'">
-                    <a *ngIf="col.target != undefined" [routerLink]="col.target" [queryParams]="col.getParams != undefined ? col.getParams(item) : null" routerLinkActive="active">
-                        <img *ngIf="col.img" src="{{col.img}}" />
-                        <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
-                    </a>
-                    <span *ngIf="col.action != undefined" (click)="col.action(item)">
-                        <img *ngIf="col.img" src="{{col.img}}" />
-                        <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
-                    </span>
+        </th>
+    </tr>
+</thead>
+<!-- Table content -->
+<tbody>
+    <tr
+        *ngFor="let item of items; let i = index" 
+        [class.odd]="i%2!=0" 
+        [class.even]="i%2==0">
+        <td *ngIf="selectionAllowed" class="checkbox-cell"><input type="checkbox" [(ngModel)]="item.isSelectedInTable" /></td>
+        <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
+        <td 
+            *ngFor="let col of columnDefs" 
+            class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" 
+            [class.bool]="isFieldBoolean(item, col)"
+            [attr.title]="col.tip != undefined ? col.tip : null"
+            (click)="col.type == 'button' ? null : onRowClick(item)"
+            >{{renderCell(item, col)}}
+            <span *ngIf="isFieldBoolean(item, col)">
+                <span *ngIf="getCellValue(item, col)" class="bool-true">&#x2713;</span>
+                <span *ngIf="!getCellValue(item, col)" class="bool-false">&#x2717;</span>
+            </span>
+            <a class="link"
+                *ngIf="col.type == 'link'"
+                [routerLink]="col.clickAction.target" 
+                [queryParams]="col.clickAction.getParams? col.clickAction.getParams(item) : null" 
+                ><i class="fas fa-external-link-alt"></i></a>
+            <span class="button" *ngIf="col.type == 'button'">
+                <a *ngIf="col.target" [routerLink]="col.target" [queryParams]="col.getParams ? col.getParams(item) : null" routerLinkActive="active">
+                    <img *ngIf="col.img" src="{{col.img}}" />
+                    <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
+                </a>
+                <span *ngIf="col.action" (click)="col.action(item)">
+                    <img *ngIf="col.img" src="{{col.img}}" />
+                    <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
                 </span>
-                <span 
-                    class="click-dummy"
-                    *ngIf="rowClickAction && col.type != 'button' && col.type != 'link'"
-                    [routerLink]="rowClickAction.target" 
-                    [queryParams]="rowClickAction.getParams != undefined ? rowClickAction.getParams(item) : null" 
-                    routerLinkActive="active"
-                    ></span>
-            </td>
-        </tr>
-
-        <!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
-        <tr class="full-row">
-            <th class="pager" [attr.colspan]="columnDefs?.length + 1">
-                <span class="clickable"
-                    [class.disabled]="currentPage == 1"
-                    (click)="currentPage > 1 ? goToPage(currentPage - 1) : void" 
-                    >&#9664;</span><span class="wrapper"
-                    *ngFor="let p of getPagerList(); let i = index" 
-                ><span *ngIf="p==null">...</span><span *ngIf="p!=null" class="clickable" (click)="goToPage(p)" [class.active]="p == currentPage">{{p}}</span></span><span 
-                    class="clickable"
-                    [class.disabled]="currentPage == getMaxPage()"
-                    (click)="currentPage < getMaxPage() ? goToPage(currentPage + 1) : void" 
-                    >&#9654;</span>
-            </th>
-        </tr>
-        <tr>
-            <th class="status-bar controls" [attr.colspan]="columnDefs?.length + 1">
-                <!-- Nb results per page input -->
-                <span class="options">
-                    <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
-                    <span *ngIf="items != undefined && items != null">Found : {{items.length}}</span>
-                    <span *ngIf="itemsSave != undefined && itemsSave != null">Total : {{getNbTotal()}}</span>
-                    <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
+            </span>
+        </td>
+    </tr>
+    <!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
+    <tr *ngIf="items?.length > 0" class="full-row">
+        <th class="pager" [attr.colspan]="columnDefs?.length + 1">
+            <shanoir-pager
+                [currentPage]="currentPage"
+                [nbPages]="page ? page.totalPages : 0"
+                (pageChange)="goToPage($event)"
+            ></shanoir-pager>
+        </th>
+    </tr>
+    <tr>
+        <th class="status-bar controls" [attr.colspan]="columnDefs?.length + 1">
+            <!-- Nb results per page input -->
+            <span class="options">
+                <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
+                <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
+                <span *ngIf="page">Total : {{page?.totalElements}}</span>
+                <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
+                <span class="loader" *ngIf="isLoading">Loading
+                    <img [src]="loaderImageUrl" />
                 </span>
-            </th>
-        </tr>
-    </tbody>
-    <!-- Loader -->
-    <tbody *ngIf="isLoading">
-        <tr>
-            <td [attr.colspan]="columnDefs?.length + 1" class="loading">
-                <img [src]="loaderImageUrl"/><br/>Loading...
-            </td>
-        </tr>
-    </tbody>
-    <!-- Empty table msg -->
-    <tbody *ngIf="!isLoading && items?.length == 0">
-        <tr>
-            <td [attr.colspan]="columnDefs?.length + 1" class="empty">
-                No results
-            </td>
-        </tr>
-    </tbody>
-</table>
+            </span>
+        </th>
+    </tr>
+</tbody>
+<!-- Empty table msg -->
+<tbody *ngIf="!isLoading && items?.length == 0">
+    <tr>
+        <td [attr.colspan]="columnDefs?.length + 1" class="empty">
+            No results
+        </td>
+    </tr>
+</tbody>

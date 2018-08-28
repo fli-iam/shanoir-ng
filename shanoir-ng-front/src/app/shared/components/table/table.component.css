@@ -1,58 +1,58 @@
-.shanoir-table { border-spacing: 0; border: 1px solid var(--light-grey); table-layout: fixed; width: 100%; border-top: 0; }
-	.shanoir-table .full-row { background-color: var(--color-b); overflow: initial; }
-	.shanoir-table th,
-	.shanoir-table caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; overflow: hidden; }
-	.shanoir-table th { width: 100%; white-space: normal; }
-		.shanoir-table .controls { padding: 0; min-height: 26px; text-align: left; background-color: var(--light-grey); color: var(--very-dark-grey); }
-			.shanoir-table .controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 0; border: 1px solid transparent; color: var(--dark-grey); }
-				.shanoir-table .controls button:hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
-				.shanoir-table .controls button span { vertical-align: middle; }
-				.shanoir-table .controls button img { height: 16px; vertical-align: middle; }
-				.shanoir-table .controls .awesome { vertical-align: middle; margin-right: 4px; }
-					.shanoir-table .controls .awesome svg { vertical-align: middle; }
-			.shanoir-table .controls input,
-			.shanoir-table .controls select { border: 1px solid var(--grey); border-radius: 2px;  height: 20px; vertical-align: middle; }
-			.shanoir-table .controls input { padding: 0 5px; width: 150px; }
-			.shanoir-table .controls select { width: 150px; margin-right: 5px; }
-			.shanoir-table .controls .text-search,
-			.shanoir-table .controls .options,
-			.shanoir-table .select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 0; border-right: 1px solid var(--grey); }
-				.shanoir-table .controls .options .max-results { width: 40px; text-align: right; }
-		.shanoir-table .select-ctrl button { padding: 0 5px; }
-		.shanoir-table .select-ctrl input[type="checkbox"] { margin: 0; width: 15px; }
-		.shanoir-table th.sortable { cursor: pointer; position: relative; overflow: initial; }
-			.shanoir-table th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
-		.shanoir-table th.checkbox-col { width: 21px; }
-		.shanoir-table th.active, 
-			.shanoir-table th.pager span.active { z-index: 10; background-color: var(--color-b-light2); }
-		.shanoir-table th.sortable:hover, 
-			.shanoir-table th.pager span.clickable:not(.disabled):hover { z-index: 5; background-color: var(--color-b-light2); }
-		.shanoir-table th.col-date { width: 70px; }
-		.shanoir-table th.col-boolean { width: 20px; }
-		.shanoir-table th.col-button { width: 20px; }
-		.shanoir-table th.pager { padding: 0 5px; overflow: initial;  }
-		.shanoir-table th.pager span:not(.wrapper) { display: inline-block; width: 30px; padding: 3px 0; height: 16px; }
-			.shanoir-table th.pager span.clickable:not(.disabled):not(.active) { cursor: pointer; }
-			.shanoir-table th.pager span.disabled { color: var(--color-b); }
-		.shanoir-table th.status-bar { text-align: left; padding: 3px 0; color: var(--greyer)}
-			.shanoir-table th.status-bar input { width: 150px; }
-			.shanoir-table th.status-bar .options { border-right: 0; }
-				.shanoir-table th.status-bar .options span { padding: 0 10px; }
-					.shanoir-table th.status-bar .options span + span { border: 0; border-left: 1px solid var(--grey); }
-	.shanoir-table tr { height: 20px; }
-		.shanoir-table tr.even { background-color: var(--light-grey); }
-		.shanoir-table tr.odd { background-color: var(--lighter-grey); }
-		.shanoir-table tr:hover td:not(.loading):not(.empty) { height: 20px; background-color: var(--color-b-light); cursor: pointer; }
-	.shanoir-table td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
-		.shanoir-table td + td { border-left: 1px dotted var(--grey); }
-		.shanoir-table td.bool { text-align: center; }
-		.shanoir-table td.cell-date { text-align: right; }
-		.shanoir-table td.cell-number { text-align: right; }
-		.shanoir-table td.cell-nofield { text-align: center; }
-		.shanoir-table td span.button { max-height: 20px; max-width: 20px; cursor: pointer; }
-			.shanoir-table td span.button img { height: 16px; vertical-align: bottom; }
-			.shanoir-table td span.button .awesome { color: var(--color-b); }
-		.shanoir-table td.loading,
-		.shanoir-table td.empty { padding: 20px 20px; text-align: center; }
-			.shanoir-table td.loading img { vertical-align: middle; margin: 0; height: 32px; }
-		.shanoir-table td .click-dummy { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 10; }
+ :host() {display: table; border-spacing: 0; border: 1px solid var(--light-grey); table-layout: fixed; width: 100%; border-top: 0; }
+.full-row { background-color: var(--color-b); overflow: initial; }
+th,
+caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; overflow: hidden; }
+th { width: 100%; white-space: normal; }
+	.controls { padding: 0; text-align: left; background-color: var(--light-grey); color: var(--very-dark-grey); }
+		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 0; border: 1px solid transparent; color: var(--dark-grey); }
+			.controls button:hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
+			.controls button span { vertical-align: middle; }
+			.controls button img { height: 16px; vertical-align: middle; }
+			.controls .awesome { vertical-align: middle; margin-right: 4px; }
+				.controls .awesome svg { vertical-align: middle; }
+		.controls input,
+		.controls select { border: 1px solid var(--grey); border-radius: 2px;  height: 20px; vertical-align: middle; }
+		.controls input { padding: 0 5px; width: 150px; }
+		.controls select { width: 150px; margin-right: 5px; }
+		.controls .text-search,
+		.controls .options,
+		.select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 0; border-right: 1px solid var(--grey); }
+			.controls .options .max-results { width: 40px; text-align: right; }
+	.select-ctrl button { padding: 0 5px; }
+	.select-ctrl input[type="checkbox"] { margin: 0; width: 15px; }
+	th.sortable { cursor: pointer; position: relative; overflow: initial; }
+		th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
+	th.checkbox-col { width: 21px; }
+	th.active { z-index: 10; background-color: var(--color-b-light2); }
+	th.sortable:hover { z-index: 5; background-color: var(--color-b-light2); }
+	th.col-date { width: 70px; }
+	th.col-boolean { width: 20px; }
+	th.col-button { width: 20px; }
+	th.pager { padding: 0 5px; overflow: initial; }
+	th.status-bar { text-align: left; padding: 3px 0; color: var(--greyer)}
+		th.status-bar input { width: 150px; }
+		th.status-bar .options { border-right: 0; }
+			th.status-bar .options span { padding: 0 10px; }
+				th.status-bar .options span + span { border: 0; border-left: 1px solid var(--grey); }
+tr { height: 20px; }
+	tr.even { background-color: var(--light-grey); }
+	tr.odd { background-color: var(--lighter-grey); }
+	tr:hover td:not(.loading):not(.empty) { height: 20px; background-color: var(--color-b-light); cursor: pointer; }
+td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
+	td + td { border-left: 1px dotted var(--grey); }
+	td.bool { text-align: center; }
+	td.cell-date { text-align: right; }
+	td.cell-number { text-align: right; }
+	td.cell-nofield { text-align: center; }
+	td span.button { max-height: 20px; max-width: 20px; cursor: pointer; }
+		td span.button img { height: 16px; vertical-align: bottom; }
+		td span.button .awesome { color: var(--color-b); }
+	td.loading,
+	td.empty { padding: 20px 20px; text-align: center; }
+		
+.loader { float: right; border-left: none !important; }
+	.loader img { margin-left: 5px; vertical-align: -1; height: 10px; }
+
+a.link { text-decoration: none; color: inherit; }
+	a.link svg { font-size: 10px; vertical-align: 0; margin-left: 5px; color: var(--greyer); }
+	a.link svg:hover { color: var(--color-a); }

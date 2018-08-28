@@ -7,6 +7,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisitionMapper;
+import org.shanoir.ng.shared.paging.PageImpl;
+import org.springframework.data.domain.Page;
 
 /**
  * Mapper for examinations.
@@ -25,7 +27,7 @@ public interface ExaminationMapper {
 	 *            list of examinations.
 	 * @return list of examinations DTO.
 	 */
-	List<ExaminationDTO> examinationsToExaminationDTOs(List<Examination> examinations);
+	PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> examinations);
 
 	/**
 	 * Map list of @Examination to list of @SubjectExaminationDTO.

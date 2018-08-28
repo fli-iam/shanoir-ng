@@ -10,6 +10,9 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { TableComponent } from "../../shared/components/table/table.component";
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { Center } from '../../centers/shared/center.model';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'acquisition-equipment-list',
@@ -18,34 +21,45 @@ import { Center } from '../../centers/shared/center.model';
 })
 
 export class AcquisitionEquipmentListComponent {
-    public acqEquips: AcquisitionEquipment[];
-    public columnDefs: any[];
-    public customActionDefs: any[];
-    public rowClickAction: Object;
-    public loading: boolean = false;
+
+    private acqEquips: AcquisitionEquipment[];
+    private acqEqPromise: Promise<void> = this.getAcquisitionEquipments();
+    private browserPaging: BrowserPaging<AcquisitionEquipment>;
+
+    private columnDefs: any[];
+    private customActionDefs: any[];
+
     private createAcqEquip = false;
-    public selectedAcqEquip : AcquisitionEquipment = new AcquisitionEquipment();
+    private selectedAcqEquip : AcquisitionEquipment = new AcquisitionEquipment();
+
     @ViewChild('coilModal') coilModal: ModalComponent;
 
-    constructor(private acqEquipService: AcquisitionEquipmentService, private confirmDialogService: ConfirmDialogService,
-        private viewContainerRef: ViewContainerRef, private keycloakService: KeycloakService) {
-        this.getAcquisitionEquipments();
+
+    constructor(
+            private acqEquipService: AcquisitionEquipmentService, 
+            private confirmDialogService: ConfirmDialogService,
+            private viewContainerRef: ViewContainerRef, 
+            private keycloakService: KeycloakService,
+            private router: Router) {
         this.createColumnDefs();
     }
 
+    getPage(pageable: FilterablePageable): Promise<Page<AcquisitionEquipment>> {
+        return new Promise((resolve) => {
+            this.acqEqPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
+
     // Grid data
-    getAcquisitionEquipments(): void {
-        this.loading = true;
-        this.acqEquipService.getAcquisitionEquipments().then(acqEquips => {
+    getAcquisitionEquipments(): Promise<void> {
+        return this.acqEquipService.getAcquisitionEquipments().then(acqEquips => {
             if (acqEquips) {
                 this.acqEquips = acqEquips;
+                this.browserPaging = new BrowserPaging(acqEquips, this.columnDefs);
             }
-            this.loading = false;
         })
-            .catch((error) => {
-                // TODO: display error
-                this.acqEquips = [];
-            });
     }
 
     // Grid columns definition
@@ -72,14 +86,14 @@ export class AcquisitionEquipmentListComponent {
                     target: "/manufacturer", getParams: function (acqEquip: AcquisitionEquipment): Object {
                         return { id: acqEquip.manufacturerModel.manufacturer.id, mode: "view" };
                     }
-                }, width: "200px"
+                }
             },
             {
                 headerName: "Manufacturer model name", field: "manufacturerModel.name", type: "link", clickAction: {
                     target: "/manufacturer-model", getParams: function (acqEquip: AcquisitionEquipment): Object {
                         return { id: acqEquip.manufacturerModel.id, mode: "view" };
                     }
-                }, width: "200px"
+                }
             },
             { headerName: "Serial number", field: "serialNumber", width: "200px" },
             {
@@ -87,7 +101,7 @@ export class AcquisitionEquipmentListComponent {
                     target: "/center", getParams: function (acqEquip: AcquisitionEquipment): Object {
                         return { id: acqEquip.center.id, mode: "view" };
                     }
-                }, width: "300px"
+                }
             }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -122,12 +136,11 @@ export class AcquisitionEquipmentListComponent {
                 }
             });
         }
+    }
+
+    private onRowClick(acqEquip: AcquisitionEquipment) {
         if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {
-                target: "/acquisition-equipment", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" }; 
-                }
-            };
+            this.router.navigate(['/acquisition-equipment'], { queryParams: { id: acqEquip.id, mode: "view" } });
         }
     }
 
@@ -145,16 +158,6 @@ export class AcquisitionEquipmentListComponent {
     deleteAcquisitionEquipment(acqEquipId: number) {
         // Delete acqEquip and refresh page
         this.acqEquipService.delete(acqEquipId).then((res) => this.getAcquisitionEquipments());
-    }
-
-    deleteAll = () => {
-        let ids: number[] = [];
-        for (let acqEquip of this.acqEquips) {
-            if (acqEquip["isSelectedInTable"]) ids.push(acqEquip.id);
-        }
-        if (ids.length > 0) {
-            console.log("TODO : delete those ids : " + ids);
-        }
     }
 
     openCreateCoil = () => { 

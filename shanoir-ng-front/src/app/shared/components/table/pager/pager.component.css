@@ -1,0 +1,5 @@
+span:not(.wrapper) { display: inline-block; width: 30px; padding: 3px 0; height: 16px; }
+span.clickable:not(.disabled):not(.active) { cursor: pointer; }
+span.disabled { color: var(--color-b); }
+span.clickable:not(.disabled):hover { z-index: 5; background-color: var(--color-b-light2); }
+span.active { z-index: 10; background-color: var(--color-b-light2); }

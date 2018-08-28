@@ -3,6 +3,7 @@ package org.shanoir.ng.examination;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -38,7 +39,7 @@ public interface ExaminationService {
 	 * @return list of examinations.
 	 * @throws ShanoirDatasetsException
 	 */
-	List<Examination> findAll(Pageable pageable) throws ShanoirDatasetsException;;
+	Page<Examination> findPage(Pageable pageable) throws ShanoirDatasetsException;;
 
 	/**
 	 * Find examination by its id.

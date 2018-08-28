@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -56,7 +57,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public List<Examination> findAll(final Pageable pageable) {
+	public Page<Examination> findPage(final Pageable pageable) {
 		// Get list of studies reachable by connected user
 		return examinationRepository.findByStudyIdIn(getStudiesForUser(), pageable);
 	}

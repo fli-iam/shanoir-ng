@@ -2,6 +2,7 @@ package org.shanoir.ng.examination;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
@@ -30,7 +31,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 *            pagination data.
 	 * @return list of examinations.
 	 */
-	List<Examination> findByStudyIdIn(List<Long> studyIds, Pageable pageable);
+	Page<Examination> findByStudyIdIn(List<Long> studyIds, Pageable pageable);
 
 	/**
 	 * Get a list of examinations for a subject.

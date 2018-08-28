@@ -1,15 +1,15 @@
-<div class="AcquisitionEquipmentListComponent">
-    <div class="title">
-        <h2 i18n="Manage acquisition equipments|Title@@acqEqptListTitle">Manage acquisition equipments</h2>
-        <!-- hr/ -->
-    </div>
-  
-    <shanoir-table [items]="acqEquips" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
+<h2 i18n="Manage acquisition equipments|Title@@acqEqptListTitle">Manage acquisition equipments</h2>
 
-    <!-- create coil popin -->
-    <app-modal modalDialogId="coilModal" #coilModal>
-        <div class="app-modal-body">
-            <coil [mode]="'create'" [acqEquip]="selectedAcqEquip"  (closing)="closePopin()"></coil>
-        </div>
-    </app-modal>
-</div>
+<shanoir-table 
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table> 
+
+<!-- create coil popin -->
+<app-modal modalDialogId="coilModal" #coilModal>
+    <div class="app-modal-body">
+        <coil [mode]="'create'" [acqEquip]="selectedAcqEquip"  (closing)="closePopin()"></coil>
+    </div>
+</app-modal>

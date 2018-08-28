@@ -1,20 +1,20 @@
-import { Component, Output, EventEmitter, ViewChild, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { PatientDicom } from "../dicom-data.model";
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
+
+import { Examination } from '../../examinations/shared/examination.model';
+import { ExaminationService } from '../../examinations/shared/examination.service';
+import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
+import { slideDown } from '../../shared/animations/animations';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { ExaminationService } from '../../examinations/shared/examination.service';
-import { Subject } from '../../subjects/shared/subject.model';
-import { SubjectService } from "../../subjects/shared/subject.service";
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import { Router } from '@angular/router';
+import { Subject } from '../../subjects/shared/subject.model';
+import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
+import { PatientDicom } from '../dicom-data.model';
 import { AbstractImportStepComponent } from '../import-step.abstract';
-import { slideDown } from '../../shared/animations/animations';
-import { Examination } from '../../examinations/shared/examination.model';
 
 export class ContextData {
     constructor(
@@ -57,7 +57,6 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     constructor(
         private studyService: StudyService,
         private examinationService: ExaminationService,
-        private subjectService: SubjectService,
         private router: Router,
     ) {
         super();
@@ -162,10 +161,6 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     
     private getContext(): ContextData {
         return new ContextData(this.study, this.studycard, this.subject, this.examination);
-    }
-
-    private updateSubjectStudyValues() {
-        this.subjectService.updateSubjectStudyValues(this.subject.subjectStudy);
     }
 
     private initializePrefillSubject(): void {
