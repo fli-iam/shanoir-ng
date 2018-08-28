@@ -135,7 +135,7 @@
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view'">
-				<subject-study-list mode="subject" [list]="subjects" [(subjectStudyList)]="study.subjectStudyList" (ssl)="onChangeSubjectStudyList($event)"></subject-study-list>
+				<subject-study-list mode="subject" [list]="subjects" [(subjectStudyList)]="study.subjectStudyList"></subject-study-list>
 			</fieldset>
 			<fieldset>
 				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers and principal investigators</legend>

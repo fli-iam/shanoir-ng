@@ -51,7 +51,6 @@ export class StudyComponent implements OnInit {
     private studyId: number;
     private studyStatusEnumValue: string;
     private studyStatuses: Enum[] = [];
-    private subjectStudyList: SubjectStudy[] = [];
     private subjects: IdNameObject[];
     private hasNameUniqueError: boolean = false;
 
@@ -138,10 +137,6 @@ export class StudyComponent implements OnInit {
                 if (centers) {
                     this.selectedCenter = centers[0];
                 }
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting center list!");
             });
     }
 
@@ -150,10 +145,6 @@ export class StudyComponent implements OnInit {
             .getSubjectsNames()
             .then(subjects => {
                 this.subjects = subjects;
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting subjects list!");
             });
     }
 
@@ -259,9 +250,10 @@ export class StudyComponent implements OnInit {
 
     submit(): void {
         let studyCenterListBackup: StudyCenter[] = this.study.studyCenterList;
+        let subjectStudyListBackup: SubjectStudy[] = this.study.subjectStudyList;
         this.study = this.studyForm.value;
         this.study.studyCenterList = studyCenterListBackup;
-        this.study.subjectStudyList = this.subjectStudyList;
+        this.study.subjectStudyList = subjectStudyListBackup;
     }
 
     create(): void {
@@ -285,11 +277,6 @@ export class StudyComponent implements OnInit {
                 this.manageRequestErrors(error);
             });
     }
-
-    private onChangeSubjectStudyList(subjectStudyList: SubjectStudy[]) {
-        this.subjectStudyList = subjectStudyList;
-    }
-
 
     private getMembers(studyId: number): Promise<void> {
         return this.studyService.findMembers(this.studyId)

@@ -350,6 +350,11 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setWithExamination(study.isWithExamination());
 		studyDb.setMonoCenter(study.isMonoCenter());
 
+		for(SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+			subjectStudy.setStudy(studyDb);
+		}
+		studyDb.setSubjectStudyList(study.getSubjectStudyList());
+
 		// Copy list of database links study/center
 		final List<StudyCenter> studyCenterDbList = new ArrayList<>(studyDb.getStudyCenterList());
 		for (final StudyCenter studyCenter : study.getStudyCenterList()) {

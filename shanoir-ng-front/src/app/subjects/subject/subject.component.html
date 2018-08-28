@@ -161,7 +161,7 @@
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view'">
-				<subject-study-list mode="study"  [list]="studies" [(subjectStudyList)]="subject.subjectStudyList" (ssl)="onChangeSubjectStudyList($event)"></subject-study-list>
+				<subject-study-list mode="study"  [list]="studies" [(subjectStudyList)]="subject.subjectStudyList"></subject-study-list>
 			</fieldset>
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode">
