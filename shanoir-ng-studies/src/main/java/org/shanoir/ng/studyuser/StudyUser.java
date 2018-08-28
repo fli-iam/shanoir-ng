@@ -1,15 +1,13 @@
 package org.shanoir.ng.studyuser;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
-import org.shanoir.ng.shared.validation.Unique;
+import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
  * Relation between the study and the users.
@@ -27,8 +25,13 @@ import org.shanoir.ng.shared.validation.Unique;
  */
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "studyId", "userId" }, name = "study_user_idx") })
-@IdClass(StudyUserId.class)
-public class StudyUser {
+@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
+public class StudyUser extends AbstractGenericItem{
+
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = 5813071870148636187L;
 
 	/** is the anonymization report to be sent to the user. */
 	private boolean receiveAnonymizationReport;
@@ -37,7 +40,6 @@ public class StudyUser {
 	private boolean receiveNewImportReport;
 
 	/** Study id. */
-	@Id
 	private Long studyId;
 
 	/** Type of the relationship. */
@@ -45,7 +47,6 @@ public class StudyUser {
 	private Integer studyUserType;
 
 	/** User id. */
-	@Id
 	private Long userId;
 	
 	/** User name. Duplicate: master record in ms users. */

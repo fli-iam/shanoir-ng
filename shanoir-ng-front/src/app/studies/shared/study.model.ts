@@ -6,6 +6,7 @@ import { StudyStatus } from "./study-status.enum";
 import { StudyType } from "./study-type.enum";
 import { SubjectStudy } from "../../subjects/shared/subject-study.model";
 import { Timepoint } from "./timepoint.model";
+import { StudyUser } from "./study-user.model";
 
 export class Study {
     centers: IdNameObject[];
@@ -27,6 +28,7 @@ export class Study {
     studyStatus: StudyStatus;
     studyType: StudyType;
     subjectStudyList: SubjectStudy[];
+    studyUserList: StudyUser[];
     timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;

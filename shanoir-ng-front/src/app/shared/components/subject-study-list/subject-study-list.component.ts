@@ -13,7 +13,7 @@ import { Subject } from '../../../subjects/shared/subject.model';
 export class SubjectStudyListComponent implements OnInit{
     @Input() mode: "study" | "subject";
     @Input() list: any[];
-    @Input () subjectStudyList : SubjectStudy[] = [];
+    @Input() subjectStudyList : SubjectStudy[] = [];
     @Output() subjectStudyListChange = new EventEmitter<SubjectStudy[]>();
     
     private legend: "Studies" | "Subjects";

@@ -56,13 +56,6 @@ export class StudyService {
     }
     
     update(id: number, study: Study): Observable<Study> {
-        return this.http.put<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id, JSON.stringify(study))
-        .map(response => response);
-    }
-    
-    findMembers(studyId: number): Promise<StudyUser[]> {
-        return this.http.get<StudyUser[]>(AppUtils.BACKEND_API_STUDY_URL + '/' + studyId + AppUtils.BACKEND_API_STUDY_FIND_MEMBERS_URL)
-        .map(studyUserList => studyUserList ? studyUserList : [])
-        .toPromise();
+        return this.http.put<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id, JSON.stringify(study));
     }
 }

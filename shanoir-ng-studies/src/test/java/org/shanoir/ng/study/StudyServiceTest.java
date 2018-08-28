@@ -56,18 +56,6 @@ public class StudyServiceTest {
 	}
 
 	@Test
-	public void addUserTest() throws ShanoirStudiesException {
-		final StudyUser studyUser = new StudyUser();
-		studyUser.setUserId(USER_ID);
-		studyUser.setStudyUserType(StudyUserType.RESPONSIBLE);
-
-		studyService.addUser(STUDY_ID, studyUser);
-
-		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
-		Mockito.verify(studyUserRepository, Mockito.times(1)).save(Mockito.any(StudyUser.class));
-	}
-
-	@Test
 	public void deleteByIdTest() {
 		final Study newStudy = ModelsUtil.createStudy();
 		final StudyUser studyUser = new StudyUser();
@@ -135,16 +123,6 @@ public class StudyServiceTest {
 		Assert.assertFalse(result);
 
 		Mockito.verify(studyRepository, Mockito.times(1)).findOne(STUDY_ID);
-	}
-
-	@Test
-	public void removeUserTest() throws ShanoirStudiesException {
-		studyService.removeUser(STUDY_ID, USER_ID);
-
-		Mockito.verify(studyRepository, Mockito.times(1)).findOne(Mockito.anyLong());
-		Mockito.verify(studyUserRepository, Mockito.times(1)).findByStudyIdAndUserId(STUDY_ID, USER_ID);
-		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
-		Mockito.verify(studyUserRepository, Mockito.times(1)).delete(Mockito.any(StudyUser.class));
 	}
 
 	@Test

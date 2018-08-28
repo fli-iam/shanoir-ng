@@ -6,7 +6,6 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
-import org.shanoir.ng.studyuser.StudyUser;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -27,17 +26,6 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/studies")
 public interface StudyApi {
 
-	@ApiOperation(value = "", notes = "Adds a member to a study", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "member added", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no study found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/{studyId}/members", produces = { "application/json" }, method = RequestMethod.PUT)
-	ResponseEntity<Void> addMember(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "relation between the study and an user", required = true) @RequestBody StudyUser studyUser);
-
 	@ApiOperation(value = "", notes = "Deletes a study", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "study deleted", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
@@ -49,15 +37,6 @@ public interface StudyApi {
 	ResponseEntity<Void> deleteStudy(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
-	@ApiOperation(value = "", notes = "Find all members (study_user) of a study", response = StudyUser.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found members", response = StudyUser.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no study found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/{studyId}/members", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<StudyUser>> findMembers(@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
-	
 	@ApiOperation(value = "", notes = "If exists, returns the studies that the user is allowed to see", response = Study.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = StudyDTO.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Study.class),
@@ -99,18 +78,6 @@ public interface StudyApi {
 	@RequestMapping(value = "/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<StudyDTO> findStudyById(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
-
-	@ApiOperation(value = "", notes = "Removes a membre from a study", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "member removed", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no study found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/{studyId}/member/{memberId}", produces = {
-			"application/json" }, method = RequestMethod.DELETE)
-	ResponseEntity<Void> removeMember(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "id of the member", required = true) @PathVariable("memberId") Long userId);
 
 	@ApiOperation(value = "", notes = "Saves a new study", response = Study.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created study", response = Study.class),

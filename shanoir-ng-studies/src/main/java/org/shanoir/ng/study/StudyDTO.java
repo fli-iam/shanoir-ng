@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
+import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
 import org.shanoir.ng.timepoint.TimepointDTO;
 
@@ -55,6 +56,8 @@ public class StudyDTO {
 	private boolean visibleByDefault;
 
 	private boolean withExamination;
+	
+	private List<StudyUser> studyUserList;
 
 	/**
 	 * Default constructor.
@@ -360,6 +363,20 @@ public class StudyDTO {
 	 */
 	public void setWithExamination(boolean withExamination) {
 		this.withExamination = withExamination;
+	}
+
+	/**
+	 * @return the studyUserList
+	 */
+	public List<StudyUser> getStudyUserList() {
+		return studyUserList;
+	}
+
+	/**
+	 * @param studyUserList the studyUserList to set
+	 */
+	public void setStudyUserList(List<StudyUser> studyUserList) {
+		this.studyUserList = studyUserList;
 	}
 
 }
