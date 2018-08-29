@@ -117,7 +117,7 @@ export class StudyComponent implements OnInit {
     }
     
     edit(): void {
-        this.mode = 'edit';
+        this.router.navigate(['/study'], { queryParams: { id: this.study.id, mode: "edit" }});
         this.createColumnDefs();
         this.studyUsersPromise = this.getUsers().then(() => {
             this.completeMembers();
@@ -308,14 +308,12 @@ export class StudyComponent implements OnInit {
     getPage(pageable: FilterablePageable): Promise<Page<StudyUser>> {
         return new Promise((resolve) => {
             this.studyUsersPromise.then(() => {
-                console.log('this.studyUsersPromise.then')
                 resolve(this.browserPaging.getPage(pageable));
             });
         });
     }
     
     private getUsers(): Promise<void> {
-        console.log('getUsers')
         return this.userService.getUsers().then(users => {
             if (users) {
                 this.users = users;
