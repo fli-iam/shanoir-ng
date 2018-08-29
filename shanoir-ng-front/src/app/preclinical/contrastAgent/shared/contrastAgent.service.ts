@@ -13,12 +13,7 @@ export class ContrastAgentService {
         getContrastAgents(protocolId:number): Promise<ContrastAgent[]>{
             const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA+PreclinicalUtils.PRECLINICAL_ALL_URL;
             return this.http.get<ContrastAgent[]>(url)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting contrast agents', error);
-                        return Promise.reject(error.message || error);
-            });
+                    .toPromise();
         }
   
         getContrastAgent(protocolId:number): Promise<ContrastAgent>{

@@ -16,32 +16,17 @@ export class AnimalSubjectService {
     
         getAnimalSubjects(): Promise<AnimalSubject[]>{
             return this.http.get<AnimalSubject[]>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_ALL_URL)
-                    .toPromise()
-                    .then(response => response )
-                    .catch((error) => {
-                        console.error('Error while getting animal subjects', error);
-                        return Promise.reject(error.message || error);
-            });
+                    .toPromise();
         }
         
         getSubjects(): Promise<Subject[]> {
         	return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL)
-            	.toPromise()
-            	.then(response => response)
-            	.catch((error) => {
-                	console.error('Error while getting subjects', error);
-                	return Promise.reject(error.message || error);
-            	});
+            	.toPromise();
     	}
     	
     	getPreclinicalSubjects(preclinical : boolean): Promise<Subject[]> {
         	return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_FILTER_URL+"/"+preclinical)
-            	.toPromise()
-            	.then(response => response)
-            	.catch((error) => {
-                	console.error('Error while getting preclinical subjects', error);
-                	return Promise.reject(error.message || error);
-            	});
+            	.toPromise();
     	}
   
         getAnimalSubject(id: number): Promise<AnimalSubject>{

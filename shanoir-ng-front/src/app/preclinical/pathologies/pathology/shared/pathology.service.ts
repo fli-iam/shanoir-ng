@@ -13,12 +13,7 @@ export class PathologyService {
     
         getPathologies(): Promise<Pathology[]>{
             return this.http.get<Pathology[]>(PreclinicalUtils.PRECLINICAL_API_PATHOLOGIES_ALL_URL)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting pathologies', error);
-                        return Promise.reject(error.message || error);
-            });
+                    .toPromise();
         }
            
         getPathology(id: string): Promise<Pathology>{

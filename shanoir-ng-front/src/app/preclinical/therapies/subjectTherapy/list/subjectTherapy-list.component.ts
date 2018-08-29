@@ -18,6 +18,9 @@ import { Modes } from "../../../shared/mode/mode.enum";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
+import { TableComponent } from '../../../../shared/components/table/table.component';
+import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 
 @Component({
     selector: 'subject-therapy-list',
@@ -27,8 +30,9 @@ import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 })
 @ModesAware
 export class SubjectTherapiesListComponent {
-    subjectTherapies: SubjectTherapy[];
-    public loading: boolean = false;
+    subjectTherapies: SubjectTherapy[] = [];
+    private subjectTherapiesPromise: Promise<void> = this.getSubjectTherapies();
+    private browserPaging: BrowserPaging<SubjectTherapy>;
     public rowClickAction: Object;
     public columnDefs: any[];
     public customActionDefs: any[];
@@ -38,6 +42,7 @@ export class SubjectTherapiesListComponent {
     public toggleFormST: boolean = false;
     public createSTMode: boolean = false;
     public therapySelected: SubjectTherapy;
+   @ViewChild('subjectTherapiesTable') table: TableComponent;
 
 
     constructor(
@@ -45,23 +50,37 @@ export class SubjectTherapiesListComponent {
         public router: Router,
         private keycloakService: KeycloakService,
         public confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
-            
-            this.checkMode();
+            this.createColumnDefs();
     }
 
-    getSubjectTherapies(): void {
-        this.loading = true;
+
+    
+    getPage(pageable: FilterablePageable): Promise<Page<SubjectTherapy>> {
+        return new Promise((resolve) => {
+        	if (this.subjectTherapiesPromise){
+            	this.subjectTherapiesPromise.then(() => {
+                	resolve(this.browserPaging.getPage(pageable));
+            	});
+            }
+        });
+    }
+    
+    
+    getSubjectTherapies(): Promise<void> {
+     	this.subjectTherapies = [];
+     	this.browserPaging = new BrowserPaging(this.subjectTherapies, this.columnDefs);
         if (this.preclinicalSubject && this.preclinicalSubject.animalSubject && this.preclinicalSubject.animalSubject.id) {
-            this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(subjectTherapies => {
+            return this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(subjectTherapies => {
                 if (subjectTherapies) {
                     this.subjectTherapies = subjectTherapies;
-                } else {
-                    this.subjectTherapies = [];
-                }
-                this.loading = false;
-            }).catch((error) => {
-                this.subjectTherapies = [];
-            });
+                } 
+                this.browserPaging.setItems(subjectTherapies);
+                this.table.refresh();
+            })
+        }else{
+        	return new Promise<void> ((resolve) => {
+        		resolve();
+        	})
         }
     }
 
@@ -69,6 +88,8 @@ export class SubjectTherapiesListComponent {
         this.subjectTherapies = this.subjectTherapies || [];
         this.subjectTherapies.push(newSubTherapy);
         this.refreshDisplay(true);
+        this.browserPaging.setItems(this.subjectTherapies);
+        this.table.refresh();
     }
 
     refreshDisplay(cancel: boolean) {
@@ -78,11 +99,9 @@ export class SubjectTherapiesListComponent {
 
     checkMode(): void {
         if(this.mode && this.mode.isCreateMode()){
-            this.loading = false;
             this.subjectTherapies = [];
             this.createColumnDefs();
         }else if(this.mode && !this.mode.isCreateMode()){
-            this.getSubjectTherapies();
             this.createColumnDefs();
         }else{
             this.mode.viewMode();
@@ -95,7 +114,7 @@ export class SubjectTherapiesListComponent {
     }
 
 
-    ngOnChanges() {
+   ngOnChanges() {
         this.checkMode();
     }
 

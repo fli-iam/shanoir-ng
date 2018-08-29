@@ -1,9 +1,9 @@
-<div class="PathologyModelsListComponent">
-    <div class="title">
-        <h2 i18n="Manage models|Title">Manage pathology models</h2>
-        <!-- hr/ -->
-    </div>
-  
-    <shanoir-table [items]="models" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
-    
-</div>
+<h2 i18n="Manage models|Title@@modelsListTitle">Manage pathology models</h2>
+
+<shanoir-table #modelsTable
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table> 
+

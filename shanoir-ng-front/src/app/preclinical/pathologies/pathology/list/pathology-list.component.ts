@@ -8,6 +8,9 @@ import { Pathology } from '../shared/pathology.model';
 import { PathologyService } from '../shared/pathology.service';
 
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
+import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 
 @Component({
   selector: 'pathology-list',
@@ -17,32 +20,40 @@ import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 })
 export class PathologiesListComponent {
   public pathologies: Pathology[];
-  public loading: boolean = false;
+  private pathologiesPromise: Promise<void> = this.getPathologies();
+  private browserPaging: BrowserPaging<Pathology>;
   public rowClickAction: Object;
   public columnDefs: any[];
   public customActionDefs: any[];
+  @ViewChild('pathologiesTableTable') table: TableComponent;
     
     constructor(
         public pathologyService: PathologyService,
         public router: Router,
         private keycloakService: KeycloakService,
         public confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
-            this.getPathologies();
             this.createColumnDefs();
      }   
+     
+    getPage(pageable: FilterablePageable): Promise<Page<Pathology>> {
+        return new Promise((resolve) => {
+            this.pathologiesPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
     
-    getPathologies(): void {
-        this.loading = true;
-        this.pathologyService.getPathologies().then(pathologies => {
-            if(pathologies){
-                this.pathologies = pathologies;
-            }else{
-                this.pathologies = [];  
-            }
-            this.loading = false;
-        }).catch((error) => {
-             this.pathologies = [];  
-        });              
+    
+    
+    getPathologies():  Promise<void> {
+    	this.pathologies = []; 
+    	this.browserPaging = new BrowserPaging(this.pathologies, this.columnDefs);
+        return this.pathologyService.getPathologies().then(pathologies => {
+            this.pathologies = pathologies;
+            
+            this.browserPaging.setItems(this.pathologies);
+            this.table.refresh();
+        })              
     }
     
     

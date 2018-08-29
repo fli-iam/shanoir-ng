@@ -10,6 +10,10 @@ import { TherapyType } from "../../../shared/enum/therapyType";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 import { SubjectTherapyService } from '../../subjectTherapy/shared/subjectTherapy.service';
+import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
+
 
 @Component({
   selector: 'therapy-list',
@@ -19,10 +23,12 @@ import { SubjectTherapyService } from '../../subjectTherapy/shared/subjectTherap
 })
 export class TherapiesListComponent {
   public therapies: Therapy[];
-  public loading: boolean = false;
+  private therapiesPromise: Promise<void> = this.getTherapies();
+  private browserPaging: BrowserPaging<Therapy>;
   public rowClickAction: Object;
   public columnDefs: any[];
   public customActionDefs: any[];
+  @ViewChild('therapiesTable') table: TableComponent;
     
     constructor(
         public therapyService: TherapyService,
@@ -31,22 +37,25 @@ export class TherapiesListComponent {
         public confirmDialogService: ConfirmDialogService,
         public subjectTherapyService: SubjectTherapyService, 
         private viewContainerRef: ViewContainerRef) {
-            this.getTherapies();
             this.createColumnDefs();
      }   
     
-    getTherapies(): void {
-        this.loading = true;
-        this.therapyService.getTherapies().then(therapies => {
-            if(therapies){
-                this.therapies = therapies;
-            }else{
-                this.therapies = [];  
-            }
-            this.loading = false;
-        }).catch((error) => {
-             this.therapies = [];  
-        });              
+    
+    getPage(pageable: FilterablePageable): Promise<Page<Therapy>> {
+        return new Promise((resolve) => {
+            this.therapiesPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
+    getTherapies(): Promise<void> {
+    	this.therapies = [];  
+        this.browserPaging = new BrowserPaging(this.therapies, this.columnDefs);
+        return this.therapyService.getTherapies().then(therapies => {
+            this.therapies = therapies;
+            this.browserPaging.setItems(therapies);
+            this.table.refresh();
+        })            
     }
     
     

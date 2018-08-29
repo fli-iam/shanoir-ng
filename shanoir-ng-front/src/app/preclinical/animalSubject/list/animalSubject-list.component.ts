@@ -11,6 +11,9 @@ import { AnimalSubject } from '../shared/animalSubject.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
+import { FilterablePageable, Page } from '../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../shared/components/table/table.component';
 
 @Component({
   selector: 'animalSubject-list',
@@ -22,10 +25,12 @@ export class AnimalSubjectsListComponent {
   public preclinicalSubjects: PreclinicalSubject[];
   public animalSubjects: AnimalSubject[];
   public subjects: Subject[];
-  public loading: boolean = false;
+  private animalSubjectsPromise: Promise<void> = this.getAnimalSubjects();
+  private browserPaging: BrowserPaging<PreclinicalSubject>;
   public rowClickAction: Object;
   public columnDefs: any[];
   public customActionDefs: any[];
+  @ViewChild('preclinicalSubjectsTable') table: TableComponent;
     
     constructor(
         public animalSubjectService: AnimalSubjectService,
@@ -33,22 +38,30 @@ export class AnimalSubjectsListComponent {
         public confirmDialogService: ConfirmDialogService, 
         private keycloakService: KeycloakService,
         private viewContainerRef: ViewContainerRef) {
-            this.getAnimalSubjects();
             this.createColumnDefs();
      }
+     
+     getPage(pageable: FilterablePageable): Promise<Page<PreclinicalSubject>> {
+        return new Promise((resolve) => {
+            this.animalSubjectsPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
     
-    getAnimalSubjects(): void {
+    getAnimalSubjects(): Promise<void> {
     	this.preclinicalSubjects = [];
     	
-        this.loading = true;
-        this.animalSubjectService.getAnimalSubjects().then(animalSubjects => {
-            if(animalSubjects){
-                this.animalSubjects = animalSubjects;
-            }else{
-                this.animalSubjects = [];
-            }
-            // load subjects
-            this.animalSubjectService.getSubjects().then(subjects => {
+        this.browserPaging = new BrowserPaging(this.preclinicalSubjects, this.columnDefs);
+        return this.animalSubjectService.getSubjects().then(subjects => {
+            	
+        	this.animalSubjectService.getAnimalSubjects().then(animalSubjects => {
+            	if(animalSubjects){
+                	this.animalSubjects = animalSubjects;
+            	}else{
+                	this.animalSubjects = [];
+            	}
+        
             	if(subjects){
                 	this.subjects = subjects;
                 	// build preclinical subject
@@ -65,13 +78,13 @@ export class AnimalSubjectsListComponent {
             	}else{
                 	this.subjects = [];
             	}
-            	this.loading = false;
-        	}).catch((error) => {
-            	this.subjects = [];
-        	}); 
-        }).catch((error) => {
-            this.animalSubjects = [];
-        }); 
+                this.browserPaging.setItems(this.preclinicalSubjects);
+                this.table.refresh();
+        	});
+        
+        	}) ;
+            
+        
     }
     
     

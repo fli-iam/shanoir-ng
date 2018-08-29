@@ -16,12 +16,7 @@ export class SubjectPathologyService {
     getSubjectPathologies(preclinicalSubject: PreclinicalSubject): Promise<SubjectPathology[]> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<SubjectPathology[]>(url)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting subject pathologies ', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
     
     

@@ -1,10 +1,6 @@
-<div class="SubjectTherapiesListComponent">
-    <div class="title">
-        <h2 i18n="Manage subjectTherapies|Title">Manage subject therapies</h2>
-        <!-- hr/ -->
-    </div>
-    
-    <div [ngSwitch]="mode.state">
+<h2 i18n="Manage subjectTherapies|Title@@subjectTherapiesListTitle">Manage subject therapies</h2>
+
+ <div [ngSwitch]="mode.state">
 		<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
 			<button *ngIf="toggleFormST==false" (click)="toggleSubjectTherapyForm()">Add a therapy</button>
 		</ng-template>
@@ -17,5 +13,10 @@
     	<subject-therapy-form [preclinicalSubject]="preclinicalSubject" [createSTMode]="createSTMode"  [mode]="mode" [canModify]="canModify" 
 			[toggleForm]="toggleFormST" [subTherapySelected]="therapySelected" (onCreated)="refreshList($event)" (onCancel)="refreshDisplay($event)"></subject-therapy-form>
 	</div>	
-	<shanoir-table [items]="subjectTherapies" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
-</div>
+	
+<shanoir-table  #subjectTherapiesTable
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table> 

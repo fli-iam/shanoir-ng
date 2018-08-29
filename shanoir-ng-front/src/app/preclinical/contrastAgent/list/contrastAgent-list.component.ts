@@ -10,6 +10,9 @@ import { InjectionInterval } from "../../shared/enum/injectionInterval";
 import { InjectionSite } from "../../shared/enum/injectionSite";
 import { InjectionType } from "../../shared/enum/injectionType";
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
+import { FilterablePageable, Page } from '../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../shared/components/table/table.component';
 
 @Component({
   selector: 'contrast-agent-list',
@@ -20,18 +23,19 @@ import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 export class ContrastAgentsListComponent {
   @Input() protocol_id:number;
   public agents: ContrastAgent[] = [];
-  public loading: boolean = false;
+  private agentsPromise: Promise<void> = this.getContrastAgents();
+  private browserPaging: BrowserPaging<ContrastAgent>;
   public rowClickAction: Object;
   public columnDefs: any[];
   public customActionDefs: any[];
+  @ViewChild('contrastAgentTable') table: TableComponent;
+  
     
     constructor(
         public contrastAgentsService: ContrastAgentService,
         public router: Router,
         private keycloakService: KeycloakService,
         public confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
-            
-            if(this.protocol_id) this.getContrastAgents(); 
             this.createColumnDefs();
      }
     
@@ -42,18 +46,28 @@ export class ContrastAgentsListComponent {
         }
     }
     
-    getContrastAgents(): void {
-        this.loading = true;
-        this.contrastAgentsService.getContrastAgents(this.protocol_id).then(agents => {
+    getPage(pageable: FilterablePageable): Promise<Page<ContrastAgent>> {
+        return new Promise((resolve) => {
+            this.agentsPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
+    
+    
+    
+    getContrastAgents(): Promise<void> {
+    	this.agents = [];
+    	this.browserPaging = new BrowserPaging(this.agents, this.columnDefs);
+        return this.contrastAgentsService.getContrastAgents(this.protocol_id).then(agents => {
             if(agents){
                 this.agents = agents;
             }else{
                 this.agents = [];
             }
-            this.loading = false;
-        }).catch((error) => {
-            this.agents = [];
-        }); 
+            this.browserPaging.setItems(this.agents);
+            this.table.refresh();
+        }) 
     }
     
     

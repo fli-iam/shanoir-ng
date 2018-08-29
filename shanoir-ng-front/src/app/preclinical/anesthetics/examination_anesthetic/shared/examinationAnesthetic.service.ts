@@ -13,12 +13,7 @@ export class ExaminationAnestheticService {
         getExaminationAnesthetics(examination_id:number): Promise<ExaminationAnesthetic[]>{
             const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examination_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
             return this.http.get<ExaminationAnesthetic[]>(url)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting examination anesthetics ', error);
-                        return Promise.reject(error.message || error);
-            });
+                    .toPromise();
         }
  
         getExaminationAnesthetic(examination_id:number,eaid: number): Promise<ExaminationAnesthetic> {

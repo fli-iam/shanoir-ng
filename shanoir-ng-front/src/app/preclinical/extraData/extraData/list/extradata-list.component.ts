@@ -7,6 +7,9 @@ import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
 import { ExtraData } from '../shared/extradata.model';
 import { ExaminationExtraDataService } from '../shared/extradata.service';
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
+import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 
 @Component({
   selector: 'extradata-list',
@@ -17,10 +20,12 @@ import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 export class ExtraDataListComponent {
   @Input() examination_id:number;
   @Input() extradatas: ExtraData[] = [];
-  public loading: boolean = false;
+  private extraDataPromise: Promise<void> = this.getExtraDatas(this.examination_id);
+  private browserPaging: BrowserPaging<ExtraData>;
   public rowClickAction: Object;
   public columnDefs: any[];
   public customActionDefs: any[];
+  @ViewChild('extradataTable') table: TableComponent;
       
     constructor(
         public extradataService: ExaminationExtraDataService,
@@ -45,23 +50,26 @@ export class ExtraDataListComponent {
         }
     }
     
-    getExtraDatas(examId:number): ExtraData[] {
-        this.loading = true;
-        if(this.examination_id){
-            this.extradataService.getExtraDatas(examId).then(extradatas => {
-                if(extradatas){
-                    this.extradatas = extradatas;
-                }else{
-                    this.extradatas = [];
-                }
-                this.loading = false;
-            }).catch((error) => {
-                this.extradatas = [];
+    getPage(pageable: FilterablePageable): Promise<Page<ExtraData>> {
+        return new Promise((resolve) => {
+            this.extraDataPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
             });
-         }else{
-            this.loading = false;  
+        });
+    }
+    
+    
+    getExtraDatas(examId:number):Promise<void> {
+    	this.extradatas = [];
+    	this.browserPaging = new BrowserPaging(this.extradatas, this.columnDefs);
+        if(this.examination_id){
+            return this.extradataService.getExtraDatas(examId).then(extradatas => {
+                this.extradatas = extradatas;
+                
+                this.browserPaging.setItems(extradatas);
+                this.table.refresh();
+            })
          }
-        return this.extradatas;
     }
     
     downloadExtraData = (extradata:ExtraData) => {

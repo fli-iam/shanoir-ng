@@ -14,6 +14,9 @@ import { Mode } from "../../../shared/mode/mode.model";
 import { Modes } from "../../../shared/mode/mode.enum";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
+import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 
 @Component({
   selector: 'ingredients-list',
@@ -24,7 +27,9 @@ import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 @ModesAware
 export class AnestheticIngredientsListComponent {
   //@Input() ingredients: AnestheticIngredient[];
-  public loading: boolean = false;
+  
+  private ingredientsPromise: Promise<void>  = this.getIngredients();
+  private browserPaging: BrowserPaging<AnestheticIngredient>;
   public rowClickAction: Object;
   public columnDefs: any[];
   public customActionDefs: any[];
@@ -36,6 +41,7 @@ export class AnestheticIngredientsListComponent {
   public ingredientSelected : AnestheticIngredient;
   @Output() onIngredientAdded = new EventEmitter();
   @Output() onIngredientDeleted = new EventEmitter();
+  @ViewChild('ingredientsTable') table: TableComponent;
     
     
     constructor(
@@ -48,6 +54,25 @@ export class AnestheticIngredientsListComponent {
             this.initiateByCreationMode();   
     }
          
+    getPage(pageable: FilterablePageable): Promise<Page<AnestheticIngredient>> {
+        return new Promise((resolve) => {
+            this.ingredientsPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
+    
+    getIngredients(): Promise<void> {
+    	let ingredients : AnestheticIngredient[] = [];
+    	if (this.anesthetic && this.anesthetic.ingredients){
+    		ingredients = this.anesthetic.ingredients;
+    	}
+    	this.browserPaging = new BrowserPaging(ingredients, this.columnDefs);
+    	return new Promise<void> ((resolve) => {
+        		resolve();
+        });
+    }
+    
     
     generateAnestheticName(){
         if(this.anesthetic){
@@ -66,6 +91,7 @@ export class AnestheticIngredientsListComponent {
                 }
             }
             this.onIngredientAdded.emit(this.anesthetic.ingredients);
+            
         }
     }
         
@@ -73,6 +99,8 @@ export class AnestheticIngredientsListComponent {
         this.toggleFormAI = false;
         this.createAIMode = false;
         this.generateAnestheticName();
+        this.browserPaging.setItems(this.anesthetic.ingredients);
+        this.table.refresh();
     }
     
     
@@ -80,7 +108,6 @@ export class AnestheticIngredientsListComponent {
        if(!this.mode.isCreateMode()){
             this.createColumnDefs();
         }else{
-            this.loading = false;
             this.anesthetic = new Anesthetic();
             this.anesthetic.ingredients = [];
             this.createColumnDefs();

@@ -1,8 +1,4 @@
-<div class="IngredientsListComponent">
-    <div class="title">
-        <h2 i18n="Manage ingredients|Title">Manage ingredients</h2>
-        <!-- hr/ -->
-    </div>
+<h2 i18n="Manage ingredients|Title@@ingredientsListTitle">Manage ingredients</h2>
     
     <div [ngSwitch]="mode.state">
 		<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
@@ -18,6 +14,14 @@
 			[toggleForm]="toggleFormAI" [ingredientSelected]="ingredientSelected" (onEvent)="refreshDisplay($event)"></anesthetic-ingredient-form>
 	</div>
   
-  	<shanoir-table *ngIf="anesthetic.ingredients" [items]="anesthetic.ingredients" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
-    
-</div>
+  	
+<shanoir-table #ingredientsTable *ngIf="anesthetic.ingredients" 
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table> 
+  	
+
+
+

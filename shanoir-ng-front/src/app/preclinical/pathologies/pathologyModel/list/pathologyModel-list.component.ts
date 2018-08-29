@@ -9,6 +9,9 @@ import { PathologyModel } from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
+import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 
 
 @Component({
@@ -19,10 +22,12 @@ import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPa
 })
 export class PathologyModelsListComponent {
   public models: PathologyModel[];
-  public loading: boolean = false;
+  private modelsPromise: Promise<void> = this.getPathologyModels();
+  private browserPaging: BrowserPaging<PathologyModel>;
   public rowClickAction: Object;
   public columnDefs: any[];
   public customActionDefs: any[];
+  @ViewChild('modelsTable') table: TableComponent;
     
     constructor(
         public modelService: PathologyModelService,
@@ -31,22 +36,25 @@ export class PathologyModelsListComponent {
         public confirmDialogService: ConfirmDialogService, 
         public subjectPathologyService: SubjectPathologyService,
         private viewContainerRef: ViewContainerRef) {
-            this.getPathologyModels();
             this.createColumnDefs();
      }
     
     
-    getPathologyModels(): void {
-        this.loading = true;
-        this.modelService.getPathologyModels().then(models => {
-            if(models){
-                this.models = models;
-            }else{
-                this.models = [];
-            }
-            this.loading = false;
-        }).catch((error) => {
-            this.models = [];
+    getPage(pageable: FilterablePageable): Promise<Page<PathologyModel>> {
+        return new Promise((resolve) => {
+            this.modelsPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
+    
+    getPathologyModels():  Promise<void> {
+    	this.models = [];
+        this.browserPaging = new BrowserPaging(this.models, this.columnDefs);
+        return this.modelService.getPathologyModels().then(models => {
+            this.models = models;
+            this.browserPaging.setItems(models);
+            this.table.refresh();
         }); 
     }
     

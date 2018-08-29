@@ -108,6 +108,7 @@ export class AnimalExaminationFormComponent implements OnInit {
     }
     
     ngOnChanges(changes: SimpleChanges) {
+        this.getSubjects();
         if (changes['preFillData']) this.initPrefillData();
     }
 
@@ -207,10 +208,11 @@ export class AnimalExaminationFormComponent implements OnInit {
     updateSubject(){
     	if (this.selectedSubjectId){
     		let subject : Subject = this.getSubjectById(this.selectedSubjectId);
-    		this.examination.subject = new IdNameObject(this.selectedSubjectId, subject.name);
-    		this.examination.subjectName = subject.name;
+    		if (subject){
+    			this.examination.subject = new IdNameObject(this.selectedSubjectId, subject.name);
+    			this.examination.subjectName = subject.name;
+    		}
     		this.examination.subjectId = this.selectedSubjectId;
-    		
     	}
     }
     

@@ -7,6 +7,9 @@ import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
 import { ExaminationAnesthetic } from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
+import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 
 @Component({
   selector: 'examination-anesthetics-list',
@@ -16,9 +19,10 @@ import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 })
 export class ExaminationAnestheticsListComponent {
   @Input() examination_id:number;
-    
+  @ViewChild('examinationAnestheticTable') table: TableComponent; 
   public examAnesthetics: ExaminationAnesthetic[];
-  public loading: boolean = false;
+  private examAnestheticsPromise: Promise<void> = this.getExaminationAnesthetics(this.examination_id);
+  private browserPaging: BrowserPaging<ExaminationAnesthetic>;
   public rowClickAction: Object;
   public columnDefs: any[];
   public customActionDefs: any[];
@@ -28,22 +32,26 @@ export class ExaminationAnestheticsListComponent {
         public router: Router,
         private keycloakService: KeycloakService,
         public confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
-            this.getExaminationAnesthetics(this.examination_id); 
             this.createColumnDefs();
      }
     
-    getExaminationAnesthetics(examination_id:number): void {
-        this.loading = true;
-        this.examAnestheticsService.getExaminationAnesthetics(examination_id).then(examAnesthetics => {
-            if(examAnesthetics){
-                this.examAnesthetics = examAnesthetics;
-            }else{
-                this.examAnesthetics = [];
-            }
-            this.loading = false;
-        }).catch((error) => {
-            this.examAnesthetics = [];
-        }); 
+    
+    getPage(pageable: FilterablePageable): Promise<Page<ExaminationAnesthetic>> {
+        return new Promise((resolve) => {
+            this.examAnestheticsPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
+    
+    getExaminationAnesthetics(examination_id:number): Promise<void> {
+        this.examAnesthetics = [];
+        this.browserPaging = new BrowserPaging(this.examAnesthetics, this.columnDefs);
+        return this.examAnestheticsService.getExaminationAnesthetics(examination_id).then(examAnesthetics => {
+            this.examAnesthetics = examAnesthetics;
+            this.browserPaging.setItems(examAnesthetics);
+            this.table.refresh();
+        }) 
     }
      
     

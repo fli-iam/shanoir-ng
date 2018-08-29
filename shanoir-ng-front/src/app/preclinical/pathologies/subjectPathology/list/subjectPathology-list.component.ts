@@ -12,6 +12,9 @@ import { Mode } from "../../../shared/mode/mode.model";
 import { Modes } from "../../../shared/mode/mode.enum";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
+import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 
 
 @Component({
@@ -22,8 +25,9 @@ import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 })
 @ModesAware
 export class SubjectPathologiesListComponent implements OnChanges {
-    public pathologies: SubjectPathology[];
-    public loading: boolean = false;
+    public pathologies: SubjectPathology[] = [];
+    private subjectPathologiesPromise: Promise<void> = this.getSubjectPathologies();
+    private browserPaging: BrowserPaging<SubjectPathology>;
     public rowClickAction: Object;
     public columnDefs: any[];
     public customActionDefs: any[];
@@ -33,36 +37,53 @@ export class SubjectPathologiesListComponent implements OnChanges {
     public toggleFormSP: boolean = false;
     public createSPMode: boolean = false;
     public pathoSelected: SubjectPathology;
-    //onSelected = new EventEmitter<SubjectPathology>()   
+    //onSelected = new EventEmitter<SubjectPathology>()  ; 
+    
+    @ViewChild('subjectPathologiesTable') table: TableComponent;
+    
     constructor(
         public subjectPathologyService: SubjectPathologyService,
         public router: Router,
         private keycloakService: KeycloakService,
         public confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
-            this.checkMode();
+            this.createColumnDefs();
     }
 
-
-    getSubjectPathologies(): void {
-        this.loading = true;
-        if (this.preclinicalSubject && this.preclinicalSubject.animalSubject && this.preclinicalSubject.animalSubject.id) {
-            this.subjectPathologyService.getSubjectPathologies(this.preclinicalSubject).then(pathologies => {
-                if (pathologies) {
-                    this.pathologies = pathologies;
-                } else {
-                    this.pathologies = [];
-                }
-                this.loading = false;
-            }).catch((error) => {
-                this.pathologies = [];
+	getPage(pageable: FilterablePageable): Promise<Page<SubjectPathology>> {
+        return new Promise((resolve) => {
+        	if (this.subjectPathologiesPromise){
+            	this.subjectPathologiesPromise.then(() => {
+                	resolve(this.browserPaging.getPage(pageable));
+            	});
+            }
+        });
+    }
+    
+    getSubjectPathologies(): Promise<void> {
+        this.pathologies = [];
+        this.browserPaging = new BrowserPaging(this.pathologies, this.columnDefs);
+    	if (this.preclinicalSubject && this.preclinicalSubject.animalSubject && this.preclinicalSubject.animalSubject.id) {
+            return this.subjectPathologyService.getSubjectPathologies(this.preclinicalSubject).then(pathologies => {
+            	if (pathologies){
+            		this.pathologies = pathologies;
+            	}
+                this.browserPaging.setItems(pathologies);
+                this.table.refresh();
             });
+        }else{
+        	return new Promise<void> ((resolve) => {
+        		resolve();
+        	})
         }
     }
 
+ 	
     refreshList(newSubPatho: SubjectPathology) {
         this.pathologies = this.pathologies || [];
         this.pathologies.push(newSubPatho);
         this.refreshDisplay(true);
+        this.browserPaging.setItems(this.pathologies);
+        this.table.refresh();
     }
 
     refreshDisplay(cancel: boolean) {
@@ -72,7 +93,6 @@ export class SubjectPathologiesListComponent implements OnChanges {
 
     checkMode(): void {
         if (this.mode && this.mode.isCreateMode()) {
-            this.loading = false;
             this.pathologies = [];
             this.createColumnDefs();
         } else if (this.mode && !this.mode.isCreateMode()) {
@@ -104,6 +124,7 @@ export class SubjectPathologiesListComponent implements OnChanges {
       //this.pathoSelected = this.onSelected.emit(pathology);
     }
     */
+    
     ngOnChanges() {
         this.checkMode();
     }

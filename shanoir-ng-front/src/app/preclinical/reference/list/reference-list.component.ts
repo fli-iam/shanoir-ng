@@ -7,6 +7,9 @@ import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
 import { Reference } from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
+import { FilterablePageable, Page } from '../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../shared/components/table/table.component';
 
 @Component({
   selector: 'reference-list',
@@ -17,32 +20,40 @@ import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
     
 export class ReferencesListComponent {
   public references: Reference[];
+  private referencesPromise: Promise<void> = this.getReferences();
+  private browserPaging: BrowserPaging<Reference>;
   public loading: boolean = false;
   public columnDefs: any[];
   public customActionDefs: any[];
   public rowClickAction: Object;
+  @ViewChild('referenceTable') table: TableComponent;
     
     constructor(
         private referenceService: ReferenceService,
         private keycloakService: KeycloakService,
         private router: Router,
         private confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
-            this.getReferences(); 
             this.createColumnDefs();
      }
     
+    getPage(pageable: FilterablePageable): Promise<Page<Reference>> {
+        return new Promise((resolve) => {
+            this.referencesPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
        
-    getReferences(): void {
-        this.loading = true;
+    getReferences():  Promise<void> {
         this.references = [];
-        this.referenceService.getReferences().then(references => {
+        this.browserPaging = new BrowserPaging(this.references, this.columnDefs);
+        return this.referenceService.getReferences().then(references => {
             if(references){
                 this.references = references;    
             }
-            this.loading = false;
-        }).catch((error) => {
-            console.log('error '+error)
-        });
+            this.browserPaging.setItems(references);
+            this.table.refresh();
+        })
     }
 
     

@@ -14,12 +14,7 @@ export class TherapyService {
     
         getTherapies(): Promise<Therapy[]>{
             return this.http.get<Therapy[]>(PreclinicalUtils.PRECLINICAL_API_THERAPIES_ALL_URL)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting therapies', error);
-                        return Promise.reject(error.message || error);
-            });
+                    .toPromise();
         }
         getTherapy(id: string): Promise<Therapy>{
             return this.http.get<Therapy>(PreclinicalUtils.PRECLINICAL_API_THERAPIES_URL+"/"+id)

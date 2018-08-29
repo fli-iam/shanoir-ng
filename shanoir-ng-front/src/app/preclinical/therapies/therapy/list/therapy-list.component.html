@@ -1,9 +1,8 @@
-<div class="TherapiesListComponent">
-    <div class="title">
-        <h2 i18n="Manage therapies|Title">Manage therapies</h2>
-        <!-- hr/ -->
-    </div>
-  
-    <shanoir-table [items]="therapies" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
-    
-</div>
+<h2 i18n="Manage therapies|Title@@therapiesListTitle">Manage therapies</h2>
+
+<shanoir-table #therapiesTable
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table> 

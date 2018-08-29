@@ -5,7 +5,8 @@
         class="step-block"
         [open]="opened == 'dicom'"
         [disabled]="false"
-        (validityChange)="dicomValid=$event; updateState();"
+        [lastEnabled]="lastEnabled == 'dicom'"
+        (validityChange)="dicomValid=$event"
         (inMemoryExtracted)="onFilesExtracted($event)" 
         (archiveUploaded)="onArchiveUploaded($event)"
         (headerClick)="toggle('dicom')">
@@ -15,7 +16,8 @@
         class="step-block"
         [open]="opened == 'series'"
         [disabled]="!seriesEnabled"
-        (validityChange)="seriesValid=$event; updateState();"
+        [lastEnabled]="lastEnabled == 'series'"
+        (validityChange)="seriesValid=$event"
         [patients]="importJob?.patients"
         [workFolder]="importJob?.workFolder"
         [dataFiles]="extracted" 
@@ -27,12 +29,14 @@
         class="step-block"
         [open]="opened == 'context'"
         [disabled]="!contextEnabled"
-        (validityChange)="contextValid=$event; updateState();"
+        [lastEnabled]="lastEnabled == 'context'"
+        (validityChange)="contextValid=$event"
         [patient]="patient" 
         (contextChange)="onContextChange($event)" 
         [examinationComment]="comment"
         (headerClick)="toggle('context')">
     </animal-clinical-context>
+    
 
     <div class="step-block" [class.active]="true">
         <div class="header command-zone" [class.disabled]="!isValid()" (click)="isValid() ? toggle('final') : null">4. Import the data</div>

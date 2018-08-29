@@ -9,6 +9,9 @@ import { AnestheticService } from '../shared/anesthetic.service';
 import { AnestheticType } from "../../../shared/enum/anestheticType";
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 import { ExaminationAnestheticService } from '../../examination_anesthetic/shared/examinationAnesthetic.service';
+import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 
 @Component({
   selector: 'anesthetic-list',
@@ -18,10 +21,12 @@ import { ExaminationAnestheticService } from '../../examination_anesthetic/share
 })
 export class AnestheticsListComponent {
   public anesthetics: Anesthetic[];
-  public loading: boolean = false;
+  private anestheticsPromise: Promise<void> = this.getAnesthetics();
+  private browserPaging: BrowserPaging<Anesthetic>;
   public rowClickAction: Object;
   public columnDefs: any[];
   public customActionDefs: any[];
+  @ViewChild('anestheticsTable') table: TableComponent;
     
     constructor(
         public anestheticsService: AnestheticService,
@@ -30,22 +35,27 @@ export class AnestheticsListComponent {
         public confirmDialogService: ConfirmDialogService,
         public examinationAnestheticService: ExaminationAnestheticService,
         private viewContainerRef: ViewContainerRef) {
-            this.getAnesthetics(); 
             this.createColumnDefs();
      }
     
-    getAnesthetics(): void {
-        this.loading = true;
-        this.anestheticsService.getAnesthetics().then(anesthetics => {
-            if(anesthetics){
-                this.anesthetics = anesthetics;
-            }else{
-                this.anesthetics = [];
-            }
-            this.loading = false;
-        }).catch((error) => {
-            this.anesthetics = [];
-        }); 
+    
+    getPage(pageable: FilterablePageable): Promise<Page<Anesthetic>> {
+        return new Promise((resolve) => {
+            this.anestheticsPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
+    
+    
+    getAnesthetics(): Promise<void> {
+    	this.anesthetics = [];
+        this.browserPaging = new BrowserPaging(this.anesthetics, this.columnDefs);
+        return this.anestheticsService.getAnesthetics().then(anesthetics => {
+            this.anesthetics = anesthetics;
+            this.browserPaging.setItems(anesthetics);
+            this.table.refresh();
+        })
     }
     
     

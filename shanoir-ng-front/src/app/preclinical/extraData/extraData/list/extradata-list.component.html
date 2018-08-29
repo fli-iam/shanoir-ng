@@ -1,12 +1,10 @@
-<div class="ExtraDataListComponent">
-    <div class="title">
-        <h2 i18n="Manage extradata|Title">Manage extradata</h2>
-        <!-- hr/ -->
-    </div>
-  
-    <shanoir-table [items]="extradatas" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
-    
-</div>
+<h2 i18n="Manage extradata|Title@@extradataListTitle">Manage extradata</h2>
 
+<shanoir-table #extradataTable
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table> 
 
 

@@ -13,12 +13,7 @@ export class ReferenceService {
     
         getReferences(): Promise<Reference[]>{
             return this.http.get<Reference[]>(PreclinicalUtils.PRECLINICAL_API_REFERENCES_ALL_URL)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting references', error);
-                        return Promise.reject(error.message || error);
-            });
+                    .toPromise();
         }
         
     

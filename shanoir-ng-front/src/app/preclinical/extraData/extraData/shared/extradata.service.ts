@@ -14,12 +14,7 @@ export class ExaminationExtraDataService {
         getExtraDatas(examId:number): Promise<ExtraData[]>{
             const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examId}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
             return this.http.get<ExtraData[]>(url)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting examination extra data', error);
-                        return Promise.reject(error.message || error);
-            });
+                    .toPromise();
         }
   
         getExtraData(id:string): Promise<ExtraData>{

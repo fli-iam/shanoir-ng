@@ -16,12 +16,7 @@ export class SubjectTherapyService {
     getSubjectTherapies(preclinicalSubject: PreclinicalSubject): Promise<SubjectTherapy[]> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_THERAPY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<SubjectTherapy[]>(url)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting subject therapies ', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
     
     getSubjectTherapy(preclinicalSubject: PreclinicalSubject, tid: string): Promise<SubjectTherapy>{

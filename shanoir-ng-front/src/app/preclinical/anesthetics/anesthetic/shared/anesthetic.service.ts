@@ -12,13 +12,9 @@ export class AnestheticService {
         
         getAnesthetics(): Promise<Anesthetic[]>{
             return this.http.get<Anesthetic[]>(PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_ALL_URL)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting anesthetics', error);
-                        return Promise.reject(error.message || error);
-            });
+                    .toPromise();
         }
+        
   
         getAnesthetic(id:number): Promise<Anesthetic>{
             return this.http.get<Anesthetic>(PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL+"/"+id)

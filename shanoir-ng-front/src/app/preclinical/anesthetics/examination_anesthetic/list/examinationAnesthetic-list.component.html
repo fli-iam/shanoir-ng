@@ -1,12 +1,14 @@
-<div class="ExamAnestheticListComponent">
-    <div class="title">
-        <h2 i18n="Manage examinationAnesthetic|Title">Manage examination anesthetics</h2>
-        <!-- hr/ -->
-    </div>
-  
-    <shanoir-table [items]="examAnesthetics" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
-    
-</div>
+<h2 i18n="Manage examinationAnesthetic|Title@@examinationanestheticsListTitle">Manage examination anesthetics</h2>
+
+<shanoir-table #examinationAnestheticTable
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table> 
+
+
+
 
 
 

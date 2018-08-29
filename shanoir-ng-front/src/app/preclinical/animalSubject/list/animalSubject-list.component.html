@@ -1,12 +1,12 @@
-<div class="SubjectsListComponent">
-    <div class="title">
-        <h2 i18n="Manage preclinicalSubjects|Title">Manage preclinical subjects</h2>
-        <!-- hr/ -->
-    </div>
-  
-    <shanoir-table [items]="preclinicalSubjects" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
-    
-</div>
+<h2 i18n="Manage preclinicalSubjects|Title@@preclinicalSubjectsListTitle">Manage preclinical subjects</h2>
+
+<shanoir-table #preclinicalSubjectsTable
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table> 
+
 
 
 

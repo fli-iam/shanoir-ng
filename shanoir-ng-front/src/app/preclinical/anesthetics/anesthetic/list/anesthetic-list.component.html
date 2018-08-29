@@ -1,12 +1,10 @@
-<div class="AnestheticsListComponent">
-    <div class="title">
-        <h2 i18n="Manage anesthetics|Title">Manage anesthetics</h2>
-        <!-- hr/ -->
-    </div>
-  
-    <shanoir-table [items]="anesthetics" [columnDefs]="columnDefs" [customActionDefs]="customActionDefs" [loading]="loading" [rowClickAction]="rowClickAction"></shanoir-table>
-    
-</div>
+<h2 i18n="Manage anesthetics|Title@@anestheticsListTitle">Manage anesthetics</h2>
 
+<shanoir-table #anestheticsTable
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs" 
+    [customActionDefs]="customActionDefs" 
+    (rowClick)="onRowClick($event)">
+</shanoir-table> 
 
 

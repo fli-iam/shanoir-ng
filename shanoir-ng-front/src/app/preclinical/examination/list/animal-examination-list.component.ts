@@ -7,9 +7,12 @@ import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
-import { Pageable } from '../../../shared/components/table/pageable.model';
 import { ExaminationAnestheticService } from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
 import { ExaminationExtraDataService } from '../../extraData/extraData/shared/extradata.service';
+
+import { FilterablePageable, Page, Pageable } from '../../../shared/components/table/pageable.model';
+import { BrowserPaging } from '../../../shared/components/table/browser-paging.model';
+import { TableComponent } from '../../../shared/components/table/table.component';
 
 @Component({
     selector: 'animal-examination-list',
@@ -25,6 +28,7 @@ export class AnimalExaminationListComponent {
     private createAcqEquip = false;
     private pageable: Pageable;
     public nbExaminations: number = 0;
+   @ViewChild('examTable') table: TableComponent;
 
     constructor(
     	private animalExaminationService: AnimalExaminationService, 
@@ -33,48 +37,17 @@ export class AnimalExaminationListComponent {
     	private extradataService: ExaminationExtraDataService,
     	private viewContainerRef: ViewContainerRef, 
         private keycloakService: KeycloakService) {
-        	this.countExaminations();
-        	this.getExaminations();
         	this.createColumnDefs();
     }
-
-    // Grid data
-    getExaminations(): void {
-        this.loading = true;
-        this.examinations = [];
-        this.animalExaminationService.getExaminations(this.pageable).then(examinations => {
-            if (examinations) {
-            	this.examinations = this.filterPreclinicalExaminations(examinations);
-            }
-            this.loading = false;
-        })
-            .catch((error) => {
-                // TODO: display error
-                this.examinations = [];
-            });
-    }
     
-    filterPreclinicalExaminations(examinations: Examination[]): Examination[]{
-    	let preclinicalEx: Examination[] = [];
-    	for (let ex of examinations) {
-    		if (ex.preclinical == true){
-    			preclinicalEx.push(ex);
-    		}
-    	}
-    	return preclinicalEx;
+    
+    getPage(pageable: Pageable): Promise<Page<Examination>> {
+        return this.animalExaminationService.getPage(pageable).then(page => {
+            return page;
+        });
     }
 
-    countExaminations(): void {
-        this.loading = true;
-        this.animalExaminationService.countExaminations().then(nbExaminations => {
-            this.nbExaminations = nbExaminations;
-        })
-            .catch((error) => {
-                // TODO: display error
-                this.examinations = [];
-            });
-    }
-
+    
     // Grid columns definition
     private createColumnDefs() {
         function dateRenderer(date: number) {
@@ -176,7 +149,7 @@ export class AnimalExaminationListComponent {
             }
         });
        
-        this.animalExaminationService.delete(examinationId).then((res) => this.getExaminations());
+        this.animalExaminationService.delete(examinationId);
     }
 
     deleteAll = () => {
@@ -189,9 +162,5 @@ export class AnimalExaminationListComponent {
         }
     }
 
-    public reloadExaminations(pageable: Pageable): void {
-        this.pageable = pageable;
-        this.getExaminations();
-    }
 
 }
