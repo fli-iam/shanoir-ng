@@ -27,8 +27,8 @@ export class Study {
     studyCenterList: StudyCenter[];
     studyStatus: StudyStatus;
     studyType: StudyType;
-    subjectStudyList: SubjectStudy[];
-    studyUserList: StudyUser[];
+    subjectStudyList: SubjectStudy[] = [];
+    studyUserList: StudyUser[] = [];
     timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;

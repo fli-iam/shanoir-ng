@@ -62,7 +62,7 @@ export class StudyComponent implements OnInit {
     private columnDefs: any[];
     private users: User[] = [];
     @ViewChild('memberTable') table: TableComponent;
-
+    
     formErrors = {
         'name': '',
         'studyStatus': '',
@@ -75,12 +75,17 @@ export class StudyComponent implements OnInit {
         private msgService: MsgBoxService, private userService: UserService) {
             
         }
-
+        
     ngOnInit(): void {
         this.getEnum();
         this.getCenters();
         this.getSubjects();
         this.getStudy();
+        this.createColumnDefs();
+        this.studyUsersPromise = this.getUsers().then(() => {
+            this.completeMembers();
+            this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
+        });
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true; 
@@ -117,11 +122,6 @@ export class StudyComponent implements OnInit {
     
     edit(): void {
         this.router.navigate(['/study'], { queryParams: { id: this.study.id, mode: "edit" }});
-        this.createColumnDefs();
-        this.studyUsersPromise = this.getUsers().then(() => {
-            this.completeMembers();
-            this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
-        });
     }
     
     editTimepoint(timepoint: Timepoint): void {  

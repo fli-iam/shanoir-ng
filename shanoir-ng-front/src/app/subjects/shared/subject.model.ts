@@ -15,7 +15,7 @@ export class Subject {
     imagedObjectCategory: ImagedObjectCategory;
     sex: Sex;
     selected: boolean = false;
-    subjectStudyList: SubjectStudy[];
+    subjectStudyList: SubjectStudy[] = [];
 
     constructor(subject?: IdNameObject) {
         if (subject) {
