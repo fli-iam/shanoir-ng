@@ -57,7 +57,6 @@ export class StudyComponent implements OnInit {
     private studyStatuses: Enum[] = [];
     private subjects: IdNameObject[];
     private hasNameUniqueError: boolean = false;
-
     private studyUsersPromise: Promise<void>;
     private browserPaging: BrowserPaging<StudyUser>;
     private columnDefs: any[];
@@ -77,15 +76,15 @@ export class StudyComponent implements OnInit {
             
         }
 
-        ngOnInit(): void {
-            this.getEnum();
-            this.getCenters();
-            this.getSubjects();
-            this.getStudy();
-            this.buildForm();
-            if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-                this.canModify = true; 
-            }
+    ngOnInit(): void {
+        this.getEnum();
+        this.getCenters();
+        this.getSubjects();
+        this.getStudy();
+        this.buildForm();
+        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+            this.canModify = true; 
+        }
     }
     
     addCenterToStudy(): void {
@@ -123,7 +122,6 @@ export class StudyComponent implements OnInit {
             this.completeMembers();
             this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
         });
-        
     }
     
     editTimepoint(timepoint: Timepoint): void {  
@@ -145,16 +143,16 @@ export class StudyComponent implements OnInit {
             this.centers = centers;
             if (centers) {
                     this.selectedCenter = centers[0];
-                }
-            });
-        }
+            }
+        });
+    }
         
     getSubjects(): void {
         this.subjectService
             .getSubjectsNames()
             .then(subjects => {
                 this.subjects = subjects;
-            });
+        });
     }
     
     getEnum(): void {
@@ -275,7 +273,7 @@ export class StudyComponent implements OnInit {
                 this.msgService.log('info', 'Study successfully created');
             }, (error: any) => {
                 this.manageRequestErrors(error);
-            });
+        });
     }
     
     update(): void {
@@ -286,9 +284,8 @@ export class StudyComponent implements OnInit {
                 this.msgService.log('info', 'Study successfully updated');
             }, (error: any) => {
                 this.manageRequestErrors(error);
-            });
+        });
     }
-
 
     private completeMembers() {
         for (let studyUser of this.study.studyUserList) {
@@ -302,7 +299,6 @@ export class StudyComponent implements OnInit {
                 }
             }
         }
-               
     }
 
     getPage(pageable: FilterablePageable): Promise<Page<StudyUser>> {
@@ -347,7 +343,7 @@ export class StudyComponent implements OnInit {
         studyUser.studyUserType = 3;
         for (let user of this.users) {
             if (studyUser.userId == user.id) {
-                studyUser.email = user.email;
+                studyUser.email = user.email;  
                 studyUser.firstName = user.firstName;
                 studyUser.lastName = user.lastName;
                 studyUser.role = user.role;

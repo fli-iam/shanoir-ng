@@ -14,6 +14,7 @@ export class Subject {
     manualHemisphericDominance: "Left" | "Right";
     imagedObjectCategory: ImagedObjectCategory;
     sex: Sex;
+    selected: boolean = false;
     subjectStudyList: SubjectStudy[];
 
     constructor(subject?: IdNameObject) {
