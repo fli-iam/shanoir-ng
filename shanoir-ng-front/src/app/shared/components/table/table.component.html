@@ -52,20 +52,46 @@
     <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
     <td 
         *ngFor="let col of columnDefs" 
-        class="cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" 
-        [class.bool]="isFieldBoolean(item, col)"
+        class="cell cell-{{col.field != undefined ? col.field : 'nofield'}} {{getCellTypeStr(col)}}" 
+        [class.bool]="isFieldBoolean(col)"
         [attr.title]="col.tip != undefined ? col.tip : null"
         (click)="col.type == 'button' ? null : onRowClick(item)"
-        >{{renderCell(item, col)}}
-        <span *ngIf="isFieldBoolean(item, col)">
+        >
+        
+        <!-- default display -->
+        <span *ngIf="!editMode || !col.editable">{{renderCell(item, col)}}</span>
+
+        <!-- editable text / number -->
+        <span *ngIf="editMode && col.editable && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
+            <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);" />
+        </span>
+
+        <!-- editable text / number with dropdown -->
+        <span *ngIf="editMode && col.editable && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
+            <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);">
+                <option *ngFor="let possibleValue of col.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
+            </select>
+        </span>
+
+        <!-- display a boolean -->
+        <span *ngIf="isFieldBoolean(col) && (!editMode || !col.editable)">
             <span *ngIf="getCellValue(item, col)" class="bool-true">&#x2713;</span>
             <span *ngIf="!getCellValue(item, col)" class="bool-false">&#x2717;</span>
         </span>
+
+        <!-- editable boolean -->
+        <span *ngIf="isFieldBoolean(col) && editMode && col.editable">
+            <input type="checkbox" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);" /> 
+        </span>
+
+        <!-- add a link -->
         <a class="link"
             *ngIf="col.type == 'link'"
             [routerLink]="col.clickAction.target" 
             [queryParams]="col.clickAction.getParams? col.clickAction.getParams(item) : null" 
             ><i class="fas fa-external-link-alt"></i></a>
+        
+        <!-- display a button -->
         <span class="button" *ngIf="col.type == 'button'">
             <a *ngIf="col.target" [routerLink]="col.target" [queryParams]="col.getParams ? col.getParams(item) : null" routerLinkActive="active">
                 <img *ngIf="col.img" src="{{col.img}}" />
@@ -75,15 +101,6 @@
                 <img *ngIf="col.img" src="{{col.img}}" />
                 <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
             </span>
-        </span>
-        <span *ngIf="col.type == 'dropdownList'">
-            <select>
-                <!-- <option *ngFor="let object of list" [ngValue]="object">{{object.name}}</option> -->
-                <option>toto</option>
-            </select>
-        </span>
-        <span *ngIf="col.type == 'checkbox'">
-            <input type="checkbox"/> 
         </span>
     </td>
 </tr>

@@ -2,13 +2,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ExaminationService } from '../../examinations/shared/examination.service';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { Study } from '../shared/study.model';
-import { StudyUserType } from '../shared/study-user-type.enum';
-import { Subject } from '../../subjects/shared/subject.model';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import { SubjectType } from '../../subjects/shared/subject.types';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { SubjectStudy } from '../../subjects/shared/subject-study.model';
+import { Study } from '../shared/study.model';
 
 @Component({
     selector: 'study-tree',
@@ -31,28 +28,6 @@ export class StudyTreeComponent {
     private xRay2IconPath: string = ImagesUrlUtil.X_RAY_2_ICON_PATH;
 
     constructor(private examinationService: ExaminationService, private router: Router) {
-    }
-
-    getMemberCategoryLabel(studyUserTypeStr: string): string {
-        let studyUserType: StudyUserType = StudyUserType[studyUserTypeStr];
-        switch (studyUserType) {
-            case StudyUserType.RESPONSIBLE: {
-                return 'Responsible';
-            }
-            case StudyUserType.SEE_DOWNLOAD_IMPORT_MODIFY: {
-                return 'Members that can modify the research study';
-            }
-            case StudyUserType.SEE_DOWNLOAD_IMPORT: {
-                return 'Members that can import datasets in the research study';
-            }
-            case StudyUserType.NOT_SEE_DOWNLOAD: {
-                return 'Members that can\'t see the datasets produced in the research study and can\'t download them';
-            }
-            case StudyUserType.SEE_DOWNLOAD: {
-                return 'Members that can download datasets produced in the research study';
-            }
-        }
-
     }
 
     getSubjectDetails(component: TreeNodeComponent) {

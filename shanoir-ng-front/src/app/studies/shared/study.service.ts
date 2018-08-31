@@ -9,6 +9,7 @@ import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { EquipmentDicom } from "../../import/dicom-data.model";
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { StudyUser } from './study-user.model';
+import { StudyUserType } from './study-user-type.enum';
 
 @Injectable()
 export class StudyService {

@@ -302,20 +302,17 @@ export class StudyComponent implements OnInit {
                 }
             }
         }
-               
     }
 
     getPage(pageable: FilterablePageable): Promise<Page<StudyUser>> {
         return new Promise((resolve) => {
             this.studyUsersPromise.then(() => {
-                console.log('this.studyUsersPromise.then')
                 resolve(this.browserPaging.getPage(pageable));
             });
         });
     }
     
     private getUsers(): Promise<void> {
-        console.log('getUsers')
         return this.userService.getUsers().then(users => {
             if (users) {
                 this.users = users;
@@ -326,15 +323,15 @@ export class StudyComponent implements OnInit {
     // Grid columns definition
     private createColumnDefs() {
         this.columnDefs = [
-            {headerName: "Username", field: "userName", width: "100%"},
-            {headerName: "First Name", field: "firstName"},
-            {headerName: "Last Name", field: "lastName"},
-            {headerName: "Email", field: "email", width: "200%"},
-            {headerName: "Role", field: "role.displayName", width: "63px"},
-            {headerName: "Role/Position*", field: "studyUserType", width: "200%"},
-            {headerName: "Receive Import Mail", field: "receiveNewImportReport", type: "checkbox", width: "100%"},
-            {headerName: "Receive Anonymization Mail", field: "receiveAnonymizationReport", type: "checkbox", width: "100%"},
-            {headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.removeStudyUser}
+            { headerName: "Username", field: "userName" },
+            { headerName: "First Name", field: "firstName" },
+            { headerName: "Last Name", field: "lastName" },
+            { headerName: "Email", field: "email" },
+            { headerName: "Role", field: "role.displayName", width: "63px" },
+            { headerName: "Role/Position*", field: "studyUserType", editable: true, possibleValues: StudyUserType.all()},
+            { headerName: "Received Import Mail", field: "receiveNewImportReport", editable: true },
+            { headerName: "Received Anonymization Mail", field: "receiveAnonymizationReport", editable: true },
+            { headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.removeStudyUser }
         ];
     }
 
@@ -345,8 +342,7 @@ export class StudyComponent implements OnInit {
         studyUser.userName = selectedUser.username;
         studyUser.receiveAnonymizationReport = false;
         studyUser.receiveNewImportReport = false;
-        // TODO: Enum studyuserType
-        studyUser.studyUserType = 3;
+        studyUser.studyUserType = StudyUserType.NOT_SEE_DOWNLOAD;
         for (let user of this.users) {
             if (studyUser.userId == user.id) {
                 studyUser.email = user.email;

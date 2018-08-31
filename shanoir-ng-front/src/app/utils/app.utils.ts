@@ -59,7 +59,7 @@ export const BACKEND_API_IMAGE_VIEWER_URL: string = BACKEND_API_IMPORT_MS_URL + 
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
-    if (error.error.details) {
+    if (error.error && error.error.details) {
         let fieldErrors = error.error.details.fieldErrors || '';
         if (fieldErrors[fieldName]) {
             for (let fieldError of fieldErrors[fieldName]) {

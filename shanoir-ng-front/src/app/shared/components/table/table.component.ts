@@ -14,7 +14,9 @@ export class TableComponent implements OnInit {
     @Input() customActionDefs: any[];
     @Input() selectionAllowed: boolean = false; // TODO : selectable
     @Input() browserSearch: boolean = true;
+    @Input() editMode: boolean = false;
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
+    @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     
     private page: Page<Object>;
     private isLoading: boolean = false;
@@ -85,14 +87,26 @@ export class TableComponent implements OnInit {
      * Get a cell content, resolving a renderer if necessary
      */
     private getCellValue(item: Object, col: any): any {
-        TableComponent.getCellValue(item, col);
+        return TableComponent.getCellValue(item, col);
     }
 
     /**
      * Just get the field value, but not using any renderer!
      */
     private getFieldRawValue(obj: Object, path: string): any {
-        TableComponent.getFieldRawValue(obj, path);
+        return TableComponent.getFieldRawValue(obj, path);
+    }
+
+    /**
+     * Just get the field value, but not using any renderer!
+     */
+    private setFieldRawValue(obj: Object, path: string, value: any) {
+        const split = path.split('.');
+        let currentObj = obj;
+        for(let i=0; i<split.length-1; i++) {
+            currentObj = currentObj[split[i]];
+        }
+        currentObj[split[split.length-1]] = value;
     }
 
     /**
@@ -110,9 +124,22 @@ export class TableComponent implements OnInit {
     /**
      * Test if a cell content is a boolean
      */
-    private isFieldBoolean(obj: Object, col: any): boolean {
-        let val = TableComponent.getCellValue(obj, col);
+    private isFieldBoolean(col: any): boolean {
+        if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
+        let val = TableComponent.getCellValue(this.items[0], col);
         return this.isValueBoolean(val);
+    }
+
+    private isColumnText(col: any): boolean {
+        return !this.isFieldBoolean(col)
+            && col.type != 'link'
+            && col.type != 'button'
+            && col.type != 'date'
+            && col.type != 'number';
+    }
+
+    private isColumnNumber(col: any): boolean {
+        return col.type == 'number';
     }
 
     /**
