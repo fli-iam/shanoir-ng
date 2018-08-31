@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, SimpleChanges, OnChanges } from '@angular/core';
 import { IdNameObject } from '../../models/id-name-object.model';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Study } from '../../../studies/shared/study.model';
@@ -10,7 +10,7 @@ import { Subject } from '../../../subjects/shared/subject.model';
   styleUrls: ['subject-study-list.component.css'],
 })
 
-export class SubjectStudyListComponent implements OnInit{
+export class SubjectStudyListComponent implements OnInit, OnChanges{
     @Input() mode: "study" | "subject";
     @Input() list: any[];
     @Input() subjectStudyList : SubjectStudy[] = [];
@@ -26,6 +26,17 @@ export class SubjectStudyListComponent implements OnInit{
     ngOnInit () {
         this.legend = this.mode == 'study' ? 'Studies' : 'Subjects';
         this.columnName = this.mode == 'study' ? 'Study Name' : 'Common Name';
+    }
+    
+    ngOnChanges(changes: SimpleChanges) {
+        if ((changes['subjectStudyList'] || changes['list'])) {
+            for (let subjectStudy of this.subjectStudyList) {
+                for (let object of this.list) {
+                    if ((this.mode == "subject" && subjectStudy.subject.id == object.id)
+                        || (this.mode == "study" && subjectStudy.study.id == object.id)) {object.selected = true;}
+                }
+            }
+        }
     }
 
     onObjectSelect(object: IdNameObject) {
