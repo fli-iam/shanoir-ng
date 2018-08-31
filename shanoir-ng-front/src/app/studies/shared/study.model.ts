@@ -7,7 +7,6 @@ import { StudyType } from "./study-type.enum";
 import { SubjectStudy } from "../../subjects/shared/subject-study.model";
 import { Timepoint } from "./timepoint.model";
 import { StudyUser } from "./study-user.model";
-import { StudyUserType } from "./study-user-type.enum";
 
 export class Study {
     centers: IdNameObject[];

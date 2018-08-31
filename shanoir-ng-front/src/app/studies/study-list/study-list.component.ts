@@ -64,7 +64,6 @@ export class StudyListComponent {
             { headerName: "Name", field: "name" },
             {
                 headerName: "Status", field: "studyStatus", cellRenderer: function (params: any) {
-                    console.log(StudyStatus[params.data.studyStatus])
                     return StudyStatus[params.data.studyStatus];
                 }
             },

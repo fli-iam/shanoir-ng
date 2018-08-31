@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, SimpleChanges, OnChanges } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -74,7 +74,7 @@ export class StudyComponent implements OnInit {
         private location: Location, private keycloakService: KeycloakService, private subjectService: SubjectService,
         private msgService: MsgBoxService, private userService: UserService) {
             
-        }
+    }
         
     ngOnInit(): void {
         this.getEnum();
@@ -82,10 +82,7 @@ export class StudyComponent implements OnInit {
         this.getSubjects();
         this.getStudy();
         this.createColumnDefs();
-        this.studyUsersPromise = this.getUsers().then(() => {
-            this.completeMembers();
-            this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
-        });
+        this.initStudyUser();
         this.buildForm();
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.canModify = true; 
@@ -122,6 +119,7 @@ export class StudyComponent implements OnInit {
     
     edit(): void {
         this.router.navigate(['/study'], { queryParams: { id: this.study.id, mode: "edit" }});
+        this.initStudyUser();
     }
     
     editTimepoint(timepoint: Timepoint): void {  
@@ -287,6 +285,13 @@ export class StudyComponent implements OnInit {
         });
     }
 
+    private initStudyUser() {
+        this.studyUsersPromise = this.getUsers().then(() => {
+            this.completeMembers();
+            this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
+        });
+    }
+
     private completeMembers() {
         for (let studyUser of this.study.studyUserList) {
             for (let user of this.users) {
@@ -323,9 +328,9 @@ export class StudyComponent implements OnInit {
             { headerName: "Username", field: "userName" },
             { headerName: "First Name", field: "firstName" },
             { headerName: "Last Name", field: "lastName" },
-            { headerName: "Email", field: "email" },
+            { headerName: "Email", field: "email", width: "200%" },
             { headerName: "Role", field: "role.displayName", width: "63px" },
-            { headerName: "Role/Position*", field: "studyUserType", editable: true, possibleValues: StudyUserType.all()},
+            { headerName: "Role/Position*", field: "studyUserType", editable: true, possibleValues: StudyUserType.all(), width: "300%" },
             { headerName: "Received Import Mail", field: "receiveNewImportReport", editable: true },
             { headerName: "Received Anonymization Mail", field: "receiveAnonymizationReport", editable: true },
             { headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.removeStudyUser }
