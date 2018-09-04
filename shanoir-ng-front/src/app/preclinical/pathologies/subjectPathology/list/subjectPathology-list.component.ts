@@ -67,7 +67,7 @@ export class SubjectPathologiesListComponent implements OnChanges {
             	if (pathologies){
             		this.pathologies = pathologies;
             	}
-                this.browserPaging.setItems(pathologies);
+                this.browserPaging.setItems(this.pathologies);
                 this.table.refresh();
             });
         }else{

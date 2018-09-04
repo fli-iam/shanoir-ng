@@ -205,9 +205,7 @@ export class SubjectPathologyFormComponent implements OnChanges {
             return;
         }
         this.setDateFromDatePicker();
-        console.log("ADD subject pathology ");
         if (this.mode.isCreateMode()) {
-        	console.log("create mode== emit");
             if (this.preclinicalSubject.pathologies === undefined) {
                 this.preclinicalSubject.pathologies = [];
             }
@@ -216,7 +214,6 @@ export class SubjectPathologyFormComponent implements OnChanges {
                 this.onCreated.emit(this.subjectPathology);
             }
         } else {
-        	console.log("else mode== create in db");
             this.subjectPathologyService.create(this.preclinicalSubject, this.subjectPathology)
                 .subscribe(subjectPathology => {
                     if (this.onCreated.observers.length > 0) {

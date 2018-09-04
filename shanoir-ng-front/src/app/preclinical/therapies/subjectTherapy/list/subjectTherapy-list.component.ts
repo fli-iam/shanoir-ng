@@ -74,7 +74,7 @@ export class SubjectTherapiesListComponent {
                 if (subjectTherapies) {
                     this.subjectTherapies = subjectTherapies;
                 } 
-                this.browserPaging.setItems(subjectTherapies);
+                this.browserPaging.setItems(this.subjectTherapies);
                 this.table.refresh();
             })
         }else{
@@ -102,6 +102,7 @@ export class SubjectTherapiesListComponent {
             this.subjectTherapies = [];
             this.createColumnDefs();
         }else if(this.mode && !this.mode.isCreateMode()){
+            this.getSubjectTherapies();
             this.createColumnDefs();
         }else{
             this.mode.viewMode();
