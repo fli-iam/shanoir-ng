@@ -21,4 +21,5 @@ export class User {
     role: Role;
     username: string;
     valid: boolean;
+    selected: boolean = false;
 }

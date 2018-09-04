@@ -9,6 +9,7 @@ import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { EquipmentDicom } from "../../import/dicom-data.model";
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { StudyUser } from './study-user.model';
+import { StudyUserType } from './study-user-type.enum';
 
 @Injectable()
 export class StudyService {
@@ -56,13 +57,6 @@ export class StudyService {
     }
     
     update(id: number, study: Study): Observable<Study> {
-        return this.http.put<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id, JSON.stringify(study))
-        .map(response => response);
-    }
-    
-    findMembers(studyId: number): Promise<StudyUser[]> {
-        return this.http.get<StudyUser[]>(AppUtils.BACKEND_API_STUDY_URL + '/' + studyId + AppUtils.BACKEND_API_STUDY_FIND_MEMBERS_URL)
-        .map(studyUserList => studyUserList ? studyUserList : [])
-        .toPromise();
+        return this.http.put<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id, JSON.stringify(study));
     }
 }

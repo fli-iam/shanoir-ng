@@ -20,7 +20,6 @@ export const BACKEND_API_CENTER_NAMES_URL: string = BACKEND_API_CENTER_URL + '/n
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';
 export const BACKEND_API_STUDY_WITH_CARDS_BY_USER_EQUIPMENT_URL: string = BACKEND_API_STUDY_URL + '/listwithcards';
 export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '/names';
-export const BACKEND_API_STUDY_FIND_MEMBERS_URL: string = '/members';
 
 // Subjects http api
 export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjects';
@@ -62,7 +61,7 @@ export const BACKEND_API_IMAGE_VIEWER_URL: string = BACKEND_API_IMPORT_MS_URL + 
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
-    if (error.error.details) {
+    if (error.error && error.error.details) {
         let fieldErrors = error.error.details.fieldErrors || '';
         if (fieldErrors[fieldName]) {
             for (let fieldError of fieldErrors[fieldName]) {

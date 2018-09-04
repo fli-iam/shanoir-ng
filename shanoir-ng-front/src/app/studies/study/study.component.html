@@ -237,11 +237,25 @@
 			</fieldset> -->
 			<fieldset *ngIf="mode != 'view'">
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
-				<shanoir-table
-					[getPage]="getPage.bind(this)" 
-					[columnDefs]="columnDefs" 
-					[customActionDefs]="customActionDefs">
-				</shanoir-table>
+
+				<ol>
+					<li>
+						<label i18n="Study detail|List of users label@@studyDetailUsers">List of users</label>
+						<span class="right-col">
+							<select id="title" [ngModel]="selectedUser" [ngModelOptions]="{standalone: true}" (ngModelChange)="onUserSelect($event)">
+								<option disabled>Please select...</option>
+								<option *ngFor="let user of users" [ngValue]="user" [disabled]="user?.selected">{{user.username}}</option>
+							</select>
+						</span>
+					</li>
+					<li>
+						<shanoir-table #memberTable
+							[getPage]="getPage.bind(this)" 
+							[columnDefs]="columnDefs"
+							[editMode]="true">
+						</shanoir-table>
+					</li>
+				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'">
 				<legend>Data</legend>

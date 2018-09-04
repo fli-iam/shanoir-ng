@@ -40,7 +40,7 @@ export class SubjectComponent implements OnInit, OnChanges {
     private canModify: Boolean = false;
     private firstName: string = "";
     private lastName: string = "";
-    private studies: IdNameObject[];
+    private studies: IdNameObject[] = [];
     private isBirthDateValid: boolean = true;
     private isAlreadyAnonymized: boolean;
     private init: boolean = false;

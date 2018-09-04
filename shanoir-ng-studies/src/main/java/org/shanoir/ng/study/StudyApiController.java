@@ -13,7 +13,6 @@ import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
-import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,24 +39,6 @@ public class StudyApiController implements StudyApi {
 	private StudyMapper studyMapper;
 
 	@Override
-	public ResponseEntity<Void> addMember(Long studyId, StudyUser studyUser) {
-		try {
-			if (!studyService.isUserResponsible(studyId, KeycloakUtil.getTokenUserId())) {
-				LOG.error("User with id " + KeycloakUtil.getTokenUserId() + " can't add member to study with id "
-						+ studyId);
-				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
-			}
-			studyService.addUser(studyId, studyUser);
-		} catch (ShanoirException e) {
-			if (StudiesErrorModelCode.STUDY_NOT_FOUND.equals(e.getErrorCode())) {
-				return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-			}
-			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	}
-
-	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
 			if (!studyService.isUserResponsible(studyId, KeycloakUtil.getTokenUserId())) {
@@ -74,15 +55,6 @@ public class StudyApiController implements StudyApi {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 	
-	@Override
-	public ResponseEntity<List<StudyUser>> findMembers(@PathVariable("studyId") Long studyId) {
-		List<StudyUser> members = studyService.findStudyUsersByStudyId(studyId);
-		if (members.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(members, HttpStatus.OK);
-	}
-
 	@Override
 	public ResponseEntity<List<StudyDTO>> findStudies() {
 		List<Study> studies;
@@ -146,24 +118,6 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
-	}
-
-	@Override
-	public ResponseEntity<Void> removeMember(Long studyId, Long memberId) {
-		try {
-			if (!studyService.isUserResponsible(studyId, KeycloakUtil.getTokenUserId())) {
-				LOG.error("User with id " + KeycloakUtil.getTokenUserId() + " can't remove member from study with id "
-						+ studyId);
-				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
-			}
-			studyService.removeUser(studyId, memberId);
-		} catch (ShanoirException e) {
-			if (StudiesErrorModelCode.STUDY_NOT_FOUND.equals(e.getErrorCode())) {
-				return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-			}
-			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override

@@ -16,6 +16,5 @@ if (window.location.href.endsWith('/account-request')) {
   KeycloakService.init()
     .then(() => {
       platformBrowserDynamic().bootstrapModule(AppModule);
-    })
-    .catch((err) => console.log(err));
+    });
 }

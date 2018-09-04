@@ -23,6 +23,7 @@ import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.studyuser.StudyUserRepository;
 import org.shanoir.ng.studyuser.StudyUserType;
 import org.shanoir.ng.subjectstudy.SubjectStudy;
+import org.shanoir.ng.subjectstudy.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,20 +69,12 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private StudyUserRepository studyUserRepository;
+	
+	@Autowired
+	private SubjectStudyRepository subjectStudyRepository;
 
 	@Autowired
 	private StudyRepository studyRepository;
-
-	@Override
-	public void addUser(final Long studyId, final StudyUser studyUser) {
-		final Study study = studyRepository.findOne(studyId);
-		// Create relation
-		studyUser.setStudyId(studyId);
-		final StudyUser savedStudyUser = studyUserRepository.save(studyUser);
-		// Add user to study
-		study.getStudyUserList().add(savedStudyUser);
-		studyRepository.save(study);
-	}
 
 	@Override
 	public boolean canUserUpdateStudy(final Long studyId, final Long userId) {
@@ -150,11 +143,6 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public List<Study> findStudiesByUserId(final Long userId) {
 		return studyRepository.findByStudyUserList_UserIdOrderByNameAsc(userId);
-	}
-	
-	@Override
-	public List<StudyUser> findStudyUsersByStudyId(final Long studyId) {
-		return studyUserRepository.findByStudyId(studyId);
 	}
 
 	@Override
@@ -317,23 +305,15 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void removeUser(final Long studyId, final Long userId) {
-		// Remove user from study
-		StudyUser studyUser = studyUserRepository.findByStudyIdAndUserId(studyId, userId);
-		final Study study = studyRepository.findOne(studyId);
-		study.getStudyUserList().remove(studyUser);
-		studyRepository.save(study);
-		// Delete relation
-		studyUserRepository.delete(studyUser);
-	}
-
-	@Override
 	public Study save(final Study study) throws ShanoirStudiesException {
 		for (final StudyCenter studyCenter : study.getStudyCenterList()) {
 			studyCenter.setStudy(study);
 		} 
 		for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 			subjectStudy.setStudy(study);
+		}
+		for (final StudyUser studyUser: study.getStudyUserList()) {
+			studyUser.setStudyId(study.getId());
 		}
 		return studyRepository.save(study);
 	}
@@ -349,11 +329,6 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setWithExamination(study.isWithExamination());
 		studyDb.setMonoCenter(study.isMonoCenter());
-
-		for(SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-			subjectStudy.setStudy(studyDb);
-		}
-		studyDb.setSubjectStudyList(study.getSubjectStudyList());
 
 		// Copy list of database links study/center
 		final List<StudyCenter> studyCenterDbList = new ArrayList<>(studyDb.getStudyCenterList());
@@ -376,6 +351,54 @@ public class StudyServiceImpl implements StudyService {
 				// Move link study/center
 				studyDb.getStudyCenterList().remove(studyCenterDb);
 				studyCenterRepository.delete(studyCenterDb.getId());
+			}
+		}
+		
+		// Copy list of database links subject/study
+		final List<SubjectStudy> subjectStudyDbList = new ArrayList<>(studyDb.getSubjectStudyList());
+		for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+			if (subjectStudy.getId() == null) {
+				// Add link subject/study
+				subjectStudy.setStudy(studyDb);
+				studyDb.getSubjectStudyList().add(subjectStudy);
+			}
+		}
+		for (final SubjectStudy subjectStudyDb : subjectStudyDbList) {
+			boolean keepSubjectStudy = false;
+			for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+				if (subjectStudyDb.getId().equals(subjectStudy.getId())) {
+					keepSubjectStudy = true;
+					break;
+				}
+			}
+			if (!keepSubjectStudy) {
+				// Move link subject/study
+				studyDb.getSubjectStudyList().remove(subjectStudyDb);
+				subjectStudyRepository.delete(subjectStudyDb.getId());
+			}
+		}
+		
+		// Copy list of database links study/user
+		final List<StudyUser> studyUserDbList = new ArrayList<>(studyDb.getStudyUserList());
+		for (final StudyUser studyUser : study.getStudyUserList()) {
+			if (studyUser.getId() == null) {
+				// Add link study/user
+				studyUser.setStudyId(studyDb.getId());
+				studyDb.getStudyUserList().add(studyUser);
+			}
+		}
+		for (final StudyUser studyUserDb : studyUserDbList) {
+			boolean keepStudyUser = false;
+			for (final StudyUser studyUser : study.getStudyUserList()) {
+				if (studyUserDb.getId().equals(studyUser.getId())) {
+					keepStudyUser = true;
+					break;
+				}
+			}
+			if (!keepStudyUser) {
+				// Move link study/user
+				studyDb.getStudyUserList().remove(studyUserDb);
+				studyUserRepository.delete(studyUserDb.getId());
 			}
 		}
 

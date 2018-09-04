@@ -7,7 +7,6 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
-import org.shanoir.ng.studyuser.StudyUser;
 
 /**
  * Study service.
@@ -16,16 +15,6 @@ import org.shanoir.ng.studyuser.StudyUser;
  *
  */
 public interface StudyService extends UniqueCheckableService<Study> {
-
-	/**
-	 * Add an user to a study.
-	 * 
-	 * @param studyId
-	 *            study id.
-	 * @param studyUser
-	 *            relation between a study and an user.
-	 */
-	void addUser(Long studyId, StudyUser studyUser);
 
 	/**
 	 * Check if an user can update a study.
@@ -112,8 +101,6 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(Long userId, EquipmentDicom equipment)
 			throws ShanoirException;
 	
-	List<StudyUser> findStudyUsersByStudyId(final Long studyId);
-	
 	/**
 	 * Check if an user is responsible of the study.
 	 * 
@@ -125,16 +112,6 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @throws ShanoirStudiesException
 	 */
 	boolean isUserResponsible(Long studyId, Long userId) throws ShanoirStudiesException;
-
-	/**
-	 * Remove an user from a study.
-	 * 
-	 * @param studyId
-	 *            study id.
-	 * @param userId
-	 *            user id.
-	 */
-	void removeUser(Long studyId, Long userId);
 
 	/**
 	 * add new study

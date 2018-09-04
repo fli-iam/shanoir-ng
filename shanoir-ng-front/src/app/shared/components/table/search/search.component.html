@@ -3,7 +3,7 @@
 to filter
 <select class="search-field" [(ngModel)]="searchField" (change)="search()"> 
     <option value="">*</option>
-    <option *ngFor="let col of getSearchableColumns()" value="{{col.field}}">
+    <option *ngFor="let col of searchableColumns" value="{{col.field}}">
         {{col.headerName}}
     </option>
 </select>

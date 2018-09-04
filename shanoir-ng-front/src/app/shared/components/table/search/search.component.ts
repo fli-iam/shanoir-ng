@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Filter } from '../pageable.model';
 
 @Component({
@@ -7,21 +7,29 @@ import { Filter } from '../pageable.model';
     styleUrls: ['search.component.css'],
 })
 
-export class TableSearchComponent {
+export class TableSearchComponent implements OnChanges {
 
     @Input() columnDefs: any[];
     @Output() onChange: EventEmitter<Filter> = new EventEmitter<Filter>();
-    public searchField: string;
-    public searchStr: string;
+    private searchField: string;
+    private searchStr: string;
+    private searchableColumns: any[] = [];
 
-    private getSearchableColumns(): any[] {
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['columnDefs']) {
+            this.computeSearchableColumns();
+        }
+    }
+
+    private computeSearchableColumns(): any[] {
+        if (!this.columnDefs) return [];
         let cols: any[] = [];
         for (let col of this.columnDefs) {
             if (col.type != "boolean" && col.type != "button") {
                 cols.push(col);
             }
         }
-        return cols;
+        this.searchableColumns = cols;
     }
 
     private search() {
