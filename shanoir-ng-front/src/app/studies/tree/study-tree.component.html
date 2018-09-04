@@ -1,11 +1,11 @@
 <node label="Subjects" [pictoUrl]="folderIconPath" deploy="true">
     <ng-template ngFor let-subject [ngForOf]="study.subjectStudyList">
         <node [label]="subject | subjectStudyLabel" [pictoUrl]="userIconPath" [nodeParams]="subject" [dataRequest]="true"
-            (openClick)="getSubjectDetails($event)">
+            (openClick)="getSubjectDetails($event)" link="true" (labelClick)="showSubjectDetails($event)">
             <ng-template ngFor let-examination [ngForOf]="subject.examinations">
                 <node [label]="examination | subjectExaminationLabel" [pictoUrl]="listIconPath" link="true" (labelClick)="showExaminationDetails($event)">
                     <node *ngFor="let acquisition of examination.datasetAcquisitions" [label]="acquisition.name" [pictoUrl]="xRay2IconPath">
-                        <node *ngFor="let dataset of acquisition.datasets" [label]="dataset.name" [pictoUrl]="usersIconPathbrainIconPath">
+                        <node *ngFor="let dataset of acquisition.datasets" [label]="dataset.name" [pictoUrl]="usersIconPathbrainIconPath" link="true" (labelClick)="showDatasetDetails(dataset.id)">
                         </node>
                     </node>
                 </node>
