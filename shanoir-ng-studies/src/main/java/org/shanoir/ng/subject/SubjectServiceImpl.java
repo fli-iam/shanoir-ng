@@ -106,18 +106,15 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public Subject save(final Subject subject) throws ShanoirStudiesException {
-		Subject savedSubject = null;
 		try {
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				subjectStudy.setSubject(subject);
 			}
-			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
 			LOG.error("Error while creating subject", dive);
 			throw new ShanoirStudiesException("Error while creating subject");
 		}
-		updateShanoirOld(savedSubject);
-		return savedSubject;
+		return subjectRepository.save(subject);
 	}
 
 	@Override
