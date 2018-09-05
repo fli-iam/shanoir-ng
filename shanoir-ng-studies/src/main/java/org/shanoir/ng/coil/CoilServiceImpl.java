@@ -3,7 +3,7 @@ package org.shanoir.ng.coil;
 import java.util.List;
 import java.util.Optional;
 
-import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.Utils;
@@ -114,11 +114,11 @@ public class CoilServiceImpl implements CoilService {
 	private void deleteCoilOnShanoirOld(final Long coilId) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteCoilQueueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.deleteCoilQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(coilId));
 		} catch (AmqpException e) {
 			LOG.error("Cannot send coil " + coilId + " delete to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.deleteCoilQueueOut().getName(), e);
+					+ RabbitMQConfiguration.deleteCoilQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send coil " + coilId + " because of an error while serializing coil.", e);
 		}
@@ -135,12 +135,12 @@ public class CoilServiceImpl implements CoilService {
 		try {
 			LOG.info("Send update to Shanoir Old");
 			final CoilDTO coilDTO = coilMapper.coilToCoilDTO(coil);
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.coilQueueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.coilQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(coilDTO));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send coil " + coil.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.coilQueueOut().getName(), e);
+					+ RabbitMQConfiguration.coilQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send coil " + coil.getId()
 					+ " save/update because of an error while serializing coil.", e);

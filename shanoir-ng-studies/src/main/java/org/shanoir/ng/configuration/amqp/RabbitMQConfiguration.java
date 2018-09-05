@@ -1,5 +1,6 @@
 package org.shanoir.ng.configuration.amqp;
 
+import org.shanoir.ng.messaging.InterMicroservicesCommunicator;
 import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 @Configuration
-public class RabbitMqConfiguration {
+public class RabbitMQConfiguration {
 
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	private static final String CENTER_QUEUE_NAME_OUT = "center_queue_from_ng";
@@ -33,9 +34,10 @@ public class RabbitMqConfiguration {
 	// Queue from MS studycard
 	private static final String STUDYCARD_QUEUE_TO_STUDY = "studycard_queue_to_study";
 
+    
 	@Bean
-	RabbitMqReceiver receiver() {
-		return new RabbitMqReceiver();
+	InterMicroservicesCommunicator receiver() {
+		return new InterMicroservicesCommunicator();
 	}
 
 	@Bean
@@ -67,7 +69,7 @@ public class RabbitMqConfiguration {
 	public static Queue deleteCoilQueueOut() {
 		return new Queue(DELETE_COIL_QUEUE_NAME_OUT, true);
 	}
-
+    
 	@Bean
 	public static Queue manufacturerModelQueueOut() {
 		return new Queue(MANUFACTURER_MODEL_QUEUE_NAME_OUT, true);

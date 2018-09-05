@@ -2,7 +2,7 @@ package org.shanoir.ng.acquisitionequipment;
 
 import java.util.List;
 
-import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.utils.Utils;
@@ -97,11 +97,11 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	private void deleteEquipmentOnShanoirOld(final Long equipmentId) {
 		try {
 			LOG.info("Send delete to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteAcqEqptQueueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.deleteAcqEqptQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(equipmentId));
 		} catch (AmqpException e) {
 			LOG.error("Cannot send equipment " + equipmentId + " delete to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.deleteAcqEqptQueueOut().getName(), e);
+					+ RabbitMQConfiguration.deleteAcqEqptQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send equipment " + equipmentId + " because of an error while serializing equipment.", e);
 		}
@@ -134,13 +134,13 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	private boolean updateShanoirOld(final AcquisitionEquipment acquisitionEquipment) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.acqEqptQueueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.acqEqptQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(acquisitionEquipment));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error(
 					"Cannot send acquisition equipment " + acquisitionEquipment.getId()
-							+ " save/update to Shanoir Old on queue : " + RabbitMqConfiguration.acqEqptQueueOut().getName(),
+							+ " save/update to Shanoir Old on queue : " + RabbitMQConfiguration.acqEqptQueueOut().getName(),
 					e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send acquisition equipment " + acquisitionEquipment.getId()

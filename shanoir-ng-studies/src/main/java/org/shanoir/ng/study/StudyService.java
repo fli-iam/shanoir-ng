@@ -36,15 +36,6 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	void deleteById(Long id);
 
 	/**
-	 * Delete a Study from the old Shanoir.
-	 *
-	 * @param Study
-	 *            Study.
-	 * @throws ShanoirStudiesException
-	 */
-	void deleteFromShanoirOld(Study study) throws ShanoirStudiesException;
-
-	/**
 	 * Get all the studies
 	 * 
 	 * @return a list of studies

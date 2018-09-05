@@ -95,19 +95,6 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void deleteFromShanoirOld(final Study study) throws ShanoirStudiesException {
-		if (study.getId() != null) {
-			LOG.warn("Delete study with name " + study.getName() + " (id: " + study.getId() + ") from shanoir-old");
-			try {
-				studyRepository.delete(study);
-			} catch (Exception e) {
-				LOG.error("Error while deleting study from Shanoir Old", e);
-				throw new ShanoirStudiesException("Error while deleting study from Shanoir Old");
-			}
-		}
-	}
-
-	@Override
 	public List<Study> findAll() {
 		return studyRepository.findAll();
 	}
