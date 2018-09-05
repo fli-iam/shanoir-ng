@@ -47,7 +47,6 @@ public class Subject extends HalEntity {
 	private Integer sex;
 
 	/** Relations between the subjects and the studies. */
-
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY)
 	private List<SubjectStudy> subjectStudyList;
 

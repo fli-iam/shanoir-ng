@@ -1,21 +1,17 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormBuilder, Validators, FormControl, FormArray, ValidationErrors } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 
 import * as AppUtils from '../../utils/app.utils';
 import * as shajs from 'sha.js';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { slideDown, preventInitialChildAnimations} from '../../shared/animations/animations';
-import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { SubjectStudy } from '../shared/subject-study.model';
 import { StudyService } from '../../studies/shared/study.service';
 
 @Component({
@@ -27,7 +23,6 @@ import { StudyService } from '../../studies/shared/study.service';
 
 export class SubjectComponent implements OnInit, OnChanges {
     
-    private readonly ImagesUrlUtil = ImagesUrlUtil;
     private readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
     
@@ -41,9 +36,7 @@ export class SubjectComponent implements OnInit, OnChanges {
     private firstName: string = "";
     private lastName: string = "";
     private studies: IdNameObject[] = [];
-    private isBirthDateValid: boolean = true;
     private isAlreadyAnonymized: boolean;
-    private init: boolean = false;
     private hasNameUniqueError: boolean = false;
 
     constructor(private route: ActivatedRoute, private router: Router,
@@ -83,7 +76,7 @@ export class SubjectComponent implements OnInit, OnChanges {
     }
     
     private chooseMode(): Promise<void> {
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
             if (this.mode == null) {
                 this.route.queryParams
                 .filter(params => params.mode)
@@ -203,7 +196,9 @@ export class SubjectComponent implements OnInit, OnChanges {
     }
 
     updateModel(): void {
+        let subjectStudyListBackup = this.subject.subjectStudyList;
         this.subject = this.subjectForm.value;
+        this.subject.subjectStudyList = subjectStudyListBackup;
     }
 
     back(subject?: Subject): void {
