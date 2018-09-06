@@ -26,6 +26,19 @@ services:
     depends_on:
       - "keycloak-database"
   #
+  # RabbitMQ: inter-microservices communication
+  #  
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.7.7-management-alpine
+    volumes:
+      - "rabbitmq-data:/var/lib/rabbitmq/mnesia/rabbitmq"
+    ports:
+     - "5672:5672"
+     - "15672:15672"
+    networks:
+      - shanoir_ng_network 
+  #
   # Database for all other microservices
   #
   database:
@@ -53,6 +66,7 @@ services:
     depends_on:
       - "keycloak"
       - "database"
+      - "rabbitmq"
   #
   # Studies microservice
   #
@@ -69,6 +83,7 @@ services:
     depends_on:
       - "keycloak"
       - "database"
+      - "rabbitmq"
   #
   # Import microservice
   #
@@ -86,6 +101,7 @@ services:
     depends_on:
       - "keycloak"
       - "database"
+      - "rabbitmq"
   #
   # Datasets microservice
   #
@@ -104,6 +120,7 @@ services:
     depends_on:
       - "keycloak"
       - "database"
+      - "rabbitmq"
       
   #
   # Preclinical microservice
@@ -122,6 +139,7 @@ services:
     depends_on:
       - "keycloak"
       - "database"
+      - "rabbitmq"
   #
   # Bruker2Dicom, Dicom2Nifti microservice
   #
@@ -142,19 +160,20 @@ services:
   #
   # Solr microservice for Shanoir-NG search
   #
-  solr:
-    container_name: solr
-    image: solr
-    volumes:
-      - "solr-data:/opt/solr/server/solr/mycores"
-    networks:
-      - shanoir_ng_network
-    ports:
-      - "8983:8983"
-    entrypoint:
-      - docker-entrypoint.sh
-      - solr-precreate
-      - mycore
+#  solr:
+#    container_name: solr
+#    image: solr
+#    volumes:
+#      - "solr-data:/opt/solr/server/solr/mycores"
+#    networks:
+#      - shanoir_ng_network
+#    ports:
+#      - "8983:8983"
+#    entrypoint:
+#      - docker-entrypoint.sh
+#      - solr-precreate
+#      - mycore
+#
   #
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
@@ -231,9 +250,11 @@ services:
       - "import"
       - "datasets"
       - "dcm4chee-arc"
+      - "rabbitmq"
 
 volumes:
   keycloak-database-data:
+  rabbitmq-data:
   database-data:
   datasets-data:
   dcm4chee-ldap-data:

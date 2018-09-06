@@ -9,8 +9,8 @@ import java.util.Optional;
 import org.joda.time.DateTime;
 import org.keycloak.KeycloakPrincipal;
 import org.shanoir.ng.accountrequest.AccountRequestInfoRepository;
-import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.email.EmailService;
+import org.shanoir.ng.events.UserDeleteEvent;
 import org.shanoir.ng.role.RoleRepository;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirAuthenticationException;
@@ -21,20 +21,17 @@ import org.shanoir.ng.utils.PasswordUtils;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * User service implementation.
  * 
  * @author msimon
+ * @author mkain
  *
  */
 @Service
@@ -55,13 +52,13 @@ public class UserServiceImpl implements UserService {
 	private KeycloakClient keycloakClient;
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
 	private RoleRepository roleRepository;
 
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+    ApplicationEventPublisher publisher;
 
 	@Override
 	public User confirmAccountRequest(final Long userId, final User user) throws ShanoirUsersException {
@@ -124,7 +121,7 @@ public class UserServiceImpl implements UserService {
 			throw new ShanoirUsersException(UsersErrorModelCode.USER_NOT_FOUND);
 		}
 		userRepository.delete(id);
-		deleteUserOnShanoirOld(id);
+		publisher.publishEvent(new UserDeleteEvent(id));
 		keycloakClient.deleteUser(user.getKeycloakId());
 	}
 
@@ -241,7 +238,6 @@ public class UserServiceImpl implements UserService {
 		}
 		// Send email to user
 		emailService.notifyNewUser(savedUser, newPassword);
-		updateShanoirOld(savedUser);
 		return savedUser;
 	}
 
@@ -275,27 +271,6 @@ public class UserServiceImpl implements UserService {
 			user.setSecondExpirationNotificationSent(true);
 		}
 		userRepository.save(user);
-		updateShanoirOld(user);
-	}
-
-	@Override
-	public void updateFromShanoirOld(final User user) throws ShanoirUsersException {
-		final User userDb = userRepository.findByUsername(user.getUsername()).orElseThrow(
-				() -> new ShanoirUsersException("User with username " + user.getUsername() + " not found"));
-		if (user.isExtensionRequestDemand()) {
-			// Extension request
-			userDb.setExtensionRequestDemand(true);
-			userDb.setExtensionRequestInfo(user.getExtensionRequestInfo());
-		} else {
-			// User update
-			updateUserValues(userDb, user);
-		}
-		try {
-			userRepository.save(userDb);
-		} catch (Exception e) {
-			LOG.error("Error while updating user from Shanoir Old", e);
-			throw new ShanoirUsersException("Error while updating user from Shanoir Old");
-		}
 	}
 
 	@Override
@@ -309,62 +284,6 @@ public class UserServiceImpl implements UserService {
 			throw new ShanoirAuthenticationException("Error while updating last login date for user " + user.getId(),
 					e);
 		}
-	}
-
-	/*
-	 * Send a message to Shanoir old to delete an user.
-	 * 
-	 * @param userId user id.
-	 */
-	private void deleteUserOnShanoirOld(final Long userId) {
-		try {
-			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteQueueOut().getName(),
-					new ObjectMapper().writeValueAsString(userId));
-		} catch (AmqpException e) {
-			LOG.error("Cannot send user " + userId + " delete to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.queueOut().getName(), e);
-		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send user " + userId + " because of an error while serializing user.", e);
-		}
-	}
-
-	/*
-	 * Update Shanoir Old.
-	 * 
-	 * @param user user.
-	 * 
-	 * @return false if it fails, true if it succeed.
-	 */
-	private boolean updateShanoirOld(final User user) {
-		// Parse user to old Shanoir user entity.
-		final ShanoirOldUserDTO shanoirOldUser = new ShanoirOldUserDTO();
-		shanoirOldUser.setId(user.getId());
-		shanoirOldUser.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
-		shanoirOldUser.setCreatedOn(user.getCreationDate());
-		shanoirOldUser.setEmail(user.getEmail());
-		shanoirOldUser.setExpirationDate(user.getExpirationDate());
-		shanoirOldUser.setFirstExpirationNotificationSent(user.isFirstExpirationNotificationSent());
-		shanoirOldUser.setFirstName(user.getFirstName());
-		shanoirOldUser.setLastLoginOn(user.getLastLogin());
-		shanoirOldUser.setLastName(user.getLastName());
-		shanoirOldUser.setRole(user.getRole());
-		shanoirOldUser.setSecondExpirationNotificationSent(user.isSecondExpirationNotificationSent());
-		shanoirOldUser.setUsername(user.getUsername());
-
-		try {
-			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueOut().getName(),
-					new ObjectMapper().writeValueAsString(shanoirOldUser));
-			return true;
-		} catch (AmqpException e) {
-			LOG.error("Cannot send user " + user.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.queueOut().getName(), e);
-		} catch (JsonProcessingException e) {
-			LOG.error("Cannot send user " + user.getId() + " save/update because of an error while serializing user.",
-					e);
-		}
-		return false;
 	}
 
 	/*
@@ -389,7 +308,6 @@ public class UserServiceImpl implements UserService {
 			LOG.error("Error while updating user", e);
 			throw new ShanoirUsersException("Error while updating user");
 		}
-		updateShanoirOld(userDb);
 		keycloakClient.updateUser(userDb);
 		return userDb;
 	}

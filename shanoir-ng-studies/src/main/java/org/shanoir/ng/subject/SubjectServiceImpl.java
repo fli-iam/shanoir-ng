@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
@@ -106,20 +106,17 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public Subject save(final Subject subject) throws ShanoirStudiesException {
-		Subject savedSubject = null;
 		try {
 			if (subject.getSubjectStudyList() != null) {
 				for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 					subjectStudy.setSubject(subject);
 				}
 			}
-			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
 			LOG.error("Error while creating subject", dive);
 			throw new ShanoirStudiesException("Error while creating subject");
 		}
-		updateShanoirOld(savedSubject);
-		return savedSubject;
+		return subjectRepository.save(subject);
 	}
 
 	@Override
@@ -206,12 +203,12 @@ public class SubjectServiceImpl implements SubjectService {
 	public boolean updateShanoirOld(final Subject subject) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.subjectQueueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.subjectQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(subject));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send Subject " + subject.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.studyQueueOut().getName(), e);
+					+ RabbitMQConfiguration.studyQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send Subject " + subject.getId()
 					+ " save/update because of an error while serializing Subject.", e);
