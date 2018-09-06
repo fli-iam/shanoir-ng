@@ -77,14 +77,10 @@ export class AnestheticFormComponent implements OnInit {
             })
             .subscribe(anesthetic => {
                 if (!this.mode.isCreateMode()) {
-                    this.anesthetic = anesthetic;
-                    //this.anestheticTypeEnumValue = AnestheticType[this.anesthetic.anestheticType];
-                    this.ingredientsService.getIngredients(this.anesthetic).then(ingredients => {
-                        if (ingredients) {
-                            this.anesthetic.ingredients = ingredients;
-                        }
-                    });
-                }
+                	if (anesthetic){
+                    	this.anesthetic = anesthetic;
+                    }
+               	 }
             });
     }
 

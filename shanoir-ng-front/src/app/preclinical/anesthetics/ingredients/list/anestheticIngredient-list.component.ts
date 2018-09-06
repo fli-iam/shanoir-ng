@@ -28,7 +28,7 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
 export class AnestheticIngredientsListComponent {
   //@Input() ingredients: AnestheticIngredient[];
   
-  private ingredientsPromise: Promise<void>  = this.getIngredients();
+  private ingredientsPromise: Promise<void>  = this.getAnestheticIngredients();
   private browserPaging: BrowserPaging<AnestheticIngredient>;
   public rowClickAction: Object;
   public columnDefs: any[];
@@ -62,16 +62,25 @@ export class AnestheticIngredientsListComponent {
         });
     }
     
-    getIngredients(): Promise<void> {
-    	let ingredients : AnestheticIngredient[] = [];
-    	if (this.anesthetic && this.anesthetic.ingredients){
-    		ingredients = this.anesthetic.ingredients;
-    	}
-    	this.browserPaging = new BrowserPaging(ingredients, this.columnDefs);
-    	return new Promise<void> ((resolve) => {
+    getAnestheticIngredients(): Promise<void> {
+        let ingredientsLoaded : AnestheticIngredient[] = [];
+        this.browserPaging = new BrowserPaging(ingredientsLoaded, this.columnDefs);
+    	if (this.anesthetic && this.anesthetic.id) {
+            return this.ingredientsService.getIngredients(this.anesthetic).then(ingredients => {
+            	if (ingredients){
+            		this.anesthetic.ingredients = ingredients;
+            		ingredientsLoaded = ingredients;
+            	}
+                this.browserPaging.setItems(ingredientsLoaded);
+                this.table.refresh();
+            });
+        }else{
+        	return new Promise<void> ((resolve) => {
         		resolve();
-        });
+        	})
+        }
     }
+                    	
     
     
     generateAnestheticName(){
@@ -99,17 +108,18 @@ export class AnestheticIngredientsListComponent {
         this.toggleFormAI = false;
         this.createAIMode = false;
         this.generateAnestheticName();
-        this.browserPaging.setItems(this.anesthetic.ingredients);
+        if (this.anesthetic.ingredients){
+        	this.browserPaging.setItems(this.anesthetic.ingredients);
+        }
         this.table.refresh();
     }
     
     
     initiateByCreationMode(): void {
        if(!this.mode.isCreateMode()){
+       		this.getAnestheticIngredients();
             this.createColumnDefs();
         }else{
-            this.anesthetic = new Anesthetic();
-            this.anesthetic.ingredients = [];
             this.createColumnDefs();
         }
     }
@@ -118,6 +128,8 @@ export class AnestheticIngredientsListComponent {
       this.ingredientsService.delete(this.anesthetic.id, ingredient.id).then((res) => this.getAnestheticIngredient(ingredient));
       let index = this.anesthetic.ingredients.findIndex(i => i.id === ingredient.id); //find index in your array
         this.anesthetic.ingredients.splice(index, 1);
+      this.browserPaging.setItems(this.anesthetic.ingredients);
+      this.table.refresh();
     }
     
     getAnestheticIngredient(ingredient: AnestheticIngredient): void {
@@ -128,6 +140,7 @@ export class AnestheticIngredientsListComponent {
        
     ngOnChanges(){
         this.initiateByCreationMode();
+        
     }
     
     viewIngredient = (ingredient: AnestheticIngredient) => {
