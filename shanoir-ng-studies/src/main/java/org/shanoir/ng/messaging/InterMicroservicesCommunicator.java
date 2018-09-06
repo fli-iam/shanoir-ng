@@ -8,7 +8,6 @@ import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.studyuser.StudyUserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -19,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  */
 public class InterMicroservicesCommunicator {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(InterMicroservicesCommunicator.class);
 
 	private static final String MS_USERS_TO_MS_STUDIES_USER_DELETE = "ms_users_to_ms_studies_user_delete";
@@ -27,9 +26,9 @@ public class InterMicroservicesCommunicator {
 	@Autowired
 	private StudyUserRepository studyUserRepository;
 
-    private CountDownLatch latch = new CountDownLatch(1);
+	private CountDownLatch latch = new CountDownLatch(1);
 
-    @RabbitListener(queues = MS_USERS_TO_MS_STUDIES_USER_DELETE)
+	// @RabbitListener(queues = MS_USERS_TO_MS_STUDIES_USER_DELETE)
 	public void receiveUserDeleteMessage(final Long userId) {
 		LOG.debug(" [x] Received User Delete Message: '" + userId + "'");
 		List<StudyUser> studyUserList = studyUserRepository.findByUserId(userId);
@@ -38,10 +37,10 @@ public class InterMicroservicesCommunicator {
 			studyUserRepository.delete(studyUser);
 		}
 		latch.countDown();
-    }
+	}
 
-    public CountDownLatch getLatch() {
-        return latch;
-    }
+	public CountDownLatch getLatch() {
+		return latch;
+	}
 
 }
