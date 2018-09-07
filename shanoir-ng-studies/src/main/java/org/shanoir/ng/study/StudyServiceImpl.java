@@ -131,11 +131,15 @@ public class StudyServiceImpl implements StudyService {
 	public List<Study> findStudiesByUserId(final Long userId) {
 		return studyRepository.findByStudyUserList_UserIdOrderByNameAsc(userId);
 	}
+	
+	public List<Study> findStudiesByUserIdAndStudyUserTypeLessThan(final Long userId,final Integer studyUserTypeId) {
+		return studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserTypeLessThanEqualOrderByNameAsc(userId,studyUserTypeId);		
+	}
 
 	@Override
 	public List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(final Long userId,
 			final EquipmentDicom equipment) throws ShanoirException {
-		final List<Study> studies = findStudiesByUserId(userId);
+		final List<Study> studies = findStudiesByUserIdAndStudyUserTypeLessThan(userId, 3);
 		if (CollectionUtils.isEmpty(studies)) {
 			return new ArrayList<>();
 		}
