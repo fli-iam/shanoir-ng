@@ -13,6 +13,7 @@ import { slideDown, preventInitialChildAnimations} from '../../shared/animations
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
 import { StudyService } from '../../studies/shared/study.service';
+import { resolve } from 'dns';
 
 @Component({
     selector: 'subject-detail',
@@ -22,14 +23,12 @@ import { StudyService } from '../../studies/shared/study.service';
 })
 
 export class SubjectComponent implements OnInit, OnChanges {
-    
-    private readonly ImagedObjectCategory = ImagedObjectCategory;
-    private readonly HASH_LENGTH: number = 14;
-    
     @Input() mode: "view" | "edit" | "create";
     @Input() preFillData: Subject;
     @Output() closing: EventEmitter<any> = new EventEmitter();
     
+    private readonly ImagedObjectCategory = ImagedObjectCategory;
+    private readonly HASH_LENGTH: number = 14;
     private subject: Subject;
     private subjectForm: FormGroup;
     private canModify: Boolean = false;
@@ -38,6 +37,8 @@ export class SubjectComponent implements OnInit, OnChanges {
     private studies: IdNameObject[] = [];
     private isAlreadyAnonymized: boolean;
     private hasNameUniqueError: boolean = false;
+    private isSubjectFoundPromise: Promise<void>;
+    private existingSubjectError: string;
 
     constructor(private route: ActivatedRoute, private router: Router,
         private subjectService: SubjectService,
@@ -217,19 +218,24 @@ export class SubjectComponent implements OnInit, OnChanges {
 
     create(): void {
         this.updateModel();
-        this.generateSubjectIdentifier();
-        // Anonymization only for human subject
-        if (this.humanSelected()) {
-            this.setSubjectBirthDateToFirstOfJanuary();
-        }
-        this.subjectService.create(this.subject)
+        this.subject.identifier = this.generateSubjectIdentifier();
+        this.isSubjectFoundPromise = this.subjectService.findSubjectByIdentifier(this.subject.identifier)
             .then((subject: Subject) => {
-                this.msgService.log('info', 'Subject successfully created');
-                this.back(subject);
-            }, (error: any) => {
-                this.manageRequestErrors(error);
-            });
-        }
+                if (subject) this.existingSubjectError = subject.name;
+                else {console.log("subject not found, create a new one..");
+                    if (this.humanSelected()) {
+                        this.setSubjectBirthDateToFirstOfJanuary();
+                    }
+                    this.subjectService.create(this.subject)
+                        .then((subject: Subject) => {
+                            this.msgService.log('info', 'Subject successfully created');
+                            this.back(subject);
+                        }, (error: any) => {
+                            this.manageRequestErrors(error);
+                });
+            }
+        })
+    }
 
     update(): void {
         this.updateModel();
@@ -246,7 +252,7 @@ export class SubjectComponent implements OnInit, OnChanges {
         this.hasNameUniqueError = AppUtils.hasUniqueError(error, 'name');
     }
 
-    generateSubjectIdentifier(): void {
+    generateSubjectIdentifier(): string {
         let hash;
         if (this.humanSelected() && !this.isAlreadyAnonymized) {
             hash = this.firstName + this.lastName + this.subject.birthDate;
@@ -254,7 +260,7 @@ export class SubjectComponent implements OnInit, OnChanges {
         else {
             hash = this.subject.name + this.subject.birthDate;
         }
-        this.subject.identifier = this.getHash(hash);
+        return this.getHash(hash);
     }
 
     getHash(stringToBeHashed: string): string {
