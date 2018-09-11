@@ -225,14 +225,14 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<Subject> findSubjectByIdentifier(
+	public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@ApiParam(value = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
 
 		final Subject subject = subjectService.findByIdentifier(subjectIdentifier);
 		if (subject == null) {
-			return new ResponseEntity<Subject>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<SubjectDTO>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<Subject>(subject, HttpStatus.OK);
+		return new ResponseEntity<SubjectDTO>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
 
 	}
 }

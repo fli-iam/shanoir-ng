@@ -13,7 +13,6 @@ import { slideDown, preventInitialChildAnimations} from '../../shared/animations
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
 import { StudyService } from '../../studies/shared/study.service';
-import { resolve } from 'dns';
 
 @Component({
     selector: 'subject-detail',
@@ -222,7 +221,7 @@ export class SubjectComponent implements OnInit, OnChanges {
         this.isSubjectFoundPromise = this.subjectService.findSubjectByIdentifier(this.subject.identifier)
             .then((subject: Subject) => {
                 if (subject) this.existingSubjectError = subject.name;
-                else {console.log("subject not found, create a new one..");
+                else {
                     if (this.humanSelected()) {
                         this.setSubjectBirthDateToFirstOfJanuary();
                     }

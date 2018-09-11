@@ -120,7 +120,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@RequestMapping(value = "/findByIdentifier/{subjectIdentifier}", produces = {
 			"application/json" }, method = RequestMethod.GET)
-	ResponseEntity<Subject> findSubjectByIdentifier(
+	ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@ApiParam(value = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier);
 
 }
