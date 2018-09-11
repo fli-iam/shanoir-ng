@@ -23,4 +23,16 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	 * @return list of studies.
 	 */
 	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);
+	
+	/**
+	 * Get studies linked to an user.
+	 * 
+	 * @param userId
+	 *            user id.
+	 * @return list of studies.
+	 */
+	//List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserTypeLowerThanEqualOrderByNameAsc(Long userId,Integer studyUserType);
+
+	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserTypeLessThanEqualOrderByNameAsc(Long userId,
+			Integer studyUserTypeId);
 }
