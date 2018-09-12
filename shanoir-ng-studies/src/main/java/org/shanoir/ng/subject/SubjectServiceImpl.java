@@ -435,7 +435,7 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public Subject saveForOFSEP(SubjectFromShupDTO subjectFromShupDTO) throws ShanoirStudiesException {
-		
+
 		Subject subject = new Subject();
 		subject.setName(subjectFromShupDTO.getName());
 		subject.setBirthDate(subjectFromShupDTO.getBirthDate());
@@ -456,7 +456,7 @@ public class SubjectServiceImpl implements SubjectService {
 		List<SubjectStudy> subjectStudyList = new ArrayList<SubjectStudy>();
 		subjectStudyList.add(subjectStudy);
 		subject.setSubjectStudyList(subjectStudyList);
-		
+	
 		
 		Subject savedSubject = null;
 		String commonName = createOfsepCommonName(subjectFromShupDTO.getStudyCardId());
@@ -465,9 +465,7 @@ public class SubjectServiceImpl implements SubjectService {
 		else
 			subject.setName(commonName);
 		try {
-			subjectStudy.setSubject(savedSubject);
-			List<SubjectStudy> savedSubjectStudy = new ArrayList<SubjectStudy>();
-			subject.setSubjectStudyList(savedSubjectStudy);
+			subjectStudy.setSubject(subject);
 			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
 			LOG.error("Error while creating subject", dive);
