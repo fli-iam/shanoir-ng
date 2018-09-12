@@ -8,7 +8,9 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
+import org.shanoir.ng.subject.dto.SubjectFromShupDTO;
 import org.shanoir.ng.subjectstudy.ExaminationDTO;
+import org.shanoir.ng.subjectstudy.SubjectStudy;
 
 /**
  * Subject service.
@@ -82,6 +84,23 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 
 	Subject saveForOFSEP( Subject subject,  Long studyCardId) throws ShanoirStudiesException;
 
+	
+	/**
+	 * Save a subject for OFSEP.
+	 *
+	 * @param subject
+	 *            subject to create.
+	 * @param subjectStudy
+	 *            subjectStudy to be added to subject.
+	 * @param studyCardId
+	 * 			id of the study card used to generate the subject common name
+	 * @return created subject.
+	 * @throws ShanoirStudiesException
+	 */
+
+	Subject saveForOFSEP(SubjectFromShupDTO subjectFromShupDTO) throws ShanoirStudiesException;
+
+	
 	/**
 	 * Update a subject.
 	 *
@@ -92,6 +111,16 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 */
 	Subject update(Subject subject) throws ShanoirStudiesException;
 
+	/**
+	 * Update a subject.
+	 *
+	 * @param subject
+	 *            subject to update.
+	 * @return updated subject.
+	 * @throws ShanoirStudiesException
+	 */
+	Subject update(Subject subject, SubjectFromShupDTO subjectFromShupDTO) throws ShanoirStudiesException;
+	
 	/**
 	 * Update a subject from the old Shanoir
 	 *
