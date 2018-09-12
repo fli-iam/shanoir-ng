@@ -1,6 +1,5 @@
 package org.shanoir.ng.subject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
@@ -11,13 +10,10 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
-import org.shanoir.ng.study.StudyRepository;
-import org.shanoir.ng.study.StudyService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectFromShupDTO;
 import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
-import org.shanoir.ng.subjectstudy.SubjectStudy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
