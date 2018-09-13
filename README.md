@@ -14,7 +14,7 @@ used from there for the docker-compose startup
 * Configure your local /etc/hosts (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
     * 127.0.0.1       shanoir-ng-nginx
 * For windows 7, increase your RAM and set the port redirection for the virtual box.
-* docker-compose up --build
+* Go to the root folder and execute "docker-compose up --build"
 * If your microservices (studies, users etc.) exit, check if the databases are created. If not, execute the scripts manually in the databases container:
 	* docker-compose exec database sh
 	* cd docker-entrypoint-initdb.d
