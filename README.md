@@ -11,7 +11,7 @@ Installation on using docker-compose
         * the tests will have to be clean up later
     * The build creates all .jars and copies them into the /docker-compose structure to be
 used from there for the docker-compose startup
-* configure your local /etc/hosts (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
+* Configure your local /etc/hosts (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
     * 127.0.0.1       shanoir-ng-nginx
 * For windows 7, increase your RAM and set the port redirection for the virtual box.
 * docker-compose up --build
@@ -25,8 +25,8 @@ used from there for the docker-compose startup
     * http://localhost:8080/auth/admin/
 * Add users for the moment manually into keycloak on using the admin interface
 (in a later version the users from ms users will be copied into keycloak)
-* access and use shanoir-ng: http://shanoir-ng-nginx
-* access to dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/
+* Access and use shanoir-ng: http://shanoir-ng-nginx
+* Access to dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/
 
-* this installation uses Docker named volumes, find more here to handle your local data:
+* This installation uses Docker named volumes, find more here to handle your local data:
 https://docs.docker.com/storage/volumes/
