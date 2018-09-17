@@ -53,12 +53,7 @@ export class UserService {
 
     getUsers(): Promise<User[]> {
         return this.http.get<User[]>(AppUtils.BACKEND_API_USER_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting users', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     requestAccount(user: User): Observable<User> {

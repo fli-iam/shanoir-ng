@@ -3,13 +3,13 @@
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
-					<div class="header command-zone" i18n="View dataset|Title@@datasetDetailViewTitle">Details on dataset</div>
+					<h2 class="header command-zone"i18n="View dataset|Title@@datasetDetailViewTitle">Details on dataset</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'">
-					<div class="header command-zone" i18n="Edit dataset|Title@@datasetDetailEditTitle">Edit dataset</div>
+					<h2 class="header command-zone"i18n="Edit dataset|Title@@datasetDetailEditTitle">Edit dataset</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'create'">
-					<div class="header command-zone" i18n="Create dataset|Title@@datasetDetailCreateTitle">Create dataset</div>
+					<h2 class="header command-zone"i18n="Create dataset|Title@@datasetDetailCreateTitle">Create dataset</h2>
 				</ng-template>
 			</span>
 

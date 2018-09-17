@@ -3,9 +3,9 @@
 		<table class="layout">
 			<tr>
 				<td colspan="2">
-					<div class="header command-zone" *ngIf="creationMode && !requestAccountMode" i18n="Create user|Title@@createUserTitle">Create an user</div>
-					<div class="header command-zone" *ngIf="creationMode && requestAccountMode" i18n="Create user|Request account title@@requestAccountTitle">Request an account</div>
-					<div class="header command-zone" *ngIf="!creationMode" i18n="Edit user|Title@@editUserTitle">Edit user</div>
+					<h2 class="header command-zone"*ngIf="creationMode && !requestAccountMode" i18n="Create user|Title@@createUserTitle">Create an user</h2>
+					<h2 class="header command-zone"*ngIf="creationMode && requestAccountMode" i18n="Create user|Request account title@@requestAccountTitle">Request an account</h2>
+					<h2 class="header command-zone"*ngIf="!creationMode" i18n="Edit user|Title@@editUserTitle">Edit user</h2>
 				</td>
 			</tr>
 			<tr>
@@ -99,7 +99,7 @@
 						<button *ngIf="!requestAccountMode" i18n="Edit user|Cancel button label@@cancelButton" class="Button" (click)="getOut()">Cancel</button>
 						<button *ngIf="requestAccountMode" i18n="Edit user|Cancel button label@@cancelButton" class="Button" (click)="cancelAccountRequest()">Cancel</button>
 						<button type="submit" *ngIf="creationMode && !requestAccountMode" i18n="Edit user|Create button label@@createButton" (click)="create()"
-						 class="Button" [disabled]="!isuserFormValid()">Create</button>
+						 class="Button" [disabled]="!isuserFormValid()">Create<i class="far fa-save"></i></button>
 						<button type="submit" *ngIf="creationMode && requestAccountMode" i18n="Edit user|Request account button label@@requestAccountButton" (click)="accountRequest()"
 						 class="Button" [disabled]="!isuserFormValid()">Request Account</button>
 						<button type="submit" *ngIf="!creationMode && !user.accountRequestDemand && !user.extensionRequestDemand" (click)="update()"

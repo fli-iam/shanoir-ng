@@ -1,15 +1,15 @@
 <div class="content-component">
-		<form [formGroup]="coilForm" class="max-content" novalidate>
+		<form *ngIf="coilForm" [formGroup]="coilForm" class="max-content" novalidate>
 			<div class="layout">
 				<span [ngSwitch]="mode">
 					<ng-template [ngSwitchCase]="'view'">
-						<div class="header command-zone" i18n="View coil|Title@@coilDetailViewTitle">Details on coil</div>
+						<h2 class="header command-zone"i18n="View coil|Title@@coilDetailViewTitle">Details on coil</h2>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'edit'">
-						<div class="header command-zone" i18n="Edit coil|Title@@coilDetailEditTitle">Edit coil</div>
+						<h2 class="header command-zone"i18n="Edit coil|Title@@coilDetailEditTitle">Edit coil</h2>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'">
-						<div class="header command-zone" i18n="Create coil|Title@@coilDetailCreateTitle">Create coil</div>
+						<h2 class="header command-zone"i18n="Create coil|Title@@coilDetailCreateTitle">Create coil</h2>
 					</ng-template>
 				</span>
 				<fieldset>
@@ -21,7 +21,7 @@
 									{{coil.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<input type="text" id="name" formControlName="name" [(ngModel)]="coil.name" />
+									<input type="text" id="name" required formControlName="name" [(ngModel)]="coil.name" />
 								</ng-template>
 							</span>
 						</li>
@@ -102,20 +102,13 @@
 						</li> 
 					</ol>
 				</fieldset>
-				<div class="footer command-zone">
-					<span [ngSwitch]="mode">
-						<button i18n="View coil|Back button label@@backButton" class="Button" (click)="back()">Back</button>
-						<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
-							<button type="submit" i18n="View coil|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
-						</ng-template>
-						<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-							<button type="submit" i18n="Edit coil|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!coilForm.valid">Update</button>
-						</ng-template>
-						<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
-							<button type="submit" i18n="Edit coil|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!coilForm.valid">Create</button>
-						</ng-template>
-					</span>
-				</div>
+				<form-footer
+					[state]="footerState"
+					(update)="update()"
+					(create)="create()"
+					(edit)="edit()"
+					(back)="back()"
+				></form-footer>
 			</div>
 		</form>
 	</div>

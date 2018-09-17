@@ -13,6 +13,7 @@ import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { FooterState } from '../../shared/components/form-footer/footer-state.model';
 
 @Component({
     selector: 'manufacturer-model-detail',
@@ -28,12 +29,12 @@ export class ManufacturerModelComponent implements OnInit {
     @Output() closing: EventEmitter<any> = new EventEmitter();
     @ViewChild('manufModal') manufModal: ModalComponent;
     private isNameUnique: Boolean = true;
-    public canModify: Boolean = false;
     private datasetModalityTypes: Enum[] = [];
     public isMR: Boolean = false;
     private manufs: Manufacturer[];
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
     private datasetModalityTypeEnumValue: string;
+    private footerState: FooterState;
 
     constructor(private route: ActivatedRoute, private router: Router,
         private manufModelService: ManufacturerModelService, private manufService: ManufacturerService,
@@ -46,10 +47,7 @@ export class ManufacturerModelComponent implements OnInit {
         this.getEnum();
         this.getManufs();
         this.getManufacturerModel();
-        this.buildForm();
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.canModify = true;
-        }
+        this.footerState = new FooterState(this.mode, this.keycloakService.isUserAdminOrExpert())
     }
 
     getEnum(): void {
@@ -104,6 +102,7 @@ export class ManufacturerModelComponent implements OnInit {
                 this.manufModel = manufModel;
                 this.datasetModalityTypeEnumValue = DatasetModalityType[this.manufModel.datasetModalityType];
                 this.checkDatasetModalityType(this.datasetModalityTypeEnumValue);
+                this.buildForm();
             });
     }
 
@@ -123,6 +122,7 @@ export class ManufacturerModelComponent implements OnInit {
         this.manufModelForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
+        this.manufModelForm.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
     }
 
     onValueChanged(data?: any) {

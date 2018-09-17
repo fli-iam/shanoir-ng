@@ -15,6 +15,7 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { ManufacturerService } from '../shared/manufacturer.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { FooterState } from '../../shared/components/form-footer/footer-state.model';
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -26,60 +27,61 @@ export class AcquisitionEquipmentComponent implements OnInit {
     @Output() closing: EventEmitter<any> = new EventEmitter();
     @Input() mode: "view" | "edit" | "create";
     @ViewChild('manufModelModal') manufModelModal: ModalComponent;
-    private acqEquip: AcquisitionEquipment = new AcquisitionEquipment();
+    private acqEquip: AcquisitionEquipment;
     public acqEquipForm: FormGroup;
-    private acqEquipId: number;
+    private id: number;
     public isModelNumberUnique: Boolean = true;
-    public canModify: Boolean = false;
     private manufModels: ManufacturerModel[];
     private centers: Center[];
     private datasetModalityTypeEnumValue: String;
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
     public infoIconPath: string = ImagesUrlUtil.INFO_ICON_PATH;
+    private footerState: FooterState;
     
-    constructor(private route: ActivatedRoute, private router: Router,
-        private acqEquipService: AcquisitionEquipmentService, private fb: FormBuilder,
-        private manufService: ManufacturerService, private manufModelService: ManufacturerModelService,
-        private centerService: CenterService,
-        private location: Location, private keycloakService: KeycloakService) {
+    constructor(
+            private route: ActivatedRoute, 
+            private router: Router,
+            private acqEquipService: AcquisitionEquipmentService, 
+            private fb: FormBuilder,
+            private manufModelService: ManufacturerModelService,
+            private centerService: CenterService,
+            private location: Location, 
+            private keycloakService: KeycloakService) {
+
+        this.mode = this.route.snapshot.data['mode'];
+        this.id = +this.route.snapshot.params['id'];   
 
     }
 
     ngOnInit(): void {
         this.getManufModels();
-        this.getCenters();
-        this.buildForm();
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.canModify = true;
-        }
+        Promise.all([
+            this.getCenters(),
+            this.getAcquisitionEquipment()
+        ]).then(() => {
+            if (this.mode == "edit") {
+                // Link to objects coming from list requests to display selected item of drop-down list
+                this.acqEquip.center = this.getCenterById(this.acqEquip.center.id);
+                this.acqEquip.manufacturerModel = this.getManufModelById(this.acqEquip.manufacturerModel.id);
+                this.datasetModalityTypeEnumValue = DatasetModalityType[this.acqEquip.manufacturerModel.datasetModalityType];
+            }
+            this.buildForm();
+        });
+        this.footerState = new FooterState(
+            this.mode,
+            this.keycloakService.isUserAdminOrExpert()
+        );
     }
 
-    getAcquisitionEquipment(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                let acqEquipId = queryParams['id'];
-                let mode = queryParams['mode'];
-                if (mode) {
-                    this.mode = mode;
-                }
-                if (acqEquipId) {
-                    // view or edit mode
-                    this.acqEquipId = acqEquipId;
-                    return this.acqEquipService.getAcquisitionEquipment(acqEquipId);
-                } else {
-                    // create mode
-                    return Observable.of<AcquisitionEquipment>();
-                }
-            })
-            .subscribe((acqEquip: AcquisitionEquipment) => {
-                if (this.mode == "edit") {
-                    // Link to objects coming from list requests to display selected item of drop-down list
-                    acqEquip.center = this.getCenterById(acqEquip.center.id);
-                    acqEquip.manufacturerModel = this.getManufModelById(acqEquip.manufacturerModel.id);
-                }
-                this.acqEquip = acqEquip;
-                this.datasetModalityTypeEnumValue = DatasetModalityType[this.acqEquip.manufacturerModel.datasetModalityType];
+    getAcquisitionEquipment(): Promise<void> {
+        if (this.mode == 'create') {
+            this.acqEquip = new AcquisitionEquipment();
+            return Promise.resolve();
+        } else {
+            return this.acqEquipService.getAcquisitionEquipment(this.id).then(ae => {
+                this.acqEquip = ae;
             });
+        }
     }
 
     getManufModels(manufModelId?: number): void {
@@ -98,12 +100,11 @@ export class AcquisitionEquipmentComponent implements OnInit {
             });
     }
 
-    getCenters(): void {
-        this.centerService
+    getCenters(): Promise<void> {
+        return this.centerService
             .getCentersNames()
             .then(centers => {
                 this.centers = centers;
-                this.getAcquisitionEquipment();
             });
     }
 
@@ -134,6 +135,7 @@ export class AcquisitionEquipmentComponent implements OnInit {
         this.acqEquipForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
+        this.acqEquipForm.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
     }
 
     onValueChanged(data?: any) {
@@ -165,7 +167,7 @@ export class AcquisitionEquipmentComponent implements OnInit {
     }
 
     edit(): void {
-        this.router.navigate(['/acquisition-equipment'], { queryParams: { id: this.acqEquipId, mode: "edit" } });
+        this.router.navigate(['/acquisition-equipment/edit/' + this.id]);
     }
 
     create(): void {
@@ -182,7 +184,7 @@ export class AcquisitionEquipmentComponent implements OnInit {
 
     update(): void {
         this.acqEquip = this.acqEquipForm.value;
-        this.acqEquipService.update(this.acqEquipId, this.acqEquip)
+        this.acqEquipService.update(this.id, this.acqEquip)
             .subscribe((acqEquip) => {
                 this.back();
             }, (err: String) => {

@@ -8,6 +8,7 @@ import { SubjectStudy } from "../../subjects/shared/subject-study.model";
 import { Timepoint } from "./timepoint.model";
 import { StudyUser } from "./study-user.model";
 import { StudyUserType } from "./study-user-type.enum";
+import { User } from "../../users/shared/user.model";
 
 export class Study {
     centers: IdNameObject[];
@@ -39,6 +40,17 @@ export class Study {
         if (study) {
             this.id = study.id;
             this.name = study.name;
+        }
+    }
+
+    public completeMembers(users: User[]) {
+        return Study.completeMembers(this, users);
+    }
+
+    public static completeMembers(study: Study, users: User[]) {
+        if (!study.studyUserList) return;
+        for (let studyUser of study.studyUserList) {
+            StudyUser.completeMember(studyUser, users); 
         }
     }
 }

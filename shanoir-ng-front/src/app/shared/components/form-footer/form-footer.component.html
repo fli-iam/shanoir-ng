@@ -1,0 +1,14 @@
+<div class="footer command-zone">
+    <span [ngSwitch]="state.mode">
+        <button i18n="View subject|Back button label@@backButton" class="Button left-icon" (click)="back.emit()"><i class="fas fa-angle-left"></i>Back</button>
+        <ng-template [ngSwitchCase]="'view'" *ngIf="state.canModify">
+            <button type="submit" i18n="View subject|Edit button label@@editButton" (click)="edit.emit()" class="Button right-icon">Edit<i class="far fa-edit"></i></button>
+        </ng-template>
+        <ng-template [ngSwitchCase]="'edit'" *ngIf="state.canModify">
+            <button type="submit" i18n="Edit center|Update button label@@updateButton" (click)="update.emit()" class="Button right-icon" [disabled]="!state.valid">Update<i class="far fa-save"></i></button>
+        </ng-template>
+        <ng-template [ngSwitchCase]="'create'" *ngIf="state.canModify">
+            <button type="submit" i18n="Edit subject|Create button label@@createButton" (click)="create.emit()" class="Button right-icon" [disabled]="!state.valid">Create<i class="far fa-save"></i></button>
+        </ng-template>
+    </span>
+</div>

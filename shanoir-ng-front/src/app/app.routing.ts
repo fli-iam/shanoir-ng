@@ -28,105 +28,79 @@ import { SubjectComponent } from './subjects/subject/subject.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 
-const appRoutes: Routes = [
-  {
-    path: '',
-    redirectTo: '/home',
-    pathMatch: 'full'
-  }, {
-    path: 'account-request',
-    component: AccountRequestComponent,
-  }, {
-    path: 'acquisition-equipment',
-    component: AcquisitionEquipmentComponent,
-    canActivate: [AuthNotGuestGuard]
-  }, {
-    path: 'acquisition-equipment-list',
-    component: AcquisitionEquipmentListComponent,
-    canActivate: [AuthNotGuestGuard]
-  }, {
-    path: 'center',
-    component: CenterComponent,
-    canActivate: [AuthNotGuestGuard]
-  }, {
-    path: 'center-list',
-    component: CenterListComponent,
-    canActivate: [AuthNotGuestGuard]
-  }, {
-    path: 'user',
-    component: UserComponent
-  }, {
-    path: 'extension-request',
-    component: ExtensionRequestComponent,
-  }, {
-    path: 'home',
-    component: HomeComponent
-  }, {
-    path: 'imports',
-    component: ImportComponent
-  }, {
-    path: 'manufacturer',
-    component: ManufacturerComponent,
-    canActivate: [AuthNotGuestGuard]
-  }, {
-    path: 'manufacturer-model',
-    component: ManufacturerModelComponent,
-    canActivate: [AuthNotGuestGuard]
-  }, {
-    path: 'study',
-    component: StudyComponent,
-    canActivate: [AuthNotGuestGuard]
-  }, {
-    path: 'study-list',
-    component: StudyListComponent,
-    canActivate: [AuthNotGuestGuard]
-  }, {
-    path: 'examination-list',
-    component: ExaminationListComponent,
-    canActivate: [AuthNotGuestGuard]
-  },{
-    path: 'examination',
-    component: ExaminationComponent,
-    canActivate: [AuthNotGuestGuard]
-  },{
-    path: 'new-instrument',
-    component: NewInstrumentComponent,
-    canActivate: [AuthNotGuestGuard]
-  },{
-    path: 'tree-test',
-    component: StudyTreeComponent,
-  }, {
-    path: 'user-list',
-    component: UserListComponent,
-    canActivate: [AuthAdminGuard]
-  }, {
-    path: 'coil-list',
-    component: CoilListComponent,
-    canActivate: [AuthNotGuestGuard]
-  }
-  ,{
-    path: 'coil',
-    component: CoilComponent,
-    canActivate: [AuthNotGuestGuard]
-  },
-  {
-    path: 'subject-list',
-    component: SubjectListComponent,
-    canActivate: [AuthNotGuestGuard]
-  },{
-    path: 'subject',
-    component: SubjectComponent,
-    canActivate: [AuthNotGuestGuard]
-  },{
-    path: 'dataset-list',
-    component: DatasetListComponent,
-    canActivate: [AuthNotGuestGuard]
-  },{
-    path: 'dataset',
-    component: DatasetComponent,
-    canActivate: [AuthNotGuestGuard]
-  }
-
+let appRoutes: Routes = [
+    {
+        path: '',
+        redirectTo: '/home',
+        pathMatch: 'full'
+    }, {
+        path: 'account-request',
+        component: AccountRequestComponent,
+    }, {
+        path: 'user',
+        component: UserComponent
+    }, {
+        path: 'user-list',
+        component: UserListComponent,
+        canActivate: [AuthAdminGuard]
+    }, {
+        path: 'extension-request',
+        component: ExtensionRequestComponent,
+    }, {
+        path: 'home',
+        component: HomeComponent
+    }, {
+        path: 'imports',
+        component: ImportComponent
+    }, {
+        path: 'manufacturer',
+        component: ManufacturerComponent,
+        canActivate: [AuthNotGuestGuard]
+    }, {
+        path: 'manufacturer-model',
+        component: ManufacturerModelComponent,
+        canActivate: [AuthNotGuestGuard]
+    }, {
+        path: 'new-instrument',
+        component: NewInstrumentComponent,
+        canActivate: [AuthNotGuestGuard]
+    }
 ];
 
+appRoutes = appRoutes.concat(
+    getRoutesFor('study', StudyComponent, StudyListComponent),
+    getRoutesFor('subject', SubjectComponent, SubjectListComponent),
+    getRoutesFor('examination', ExaminationComponent, ExaminationListComponent),
+    getRoutesFor('dataset', DatasetComponent, DatasetListComponent),
+    getRoutesFor('center', CenterComponent, CenterListComponent),
+    getRoutesFor('acquisition-equipment', AcquisitionEquipmentComponent, AcquisitionEquipmentListComponent),
+    getRoutesFor('coil', CoilComponent, CoilListComponent),
+);
+
 export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes);
+
+function getRoutesFor(entityName: string, entityComponent, listComponent): Routes {
+    return [
+        {
+            path: entityName,
+            redirectTo: entityName + '/list',
+            pathMatch: 'full'
+        }, {
+            path: entityName + '/list',
+            component: listComponent,
+            canActivate: [AuthNotGuestGuard],
+        }, {
+            path: entityName+'/details/:id',
+            component: entityComponent,
+            data: { mode: 'view' }
+        }, {
+            path: entityName+'/edit/:id',
+            component: entityComponent,
+            data: { mode: 'edit' }
+        }, {
+            path: entityName+'/create',
+            component: entityComponent,
+            data: { mode: 'create' }
+        }
+    ];
+};

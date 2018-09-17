@@ -7,6 +7,7 @@ import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms'
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { FooterState } from '../../shared/components/form-footer/footer-state.model';
 
 @Component({
     selector: 'center-detail',
@@ -18,49 +19,32 @@ export class CenterComponent implements OnInit {
 
     private center: Center = new Center();
     public centerForm: FormGroup;
-    private centerId: number;
+    private id: number;
     @Input() mode: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
-    public canModify: Boolean = false;
     private phoneNumberPatternError = false;
+    private footerState: FooterState;
 
     constructor(private route: ActivatedRoute, private router: Router,
-        private centerService: CenterService, private fb: FormBuilder,
-        private location: Location, private keycloakService: KeycloakService) {
+            private centerService: CenterService, private fb: FormBuilder,
+            private location: Location, private keycloakService: KeycloakService) {
 
+        this.mode = this.route.snapshot.data['mode'];
+        this.id = +this.route.snapshot.params['id'];   
     }
 
     ngOnInit(): void {
-        this.getCenter();
-        this.buildForm();
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.canModify = true;
-        }
-    }
-
-    getCenter(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                let centerId = queryParams['id'];
-                if (!this.mode) {
-                    let mode = queryParams['mode'];
-                    if (mode) {
-                        this.mode = mode;
-                    }
-                }
-                if (centerId && this.mode !== 'create') {
-                    // view or edit mode
-                    this.centerId = centerId;
-                    return this.centerService.getCenter(centerId);
-                } else {
-                    // create mode
-                    return Observable.of<Center>();
-                }
-            })
-            .subscribe((center: Center) => {
+        if (this.mode == 'create') {
+            this.center = new Center();
+            this.buildForm();
+        } else {
+            this.centerService.getCenter(this.id).then((center: Center) => {
                 this.center = center;
+                this.buildForm();
             });
+        }
+        this.footerState = new FooterState(this.mode, this.keycloakService.isUserAdminOrExpert());
     }
 
     buildForm(): void {
@@ -76,6 +60,7 @@ export class CenterComponent implements OnInit {
         this.centerForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
+        this.centerForm.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
     }
 
     onValueChanged(data?: any) {
@@ -100,14 +85,14 @@ export class CenterComponent implements OnInit {
     back(): void {
         if (this.closing.observers.length > 0) {
             this.center = new Center();
-            this.closing.emit(this.centerId);
+            this.closing.emit(this.id);
         } else {
-        this.location.back();
+            this.location.back();
         }
     }
 
     edit(): void {
-        this.router.navigate(['/center'], { queryParams: { id: this.centerId, mode: "edit" } });
+        this.router.navigate(['/center/edit/'+this.center.id]);
     }
 
     create(): void {
@@ -122,7 +107,7 @@ export class CenterComponent implements OnInit {
 
     update(): void {
         this.center = this.centerForm.value;
-        this.centerService.update(this.centerId, this.center)
+        this.centerService.update(this.id, this.center)
             .subscribe((center) => {
                 this.back();
             }, (err: string) => {

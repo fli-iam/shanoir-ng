@@ -2,6 +2,7 @@
     [class.opened]="init && opened" 
     [class.closed]="!opened" 
     [class.animate]="overflow"
+    [class.disabled]="!hasChildren && boolVar == undefined && (!link || link=='')"
     >
     <span 
         *ngIf="hasChildren"

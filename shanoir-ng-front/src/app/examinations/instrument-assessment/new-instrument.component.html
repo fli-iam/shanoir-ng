@@ -3,13 +3,13 @@
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
-					<div class="header command-zone" i18n="View instAssessment|Title@@instAssessmentDetailViewTitle">Details on Instrument Based Assessement</div>
+					<h2 class="header command-zone"i18n="View instAssessment|Title@@instAssessmentDetailViewTitle">Details on Instrument Based Assessement</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'"> 
-					<div class="header command-zone" i18n="Edit instAssessment|Title@@instAssessmentDetailEditTitle">Edit Instrument Based Assessement</div>
+					<h2 class="header command-zone"i18n="Edit instAssessment|Title@@instAssessmentDetailEditTitle">Edit Instrument Based Assessement</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'create'"> 
-					<div class="header command-zone" i18n="Create instAssessment|Title@@instAssessmentDetailCreateTitle">Create Instrument Based Assessement</div>
+					<h2 class="header command-zone"i18n="Create instAssessment|Title@@instAssessmentDetailCreateTitle">Create Instrument Based Assessement</h2>
 				</ng-template>
 			</span>
 			<fieldset>
@@ -37,10 +37,10 @@
 						<button type="submit" i18n="instAssessment detail|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
-						<button type="submit" i18n="instAssessment detail|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!instAssessmentForm.valid">Update</button>
+						<button type="submit" i18n="instAssessment detail|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!instAssessmentForm.valid">Update<i class="far fa-save"></i></button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
-						<button type="submit" i18n="instAssessment detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!instAssessmentForm.valid">Create</button>
+						<button type="submit" i18n="instAssessment detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!instAssessmentForm.valid">Create<i class="far fa-save"></i></button>
 					</ng-template>
 				</span>
 			</div>

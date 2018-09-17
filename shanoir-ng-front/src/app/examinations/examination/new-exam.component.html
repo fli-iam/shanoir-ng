@@ -2,7 +2,7 @@
 	<form [formGroup]="examinationForm"class="max-content" novalidate>
 		<div class="layout">
 			<span>
-                <div class="header command-zone" i18n="Create examination|Title@@examinationDetailCreateTitle">Create examination</div>
+                <h2 class="header command-zone"i18n="Create examination|Title@@examinationDetailCreateTitle">Create examination</h2>
 			</span>
 			<fieldset>
 				<ol>
@@ -53,7 +53,7 @@
 				<span>
 					<button i18n="View examination|Back button label@@backButton" class="Button" (click)="back()">Back</button>
                     <button type="submit" i18n="Edit examination|Create button label@@createButton"
-                        (click)="create()" class="Button" [disabled]="!examinationForm.valid">Create</button>
+                        (click)="create()" class="Button" [disabled]="!examinationForm.valid">Create<i class="far fa-save"></i></button>
 				</span>
 			</div>
 		</div>

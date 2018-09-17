@@ -1,15 +1,15 @@
 <div class="content-component detail">
-	<form [formGroup]="centerForm" class="max-content" novalidate>
+	<form *ngIf="centerForm" [formGroup]="centerForm" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
-					<div class="header command-zone" i18n="View center|Title@@centerDetailViewTitle">Details on center</div>
+					<h2 class="header command-zone"i18n="View center|Title@@centerDetailViewTitle">Details on center</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'">
-					<div class="header command-zone" i18n="Edit center|Title@@centerDetailEditTitle">Edit center</div>
+					<h2 class="header command-zone"i18n="Edit center|Title@@centerDetailEditTitle">Edit center</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'create'">
-					<div class="header command-zone" i18n="Create center|Title@@centerDetailCreateTitle">Create center</div>
+					<h2 class="header command-zone"i18n="Create center|Title@@centerDetailCreateTitle">Create center</h2>
 				</ng-template>
 			</span>
 			<fieldset>
@@ -97,20 +97,13 @@
 					</li>
 				</ol>
 			</fieldset>
-			<div class="footer command-zone">
-				<span [ngSwitch]="mode">
-					<button i18n="View center|Back button label@@backButton" class="Button" (click)="back()">Back</button>
-					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
-						<button type="submit" i18n="View center|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-						<button type="submit" i18n="Edit center|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!centerForm.valid">Update</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
-						<button type="submit" i18n="Edit center|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!centerForm.valid">Create</button>
-					</ng-template>
-				</span>
-			</div>
+			<form-footer
+				[state]="footerState"
+				(update)="update()"
+				(create)="create()"
+				(edit)="edit()"
+				(back)="back()"
+			></form-footer>
 		</div>
 		<div class="layout right" *ngIf="mode=='view'">
 			<div *ngIf="center.acquisitionEquipments?.length > 0">

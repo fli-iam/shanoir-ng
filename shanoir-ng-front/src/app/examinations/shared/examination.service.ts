@@ -47,12 +47,7 @@ export class ExaminationService {
 
     getExamination(id: number): Promise<Examination> {
         return this.http.get<Examination>(AppUtils.BACKEND_API_EXAMINATION_URL + '/' + id)
-            .toPromise()
-            .then(res => res)
-            .catch((error) => {
-                console.error('Error while getting examination', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
