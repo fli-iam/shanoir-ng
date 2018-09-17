@@ -64,4 +64,18 @@ export class StudyTreeComponent {
         this.router.navigate(['/user'], { queryParams: { id: userId } });
     }
 
+    showSubjectDetails(subjectStudy: SubjectStudy) {
+        this.router.navigate(['/subject'], { queryParams: { id: subjectStudy.subject.id, mode: "view" } });
+    }
+
+    /* TODO: uncomment when dataset-acquisition done
+    showDatasetAcquisitionDetails(datasetAcquisitionId: number) {
+        this.router.navigate(['/dataset-acquisition'], { queryParams: { id: datasetAcquisitionId, mode: "view" } });
+    }
+    */
+
+    showDatasetDetails(datasetId: number) {
+        this.router.navigate(['/dataset'], { queryParams: { id: datasetId, mode: "view" } });
+    }
+
 }

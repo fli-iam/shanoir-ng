@@ -108,7 +108,7 @@ spring:
   mail:
     host: localhost
   rabbitmq:
-    host: localhost
+    host: rabbitmq
 server:
   port: 9901
 front.server:

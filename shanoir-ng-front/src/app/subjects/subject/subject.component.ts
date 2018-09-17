@@ -9,7 +9,6 @@ import { FooterState } from '../../shared/components/form-footer/footer-state.mo
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { StudyService } from '../../studies/shared/study.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
@@ -24,26 +23,23 @@ import { SubjectService } from '../shared/subject.service';
 })
 
 export class SubjectComponent implements OnInit, OnChanges {
-    
-    private readonly ImagesUrlUtil = ImagesUrlUtil;
-    private readonly ImagedObjectCategory = ImagedObjectCategory;
-    private readonly HASH_LENGTH: number = 14;
-    
     @Input() mode: "view" | "edit" | "create";
     @Input() preFillData: Subject;
     @Output() closing: EventEmitter<any> = new EventEmitter();
     
     private id: number;
+    private readonly ImagedObjectCategory = ImagedObjectCategory;
+    private readonly HASH_LENGTH: number = 14;
     private subject: Subject;
     private subjectForm: FormGroup;
     private firstName: string = "";
     private lastName: string = "";
     private studies: IdNameObject[] = [];
-    private isBirthDateValid: boolean = true;
     private isAlreadyAnonymized: boolean;
-    private init: boolean = false;
     private hasNameUniqueError: boolean = false;
     private footerState: FooterState;
+    private isSubjectFoundPromise: Promise<void>;
+    private existingSubjectError: string;
 
     constructor(private route: ActivatedRoute, private router: Router,
             private subjectService: SubjectService,
@@ -184,7 +180,9 @@ export class SubjectComponent implements OnInit, OnChanges {
     }
 
     updateModel(): void {
+        let subjectStudyListBackup = this.subject.subjectStudyList;
         this.subject = this.subjectForm.value;
+        this.subject.subjectStudyList = subjectStudyListBackup;
     }
 
     back(subject?: Subject): void {
@@ -203,19 +201,24 @@ export class SubjectComponent implements OnInit, OnChanges {
 
     create(): void {
         this.updateModel();
-        this.generateSubjectIdentifier();
-        // Anonymization only for human subject
-        if (this.humanSelected()) {
-            this.setSubjectBirthDateToFirstOfJanuary();
-        }
-        this.subjectService.create(this.subject)
+        this.subject.identifier = this.generateSubjectIdentifier();
+        this.isSubjectFoundPromise = this.subjectService.findSubjectByIdentifier(this.subject.identifier)
             .then((subject: Subject) => {
-                this.msgService.log('info', 'Subject successfully created');
-                this.back(subject);
-            }, (error: any) => {
-                this.manageRequestErrors(error);
-            });
-        }
+                if (subject) this.existingSubjectError = subject.name;
+                else {
+                    if (this.humanSelected()) {
+                        this.setSubjectBirthDateToFirstOfJanuary();
+                    }
+                    this.subjectService.create(this.subject)
+                        .then((subject: Subject) => {
+                            this.msgService.log('info', 'Subject successfully created');
+                            this.back(subject);
+                        }, (error: any) => {
+                            this.manageRequestErrors(error);
+                });
+            }
+        })
+    }
 
     update(): void {
         this.updateModel();
@@ -232,7 +235,7 @@ export class SubjectComponent implements OnInit, OnChanges {
         this.hasNameUniqueError = AppUtils.hasUniqueError(error, 'name');
     }
 
-    generateSubjectIdentifier(): void {
+    generateSubjectIdentifier(): string {
         let hash;
         if (this.humanSelected() && !this.isAlreadyAnonymized) {
             hash = this.firstName + this.lastName + this.subject.birthDate;
@@ -240,7 +243,7 @@ export class SubjectComponent implements OnInit, OnChanges {
         else {
             hash = this.subject.name + this.subject.birthDate;
         }
-        this.subject.identifier = this.getHash(hash);
+        return this.getHash(hash);
     }
 
     getHash(stringToBeHashed: string): string {

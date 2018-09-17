@@ -63,11 +63,19 @@ export class SubjectService {
     getSubject(id: number): Promise<Subject> {
         return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id)
             .toPromise()
-            .then(res => res)
             .catch((error) => {
                 console.error('Error while getting subject', error);
                 return Promise.reject(error.message || error);
             });
+    }
+
+    findSubjectByIdentifier(identifier: string): Promise<Subject> {
+        return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
+            .toPromise()
+            .catch((error)=> {
+                console.error('Error while finding subject by identifier', error);
+                return Promise.reject(error.message || error);
+        });
     }
 
     create(subject: Subject): Promise<Subject> {

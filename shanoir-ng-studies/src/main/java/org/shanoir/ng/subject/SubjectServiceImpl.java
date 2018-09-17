@@ -7,14 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.StudyRepository;
+import org.shanoir.ng.study.StudyService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
+import org.shanoir.ng.subject.dto.SubjectFromShupDTO;
 import org.shanoir.ng.subjectstudy.ExaminationDTO;
 import org.shanoir.ng.subjectstudy.SubjectStudy;
 import org.shanoir.ng.subjectstudy.SubjectStudyDecorator;
@@ -73,6 +75,9 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Autowired
 	private SubjectStudyDecorator subjectStudyMapper;
+	
+	@Autowired
+	private StudyService studyService;
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirStudiesException {
@@ -106,18 +111,15 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public Subject save(final Subject subject) throws ShanoirStudiesException {
-		Subject savedSubject = null;
 		try {
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				subjectStudy.setSubject(subject);
 			}
-			savedSubject = subjectRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
 			LOG.error("Error while creating subject", dive);
 			throw new ShanoirStudiesException("Error while creating subject");
 		}
-		updateShanoirOld(savedSubject);
-		return savedSubject;
+		return subjectRepository.save(subject);
 	}
 
 	@Override
@@ -174,6 +176,19 @@ public class SubjectServiceImpl implements SubjectService {
 		updateShanoirOld(subjectDb);
 		return subjectDb;
 	}
+	
+	@Override
+	public Subject update(final Subject subject, final SubjectFromShupDTO subjectFromShupDTO) throws ShanoirStudiesException {
+		Subject subjectUpdated = updateSubjectValues(subject, subjectFromShupDTO);
+		try {
+			subjectRepository.save(subjectUpdated);
+		} catch (Exception e) {
+			LOG.error("Error while updating subject", e);
+			throw new ShanoirStudiesException("Error while updating subject");
+		}
+		updateShanoirOld(subjectUpdated);
+		return subjectUpdated;
+	}
 
 	@Override
 	public void updateFromShanoirOld(final Subject subject) throws ShanoirStudiesException {
@@ -204,12 +219,12 @@ public class SubjectServiceImpl implements SubjectService {
 	public boolean updateShanoirOld(final Subject subject) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.subjectQueueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.subjectQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(subject));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send Subject " + subject.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.studyQueueOut().getName(), e);
+					+ RabbitMQConfiguration.studyQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send Subject " + subject.getId()
 					+ " save/update because of an error while serializing Subject.", e);
@@ -238,6 +253,40 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+		return subjectDb;
+	}
+	
+	/*
+	 * Update some values of template to save them in database.
+	 *
+	 * @param templateDb template found in database.
+	 *
+	 * @param template template with new values.
+	 *
+	 * @return database template with new values.
+	 */
+	private Subject updateSubjectValues(final Subject subjectDb, final SubjectFromShupDTO subjectFromShupDTO) {
+
+		subjectDb.setName(subjectFromShupDTO.getName());
+		subjectDb.setBirthDate(subjectFromShupDTO.getBirthDate());
+		subjectDb.setIdentifier(subjectFromShupDTO.getIdentifier());
+		subjectDb.setPseudonymusHashValues(subjectFromShupDTO.getPseudonymusHashValues());
+		subjectDb.setSex(Sex.getSex(subjectFromShupDTO.getSex()));
+		boolean foundStudy = false;
+		for (SubjectStudy ss : subjectDb.getSubjectStudyList()) {
+			if (ss.getId() == subjectFromShupDTO.getStudyId()) {
+				foundStudy = true;
+			}
+		}
+		if (!foundStudy) {
+			SubjectStudy subjectStudy =  new SubjectStudy();
+
+		}
+
+		subjectDb.setManualHemisphericDominance(HemisphericDominance.getDominance(subjectFromShupDTO.getManualHemisphericDominance()));
+		subjectDb.setLanguageHemisphericDominance(HemisphericDominance.getDominance(subjectFromShupDTO.getLanguageHemisphericDominance()));
+		subjectDb.setImagedObjectCategory(ImagedObjectCategory.getCategory(subjectFromShupDTO.getImagedObjectCategory()));
+		//subjectDb.setUserPersonalCommentList(subjectFromShupDTO.getUserPersonalCommentList());
 		return subjectDb;
 	}
 
@@ -382,6 +431,49 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		
 		return examinations;
+	}
+
+	@Override
+	public Subject saveForOFSEP(SubjectFromShupDTO subjectFromShupDTO) throws ShanoirStudiesException {
+
+		Subject subject = new Subject();
+		subject.setName(subjectFromShupDTO.getName());
+		subject.setBirthDate(subjectFromShupDTO.getBirthDate());
+		subject.setIdentifier(subjectFromShupDTO.getIdentifier());
+		subject.setImagedObjectCategory(ImagedObjectCategory.getCategory(subjectFromShupDTO.getImagedObjectCategory()));
+		subject.setLanguageHemisphericDominance(HemisphericDominance.getDominance(subjectFromShupDTO.getLanguageHemisphericDominance()));
+		subject.setManualHemisphericDominance(HemisphericDominance.getDominance(subjectFromShupDTO.getManualHemisphericDominance()));
+		subject.setPseudonymusHashValues(subjectFromShupDTO.getPseudonymusHashValues());
+		subject.setSex(Sex.getSex(subjectFromShupDTO.getSex()));
+		
+		SubjectStudy subjectStudy = new SubjectStudy();
+		subjectStudy.setStudy(studyService.findById(subjectFromShupDTO.getStudyId()));
+		subjectStudy.setPhysicallyInvolved(subjectFromShupDTO.getPhysicallyInvolved());
+		subjectStudy.setSubject(subject);
+		subjectStudy.setSubjectStudyIdentifier(subjectFromShupDTO.getSubjectStudyIdentifier());
+		subjectStudy.setSubjectType(SubjectType.getType(subjectFromShupDTO.getSubjectType()));
+		
+		List<SubjectStudy> subjectStudyList = new ArrayList<SubjectStudy>();
+		subjectStudyList.add(subjectStudy);
+		subject.setSubjectStudyList(subjectStudyList);
+	
+		
+		Subject savedSubject = null;
+		String commonName = createOfsepCommonName(subjectFromShupDTO.getStudyCardId());
+		if (commonName == null || commonName.equals(""))
+			subject.setName("NoCommonName");
+		else
+			subject.setName(commonName);
+		try {
+			subjectStudy.setSubject(subject);
+			savedSubject = subjectRepository.save(subject);
+		} catch (DataIntegrityViolationException dive) {
+			LOG.error("Error while creating subject", dive);
+			throw new ShanoirStudiesException("Error while creating subject");
+		}
+		
+		// updateShanoirOld(savedSubject);
+		return savedSubject;
 	}
 	
 	

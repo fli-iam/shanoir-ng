@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { slideDown } from '../../shared/animations/animations';
+import { FooterState } from '../../shared/components/form-footer/footer-state.model';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
@@ -25,7 +26,6 @@ import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { Timepoint } from '../shared/timepoint.model';
-import { FooterState } from '../../shared/components/form-footer/footer-state.model';
 
 declare type Mode = 'create' | 'edit' | 'view';
 
@@ -309,11 +309,11 @@ export class StudyComponent implements OnInit, AfterViewInit {
 
         this.columnDefs = [
             { headerName: "Username", field: "userName" },
-            { headerName: "First Name", field: "user.firstName" },
-            { headerName: "Last Name", field: "user.lastName" },
-            { headerName: "Email", field: "user.email" },
-            { headerName: "Role", field: "user.role.displayName", width: "63px" },
-            { headerName: "Role/Position*", field: "studyUserType", editable: true, possibleValues: allStudyUserTypes},
+            { headerName: "First Name", field: "firstName" },
+            { headerName: "Last Name", field: "lastName" },
+            { headerName: "Email", field: "email", width: "200%" },
+            { headerName: "Role", field: "role.displayName", width: "63px" },
+            { headerName: "Role/Position*", field: "studyUserType", editable: true, possibleValues: StudyUserType.all(), width: "300%" },
             { headerName: "Received Import Mail", field: "receiveNewImportReport", editable: true },
             { headerName: "Received Anonymization Mail", field: "receiveAnonymizationReport", editable: true },
             { headerName: "", type: "button", awesome: "fa-trash", action: this.removeStudyUser }

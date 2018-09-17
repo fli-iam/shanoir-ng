@@ -279,14 +279,6 @@ public class UserServiceTest {
 		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
 	}
 
-	@Test
-	public void updateFromShanoirOldTest() throws ShanoirUsersException {
-		userService.updateFromShanoirOld(createUser());
-
-		Mockito.verify(userRepository, Mockito.times(1)).findByUsername(Mockito.anyString());
-		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
-	}
-
 	private User createUser() {
 		final User user = new User();
 		user.setId(USER_ID);

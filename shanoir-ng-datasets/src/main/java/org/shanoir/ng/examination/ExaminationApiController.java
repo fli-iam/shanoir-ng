@@ -174,4 +174,40 @@ public class ExaminationApiController implements ExaminationApi {
 		return new EditableOnlyByValidator<Examination>().validate(examination);
 	}
 
+	@Override
+	public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+		final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
+		if (examinations.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations),
+				HttpStatus.OK);
+	}
+
+
+	@Override
+	public ResponseEntity<Long> saveNewExaminationFromShup(@ApiParam(value = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
+			final BindingResult result) throws RestServiceException {
+		
+		
+		// TODO : need to add a check on examination in order to see if it exists already in Shanoig Ng
+		//		Examination examination = examinationService.findByIdentifier(subjectFromShupDTO.getIdentifier());
+		//		if (subject != null) {
+		//			return new ResponseEntity<Long>(HttpStatus.FOUND);
+		//		}
+		
+		// TODO : need to add a data Validation STEP 
+		
+
+		try {
+			final Examination createdExamination= examinationService.save(examinationDTO);
+			LOG.warn("Subject service completed");
+			return new ResponseEntity<Long>(createdExamination.getId(), HttpStatus.OK);
+		} catch (ShanoirDatasetsException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+		}
+
+	}
+
 }

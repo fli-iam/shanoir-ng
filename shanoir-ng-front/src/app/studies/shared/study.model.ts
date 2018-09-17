@@ -1,14 +1,13 @@
-import { IdNameObject } from "../../shared/models/id-name-object.model";
-import { MembersCategory } from "./members-category.model";
-import { StudyCard } from "../../study-cards/shared/study-card.model";
-import { StudyCenter } from "./study-center.model";
-import { StudyStatus } from "./study-status.enum";
-import { StudyType } from "./study-type.enum";
-import { SubjectStudy } from "../../subjects/shared/subject-study.model";
-import { Timepoint } from "./timepoint.model";
-import { StudyUser } from "./study-user.model";
-import { StudyUserType } from "./study-user-type.enum";
-import { User } from "../../users/shared/user.model";
+import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { StudyCard } from '../../study-cards/shared/study-card.model';
+import { SubjectStudy } from '../../subjects/shared/subject-study.model';
+import { User } from '../../users/shared/user.model';
+import { MembersCategory } from './members-category.model';
+import { StudyCenter } from './study-center.model';
+import { StudyStatus } from './study-status.enum';
+import { StudyType } from './study-type.enum';
+import { StudyUser } from './study-user.model';
+import { Timepoint } from './timepoint.model';
 
 export class Study {
     centers: IdNameObject[];

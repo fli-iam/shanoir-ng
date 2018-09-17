@@ -2,7 +2,7 @@ package org.shanoir.ng.manufacturermodel;
 
 import java.util.List;
 
-import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
@@ -92,13 +92,13 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 	private boolean updateShanoirOld(final ManufacturerModel manufacturerModel) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.manufacturerModelQueueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.manufacturerModelQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(manufacturerModel));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send manufacturer model " + manufacturerModel.getId()
 					+ " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.manufacturerModelQueueOut().getName(), e);
+					+ RabbitMQConfiguration.manufacturerModelQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send manufacturer model " + manufacturerModel.getId()
 					+ " save/update because of an error while serializing manufacturer model.", e);

@@ -31,12 +31,12 @@ export class SubjectStudyListComponent implements OnInit, OnChanges{
     ngOnChanges(changes: SimpleChanges) {
         if ((changes['subjectStudyList'] || changes['list'])) {
             if (this.list && this.subjectStudyList)
-            for (let subjectStudy of this.subjectStudyList) {
-                for (let object of this.list) {
-                    if ((this.mode == "subject" && subjectStudy.subject.id == object.id)
-                        || (this.mode == "study" && subjectStudy.study.id == object.id)) {object.selected = true;}
+                for (let subjectStudy of this.subjectStudyList) {
+                    for (let object of this.list) {
+                        if ((this.mode == "subject" && subjectStudy.subject.id == object.id)
+                            || (this.mode == "study" && subjectStudy.study.id == object.id)) {object.selected = true;}
+                    }
                 }
-            }
         }
     }
 

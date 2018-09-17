@@ -12,6 +12,7 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
  *
  * @author msimon
  * @author jlouis
+ * @author mkain
  *
  */
 public interface UserService extends UniqueCheckableService<User> {
@@ -144,14 +145,6 @@ public interface UserService extends UniqueCheckableService<User> {
 	 *            is it first notification?
 	 */
 	void updateExpirationNotification(User user, boolean firstNotification);
-
-	/**
-	 * Update a user from the old Shanoir
-	 * 
-	 * @param user
-	 * @throws ShanoirUsersException
-	 */
-	void updateFromShanoirOld(User user) throws ShanoirUsersException;
 
 	/**
 	 * Update last login date.

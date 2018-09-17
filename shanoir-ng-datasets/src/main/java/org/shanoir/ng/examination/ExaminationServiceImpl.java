@@ -45,6 +45,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Autowired
 	private RestTemplate restTemplate;
+	
+	@Autowired
+	private ExaminationMapper examinationMapper;
 
 	@Override
 	public long countExaminationsByUserId() throws ShanoirDatasetsException {
@@ -75,6 +78,20 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Override
 	public Examination save(final Examination examination) throws ShanoirDatasetsException {
 		Examination savedExamination = null;
+		try {
+			savedExamination = examinationRepository.save(examination);
+		} catch (DataIntegrityViolationException dive) {
+			LOG.error("Error while creating examination", dive);
+			throw new ShanoirDatasetsException("Error while creating examination");
+		}
+		//updateShanoirOld(savedExamination);
+		return savedExamination;
+	}
+	
+	@Override
+	public Examination save(final ExaminationDTO examinationDTO) throws ShanoirDatasetsException {
+		Examination savedExamination = null;
+		Examination examination = examinationMapper.examinationDTOToExamination(examinationDTO);
 		try {
 			savedExamination = examinationRepository.save(examination);
 		} catch (DataIntegrityViolationException dive) {

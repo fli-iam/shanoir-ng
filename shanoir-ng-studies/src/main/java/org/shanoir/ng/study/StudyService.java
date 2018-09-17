@@ -36,15 +36,6 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	void deleteById(Long id);
 
 	/**
-	 * Delete a Study from the old Shanoir.
-	 *
-	 * @param Study
-	 *            Study.
-	 * @throws ShanoirStudiesException
-	 */
-	void deleteFromShanoirOld(Study study) throws ShanoirStudiesException;
-
-	/**
 	 * Get all the studies
 	 * 
 	 * @return a list of studies
@@ -87,6 +78,17 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @return a list of studies.
 	 */
 	List<Study> findStudiesByUserId(Long userId);
+
+	/**
+	 * Find all studies for a user with permission level (studyUserType) lower than specified value.
+	 * 
+	 * @param userId
+	 *            user id.
+	 * @param studyUserTypeId
+	 *            studyUserType id.
+	 * @return a list of studies.
+	 */
+	List<Study> findStudiesByUserIdAndStudyUserTypeLessThan(final Long userId,final Integer studyUserTypeId);
 
 	/**
 	 * Find all studies with theirs study cards for a user.

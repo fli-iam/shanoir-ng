@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
+import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -140,11 +140,11 @@ public class CenterServiceImpl implements CenterService {
 	private void deleteCenterOnShanoirOld(final Long centerId) {
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.deleteCenterQueueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.deleteCenterQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(centerId));
 		} catch (AmqpException e) {
 			LOG.error("Cannot send center " + centerId + " delete to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.deleteCenterQueueOut().getName(), e);
+					+ RabbitMQConfiguration.deleteCenterQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send center " + centerId + " because of an error while serializing center.", e);
 		}
@@ -162,12 +162,12 @@ public class CenterServiceImpl implements CenterService {
 		centerDTO.setAcquisitionEquipments(null);
 		try {
 			LOG.info("Send update to Shanoir Old");
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.centerQueueOut().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.centerQueueOut().getName(),
 					new ObjectMapper().writeValueAsString(centerDTO));
 			return true;
 		} catch (AmqpException e) {
 			LOG.error("Cannot send center " + center.getId() + " save/update to Shanoir Old on queue : "
-					+ RabbitMqConfiguration.centerQueueOut().getName(), e);
+					+ RabbitMQConfiguration.centerQueueOut().getName(), e);
 		} catch (JsonProcessingException e) {
 			LOG.error("Cannot send center " + center.getId()
 					+ " save/update because of an error while serializing center.", e);

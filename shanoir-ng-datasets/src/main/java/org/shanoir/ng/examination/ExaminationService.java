@@ -62,6 +62,16 @@ public interface ExaminationService {
 	Examination save(Examination examination) throws ShanoirDatasetsException;
 
 	/**
+	 * Save an examination.
+	 *
+	 * @param examinationDTO
+	 *            examination to create.
+	 * @return created examination.
+	 * @throws ShanoirDatasetsException
+	 */
+	Examination save(ExaminationDTO examinationDTO) throws ShanoirDatasetsException;
+	
+	/**
 	 * Update an examination.
 	 *
 	 * @param examination
@@ -86,7 +96,7 @@ public interface ExaminationService {
 	 * @author yyao
 	 */
 	List<Examination> findBySubjectId(Long subjectId);
-	
+
 	/**
 	 * Find examinations related to particular subject and study
 	 * 

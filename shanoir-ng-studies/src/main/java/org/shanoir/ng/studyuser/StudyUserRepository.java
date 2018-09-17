@@ -1,5 +1,7 @@
 package org.shanoir.ng.studyuser;
 
+import java.util.List;
+
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -9,4 +11,6 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface StudyUserRepository extends CrudRepository<StudyUser, Long> {
 
+	List<StudyUser> findByUserId(Long userId);
+	
 }

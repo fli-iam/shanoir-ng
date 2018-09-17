@@ -95,19 +95,6 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void deleteFromShanoirOld(final Study study) throws ShanoirStudiesException {
-		if (study.getId() != null) {
-			LOG.warn("Delete study with name " + study.getName() + " (id: " + study.getId() + ") from shanoir-old");
-			try {
-				studyRepository.delete(study);
-			} catch (Exception e) {
-				LOG.error("Error while deleting study from Shanoir Old", e);
-				throw new ShanoirStudiesException("Error while deleting study from Shanoir Old");
-			}
-		}
-	}
-
-	@Override
 	public List<Study> findAll() {
 		return studyRepository.findAll();
 	}
@@ -144,11 +131,15 @@ public class StudyServiceImpl implements StudyService {
 	public List<Study> findStudiesByUserId(final Long userId) {
 		return studyRepository.findByStudyUserList_UserIdOrderByNameAsc(userId);
 	}
+	
+	public List<Study> findStudiesByUserIdAndStudyUserTypeLessThan(final Long userId,final Integer studyUserTypeId) {
+		return studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserTypeLessThanEqualOrderByNameAsc(userId,studyUserTypeId);		
+	}
 
 	@Override
 	public List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(final Long userId,
 			final EquipmentDicom equipment) throws ShanoirException {
-		final List<Study> studies = findStudiesByUserId(userId);
+		final List<Study> studies = findStudiesByUserIdAndStudyUserTypeLessThan(userId, 3);
 		if (CollectionUtils.isEmpty(studies)) {
 			return new ArrayList<>();
 		}
@@ -329,12 +320,6 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setWithExamination(study.isWithExamination());
 		studyDb.setMonoCenter(study.isMonoCenter());
-		studyDb.setSubjectStudyList(study.getSubjectStudyList());
-
-		for(SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-			subjectStudy.setStudy(studyDb);
-		}
-		studyDb.setSubjectStudyList(study.getSubjectStudyList());
 
 		// Copy list of database links study/center
 		final List<StudyCenter> studyCenterDbList = new ArrayList<>(studyDb.getStudyCenterList());
