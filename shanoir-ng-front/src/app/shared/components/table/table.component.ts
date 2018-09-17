@@ -79,7 +79,7 @@ export class TableComponent implements OnInit {
     }
 
     public static getFieldRawValue(obj: Object, path: string): any {
-        function index(robj: any, i: string) { return robj[i] };
+        function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
     }
 
