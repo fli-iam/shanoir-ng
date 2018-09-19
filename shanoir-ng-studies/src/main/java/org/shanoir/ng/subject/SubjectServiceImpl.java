@@ -179,7 +179,24 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Override
 	public Subject update(final Subject subject, final SubjectFromShupDTO subjectFromShupDTO) throws ShanoirStudiesException {
+	
+		for (SubjectStudy ss : subject.getSubjectStudyList()) {
+				LOG.error("<INIT> Suject id " + ss.getId());
+				LOG.error("<INIT> Suject/study id " + ss.getSubjectStudyIdentifier());
+				LOG.error("<INIT> Suject Type " + ss.getSubjectType().name());
+				LOG.error("<INIT> physically involved " + ss.isPhysicallyInvolved());
+		}
+
 		Subject subjectUpdated = updateSubjectValues(subject, subjectFromShupDTO);
+		for (SubjectStudy ss : subjectUpdated.getSubjectStudyList()) {
+			//if (ss.getId() == subjectFromShupDTO.getStudyId()) {
+				LOG.error("<AFTER> Suject id " + ss.getId());
+				LOG.error("<AFTER> Suject/study id " + ss.getSubjectStudyIdentifier());
+				LOG.error("<AFTER> Suject Type " + ss.getSubjectType().name());
+				LOG.error("<AFTER> physically involved " + ss.isPhysicallyInvolved());
+
+		//	}
+		}
 		try {
 			subjectRepository.save(subjectUpdated);
 		} catch (Exception e) {
@@ -274,13 +291,29 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setSex(Sex.getSex(subjectFromShupDTO.getSex()));
 		boolean foundStudy = false;
 		for (SubjectStudy ss : subjectDb.getSubjectStudyList()) {
-			if (ss.getId() == subjectFromShupDTO.getStudyId()) {
+			if (ss.getStudy().getId() == subjectFromShupDTO.getStudyId()) {
+				LOG.error("<BEFORE> Suject id " + ss.getId());
+				LOG.error("<BEFORE> Suject/study id " + ss.getSubjectStudyIdentifier());
+				LOG.error("<BEFORE> Suject Type " + ss.getSubjectType().name());
+				LOG.error("<BEFORE> Suject physically involved " + ss.isPhysicallyInvolved());
+				ss.setSubjectType(SubjectType.getType(subjectFromShupDTO.getSubjectType()));
+				ss.setPhysicallyInvolved(subjectFromShupDTO.getPhysicallyInvolved());
 				foundStudy = true;
 			}
 		}
 		if (!foundStudy) {
 			SubjectStudy subjectStudy =  new SubjectStudy();
-
+			subjectStudy.setSubjectType(SubjectType.getType(subjectFromShupDTO.getSubjectType()));
+			subjectStudy.setPhysicallyInvolved(subjectFromShupDTO.getPhysicallyInvolved());
+			subjectStudy.setStudy(studyService.findById(subjectFromShupDTO.getStudyId()));
+			subjectStudy.setSubject(subjectDb);
+			if (subjectDb.getSubjectStudyList() == null) {
+				List<SubjectStudy> subjectStudyList = new ArrayList<SubjectStudy>();
+				subjectStudyList.add(subjectStudy);
+				subjectDb.setSubjectStudyList(subjectStudyList);
+			} else {
+				subjectDb.getSubjectStudyList().add(subjectStudy);
+			}
 		}
 
 		subjectDb.setManualHemisphericDominance(HemisphericDominance.getDominance(subjectFromShupDTO.getManualHemisphericDominance()));
