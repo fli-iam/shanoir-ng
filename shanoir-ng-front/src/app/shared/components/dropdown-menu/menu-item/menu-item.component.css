@@ -1,7 +1,10 @@
 .menu-item { display: block; margin: 0; color: var(--dark-grey); background-color: var(--light-grey); position: relative; text-align: right; white-space: nowrap; }
+
+.menu-item.disabled::after { content: " "; top: 0;bottom: 0; left: 0;  right: 0;  position: absolute; background-color: var(--light-grey); opacity: 0.8; }
+
 /* .menu-item.active { color: var(--very-light-grey); background-color: var(--color-a); } */
 /* .menu-item.opened { color: var(--very-light-grey); background-color: var(--color-a); } */
-.menu-item:hover, .menu-item.opened { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-a); }
+.menu-item:not(.disabled):hover, .menu-item.opened { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-a); }
 .sub-content { display: inline-block; padding: 0; width: intrinsic; width: -moz-max-content; width: -webkit-max-content; position: absolute; top: 0px; }
     .sub-content:before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; }
 

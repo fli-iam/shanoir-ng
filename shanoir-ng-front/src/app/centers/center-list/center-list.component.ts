@@ -64,18 +64,13 @@ export class CenterListComponent {
             { headerName: "Country", field: "country" }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push(
-                {
-                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/center", getParams: function (item: any): Object {
-                        return { id: item.id, mode: "edit" };
-                    }
+            this.columnDefs.push({
+                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, action: center => this.router.navigate(['/center/edit/'+center.id])
                 });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.columnDefs.push({
-                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/center", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
+                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, action: center => this.router.navigate(['/center/details/'+center.id])
             });
         }
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
@@ -88,16 +83,14 @@ export class CenterListComponent {
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new center", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/center", getParams: function (item: any): Object {
-                    return { mode: "create" };
-                }
+                title: "new center", img: ImagesUrlUtil.ADD_ICON_PATH, action: center => this.router.navigate(['/center/create'])
             });
         }
     }
 
     private onRowClick(center: Center) {
         if (!this.keycloakService.isUserGuest()) {
-            this.router.navigate(['/center'], { queryParams: { id: center.id, mode: "view" } });
+            this.router.navigate(['/center/details/'+center.id])
         }
     }
 

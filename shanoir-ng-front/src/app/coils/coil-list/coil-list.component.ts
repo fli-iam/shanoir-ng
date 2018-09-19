@@ -29,6 +29,7 @@ export class CoilListComponent {
             private viewContainerRef: ViewContainerRef, 
             private keycloakService: KeycloakService,
             private router: Router) {
+                
         this.createColumnDefs();
     }
 
@@ -75,32 +76,26 @@ export class CoilListComponent {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push(
                 {
-                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/coil", getParams: function (item: any): Object {
-                        return { id: item.id, mode: "edit" };
-                    }
+                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, action: item => this.router.navigate(['/coil/edit/' + item.id])
                 });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.columnDefs.push({
-                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/coil", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
+                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, action: item => this.router.navigate(['/coil/details/' + item.id])
             });
         }
 
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new coil.", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/coil", getParams: function (item: any): Object {
-                    return { mode: "create" };
-                }
+                title: "new coil.", img: ImagesUrlUtil.ADD_ICON_PATH, action: item => this.router.navigate(['/coil/create'])
             });
         }
     }
 
     private onRowClick(coil: Coil) {
         if (!this.keycloakService.isUserGuest()) {
-            this.router.navigate(['/coil'], { queryParams: { id: coil.id, mode: "view" } });
+            this.router.navigate(['/coil/details/' + coil.id])
         }
     }
 

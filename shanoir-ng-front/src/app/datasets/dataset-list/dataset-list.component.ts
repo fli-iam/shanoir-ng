@@ -66,9 +66,7 @@ export class DatasetListComponent {
             {headerName: "Comment", field: "originMetadata.comment"},
         ];
         this.columnDefs.push({
-            headerName: "", type: "button", awesome: "fa-eye", target: "/dataset", getParams: function (item: any): Object {
-                return { id: item.id, mode: "view" };
-            }
+            headerName: "", type: "button", awesome: "fa-eye", action: (dataset) => this.router.navigate(['/dataset/details/'+dataset.id])
         });
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push(
@@ -76,10 +74,7 @@ export class DatasetListComponent {
                     headerName: "", 
                     type: "button", 
                     awesome: "fa-edit", 
-                    target: "/dataset", 
-                    getParams: function (item: any): Object {
-                        return { id: item.id, mode: "edit" };
-                    }
+                    action: (dataset) => this.router.navigate(['/dataset/edit/'+dataset.id])
                 }, {
                     headerName: "", 
                     type: "button", 
@@ -91,7 +86,7 @@ export class DatasetListComponent {
     }
     
     private onRowClick(dataset: Dataset) {
-        this.router.navigate(['/dataset'], { queryParams: { id: dataset.id, mode: "view" } });
+        this.router.navigate(['/dataset/details/'+dataset.id]);
     }
 
     openDeleteConfirmDialog = (item: Dataset) => {

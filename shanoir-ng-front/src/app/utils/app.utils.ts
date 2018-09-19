@@ -113,3 +113,12 @@ export class TimesPipe implements PipeTransform {
     return iterable;
   }
 }
+
+export function allOfEnum<T>(enumClass): Array<T> {
+    let list: Array<T> = [];
+    for (let key in enumClass) {
+        if (key != 'all' && isNaN(Number(key)))
+        list.push(enumClass[key]);
+    }
+    return list;
+}

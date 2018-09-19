@@ -270,6 +270,30 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+		
+		// Copy list of database links subject/study
+		final List<SubjectStudy> subjectStudyDbList = new ArrayList<>(subjectDb.getSubjectStudyList());
+		for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+			if (subjectStudy.getId() == null) {
+				// Add link subject/study
+				subjectStudy.setSubject(subjectDb);
+				subjectDb.getSubjectStudyList().add(subjectStudy);
+			}
+		}
+		for (final SubjectStudy subjectStudyDb : subjectStudyDbList) {
+			boolean keepSubjectStudy = false;
+			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				if (subjectStudyDb.getId().equals(subjectStudy.getId())) {
+					keepSubjectStudy = true;
+					break;
+				}
+			}
+			if (!keepSubjectStudy) {
+				// Move link subject/study
+				subjectDb.getSubjectStudyList().remove(subjectStudyDb);
+				subjectStudyRepository.delete(subjectStudyDb.getId());
+			}
+		}
 		return subjectDb;
 	}
 	

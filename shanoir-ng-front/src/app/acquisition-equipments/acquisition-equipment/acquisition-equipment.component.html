@@ -1,15 +1,15 @@
 <div class="content-component">
-	<form [formGroup]="acqEquipForm" class="max-content" novalidate>
+	<form *ngIf="acqEquipForm" [formGroup]="acqEquipForm" class="max-content" novalidate>
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
-					<div class="header command-zone" i18n="View acqEquip|Title@@acqEqptDetailViewTitle">Details on acquisition equipment</div>
+					<h2 class="header command-zone"i18n="View acqEquip|Title@@acqEqptDetailViewTitle">Details on acquisition equipment</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'"> 
-					<div class="header command-zone" i18n="Edit acqEquip|Title@@acqEqptDetailEditTitle">Edit acquisition equipment</div>
+					<h2 class="header command-zone"i18n="Edit acqEquip|Title@@acqEqptDetailEditTitle">Edit acquisition equipment</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'create'"> 
-					<div class="header command-zone" i18n="Create acqEquip|Title@@acqEqptDetailCreateTitle">Create acquisition equipment</div>
+					<h2 class="header command-zone"i18n="Create acqEquip|Title@@acqEqptDetailCreateTitle">Create acquisition equipment</h2>
 				</ng-template>
 			</span>
 			<fieldset>
@@ -82,20 +82,13 @@
 					</li>
 				</ol>
 			</fieldset>
-			<div class="footer command-zone">
-				<span [ngSwitch]="mode">
-					<button i18n="View acqEquip|Back button label@@backButton" class="Button" (click)="back()">Back</button>	
-					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
-						<button type="submit" i18n="View acqEquip|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
-						<button type="submit" i18n="Edit acqEquip|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!acqEquipForm.valid">Update</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
-						<button type="submit" i18n="Create acqEquip|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!acqEquipForm.valid">Create</button>
-					</ng-template>
-				</span>
-			</div>
+			<form-footer
+				[state]="footerState"
+				(update)="update()"
+				(create)="create()"
+				(edit)="edit()"
+				(back)="back()"
+			></form-footer>
 		</div>
 	</form>
 </div>

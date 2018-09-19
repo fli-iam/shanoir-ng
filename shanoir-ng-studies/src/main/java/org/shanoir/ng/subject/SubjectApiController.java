@@ -84,6 +84,20 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<SubjectDTO> saveNewSubject(
 			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException {
+		
+		/* Validation */
+		// A basic template can only update certain fields, check that
+		final FieldErrorMap accessErrors = this.getCreationRightsErrors(subject);
+		// Check hibernate validation
+		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+		// Check unique constrainte
+		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(subject);
+		/* Merge errors. */
+		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		if (!errors.isEmpty()) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+		}
 
 		try {
 			final Subject createdSubject = subjectService.save(subject);
@@ -124,7 +138,6 @@ public class SubjectApiController implements SubjectApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
-
 	}
 
 	@Override
@@ -219,7 +232,7 @@ public class SubjectApiController implements SubjectApi {
 		if (subject == null) {
 			return new ResponseEntity<SubjectDTO>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
+		return new ResponseEntity<SubjectDTO>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
 
 	}
 

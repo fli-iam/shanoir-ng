@@ -77,34 +77,27 @@ export class ExaminationListComponent {
             }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push(
-                {
-                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/examination", getParams: function (item: any): Object {
-                        return { id: item.id, mode: "edit" };
-                    }
-                });
+            this.columnDefs.push({
+                headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, action: (item: any) => this.router.navigate(['/examination/edit/' + item.id])
+            });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.columnDefs.push({
-                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/examination", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
+                headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, action: (item: any) => this.router.navigate(['/examination/details/' + item.id])
             });
         }
 
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new examination.", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/examination", getParams: function (item: any): Object {
-                    return { mode: "create" };
-                }
+                title: "new examination.", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/examination/create"
             });
         }
     }
 
     private onRowClick(exam: Examination) {
         if (!this.keycloakService.isUserGuest()) {
-            this.router.navigate(['/examination'], { queryParams: { id: exam.id, mode: "view" } });
+            this.router.navigate(['/examination/details/' + exam.id])
         }
     }
 

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef } from '@angular/core';
 
 import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pageable.model';
 
@@ -29,7 +29,7 @@ export class TableComponent implements OnInit {
     private loaderImageUrl: string = "assets/images/loader.gif";
     
 
-    constructor() {
+    constructor(private applicationRef: ApplicationRef) {
         this.maxResultsField = this.maxResults;
     }
 
@@ -79,7 +79,7 @@ export class TableComponent implements OnInit {
     }
 
     public static getFieldRawValue(obj: Object, path: string): any {
-        function index(robj: any, i: string) { return robj[i] };
+        function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
     }
 
@@ -98,7 +98,7 @@ export class TableComponent implements OnInit {
     }
 
     /**
-     * Just get the field value, but not using any renderer!
+     * Set the property value
      */
     private setFieldRawValue(obj: Object, path: string, value: any) {
         const split = path.split('.');
@@ -182,7 +182,7 @@ export class TableComponent implements OnInit {
         this.currentPage = p;
         this.isLoading = true;
         this.getPage(this.getPageable()).then(page => {
-            this.page = page;  
+            this.page = page;
             setTimeout(() => this.isLoading = false, 200);
         });
     }

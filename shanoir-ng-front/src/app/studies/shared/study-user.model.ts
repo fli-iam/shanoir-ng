@@ -1,26 +1,26 @@
 import { Role } from "../../roles/role.model";
 import { StudyUserType } from "./study-user-type.enum";
+import { User } from "../../users/shared/user.model";
 
 export class StudyUser {
     studyId: number;
     userId: number;
     receiveAnonymizationReport: boolean;
     receiveNewImportReport: boolean;
-    _studyUserType: any;
+    studyUserType: StudyUserType;
     userName: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: Role;
+    user: User;
 
-    get studyUserType(): any {
-        if (typeof this._studyUserType == 'string') {
-            this._studyUserType = StudyUserType.get(this._studyUserType);
-        }
-        return this._studyUserType;
+    public completeMember(users: User[]) {
+        StudyUser.completeMember(this, users);
     }
 
-    set studyUserType(studyUserType: any) {
-        this._studyUserType = studyUserType;
+    public static completeMember(studyUser: StudyUser, users: User[]) {
+        for (let user of users) {
+            if (studyUser.userId == user.id) {
+                studyUser.user = user;
+                user.selected = true;
+            }
+        }
     }
 }

@@ -1,21 +1,18 @@
-import { Component, OnInit, Input , ViewChild} from '@angular/core';
 import { Location } from '@angular/common';
-import { ActivatedRoute, Router, Params } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-import { ExaminationService } from '../shared/examination.service';
-import { Examination } from '../shared/examination.model';
-import { Center } from '../../centers/shared/center.model';
-import { CenterService } from '../../centers/shared/center.service';
-import { Study } from '../../studies/shared/study.model';
-import { StudyService } from '../../studies/shared/study.service';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { ImagesUrlUtil } from "../../shared/utils/images-url.util";
-
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
+
+import { CenterService } from '../../centers/shared/center.service';
+import { FooterState } from '../../shared/components/form-footer/footer-state.model';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { StudyService } from '../../studies/shared/study.service';
+import { Examination } from '../shared/examination.model';
+import { ExaminationService } from '../shared/examination.service';
 
 
 @Component({
@@ -29,11 +26,10 @@ export class ExaminationComponent implements OnInit {
     @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
     public examinationForm: FormGroup
-    public examination: Examination = new Examination();
-    private examinationId: number;
+    private _examination: Examination;
+    private id: number;
     public mode: "view" | "edit" | "create";
     private isNameUnique: Boolean = true;
-    public canModify: Boolean = false;
     private centers: IdNameObject[];
     public studies: IdNameObject[];
     private subjects: IdNameObject[];
@@ -41,46 +37,44 @@ export class ExaminationComponent implements OnInit {
     private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
     isDateValid: boolean = true;
     selectedDateNormal: IMyDate;
+    private footerState: FooterState;
 
     constructor(private route: ActivatedRoute, private router: Router,
-        private examinationService: ExaminationService, private fb: FormBuilder,
-        private centerService: CenterService,
-        private studyService: StudyService,
-        private location: Location, private keycloakService: KeycloakService) {
+            private examinationService: ExaminationService, private fb: FormBuilder,
+            private centerService: CenterService,
+            private studyService: StudyService,
+            private location: Location, private keycloakService: KeycloakService) {
 
+        this.mode = this.route.snapshot.data['mode'];
+        this.id = +this.route.snapshot.params['id'];
     }
 
     ngOnInit(): void {
         this.getCenters();
         this.getStudies();
-        this.getExamination();
-        this.buildForm();
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.canModify = true;
-        }
+        this.fetchExamination();
+        this.footerState = new FooterState(this.mode, this.keycloakService.isUserAdminOrExpert());
     }
 
-    getExamination(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                let examinationId = queryParams['id'];
-                let mode = queryParams['mode'];
-                if (mode) {
-                    this.mode = mode;
-                }
-                if (examinationId) {
-                    // view or edit mode
-                    this.examinationId = examinationId;
-                    return this.examinationService.getExamination(examinationId);
-                } else {
-                    // create mode
-                    return Observable.of<Examination>();
-                }
-            })
-            .subscribe((examination: Examination) => {
+    set examination(examination: Examination) {
+        this._examination = examination;
+        this.buildForm();
+    }
+
+    get examination(): Examination {
+        return this._examination;
+    }
+
+    fetchExamination(): void {
+        if (this.mode == 'create') {
+            this.examination = new Examination();
+        } else {
+            this.examinationService.getExamination(this.id)
+            .then((examination: Examination) => {
                 this.examination = examination;
                 this.getDateToDatePicker(this.examination);
             });
+        }
     }
 
     getCenters(): void {
@@ -88,10 +82,6 @@ export class ExaminationComponent implements OnInit {
             .getCentersNamesForExamination()
             .then(centers => {
                 this.centers = centers;
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting center list!");
             });
     }
 
@@ -100,10 +90,6 @@ export class ExaminationComponent implements OnInit {
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting study list!");
             });
     }
 
@@ -122,6 +108,7 @@ export class ExaminationComponent implements OnInit {
         this.examinationForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
+        this.examinationForm.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
     }
 
     onValueChanged(data?: any) {
@@ -193,7 +180,7 @@ export class ExaminationComponent implements OnInit {
     }
 
     edit(): void {
-        this.router.navigate(['/examination'], { queryParams: { id: this.examinationId, mode: "edit" } });
+        this.router.navigate(['/examination/edit/'+this.examination.id]);
     }
 
     submit(): void {
@@ -213,7 +200,7 @@ export class ExaminationComponent implements OnInit {
 
     update(): void {
         this.submit();
-        this.examinationService.update(this.examinationId, this.examination)
+        this.examinationService.update(this.id, this.examination)
             .subscribe((examination) => {
                 this.back();
             }, (err: String) => {

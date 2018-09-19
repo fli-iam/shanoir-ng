@@ -58,7 +58,7 @@ export class SubjectListComponent {
             return null;
         };
         this.columnDefs = [
-            { headerName: "Common Name", field: "name" },
+            { headerName: "Common Name", field: "name", defaultSortCol: true, defaultAsc: true },
             { headerName: "Sex", field: "sex" },
 
             {
@@ -74,34 +74,27 @@ export class SubjectListComponent {
         ];
 
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push(
-                {
-                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/subject", getParams: function (item: any): Object {
-                        return { id: item.id, mode: "edit" };
-                    }
+            this.columnDefs.push({
+                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, action: subject => this.router.navigate(['/subject/edit/' + subject.id])
                 });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.columnDefs.push({
-                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/subject", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
+                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, action: subject => this.router.navigate(['/subject/details/' + subject.id])
             });
         }
 
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new subject.", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/subject", getParams: function (item: any): Object {
-                    return { mode: "create" };
-                }
+                title: "new subject.", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/subject/create"
             });
         }
     }
 
     private onRowClick(subject: Subject) {
         if (!this.keycloakService.isUserGuest()) {
-            this.router.navigate(['/subject'], { queryParams: { id: subject.id, mode: "view" } });
+            this.router.navigate(['/subject/details/' + subject.id]);
         }
     }
 }

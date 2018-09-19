@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { NgModule, ErrorHandler } from '@angular/core';
+import { NgModule, ErrorHandler, Injector } from '@angular/core';
 
 import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
@@ -100,6 +100,7 @@ import { DateValidator } from './shared/date/date.validator';
 import { PagerComponent } from './shared/components/table/pager/pager.component';
 import { TableSearchComponent } from './shared/components/table/search/search.component';
 import { TimesPipe } from './utils/app.utils';
+import { FormFooterComponent } from './shared/components/form-footer/form-footer.component'
 
 
 @NgModule({
@@ -179,7 +180,8 @@ import { TimesPipe } from './utils/app.utils';
         SubjectStudyListComponent,
         DateValidator,
         TableSearchComponent,
-        TimesPipe
+        TimesPipe,
+        FormFooterComponent
     ],
     entryComponents: [
         ConfirmDialogComponent
@@ -218,4 +220,7 @@ import { TimesPipe } from './utils/app.utils';
     ],
     bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {
+
+    
+ }

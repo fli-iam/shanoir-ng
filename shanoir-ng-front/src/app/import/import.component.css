@@ -2,11 +2,12 @@
 
 form { border: none !important; background-color: transparent; }
 
-.step-block { position: relative; margin-top: 20px; display: block; }
+.step-block { margin-top: 20px; display: block; }
 
 .commands button + button { margin-left: 10px; }
 
 .last.step { padding: 15px; }
     .last.step button { font-size: 16px; }
-    .progress { margin-left: 30px; }
-    .progress img { height: 10px; vertical-align: middle; margin: 0 10px; }
+    .last.step img { height: 41px; vertical-align: top; margin: 0 20px; }
+
+.tree > node { margin-left: 0; }

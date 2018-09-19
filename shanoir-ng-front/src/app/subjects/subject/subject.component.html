@@ -1,15 +1,15 @@
 <div class="content-component detail" [@preventInitialChildAnimations]>
-	<form *ngIf="subject" [formGroup]="subjectForm" class="max-content" novalidate>
+	<form *ngIf="subjectForm" [formGroup]="subjectForm" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
-					<div class="header command-zone" i18n="View subject|Title@@subjectDetailViewTitle">Details on subject</div>
+					<h2 class="header command-zone"i18n="View subject|Title@@subjectDetailViewTitle">Details on subject</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'">
-					<div class="header command-zone" i18n="Edit subject|Title@@subjectDetailEditTitle">Edit subject</div>
+					<h2 class="header command-zone"i18n="Edit subject|Title@@subjectDetailEditTitle">Edit subject</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'create'">
-					<div class="header command-zone" i18n="Create subject|Title@@subjectDetailCreateTitle">Create subject</div>
+					<h2 class="header command-zone"i18n="Create subject|Title@@subjectDetailCreateTitle">Create subject</h2>
 				</ng-template>
 			</span>
 			<fieldset>
@@ -164,22 +164,18 @@
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view'">
+				<legend>Studies</legend>
 				<subject-study-list mode="study" [list]="studies" [(subjectStudyList)]="subject.subjectStudyList"></subject-study-list>
 			</fieldset>
-			<div class="footer command-zone">
-				<span [ngSwitch]="mode">
-					<button i18n="View subject|Back button label@@backButton" class="Button" (click)="back()">Back</button>
-					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
-						<button type="submit" i18n="View subject|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-						<button type="submit" i18n="Edit center|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!subjectForm.valid">Update</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
-						<button type="submit" i18n="Edit subject|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!subjectForm.valid">Create</button>
-					</ng-template>
-				</span>
-			</div>
+			
+			<form-footer
+				[state]="footerState"
+				(update)="update()"
+				(create)="create()"
+				(edit)="edit()"
+				(back)="back()"
+			></form-footer>
+
 		</div>
 		<div class="layout right" *ngIf="mode=='view'">
 			<span class="right-col">

@@ -1,15 +1,15 @@
 <div class="content-component">
-	<form [formGroup]="examinationForm" class="max-content" novalidate>
+	<form *ngIf="examination" [formGroup]="examinationForm" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
-					<div class="header command-zone" i18n="View examination|Title@@examinationDetailViewTitle">Details on examination</div>
+					<h2 class="header command-zone"i18n="View examination|Title@@examinationDetailViewTitle">Details on examination</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'">
-					<div class="header command-zone" i18n="Edit examination|Title@@examinationDetailEditTitle">Edit examination</div>
+					<h2 class="header command-zone"i18n="Edit examination|Title@@examinationDetailEditTitle">Edit examination</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'create'">
-					<div class="header command-zone" i18n="Create examination|Title@@examinationDetailCreateTitle">Create examination</div>
+					<h2 class="header command-zone"i18n="Create examination|Title@@examinationDetailCreateTitle">Create examination</h2>
 				</ng-template>
 			</span>
 			<fieldset>
@@ -171,38 +171,31 @@
 						</li>
 				</ol>
 			</fieldset>
-			<div class="footer command-zone">
-				<span [ngSwitch]="mode">
-					<button i18n="View examination|Back button label@@backButton" class="Button" (click)="back()">Back</button>
-					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
-						<button type="submit" i18n="View examination|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-						<button type="submit" i18n="Edit examination|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!examinationForm.valid">Update</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
-						<button type="submit" i18n="Edit examination|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!examinationForm.valid">Create</button>
-					</ng-template>
-				</span>
-			</div>
+			<form-footer
+				[state]="footerState"
+				(update)="update()"
+				(create)="create()"
+				(edit)="edit()"
+				(back)="back()"
+			></form-footer>
 		</div>
 		<div class="layout right" *ngIf="mode=='view'">
 			<span class="right-col">
 				<div class="examination-data" i18n="Examination data|Title@@examinationDetailDataTitle">Data</div>
 			</span>
-			<examination-tree [examination]="examination"></examination-tree> 
+			<examination-tree *ngIf="examination" [examination]="examination"></examination-tree> 
 		</div>
 	</form>
 </div>
 
 <app-modal modalDialogId="instAssessmentModal" #instAssessmentModal>
 		<div class="app-modal-body">
-		  <instrument-essessment-detail  (closing)="closePopin($event)"></instrument-essessment-detail>
+		  <instrument-essessment-detail (closing)="closePopin($event)"></instrument-essessment-detail>
 		</div>
 </app-modal>
 
-<app-modal modalDialogId="attachNewFilesModal" #attachNewFilesModal>
+<app-modal *ngIf="examination" modalDialogId="attachNewFilesModal" #attachNewFilesModal>
 		<div class="app-modal-body">
-		  <upload-extra-data  [examinationStudyId]="examination.studyId" [studies]="studies" (closing)="closeAttachedFilePopin($event)"></upload-extra-data>
+		  <upload-extra-data [examination]="examination" [studies]="studies" (closing)="closeAttachedFilePopin($event)"></upload-extra-data>
 		</div>
 </app-modal>

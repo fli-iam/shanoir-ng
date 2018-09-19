@@ -24,11 +24,11 @@ export class SubjectService {
     getSubjectsNames(): Promise<IdNameObject[]> {
         return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_SUBJECT_NAMES_URL)
         .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting subjects names', error);
-                return Promise.reject(error.message || error);
-            });
+        .then(response => response)
+        .catch((error) => {
+            console.error('Error while getting subjects names', error);
+            return Promise.reject(error.message || error);
+        });
     }
 
     getCentersNames(): Promise<Subject[]> {
