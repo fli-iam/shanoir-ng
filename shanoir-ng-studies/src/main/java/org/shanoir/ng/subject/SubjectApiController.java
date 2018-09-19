@@ -260,11 +260,10 @@ public class SubjectApiController implements SubjectApi {
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "subject to update", required = true) @RequestBody SubjectFromShupDTO subjectFromShupDTO,
 			final BindingResult result) throws RestServiceException {
+
 		// IMPORTANT : avoid any confusion that could lead to security breach
-		LOG.error("################################################# Q ## ");
-		LOG.error("################################################# S ## ");
-		
-		Subject subject = subjectService.findById(subjectId);
+	
+		Subject subject = subjectService.findByIdWithSubjecStudies(subjectId);
 		if (subject == null) {
 			return new ResponseEntity<Long>(HttpStatus.NO_CONTENT);
 		}

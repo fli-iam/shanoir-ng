@@ -162,5 +162,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	
 	public List<ExaminationDTO> findExaminationsForSubjectStudyRel(final Long subjectId, final Long studyId) throws ShanoirStudiesException;
 
+	Subject findByIdWithSubjecStudies(Long id);
+
 
 }

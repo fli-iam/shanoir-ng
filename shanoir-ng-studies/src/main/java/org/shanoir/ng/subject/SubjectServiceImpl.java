@@ -68,6 +68,9 @@ public class SubjectServiceImpl implements SubjectService {
 	private SubjectStudyRepository subjectStudyRepository;
 
 	@Autowired
+	private SubjectRepositoryImpl subjectRepositoryImpl;
+	
+	@Autowired
 	private RestTemplate restTemplate;
 
 	@Autowired
@@ -109,6 +112,11 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectRepository.findOne(id);
 	}
 
+	@Override
+	public Subject findByIdWithSubjecStudies(final Long id) {
+		return subjectRepositoryImpl.findSubjectWithSubjectStudyById(id);
+	}
+	
 	@Override
 	public Subject save(final Subject subject) throws ShanoirStudiesException {
 		try {
@@ -180,23 +188,8 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public Subject update(final Subject subject, final SubjectFromShupDTO subjectFromShupDTO) throws ShanoirStudiesException {
 	
-		for (SubjectStudy ss : subject.getSubjectStudyList()) {
-				LOG.error("<INIT> Suject id " + ss.getId());
-				LOG.error("<INIT> Suject/study id " + ss.getSubjectStudyIdentifier());
-				LOG.error("<INIT> Suject Type " + ss.getSubjectType().name());
-				LOG.error("<INIT> physically involved " + ss.isPhysicallyInvolved());
-		}
 
 		Subject subjectUpdated = updateSubjectValues(subject, subjectFromShupDTO);
-		for (SubjectStudy ss : subjectUpdated.getSubjectStudyList()) {
-			//if (ss.getId() == subjectFromShupDTO.getStudyId()) {
-				LOG.error("<AFTER> Suject id " + ss.getId());
-				LOG.error("<AFTER> Suject/study id " + ss.getSubjectStudyIdentifier());
-				LOG.error("<AFTER> Suject Type " + ss.getSubjectType().name());
-				LOG.error("<AFTER> physically involved " + ss.isPhysicallyInvolved());
-
-		//	}
-		}
 		try {
 			subjectRepository.save(subjectUpdated);
 		} catch (Exception e) {
@@ -298,13 +291,15 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 	
 	/*
-	 * Update some values of template to save them in database.
+	 * Update some values of subject to save them in database.
+	 * 
+	 * EXCEPT FOR Attribute UserPersonalCommentList
 	 *
-	 * @param templateDb template found in database.
+	 * @param subjectDB is subject found in DB prior the update
 	 *
-	 * @param template template with new values.
+	 * @param SubjectFromShupDTO contains the new values.
 	 *
-	 * @return database template with new values.
+	 * @return a Subject with new values.
 	 */
 	private Subject updateSubjectValues(final Subject subjectDb, final SubjectFromShupDTO subjectFromShupDTO) {
 
@@ -316,10 +311,6 @@ public class SubjectServiceImpl implements SubjectService {
 		boolean foundStudy = false;
 		for (SubjectStudy ss : subjectDb.getSubjectStudyList()) {
 			if (ss.getStudy().getId() == subjectFromShupDTO.getStudyId()) {
-				LOG.error("<BEFORE> Suject id " + ss.getId());
-				LOG.error("<BEFORE> Suject/study id " + ss.getSubjectStudyIdentifier());
-				LOG.error("<BEFORE> Suject Type " + ss.getSubjectType().name());
-				LOG.error("<BEFORE> Suject physically involved " + ss.isPhysicallyInvolved());
 				ss.setSubjectType(SubjectType.getType(subjectFromShupDTO.getSubjectType()));
 				ss.setPhysicallyInvolved(subjectFromShupDTO.getPhysicallyInvolved());
 				foundStudy = true;
@@ -343,7 +334,15 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setManualHemisphericDominance(HemisphericDominance.getDominance(subjectFromShupDTO.getManualHemisphericDominance()));
 		subjectDb.setLanguageHemisphericDominance(HemisphericDominance.getDominance(subjectFromShupDTO.getLanguageHemisphericDominance()));
 		subjectDb.setImagedObjectCategory(ImagedObjectCategory.getCategory(subjectFromShupDTO.getImagedObjectCategory()));
-		//subjectDb.setUserPersonalCommentList(subjectFromShupDTO.getUserPersonalCommentList());
+		
+		/**
+		 *  the following line is commented because R/O in shanoir uploader. 
+		 *  If in future version, this is enable in Shanoir Uploader remove the comment
+		 *  on the following line..
+		 */
+				
+		// subjectDb.setUserPersonalCommentList(subjectFromShupDTO.getUserPersonalCommentList());
+		
 		return subjectDb;
 	}
 
