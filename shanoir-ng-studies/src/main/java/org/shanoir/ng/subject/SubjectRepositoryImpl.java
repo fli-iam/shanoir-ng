@@ -31,7 +31,7 @@ public class SubjectRepositoryImpl implements SubjectRepositoryCustom {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<IdNameDTO> findIdsAndNames() {
-		return em.createNativeQuery("SELECT id, name FROM subject", "subjectNameResult").getResultList();
+		return em.createNativeQuery("SELECT id, name FROM subject ORDER BY name", "subjectNameResult").getResultList();
 	}
 
 }
