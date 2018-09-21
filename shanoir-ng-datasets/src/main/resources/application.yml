@@ -99,8 +99,9 @@ spring:
     show-sql: true
   jooq:
     sql-dialect: Mysql
-#  rabbitmq:
-#    host: localhost
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
 server:
     port: 9904
 front.server:
