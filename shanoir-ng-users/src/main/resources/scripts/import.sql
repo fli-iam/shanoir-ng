@@ -27,4 +27,5 @@ VALUES
 	(4, 0, null, 0, NOW(), 'jacques.martin@gmail.com', '2016/12/31', null, null, 0, 'Jacques', 0, 0, 'Martin', 'jmartin', 2),
 	(5, 0, 2, 0, NOW(), 'ricky.martin@gmail.com', '2017/05/31', '2018/05/31', 'MotivationMotivationMotivationMotivationMotivationMotivationMotivationMotivationMotivationMotivationMotivationMotivationMotivationMotivation MotivationMotivationMotivationMotivation', 1, 'Ricky', 0, 0, 'Martin', 'wopa', 2),
 	(6, 1, 1, 0, NOW(), 'michel.sardou@gmail.com', null, null, null, 0, 'Michel', 0, 0, 'sardou', 'connemara', 2),
-	(7, 0, 3, 0, NOW(), 'paul.bismuth@gmail.com', null, null, null, 0, 'Paul', 0, 0, 'Bismuth', 'ns2017', 4);
+	(7, 0, 3, 0, NOW(), 'paul.bismuth@gmail.com', null, null, null, 0, 'Paul', 0, 0, 'Bismuth', 'ns2017', 4),
+	(8, 0, null, 0, NOW(), 'mbodin@shanoir.fr', null, null, null, 0, 'Marjolaine', 0, 0, 'Bodin', 'mbodin', 1);
