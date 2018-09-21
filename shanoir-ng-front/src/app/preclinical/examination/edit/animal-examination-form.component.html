@@ -251,6 +251,6 @@
 
 <app-modal modalDialogId="attachNewFilesModal" #attachNewFilesModal>
 		<div class="app-modal-body">
-		  <upload-extra-data  [examinationStudyId]="examination.studyId" [studies]="studies" (closing)="closeAttachedFilePopin($event)"></upload-extra-data>
+		  <upload-extra-data  [examination]="examination" [studies]="studies" (closing)="closeAttachedFilePopin($event)"></upload-extra-data>
 		</div>
 </app-modal>
