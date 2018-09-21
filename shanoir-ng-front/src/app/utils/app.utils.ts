@@ -39,6 +39,7 @@ export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/da
 
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
+export const BACKEND_API_EXAMINATION_PRECLINICAL_URL: string = BACKEND_API_EXAMINATION_URL + '/preclinical';
 export const BACKEND_API_EXAMINATION_COUNT_URL: string = BACKEND_API_EXAMINATION_URL + '/count';
 
 // Acquisition equipment http api

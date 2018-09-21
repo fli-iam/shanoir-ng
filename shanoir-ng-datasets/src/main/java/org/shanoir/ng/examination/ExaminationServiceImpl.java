@@ -42,10 +42,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Autowired
 	private MicroserviceRequestsService microservicesRequestsService;
 
-
 	@Autowired
 	private RestTemplate restTemplate;
-	
+
 	@Autowired
 	private ExaminationMapper examinationMapper;
 
@@ -53,7 +52,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	public long countExaminationsByUserId() throws ShanoirDatasetsException {
 		return examinationRepository.countByStudyIdIn(getStudiesForUser());
 	}
-	
+
 	@Override
 	public void deleteById(final Long id) throws ShanoirDatasetsException {
 		examinationRepository.delete(id);
@@ -84,10 +83,10 @@ public class ExaminationServiceImpl implements ExaminationService {
 			LOG.error("Error while creating examination", dive);
 			throw new ShanoirDatasetsException("Error while creating examination");
 		}
-		//updateShanoirOld(savedExamination);
+		// updateShanoirOld(savedExamination);
 		return savedExamination;
 	}
-	
+
 	@Override
 	public Examination save(final ExaminationDTO examinationDTO) throws ShanoirDatasetsException {
 		Examination savedExamination = null;
@@ -98,7 +97,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			LOG.error("Error while creating examination", dive);
 			throw new ShanoirDatasetsException("Error while creating examination");
 		}
-		//updateShanoirOld(savedExamination);
+		// updateShanoirOld(savedExamination);
 		return savedExamination;
 	}
 
@@ -112,7 +111,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			LOG.error("Error while updating examination", e);
 			throw new ShanoirDatasetsException("Error while updating examination");
 		}
-		//updateShanoirOld(examinationDb);
+		// updateShanoirOld(examinationDb);
 		return examinationDb;
 	}
 
@@ -131,6 +130,12 @@ public class ExaminationServiceImpl implements ExaminationService {
 				}
 			}
 		}
+	}
+
+	@Override
+	public Page<Examination> findPreclinicalPage(final boolean isPreclinical, final Pageable pageable) {
+		// Get list of studies reachable by connected user
+		return examinationRepository.findByStudyIdInAndPreclinical(getStudiesForUser(), isPreclinical, pageable);
 	}
 
 	/*
@@ -183,21 +188,22 @@ public class ExaminationServiceImpl implements ExaminationService {
 	 * 
 	 * @return false if it fails, true if it succeed.
 	 */
-//	private boolean updateShanoirOld(final Examination examination) {
-//		try {
-//			LOG.info("Send update to Shanoir Old");
-//			rabbitTemplate.convertAndSend(RabbitMqConfiguration.examinationQueueOut().getName(),
-//					new ObjectMapper().writeValueAsString(examination));
-//			return true;
-//		} catch (AmqpException e) {
-//			LOG.error("Cannot send examination " + examination.getId() + " save/update to Shanoir Old on queue : "
-//					+ RabbitMqConfiguration.examinationQueueOut().getName(), e);
-//		} catch (JsonProcessingException e) {
-//			LOG.error("Cannot send examination " + examination.getId()
-//					+ " save/update because of an error while serializing examination.", e);
-//		}
-//		return false;
-//	}
+	// private boolean updateShanoirOld(final Examination examination) {
+	// try {
+	// LOG.info("Send update to Shanoir Old");
+	// rabbitTemplate.convertAndSend(RabbitMqConfiguration.examinationQueueOut().getName(),
+	// new ObjectMapper().writeValueAsString(examination));
+	// return true;
+	// } catch (AmqpException e) {
+	// LOG.error("Cannot send examination " + examination.getId() + " save/update to
+	// Shanoir Old on queue : "
+	// + RabbitMqConfiguration.examinationQueueOut().getName(), e);
+	// } catch (JsonProcessingException e) {
+	// LOG.error("Cannot send examination " + examination.getId()
+	// + " save/update because of an error while serializing examination.", e);
+	// }
+	// return false;
+	// }
 
 	/*
 	 * Update some values of examination to save them in database.

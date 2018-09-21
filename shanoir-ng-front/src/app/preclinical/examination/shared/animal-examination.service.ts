@@ -14,7 +14,7 @@ export class AnimalExaminationService {
     
      getPage(pageable: Pageable): Promise<Page<Examination>> {
         return this.http.get<Page<Examination>>(
-            AppUtils.BACKEND_API_EXAMINATION_URL, 
+            AppUtils.BACKEND_API_EXAMINATION_PRECLINICAL_URL+'/1', 
             { 'params': pageable.toParams() }
         ).toPromise();
     }

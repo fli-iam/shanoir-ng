@@ -70,7 +70,7 @@ public interface ExaminationService {
 	 * @throws ShanoirDatasetsException
 	 */
 	Examination save(ExaminationDTO examinationDTO) throws ShanoirDatasetsException;
-	
+
 	/**
 	 * Update an examination.
 	 *
@@ -100,11 +100,24 @@ public interface ExaminationService {
 	/**
 	 * Find examinations related to particular subject and study
 	 * 
-	 * @param subjectId: the id of the subject
-	 * @param studyId: the id of the study
+	 * @param subjectId:
+	 *            the id of the subject
+	 * @param studyId:
+	 *            the id of the study
 	 * @return list of examinations.
 	 */
 	List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId);
-	
 
+	/**
+	 * Get a paginated list of examinations reachable by connected user, for a given
+	 * preclinical value.
+	 * 
+	 * @param isPreclinical
+	 *            preclinical examination
+	 * @param pageable
+	 *            pagination data.
+	 * @return list of examinations.
+	 * @throws ShanoirDatasetsException
+	 */
+	Page<Examination> findPreclinicalPage(boolean isPreclinical, Pageable pageable) throws ShanoirDatasetsException;;
 }

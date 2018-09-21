@@ -86,7 +86,26 @@ public class ExaminationApiController implements ExaminationApi {
 		if (examinations.getContent().size() == 0) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<Page<ExaminationDTO>>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+		return new ResponseEntity<Page<ExaminationDTO>>(examinationMapper.examinationsToExaminationDTOs(examinations),
+				HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
+			@ApiParam(value = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical,
+			Pageable pageable) {
+		Page<Examination> examinations;
+		try {
+			// Get examinations reachable by connected user
+			examinations = examinationService.findPreclinicalPage(isPreclinical, pageable);
+		} catch (ShanoirDatasetsException e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		if (examinations.getContent().size() == 0) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<Page<ExaminationDTO>>(examinationMapper.examinationsToExaminationDTOs(examinations),
+				HttpStatus.OK);
 	}
 
 	@Override
@@ -175,32 +194,32 @@ public class ExaminationApiController implements ExaminationApi {
 	}
 
 	@Override
-	public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+	public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations),
-				HttpStatus.OK);
+		return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
 
-
 	@Override
-	public ResponseEntity<Long> saveNewExaminationFromShup(@ApiParam(value = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
+	public ResponseEntity<Long> saveNewExaminationFromShup(
+			@ApiParam(value = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException {
-		
-		
-		// TODO : need to add a check on examination in order to see if it exists already in Shanoig Ng
-		//		Examination examination = examinationService.findByIdentifier(subjectFromShupDTO.getIdentifier());
-		//		if (subject != null) {
-		//			return new ResponseEntity<Long>(HttpStatus.FOUND);
-		//		}
-		
-		// TODO : need to add a data Validation STEP 
-		
+
+		// TODO : need to add a check on examination in order to see if it exists
+		// already in Shanoig Ng
+		// Examination examination =
+		// examinationService.findByIdentifier(subjectFromShupDTO.getIdentifier());
+		// if (subject != null) {
+		// return new ResponseEntity<Long>(HttpStatus.FOUND);
+		// }
+
+		// TODO : need to add a data Validation STEP
 
 		try {
-			final Examination createdExamination= examinationService.save(examinationDTO);
+			final Examination createdExamination = examinationService.save(examinationDTO);
 			LOG.warn("Subject service completed");
 			return new ResponseEntity<Long>(createdExamination.getId(), HttpStatus.OK);
 		} catch (ShanoirDatasetsException e) {
