@@ -25,6 +25,7 @@ export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '
 export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjects';
 export const BACKEND_API_SUBJECT_NAMES_URL: string = BACKEND_API_SUBJECT_URL + '/names';
 export const BACKEND_API_SUBJECT_FILTER_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjects/filter';
+export const BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER : string = BACKEND_API_SUBJECT_URL + '/findByIdentifier';
 
 // Subject Study http api
 export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjectStudy';
@@ -113,4 +114,13 @@ export class TimesPipe implements PipeTransform {
     };
     return iterable;
   }
+}
+
+export function allOfEnum<T>(enumClass): Array<T> {
+    let list: Array<T> = [];
+    for (let key in enumClass) {
+        if (key != 'all' && isNaN(Number(key)))
+        list.push(enumClass[key]);
+    }
+    return list;
 }

@@ -30,6 +30,15 @@ public interface ExaminationMapper {
 	PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> examinations);
 
 	/**
+	 * Map list of @Examination to not pageable list of @ExaminationDTO.
+	 * 
+	 * @param examinations
+	 *            list of examinations.
+	 * @return list of examinations DTO.
+	 */
+	List<ExaminationDTO> examinationsToExaminationDTOs(List<Examination> examinations);
+	
+	/**
 	 * Map list of @Examination to list of @SubjectExaminationDTO.
 	 * 
 	 * @param examination
@@ -49,6 +58,16 @@ public interface ExaminationMapper {
 	 */
 	ExaminationDTO examinationToExaminationDTO(Examination examination);
 
+	/**
+	 * Map a @ExaminationDTO to a @Examination.
+	 * 
+	 * @param examinationDTO
+	 *
+	 * @return examination.
+	 */
+	
+	Examination examinationDTOToExamination(ExaminationDTO examinationDTO);
+	
 	/**
 	 * Map a @Examination to a @SubjectExaminationDTO.
 	 * 

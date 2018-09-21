@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { NgModule, ErrorHandler } from '@angular/core';
+import { NgModule, ErrorHandler, Injector } from '@angular/core';
 
 import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
@@ -101,6 +101,7 @@ import { DateValidator } from './shared/date/date.validator';
 import { PagerComponent } from './shared/components/table/pager/pager.component';
 import { TableSearchComponent } from './shared/components/table/search/search.component';
 import { TimesPipe } from './utils/app.utils';
+import { FormFooterComponent } from './shared/components/form-footer/form-footer.component'
 
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
@@ -229,6 +230,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         DateValidator,
         TableSearchComponent,
         TimesPipe,
+        FormFooterComponent,
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,
@@ -312,4 +314,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     ],
     bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {
+
+    
+ }

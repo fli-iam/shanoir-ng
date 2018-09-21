@@ -26,14 +26,13 @@ public class ManufacturerModelRepositoryImpl implements ManufacturerModelReposit
 		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
 	}
 
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<IdNameDTO> findIdsAndNames() {
 		return em.createNativeQuery("SELECT id, name FROM manufacturer_model", "ManufacturerModelNameResult").getResultList();
 	}
 
-
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<IdNameDTO> findIdsAndNamesForCenter(Long centerId) {
 		return em.createNativeQuery("SELECT id, name FROM center ", "ManufacturerModelNameResult").getResultList();

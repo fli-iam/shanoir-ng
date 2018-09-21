@@ -19,5 +19,16 @@ public interface SubjectRepositoryCustom extends ItemRepositoryCustom<Subject> {
 	 * @return list of studies.
 	 */
 	List<IdNameDTO> findIdsAndNames();
+	
+	
+	/**
+	 * Find subject by Id with subject study info (since it is a Lazy Loading).
+	 * 
+	 * @Param Long id;
+	 * 
+	 * @return Subject.
+	 */
+	Subject findSubjectWithSubjectStudyById(Long id);
+
 
 }

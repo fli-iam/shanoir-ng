@@ -1,16 +1,14 @@
-import { Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ViewContainerRef } from '@angular/core';
+import { Router } from '@angular/router';
 
-import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-dialog.component";
-import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
+import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { StudyStatus } from '../shared/study-status.enum';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { StudyStatus } from '../shared/study-status.enum';
-import { TableComponent } from "../../shared/components/table/table.component";
-import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
-import { Router } from '@angular/router';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 
 @Component({
     selector: 'study-list',
@@ -84,9 +82,7 @@ export class StudyListComponent {
                 headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'
             },
             {
-                headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/study", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "edit" };
-                }
+                headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, action: study => this.router.navigate(['/study/edit/' + study.id]) 
             }
             // ,{ headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteStudyConfirmDialog }
         ];
@@ -94,16 +90,14 @@ export class StudyListComponent {
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new study", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/study", getParams: function (item: any): Object {
-                    return { mode: "create" };
-                }
+                title: "new study", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/study/create"
             });
         }
     }
 
     private onRowClick(study: Study) {
         if (!this.keycloakService.isUserGuest()) {
-            this.router.navigate(['/study'], { queryParams: { id: study.id, mode: "view" } });
+            this.router.navigate(['study/details/'+study.id]);
         }
     }
 

@@ -1,9 +1,9 @@
- :host() {display: table; border-spacing: 0; border: 1px solid var(--light-grey); table-layout: fixed; width: 100%; border-top: 0; }
+ :host() { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; }
 .full-row { background-color: var(--color-b); overflow: initial; }
 th,
 caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; overflow: hidden; }
 th { width: 100%; white-space: normal; }
-	.controls { padding: 0; text-align: left; background-color: var(--light-grey); color: var(--very-dark-grey); }
+	.controls { padding: 0; text-align: left; background-color: transparent; color: var(--very-dark-grey); }
 		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 0; border: 1px solid transparent; color: var(--dark-grey); }
 			.controls button:hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
 			.controls button span { vertical-align: middle; }
@@ -35,12 +35,13 @@ th { width: 100%; white-space: normal; }
 			th.status-bar .options span { padding: 0 10px; }
 				th.status-bar .options span + span { border: 0; border-left: 1px solid var(--grey); }
 tr { height: 20px; }
-	tr.even { background-color: var(--light-grey); }
-	tr.odd { background-color: var(--lighter-grey); }
+	/* tr.even { background-color: var(--light-grey); }
+	tr.odd { background-color: var(--lighter-grey); } */
 	tr:hover td:not(.loading):not(.empty) { height: 20px; background-color: var(--color-b-light); cursor: pointer; }
 td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
-	td + td { border-left: 1px dotted var(--grey); }
+	td + td { border-left: 1px solid var(--light-grey); }
 	td.bool { text-align: center; }
+	td.cell input:not([type='checkbox']), td.cell select { width: 100%; }
 	td.cell-date { text-align: right; }
 	td.cell-number { text-align: right; }
 	td.cell-nofield { text-align: center; }

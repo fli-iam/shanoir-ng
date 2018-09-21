@@ -7,6 +7,7 @@ import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms'
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { FooterState } from '../../shared/components/form-footer/footer-state.model';
 
 @Component({
     selector: 'manufacturer-detail',
@@ -21,7 +22,7 @@ export class ManufacturerComponent implements OnInit {
     @Input() mode: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
-    public canModify: Boolean = false;
+    private footerState: FooterState;
 
     constructor (private route: ActivatedRoute, private router: Router,
         private manufService: ManufacturerService,   private fb: FormBuilder,
@@ -31,10 +32,7 @@ export class ManufacturerComponent implements OnInit {
 
     ngOnInit(): void {
         this.getManufacturer();
-        this.buildForm();
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.canModify = true;
-        }
+        this.footerState = new FooterState(this.mode, this.keycloakService.isUserAdminOrExpert());
     }
 
     getManufacturer(): void {
@@ -58,6 +56,7 @@ export class ManufacturerComponent implements OnInit {
             })
             .subscribe((manuf: Manufacturer) => {
                 this.manuf = manuf;
+                this.buildForm();
             });
     }   
 
@@ -68,6 +67,7 @@ export class ManufacturerComponent implements OnInit {
         this.manufForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
+        this.manufForm.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
     }
 
     onValueChanged(data?: any) {

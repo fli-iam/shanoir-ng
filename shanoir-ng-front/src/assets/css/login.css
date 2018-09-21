@@ -6,9 +6,10 @@ body { background-color: var(--color-a); }
 	.logo img { margin: 20px; }
 
 .login-main { text-align: center; background-color: var(--color-a); width: 100%; height: 100%; }
-	.login-main form { margin: auto;	width: 300px; text-align: center; }
-		.login-main form a { text-decoration: none; color: var(--color-a); }
-	.login-main .footer { text-align: center; } 
+	.login-main form { margin: auto; text-align: center; }
+		.login-main form a { text-decoration: none; color: var(--color-b-light); }
+	.login-main .header { padding: 20px 0; color: var(--color-b-light); } 
+	.login-main .footer { text-align: center; padding: 0; } 
 	.login-main .error { color: var(--color-error); } 
 
 .instructions { line-height: 1.3; }

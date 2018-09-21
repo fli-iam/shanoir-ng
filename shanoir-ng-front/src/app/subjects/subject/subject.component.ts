@@ -1,18 +1,19 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Location } from '@angular/common';
-import { ActivatedRoute, Router, Params } from '@angular/router';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-
-import * as AppUtils from '../../utils/app.utils';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as shajs from 'sha.js';
-import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
+
+import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
+import { FooterState } from '../../shared/components/form-footer/footer-state.model';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
-import { slideDown, preventInitialChildAnimations} from '../../shared/animations/animations';
+import { StudyService } from '../../studies/shared/study.service';
+import * as AppUtils from '../../utils/app.utils';
+import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { StudyService } from '../../studies/shared/study.service';
 
 @Component({
     selector: 'subject-detail',
@@ -22,34 +23,38 @@ import { StudyService } from '../../studies/shared/study.service';
 })
 
 export class SubjectComponent implements OnInit, OnChanges {
-    
-    private readonly ImagedObjectCategory = ImagedObjectCategory;
-    private readonly HASH_LENGTH: number = 14;
-    
     @Input() mode: "view" | "edit" | "create";
     @Input() preFillData: Subject;
     @Output() closing: EventEmitter<any> = new EventEmitter();
     
+    private id: number;
+    private readonly ImagedObjectCategory = ImagedObjectCategory;
+    private readonly HASH_LENGTH: number = 14;
     private subject: Subject;
     private subjectForm: FormGroup;
-    private canModify: Boolean = false;
     private firstName: string = "";
     private lastName: string = "";
     private studies: IdNameObject[] = [];
     private isAlreadyAnonymized: boolean;
     private hasNameUniqueError: boolean = false;
+    private footerState: FooterState;
+    private isSubjectFoundPromise: Promise<void>;
+    private existingSubjectError: string;
 
     constructor(private route: ActivatedRoute, private router: Router,
-        private subjectService: SubjectService,
-        private studyService: StudyService,
-        private fb: FormBuilder,
-        private location: Location, 
-        private keycloakService: KeycloakService,
-        private msgService: MsgBoxService) {
+            private subjectService: SubjectService,
+            private studyService: StudyService,
+            private fb: FormBuilder,
+            private location: Location, 
+            private keycloakService: KeycloakService,
+            private msgService: MsgBoxService) {
+
+        this.mode = this.route.snapshot.data['mode'];
+        this.id = +this.route.snapshot.params['id'];
     }
 
     ngOnInit(): void {
-        this.chooseMode().then(this.initData.bind(this));
+        this.initData();
     }
 
     private initData() {
@@ -70,28 +75,14 @@ export class SubjectComponent implements OnInit, OnChanges {
             case 'view': {
                 this.fetchSubject();
                 break;
-            }   
+            } 
+            default: {
+                throw new Error('Cannot find the component\'s mode')
+            }
         }
-        this.canModify = this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert();
+        this.footerState = new FooterState(this.mode, this.keycloakService.isUserAdminOrExpert());
     }
     
-    private chooseMode(): Promise<void> {
-        return new Promise(resolve => {
-            if (this.mode == null) {
-                this.route.queryParams
-                .filter(params => params.mode)
-                .subscribe(params => {
-                    if (!params.mode) {
-                        throw new Error("a mode parameter must be set");
-                    }
-                    this.mode = params.mode;
-                    resolve();
-                });
-            } else {
-                resolve();
-            }
-        });
-    }
 
     public setSubject(subject: Subject) {
         this.subject = subject;
@@ -117,15 +108,7 @@ export class SubjectComponent implements OnInit, OnChanges {
 
     fetchSubject(): void {
         if (this.mode == 'create') throw new Error ("A subject cannot be fetch in create mode");
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                if (queryParams['id']) {
-                    return this.subjectService.getSubject(queryParams['id']);
-                } else throw new Error ("A id must be passed as a parameter in edit mode");
-            })
-            .subscribe((subject: Subject) => {
-                this.setSubject(subject);
-            });
+        this.subjectService.getSubject(this.id).then(subject => this.setSubject(subject));
     }
 
     loadAllStudies(): void {
@@ -167,6 +150,7 @@ export class SubjectComponent implements OnInit, OnChanges {
 
         this.subjectForm.valueChanges.subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
+        this.subjectForm.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
 
         this.subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
             this.isAlreadyAnonymized = false;
@@ -212,28 +196,33 @@ export class SubjectComponent implements OnInit, OnChanges {
     }
 
     edit(): void {
-        this.router.navigate(['/subject'], { queryParams: { id: this.subject.id, mode: "edit" } });
+        this.router.navigate(['/subject/edit/'+ this.subject.id]);
     }
 
     create(): void {
         this.updateModel();
-        this.generateSubjectIdentifier();
-        // Anonymization only for human subject
-        if (this.humanSelected()) {
-            this.setSubjectBirthDateToFirstOfJanuary();
-        }
-        this.subjectService.create(this.subject)
+        this.subject.identifier = this.generateSubjectIdentifier();
+        this.isSubjectFoundPromise = this.subjectService.findSubjectByIdentifier(this.subject.identifier)
             .then((subject: Subject) => {
-                this.msgService.log('info', 'Subject successfully created');
-                this.back(subject);
-            }, (error: any) => {
-                this.manageRequestErrors(error);
-            });
-        }
+                if (subject) this.existingSubjectError = subject.name;
+                else {
+                    if (this.humanSelected()) {
+                        this.setSubjectBirthDateToFirstOfJanuary();
+                    }
+                    this.subjectService.create(this.subject)
+                        .then((subject: Subject) => {
+                            this.msgService.log('info', 'Subject successfully created');
+                            this.back(subject);
+                        }, (error: any) => {
+                            this.manageRequestErrors(error);
+                });
+            }
+        })
+    }
 
     update(): void {
         this.updateModel();
-        this.subjectService.update(this.subject.id, this.subject)
+        this.subjectService.update(this.id, this.subject)
             .subscribe((subject) => {
                 this.msgService.log('info', 'Subject successfully updated');
                 this.back();
@@ -246,7 +235,7 @@ export class SubjectComponent implements OnInit, OnChanges {
         this.hasNameUniqueError = AppUtils.hasUniqueError(error, 'name');
     }
 
-    generateSubjectIdentifier(): void {
+    generateSubjectIdentifier(): string {
         let hash;
         if (this.humanSelected() && !this.isAlreadyAnonymized) {
             hash = this.firstName + this.lastName + this.subject.birthDate;
@@ -254,7 +243,7 @@ export class SubjectComponent implements OnInit, OnChanges {
         else {
             hash = this.subject.name + this.subject.birthDate;
         }
-        this.subject.identifier = this.getHash(hash);
+        return this.getHash(hash);
     }
 
     getHash(stringToBeHashed: string): string {

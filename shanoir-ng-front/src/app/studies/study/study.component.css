@@ -6,3 +6,4 @@
 .icon { margin-left: 5px; vertical-align: middle; }
 .icon-clickable { cursor: pointer;  }
 .data-loading img { height: 20px; vertical-align: bottom; }
+svg { color: var(--color-b); } 

@@ -1,6 +1,8 @@
 package org.shanoir.ng.examination;
 
-import java.time.LocalDate;
+
+
+import java.util.Date;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
 
@@ -20,7 +22,7 @@ public class ExaminationDTO {
 
 	private String comment;
 
-	private LocalDate examinationDate;
+	private Date examinationDate;
 
 	private String note;
 
@@ -97,7 +99,7 @@ public class ExaminationDTO {
 	/**
 	 * @return the examinationDate
 	 */
-	public LocalDate getExaminationDate() {
+	public Date getExaminationDate() {
 		return examinationDate;
 	}
 
@@ -105,7 +107,7 @@ public class ExaminationDTO {
 	 * @param examinationDate
 	 *            the examinationDate to set
 	 */
-	public void setExaminationDate(LocalDate examinationDate) {
+	public void setExaminationDate(Date examinationDate) {
 		this.examinationDate = examinationDate;
 	}
 

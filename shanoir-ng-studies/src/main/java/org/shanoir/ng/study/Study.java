@@ -31,7 +31,9 @@ import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.subjectstudy.SubjectStudy;
 import org.shanoir.ng.timepoint.Timepoint;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
  * Study.
@@ -83,6 +85,7 @@ public class Study extends HalEntity {
 
 	/** Associated experimental groups of subjects. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
+	@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 	private List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects;
 
 	/** The is mono center. */

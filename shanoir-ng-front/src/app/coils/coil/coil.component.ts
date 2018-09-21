@@ -1,22 +1,20 @@
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
-import { ActivatedRoute, Router, Params } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { Enum } from '../../shared/utils/enum';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
-import { ManufacturerModelService } from '../../acquisition-equipments/shared/manufacturer-model.service';
-import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { Enum } from "../../shared/utils/enum";
-import { CoilType } from '../shared/coil-type.enum';
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { FooterState } from '../../shared/components/form-footer/footer-state.model';
 
 @Component({
     selector: 'coil',
@@ -29,105 +27,69 @@ export class CoilComponent implements OnInit {
     @ViewChild('centerModal') centerModal: ModalComponent;
     @Input() mode: "view" | "edit" | "create";
     @Input() acqEquip: AcquisitionEquipment;
-    public coil: Coil = new Coil();
-    public coilId: number;
+    public coil: Coil;
+    public id: number;
     public coilForm: FormGroup;
-    public canModify: Boolean = false;
     public centers: Center[] = [];
     public manufModels: ManufacturerModel[] = [];
     public addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
     public coilTypes: Enum[] = [];
+    private footerState: FooterState;
 
-    constructor(private route: ActivatedRoute, 
-        private router: Router,
-        private coilService: CoilService, 
-        private fb: FormBuilder,
-        private centerService: CenterService,
-        private manufModelService: ManufacturerModelService,
-        private location: Location, 
-        private keycloakService: KeycloakService) {
+    constructor(
+            private route: ActivatedRoute, 
+            private router: Router,
+            private coilService: CoilService, 
+            private fb: FormBuilder,
+            private centerService: CenterService,
+            private location: Location, 
+            private keycloakService: KeycloakService) {
+
+        this.mode = this.route.snapshot.data['mode'];
+        this.id = +this.route.snapshot.params['id'];   
     }
+
 
     ngOnInit(): void {
-        if (this.acqEquip) {
-            this.coil.center = this.acqEquip.center;
-            this.coil.manufacturerModel = this.acqEquip.manufacturerModel;
-        }
         this.getEnum();
-        this.getCenters();
-        this.buildForm();
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.canModify = true;
-        }
-        this.getCoil();
+        this.coil = new Coil();
+        this.getCoil().then(() => this.buildForm());
+        this.footerState = new FooterState(
+            this.mode,
+            this.keycloakService.isUserAdminOrExpert()
+        );
     }
 
-    getCoil(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                let coilId = queryParams['id'];
-                let mode = queryParams['mode'];
-                if (mode) {
-                    this.mode = mode;
-                }
-                if (coilId && this.mode !== 'create') {
-                    // view or edit mode
-                    this.coilId = coilId;
-                    return this.coilService.getCoil(coilId);
-                } else {
-                    // create mode
-                    return Observable.of<Coil>();
-                }
-            })
-            .subscribe((coil: Coil) => {
+    getCoil(): Promise<Coil> {
+        if (this.mode == 'create') {
+            return new Promise(resolve => {
+                this.coil = new Coil();
+                resolve(this.coil); 
+            });
+        } else {
+            return Promise.all([
+                this.centerService.getCenters().then(centers => { this.centers = centers; return centers; }),
+                this.coilService.getCoil(this.id)
+            ]).then(([centers, coil]) => {
                 if (this.mode === 'edit') {
                     // Link to objects coming from list requests to display selected item of drop-down list
-                    coil.center = this.getCenterById(coil.center.id);
+                    coil.center = this.centers.find(center => center.id == coil.center.id);
                     this.onSelectCenter(coil.center);
-                    coil.manufacturerModel = this.getManufModelById(coil.manufacturerModel.id);
+                    coil.manufacturerModel = this.manufModels.find(manuf => manuf.id == coil.manufacturerModel.id);
+                }
+                if (this.acqEquip) {
+                    coil.center = this.acqEquip.center;
+                    coil.manufacturerModel = this.acqEquip.manufacturerModel;
                 }
                 this.coil = coil;
+                return coil;
             });
-    }
-
-    getCenters(): void {
-        this.centerService
-            .getCenters()
-            .then(centers => {
-                this.centers = centers;
-                this.getCoil();
-            })
-        .catch((error) => {
-            // TODO: display error
-            console.log("error getting center list!");
-        });
-    }
-    
-    getCenterById(id: number): Center {
-        for (let center of this.centers) {
-            if (id == center.id) {
-                return center;
-            }
         }
-        return null;
     }
     
     onSelectCenter(center: Center): void {
         this.manufModels = [];
-        if (center) {
-            for (let acquisitionEquipmentOfCenter of center.acquisitionEquipments) {
-                this.manufModels.push(acquisitionEquipmentOfCenter.manufacturerModel);
-            }
-        }
-    }
-    
-    getManufModelById(id: number): ManufacturerModel {
-        for (let manufModel of this.manufModels) {
-            if (id == manufModel.id) {
-                return manufModel;
-            }
-        }
-        return null;
+        if (center) center.acquisitionEquipments.map(acqEqu => this.manufModels.push(acqEqu.manufacturerModel));
     }
     
     getEnum(): void {
@@ -149,10 +111,9 @@ export class CoilComponent implements OnInit {
             'nbChannel': [this.coil.numberOfChannels],
             'serialNb': [this.coil.serialNumber]
         });
-
-        this.coilForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
-        this.onValueChanged(); // (re)set validation messages now
+        this.coilForm.valueChanges.subscribe(data => this.onValueChanged(data));
+        this.coilForm.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
+        this.onValueChanged();
     }
 
     onValueChanged(data?: any) {
@@ -180,7 +141,7 @@ export class CoilComponent implements OnInit {
     }
 
     edit(): void {
-        this.router.navigate(['/coil'], {queryParams: { id: this.coilId, mode: "edit" }});
+        this.router.navigate(['/coil/edit/' + this.id]);
     }
 
     submit(): void {
@@ -198,7 +159,7 @@ export class CoilComponent implements OnInit {
 
     update(): void {
         this.submit();
-        this.coilService.update(this.coilId, this.coil)
+        this.coilService.update(this.id, this.coil)
             .subscribe((coil) => {
                 this.back();
             }, (err: String) => {

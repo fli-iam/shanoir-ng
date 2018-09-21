@@ -41,6 +41,7 @@ export class AcquisitionEquipmentListComponent {
             private viewContainerRef: ViewContainerRef, 
             private keycloakService: KeycloakService,
             private router: Router) {
+
         this.createColumnDefs();
     }
 
@@ -75,6 +76,7 @@ export class AcquisitionEquipmentListComponent {
             {
                 headerName: "Acquisition equipment", field: "name", cellRenderer: function (params: any) {
                     let acqEquip: AcquisitionEquipment = params.data;
+                    if (!acqEquip) return;
                     return acqEquip.manufacturerModel.manufacturer.name + " - " + acqEquip.manufacturerModel.name + " "
                         + (acqEquip.manufacturerModel.magneticField ? (acqEquip.manufacturerModel.magneticField + "T") : "")
                         + " (" + DatasetModalityType[acqEquip.manufacturerModel.datasetModalityType] + ")"
@@ -107,16 +109,12 @@ export class AcquisitionEquipmentListComponent {
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push(
                 {
-                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/acquisition-equipment", getParams: function (item: any): Object {
-                        return { id: item.id, mode: "edit" };
-                    }
+                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, action: item => this.router.navigate(['/acquisition-equipment/edit/'+ item.id])
                 });
         }
         if (!this.keycloakService.isUserGuest()) {
             this.columnDefs.push({
-                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/acquisition-equipment", getParams: function (item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
+                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, action: item => this.router.navigate(['/acquisition-equipment/details/'+ item.id])
             });
         }
 
@@ -131,16 +129,14 @@ export class AcquisitionEquipmentListComponent {
         this.customActionDefs = [];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new acq. equip.", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/acquisition-equipment", getParams: function (item: any): Object {
-                    return { mode: "create" };
-                }
+                title: "new acq. equip.", img: ImagesUrlUtil.ADD_ICON_PATH, action: item => this.router.navigate(['/acquisition-equipment/create'])
             });
         }
     }
 
     private onRowClick(acqEquip: AcquisitionEquipment) {
         if (!this.keycloakService.isUserGuest()) {
-            this.router.navigate(['/acquisition-equipment'], { queryParams: { id: acqEquip.id, mode: "view" } });
+            this.router.navigate(['/acquisition-equipment/details/'+ acqEquip.id]);
         }
     }
 

@@ -7,6 +7,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
+import org.shanoir.ng.subject.dto.SubjectFromShupDTO;
 import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -97,6 +98,19 @@ public interface SubjectApi {
 	ResponseEntity<Subject> saveNewOFSEPSubject(
 			@ApiParam(value = "subject to create and the id of the study card", required = true) @RequestBody SubjectStudyCardIdDTO subjectStudyCardIdDTO,
 			final BindingResult result) throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Saves a new subject with auto generated common name", response = Subject.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "created subject", response = Subject.class),
+			@ApiResponse(code = 302, message = "found already existing subject", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = Subject.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
+	@RequestMapping(value = "/OFSEP/SHUP", produces = { "application/json" }, consumes = {
+			"application/json" }, method = RequestMethod.POST)
+	ResponseEntity<Long> saveNewOFSEPSubjectFromShup(
+			@ApiParam(value = "subject to create and the id of the study card", required = true) @RequestBody SubjectFromShupDTO subjectFromShupDTO,
+			final BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates a subject", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "subject updated", response = Void.class),
@@ -109,6 +123,19 @@ public interface SubjectApi {
 	ResponseEntity<Void> updateSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "subject to update", required = true) @RequestBody Subject subject,
+			final BindingResult result) throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Updates a subject", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "subject updated", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "/SHUP/{subjectId}", produces = { "application/json" }, consumes = {
+			"application/json" }, method = RequestMethod.PUT)
+	ResponseEntity<Long> updateSubjectFromShup(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "subject to update", required = true) @RequestBody SubjectFromShupDTO subjectFromShupDTO,
 			final BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the subjects of a study", response = Subject.class, tags = {})
@@ -123,14 +150,14 @@ public interface SubjectApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given identifier", response = Subject.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subject", response = Subject.class),
-			@ApiResponse(code = 204, message = "no subject found", response = Subject.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subject", response = SubjectDTO.class),
+			@ApiResponse(code = 204, message = "no subject found", response = SubjectDTO.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = SubjectDTO.class),
+			@ApiResponse(code = 403, message = "forbidden", response = SubjectDTO.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = SubjectDTO.class) })
 	@RequestMapping(value = "/findByIdentifier/{subjectIdentifier}", produces = {
 			"application/json" }, method = RequestMethod.GET)
-	ResponseEntity<Subject> findSubjectByIdentifier(
+	ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@ApiParam(value = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier);
 
 }

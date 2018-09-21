@@ -12,6 +12,7 @@ import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
+import org.shanoir.ng.subject.dto.SubjectFromShupDTO;
 import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.shanoir.ng.subjectstudy.SubjectStudy;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Autowired
 	private SubjectService subjectService;
-
+	
 	@Override
 	public ResponseEntity<Void> deleteSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
@@ -95,7 +96,7 @@ public class SubjectApiController implements SubjectApi {
 	public ResponseEntity<SubjectDTO> saveNewSubject(
 			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException {
-
+		
 		/* Validation */
 		// A basic template can only update certain fields, check that
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(subject);
@@ -149,7 +150,6 @@ public class SubjectApiController implements SubjectApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
-
 	}
 
 	@Override
@@ -247,14 +247,72 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<Subject> findSubjectByIdentifier(
+	public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@ApiParam(value = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
 
 		final Subject subject = subjectService.findByIdentifier(subjectIdentifier);
 		if (subject == null) {
-			return new ResponseEntity<Subject>(HttpStatus.NO_CONTENT);
+			return new ResponseEntity<SubjectDTO>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<Subject>(subject, HttpStatus.OK);
+		return new ResponseEntity<SubjectDTO>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
+
+	}
+
+	@Override
+	public ResponseEntity<Long> saveNewOFSEPSubjectFromShup(@ApiParam(value = "subject to create and the id of the study card", required = true) @RequestBody SubjectFromShupDTO subjectFromShupDTO,
+			final BindingResult result) throws RestServiceException {
+		Subject subject = subjectService.findByIdentifier(subjectFromShupDTO.getIdentifier());
+		if (subject != null) {
+			return new ResponseEntity<Long>(HttpStatus.FOUND);
+		}
+		
+		try {
+			final Subject createdSubject = subjectService.saveForOFSEP(subjectFromShupDTO);
+			LOG.warn("Subject service completed");
+			subjectService.updateShanoirOld(createdSubject);
+			return new ResponseEntity<Long>(createdSubject.getId(), HttpStatus.OK);
+		} catch (ShanoirStudiesException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+		}
+	}
+
+	@Override
+	public ResponseEntity<Long> updateSubjectFromShup(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "subject to update", required = true) @RequestBody SubjectFromShupDTO subjectFromShupDTO,
+			final BindingResult result) throws RestServiceException {
+
+		// IMPORTANT : avoid any confusion that could lead to security breach
+	
+		Subject subject = subjectService.findByIdWithSubjecStudies(subjectId);
+		if (subject == null) {
+			return new ResponseEntity<Long>(HttpStatus.NO_CONTENT);
+		}
+
+		// A basic template can only update certain fields, check that
+		final FieldErrorMap accessErrors = this.getUpdateRightsErrors(subject);
+		// Check hibernate validation
+		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
+		// Check unique constrainte
+		final FieldErrorMap uniqueErrors = this.getUniqueConstraintErrors(subject);
+		/* Merge errors. */
+		final FieldErrorMap errors = new FieldErrorMap(accessErrors, hibernateErrors, uniqueErrors);
+		if (!errors.isEmpty()) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+		}
+
+		/* Update template in db. */
+		try {
+			subjectService.update(subject,subjectFromShupDTO);
+			return new ResponseEntity<Long>(subject.getId(), HttpStatus.OK);
+		} catch (ShanoirStudiesException e) {
+			LOG.error("Error while trying to update subject " + subjectId + " : ", e);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+		}
+
 
 	}
 }

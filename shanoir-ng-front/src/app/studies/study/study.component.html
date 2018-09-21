@@ -1,15 +1,15 @@
 <div class="content-component detail max-content">
 	<div class="layout" [ngClass]="{'left': mode=='view'}">
-		<form [formGroup]="studyForm" novalidate>
+		<form *ngIf="studyForm" [formGroup]="studyForm" novalidate>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
-					<div class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</div>
+					<h2 class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'edit'">
-					<div class="header command-zone" i18n="Edit study|Title@@studyDetailEditTitle">Edit study</div>
+					<h2 class="header command-zone" i18n="Edit study|Title@@studyDetailEditTitle">Edit study</h2>
 				</ng-template>
 				<ng-template [ngSwitchCase]="'create'">
-					<div class="header command-zone" i18n="Create study|Title@@studyDetailCreateTitle">Create study</div>
+					<h2 class="header command-zone" i18n="Create study|Title@@studyDetailCreateTitle">Create study</h2>
 				</ng-template>
 			</span>
 			<fieldset>
@@ -135,6 +135,7 @@
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view'">
+				<legend>Subjects</legend>
 				<subject-study-list mode="subject" [list]="subjects" [(subjectStudyList)]="study.subjectStudyList"></subject-study-list>
 			</fieldset>
 			<fieldset>
@@ -164,8 +165,7 @@
 							<select [(ngModel)]="selectedCenter" [ngModelOptions]="{standalone: true}">
 								<option *ngFor="let center of centers" [ngValue]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</option>
 							</select>
-							<img [hidden]="!enableAddIcon()" [src]="addIconPath" class="icon icon-clickable" (click)="addCenterToStudy()" />
-							<img [hidden]="enableAddIcon()" [src]="addDisabledIconPath" class="icon" />
+							<span *ngIf="enableAddIcon()" class="icon icon-clickable" (click)="addCenterToStudy()"><i class="fas fa-plus"></i></span>
 						</span>
 					</li>
 					<li>
@@ -175,7 +175,7 @@
 								<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: studyCenter.center.id}">
 									{{studyCenter.center.name}}
 								</a>
-								<img [src]="deleteIconPath" class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.center.id)" *ngIf="mode != 'view'"/>
+								<span class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.center.id)" *ngIf="mode != 'view'"><i class="fas fa-ban"></i></span>
 							</div>
 							<span *ngIf="studyCenterListEmpty()" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">No center is currently associated to the research study!</span>
 						</span>
@@ -258,26 +258,15 @@
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'">
-				<legend>Data</legend>
-				<div *ngIf="loading" class="data-loading">
-					Loading... <img [src]="loaderImagePath" />
-				</div>
-				<study-tree *ngIf="!loading" [study]="study"></study-tree>
+				<study-tree [study]="study"></study-tree>
 			</fieldset>
-			<div class="footer command-zone">
-				<span [ngSwitch]="mode">
-					<button i18n="View center|Back button label@@backButton" class="Button" (click)="back()">Back</button>
-					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
-						<button type="submit" i18n="View center|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-						<button type="submit" i18n="Edit center|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!studyForm.valid || studyCenterListEmpty()">Update</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
-						<button type="submit" i18n="Edit center|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!studyForm.valid || studyCenterListEmpty()">Create</button>
-					</ng-template>
-				</span>
-			</div>
+			<form-footer
+				[state]="footerState"
+				(update)="update()"
+				(create)="create()"
+				(edit)="edit()"
+				(back)="back()"
+			></form-footer>
 		</form>
 	</div>
 </div>

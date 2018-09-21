@@ -26,7 +26,7 @@
 					<li class="required">
 						    <label i18n="uploadExtraData|examination label@@uploadExtraDataExamination" class="required-label">Select an examination
 								</label> 
-							<input type="text" id="examination" formControlName="examination" [(ngModel)]="examinationId" />
+							<input type="text" id="examination" formControlName="examination" [(ngModel)]="examination.id" />
 					</li>
 				</ol>
 			</fieldset>
@@ -39,10 +39,10 @@
 						<button type="submit" i18n="uploadExtraData detail|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify"> 
-						<button type="submit" i18n="uploadExtraData detail|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!uploadExtraDataForm.valid">Update</button>
+						<button type="submit" i18n="uploadExtraData detail|Update button label@@updateButton" (click)="update()" class="Button" [disabled]="!uploadExtraDataForm.valid">Update<i class="far fa-save"></i></button>
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
-						<button type="submit" i18n="uploadExtraData detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!uploadExtraDataForm.valid">Create</button>
+						<button type="submit" i18n="uploadExtraData detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!uploadExtraDataForm.valid">Create<i class="far fa-save"></i></button>
 					</ng-template>
 				</span>
 			</div>

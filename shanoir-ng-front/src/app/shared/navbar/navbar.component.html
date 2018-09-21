@@ -3,17 +3,17 @@
         <ul class="menu-list">
 
             <dropdown-menu label="Manage data" *ngIf="!isUserGuest()">
-                <menu-item label="Research study" i18n-label="Manage data menu|Research study@@navbarResearchStudy" link="study-list" [icon]="ImagesUrlUtil.FOLDER_12_ICON_PATH"></menu-item>
-                <menu-item *ngIf="dev" label="Subject" i18n-label="Manage data menu|Subject@@navbarSubject" link="subject-list" [icon]="ImagesUrlUtil.USER_ICON_PATH"></menu-item>
+                <menu-item label="Research study" i18n-label="Manage data menu|Research study@@navbarResearchStudy" link="study" [icon]="ImagesUrlUtil.FOLDER_12_ICON_PATH"></menu-item>
+                <menu-item *ngIf="dev" label="Subject" i18n-label="Manage data menu|Subject@@navbarSubject" link="subject" [icon]="ImagesUrlUtil.USER_ICON_PATH"></menu-item>
                 <menu-item label="Preclinical Subjects" link="preclinical-subjects" [icon]="ImagesUrlUtil.RAT_ICON_PATH"></menu-item>
-                <menu-item label="Examination" i18n-label="Manage data menu|Examination@@navbarExamination" link="examination-list" [icon]="ImagesUrlUtil.STETHOSCOPE_ICON_PATH"></menu-item>
+                <menu-item label="Examination" i18n-label="Manage data menu|Examination@@navbarExamination" link="examination" [icon]="ImagesUrlUtil.STETHOSCOPE_ICON_PATH"></menu-item>
                 <menu-item label="Preclinical Examinations" link="preclinical-examinations" [icon]="ImagesUrlUtil.EXAMINATION_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Dataset acquisition" i18n-label="Manage data menu|Dataset acquisition@@navbarDatasetAcquisition" link="" [icon]="ImagesUrlUtil.X_RAY_1_ICON_PATH"></menu-item>
-                <menu-item label="Dataset" i18n-label="Manage data menu|Dataset@@navbarDataset" link="dataset-list" [icon]="ImagesUrlUtil.BRAIN_ICON_PATH"></menu-item>
-                <menu-item label="Center" i18n-label="Manage data menu|Center@@navbarCenter" link="center-list" [icon]="ImagesUrlUtil.HOSPITAL_ICON_PATH"></menu-item>   
+                <menu-item label="Dataset" i18n-label="Manage data menu|Dataset@@navbarDataset" link="dataset" [icon]="ImagesUrlUtil.BRAIN_ICON_PATH"></menu-item>
+                <menu-item label="Center" i18n-label="Manage data menu|Center@@navbarCenter" link="center" [icon]="ImagesUrlUtil.HOSPITAL_ICON_PATH"></menu-item>   
                 <menu-item *ngIf="dev" label="Investigator" i18n-label="Manage data menu|Investigator@@navbarInvestigator" link="" [icon]="ImagesUrlUtil.NURSE_ICON_PATH"></menu-item>
-                <menu-item label="Acquisition equipment" i18n-label="Manage data menu|Acquisition equipment@@navbarAcquisitionEquipment" link="acquisition-equipment-list" [icon]="ImagesUrlUtil.CARDIOGRAM_ICON_PATH"></menu-item>
-                <menu-item label="Coil" i18n-label="Manage data menu|Coil@@navbarCoil" link="coil-list" [icon]="ImagesUrlUtil.WIFI_ICON_PATH"></menu-item>
+                <menu-item label="Acquisition equipment" i18n-label="Manage data menu|Acquisition equipment@@navbarAcquisitionEquipment" link="acquisition-equipment" [icon]="ImagesUrlUtil.CARDIOGRAM_ICON_PATH"></menu-item>
+                <menu-item label="Coil" i18n-label="Manage data menu|Coil@@navbarCoil" link="coil" [icon]="ImagesUrlUtil.WIFI_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Experimental group of subjects" i18n-label="Manage data menu|Experimental group of subjects@@navbarExperimentalGroupOfSubjects" [icon]="ImagesUrlUtil.USERS_ICON_PATH"></menu-item>
                 <menu-item *ngIf="dev" label="Score" i18n-label="Manage data menu|Score@@navbarScore" link="" [icon]="ImagesUrlUtil.PODIUM_ICON_PATH"></menu-item>
                	<menu-item label="Pathology Models" link="preclinical-pathologies-models" [icon]="ImagesUrlUtil.VIRUS_ICON_PATH"></menu-item>

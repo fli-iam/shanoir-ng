@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.springframework.stereotype.Component;
@@ -31,7 +32,16 @@ public class SubjectRepositoryImpl implements SubjectRepositoryCustom {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<IdNameDTO> findIdsAndNames() {
-		return em.createNativeQuery("SELECT id, name FROM subject", "subjectNameResult").getResultList();
+		return em.createNativeQuery("SELECT id, name FROM subject ORDER BY name", "subjectNameResult").getResultList();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Subject findSubjectWithSubjectStudyById(Long id) {
+		// TODO Auto-generated method stu
+		Query q = em.createQuery("SELECT s FROM Subject s LEFT JOIN FETCH s.subjectStudyList where s.id=:id",Subject.class);
+		q.setParameter("id", id);
+		return (Subject) q.getSingleResult();
 	}
 
 }
