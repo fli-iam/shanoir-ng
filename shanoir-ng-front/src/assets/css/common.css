@@ -132,7 +132,7 @@ form { color: var(--dark-grey); }
 .left-icon svg { margin-right: 7px; vertical-align: -2; }
 .right-icon svg { margin-left: 7px; vertical-align: -2; }
 
-.content-component { background-color: var(--very-light-grey); }
+.content-component { background-color: var(--very-light-grey); text-align: left; display: inline-block; }
 .main-content { padding: 0 20px 10px 20px; position: relative; }
 .max-content { display: inline-block; }
 .command-zone { }

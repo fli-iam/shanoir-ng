@@ -21,7 +21,6 @@ export class CenterComponent implements OnInit {
     public centerForm: FormGroup;
     private id: number;
     @Input() mode: "view" | "edit" | "create";
-    @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
     private phoneNumberPatternError = false;
     private footerState: FooterState;
@@ -35,6 +34,7 @@ export class CenterComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        console.log(this.mode);
         if (this.mode == 'create') {
             this.center = new Center();
             this.buildForm();
@@ -83,12 +83,7 @@ export class CenterComponent implements OnInit {
     };
 
     back(): void {
-        if (this.closing.observers.length > 0) {
-            this.center = new Center();
-            this.closing.emit(this.id);
-        } else {
-            this.location.back();
-        }
+        this.location.back();
     }
 
     edit(): void {

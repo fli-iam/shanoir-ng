@@ -1,8 +1,16 @@
+import { allOfEnum } from "../../utils/app.utils";
 
 export enum CoilType {
-    BODY = <any> "BODY",
-    HEAD = <any> "HEAD",
-    SURFACE = <any> "SURFACE",
-    MULTICOIL = <any> "MULTICOIL",
-    EXTREMITY = <any> "EXTREMITY"
+    BODY = "BODY",
+    HEAD = "HEAD",
+    SURFACE = "SURFACE",
+    MULTICOIL = "MULTICOIL",
+    EXTREMITY = "EXTREMITY"
+}
+
+export namespace CoilType {
+
+    export function all(): Array<CoilType> {
+        return allOfEnum<CoilType>(CoilType);
+    }
 }

@@ -27,6 +27,7 @@ import { ConfirmDialogComponent } from "./shared/components/confirm-dialog/confi
 import { ConfirmDialogService } from "./shared/components/confirm-dialog/confirm-dialog.service";
 import { ConsoleComponent } from './shared/console/console.line.component';
 import { ModalComponent } from "./shared/components/modal/modal.component";
+import { ModalsComponent } from "./shared/components/modals/modals.component";
 import { DropdownMenuComponent } from './shared/components/dropdown-menu/dropdown-menu.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
@@ -49,7 +50,8 @@ import { ManufacturerModelPipe } from './acquisition-equipments/shared/manufactu
 import { ManufacturerModelService } from './acquisition-equipments/shared/manufacturer-model.service';
 import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
 import { MenuItemComponent } from './shared/components/dropdown-menu/menu-item/menu-item.component';
-import { ModalService} from './shared/components/modal/modal.service';
+//import { ModalService} from './shared/components/modal/modal.service';
+import { ModalService} from './shared/components/modals/modal.service';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { RoleService } from './roles/role.service';
 import { StudyComponent } from './studies/study/study.component';
@@ -101,6 +103,9 @@ import { PagerComponent } from './shared/components/table/pager/pager.component'
 import { TableSearchComponent } from './shared/components/table/search/search.component';
 import { TimesPipe } from './utils/app.utils';
 import { FormFooterComponent } from './shared/components/form-footer/form-footer.component'
+import { ServiceLocator } from './utils/locator.service';
+import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
+import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 
 
 @NgModule({
@@ -181,10 +186,13 @@ import { FormFooterComponent } from './shared/components/form-footer/form-footer
         DateValidator,
         TableSearchComponent,
         TimesPipe,
-        FormFooterComponent
+        FormFooterComponent,
+        ModalsComponent,
+        BreadcrumbsComponent
     ],
     entryComponents: [
-        ConfirmDialogComponent
+        ConfirmDialogComponent,
+        ModalsComponent
     ],
     providers: [
         AccountEventsService,
@@ -216,11 +224,14 @@ import { FormFooterComponent } from './shared/components/form-footer/form-footer
             provide: HTTP_INTERCEPTORS,
             useClass: KeycloakHttpInterceptor,
             multi: true
-        }
+        },
+        BreadcrumbsService
     ],
     bootstrap: [AppComponent],
 })
 export class AppModule {
 
-    
+    constructor(private injector: Injector) {
+        ServiceLocator.injector = injector;
+    }
  }
