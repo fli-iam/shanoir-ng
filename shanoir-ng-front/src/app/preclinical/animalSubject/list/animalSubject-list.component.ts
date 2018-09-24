@@ -121,9 +121,9 @@ export class AnimalSubjectsListComponent {
                     let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory>params.data.subject.imagedObjectCategory;
                     if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.PHANTOM) {
                     	return 'Phantom';
-                    }else if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.LIVING_HUMAN_BEING) {
+                    }else if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.LIVING_ANIMAL) {
                      	return 'Living animal';
-                    }else if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.HUMAN_CADAVER) {
+                    }else if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.ANIMAL_CADAVER) {
                      	return 'Animal cadaver';
                     }else if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.ANATOMICAL_PIECE) {
                      	return 'Anatomical piece';

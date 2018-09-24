@@ -194,7 +194,7 @@ export class AnimalSubjectFormComponent implements OnInit {
         this.getAnimalSubject();
         if (this.mode.isCreateMode()) {
         	this.preclinicalSubject.subject.preclinical = true;
-        	this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        	this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
         }
         this.buildForm();
         this.initPrefillData();
@@ -269,7 +269,7 @@ export class AnimalSubjectFormComponent implements OnInit {
             	this.preclinicalSubject = new PreclinicalSubject();
             	this.preclinicalSubject.subject = new Subject();
             	this.preclinicalSubject.animalSubject = new AnimalSubject();
-            	this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+            	this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
             }else{
             	this.closing.emit(new Subject());
             }

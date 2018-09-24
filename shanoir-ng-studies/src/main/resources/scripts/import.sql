@@ -494,7 +494,7 @@ VALUES
 	(1,'subject1', 'sub1', '2013/01/01', 2, 1, 1, 2, 1, false),
 	(2,'subject2', 'sub2', '2001/02/01', 2, 2, 1, 2, 1, false),
 	(3,'0010001', 'sub3', '2001/02/01', 2, 1, 2, 2, 1, false),
-    (4,'rat2', 'rat2', NULL, 2, 1, 1, 1, 1, true);
+    (4,'rat2', 'rat2', NULL, 6, 1, 1, 1, 1, true);
 
 
 INSERT INTO subject_study

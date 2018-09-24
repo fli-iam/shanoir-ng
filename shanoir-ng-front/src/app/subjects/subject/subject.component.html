@@ -23,7 +23,7 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="subject.imagedObjectCategory" (change)="buildForm()">
-									<option *ngFor="let cat of ImagedObjectCategory.all()" [value]="cat" [ngSwitch]="cat"
+									<option *ngFor="let cat of ImagedObjectCategory.allPreClinical(false)" [value]="cat" [ngSwitch]="cat"
 										i18n="Imaged Object Category {{cat}}|Category label@@ImagedObjectCategory{{cat}}">
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_HUMAN_BEING">Living human being</ng-template>

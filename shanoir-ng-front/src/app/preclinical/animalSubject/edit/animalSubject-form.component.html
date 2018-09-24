@@ -21,8 +21,8 @@
 							<ng-template [ngSwitchCase]="Modes.view">
 								<div [ngSwitch]="preclinicalSubject.subject.imagedObjectCategory">
 									<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
-									<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_HUMAN_BEING">Living animal</ng-template>
-									<ng-template [ngSwitchCase]="ImagedObjectCategory.HUMAN_CADAVER">Animal cadaver</ng-template>
+									<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_ANIMAL">Living animal</ng-template>
+									<ng-template [ngSwitchCase]="ImagedObjectCategory.ANIMAL_CADAVER">Animal cadaver</ng-template>
 									<ng-template [ngSwitchCase]="ImagedObjectCategory.ANATOMICAL_PIECE">Anatomical piece</ng-template>
 									<ng-template ngSwitchDefault>{{preclinicalSubject?.subject?.imagedObjectCategory}}</ng-template>
 								
@@ -30,11 +30,11 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="imagedObjectCategory" required formControlName="imagedObjectCategory" [(ngModel)]="preclinicalSubject.subject.imagedObjectCategory">
-									<option *ngFor="let cat of ImagedObjectCategory.all()" [value]="cat" [ngSwitch]="cat" 
+									<option *ngFor="let cat of ImagedObjectCategory.allPreClinical(true)" [value]="cat" [ngSwitch]="cat" 
 										i18n="Imaged Object Category {{cat}}|Category label@@ImagedObjectCategory{{cat}}">
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
-											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_HUMAN_BEING">Living animal</ng-template>
-											<ng-template [ngSwitchCase]="ImagedObjectCategory.HUMAN_CADAVER">Animal cadaver</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_ANIMAL">Living animal</ng-template>
+											<ng-template [ngSwitchCase]="ImagedObjectCategory.ANIMAL_CADAVER">Animal cadaver</ng-template>
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.ANATOMICAL_PIECE">Anatomical piece</ng-template>
 											<ng-template ngSwitchDefault>{{cat}}</ng-template>
 									</option>
