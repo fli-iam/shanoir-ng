@@ -68,6 +68,7 @@ export class SubjectPathologiesListComponent implements OnChanges {
             		this.pathologies = pathologies;
             	}
                 this.browserPaging.setItems(this.pathologies);
+            	this.browserPaging.setColumnDefs(this.columnDefs);
                 this.table.refresh();
             });
         }else{
@@ -198,6 +199,12 @@ export class SubjectPathologiesListComponent implements OnChanges {
 
         if (!this.keycloakService.isUserGuest()) {
             this.rowClickAction = { action: this.viewSubjectPathology, component: this };
+        }
+    }
+    
+    private onRowClick(item: SubjectPathology) {
+        if (!this.keycloakService.isUserGuest()) {
+            this.viewSubjectPathology(item);
         }
     }
 

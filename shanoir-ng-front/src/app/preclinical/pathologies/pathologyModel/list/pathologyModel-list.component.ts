@@ -54,6 +54,7 @@ export class PathologyModelsListComponent {
         return this.modelService.getPathologyModels().then(models => {
             this.models = models;
             this.browserPaging.setItems(models);
+            this.browserPaging.setColumnDefs(this.columnDefs);
             this.table.refresh();
         }); 
     }
@@ -128,6 +129,12 @@ export class PathologyModelsListComponent {
             this.rowClickAction = {target : "/preclinical-pathologies-model", getParams: function(item: any): Object {
                     return {id: item.id, mode: "view"};
             }};
+        }
+    }
+    
+    private onRowClick(item: PathologyModel) {
+        if (!this.keycloakService.isUserGuest()) {
+            this.router.navigate(['/preclinical-pathologies-model'], { queryParams: { id: item.id, mode: "view" } });
         }
     }
     

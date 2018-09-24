@@ -31,7 +31,8 @@ export class AnimalExaminationListComponent {
    @ViewChild('examTable') table: TableComponent;
 
     constructor(
-    	private animalExaminationService: AnimalExaminationService, 
+    	private animalExaminationService: AnimalExaminationService,
+    	public router: Router, 
     	private confirmDialogService: ConfirmDialogService,
     	private examAnestheticsService: ExaminationAnestheticService,
     	private extradataService: ExaminationExtraDataService,
@@ -117,6 +118,13 @@ export class AnimalExaminationListComponent {
             };
         }
     }
+    
+     private onRowClick(item: Examination) {
+        if (!this.keycloakService.isUserGuest()) {
+             this.router.navigate(['/preclinical-examination'], { queryParams: { id: item.id, mode: "view" } });
+        }
+    }
+    
 
     openDeleteExaminationConfirmDialog = (item: Examination) => {
         this.confirmDialogService

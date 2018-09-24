@@ -66,6 +66,7 @@ export class ContrastAgentsListComponent {
                 this.agents = [];
             }
             this.browserPaging.setItems(this.agents);
+            this.browserPaging.setColumnDefs(this.columnDefs);
             this.table.refresh();
         }) 
     }
@@ -150,6 +151,12 @@ export class ContrastAgentsListComponent {
             this.rowClickAction = {target : "/preclinical-contrastagent", getParams: function(item: any): Object {
                     return {id: item.id, mode: "view"};
             }};
+        }
+    }
+    
+    private onRowClick(item: ContrastAgent) {
+        if (!this.keycloakService.isUserGuest()) {
+            this.router.navigate(['/preclinical-contrastagent'], { queryParams: { id: item.id, mode: "view" } });
         }
     }
     

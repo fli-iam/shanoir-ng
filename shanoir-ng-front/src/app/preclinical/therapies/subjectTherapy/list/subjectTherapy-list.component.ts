@@ -75,6 +75,7 @@ export class SubjectTherapiesListComponent {
                     this.subjectTherapies = subjectTherapies;
                 } 
                 this.browserPaging.setItems(this.subjectTherapies);
+            	this.browserPaging.setColumnDefs(this.columnDefs);
                 this.table.refresh();
             })
         }else{
@@ -209,6 +210,12 @@ export class SubjectTherapiesListComponent {
 
         if (!this.keycloakService.isUserGuest()) {
             this.rowClickAction = { action: this.viewSubjectTherapy, component: this };
+        }
+    }
+    
+    private onRowClick(item: SubjectTherapy) {
+        if (!this.keycloakService.isUserGuest()) {
+            this.viewSubjectTherapy(item);
         }
     }
 

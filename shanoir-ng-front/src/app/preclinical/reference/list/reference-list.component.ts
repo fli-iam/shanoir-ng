@@ -52,6 +52,7 @@ export class ReferencesListComponent {
                 this.references = references;    
             }
             this.browserPaging.setItems(references);
+            this.browserPaging.setColumnDefs(this.columnDefs);
             this.table.refresh();
         })
     }
@@ -99,6 +100,12 @@ export class ReferencesListComponent {
             }};
         }
         
+    }
+    
+    private onRowClick(item: Reference) {
+        if (!this.keycloakService.isUserGuest()) {
+            this.router.navigate(['/preclinical-reference'], { queryParams: { id: item.id, mode: "view" } });
+        }
     }
     
     openDeleteReferenceConfirmDialog = (item: Reference) => {

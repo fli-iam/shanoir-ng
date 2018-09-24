@@ -52,6 +52,7 @@ export class PathologiesListComponent {
             this.pathologies = pathologies;
             
             this.browserPaging.setItems(this.pathologies);
+            this.browserPaging.setColumnDefs(this.columnDefs);
             this.table.refresh();
         })              
     }
@@ -97,6 +98,12 @@ export class PathologiesListComponent {
             this.rowClickAction = {target : "/preclinical-pathology", getParams: function(item: any): Object {
                     return {id: item.id, mode: "view"};
             }};
+        }
+    }
+    
+    private onRowClick(item: Pathology) {
+        if (!this.keycloakService.isUserGuest()) {
+            this.router.navigate(['/preclinical-pathology'], { queryParams: { id: item.id, mode: "view" } });
         }
     }
     

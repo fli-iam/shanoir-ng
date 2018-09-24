@@ -67,6 +67,7 @@ export class ExtraDataListComponent {
                 this.extradatas = extradatas;
                 
                 this.browserPaging.setItems(extradatas);
+            	this.browserPaging.setColumnDefs(this.columnDefs);
                 this.table.refresh();
             })
          }
@@ -125,6 +126,12 @@ export class ExtraDataListComponent {
         this.customActionDefs = [];        
         this.customActionDefs.push({title: "delete selected", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.deleteAll });
           
+    }
+    
+    private onRowClick(item: ExtraData) {
+        if (!this.keycloakService.isUserGuest()) {
+            this.router.navigate(['/preclinical-extradata'], { queryParams: { id: item.id, mode: "view" } });
+        }
     }
     
     openDeleteExtraDataConfirmDialog = (item: ExtraData) => {

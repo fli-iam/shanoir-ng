@@ -54,6 +54,7 @@ export class TherapiesListComponent {
         return this.therapyService.getTherapies().then(therapies => {
             this.therapies = therapies;
             this.browserPaging.setItems(therapies);
+            this.browserPaging.setColumnDefs(this.columnDefs);
             this.table.refresh();
         })            
     }
@@ -100,6 +101,12 @@ export class TherapiesListComponent {
             this.rowClickAction = {target : "/preclinical-therapy", getParams: function(item: any): Object {
                     return {id: item.id, mode: "view"};
             }};
+        }
+    }
+    
+    private onRowClick(item: Therapy) {
+        if (!this.keycloakService.isUserGuest()) {
+            this.router.navigate(['/preclinical-therapy'], { queryParams: { id: item.id, mode: "view" } });
         }
     }
     

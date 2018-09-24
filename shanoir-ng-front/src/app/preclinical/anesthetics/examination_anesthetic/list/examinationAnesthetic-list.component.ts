@@ -46,11 +46,9 @@ export class ExaminationAnestheticsListComponent {
     
     getExaminationAnesthetics(examination_id:number): Promise<void> {
         this.examAnesthetics = [];
-        this.browserPaging = new BrowserPaging(this.examAnesthetics, this.columnDefs);
         return this.examAnestheticsService.getExaminationAnesthetics(examination_id).then(examAnesthetics => {
             this.examAnesthetics = examAnesthetics;
-            this.browserPaging.setItems(examAnesthetics);
-            this.table.refresh();
+        	this.browserPaging = new BrowserPaging(this.examAnesthetics, this.columnDefs);
         }) 
     }
      
@@ -159,6 +157,12 @@ export class ExaminationAnestheticsListComponent {
         }
         if (ids.length > 0) {
             console.log("TODO : delete those ids : " + ids);
+        }
+    }
+    
+    private onRowClick(item: ExaminationAnesthetic) {
+        if (!this.keycloakService.isUserGuest()) {
+             this.router.navigate(['/preclinical-examination'], { queryParams: { id: item.id, mode: "view" } });
         }
     }
 

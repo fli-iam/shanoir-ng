@@ -28,8 +28,9 @@ export class AnimalSubjectsListComponent {
   private animalSubjectsPromise: Promise<void> = this.getAnimalSubjects();
   private browserPaging: BrowserPaging<PreclinicalSubject>;
   public rowClickAction: Object;
-  public columnDefs: any[];
-  public customActionDefs: any[];
+  
+  private columnDefs: any[];
+  private customActionDefs: any[];
   @ViewChild('preclinicalSubjectsTable') table: TableComponent;
     
     constructor(
@@ -38,6 +39,7 @@ export class AnimalSubjectsListComponent {
         public confirmDialogService: ConfirmDialogService, 
         private keycloakService: KeycloakService,
         private viewContainerRef: ViewContainerRef) {
+        
             this.createColumnDefs();
      }
      
@@ -78,7 +80,7 @@ export class AnimalSubjectsListComponent {
             	}else{
                 	this.subjects = [];
             	}
-                this.browserPaging.setItems(this.preclinicalSubjects);
+               this.browserPaging = new BrowserPaging(this.preclinicalSubjects, this.columnDefs);
                 this.table.refresh();
         	});
         
@@ -165,6 +167,12 @@ export class AnimalSubjectsListComponent {
                         return {id: item.id, mode: "view"};
                 }};
             }
+    }
+    
+    private onRowClick(item: PreclinicalSubject) {
+        if (!this.keycloakService.isUserGuest()) {
+            this.router.navigate(['/preclinical-subject'], { queryParams: { id: item.id, mode: "view" } });
+        }
     }
     
     openDeleteSubjectConfirmDialog = (item: PreclinicalSubject) => {

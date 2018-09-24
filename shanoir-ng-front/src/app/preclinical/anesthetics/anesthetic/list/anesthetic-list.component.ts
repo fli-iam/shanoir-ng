@@ -50,11 +50,9 @@ export class AnestheticsListComponent {
     
     getAnesthetics(): Promise<void> {
     	this.anesthetics = [];
-        this.browserPaging = new BrowserPaging(this.anesthetics, this.columnDefs);
         return this.anestheticsService.getAnesthetics().then(anesthetics => {
             this.anesthetics = anesthetics;
-            this.browserPaging.setItems(anesthetics);
-            this.table.refresh();
+            this.browserPaging = new BrowserPaging(this.anesthetics, this.columnDefs);
         })
     }
     
@@ -166,5 +164,11 @@ export class AnestheticsListComponent {
     		this.openDeleteAnestheticConfirmDialog(item);
     	});    
  	}
+ 	
+ 	private onRowClick(item: Anesthetic) {
+        if (!this.keycloakService.isUserGuest()) {
+             this.router.navigate(['/preclinical-anesthetic'], { queryParams: { id: item.id, mode: "view" } });
+        }
+    }
 
 }

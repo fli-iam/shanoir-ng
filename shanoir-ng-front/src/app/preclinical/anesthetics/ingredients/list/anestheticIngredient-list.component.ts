@@ -72,6 +72,7 @@ export class AnestheticIngredientsListComponent {
             		ingredientsLoaded = ingredients;
             	}
                 this.browserPaging.setItems(ingredientsLoaded);
+                this.browserPaging.setColumnDefs(this.columnDefs);
                 this.table.refresh();
             });
         }else{
@@ -210,6 +211,12 @@ export class AnestheticIngredientsListComponent {
             this.rowClickAction = { action: this.viewIngredient,component:this};
         }
        
+    }
+    
+    private onRowClick(item: AnestheticIngredient) {
+        if (!this.keycloakService.isUserGuest()) {
+            this.viewIngredient(item);
+        }
     }
     
     openDeleteIngredientConfirmDialog = (item: AnestheticIngredient) => {
