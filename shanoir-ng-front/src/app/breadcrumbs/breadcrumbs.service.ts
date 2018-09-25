@@ -6,6 +6,7 @@ import { Entity } from '../shared/components/entity/entity.interface';
 export class BreadcrumbsService {
 
     public steps: Step[] = [];
+    public lastStep: Step;
 
     constructor(private router: Router) {}
 
@@ -18,10 +19,21 @@ export class BreadcrumbsService {
     }
 
     public clickStep(index: number) {
-        let step = this.steps[index];
+        this.lastStep = this.steps[index];
         this.steps = this.steps.slice(0, index);
-        console.log(step.entity)
-        this.router.navigate([step.route, {fragment: step.entity}])
+        this.router.navigate([this.lastStep.route])
+    }
+
+    public notifyBack() {
+        if (this.steps.length > 0) {
+            const index = this.steps.length - 2;
+            this.lastStep = this.steps[index];
+            this.steps = this.steps.slice(0, index);
+        }
+    }
+
+    public entityToReload(): boolean {
+        return this.lastStep && this.lastStep.entity && this.lastStep.route == this.router.url;
     }
 
 }

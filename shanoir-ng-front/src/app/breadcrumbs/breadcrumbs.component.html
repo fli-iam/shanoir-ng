@@ -1,6 +1,6 @@
 <div id="my-breadcrumbs">
 	<ul>
-		<li><a><i class="fas fa-home"></i>Home</a></li>
+		<li><a (click)="goHome()"><i class="fas fa-home"></i>Home</a></li>
 		<li *ngFor="let step of steps; let i = index">
             <a (click)="clickStep(i)">{{step.label}}</a>
         </li>

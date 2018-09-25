@@ -34,7 +34,6 @@ export class CenterComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        console.log(this.mode);
         if (this.mode == 'create') {
             this.center = new Center();
             this.buildForm();

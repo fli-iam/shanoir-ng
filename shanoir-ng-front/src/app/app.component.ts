@@ -3,6 +3,7 @@ import { Component, ViewContainerRef } from '@angular/core';
 import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { ModalService } from './shared/components/modals/modal.service';
 import { LocationStrategy } from '@angular/common';
+import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'shanoir-ng-app',
@@ -14,13 +15,16 @@ export class AppComponent {
     constructor(
             public viewContainerRef: ViewContainerRef,
             private modalService: ModalService,
-            location: LocationStrategy) {
+            private location: LocationStrategy,
+            private breadcrumbsService: BreadcrumbsService) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
         
         location.onPopState(() => {
-            console.log(window.location, window.history);
-          });
+            this.breadcrumbsService.notifyBack();
+        });
+
+        window.onbeforeunload = function() { return "Warning! Your work may be lost!"; };
     }
 
     isAuthenticated(): boolean {

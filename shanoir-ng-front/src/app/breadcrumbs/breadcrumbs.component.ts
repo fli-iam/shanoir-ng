@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { BreadcrumbsService, Step } from './breadcrumbs.service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'breadcrumbs',
@@ -9,7 +10,9 @@ import { BreadcrumbsService, Step } from './breadcrumbs.service';
 
 export class BreadcrumbsComponent {
 
-    constructor(private service: BreadcrumbsService) { 
+    constructor(
+        private service: BreadcrumbsService,
+        private router: Router) { 
     }
 
     get steps(): Step[] {
@@ -18,5 +21,10 @@ export class BreadcrumbsComponent {
 
     clickStep(index: number) {
         this.service.clickStep(index);
+    }
+
+    goHome() {
+        this.service.reset();
+        this.router.navigate(['/']);
     }
 }

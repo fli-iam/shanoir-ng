@@ -49,9 +49,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
 
     ngOnInit(): void {
         const choose = (): Promise<void> => {
-            let givenEntity: string = this.activatedRoute.snapshot.fragment;
-            console.log(givenEntity)
-            if (givenEntity) Promise.resolve(givenEntity);
             switch (this.mode) { 
                 case 'create' : return this.initCreate();
                 case 'edit' : return this.initEdit();
@@ -59,6 +56,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
             }
         }
         choose().then(() => {
+            if (this.breadcrumbsService.entityToReload()) this.entity = this.breadcrumbsService.lastStep.entity as T;
             this.form = this.buildForm();
             this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
             this.addBCStep();
@@ -156,17 +154,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
         this.router.navigate([this.getRouteToList()]);
     }
 
-    back(): void {
+    goBack(): void {
+        this.breadcrumbsService.notifyBack();
         if (this.mode == 'view' || this.mode == 'create') this.goToList();
         else if (this.mode == 'edit') this.goToView();
-    }
-
-    goBack(): void {
-        if (this.close.observers.length > 0) {
-            this.close.emit(this.id);
-        } else {
-            this.location.back();
-        }
     }
 
 }

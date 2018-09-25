@@ -11,7 +11,6 @@ export class ModalService {
         private componentFactoryResolver: ComponentFactoryResolver) {}
 
     public open(componentClass: Type<any>, mode: Mode): Promise<any> { // TODO : componentClass: EntityComponent<any>
-        console.log('open');
         let componentFactory = this.componentFactoryResolver.resolveComponentFactory(componentClass);
         
         let componentRef = this.rootViewCRef.createComponent(componentFactory);

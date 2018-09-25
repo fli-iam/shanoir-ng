@@ -26,7 +26,8 @@ ul li a {
 }
 
 ul li a:hover{
-  background: var(--bg-hover);	
+    background: var(--bg-hover);
+    cursor: pointer;
 }
 
 ul li a:after {
@@ -66,4 +67,9 @@ ul li:first-child a:before {
 /* Add Border Radius */
 ul li:first-child a{
 	border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-bottom-right-radius: 1px;
+}
+
+svg {
+    margin-right: 7px;
+    vertical-align: -1;
 }
