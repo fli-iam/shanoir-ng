@@ -4,6 +4,7 @@ import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { ModalService } from './shared/components/modals/modal.service';
 import { LocationStrategy } from '@angular/common';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
+import { ServiceLocator } from './utils/locator.service';
 
 @Component({
     selector: 'shanoir-ng-app',
@@ -19,6 +20,7 @@ export class AppComponent {
             private breadcrumbsService: BreadcrumbsService) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
+        ServiceLocator.rootViewContainerRef = this.viewContainerRef;
         
         location.onPopState(() => {
             this.breadcrumbsService.notifyBack();

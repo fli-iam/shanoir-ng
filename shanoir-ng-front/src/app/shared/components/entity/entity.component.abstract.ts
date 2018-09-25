@@ -7,7 +7,7 @@ import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
 import { FooterState } from '../form-footer/footer-state.model';
-import { Entity } from './entity.interface';
+import { Entity, EntityRoutes } from './entity.interface';
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 
 export type Mode =  "view" | "edit" | "create";
@@ -20,6 +20,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
     private footerState: FooterState;
     private form: FormGroup;
 
+    private entityRoutes: EntityRoutes;
     private router: Router;
     private location: Location;
     private keycloakService: KeycloakService;
@@ -36,6 +37,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
             private activatedRoute: ActivatedRoute,
             private readonly ROUTING_NAME: string) {
         
+        this.entityRoutes = new EntityRoutes(ROUTING_NAME);
         this.router = ServiceLocator.injector.get(Router);
         this.location = ServiceLocator.injector.get(Location);
         this.keycloakService = ServiceLocator.injector.get(KeycloakService);
@@ -69,15 +71,15 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
         let label: string;
         switch (this.mode) { 
             case 'create' : 
-                route = this.getRouteToCreate();
+                route = this.entityRoutes.getRouteToCreate();
                 label = 'new ' + this.ROUTING_NAME;
                 break;
             case 'edit' : 
-                route = this.getRouteToEdit(this.entity.id);
+                route = this.entityRoutes.getRouteToEdit(this.entity.id);
                 label = 'edit ' + this.ROUTING_NAME;
                 break;
             case 'view' : 
-                route = this.getRouteToView(this.entity.id);
+                route = this.entityRoutes.getRouteToView(this.entity.id);
                 label = 'view ' + this.ROUTING_NAME;
                 break;
         }
@@ -111,30 +113,13 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
         this.entity.delete();
     }
 
-
-    public getRouteToView(id: number): string {
-        return '/' + this.ROUTING_NAME + '/details/' + id;
-    }
-
-    public getRouteToEdit(id: number): string {
-        return '/' + this.ROUTING_NAME + '/edit/' + id;
-    }
-
-    public getRouteToCreate(): string {
-        return '/' + this.ROUTING_NAME + '/create';
-    }
-
-    public getRouteToList(): string {
-        return '/' + this.ROUTING_NAME + '/list';
-    }
-
     goToView(id?: number): void {
         if (!id) {
             if (this.mode == 'view') return;
             else if (this.mode == 'edit') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToView method');
         }
-        this.router.navigate([this.getRouteToView(id)]);
+        this.router.navigate([this.entityRoutes.getRouteToView(id)]);
     }
 
     goToEdit(id?: number): void {
@@ -143,15 +128,15 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
             else if (this.mode == 'view') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToEdit method');
         }
-        this.router.navigate([this.getRouteToEdit(id)]);
+        this.router.navigate([this.entityRoutes.getRouteToEdit(id)]);
     }
 
     goToCreate(): void {
-        this.router.navigate([this.getRouteToCreate()]);
+        this.router.navigate([this.entityRoutes.getRouteToCreate()]);
     }
 
     goToList(): void {
-        this.router.navigate([this.getRouteToList()]);
+        this.router.navigate([this.entityRoutes.getRouteToList()]);
     }
 
     goBack(): void {

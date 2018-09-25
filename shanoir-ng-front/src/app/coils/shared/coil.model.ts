@@ -26,7 +26,7 @@ export class Coil implements Entity {
         return this.coilService.update(this.id, this);
     }
 
-    delete(): void {
-        this.coilService.delete(this.id);
+    delete(): Promise<void> {
+        return this.coilService.delete(this.id);
     }
 }

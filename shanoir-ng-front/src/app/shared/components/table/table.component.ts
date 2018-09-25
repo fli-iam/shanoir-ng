@@ -191,6 +191,7 @@ export class TableComponent implements OnInit {
      * Call to refresh from outsilde
      */
     public refresh() {
+        console.log('refresh', this.currentPage)
         this.goToPage(this.currentPage);
     }
 
