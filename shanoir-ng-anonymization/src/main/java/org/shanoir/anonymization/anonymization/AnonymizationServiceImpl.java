@@ -117,8 +117,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 */
 	public void performAnonymization(final File dicomFile, String profile, boolean isShanoirAnonymization,
 			String patientName, String patientID) {
+		DicomInputStream din = null;
+		DicomOutputStream dos = null;
 		try {
-			DicomInputStream din = new DicomInputStream(dicomFile);
+			din = new DicomInputStream(dicomFile);
 			// read metadata
 			Attributes metaInformationAttributes = din.readFileMetaInformation();
 			for (int tagInt : metaInformationAttributes.tags()) {
@@ -181,13 +183,23 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				anonymizePatientMetaData(datasetAttributes, patientName, patientID);
 			}
 			LOG.debug("finish anonymization: begin storage");
-
-			final DicomOutputStream dos = new DicomOutputStream(dicomFile);
+			dos = new DicomOutputStream(dicomFile);
 			dos.writeDataset(metaInformationAttributes, datasetAttributes);
-			dos.close();
 			LOG.debug("finish anonymization: end storage");
 		} catch (final IOException exc) {
 			LOG.error("performAnonymization : error while anonimizing file " + dicomFile.toString() + " : ", exc);
+		} finally {
+			try {
+				if (din != null) {
+					din.close();
+				}
+				if (dos != null) {
+					dos.close();
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}
