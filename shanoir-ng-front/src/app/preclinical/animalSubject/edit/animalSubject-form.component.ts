@@ -19,6 +19,7 @@ import { SubjectTherapyService } from '../../therapies/subjectTherapy/shared/sub
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
 import { Sex } from '../../../subjects/shared/subject.types';
 
+import * as AppUtils from '../../../utils/app.utils';
 import * as shajs from 'sha.js';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
@@ -65,6 +66,9 @@ export class AnimalSubjectFormComponent implements OnInit {
     private selectedStudy : IdNameObject;
     private selectedStudyId: number; 
     
+    private hasNameUniqueError: boolean = false;
+    private existingSubjectError: string;
+    private isSubjectFoundPromise: Promise<void>;
 
     constructor(
         private animalSubjectService: AnimalSubjectService,
@@ -291,41 +295,49 @@ export class AnimalSubjectFormComponent implements OnInit {
 
     addSubject() {
         if (!this.preclinicalSubject ) { return; }
-        this.generateSubjectIdentifier();
-        this.animalSubjectService.createSubject(this.preclinicalSubject.subject)
-            .subscribe(subject => {
-            	this.preclinicalSubject.subject = subject;
-            	this.preclinicalSubject.animalSubject.subjectId = subject.id;
-            	// Add animalSubject
-            	if (this.preclinicalSubject && this.preclinicalSubject.animalSubject){
-            		this.animalSubjectService.create(this.preclinicalSubject.animalSubject)
-            		 .subscribe(animalSubject => {
-            		 	this.preclinicalSubject.id = animalSubject.id;
-            		 	this.preclinicalSubject.animalSubject = animalSubject;
-            		 	 //Then add pathologies
-                		if (this.preclinicalSubject && this.preclinicalSubject.pathologies) {
-                    		for (let patho of this.preclinicalSubject.pathologies) {
-                        		//patho.subject = subject;
-                        		this.subjectPathologyService.create(this.preclinicalSubject, patho)
-                            		.subscribe(subjectPathology => {
+        this.preclinicalSubject.subject.identifier = this.generateSubjectIdentifier();
+        this.isSubjectFoundPromise = this.animalSubjectService.findSubjectByIdentifier(this.preclinicalSubject.subject.identifier)
+            .then((subject: Subject) => {
+                if (subject) {
+                	this.existingSubjectError = subject.name;
+                }else {
+        			this.animalSubjectService.createSubject(this.preclinicalSubject.subject)
+            			.then(subject => {
+            				this.preclinicalSubject.subject = subject;
+            				this.preclinicalSubject.animalSubject.subjectId = subject.id;
+            				// Add animalSubject
+            				if (this.preclinicalSubject && this.preclinicalSubject.animalSubject){
+            					this.animalSubjectService.create(this.preclinicalSubject.animalSubject)
+            		 				.subscribe(animalSubject => {
+            		 				this.preclinicalSubject.id = animalSubject.id;
+            		 				this.preclinicalSubject.animalSubject = animalSubject;
+            		 	 			//Then add pathologies
+                					if (this.preclinicalSubject && this.preclinicalSubject.pathologies) {
+                    					for (let patho of this.preclinicalSubject.pathologies) {
+                        					//patho.subject = subject;
+                        					this.subjectPathologyService.create(this.preclinicalSubject, patho)
+                            					.subscribe(subjectPathology => {
 
-                            	});
-                    		}
-                		}
-                		//Then add therapies
-                		if (this.preclinicalSubject && this.preclinicalSubject.therapies) {
-                    		for (let therapy of this.preclinicalSubject.therapies) {
-                        		this.subjectTherapyService.create(this.preclinicalSubject, therapy)
-                            		.subscribe(subjectTherapy => {
+                            				});
+                    					}
+                					}
+                					//Then add therapies
+                					if (this.preclinicalSubject && this.preclinicalSubject.therapies) {
+                    					for (let therapy of this.preclinicalSubject.therapies) {
+                        					this.subjectTherapyService.create(this.preclinicalSubject, therapy)
+                            					.subscribe(subjectTherapy => {
 
-                            		});
-                    		}
-                		}
-                		this.getOut(this.preclinicalSubject);
-            		 }
-            		 );
-            	}
-            });
+                            					});
+                    					}
+                					}
+                					this.getOut(this.preclinicalSubject);
+            		 		});
+            				}
+            			}, (error: any) => {
+            				this.manageRequestErrors(error);
+            			});
+        		}
+    	});
     }
 
     updateSubject(): void {
@@ -342,6 +354,8 @@ export class AnimalSubjectFormComponent implements OnInit {
                 			}
                 		);
                 	}
+            	}, (error: any) => {
+            		this.manageRequestErrors(error);
             	}
             );
         }
@@ -430,11 +444,13 @@ export class AnimalSubjectFormComponent implements OnInit {
         }
     }
     
-    generateSubjectIdentifier(): void {
-    	if (this.preclinicalSubject && this.preclinicalSubject.subject){
-        	let hash = this.preclinicalSubject.subject.name ;
-        	this.preclinicalSubject.subject.identifier = this.getHash(hash);
+    
+    generateSubjectIdentifier(): string {
+        let hash;
+        if (this.preclinicalSubject && this.preclinicalSubject.subject) {
+            hash = this.preclinicalSubject.subject.name
         }
+        return this.getHash(hash);
     }
 
     getHash(stringToBeHashed: string): string {
@@ -448,6 +464,9 @@ export class AnimalSubjectFormComponent implements OnInit {
     	this.router.navigate(['/preclinical-subject'], { queryParams: { id: this.subjectId, mode: "edit" } });
     }
     
+     private manageRequestErrors(error: any): void {
+        this.hasNameUniqueError = AppUtils.hasUniqueError(error, 'name');
+    }
     
 
 }

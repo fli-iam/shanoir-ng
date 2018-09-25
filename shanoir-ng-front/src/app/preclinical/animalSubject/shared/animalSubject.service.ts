@@ -68,10 +68,12 @@ export class AnimalSubjectService {
             	.map(res => res);
     	}
     	
-    	createSubject(subject: Subject): Observable<Subject> {
-    		return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, JSON.stringify(subject))
-            	.map(res => res);
+    	
+    	createSubject(subject: Subject): Promise<Subject> {
+       		return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, JSON.stringify(subject))
+            	.toPromise();
     	}
+    	
     
         
         delete(id: number): Promise<void> {
@@ -111,5 +113,14 @@ export class AnimalSubjectService {
                         return Promise.reject(error.message || error);
             });
         }
+        
+        findSubjectByIdentifier(identifier: string): Promise<Subject> {
+        	return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
+            .toPromise()
+            .catch((error)=> {
+                console.error('Error while finding subject by identifier', error);
+                return Promise.reject(error.message || error);
+        });
+    }
     
 }

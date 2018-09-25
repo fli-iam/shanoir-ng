@@ -50,9 +50,14 @@
 									{{preclinicalSubject?.subject?.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="name" formControlName="name" [(ngModel)]="preclinicalSubject.subject.name"/>
-								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit subject|NameRequiredError label">Name is required!</label>
-							</ng-template>							
+								<input type="text" id="name" required minlength="2" maxlength="255"  formControlName="name" [(ngModel)]="preclinicalSubject.subject.name" (keyup)="isNameUnique=true" />
+								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit subject|NameRequiredError label">Common Name is required!</label>
+								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 255!</label>
+								<label *ngIf="hasNameUniqueError" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">Common Name should be unique!</label>
+								<label *ngIf="existingSubjectError" class="form-validation-alert" i18n="Subject detail|Existing subject error@@existingSubjectError">
+									This subject already exists and his common name is: {{existingSubjectError}}
+								</label>
+							</ng-template>		
 						</span>
 					</li>
 					<li *ngIf="displaySex()">
