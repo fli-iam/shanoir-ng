@@ -14,12 +14,13 @@
 
     --color-a: #5f0f4e;
     --color-b: #675682;
-    --color-b-light: #E0DDE6;
-    --color-b-light2: #76678E;
-    --color-c: #e52a6F;
-    --color-error: red;
-    --color-important: red;
-    --color-light-error: #f4dede;
+    --color-b-light: #E3E0E8;
+    --color-b-light2: #827498;
+    --color-c: #498467;
+    --color-c-light: #6A9A82;
+    --color-error: #BA2D0B;
+    --color-important: #BA2D0B;
+    --color-light-error: #F2D8D2 ;
 
     --shadow-height: 15px;
     --shadow-color: rgba(0,0,0,0.3);

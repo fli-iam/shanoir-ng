@@ -1,5 +1,5 @@
 <div class="content-component detail">
-	<form *ngIf="centerForm" [formGroup]="centerForm" class="max-content" novalidate>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
@@ -99,10 +99,9 @@
 			</fieldset>
 			<form-footer
 				[state]="footerState"
-				(update)="update()"
-				(create)="create()"
-				(edit)="edit()"
-				(back)="back()"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()"
 			></form-footer>
 		</div>
 		<div class="layout right" *ngIf="mode=='view'">

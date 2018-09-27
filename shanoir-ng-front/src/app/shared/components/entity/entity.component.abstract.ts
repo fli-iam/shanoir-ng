@@ -3,12 +3,12 @@ import { EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
 import { FooterState } from '../form-footer/footer-state.model';
 import { Entity, EntityRoutes } from './entity.interface';
-import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 
 export type Mode =  "view" | "edit" | "create";
 export abstract class EntityComponent<T extends Entity> implements OnInit {
@@ -19,14 +19,15 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
     @Output() close: EventEmitter<any> = new EventEmitter();
     private footerState: FooterState;
     private form: FormGroup;
+    private bcStep: Step;
 
     private entityRoutes: EntityRoutes;
-    private router: Router;
+    protected router: Router;
     private location: Location;
     private keycloakService: KeycloakService;
     protected formBuilder: FormBuilder;
     private msgBoxService: MsgBoxService; 
-    private breadcrumbsService: BreadcrumbsService;
+    protected breadcrumbsService: BreadcrumbsService;
 
     abstract initView(): Promise<void>;
     abstract initEdit(): Promise<void>;
@@ -47,6 +48,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
         
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.id = +this.activatedRoute.snapshot.params['id'];
+        this.addBCStep();
     }
 
     ngOnInit(): void {
@@ -58,35 +60,36 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
             }
         }
         choose().then(() => {
-            if (this.breadcrumbsService.entityToReload()) this.entity = this.breadcrumbsService.lastStep.entity as T;
+            if (this.breadcrumbsService.entityToReload()) this.entity = this.breadcrumbsService.reloadSavedEntity<T>();
+            this.bcStep.entity = this.entity;
             this.form = this.buildForm();
-            this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
-            this.addBCStep();
+            if (this.form) 
+                this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
+            else 
+                this.footerState.valid = true;
         });
         this.footerState = new FooterState(this.mode, this.keycloakService.isUserAdminOrExpert());
     }
 
     private addBCStep() {
-        let route: string;
         let label: string;
         switch (this.mode) { 
             case 'create' : 
-                route = this.entityRoutes.getRouteToCreate();
-                label = 'new ' + this.ROUTING_NAME;
+                label = 'New ' + this.ROUTING_NAME;
                 break;
             case 'edit' : 
-                route = this.entityRoutes.getRouteToEdit(this.entity.id);
-                label = 'edit ' + this.ROUTING_NAME;
+                label = 'Edit ' + this.ROUTING_NAME;
                 break;
             case 'view' : 
-                route = this.entityRoutes.getRouteToView(this.entity.id);
-                label = 'view ' + this.ROUTING_NAME;
+                label = 'View ' + this.ROUTING_NAME;
                 break;
         }
-        this.breadcrumbsService.addStep(new Step(label, route, this.entity));
+        this.bcStep = new Step(label, this.router.url);
+        this.breadcrumbsService.addStep(this.bcStep);
     }
 
     formErrors(field: string): any {
+        if (!this.form) return;
         const control = this.form.get(field);
         if (control && control.dirty && !control.valid) {
             return control.errors;
@@ -97,15 +100,25 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
     save(): Promise<void> {
         if (this.mode == 'create') {
             return this.entity.create().then((entity) => {
-                this.goToView(entity.id);
+                this.chooseRoute(entity);
                 this.msgBoxService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the number ' + entity.id);
             });
         }
         else if (this.mode == 'edit') {
             return this.entity.update().then(() => {
-                this.goToView();
+                this.chooseRoute(this.entity);
                 this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + this.entity.id + ' has been successfully updated');
             });
+        }
+    }
+
+    private chooseRoute(entity: Entity) {
+        this.breadcrumbsService.lastStep.notifySave(entity);
+        if (this.breadcrumbsService.beforeLastStep && this.breadcrumbsService.beforeLastStep.isWaitingFor(this.breadcrumbsService.lastStep)) {
+            this.breadcrumbsService.goBack();
+        }
+        else {
+            this.goToView(entity.id);
         }
     }
 
@@ -119,6 +132,11 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
             else if (this.mode == 'edit') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToView method');
         }
+        if (this.breadcrumbsService.lastStep && (
+                this.breadcrumbsService.lastStep.route == this.entityRoutes.getRouteToEdit(id)
+                || this.breadcrumbsService.lastStep.route == this.entityRoutes.getRouteToCreate())){
+            this.breadcrumbsService.disableLastStep();
+        } else {}
         this.router.navigate([this.entityRoutes.getRouteToView(id)]);
     }
 
@@ -127,6 +145,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
             if (this.mode == 'edit') return;
             else if (this.mode == 'view') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToEdit method');
+        }
+        if (this.breadcrumbsService.lastStep && this.breadcrumbsService.lastStep.route == this.entityRoutes.getRouteToView(id)) {
+            this.breadcrumbsService.disableLastStep();
         }
         this.router.navigate([this.entityRoutes.getRouteToEdit(id)]);
     }
@@ -140,9 +161,12 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
     }
 
     goBack(): void {
-        this.breadcrumbsService.notifyBack();
-        if (this.mode == 'view' || this.mode == 'create') this.goToList();
-        else if (this.mode == 'edit') this.goToView();
+        this.breadcrumbsService.notifyBeforeBack();
+        this.location.back();
     }
+
+    private compareEntities(e1: Entity, e2: Entity) : boolean {
+        return e1 && e2 && e1.id === e2.id;
+      }
 
 }

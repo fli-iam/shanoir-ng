@@ -22,22 +22,15 @@
 				<papaya [params]="papayaParams"></papaya>
 			</fieldset>
 
-			<div class="footer command-zone">
-				<span [ngSwitch]="mode">
-					<button type="button" i18n="Buttons|Back button label@@backButton" class="back-button left-icon" (click)="back()"><i class="fas fa-angle-left"></i>Back</button>
-					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify">
-						<button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
-						<button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
-						<button type="button" class="right-icon" i18n="Buttons|Edit button label@@editButton" (click)="edit()">Edit<i class="far fa-edit"></i></button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-						<button type="submit" class="right-icon" i18n="Buttons|Update button label@@updateButton" (click)="update()" [disabled]="form.invalid">Update<i class="far fa-save"></i></button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
-						<button type="submit" class="right-icon" i18n="Buttons|Create button label@@createButton" (click)="create()" [disabled]="form.invalid">Create<i class="far fa-save"></i></button>
-					</ng-template>
-				</span>
-			</div>
+			<form-footer
+					[state]="footerState"
+					(save)="save()"
+					(edit)="goToEdit()"
+					(back)="goBack()">
+				<button *ngIf="mode=='view'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download Dicom<i class="fas fa-download"></i></button>
+				<button *ngIf="mode=='view'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Nifti<i class="fas fa-download"></i></button>
+			</form-footer>
+
 		</div>
 	</form>
 </div>

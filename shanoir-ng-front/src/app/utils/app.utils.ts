@@ -1,6 +1,7 @@
-import { Pageable } from '../shared/components/table/pageable.model';
-import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
+
+import { MrDataset } from '../datasets/dataset/mr/dataset.mr.model';
+import { Dataset } from '../datasets/shared/dataset.model';
 
 // Users http api
 const BACKEND_API_USERS_MS_URL: string = process.env.BACKEND_API_USERS_MS_URL;
@@ -121,4 +122,15 @@ export function allOfEnum<T>(enumClass): Array<T> {
         list.push(enumClass[key]);
     }
     return list;
+}
+
+export function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+// Had trouble with circular dependencies limit, this temporary fixes it
+export function mapType(dataset: Dataset) {
+    if (dataset.type == 'Mr') return Object.assign(new MrDataset(), dataset);
+    // TODO : implements other types
+    else return Object.assign(new MrDataset(), dataset); // That is just for those buggy test data without a real concrete type
 }

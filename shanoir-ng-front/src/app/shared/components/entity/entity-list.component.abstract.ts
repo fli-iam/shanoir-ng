@@ -8,6 +8,8 @@ import { Page, Pageable } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { Entity, EntityRoutes } from './entity.interface';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
+import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
+import { capitalizeFirstLetter } from '../../../utils/app.utils';
 
 export abstract class EntityListComponent<T extends Entity> {
 
@@ -18,7 +20,8 @@ export abstract class EntityListComponent<T extends Entity> {
     protected confirmDialogService: ConfirmDialogService;
     private keycloakService: KeycloakService;
     private entityRoutes: EntityRoutes;
-    private msgBoxService: MsgBoxService; 
+    private msgBoxService: MsgBoxService;
+    private breadcrumbsService: BreadcrumbsService;
 
     private edit: boolean = true;
     private view: boolean = true;
@@ -34,12 +37,14 @@ export abstract class EntityListComponent<T extends Entity> {
         this.confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
         this.keycloakService = ServiceLocator.injector.get(KeycloakService);
         this.msgBoxService = ServiceLocator.injector.get(MsgBoxService);
+        this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         
         if (options) this.setOptions(options);
         this.columnDefs = this.getColumnDefs();
         this.completeColDefs();
         this.customActionDefs = this.getCustomActionsDefs();
-        this.completeCustomActions();        
+        this.completeCustomActions();
+        this.breadcrumbsService.addStep(new Step(capitalizeFirstLetter(ROUTING_NAME) + ' list', this.entityRoutes.getRouteToList()));       
     }
 
     private setOptions(options: any) {
@@ -64,7 +69,7 @@ export abstract class EntityListComponent<T extends Entity> {
     private completeCustomActions(): void {
         if (this.new && this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "new coil.",awesome: "fa-plus", action: item => this.router.navigate(['/coil/create'])
+                title: "New",awesome: "fa-plus", action: item => this.router.navigate(['/coil/create'])
             });
         }
     }

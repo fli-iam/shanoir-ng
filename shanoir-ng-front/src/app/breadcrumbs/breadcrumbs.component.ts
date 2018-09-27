@@ -20,7 +20,8 @@ export class BreadcrumbsComponent {
     }
 
     clickStep(index: number) {
-        this.service.clickStep(index);
+        if (index < this.service.steps.length - 1)
+            this.service.goToStep(index);
     }
 
     goHome() {

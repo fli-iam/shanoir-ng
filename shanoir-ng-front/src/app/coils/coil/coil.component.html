@@ -69,7 +69,7 @@
 									</a> 
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="center" required formControlName="center" [(ngModel)]="coil.center" (ngModelChange)="updateManufList($event)">
+									<select id="center" required formControlName="center" [(ngModel)]="coil.center" (ngModelChange)="updateManufList($event)" [compareWith]="compareEntities">
 										<option *ngFor="let center of centers" [ngValue]="center">{{center?.name}}</option>
 									</select>
 									<button i18n="Coil detail|Create new center label@@coilDetailNewCenter" (click)="openNewCenter()">

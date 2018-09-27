@@ -23,7 +23,7 @@ export class AppComponent {
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
         
         location.onPopState(() => {
-            this.breadcrumbsService.notifyBack();
+            this.breadcrumbsService.notifyBeforeBack();
         });
 
         window.onbeforeunload = function() { return "Warning! Your work may be lost!"; };

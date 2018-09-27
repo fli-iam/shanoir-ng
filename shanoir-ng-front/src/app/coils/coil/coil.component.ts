@@ -4,15 +4,13 @@ import { ActivatedRoute } from '@angular/router';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
-import { CenterComponent } from '../../centers/center/center.component';
-import { ManufacturerComponent } from '../../acquisition-equipments/manufacturer/manufacturer.component';
-import { ModalService } from '../../shared/components/modals/modal.service';
 
 @Component({
     selector: 'coil',
@@ -29,8 +27,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     constructor(
             private route: ActivatedRoute,
             private coilService: CoilService, 
-            private centerService: CenterService,
-            private modalService: ModalService) {
+            private centerService: CenterService) {
         super(route, 'coil');
     }
 
@@ -86,25 +83,20 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     private updateManufList(center: Center): void {
         this.manufModels = [];
-        if (center) center.acquisitionEquipments.map(acqEqu => this.manufModels.push(acqEqu.manufacturerModel));
+        if (center && center.acquisitionEquipments) center.acquisitionEquipments.map(acqEqu => this.manufModels.push(acqEqu.manufacturerModel));
     }
 
     private openNewCenter() {
-        this.modalService.open(CenterComponent, 'create').then(
-            (newCenter) => {
-                this.centers = [newCenter].concat(this.centers);
-                this.coil.center = newCenter;
-                this.updateManufList(this.coil.center);
-            }
-        );
+        let currentStep: Step = this.breadcrumbsService.lastStep;
+        this.router.navigate(['/center/create']).then(success => {
+            currentStep.waitFor(this.breadcrumbsService.lastStep).subscribe(entity => {
+                (currentStep.entity as Coil).center = entity as Center;
+            });
+        });
     }
 
     private openNewManufModel() {
-        this.modalService.open(ManufacturerComponent, 'create').then(
-            (newManuf) => {
-                this.manufModels = [newManuf].concat(this.manufModels);
-            }
-        );
+ 
     }
 
 }

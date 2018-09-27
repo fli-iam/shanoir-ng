@@ -1,13 +1,10 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { Location } from '@angular/common';
-import { ActivatedRoute, Router, Params } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { Component } from '@angular/core';
+import { FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
+import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
-import { KeycloakService } from "../../shared/keycloak/keycloak.service";
-import { FooterState } from '../../shared/components/form-footer/footer-state.model';
 
 @Component({
     selector: 'center-detail',
@@ -15,39 +12,40 @@ import { FooterState } from '../../shared/components/form-footer/footer-state.mo
     styleUrls: ['center.component.css']
 })
 
-export class CenterComponent implements OnInit {
+export class CenterComponent extends EntityComponent<Center> {
 
-    private center: Center = new Center();
-    public centerForm: FormGroup;
-    private id: number;
-    @Input() mode: "view" | "edit" | "create";
     private isNameUnique: Boolean = true;
     private phoneNumberPatternError = false;
-    private footerState: FooterState;
 
-    constructor(private route: ActivatedRoute, private router: Router,
-            private centerService: CenterService, private fb: FormBuilder,
-            private location: Location, private keycloakService: KeycloakService) {
+    constructor(
+            private route: ActivatedRoute,
+            private centerService: CenterService) {
 
-        this.mode = this.route.snapshot.data['mode'];
-        this.id = +this.route.snapshot.params['id'];   
+        super(route, 'center');
     }
 
-    ngOnInit(): void {
-        if (this.mode == 'create') {
-            this.center = new Center();
-            this.buildForm();
-        } else {
-            this.centerService.getCenter(this.id).then((center: Center) => {
-                this.center = center;
-                this.buildForm();
-            });
-        }
-        this.footerState = new FooterState(this.mode, this.keycloakService.isUserAdminOrExpert());
+    get center(): Center { return this.entity; }
+    set center(center: Center) { this.entity = center; }
+
+    initView(): Promise<void> {
+        return this.centerService.getCenter(this.id).then(center => {
+            this.center = center;
+        });
     }
 
-    buildForm(): void {
-        this.centerForm = this.fb.group({
+    initEdit(): Promise<void> {
+        return this.centerService.getCenter(this.id).then(center => {
+            this.center = center;
+        });
+    }
+
+    initCreate(): Promise<void> {
+        this.entity = new Center();
+        return Promise.resolve();
+    }
+
+    buildForm(): FormGroup {
+        return this.formBuilder.group({
             'name': [this.center.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
             'street': [this.center.street],
             'postalCode': [this.center.postalCode],
@@ -56,58 +54,20 @@ export class CenterComponent implements OnInit {
             'phoneNumber': [this.center.phoneNumber],
             'website': [this.center.website]
         });
-        this.centerForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
-        this.onValueChanged(); // (re)set validation messages now
-        this.centerForm.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
     }
 
-    onValueChanged(data?: any) {
-        if (!this.centerForm) { return; }
-        const form = this.centerForm;
-        for (const field in this.formErrors) {
-            // clear previous error message (if any)
-            this.formErrors[field] = '';
-            const control = form.get(field);
-            if (control && control.dirty && !control.valid) {
-                for (const key in control.errors) {
-                    this.formErrors[field] += key;
-                }
-            }
-        }
-    }
 
-    formErrors = {
-        'name': ''
-    };
 
-    back(): void {
-        this.location.back();
-    }
+    // create(): void {
+    //     this.center = this.centerForm.value;
+    //     this.centerService.create(this.center)
+    //         .subscribe((center) => {
+    //             this.back();
+    //         }, (err: string) => {
+    //             this.manageRequestErrors(err);
+    //       });
+    // }  
 
-    edit(): void {
-        this.router.navigate(['/center/edit/'+this.center.id]);
-    }
-
-    create(): void {
-        this.center = this.centerForm.value;
-        this.centerService.create(this.center)
-            .subscribe((center) => {
-                this.back();
-            }, (err: string) => {
-                this.manageRequestErrors(err);
-            });
-    }
-
-    update(): void {
-        this.center = this.centerForm.value;
-        this.centerService.update(this.id, this.center)
-            .subscribe((center) => {
-                this.back();
-            }, (err: string) => {
-                this.manageRequestErrors(err);
-            });
-    }
 
     private manageRequestErrors(err: string): void {
         if (err.indexOf("name should be unique") != -1) {
