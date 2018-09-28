@@ -89,7 +89,7 @@
 									</a>
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="acquiEquipModel" required formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel">
+									<select id="acquiEquipModel" required formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel" [compareWith]="compareEntities">
 										<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel.name}}</option>
 									</select>
 									<button i18n="Coil detail|Create new model label@@coilDetailNewManufModel" (click)="openNewManufModel()">

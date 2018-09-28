@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -9,9 +9,11 @@ import { KeycloakService } from '../../keycloak/keycloak.service';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
 import { FooterState } from '../form-footer/footer-state.model';
 import { Entity, EntityRoutes } from './entity.interface';
+import { Subject, Subscription } from 'rxjs';
+import { ShanoirError } from '../../models/error.model';
 
 export type Mode =  "view" | "edit" | "create";
-export abstract class EntityComponent<T extends Entity> implements OnInit {
+export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy {
 
     protected id: number;
     protected entity: T;
@@ -28,6 +30,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
     protected formBuilder: FormBuilder;
     private msgBoxService: MsgBoxService; 
     protected breadcrumbsService: BreadcrumbsService;
+    public onSave: Subject<any> =  new Subject<any>();
+    protected subscribtions: Subscription[] = [];
 
     abstract initView(): Promise<void>;
     abstract initEdit(): Promise<void>;
@@ -57,6 +61,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
                 case 'create' : return this.initCreate();
                 case 'edit' : return this.initEdit();
                 case 'view' : return this.initView();
+                default: throw Error('mode has to be set!');
             }
         }
         choose().then(() => {
@@ -96,8 +101,18 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
         }
     }
 
-
     save(): Promise<void> {
+        return this.saveEntity().then(() => {
+            this.onSave.next(this.entity);
+        }).catch(reason => {
+            if (reason && reason.error) {
+                this.onSave.next(new ShanoirError(reason.error.code, reason.error.details, reason.error.message));
+                if (reason.error.code != 422) throw Error(reason);
+            }
+        });
+    }
+
+    private saveEntity(): Promise<void> {
         if (this.mode == 'create') {
             return this.entity.create().then((entity) => {
                 this.chooseRoute(entity);
@@ -136,7 +151,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
                 this.breadcrumbsService.lastStep.route == this.entityRoutes.getRouteToEdit(id)
                 || this.breadcrumbsService.lastStep.route == this.entityRoutes.getRouteToCreate())){
             this.breadcrumbsService.disableLastStep();
-        } else {}
+        }
         this.router.navigate([this.entityRoutes.getRouteToView(id)]);
     }
 
@@ -167,6 +182,12 @@ export abstract class EntityComponent<T extends Entity> implements OnInit {
 
     private compareEntities(e1: Entity, e2: Entity) : boolean {
         return e1 && e2 && e1.id === e2.id;
-      }
+    }
+
+    ngOnDestroy() {
+        for(let subscribtion of this.subscribtions) {
+            subscribtion.unsubscribe();
+        }
+    }
 
 }

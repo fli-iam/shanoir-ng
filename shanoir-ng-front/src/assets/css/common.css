@@ -96,8 +96,10 @@ form { color: var(--dark-grey); }
   form .right-col label { text-align: left; display: block; }
   form .right-col button { padding: 0 5px; margin: 0; background-color: transparent; border: 1px solid var(--grey); color: var(--very-dark-grey); height: 21px; }
     form .right-col button:active { background-color: var(--color-b-light); }
+    form .right-col button:hover { background-color: inherit; color: inherit; }
     form .right-col button:disabled { color: var(--grey); }
     form .right-col button img { height: 12px; vertical-align: sub; margin: 0px 5px 2px 0px; }
+    form .right-col button svg { margin-right: 3px; vertical-align: -1; color: var(--color-a); }
 
   /* Date picker style overriding */
   form my-date-picker input { height: 21px; font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; }

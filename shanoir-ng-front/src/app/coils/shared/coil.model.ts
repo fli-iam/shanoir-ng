@@ -16,17 +16,17 @@ export class Coil implements Entity {
     coilType:CoilType;
 
     
-    private coilService: CoilService = ServiceLocator.injector.get(CoilService);
+    private service: CoilService = ServiceLocator.injector.get(CoilService);
 
     create(): Promise<Entity> {
-        return this.coilService.create(this);
+        return this.service.create(this);
     }
 
     update(): Promise<void> {
-        return this.coilService.update(this.id, this);
+        return this.service.update(this.id, this);
     }
 
     delete(): Promise<void> {
-        return this.coilService.delete(this.id);
+        return this.service.delete(this.id);
     }
 }

@@ -23,6 +23,7 @@ export class CoilListComponent extends EntityListComponent<Coil> {
             private coilService: CoilService) {
                 
         super('coil');
+        this.manageDelete();
     }
 
     getPage(pageable: FilterablePageable): Promise<Page<Coil>> {
@@ -67,11 +68,13 @@ export class CoilListComponent extends EntityListComponent<Coil> {
         return colDef;       
     }
 
-    onDelete(entity: Coil) {
-        this.coils = this.coils.filter(coil => coil.id != entity.id);
-    }
-
     getCustomActionsDefs(): any[] {
         return [];
+    }
+
+    private manageDelete() {
+        this.onDelete.subscribe(entity => {
+            this.coils = this.coils.filter(item => item.id != entity.id);
+        });
     }
 }

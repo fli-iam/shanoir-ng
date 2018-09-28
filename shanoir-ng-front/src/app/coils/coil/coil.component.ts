@@ -96,7 +96,12 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
 
     private openNewManufModel() {
- 
+        let currentStep: Step = this.breadcrumbsService.lastStep;
+        this.router.navigate(['/manufacturer-model/create']).then(success => {
+            currentStep.waitFor(this.breadcrumbsService.lastStep).subscribe(entity => {
+                (currentStep.entity as Coil).manufacturerModel = entity as ManufacturerModel;
+            });
+        });
     }
 
 }

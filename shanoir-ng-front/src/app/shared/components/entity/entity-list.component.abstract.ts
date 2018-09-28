@@ -1,4 +1,4 @@
-import { ViewContainerRef } from '@angular/core';
+import { ViewContainerRef, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ServiceLocator } from '../../../utils/locator.service';
@@ -10,18 +10,22 @@ import { Entity, EntityRoutes } from './entity.interface';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { capitalizeFirstLetter } from '../../../utils/app.utils';
+import { Subject, Subscription } from 'rxjs';
+import { ShanoirError } from '../../models/error.model';
 
-export abstract class EntityListComponent<T extends Entity> {
+export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
 
     abstract table: TableComponent;  
     protected columnDefs: any[];
     protected customActionDefs: any[];
     protected router: Router;
     protected confirmDialogService: ConfirmDialogService;
-    private keycloakService: KeycloakService;
+    protected keycloakService: KeycloakService;
     private entityRoutes: EntityRoutes;
-    private msgBoxService: MsgBoxService;
+    protected msgBoxService: MsgBoxService;
     private breadcrumbsService: BreadcrumbsService;
+    public onDelete: Subject<any> =  new Subject<any>();
+    protected subscribtions: Subscription[] = [];
 
     private edit: boolean = true;
     private view: boolean = true;
@@ -44,6 +48,7 @@ export abstract class EntityListComponent<T extends Entity> {
         this.completeColDefs();
         this.customActionDefs = this.getCustomActionsDefs();
         this.completeCustomActions();
+        this.breadcrumbsService.reset();
         this.breadcrumbsService.addStep(new Step(capitalizeFirstLetter(ROUTING_NAME) + ' list', this.entityRoutes.getRouteToList()));       
     }
 
@@ -61,7 +66,7 @@ export abstract class EntityListComponent<T extends Entity> {
         if (this.view && !this.keycloakService.isUserGuest()) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-eye", action: item => this.goToView(item.id) });
         }
-        if (this.view && !this.keycloakService.isUserGuest()) {
+        if (this.delete && !this.keycloakService.isUserGuest()) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.openDeleteConfirmDialog(item) });
         }
     }
@@ -69,7 +74,7 @@ export abstract class EntityListComponent<T extends Entity> {
     private completeCustomActions(): void {
         if (this.new && this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.customActionDefs.push({
-                title: "New",awesome: "fa-plus", action: item => this.router.navigate(['/coil/create'])
+                title: "New",awesome: "fa-plus", action: item => this.router.navigate([this.entityRoutes.getRouteToCreate()])
             });
         }
     }
@@ -77,7 +82,6 @@ export abstract class EntityListComponent<T extends Entity> {
     abstract getPage(pageable: Pageable): Promise<Page<T>>;
     abstract getColumnDefs(): any[];
     abstract getCustomActionsDefs(): any[];
-    abstract onDelete(entity: T): void;
 
     private onRowClick(entity: T) {
         if (!this.keycloakService.isUserGuest()) {
@@ -94,9 +98,14 @@ export abstract class EntityListComponent<T extends Entity> {
             ).subscribe(res => {
                 if (res) {
                     entity.delete().then(() => {
-                        this.onDelete(entity);
+                        this.onDelete.next(entity);
                         this.table.refresh();
                         this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
+                    }).catch(reason => {
+                        if (reason && reason.error) {
+                            this.onDelete.next(new ShanoirError(reason.error.code, reason.error.details, reason.error.message));
+                            if (reason.error.code != 422) throw Error(reason);
+                        }
                     });                    
                 }
             })
@@ -116,6 +125,12 @@ export abstract class EntityListComponent<T extends Entity> {
 
     goToList(): void {
         this.router.navigate([this.entityRoutes.getRouteToList()]);
+    }
+
+    ngOnDestroy() {
+        for(let subscribtion of this.subscribtions) {
+            subscribtion.unsubscribe();
+        }
     }
 
 }

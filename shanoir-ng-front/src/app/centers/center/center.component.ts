@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
+import { ShanoirError } from '../../shared/models/error.model';
 
 @Component({
     selector: 'center-detail',
@@ -14,7 +15,7 @@ import { CenterService } from '../shared/center.service';
 
 export class CenterComponent extends EntityComponent<Center> {
 
-    private isNameUnique: Boolean = true;
+    private isNameUniqueError: Boolean = true;
     private phoneNumberPatternError = false;
 
     constructor(
@@ -22,6 +23,7 @@ export class CenterComponent extends EntityComponent<Center> {
             private centerService: CenterService) {
 
         super(route, 'center');
+        this.manageSaveErrors();
     }
 
     get center(): Center { return this.entity; }
@@ -56,30 +58,21 @@ export class CenterComponent extends EntityComponent<Center> {
         });
     }
 
-
-
-    // create(): void {
-    //     this.center = this.centerForm.value;
-    //     this.centerService.create(this.center)
-    //         .subscribe((center) => {
-    //             this.back();
-    //         }, (err: string) => {
-    //             this.manageRequestErrors(err);
-    //       });
-    // }  
-
-
-    private manageRequestErrors(err: string): void {
-        if (err.indexOf("name should be unique") != -1) {
-            this.isNameUnique = false;
-        }
-        if (err.indexOf("phoneNumber should be Pattern") != -1) {
-            this.phoneNumberPatternError = true;
-        }
+    private manageSaveErrors() {
+        this.subscribtions.push(
+            this.onSave.subscribe(response => {
+                if (response && response instanceof ShanoirError && response.code == 422) {
+                    if (response.code == 422) {
+                        this.phoneNumberPatternError = response.hasFieldError('phoneNumber', 'Pattern');
+                        this.phoneNumberPatternError = response.hasFieldError('name', 'unique');
+                    }     
+                }
+            })
+        );
     }
 
     resetNameErrorMsg(): void {
-        this.isNameUnique = true;
+        this.isNameUniqueError = true;
     }
 
     resetPhoneNumberErrorMsg(): void {

@@ -26,7 +26,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             private studyService: StudyService,
             private subjectService: SubjectService) {
                 
-        super('dataset');
+        super('dataset', {'new': false});
         this.fetchStudies();
         this.fetchSubjects();
     }
@@ -83,8 +83,6 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
         }
         throw new Error('Cannot find study for id = ' + id);
     }
-
-    onDelete(entity: Dataset) {}
 
     getCustomActionsDefs(): any[] {
         return [];

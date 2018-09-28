@@ -1,5 +1,5 @@
 <div class="content-component">
-	<form *ngIf="acqEquipForm" [formGroup]="acqEquipForm" class="max-content" novalidate>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
@@ -36,10 +36,9 @@
 									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</option>
 								</select>
 								<button i18n="AcqEquip detail|Create new model label@@acqEqptDetailNewManufModel" (click)="manufModelModal.show()">
-									<img [src]="addIconPath"/>
-									new manufacturer model
+									<i class="fas fa-plus-square"></i> new manufacturer model
 								</button>
-								<label *ngIf="formErrors.manufacturerModel.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
+								<label *ngIf="formErrors('manufacturerModel')?.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -61,7 +60,7 @@
 								<select id="center" required formControlName="center" [(ngModel)]="acqEquip.center">
 									<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
 								</select>
-								<label *ngIf="formErrors.center.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
+								<label *ngIf="formErrors('center')?.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
 								<a [routerLink] = "['/center']" [queryParams]="{mode: 'view', id: acqEquip.center?.id}">details</a>
 							</ng-template>
 						</span>
@@ -69,7 +68,7 @@
 					<li>
 						<label i18n="AcqEquip detail|Serial number label@@acqEqptDetailSerialNumber">
 							Serial Number
-							<img [src]="infoIconPath" i18n-title="AcqEquip detail|Serial number tooltip@@acqEqptDetailSerialNumberTooltip" title="Value of DICOM Device Serial Number tag (0018,1000). Used to verify data imported from this equipment."/>
+							<tool-tip>Value of DICOM Device Serial Number tag (0018,1000). Used to verify data imported from this equipment."</tool-tip>
 						</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
@@ -84,17 +83,10 @@
 			</fieldset>
 			<form-footer
 				[state]="footerState"
-				(update)="update()"
-				(create)="create()"
-				(edit)="edit()"
-				(back)="back()"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()"
 			></form-footer>
 		</div>
 	</form>
 </div>
-
-<app-modal modalDialogId="manufModelModal" #manufModelModal>
-    <div class="app-modal-body">
-      <manufacturer-model-detail [mode]="'create'" (closing)="closePopin($event)"></manufacturer-model-detail>
-    </div>
-</app-modal>
