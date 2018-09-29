@@ -1,8 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
 
-import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
-import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ShanoirError } from '../../shared/models/error.model';
 import { Center } from '../shared/center.model';
@@ -14,35 +14,19 @@ import { CenterService } from '../shared/center.service';
     styleUrls: ['center-list.component.css']
 })
 
-export class CenterListComponent extends EntityListComponent<Center> {
+export class CenterListComponent extends BrowserPaginEntityListComponent<Center> {
 
     @ViewChild('table') table: TableComponent;
-    private centersPromise: Promise<void> = this.getCenters();
-    private browserPaging: BrowserPaging<Center>;
-    private centers: Center[];
     
     constructor(
             private centerService: CenterService) {
+
         super('center');
         this.manageDelete();
     }
 
-    getPage(pageable: FilterablePageable): Promise<Page<Center>> {
-        return new Promise((resolve) => {
-            this.centersPromise.then(() => {
-                this.browserPaging.setItems(this.centers);
-                resolve(this.browserPaging.getPage(pageable));
-            });
-        });
-    }
-
-    private getCenters(): Promise<void> {
-        return this.centerService.getCenters().then(centers => {
-            if (centers) {
-                this.centers = centers;
-                this.browserPaging = new BrowserPaging(centers, this.columnDefs);
-            }
-        });
+    getEntities(): Promise<Center[]> {
+        return this.centerService.getCenters(); 
     }
 
     getColumnDefs() {
@@ -52,30 +36,27 @@ export class CenterListComponent extends EntityListComponent<Center> {
             { headerName: "Country", field: "country" }
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
-            columnDefs.push({ headerName: "", type: "button", awesome: "fa-podcast", tip: "Add acq. equip.", action: item => this.openCreateAcqEquip() });
+            columnDefs.push({ headerName: "", type: "button", awesome: "fa-podcast", tip: "Add acq. equip.", action: item => this.openCreateAcqEquip(item) });
         }
         return columnDefs;
     }
 
-    private openCreateAcqEquip = () => {
-        //this.acqEqptModal.show();
+    private openCreateAcqEquip = (center: Center) => {
+        let currentStep: Step = this.breadcrumbsService.lastStep;
+        this.router.navigate(['/acquisition-equipment/create']).then(success => {
+            this.breadcrumbsService.lastStep.addPrefilled('center', center);
+            currentStep.waitFor(this.breadcrumbsService.lastStep, false).subscribe(entity => {
+                center.acquisitionEquipments.push(entity as AcquisitionEquipment);
+            });
+        });
     }
-
-    // closePopin() {
-    //     this.acqEqptModal.hide();
-    // }
-
 
     private manageDelete() {
         this.subscribtions.push(
             this.onDelete.subscribe(response => {
-                if (response instanceof Center) {
-                    this.centers = this.centers.filter(item => item.id != response.id);
-                } else if (response instanceof ShanoirError) {
-                    if (response.code == 422) {
-                        let msg: string  = this.buildDeleteErrMsg(response.details.fieldErrors["delete"] || '');
-                        this.msgBoxService.log('warn', msg, 10000);
-                    }     
+                if (response instanceof ShanoirError && response.code == 422) {
+                    let msg: string  = this.buildDeleteErrMsg(response.details.fieldErrors["delete"] || '');
+                    this.msgBoxService.log('warn', msg, 10000); 
                 }
             })
         );

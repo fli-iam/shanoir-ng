@@ -15,8 +15,8 @@ import { ShanoirError } from '../../shared/models/error.model';
 
 export class CenterComponent extends EntityComponent<Center> {
 
-    private isNameUniqueError: Boolean = true;
-    private phoneNumberPatternError = false;
+    private isNameUniqueError: boolean = false;
+    private phoneNumberPatternError: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
@@ -64,19 +64,11 @@ export class CenterComponent extends EntityComponent<Center> {
                 if (response && response instanceof ShanoirError && response.code == 422) {
                     if (response.code == 422) {
                         this.phoneNumberPatternError = response.hasFieldError('phoneNumber', 'Pattern');
-                        this.phoneNumberPatternError = response.hasFieldError('name', 'unique');
+                        this.isNameUniqueError = response.hasFieldError('name', 'unique');
                     }     
                 }
             })
         );
-    }
-
-    resetNameErrorMsg(): void {
-        this.isNameUniqueError = true;
-    }
-
-    resetPhoneNumberErrorMsg(): void {
-        this.phoneNumberPatternError = false;
     }
 
 }

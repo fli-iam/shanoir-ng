@@ -1,47 +1,27 @@
 import { Component, ViewChild } from '@angular/core';
 
-import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
-import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
+import { TableComponent } from '../../shared/components/table/table.component';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
-import { TableComponent } from '../../shared/components/table/table.component';
 
 @Component({
     selector: 'coil-list',
     templateUrl: 'coil-list.component.html',
     styleUrls: ['coil-list.component.css'],
 })
-export class CoilListComponent extends EntityListComponent<Coil> {
+export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
     
     @ViewChild('table') table: TableComponent;
-    private coilsPromise: Promise<void> = this.getCoils();
-    private browserPaging: BrowserPaging<Coil>;
-    private coils: Coil[];
 
     constructor(
             private coilService: CoilService) {
                 
         super('coil');
-        this.manageDelete();
     }
 
-    getPage(pageable: FilterablePageable): Promise<Page<Coil>> {
-        return new Promise((resolve) => {
-            this.coilsPromise.then(() => {
-                this.browserPaging.setItems(this.coils);
-                resolve(this.browserPaging.getPage(pageable));
-            });
-        });
-    }
-
-    private getCoils(): Promise<void> {
-        return this.coilService.getCoils().then(coils => {
-            if (coils) {
-                this.coils = coils;
-                this.browserPaging = new BrowserPaging(this.coils, this.columnDefs);
-            }
-        })
+    getEntities(): Promise<Coil[]> {
+        return this.coilService.getCoils();
     }
 
     getColumnDefs(): any[] {
@@ -70,11 +50,5 @@ export class CoilListComponent extends EntityListComponent<Coil> {
 
     getCustomActionsDefs(): any[] {
         return [];
-    }
-
-    private manageDelete() {
-        this.onDelete.subscribe(entity => {
-            this.coils = this.coils.filter(item => item.id != entity.id);
-        });
     }
 }

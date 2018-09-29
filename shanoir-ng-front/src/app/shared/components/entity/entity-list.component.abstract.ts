@@ -23,7 +23,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected keycloakService: KeycloakService;
     private entityRoutes: EntityRoutes;
     protected msgBoxService: MsgBoxService;
-    private breadcrumbsService: BreadcrumbsService;
+    protected breadcrumbsService: BreadcrumbsService;
     public onDelete: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
 

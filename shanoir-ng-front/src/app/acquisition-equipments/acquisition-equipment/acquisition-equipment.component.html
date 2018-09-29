@@ -14,7 +14,7 @@
 			</span>
 			<fieldset>
 				<ol>
-					<label *ngIf="isModelNumberUnique==false" class="form-validation-alert" i18n="Edit acqEquip|Model number unique error@@acqEqptDetailModelNumberUniqueError">This equipment (same manufacturer model and same serial number) already exists!</label>
+					<label *ngIf="uniqueSerialError" class="form-validation-alert" i18n="Edit acqEquip|Model number unique error@@acqEqptDetailModelNumberUniqueError">This equipment (same manufacturer model and same serial number) already exists!</label>
 					<li *ngIf="mode=='view'">
 						<label i18n="AcqEquip detail|Manufacturer label@@acqEqptDetailManuf">Manufacturer</label>
 						<span class="right-col">
@@ -32,10 +32,10 @@
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select id="manufModel" required formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel">
+								<select id="manufModel" required formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel" [compareWith]="compareEntities" (change)="uniqueSerialError=false">
 									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</option>
 								</select>
-								<button i18n="AcqEquip detail|Create new model label@@acqEqptDetailNewManufModel" (click)="manufModelModal.show()">
+								<button i18n="AcqEquip detail|Create new model label@@acqEqptDetailNewManufModel" (click)="openNewManufModel()">
 									<i class="fas fa-plus-square"></i> new manufacturer model
 								</button>
 								<label *ngIf="formErrors('manufacturerModel')?.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
@@ -57,7 +57,7 @@
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select id="center" required formControlName="center" [(ngModel)]="acqEquip.center">
+								<select id="center" required formControlName="center" [(ngModel)]="acqEquip.center" [compareWith]="compareEntities">
 									<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
 								</select>
 								<label *ngIf="formErrors('center')?.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
@@ -75,7 +75,7 @@
 								{{acqEquip.serialNumber}}
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<input type="text" id="serialNumber" formControlName="serialNumber" [(ngModel)]="acqEquip.serialNumber"/>
+								<input type="text" id="serialNumber" formControlName="serialNumber" [(ngModel)]="acqEquip.serialNumber" (change)="uniqueSerialError=false"/>
 							</ng-template>
 						</span>
 					</li>

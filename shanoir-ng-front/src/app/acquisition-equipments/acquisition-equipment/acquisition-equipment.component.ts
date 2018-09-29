@@ -10,6 +10,8 @@ import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { ShanoirError } from '../../shared/models/error.model';
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -18,10 +20,11 @@ import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {
 
-    private isModelNumberUnique: Boolean = true;
+    private uniqueSerialError: boolean = false;
     private manufModels: ManufacturerModel[];
     private centers: Center[];
-    private datasetModalityTypeEnumValue: String;
+    private datasetModalityTypeEnumValue: string;
+    private nonEditableCenter: boolean = false;
 
     private get acqEquip(): AcquisitionEquipment { return this.entity; }
     private set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
@@ -32,7 +35,8 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             private manufModelService: ManufacturerModelService,
             private centerService: CenterService) {
 
-        super(route, 'acquisition-equipment'); 
+        super(route, 'acquisition-equipment');
+        this.manageSaveErrors();
     }
 
     initView(): Promise<void> {
@@ -61,6 +65,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return Promise.resolve();
     }
 
+    private prefill() {
+        this.nonEditableCenter = this.breadcrumbsService.lastStep.isPrefilled('center');
+        if (this.nonEditableCenter) {
+            this.acqEquip.center = this.breadcrumbsService.lastStep.getPrefilledValue('center');
+        }
+    }
+
     private updateAcquEq(): void {
         // this.centerService.getCenter(this.acqEquip.center.id)
         //     .then(center => this.acqEquip.center = center);
@@ -70,15 +81,37 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     buildForm(): FormGroup {
+        this.prefill();
         return this.formBuilder.group({
             'serialNumber': [this.acqEquip.serialNumber],
             'manufacturerModel': [this.acqEquip.manufacturerModel, Validators.required],
-            'center': [this.acqEquip.center, Validators.required]
+            'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required], 
         });
     }
 
     private getManufModels(manufModelId?: number): void {
         this.manufModelService.getManufacturerModels()
             .then(manufModels => this.manufModels = manufModels);
+    }
+
+    private openNewManufModel() {
+        let currentStep: Step = this.breadcrumbsService.lastStep;
+        this.router.navigate(['/manufacturer-model/create']).then(success => {
+            currentStep.waitFor(this.breadcrumbsService.lastStep).subscribe(entity => {
+                (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
+            });
+        });
+    }
+
+    private manageSaveErrors() {
+        this.subscribtions.push(
+            this.onSave.subscribe(response => {
+                if (response && response instanceof ShanoirError && response.code == 422) {
+                    if (response.code == 422) {
+                        this.uniqueSerialError = response.hasFieldError('manufacturerModel - serialNumber', 'unique');
+                    }     
+                }
+            })
+        );
     }
 }

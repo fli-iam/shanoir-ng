@@ -15,18 +15,10 @@ export class AppComponent {
 
     constructor(
             public viewContainerRef: ViewContainerRef,
-            private modalService: ModalService,
-            private location: LocationStrategy,
-            private breadcrumbsService: BreadcrumbsService) {
+            private modalService: ModalService) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
-        
-        location.onPopState(() => {
-            this.breadcrumbsService.notifyBeforeBack();
-        });
-
-        window.onbeforeunload = function() { return "Warning! Your work may be lost!"; };
     }
 
     isAuthenticated(): boolean {

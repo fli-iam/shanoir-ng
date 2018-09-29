@@ -2,14 +2,22 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Entity } from '../shared/components/entity/entity.interface';
 import { Subject } from 'rxjs';
+import { LocationStrategy } from '@angular/common';
 
 @Injectable()
 export class BreadcrumbsService {
 
     public steps: Step[] = [];
-    public savedStep: Step;
+    private savedStep: Step;
 
-    constructor(private router: Router) {}
+    constructor(
+            private router: Router, 
+            private location: LocationStrategy) {
+                
+        location.onPopState(() => {
+            this.notifyBeforeBack();
+        });
+    }
 
     public addStep(step: Step) {
         if (this.lastStep && step.route == this.lastStep.route) return;
@@ -32,7 +40,7 @@ export class BreadcrumbsService {
     }
 
     private removeStepsAfter(index: number) {
-        this.steps = this.steps.slice(0, index);
+        this.steps = this.steps.slice(0, index + 1);
     }
 
     public goBack() {
@@ -44,7 +52,10 @@ export class BreadcrumbsService {
     }
 
     public notifyBeforeBack() {
-        if (this.nbSteps > 0) this.steps.pop();
+        if (this.nbSteps > 0) {
+            this.steps.pop();
+            this.lastStep.disabled = false;
+        }
     }
 
     public entityToReload(): boolean {
@@ -79,14 +90,16 @@ export class Step {
         public label: string,
         public route: string,
         public entity?: Entity
-    ) {}
+    ) { }
 
     private subscribers: number = 0;
     private onSaveSubject: Subject<Entity> = new Subject<Entity>();
     private waitStep: Step;
     public disabled: boolean = false;
+    private displayWaitStatus: boolean = true;
+    private prefilled: any[] = [];
 
-    public onSave(): Subject<Entity> {
+    private onSave(): Subject<Entity> {
         this.subscribers++;
         return this.onSaveSubject;
     }
@@ -104,12 +117,26 @@ export class Step {
         return this.waitStep && step.route == this.waitStep.route;
     }
 
-    public waitFor(step: Step): Subject<Entity> {
+    public waitFor(step: Step, displayWaitStatus: boolean = true): Subject<Entity> {
+        if (displayWaitStatus != undefined) this.displayWaitStatus = displayWaitStatus;
         this.waitStep = step;
         return step.onSave();
     }
 
     public get isWaiting(): boolean {
         return this.waitStep != null && this.waitStep != undefined;
+    }
+
+    public addPrefilled(field: string, value: any) {
+        this.prefilled.push({field: field, value: value});
+    }
+
+    public isPrefilled(field: string): boolean {
+        return this.prefilled.filter(obj => obj.field == field).length > 0;
+    }
+
+    public getPrefilledValue(field: string): any {
+        let found: any[] = this.prefilled.filter(obj => obj.field == field);
+        return found && found.length > 0 ? found[0].value : undefined;
     }
 }

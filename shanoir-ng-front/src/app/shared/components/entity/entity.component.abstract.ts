@@ -176,7 +176,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     goBack(): void {
-        this.breadcrumbsService.notifyBeforeBack();
         this.location.back();
     }
 

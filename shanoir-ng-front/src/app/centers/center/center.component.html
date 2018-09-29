@@ -21,7 +21,7 @@
 								{{center.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="center.name" (change)="resetNameErrorMsg()" />
+								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="center.name" (change)="isNameUniqueError=false" />
 								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit center|Name required error@@centerDetailNameRequiredError">Name is required!</label>
 								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit center|Name length error@@centerDetailNameLengthError">Name length must be between 2 and 200!</label>
 								<label *ngIf="isNameUniqueError" class="form-validation-alert" i18n="Edit center|Name unique error@@centerDetailNameUniqueError">Name should be unique!</label>
@@ -79,7 +79,7 @@
 								{{center.phoneNumber}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="phoneNumber" formControlName="phoneNumber" [(ngModel)]="center.phoneNumber" (change)="resetPhoneNumberErrorMsg()" />
+								<input type="text" id="phoneNumber" formControlName="phoneNumber" [(ngModel)]="center.phoneNumber" (change)="phoneNumberPatternError=false" />
 								<label *ngIf="phoneNumberPatternError" class="form-validation-alert" i18n="Edit center|PhoneNumberPatternError label">Invalid phone number!</label>
 							</ng-template>
 						</span>
