@@ -8,8 +8,11 @@ import { StudyStatus } from './study-status.enum';
 import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
 import { Timepoint } from './timepoint.model';
+import { Entity } from '../../shared/components/entity/entity.interface';
+import { StudyService } from './study.service';
+import { ServiceLocator } from '../../utils/locator.service';
 
-export class Study {
+export class Study implements Entity{
     centers: IdNameObject[];
     clinical: boolean;
     compatible: boolean;
@@ -51,5 +54,19 @@ export class Study {
         for (let studyUser of study.studyUserList) {
             StudyUser.completeMember(studyUser, users); 
         }
+    }
+
+    private service: StudyService = ServiceLocator.injector.get(StudyService);
+
+    create(): Promise<Entity> {
+        return this.service.create(this);
+    }
+
+    update(): Promise<void> {
+        return this.service.update(this.id, this);
+    }
+
+    delete(): Promise<void> {
+        return this.service.delete(this.id);
     }
 }

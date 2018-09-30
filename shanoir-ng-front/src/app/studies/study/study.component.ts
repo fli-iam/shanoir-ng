@@ -270,7 +270,7 @@ export class StudyComponent implements OnInit, AfterViewInit {
     create(): void {
         this.submit();
         this.studyService.create(this.study)
-            .subscribe((study: Study) => {
+            .then((study: Study) => {
                 this.back();
                 this.msgService.log('info', 'Study successfully created');
             }, (error: any) => {
@@ -281,7 +281,7 @@ export class StudyComponent implements OnInit, AfterViewInit {
     update(): void {
         this.submit();
         this.studyService.update(this.id, this.study)
-            .subscribe((study: Study) => {
+            .then(() => {
                 this.back();
                 this.msgService.log('info', 'Study successfully updated');
             }, (error: any) => {

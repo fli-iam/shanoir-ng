@@ -31,13 +31,8 @@ export class CoilComponent extends EntityComponent<Coil> {
         super(route, 'coil');
     }
 
-    get coil(): Coil {
-        return this.entity;
-    }
-
-    set coil(coil: Coil) {
-        this.entity = coil;
-    }
+    get coil(): Coil { return this.entity; }
+    set coil(coil: Coil) { this.entity = coil; }
 
     initView(): Promise<void> {
         return this.coilService.getCoil(this.id).then(coil => {

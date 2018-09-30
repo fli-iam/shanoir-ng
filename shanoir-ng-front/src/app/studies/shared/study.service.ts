@@ -1,15 +1,12 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { Injectable } from '@angular/core';
 
-import { Study } from './study.model';
+import { EquipmentDicom } from '../../import/dicom-data.model';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { EquipmentDicom } from "../../import/dicom-data.model";
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
-import { StudyUser } from './study-user.model';
-import { StudyUserType } from './study-user-type.enum';
+import { Study } from './study.model';
 
 @Injectable()
 export class StudyService {
@@ -17,18 +14,20 @@ export class StudyService {
     
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
+        .map(entities => entities.map((entity) => Object.assign(new Study(), entity)))
         .toPromise();
     }
     
     findStudiesWithStudyCardsByUserAndEquipment(equipment: EquipmentDicom): Promise<Study[]> {
         return this.http.post<Study[]>(AppUtils.BACKEND_API_STUDY_WITH_CARDS_BY_USER_EQUIPMENT_URL, JSON.stringify(equipment))
-        .map(studies => { return studies ? studies : []; })
-        .toPromise();
+            .map(entities => entities.map((entity) => Object.assign(new Study(), entity)))
+            .toPromise();
     }
 
-    create(study: Study): Observable<Study> {
+    create(study: Study): Promise<Study> {
         return this.http.post<Study>(AppUtils.BACKEND_API_STUDY_URL, JSON.stringify(study))
-        .map(res => res);
+        .map((entity) => Object.assign(new Study(), entity))
+        .toPromise();
     }
     
     delete(id: number): Promise<void> {
@@ -38,25 +37,28 @@ export class StudyService {
     
     getStudies(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
-        .toPromise();
+            .map(entities => entities.map((entity) => Object.assign(new Study(), entity)))
+            .toPromise();
     }
     
     getStudiesNames(): Promise<IdNameObject[]> {
         return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
-        .toPromise();
+            .toPromise();
     }
     
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
-        .toPromise();
+            .toPromise();
     }
     
     getStudy(id: number): Promise<Study> {
         return this.http.get<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id)
-        .toPromise();
+            .map((entity) => Object.assign(new Study(), entity))
+            .toPromise();
     }
     
-    update(id: number, study: Study): Observable<Study> {
-        return this.http.put<Study>(AppUtils.BACKEND_API_STUDY_URL + '/' + id, JSON.stringify(study));
+    update(id: number, study: Study): Promise<void> {
+        return this.http.put<void>(AppUtils.BACKEND_API_STUDY_URL + '/' + id, JSON.stringify(study))
+            .toPromise();
     }
 }
