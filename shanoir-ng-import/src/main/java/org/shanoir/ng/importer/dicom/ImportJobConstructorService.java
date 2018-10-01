@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -50,7 +51,8 @@ public class ImportJobConstructorService {
 			for (Serie serie : study.getSeries()) {
 				serie.setNonImages(new ArrayList<Object>());
 				boolean firstImageOfSerie = true; 
-				for (Image image : serie.getImages()) {
+				for (Iterator<Image> iterator = serie.getImages().iterator(); iterator.hasNext();) {
+					Image image=iterator.next();
 					File imageFile = new File(
 							folder.getAbsolutePath() + File.separator + image.getPath());
 					DicomInputStream dIS = new DicomInputStream(imageFile);
@@ -99,11 +101,14 @@ public class ImportJobConstructorService {
 					if (serie.getSopClassUID().startsWith("1.2.840.10008.5.1.4.1.1.66")) {
 						// ((ArrayNode) instances).remove(index);
 						// do nothing here as instances array will be deleted after split
+						iterator.remove();
 					} else {
 						// divide here between non-images and images, non-images at first
 						if (UID.PrivateSiemensCSANonImageStorage.equals(serie.getSopClassUID())
 								|| UID.MRSpectroscopyStorage.equals(serie.getSopClassUID())
 								|| checkSerieIsSpectroscopy(seriesDescription)) {
+							iterator.remove();
+							serie.getNonImages().add(image);
 							// ObjectNode nonImage = mapper.createObjectNode();
 							// nonImage.put("path", instanceFilePath.replace(unzipFolderFileAbsolutePath +
 							// "/", ""));
