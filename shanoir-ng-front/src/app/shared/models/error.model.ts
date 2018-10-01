@@ -1,7 +1,15 @@
-export class GuiError extends Error {
-    constructor(public guiMsg: string, error: Error) {
-        super(error.message);
-        this.name = error.name;
-        this.stack = error.stack;
+export class ShanoirError {
+    constructor(
+        public code: number,
+        public details: any,
+        public message: string
+    ) {}
+
+    public hasFieldError(field: string, code: string): boolean {
+        if (this.details && this.details.fieldErrors && this.details.fieldErrors[field]) {
+            for (let error of this.details.fieldErrors[field]) {
+                if (error.code == code) return true;
+            }
+        }
     }
 }

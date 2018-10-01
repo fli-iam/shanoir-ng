@@ -1,8 +1,7 @@
-import { Injectable, ErrorHandler } from '@angular/core';
+import { ErrorHandler, Injectable } from '@angular/core';
 import { Response } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
+
 import { MsgBoxService } from '../msg-box/msg-box.service';
-import { GuiError } from '../models/error.model';
 
 @Injectable()
 export class HandleErrorService implements ErrorHandler {

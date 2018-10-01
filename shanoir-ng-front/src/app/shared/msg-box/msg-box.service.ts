@@ -2,7 +2,7 @@ import { Injectable, ApplicationRef, Injector } from '@angular/core';
 import { Subject } from 'rxjs';
 
 type msgType = 'error' | 'warn' | 'info';
-class Message { constructor(public type: msgType, public txt: string) {} }
+class Message { constructor(public type: msgType, public txt: string, public duration: number) {} }
 const ANIMATION_TRANSITION_DURATION = 500;
 const MSG_DURATION = 5000;
 
@@ -17,8 +17,8 @@ export class MsgBoxService {
         setTimeout(() => this.appRef = this.injector.get(ApplicationRef));
      }
 
-    public log(type: msgType, txt: string) {
-        let message = new Message(type, txt);
+    public log(type: msgType, txt: string, duration: number = MSG_DURATION) {
+        let message = new Message(type, txt, duration);
         this.messages.push(message);
         if (!this.opened) this.run();
     }
@@ -35,7 +35,7 @@ export class MsgBoxService {
                 this.messages.splice(0, 1);
                 this.run();
             }, ANIMATION_TRANSITION_DURATION);
-        }, MSG_DURATION);
+        }, this.messages[0].duration);
     }
 
     private open() {

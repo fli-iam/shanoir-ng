@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { Injectable } from '@angular/core';
 
-import { AcquisitionEquipment } from './acquisition-equipment.model';
 import * as AppUtils from '../../utils/app.utils';
+import { AcquisitionEquipment } from './acquisition-equipment.model';
 
 @Injectable()
 export class AcquisitionEquipmentService {
@@ -11,35 +10,29 @@ export class AcquisitionEquipmentService {
 
     getAcquisitionEquipments(): Promise<AcquisitionEquipment[]> {
         return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL)
+            .map(acqs => acqs.map(acq => Object.assign(new AcquisitionEquipment(), acq))) 
             .toPromise();
     }
 
     delete(id: number): Promise<void> {
         return this.http.delete<void>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id)
-            .toPromise()
-            .catch((error) => {
-                console.error('Error delete acqEquip', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     getAcquisitionEquipment(id: number): Promise<AcquisitionEquipment> {
         return this.http.get<AcquisitionEquipment>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id)
-            .toPromise()
-            .then(res => res)
-            .catch((error) => {
-                console.error('Error while getting acqEquip', error);
-                return Promise.reject(error.message || error);
-            });
+            .map(acq => Object.assign(new AcquisitionEquipment(), acq)) 
+            .toPromise();
     }
 
-    create(acqEquip: AcquisitionEquipment): Observable<AcquisitionEquipment> {
+    create(acqEquip: AcquisitionEquipment): Promise<AcquisitionEquipment> {
         return this.http.post<AcquisitionEquipment>(AppUtils.BACKEND_API_ACQ_EQUIP_URL, JSON.stringify(acqEquip))
-            .map(res => res);
+            .map(acq => Object.assign(new AcquisitionEquipment(), acq)) 
+            .toPromise();
     }
 
-    update(id: number, acqEquip: AcquisitionEquipment): Observable<AcquisitionEquipment> {
-        return this.http.put<AcquisitionEquipment>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id, JSON.stringify(acqEquip))
-            .map(response => response);
+    update(id: number, acqEquip: AcquisitionEquipment): Promise<void> {
+        return this.http.put<void>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/' + id, JSON.stringify(acqEquip))
+            .toPromise();
     }
 }

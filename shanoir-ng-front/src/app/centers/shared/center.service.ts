@@ -1,10 +1,9 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { Injectable } from '@angular/core';
 
-import { Center } from './center.model';
-import * as AppUtils from '../../utils/app.utils';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
+import * as AppUtils from '../../utils/app.utils';
+import { Center } from './center.model';
 
 @Injectable()
 export class CenterService {
@@ -12,60 +11,39 @@ export class CenterService {
 
     getCenters(): Promise<Center[]> {
         return this.http.get<Center[]>(AppUtils.BACKEND_API_CENTER_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting centers', error);
-                return Promise.reject(error.message || error);
-            });
+            .map(centers => centers.map((center) => Object.assign(new Center(), center))) 
+            .toPromise();
     }
 
     getCentersNames(): Promise<Center[]> {
         return this.http.get<Center[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting centers', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     getCentersNamesForExamination(): Promise<IdNameObject[]> {
         return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting centers', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     delete(id: number): Promise<void> {
         return this.http.delete<void>(AppUtils.BACKEND_API_CENTER_URL + '/' + id)
-            .toPromise()
-            .catch((error) => {
-                console.error('Error delete center', error);
-                return Promise.reject(error);
-            });
+            .toPromise();
     }
 
     getCenter(id: number): Promise<Center> {
         return this.http.get<Center>(AppUtils.BACKEND_API_CENTER_URL + '/' + id)
-            .toPromise()
-            .then(res => res)
-            .catch((error) => {
-                console.error('Error while getting center', error);
-                return Promise.reject(error.message || error);
-            });
+            .map(center =>  Object.assign(new Center(), center))
+            .toPromise();
     }
 
-    create(center: Center): Observable<Center> {
+    create(center: Center): Promise<Center> {
         return this.http.post<Center>(AppUtils.BACKEND_API_CENTER_URL, JSON.stringify(center))
-            .map(res => res);
+            .map(center =>  Object.assign(new Center(), center))
+            .toPromise();
     }
 
-    update(id: number, center: Center): Observable<Center> {
-        return this.http.put<Center>(AppUtils.BACKEND_API_CENTER_URL + '/' + id, JSON.stringify(center))
-            .map(response => response);
+    update(id: number, center: Center): Promise<void> {
+        return this.http.put<void>(AppUtils.BACKEND_API_CENTER_URL + '/' + id, JSON.stringify(center))
+            .toPromise();
     }
 }

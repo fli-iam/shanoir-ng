@@ -5,6 +5,7 @@ import { SubjectService } from '../../../subjects/shared/subject.service';
 import { StudyService } from '../../../studies/shared/study.service';
 import { Study } from '../../../studies/shared/study.model';
 import { NgForm, ControlContainer } from '@angular/forms';
+import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 
 
 @Component({
@@ -15,7 +16,7 @@ import { NgForm, ControlContainer } from '@angular/forms';
 
 export class CommonDatasetComponent implements OnChanges {
 
-    @Input() private mode: 'create' | 'edit' | 'view';
+    @Input() private mode: Mode;
     @Input() private dataset: Dataset;
     private subjects: Subject[] = [];
     private studies: Study[] = [];

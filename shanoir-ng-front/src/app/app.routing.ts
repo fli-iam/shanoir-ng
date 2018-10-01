@@ -53,13 +53,15 @@ let appRoutes: Routes = [
         path: 'imports',
         component: ImportComponent
     }, {
-        path: 'manufacturer',
+        path: 'manufacturer/create',
         component: ManufacturerComponent,
-        canActivate: [AuthNotGuestGuard]
+        canActivate: [AuthNotGuestGuard],
+        data: { mode: 'create' }
     }, {
-        path: 'manufacturer-model',
+        path: 'manufacturer-model/create',
         component: ManufacturerModelComponent,
-        canActivate: [AuthNotGuestGuard]
+        canActivate: [AuthNotGuestGuard],
+        data: { mode: 'create' }
     }, {
         path: 'new-instrument',
         component: NewInstrumentComponent,
