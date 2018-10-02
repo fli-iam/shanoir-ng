@@ -35,15 +35,15 @@ export class CoilComponent extends EntityComponent<Coil> {
     set coil(coil: Coil) { this.entity = coil; }
 
     initView(): Promise<void> {
-        return this.coilService.getCoil(this.id).then(coil => {
+        return this.coilService.get(this.id).then(coil => {
             this.coil = coil;
         });
     }
 
     initEdit(): Promise<void> {
         return Promise.all([
-            this.centerService.getCenters(),
-            this.coilService.getCoil(this.id)
+            this.centerService.getAll(),
+            this.coilService.get(this.id)
         ]).then(([centers, coil]) => {
             this.centers = centers;
             this.coil = coil;
@@ -59,7 +59,7 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     initCreate(): Promise<void> {
         this.entity = new Coil();
-        return this.centerService.getCenters().then(centers => {
+        return this.centerService.getAll().then(centers => {
             this.centers = centers;
         });
     }

@@ -128,9 +128,12 @@ export function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-// Had trouble with circular dependencies limit, this temporary fixes it
-export function mapType(dataset: Dataset) {
-    if (dataset.type == 'Mr') return Object.assign(new MrDataset(), dataset);
-    // TODO : implements other types
-    else return Object.assign(new MrDataset(), dataset); // That is just for those buggy test data without a real concrete type
+export function getEntityInstance(entity: Dataset) { 
+    if (entity.type == 'Mr') return new MrDataset();
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // TODO : Implement others !!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    else return new MrDataset(); // fixes errors with our test dataset (which have no real types)
+    // TODO : Throw en exception
 }

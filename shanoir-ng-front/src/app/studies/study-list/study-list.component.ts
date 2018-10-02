@@ -23,7 +23,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     getEntities(): Promise<Study[]> {
-        return this.studyService.getStudies();
+        return this.studyService.getAll();
     }
 
     getColumnDefs(): any[] {

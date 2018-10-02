@@ -76,14 +76,14 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     }
 
     private getManufacturerModel(): Promise<void> {
-        return this.manufModelService.getManufacturerModel(this.id)
+        return this.manufModelService.get(this.id)
             .then(manufModel => {
                 this.manufModel = manufModel;
             });
     }
 
     private getManufs(): Promise<void> {
-        return this.manufService.getManufacturers()
+        return this.manufService.getAll()
             .then(manufs => {
                 this.manufs = manufs;
             });
@@ -102,9 +102,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         this.subscribtions.push(
             this.onSave.subscribe(response => {
                 if (response && response instanceof ShanoirError && response.code == 422) {
-                    if (response.code == 422) {
-                        this.isNameUniqueError = response.hasFieldError('name', 'unique');
-                    }     
+                    this.isNameUniqueError = response.hasFieldError('name', 'unique');
                 }
             })
         );

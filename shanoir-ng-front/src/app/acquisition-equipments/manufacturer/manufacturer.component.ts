@@ -41,7 +41,7 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
     }
 
     getManufacturer(): Promise<void> {
-        return this.manufService.getManufacturer(this.id)
+        return this.manufService.get(this.id)
             .then(manuf => {
                 this.manuf = manuf;
             });
@@ -58,9 +58,7 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
         this.subscribtions.push(
             this.onSave.subscribe(response => {
                 if (response && response instanceof ShanoirError && response.code == 422) {
-                    if (response.code == 422) {
-                        this.isNameUniqueError = response.hasFieldError('name', 'unique');
-                    }     
+                    this.isNameUniqueError = response.hasFieldError('name', 'unique');   
                 }
             })
         );

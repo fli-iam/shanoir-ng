@@ -8,11 +8,11 @@ import { StudyStatus } from './study-status.enum';
 import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
 import { Timepoint } from './timepoint.model';
-import { Entity } from '../../shared/components/entity/entity.interface';
+import { Entity } from '../../shared/components/entity/entity.abstract';
 import { StudyService } from './study.service';
 import { ServiceLocator } from '../../utils/locator.service';
 
-export class Study implements Entity{
+export class Study extends Entity {
     centers: IdNameObject[];
     clinical: boolean;
     compatible: boolean;
@@ -37,18 +37,11 @@ export class Study implements Entity{
     visibleByDefault: boolean;
     withExamination: boolean;
     selected: boolean = false;
-
-    constructor(study?: IdNameObject) {
-        if (study) {
-            this.id = study.id;
-            this.name = study.name;
-        }
-    }
-
-    public completeMembers(users: User[]) {
+    
+    private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);
     }
-
+    
     public static completeMembers(study: Study, users: User[]) {
         if (!study.studyUserList) return;
         for (let studyUser of study.studyUserList) {
@@ -56,17 +49,9 @@ export class Study implements Entity{
         }
     }
 
-    private service: StudyService = ServiceLocator.injector.get(StudyService);
-
-    create(): Promise<Entity> {
-        return this.service.create(this);
+    protected getIgnoreList(): string[] {
+        return super.getIgnoreList().concat(['completeMembers']);
     }
-
-    update(): Promise<void> {
-        return this.service.update(this.id, this);
-    }
-
-    delete(): Promise<void> {
-        return this.service.delete(this.id);
-    }
+    
+    service: StudyService = ServiceLocator.injector.get(StudyService);
 }

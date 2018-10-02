@@ -3,33 +3,12 @@ import { Injectable } from '@angular/core';
 
 import * as AppUtils from '../../utils/app.utils';
 import { Coil } from './coil.model';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 
 @Injectable()
-export class CoilService {
-    constructor(private http: HttpClient) { }
+export class CoilService extends EntityService<Coil> {
 
-    getCoils(): Promise<Coil[]> {
-        return this.http.get<Coil[]>(AppUtils.BACKEND_API_COIL_URL)
-        .map(coils => coils.map((coil) => Object.assign(new Coil(), coil)))
-        .toPromise();
-    }
+    API_URL = AppUtils.BACKEND_API_COIL_URL;
 
-    delete(id: number): Promise<void> {
-        return this.http.delete<void>(AppUtils.BACKEND_API_COIL_URL + '/' + id).toPromise();
-    }
-
-    getCoil(id: number): Promise<Coil> {
-        return this.http.get<Coil>(AppUtils.BACKEND_API_COIL_URL + '/' + id)
-        .map(coil => Object.assign(new Coil(), coil))
-        .toPromise();
-    }
-
-    create(coil: Coil): Promise<Coil> {
-        return this.http.post<Coil>(AppUtils.BACKEND_API_COIL_URL, JSON.stringify(coil)).toPromise();
-    }
-
-    update(id: number, coil: Coil): Promise<void> {
-        return this.http.put<void>(AppUtils.BACKEND_API_COIL_URL + '/' + id, JSON.stringify(coil)).toPromise();
-    }
-
+    getEntityInstance() { return new Coil(); }
 }

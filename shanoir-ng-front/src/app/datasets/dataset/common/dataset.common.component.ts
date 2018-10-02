@@ -49,26 +49,26 @@ export class CommonDatasetComponent implements OnChanges {
 
     private fetchOneSubject() {
         if (!this.dataset.subjectId) return;
-        this.subjectService.getSubject(this.dataset.subjectId).then(subject => {
+        this.subjectService.get(this.dataset.subjectId).then(subject => {
             this.subjects = [subject];
         });
     }
 
     private fetchOneStudy() {
         if (!this.dataset.studyId) return;
-        this.studyService.getStudy(this.dataset.studyId).then(study => {
+        this.studyService.get(this.dataset.studyId).then(study => {
             this.studies = [study];
         });
     }
 
     private fetchAllSubjects() {
-        this.subjectService.getSubjects().then(subjects => {
+        this.subjectService.getAll().then(subjects => {
             this.subjects = subjects;
         });
     }
 
     private fetchAllStudies() {
-        this.studyService.getStudies().then(studies => {
+        this.studyService.getAll().then(studies => {
             this.studies = studies;
         });
     }

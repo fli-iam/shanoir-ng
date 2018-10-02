@@ -40,7 +40,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     initView(): Promise<void> {
-        return this.acqEquipService.getAcquisitionEquipment(this.id).then(ae => {
+        return this.acqEquipService.get(this.id).then(ae => {
             this.acqEquip = ae;
             this.updateAcquEq();
         });
@@ -50,7 +50,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.getManufModels();
         return Promise.all([
             this.centerService.getCentersNames(),
-            this.acqEquipService.getAcquisitionEquipment(this.id)
+            this.acqEquipService.get(this.id)
         ]).then(([centers, ae]) => {
             this.centers = centers;
             this.acqEquip = ae;
@@ -90,7 +90,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private getManufModels(manufModelId?: number): void {
-        this.manufModelService.getManufacturerModels()
+        this.manufModelService.getAll()
             .then(manufModels => this.manufModels = manufModels);
     }
 
@@ -107,9 +107,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.subscribtions.push(
             this.onSave.subscribe(response => {
                 if (response && response instanceof ShanoirError && response.code == 422) {
-                    if (response.code == 422) {
-                        this.uniqueSerialError = response.hasFieldError('manufacturerModel - serialNumber', 'unique');
-                    }     
+                    this.uniqueSerialError = response.hasFieldError('manufacturerModel - serialNumber', 'unique'); 
                 }
             })
         );

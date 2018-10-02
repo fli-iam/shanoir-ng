@@ -30,13 +30,13 @@ export class CenterComponent extends EntityComponent<Center> {
     set center(center: Center) { this.entity = center; }
 
     initView(): Promise<void> {
-        return this.centerService.getCenter(this.id).then(center => {
+        return this.centerService.get(this.id).then(center => {
             this.center = center;
         });
     }
 
     initEdit(): Promise<void> {
-        return this.centerService.getCenter(this.id).then(center => {
+        return this.centerService.get(this.id).then(center => {
             this.center = center;
         });
     }
@@ -62,10 +62,8 @@ export class CenterComponent extends EntityComponent<Center> {
         this.subscribtions.push(
             this.onSave.subscribe(response => {
                 if (response && response instanceof ShanoirError && response.code == 422) {
-                    if (response.code == 422) {
-                        this.phoneNumberPatternError = response.hasFieldError('phoneNumber', 'Pattern');
-                        this.isNameUniqueError = response.hasFieldError('name', 'unique');
-                    }     
+                    this.phoneNumberPatternError = response.hasFieldError('phoneNumber', 'Pattern');
+                    this.isNameUniqueError = response.hasFieldError('name', 'unique');   
                 }
             })
         );

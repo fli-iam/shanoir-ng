@@ -32,7 +32,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
 
     // Grid data
     getEntities(): Promise<AcquisitionEquipment[]> {
-        return this.acqEquipService.getAcquisitionEquipments();
+        return this.acqEquipService.getAll();
     }
 
     // Grid columns definition

@@ -40,11 +40,6 @@ export class SubjectTreeComponent {
                 }
                 component.open();
             })
-            .catch((error) => {
-                component.open();
-                // TODO: display error
-                console.log("error getting examination list!");
-            });
     }
 
     showExaminationDetails(examinationId: number) {

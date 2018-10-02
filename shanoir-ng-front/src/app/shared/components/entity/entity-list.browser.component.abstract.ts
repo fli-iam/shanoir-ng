@@ -1,5 +1,5 @@
 import { EntityListComponent } from "./entity-list.component.abstract";
-import { Entity } from "./entity.interface";
+import { Entity } from "./entity.abstract";
 import { FilterablePageable, Page } from "../table/pageable.model";
 import { BrowserPaging } from "../table/browser-paging.model";
 import { OnInit } from "@angular/core";

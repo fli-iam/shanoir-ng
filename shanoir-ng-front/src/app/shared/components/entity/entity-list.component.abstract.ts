@@ -6,7 +6,7 @@ import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
-import { Entity, EntityRoutes } from './entity.interface';
+import { Entity, EntityRoutes } from './entity.abstract';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { capitalizeFirstLetter } from '../../../utils/app.utils';

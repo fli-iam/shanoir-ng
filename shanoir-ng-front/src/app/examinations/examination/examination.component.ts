@@ -39,7 +39,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     get examination(): Examination { return this.entity; }
 
     initView(): Promise<void> {
-        return this.examinationService.getExamination(this.id).then((examination: Examination) => {
+        return this.examinationService.get(this.id).then((examination: Examination) => {
             this.examination = examination
         });
     }
@@ -47,7 +47,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     initEdit(): Promise<void> {
         this.getCenters();
         this.getStudies();
-        return this.examinationService.getExamination(this.id).then((examination: Examination) => {
+        return this.examinationService.get(this.id).then((examination: Examination) => {
             this.examination = examination
         });
     }

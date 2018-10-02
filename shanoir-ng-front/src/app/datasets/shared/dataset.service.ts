@@ -1,44 +1,27 @@
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { Dataset } from './dataset.model';
 
 @Injectable()
-export class DatasetService {
+export class DatasetService extends EntityService<Dataset> {
 
-    constructor(private http: HttpClient) { }
+    API_URL = AppUtils.BACKEND_API_DATASET_URL;
 
-    create(dataset: Dataset): Promise<Dataset> {
-        return this.http.post<Dataset>(AppUtils.BACKEND_API_DATASET_URL, JSON.stringify(dataset))
-            .toPromise();
-    }
-
-    delete(id: number): Promise<void> {
-        return this.http.delete<void>(AppUtils.BACKEND_API_DATASET_URL + '/' + id)
-            .toPromise();
-    }
-
-    get(id: number): Promise<Dataset> {
-        return this.http.get<Dataset>(AppUtils.BACKEND_API_DATASET_URL + '/' + id)
-            .map(AppUtils.mapType)
-            .toPromise();
+    getEntityInstance(entity: Dataset) { 
+        return AppUtils.getEntityInstance(entity);
     }
 
     getPage(pageable: Pageable): Promise<any> {
         return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL, { 'params': pageable.toParams() })
             .map((page: Page<Dataset>) => {
-                page.content = page.content.map(AppUtils.mapType);
+                page.content = page.content.map(ds => Object.assign(ds, this.getEntityInstance(ds)));
                 return page;
             })
-            .toPromise();
-    }
-
-    update(dataset: Dataset): Promise<void> {
-        if (!dataset.id) throw Error('Cannot update a dataset without an id');
-        return this.http.put<void>(AppUtils.BACKEND_API_DATASET_URL + '/' + dataset.id, JSON.stringify(dataset))
             .toPromise();
     }
 

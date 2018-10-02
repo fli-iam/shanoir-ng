@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Entity } from '../shared/components/entity/entity.interface';
+import { Entity } from '../shared/components/entity/entity.abstract';
 import { Subject } from 'rxjs';
 import { LocationStrategy } from '@angular/common';
 
@@ -41,6 +41,10 @@ export class BreadcrumbsService {
 
     private removeStepsAfter(index: number) {
         this.steps = this.steps.slice(0, index + 1);
+        if (this.nbSteps > 0) {
+            this.lastStep.disabled = false;
+            this.lastStep.resetWait();
+        }
     }
 
     public goBack() {
@@ -54,7 +58,10 @@ export class BreadcrumbsService {
     public notifyBeforeBack() {
         if (this.nbSteps > 0) {
             this.steps.pop();
-            this.lastStep.disabled = false;
+            if (this.nbSteps > 0) {
+                this.lastStep.disabled = false;
+                this.lastStep.resetWait();
+            }
         }
     }
 
@@ -138,5 +145,9 @@ export class Step {
     public getPrefilledValue(field: string): any {
         let found: any[] = this.prefilled.filter(obj => obj.field == field);
         return found && found.length > 0 ? found[0].value : undefined;
+    }
+
+    public resetWait() {
+        this.waitStep = null;
     }
 }

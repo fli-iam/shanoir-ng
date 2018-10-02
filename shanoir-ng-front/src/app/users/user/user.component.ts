@@ -1,15 +1,15 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Location } from '@angular/common';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { IMyDate } from 'mydatepicker';
 import { Observable } from 'rxjs/Observable';
-import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 
-import { User } from '../shared/user.model';
-import { UserService } from '../shared/user.service';
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
+import { User } from '../shared/user.model';
+import { UserService } from '../shared/user.service';
 
 @Component({
     selector: 'user-detail',

@@ -1,5 +1,5 @@
 <div class="content-component detail" [@preventInitialChildAnimations]>
-	<form *ngIf="subjectForm" [formGroup]="subjectForm" class="max-content" novalidate>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
@@ -32,7 +32,7 @@
 											<ng-template ngSwitchDefault>{{cat}}</ng-template>
 									</option>
 								</select>
-								<label *ngIf="formErrors.imagedObjectCategory.includes('required')" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
+								<label *ngIf="hasError('imagedObjectCategory', ['required'])" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -54,23 +54,23 @@
 						<br/>Notice that the birth Date will be set to the 1st of January of the birth Year for the same reason.
 					</li>
 					<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
-						<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName">First Name</label>
+						<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" class="required-label">First Name</label>
 						<span class="right-col">
 							<input type="text" id="firstName" [(ngModel)]="firstName" formControlName="firstName" />
 						</span>
-						<label *ngIf="formErrors.firstName.includes('required')" class="form-validation-alert" i18n="Subject detail|FirstName required error@@subjectDetailFirstNameRequiredError">First name is required!</label>
-						<label *ngIf="formErrors.firstName.includes('length')" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
+						<label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Subject detail|FirstName required error@@subjectDetailFirstNameRequiredError">First name is required!</label>
+						<label *ngIf="hasError('firstName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
 					</li>
 					<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
-						<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName">Last Name</label>
+						<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" class="required-label">Last Name</label>
 						<span class="right-col">
 							<input type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
 						</span>
-						<label *ngIf="formErrors.lastName.includes('required')" class="form-validation-alert" i18n="Subject detail|LastName required error@@subjectDetailLastNameRequiredError">Last name is required!</label>
-						<label *ngIf="formErrors.lastName.includes('length')" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
+						<label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Subject detail|LastName required error@@subjectDetailLastNameRequiredError">Last name is required!</label>
+						<label *ngIf="hasError('lastName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
 					</li>
 					<li>
-						<label *ngIf="mode !== 'edit'" i18n="Subject detail|Birth date label@@subjectDetailBirthDate">Birth date</label>
+						<label *ngIf="mode !== 'edit'" i18n="Subject detail|Birth date label@@subjectDetailBirthDate" class="required-label">Birth date</label>
 						<span [ngSwitch]="mode">
 							<ng-template class="right-col" [ngSwitchCase]="'view'">
 								{{subject.birthDate | date: 'dd/MM/yyyy'}}
@@ -78,7 +78,7 @@
 							<ng-template class="right-col" [ngSwitchCase]="'create'">
 								<datepicker [(ngModel)]="subject.birthDate" formControlName="birthDate"></datepicker>
 								<label *ngIf="isBirthDateValid==false" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
-								<label *ngIf="formErrors.birthDate.includes('required')" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">You need to enter a birth date for a living humain being!</label>
+								<label *ngIf="hasError('birthDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">You need to enter a birth date for a living humain being!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -140,9 +140,9 @@
 								{{subject.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="subject.name" (keyup)="isNameUnique=true" />
-								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required!</label>
-								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
+								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="subject.name" (keyup)="hasNameUniqueError=false" />
+								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required!</label>
+								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
 								<label *ngIf="hasNameUniqueError" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">Name should be unique!</label>
 								<label *ngIf="existingSubjectError" class="form-validation-alert" i18n="Subject detail|Existing subject error@@existingSubjectError">
 									This subject already exists and his common name is: {{existingSubjectError}}
@@ -164,25 +164,19 @@
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view'">
-				<legend>Studies</legend>
-				<subject-study-list mode="study" [list]="studies" [(subjectStudyList)]="subject.subjectStudyList"></subject-study-list>
+				<subject-study-list [subject]="subject" [selectableList]="studies" [(ngModel)]="subject.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
+			</fieldset>
+			<fieldset *ngIf="mode=='view'">
+				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
+				<subject-tree [subject]="subject" [studies]="studies"></subject-tree>
 			</fieldset>
 			
 			<form-footer
 				[state]="footerState"
-				(update)="update()"
-				(create)="create()"
-				(edit)="edit()"
-				(back)="back()"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()"
 			></form-footer>
-
 		</div>
-		<div class="layout right" *ngIf="mode=='view'">
-			<span class="right-col">
-				<div class="subject-data" i18n="Subject data|Title@@subjectDetailDataTitle">Data</div>
-			</span>
-			<subject-tree [subject]="subject" [studies]="studies"></subject-tree>
-		</div>
-
 	</form>
 </div>

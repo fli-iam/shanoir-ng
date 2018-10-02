@@ -1,11 +1,11 @@
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { Center } from '../../centers/shared/center.model';
-import { Entity } from '../../shared/components/entity/entity.interface';
+import { Entity } from '../../shared/components/entity/entity.abstract';
 import { ServiceLocator } from '../../utils/locator.service';
 import { CoilType } from './coil-type.enum';
 import { CoilService } from './coil.service';
 
-export class Coil implements Entity {
+export class Coil extends Entity {
 
     id: number;
     name: string;
@@ -15,18 +15,5 @@ export class Coil implements Entity {
     manufacturerModel: ManufacturerModel;
     coilType:CoilType;
 
-    
-    private service: CoilService = ServiceLocator.injector.get(CoilService);
-
-    create(): Promise<Entity> {
-        return this.service.create(this);
-    }
-
-    update(): Promise<void> {
-        return this.service.update(this.id, this);
-    }
-
-    delete(): Promise<void> {
-        return this.service.delete(this.id);
-    }
+    service: CoilService = ServiceLocator.injector.get(CoilService);
 }

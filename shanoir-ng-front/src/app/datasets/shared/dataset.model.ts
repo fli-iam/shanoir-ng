@@ -1,4 +1,4 @@
-import { Entity } from '../../shared/components/entity/entity.interface';
+import { Entity } from '../../shared/components/entity/entity.abstract';
 import { ServiceLocator } from '../../utils/locator.service';
 import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetType } from './dataset-type.model';
@@ -8,7 +8,8 @@ declare type ExploredEntity = 'ANATOMICAL_DATASET' | 'FUNCTIONAL_DATASET' | 'HEM
 declare type ProcessedDatasetType = 'RECONSTRUCTEDDATASET' | 'NONRECONSTRUCTEDDATASET';
 declare type CardinalityOfRelatedSubjects = 'SINGLE_SUBJECT_DATASET' | 'MULTIPLE_SUBJECTS_DATASET';
 
-export abstract class Dataset implements Entity {
+export abstract class Dataset extends Entity {
+    
     id: number;
     creationDate: Date;
     name: string;
@@ -24,19 +25,7 @@ export abstract class Dataset implements Entity {
     originMetadata: DatasetMetadata;
     updatedMetadata : DatasetMetadata = new DatasetMetadata();
 
-    private datasetService: DatasetService = ServiceLocator.injector.get(DatasetService);
-
-    create(): Promise<Entity> {
-        return this.datasetService.create(this);
-    }
-
-    update(): Promise<void> {
-        return this.datasetService.update(this);
-    }
-
-    delete(): Promise<void> {
-        return this.datasetService.delete(this.id);
-    }
+    service: DatasetService = ServiceLocator.injector.get(DatasetService);
 }
 
 export class DatasetMetadata {

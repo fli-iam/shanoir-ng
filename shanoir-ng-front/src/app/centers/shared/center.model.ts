@@ -1,9 +1,9 @@
 import { AcquisitionEquipment } from "../../acquisition-equipments/shared/acquisition-equipment.model";
-import { Entity } from "../../shared/components/entity/entity.interface";
+import { Entity } from "../../shared/components/entity/entity.abstract";
 import { CenterService } from "./center.service";
 import { ServiceLocator } from "../../utils/locator.service";
 
-export class Center implements Entity {
+export class Center extends Entity {
     acquisitionEquipments: AcquisitionEquipment[];
     city: string;
     country: string;
@@ -14,18 +14,5 @@ export class Center implements Entity {
     street: string;
     website: string;
 
-
-    private service: CenterService = ServiceLocator.injector.get(CenterService);
-
-    create(): Promise<Entity> {
-        return this.service.create(this);
-    }
-
-    update(): Promise<void> {
-        return this.service.update(this.id, this);
-    }
-
-    delete(): Promise<void> {
-        return this.service.delete(this.id);
-    }
+    service: CenterService = ServiceLocator.injector.get(CenterService);
 }

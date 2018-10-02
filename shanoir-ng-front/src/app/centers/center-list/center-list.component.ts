@@ -26,7 +26,7 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
     }
 
     getEntities(): Promise<Center[]> {
-        return this.centerService.getCenters(); 
+        return this.centerService.getAll(); 
     }
 
     getColumnDefs() {

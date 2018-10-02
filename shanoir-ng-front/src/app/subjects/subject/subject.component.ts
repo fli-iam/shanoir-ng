@@ -1,16 +1,13 @@
-import { Location } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
-import { FooterState } from '../../shared/components/form-footer/footer-state.model';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { ShanoirError } from '../../shared/models/error.model';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { StudyService } from '../../studies/shared/study.service';
-import * as AppUtils from '../../utils/app.utils';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
@@ -22,93 +19,80 @@ import { SubjectService } from '../shared/subject.service';
     animations: [slideDown, preventInitialChildAnimations]
 })
 
-export class SubjectComponent implements OnInit, OnChanges {
-    @Input() mode: "view" | "edit" | "create";
-    @Input() preFillData: Subject;
-    @Output() closing: EventEmitter<any> = new EventEmitter();
-    
-    private id: number;
+export class SubjectComponent extends EntityComponent<Subject> {
+
     private readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
-    private subject: Subject;
-    private subjectForm: FormGroup;
-    private firstName: string = "";
-    private lastName: string = "";
     private studies: IdNameObject[] = [];
     private isAlreadyAnonymized: boolean;
     private hasNameUniqueError: boolean = false;
-    private footerState: FooterState;
-    private isSubjectFoundPromise: Promise<void>;
     private existingSubjectError: string;
+    private firstName: string = "";
+    private lastName: string = "";
+    private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
 
-    constructor(private route: ActivatedRoute, private router: Router,
+    constructor(private route: ActivatedRoute,
             private subjectService: SubjectService,
-            private studyService: StudyService,
-            private fb: FormBuilder,
-            private location: Location, 
-            private keycloakService: KeycloakService,
-            private msgService: MsgBoxService) {
+            private studyService: StudyService) {
 
-        this.mode = this.route.snapshot.data['mode'];
-        this.id = +this.route.snapshot.params['id'];
+        super(route, 'subject');
+        this.manageSaveErrors();
     }
 
-    ngOnInit(): void {
-        this.initData();
+    public get subject(): Subject { return this.entity; }
+    public set subject(subject: Subject) { this.entity = subject; }
+
+    initView(): Promise<void> {
+        return this.subjectService.get(this.id).then(subject => { this.subject = subject; });
     }
 
-    private initData() {
-        switch(this.mode) {
-            case 'create': {
-                this.loadAllStudies();
-                this.subject = new Subject();
-                this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
-                this.buildForm();
-                this.initPrefillData();
-                break;    
-            }
-            case 'edit': {
-                this.loadAllStudies();
-                this.fetchSubject();
-                break;
-            }
-            case 'view': {
-                this.fetchSubject();
-                break;
-            } 
-            default: {
-                throw new Error('Cannot find the component\'s mode')
-            }
+    initEdit(): Promise<void> {
+        this.loadAllStudies();
+        return this.subjectService.get(this.id).then(subject => { this.subject = subject; });
+    }
+
+    initCreate(): Promise<void> {
+        this.loadAllStudies();
+        this.subject = new Subject();
+        this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        return Promise.resolve();
+    }
+
+    buildForm(): FormGroup {
+        let subjectForm = this.formBuilder.group({
+            'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
+            'isAlreadyAnonymized': [],
+            'name': [this.subject.name, this.nameValidators],
+            'firstName': [this.firstName],
+            'lastName': [this.lastName],
+            'birthDate': [this.subject.birthDate, this.mode == 'create' ? [Validators.required] : undefined],
+            'sex': [this.subject.sex],
+            'subjectStudyList': [],
+            'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
+            'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
+            'personalComments': []
+        });
+        this.updateFormControl(subjectForm);
+        subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
+            this.isAlreadyAnonymized = false;
+            this.updateFormControl(subjectForm);
+        });
+        subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(val => {
+            this.updateFormControl(subjectForm);
+        });
+        return subjectForm;
+    }
+
+    private updateFormControl(formGroup: FormGroup) {
+        if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized) {
+            formGroup.get('firstName').setValidators(this.nameValidators);
+            formGroup.get('lastName').setValidators(this.nameValidators);
+        } else {
+            formGroup.get('firstName').setValidators([]);
+            formGroup.get('lastName').setValidators([]);
         }
-        this.footerState = new FooterState(this.mode, this.keycloakService.isUserAdminOrExpert());
-    }
-    
-
-    public setSubject(subject: Subject) {
-        this.subject = subject;
-        this.buildForm();
-    }
-    
-    initPrefillData() {
-        if (this.preFillData && this.subject) {
-            if (this.preFillData) {
-                this.computeNameFromDicomTag(this.preFillData.name);
-                this.subject.sex = this.preFillData.sex;
-                this.subject.birthDate = new Date(this.preFillData.birthDate);
-            }
-            if (this.preFillData.subjectStudyList && this.preFillData.subjectStudyList.length > 0) {
-                this.subject.subjectStudyList = this.preFillData.subjectStudyList;
-                this.studies = [];
-                for (let subjectStudy of this.preFillData.subjectStudyList) {
-                    this.studies.push(new IdNameObject(subjectStudy.study.id, subjectStudy.study.name));
-                }
-            }
-        }
-    }
-
-    fetchSubject(): void {
-        if (this.mode == 'create') throw new Error ("A subject cannot be fetch in create mode");
-        this.subjectService.getSubject(this.id).then(subject => this.setSubject(subject));
+        formGroup.get('firstName').updateValueAndValidity();
+        formGroup.get('lastName').updateValueAndValidity();
     }
 
     loadAllStudies(): void {
@@ -117,125 +101,19 @@ export class SubjectComponent implements OnInit, OnChanges {
             .then(studies => {
                 this.studies = studies;
             });
-    }
+    }  
 
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes['preFillData']) this.initPrefillData();
-    }
-
-    buildForm(): void {
-        let firstNameFC, lastNameFC, birthDateFC : FormControl;
-        if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING) {
-            firstNameFC = new FormControl(this.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(64)]);
-            lastNameFC = new FormControl(this.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(64)]);
-            birthDateFC = new FormControl(this.subject.birthDate, [Validators.required]);
-        } else {
-            firstNameFC = new FormControl(this.firstName);
-            lastNameFC = new FormControl(this.lastName);
-            birthDateFC = new FormControl(this.subject.birthDate);
-        }
-
-        this.subjectForm = this.fb.group({
-            'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
-            'isAlreadyAnonymized': new FormControl('No'),
-            'name': [this.subject.name, [Validators.required, Validators.minLength(2), Validators.maxLength(64)]],
-            'firstName': firstNameFC,
-            'lastName': lastNameFC,
-            'birthDate': birthDateFC,
-            'sex': [this.subject.sex],
-            'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
-            'languageHemisphericDominance': [this.subject.languageHemisphericDominance],
-            'personalComments': []
-        });
-
-        this.subjectForm.valueChanges.subscribe(data => this.onValueChanged(data));
-        this.onValueChanged(); // (re)set validation messages now
-        this.subjectForm.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
-
-        this.subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
-            this.isAlreadyAnonymized = false;
-        });
-    }
-
-    onValueChanged(data?: any) {
-        if (!this.subjectForm) { return; }
-        for (const field in this.formErrors) {
-            // clear previous error message (if any)
-            this.formErrors[field] = '';
-            const control = this.subjectForm.get(field);
-            if (control && control.dirty && !control.valid) {
-                for (const key in control.errors) {
-                    this.formErrors[field] += key;
+    private manageSaveErrors() {
+        this.subscribtions.push(
+            this.onSave.subscribe(response => {
+                if (response && response instanceof ShanoirError && response.code == 422) {
+                    this.hasNameUniqueError = response.hasFieldError('name', 'unique');     
                 }
-            }
-        }
+            })
+        );
     }
 
-    formErrors = {
-        'name': '',
-        'imagedObjectCategory': '',
-        'firstName': '',
-        'lastName': '',
-        'birthDate': ''
-    }
-
-    updateModel(): void {
-        let subjectStudyListBackup = this.subject.subjectStudyList;
-        this.subject = this.subjectForm.value;
-        this.subject.subjectStudyList = subjectStudyListBackup;
-    }
-
-    back(subject?: Subject): void {
-        if (this.closing.observers.length > 0) {
-            this.closing.emit(subject);
-            this.subject = new Subject();
-            this.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
-        } else {
-            this.location.back();
-        }
-    }
-
-    edit(): void {
-        this.router.navigate(['/subject/edit/'+ this.subject.id]);
-    }
-
-    create(): void {
-        this.updateModel();
-        this.subject.identifier = this.generateSubjectIdentifier();
-        this.isSubjectFoundPromise = this.subjectService.findSubjectByIdentifier(this.subject.identifier)
-            .then((subject: Subject) => {
-                if (subject) this.existingSubjectError = subject.name;
-                else {
-                    if (this.humanSelected()) {
-                        this.setSubjectBirthDateToFirstOfJanuary();
-                    }
-                    this.subjectService.create(this.subject)
-                        .then((subject: Subject) => {
-                            this.msgService.log('info', 'Subject successfully created');
-                            this.back(subject);
-                        }, (error: any) => {
-                            this.manageRequestErrors(error);
-                });
-            }
-        })
-    }
-
-    update(): void {
-        this.updateModel();
-        this.subjectService.update(this.id, this.subject)
-            .subscribe((subject) => {
-                this.msgService.log('info', 'Subject successfully updated');
-                this.back();
-            }, (error: any) => {
-                this.manageRequestErrors(error);
-        });
-    }
-
-    private manageRequestErrors(error: any): void {
-        this.hasNameUniqueError = AppUtils.hasUniqueError(error, 'name');
-    }
-
-    generateSubjectIdentifier(): string {
+    private generateSubjectIdentifier(): string {
         let hash;
         if (this.humanSelected() && !this.isAlreadyAnonymized) {
             hash = this.firstName + this.lastName + this.subject.birthDate;
@@ -246,23 +124,18 @@ export class SubjectComponent implements OnInit, OnChanges {
         return this.getHash(hash);
     }
 
-    getHash(stringToBeHashed: string): string {
+    private getHash(stringToBeHashed: string): string {
         let hash = shajs('sha').update(stringToBeHashed).digest('hex');
         let hex = "";
         hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
 
-    setSubjectBirthDateToFirstOfJanuary(): void {
-        let newDate: Date = new Date(this.subject.birthDate.getFullYear(), 0, 1);
-        this.subject.birthDate = newDate;
-    }
-
     /**
      * Try to compute patient first name and last name from dicom tags. 
      * eg. TOM^HANKS -> return TOM as first name and HANKS as last name
      */
-    computeNameFromDicomTag (patientName: string): void {
+    private computeNameFromDicomTag (patientName: string): void {
         if (patientName) {
             let names: string[] = patientName.split("\\^");
             if (names !== null && names.length == 2) {
@@ -274,7 +147,7 @@ export class SubjectComponent implements OnInit, OnChanges {
         }
     }
 
-    public humanSelected(): boolean {
+    private humanSelected(): boolean {
         return this.subject.imagedObjectCategory != null
             && (this.subject.imagedObjectCategory == ImagedObjectCategory.HUMAN_CADAVER
                 || this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING);

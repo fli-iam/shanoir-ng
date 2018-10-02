@@ -21,7 +21,7 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
     }
 
     getEntities(): Promise<Coil[]> {
-        return this.coilService.getCoils();
+        return this.coilService.getAll();
     }
 
     getColumnDefs(): any[] {

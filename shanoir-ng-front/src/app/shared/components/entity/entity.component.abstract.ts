@@ -8,7 +8,7 @@ import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
 import { FooterState } from '../form-footer/footer-state.model';
-import { Entity, EntityRoutes } from './entity.interface';
+import { Entity, EntityRoutes } from './entity.abstract';
 import { Subject, Subscription } from 'rxjs';
 import { ShanoirError } from '../../models/error.model';
 
@@ -20,7 +20,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     @Input() mode: Mode;
     @Output() close: EventEmitter<any> = new EventEmitter();
     private footerState: FooterState;
-    private form: FormGroup;
+    protected form: FormGroup;
     private bcStep: Step;
 
     private entityRoutes: EntityRoutes;
@@ -99,6 +99,16 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         if (control && control.dirty && !control.valid) {
             return control.errors;
         }
+    }
+
+    hasError(fieldName: string, errors: string[] ) {
+        let formError = this.formErrors(fieldName);
+        if (formError) {
+            for(let errorName of errors) {
+                if(formError[errorName]) return true;
+            }
+        }
+        return false;
     }
 
     save(): Promise<void> {

@@ -57,13 +57,13 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
     }
 
     private fetchSubjects() {
-        this.subjectService.getSubjects().then(subjects => {
+        this.subjectService.getAll().then(subjects => {
             this.subjects = subjects;
         });
     }
 
     private fetchStudies() {
-        this.studyService.getStudies().then(studies => {
+        this.studyService.getAll().then(studies => {
             this.studies = studies;
         });
     }
