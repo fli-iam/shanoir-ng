@@ -91,6 +91,7 @@ spring:
     sql-dialect: Mysql
   rabbitmq:
     host: rabbitmq
+    port: 5672
 server:
     port: 9902
 front.server:
