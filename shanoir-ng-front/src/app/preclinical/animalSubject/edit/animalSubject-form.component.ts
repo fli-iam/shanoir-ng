@@ -224,6 +224,12 @@ export class AnimalSubjectFormComponent implements OnInit {
     
 
     buildForm(): void {
+        let sexFC : FormControl;
+        if (this.animalSelected()) {
+            sexFC = new FormControl(this.preclinicalSubject.subject.sex, [Validators.required]);
+        } else {
+            sexFC = new FormControl(this.preclinicalSubject.subject.sex);
+        }
         this.newSubjectForm = this.fb.group({
             'name': [this.preclinicalSubject.subject.name, Validators.required],
             'specie': [this.preclinicalSubject.animalSubject.specie, Validators.required],
@@ -231,7 +237,7 @@ export class AnimalSubjectFormComponent implements OnInit {
             'biotype': [this.preclinicalSubject.animalSubject.biotype, Validators.required],
             'provider': [this.preclinicalSubject.animalSubject.provider, Validators.required],
             'stabulation': [this.preclinicalSubject.animalSubject.stabulation, Validators.required],
-            'sex': [this.preclinicalSubject.subject.sex],
+            'sex': sexFC,
             'imagedObjectCategory': [this.preclinicalSubject.subject.imagedObjectCategory],
             'studies' : [this.selectedStudy]
         });
@@ -255,6 +261,13 @@ export class AnimalSubjectFormComponent implements OnInit {
             }
         }
     }
+    
+    onChangeImagedObjectCategory(){
+    	if (!this.animalSelected()){
+        	this.setSex();
+        }
+        this.buildForm();
+    }
 
     formErrors = {
         'name': '',
@@ -263,7 +276,8 @@ export class AnimalSubjectFormComponent implements OnInit {
         'biotype': '',
         'provider': '',
         'stabulation': '',
-        'imagedObjectCategory': ''
+        'imagedObjectCategory': '',
+        'sex' : ''
     };
 
     getOut(preclinicalSubject?: PreclinicalSubject): void {
@@ -301,6 +315,9 @@ export class AnimalSubjectFormComponent implements OnInit {
                 if (subject) {
                 	this.existingSubjectError = subject.name;
                 }else {
+                	if (!this.animalSelected()){
+                		this.setSex();
+                	}
         			this.animalSubjectService.createSubject(this.preclinicalSubject.subject)
             			.then(subject => {
             				this.preclinicalSubject.subject = subject;
@@ -359,6 +376,10 @@ export class AnimalSubjectFormComponent implements OnInit {
             	}
             );
         }
+    }
+    
+    setSex(): void {
+    	this.preclinicalSubject.subject.sex = 'M';
     }
 
     sortReferences() {
