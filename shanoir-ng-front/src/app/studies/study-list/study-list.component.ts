@@ -97,7 +97,7 @@ export class StudyListComponent {
 
     private onRowClick(study: Study) {
         if (!this.keycloakService.isUserGuest()) {
-            this.router.navigate(['study/details/'+study.id]);
+            this.router.navigate(['study/details/' + study.id]);
         }
     }
 

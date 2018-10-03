@@ -66,7 +66,7 @@ export class DatasetListComponent {
             {headerName: "Comment", field: "originMetadata.comment"},
         ];
         this.columnDefs.push({
-            headerName: "", type: "button", awesome: "fa-eye", action: (dataset) => this.router.navigate(['/dataset/details/'+dataset.id])
+            headerName: "", type: "button", awesome: "fa-eye", action: (dataset) => this.router.navigate(['/dataset/details/' + dataset.id])
         });
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
             this.columnDefs.push(
@@ -74,7 +74,7 @@ export class DatasetListComponent {
                     headerName: "", 
                     type: "button", 
                     awesome: "fa-edit", 
-                    action: (dataset) => this.router.navigate(['/dataset/edit/'+dataset.id])
+                    action: (dataset) => this.router.navigate(['/dataset/edit/' + dataset.id])
                 }, {
                     headerName: "", 
                     type: "button", 
