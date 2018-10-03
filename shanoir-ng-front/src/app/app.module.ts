@@ -41,7 +41,6 @@ import { HomeComponent } from './home/home.component';
 import { KeycloakHttpInterceptor } from "./shared/keycloak/keycloak.http.interceptor";
 import { KeycloakService } from "./shared/keycloak/keycloak.service";
 import { ImportComponent } from './import/import.component';
-import { ListComponent } from "./shared/components/list/list.component";
 import { ImportService } from './import/import.service';
 import { LoadingBarComponent } from './shared/components/loading-bar/loading-bar.component';
 import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
@@ -144,7 +143,6 @@ import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
         HeaderComponent,
         HomeComponent,
         ImportComponent,
-        ListComponent,
         LoadingBarComponent,
         ManufacturerComponent,
         ManufacturerModelComponent,

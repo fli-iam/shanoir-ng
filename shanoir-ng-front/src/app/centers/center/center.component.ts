@@ -6,6 +6,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
 import { ShanoirError } from '../../shared/models/error.model';
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 
 @Component({
     selector: 'center-detail',
@@ -17,6 +18,7 @@ export class CenterComponent extends EntityComponent<Center> {
 
     private isNameUniqueError: boolean = false;
     private phoneNumberPatternError: boolean = false;
+    private openAcqEq: boolean = true;
 
     constructor(
             private route: ActivatedRoute,
@@ -67,6 +69,10 @@ export class CenterComponent extends EntityComponent<Center> {
                 }
             })
         );
+    }
+
+    private goToAcquisitionEquipment(acqE: AcquisitionEquipment) {
+        this.router.navigate(['/acquisition-equipment/details/' + acqE.id]);
     }
 
 }
