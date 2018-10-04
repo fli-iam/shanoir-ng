@@ -19,7 +19,8 @@ export class BreadcrumbsService {
         });
     }
 
-    public addStep(step: Step) {
+    public addStep(label: string) {
+        let step = new Step(label, this.router.url);
         if (this.lastStep && step.route == this.lastStep.route) return;
         if (this.beforeLastStep && step.route == this.beforeLastStep.route) {
             this.removeStepsAfter(this.nbSteps - 2);

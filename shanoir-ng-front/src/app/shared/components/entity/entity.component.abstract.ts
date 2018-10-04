@@ -21,7 +21,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     @Output() close: EventEmitter<any> = new EventEmitter();
     private footerState: FooterState;
     protected form: FormGroup;
-    private bcStep: Step;
 
     private entityRoutes: EntityRoutes;
     protected router: Router;
@@ -66,7 +65,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
         choose().then(() => {
             if (this.breadcrumbsService.entityToReload()) this.entity = this.breadcrumbsService.reloadSavedEntity<T>();
-            this.bcStep.entity = this.entity;
+            this.breadcrumbsService.lastStep.entity = this.entity;
             this.form = this.buildForm();
             if (this.form) 
                 this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
@@ -89,8 +88,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 label = 'View ' + this.ROUTING_NAME;
                 break;
         }
-        this.bcStep = new Step(label, this.router.url);
-        this.breadcrumbsService.addStep(this.bcStep);
+        this.breadcrumbsService.addStep(label);
     }
 
     formErrors(field: string): any {

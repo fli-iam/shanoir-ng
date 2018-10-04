@@ -49,7 +49,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.customActionDefs = this.getCustomActionsDefs();
         this.completeCustomActions();
         this.breadcrumbsService.reset();
-        this.breadcrumbsService.addStep(new Step(capitalizeFirstLetter(ROUTING_NAME) + ' list', this.entityRoutes.getRouteToList()));       
+        this.breadcrumbsService.addStep(capitalizeFirstLetter(ROUTING_NAME) + ' list');       
     }
 
     private setOptions(options: any) {
@@ -60,7 +60,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     }
 
     private completeColDefs(): void {
-        if (this.edit && this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+        if (this.edit && this.keycloakService.isUserAdminOrExpert()) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.goToEdit(item.id) });
         }
         if (this.view && !this.keycloakService.isUserGuest()) {
@@ -72,7 +72,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     }
 
     private completeCustomActions(): void {
-        if (this.new && this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+        if (this.new && this.keycloakService.isUserAdminOrExpert()) {
             this.customActionDefs.push({
                 title: "New",awesome: "fa-plus", action: item => this.router.navigate([this.entityRoutes.getRouteToCreate()])
             });
