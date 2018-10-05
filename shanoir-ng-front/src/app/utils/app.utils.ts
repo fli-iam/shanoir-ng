@@ -124,8 +124,14 @@ export function allOfEnum<T>(enumClass): Array<T> {
     return list;
 }
 
-export function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+export function capitalizeFirstLetter(str: string) {
+    if (!str) return;
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function capitalsAndUnderscoresToDisplayable(str: string) {
+    if (!str) return;
+    return capitalizeFirstLetter(str.replace('_', ' ').toLowerCase());
 }
 
 export function getEntityInstance(entity: Dataset) { 

@@ -12,8 +12,8 @@ export class CenterService extends EntityService<Center> {
 
     getEntityInstance() { return new Center(); }
 
-    getCentersNames(): Promise<Center[]> {
-        return this.http.get<Center[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
+    getCentersNames(): Promise<IdNameObject[]> {
+        return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
             .toPromise();
     }
 

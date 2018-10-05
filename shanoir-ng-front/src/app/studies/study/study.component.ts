@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { Center } from '../../centers/shared/center.model';
@@ -9,16 +9,17 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { ShanoirError } from '../../shared/models/error.model';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
 import { UserService } from '../../users/shared/user.service';
+import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserType } from '../shared/study-user-type.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { ShanoirError } from '../../shared/models/error.model';
 
 declare type Mode = 'create' | 'edit' | 'view';
 
@@ -33,9 +34,9 @@ export class StudyComponent extends EntityComponent<Study> {
     
     @ViewChild('memberTable') table: TableComponent;
 
-    private centers: Center[];
+    private centers: IdNameObject[];
     private subjects: IdNameObject[];
-    private selectedCenter: Center;
+    private selectedCenter: IdNameObject;
     private isNameUniqueError: boolean = false;
     
     private browserPaging: BrowserPaging<StudyUser>;
@@ -63,7 +64,6 @@ export class StudyComponent extends EntityComponent<Study> {
 
     initEdit(): Promise<void> {
         let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => this.study = study);
-        this.getCenters();
         this.getSubjects();
 
         this.createColumnDefs();
@@ -76,13 +76,21 @@ export class StudyComponent extends EntityComponent<Study> {
             this.userService.getUsers().then(users => this.users = users)
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
-        })
+        });
+        Promise.all([
+            studyPromise,
+            this.getCenters()
+        ]).then(([study, centers]) => {
+            this.onMonoMultiChange();
+        });
+
         return studyPromise.then(() => null);
     }
 
     initCreate(): Promise<void> {
         this.study = this.newStudy();
         this.getCenters();
+        this.selectedCenter = null;
         this.getSubjects();
 
         this.createColumnDefs();
@@ -95,7 +103,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     buildForm(): FormGroup {
-        return this.formBuilder.group({
+        let formGroup = this.formBuilder.group({
             'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
             'startDate': [this.study.startDate],
             'endDate': [this.study.endDate],
@@ -105,8 +113,9 @@ export class StudyComponent extends EntityComponent<Study> {
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
-            'studyCenterList': [this.study.studyCenterList]
+            'studyCenterList': [this.selectedCenter, [this.validateCenter]]
         });
+        return formGroup;
     }
 
     private newStudy(): Study {
@@ -119,15 +128,10 @@ export class StudyComponent extends EntityComponent<Study> {
         return study;
     }
 
-    private getCenters(): void {
-        this.centerService
-        .getCentersNames()
-        .then(centers => {
-            this.centers = centers;
-            if (centers) {
-                this.selectedCenter = centers[0];
-            }
-        });
+    private getCenters(): Promise<IdNameObject[]> {
+        return this.centerService
+            .getCentersNames()
+            .then(centers => this.centers = centers);
     }
         
     private getSubjects(): void {
@@ -138,26 +142,37 @@ export class StudyComponent extends EntityComponent<Study> {
         });
     }
 
-    private manageSaveErrors() {
-        this.subscribtions.push(
-            this.onSave.subscribe(response => {
-                if (response && response instanceof ShanoirError && response.code == 422) {
-                    this.isNameUniqueError = response.hasFieldError('name', 'unique'); 
-                }
-            })
-        );
+    save(): Promise<void> {
+        return super.save().catch(reason => {
+            if (reason && reason.error && reason.error.code == 422) {
+                this.isNameUniqueError = new ShanoirError(reason).hasFieldError('name', 'unique'); 
+            }
+        });
     }
+    
+    /** Center section management  **/
 
     private get disableMono(): boolean {
         return this.study.studyCenterList && this.study.studyCenterList.length > 1;
     }
 
-    /** Center section management  **/
+    private onMonoMultiChange() {
+        if (this.study.monoCenter && this.study.studyCenterList.length == 1) {
+            this.selectedCenter = this.centers.find(center => center.id == this.study.studyCenterList[0].center.id);
+        }
+    }
+
+    private goToCenter(id: number) {
+        this.router.navigate(['/center/details/' + id]);
+    }
 
     private onCenterAdd(): void {
         let studyCenter: StudyCenter = new StudyCenter();
-        studyCenter.center = this.selectedCenter;
+        studyCenter.center = new Center();
+        studyCenter.center.id = this.selectedCenter.id;
+        studyCenter.center.name = this.selectedCenter.name;
         this.study.studyCenterList.push(studyCenter);
+        this.form.get('studyCenterList').updateValueAndValidity();
     }
 
     private onCenterChange(): void {
@@ -167,11 +182,21 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
+    private validateCenter = (control: AbstractControl): ValidationErrors | null => {
+        if (!this.study.studyCenterList || this.study.studyCenterList.length == 0) {
+            return { noCenter: true}
+        }
+        return null;
+    }
+
     private removeCenterFromStudy(centerId: number): void {
+        if (!this.study.studyCenterList || this.study.studyCenterList.length < 2) return;
         this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
         if (this.study.studyCenterList.length < 2) {
             this.study.monoCenter = true;
+            this.onMonoMultiChange();
         }
+        this.form.get('studyCenterList').updateValueAndValidity();
     }
     
     private enableAddIcon(): boolean {
@@ -201,21 +226,13 @@ export class StudyComponent extends EntityComponent<Study> {
     }
         
     private createColumnDefs() {
-        const allStudyUserTypes: any[] = [
-            { value: StudyUserType.NOT_SEE_DOWNLOAD, label: "Cannot see or download datasets" },
-            { value: StudyUserType.RESPONSIBLE, label: "Is responsible for the research study" },
-            { value: StudyUserType.SEE_DOWNLOAD, label: "Can see and download datasets" },
-            { value: StudyUserType.SEE_DOWNLOAD_IMPORT, label: "Can see, download and import datasets" },
-            { value: StudyUserType.SEE_DOWNLOAD_IMPORT_MODIFY, label: "Can see, download, import datasets and modify the study parameters" },
-        ];
-
         this.columnDefs = [
             { headerName: "Username", field: "userName" },
             { headerName: "First Name", field: "user.firstName" },
             { headerName: "Last Name", field: "user.lastName" },
             { headerName: "Email", field: "user.email", width: "200%" },
             { headerName: "Role", field: "user.role.displayName", width: "63px" },
-            { headerName: "Role/Position*", field: "studyUserType", editable: true, possibleValues: allStudyUserTypes, width: "300%"},
+            { headerName: "Role/Position*", field: "studyUserType", editable: true, possibleValues: StudyUserType.getValueLabelJsonArray(), width: "300%"},
             { headerName: "Received Import Mail", field: "receiveNewImportReport", editable: true },
             { headerName: "Received Anonymization Mail", field: "receiveAnonymizationReport", editable: true },
             { headerName: "", type: "button", awesome: "fa-trash", action: this.removeStudyUser }
@@ -246,6 +263,9 @@ export class StudyComponent extends EntityComponent<Study> {
         this.table.refresh();
     }
 
+    private studyStatusStr(studyStatus: string) {
+        return capitalsAndUnderscoresToDisplayable(studyStatus);
+    }
 
         
     // removeTimepoint(timepoint: Timepoint): void {

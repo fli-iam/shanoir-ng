@@ -6,6 +6,7 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Study } from '../shared/study.model';
+import { StudyUserType } from '../shared/study-user-type.enum';
 
 @Component({
     selector: 'study-tree',
@@ -71,6 +72,10 @@ export class StudyTreeComponent {
 
     showDatasetDetails(datasetId: number) {
         this.router.navigate(['/dataset'], { queryParams: { id: datasetId, mode: "view" } });
+    }
+
+    private getStudyUserTypeLabel(studyUserType: StudyUserType) {
+        return StudyUserType.getLabel(studyUserType);
     }
 
 }

@@ -2,9 +2,9 @@ import { Component, ViewChild } from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { StudyStatus } from '../shared/study-status.enum';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 
 @Component({
     selector: 'study-list',
@@ -37,7 +37,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             { headerName: "Name", field: "name" },
             {
                 headerName: "Status", field: "studyStatus", cellRenderer: function (params: any) {
-                    return StudyStatus[params.data.studyStatus];
+                    return capitalsAndUnderscoresToDisplayable(params.data.studyStatus);
                 }
             },
             {

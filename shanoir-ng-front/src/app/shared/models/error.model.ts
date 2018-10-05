@@ -1,9 +1,13 @@
 export class ShanoirError {
-    constructor(
-        public code: number,
-        public details: any,
-        public message: string
-    ) {}
+    public code: number;
+    public details: any;
+    public message: string;
+    
+    constructor(reason: any) {
+        this.code = reason.error.code;
+        this.details = reason.error.details;
+        this.message = reason.error.message;
+    }
 
     public hasFieldError(field: string, code: string): boolean {
         if (this.details && this.details.fieldErrors && this.details.fieldErrors[field]) {

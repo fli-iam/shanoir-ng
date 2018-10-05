@@ -12,6 +12,7 @@ import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { ShanoirError } from '../../shared/models/error.model';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -22,7 +23,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     private uniqueSerialError: boolean = false;
     private manufModels: ManufacturerModel[];
-    private centers: Center[];
+    private centers: IdNameObject[];
     private datasetModalityTypeEnumValue: string;
     private nonEditableCenter: boolean = false;
 

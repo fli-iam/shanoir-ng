@@ -103,7 +103,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                         this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason.error.code, reason.error.details, reason.error.message));
+                            this.onDelete.next(new ShanoirError(reason));
                             if (reason.error.code != 422) throw Error(reason);
                         }
                     });                    

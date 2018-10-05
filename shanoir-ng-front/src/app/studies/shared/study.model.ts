@@ -1,19 +1,17 @@
+import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { User } from '../../users/shared/user.model';
+import { ServiceLocator } from '../../utils/locator.service';
 import { MembersCategory } from './members-category.model';
 import { StudyCenter } from './study-center.model';
-import { StudyStatus } from './study-status.enum';
 import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
-import { Timepoint } from './timepoint.model';
-import { Entity } from '../../shared/components/entity/entity.abstract';
 import { StudyService } from './study.service';
-import { ServiceLocator } from '../../utils/locator.service';
+import { Timepoint } from './timepoint.model';
 
 export class Study extends Entity {
-    centers: IdNameObject[];
     clinical: boolean;
     compatible: boolean;
     downloadableByDefault: boolean;
@@ -29,7 +27,7 @@ export class Study extends Entity {
     startDate: Date;
     studyCards: StudyCard[];
     studyCenterList: StudyCenter[];
-    studyStatus: StudyStatus;
+    studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
     studyType: StudyType;
     subjectStudyList: SubjectStudy[] = [];
     studyUserList: StudyUser[] = [];

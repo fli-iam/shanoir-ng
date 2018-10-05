@@ -29,7 +29,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected formBuilder: FormBuilder;
     private msgBoxService: MsgBoxService; 
     protected breadcrumbsService: BreadcrumbsService;
-    public onSave: Subject<any> =  new Subject<any>();
+    protected onSave: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
 
     abstract initView(): Promise<void>;
@@ -64,7 +64,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             }
         }
         choose().then(() => {
-            if (this.breadcrumbsService.entityToReload()) this.entity = this.breadcrumbsService.reloadSavedEntity<T>();
+            if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.entityToReload()) 
+                this.entity = this.breadcrumbsService.reloadSavedEntity<T>();
             this.breadcrumbsService.lastStep.entity = this.entity;
             this.form = this.buildForm();
             if (this.form) 
@@ -109,18 +110,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         return false;
     }
 
-    save(): Promise<void> {
-        return this.saveEntity().then(() => {
-            this.onSave.next(this.entity);
-        }).catch(reason => {
-            if (reason && reason.error) {
-                this.onSave.next(new ShanoirError(reason.error.code, reason.error.details, reason.error.message));
-                if (reason.error.code != 422) throw Error(reason);
-            }
-        });
-    }
-
-    private saveEntity(): Promise<void> {
+    protected save(): Promise<void> {
         if (this.mode == 'create') {
             return this.entity.create().then((entity) => {
                 this.chooseRoute(entity);
