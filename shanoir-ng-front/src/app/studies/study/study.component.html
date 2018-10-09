@@ -31,14 +31,14 @@
 					</li>
 					<li>
 						<label i18n="Study detail|Start date label@@studyDetailStartDate">Start date</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
+						<span class="right-col">
+							<ng-container *ngIf="mode == 'view' || mode == 'edit'">
 								{{study.startDate | date: 'dd/MM/yyyy'}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
+							</ng-container>
+							<ng-container *ngIf="mode == 'create'">
 								<datepicker [(ngModel)]="study.startDate" formControlName="startDate"></datepicker>
-								<label *ngIf="isStartDateValid==false" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
-							</ng-template>
+								<label *ngIf="hasError('startDate', ['valid'])" class="form-validation-alert" i18n="Study detail|Date vali error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+							</ng-container>
 						</span>
 					</li>
 					<li>
@@ -49,7 +49,7 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<datepicker [(ngModel)]="study.endDate" formControlName="endDate"></datepicker>
-								<label *ngIf="isEndDateValid==false" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+								<label *ngIf="hasError('endDate', ['valid'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
 							</ng-template>
 						</span>
 					</li>
@@ -143,12 +143,11 @@
 				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers and principal investigators</legend>
 				<ol>
 					<li>
-						<div *ngIf="mode == 'view' ; then view_mode else edit_mode"></div>
-						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter" class="required-label">Multi / single center</label>
+						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter" [class.required-label]="mode != view">Multi / single center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="!study.monoCenter" class="bool-true">&#x2713;</span>
-								<span *ngIf="study.monoCenter" class="bool-false">&#x2717;</span>
+								<span *ngIf="study.monoCenter">Single center</span>
+								<span *ngIf="!study.monoCenter">Multicenter</span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<span [class.disabled]="study.studyCenterList?.length > 1" class="mono">
@@ -171,7 +170,7 @@
 							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>
-					<li *ngIf="!study.monoCenter">
+					<li *ngIf="mode != 'view' && !study.monoCenter">
 						<label i18n="Study detail|Current centers and investigators label@@studyDetailCurrentCentersAndPI">Current centers and investigators</label>
 						<span class="right-col study-center-list">
 							<div *ngFor="let studyCenter of study.studyCenterList">

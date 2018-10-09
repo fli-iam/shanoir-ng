@@ -1,16 +1,15 @@
 import { Location } from '@angular/common';
-import { EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
+import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, Subscription } from 'rxjs';
 
-import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
+import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
 import { FooterState } from '../form-footer/footer-state.model';
 import { Entity, EntityRoutes } from './entity.abstract';
-import { Subject, Subscription } from 'rxjs';
-import { ShanoirError } from '../../models/error.model';
 
 export type Mode =  "view" | "edit" | "create";
 export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy {
@@ -187,4 +186,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
     }
 
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == 'œ') {
+            console.log('form', this.form);
+            console.log('entity', this.entity);
+        }
+    }
 }

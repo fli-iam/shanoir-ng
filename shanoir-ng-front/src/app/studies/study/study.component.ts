@@ -20,6 +20,7 @@ import { StudyUserType } from '../shared/study-user-type.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { DatepickerComponent } from '../../shared/date/date.component';
 
 declare type Mode = 'create' | 'edit' | 'view';
 
@@ -105,8 +106,8 @@ export class StudyComponent extends EntityComponent<Study> {
     buildForm(): FormGroup {
         let formGroup = this.formBuilder.group({
             'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
-            'startDate': [this.study.startDate],
-            'endDate': [this.study.endDate],
+            'startDate': [this.study.startDate, [DatepickerComponent.validator]],
+            'endDate': [this.study.endDate, [DatepickerComponent.validator]],
             'studyStatus': [this.study.studyStatus, [Validators.required]],
             'withExamination': [this.study.withExamination],
             'clinical': [this.study.clinical, [Validators.required]],

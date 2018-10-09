@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { DatepickerComponent } from '../../shared/date/date.component';
 import { ShanoirError } from '../../shared/models/error.model';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { StudyService } from '../../studies/shared/study.service';
@@ -36,7 +37,6 @@ export class SubjectComponent extends EntityComponent<Subject> {
             private studyService: StudyService) {
 
         super(route, 'subject');
-        this.manageSaveErrors();
     }
 
     public get subject(): Subject { return this.entity; }
@@ -65,7 +65,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
             'name': [this.subject.name, this.nameValidators],
             'firstName': [this.firstName],
             'lastName': [this.lastName],
-            'birthDate': [this.subject.birthDate, this.mode == 'create' ? [Validators.required] : undefined],
+            'birthDate': [this.subject.birthDate],
             'sex': [this.subject.sex],
             'subjectStudyList': [],
             'manualHemisphericDominance': [this.subject.manualHemisphericDominance],
@@ -84,12 +84,14 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     private updateFormControl(formGroup: FormGroup) {
-        if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized) {
+        if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized && this.mode == 'create') {
             formGroup.get('firstName').setValidators(this.nameValidators);
             formGroup.get('lastName').setValidators(this.nameValidators);
+            formGroup.get('birthDate').setValidators([Validators.required, DatepickerComponent.validator])
         } else {
             formGroup.get('firstName').setValidators([]);
             formGroup.get('lastName').setValidators([]);
+            formGroup.get('birthDate').setValidators([DatepickerComponent.validator])
         }
         formGroup.get('firstName').updateValueAndValidity();
         formGroup.get('lastName').updateValueAndValidity();
@@ -103,14 +105,12 @@ export class SubjectComponent extends EntityComponent<Subject> {
             });
     }  
 
-    private manageSaveErrors() {
-        this.subscribtions.push(
-            this.onSave.subscribe(response => {
-                if (response && response instanceof ShanoirError && response.code == 422) {
-                    this.hasNameUniqueError = response.hasFieldError('name', 'unique');     
-                }
-            })
-        );
+    save(): Promise<void> {
+        return super.save().catch(reason => {
+            if (reason && reason.error && reason.error.code == 422) {
+                this.hasNameUniqueError = new ShanoirError(reason).hasFieldError('name', 'unique'); 
+            }
+        });
     }
 
     private generateSubjectIdentifier(): string {

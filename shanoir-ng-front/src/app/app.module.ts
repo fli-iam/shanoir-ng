@@ -97,7 +97,6 @@ import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.compone
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { NewExamComponent } from './examinations/examination/new-exam.component';
 import { SubjectStudyListComponent } from "./shared/components/subject-study-list/subject-study-list.component";
-import { DateValidator } from './shared/date/date.validator';
 import { PagerComponent } from './shared/components/table/pager/pager.component';
 import { TableSearchComponent } from './shared/components/table/search/search.component';
 import { TimesPipe } from './utils/app.utils';
@@ -181,7 +180,6 @@ import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
         DicomUploadComponent,
         ClinicalContextComponent,
         SubjectStudyListComponent,
-        DateValidator,
         TableSearchComponent,
         TimesPipe,
         FormFooterComponent,

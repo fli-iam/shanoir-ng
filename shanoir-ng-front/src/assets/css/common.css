@@ -58,7 +58,8 @@ h2 + shanoir-table { margin-top: 20px; }
 form { color: var(--dark-grey); }
   form input:not([type='file']),
   form textarea,
-  form select { border: 1px solid var(--grey) !important; border-radius: 2px !important; }
+  form select,
+  form datepicker { border: 1px solid var(--grey) !important; border-radius: 2px !important; }
   form input[readonly],
   form textarea[readonly],
   form select[readonly] { background-color: var(--light-grey); cursor: default; color : transparent; text-shadow : 0 0 0 var(--greyer);}
@@ -88,7 +89,6 @@ form { color: var(--dark-grey); }
       form li.info .icon { margin-right: 6px; vertical-align: middle; color: var(--color-b); font-size: 16px; }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { padding: 6px 15px; }
-  form .footer { }
   form .header { color: var(--color-b); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
   form div.header { font-size: 16px; }
   form .required-label:after{ content:" *"; }
@@ -103,7 +103,8 @@ form { color: var(--dark-grey); }
     form .right-col button svg { margin-right: 3px; vertical-align: -1; color: var(--color-a); }
 
   /* Date picker style overriding */
-  form my-date-picker input { height: 21px; font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; }
+  form my-date-picker input.selection { border: none !important; height: 19px; font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; background-color: transparent !important; }
+  form my-date-picker .selectiongroup { background-color: transparent !important; }
   form my-date-picker .selector { border: 1px solid var(--light-grey) !important; box-shadow: 0 0 var(--shadow-height) 0px gray !important; }
   form my-date-picker input.selection { text-align: left !important; padding: 0 5px !important; }
   form my-date-picker button.btnpicker,
@@ -132,14 +133,12 @@ form { color: var(--dark-grey); }
   form my-date-picker .mydp .weekdaytitle { color: var(--color-a) !important; }
   form my-date-picker .mydp .sunday { color: var(--color-b) !important; }
 
-.back-button { }
 .left-icon svg { margin-right: 7px; vertical-align: -2; }
 .right-icon svg { margin-left: 7px; vertical-align: -2; }
 
 .content-component { background-color: var(--very-light-grey); text-align: left; display: inline-block; }
 .main-content { padding: 0 20px 10px 20px; position: relative; }
 .max-content { display: inline-block; }
-.command-zone { }
 
 .error-message label { color: var(--color-error); }
 .error-message li { color: var(--color-error); }
