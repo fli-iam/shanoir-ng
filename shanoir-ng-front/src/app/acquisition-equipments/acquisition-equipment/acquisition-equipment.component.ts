@@ -73,10 +73,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private updateAcquEq(): void {
-        // this.centerService.getCenter(this.acqEquip.center.id)
-        //     .then(center => this.acqEquip.center = center);
-        // this.manufModelService.getManufacturerModel(this.acqEquip.manufacturerModel.id)
-        //     .then(manufModel => this.acqEquip.manufacturerModel = manufModel);
         this.datasetModalityTypeEnumValue = DatasetModalityType[this.acqEquip.manufacturerModel.datasetModalityType];
     }
 

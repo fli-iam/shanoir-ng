@@ -100,9 +100,14 @@ export class SubjectComponent extends EntityComponent<Subject> {
     }
 
     save(): Promise<void> {
-        if (this.mode == 'create') this.subject.identifier = this.generateSubjectIdentifier();
-        console.log(this.subject.identifier);
-        return super.save();
+        let savedDate: Date;
+        if (this.mode == 'create') {
+            this.subject.identifier = this.generateSubjectIdentifier();
+            this.setSubjectBirthDateToFirstOfJanuary();
+        }
+        return super.save()
+            .then(() => { if (savedDate) this.subject.birthDate = savedDate })
+            .catch(reason => { if (savedDate) this.subject.birthDate = savedDate; throw reason; })
     }
 
     loadAllStudies(): void {
@@ -151,5 +156,10 @@ export class SubjectComponent extends EntityComponent<Subject> {
         return this.subject.imagedObjectCategory != null
             && (this.subject.imagedObjectCategory == ImagedObjectCategory.HUMAN_CADAVER
                 || this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING);
+    }
+
+    private setSubjectBirthDateToFirstOfJanuary(): void {
+        let newDate: Date = new Date(new Date(this.subject.birthDate).getFullYear(), 0, 1);
+        this.subject.birthDate = newDate;
     }
 }
