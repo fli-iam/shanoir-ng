@@ -1,6 +1,6 @@
 import { Location } from '@angular/common';
 import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
@@ -10,6 +10,7 @@ import { KeycloakService } from '../../keycloak/keycloak.service';
 import { MsgBoxService } from '../../msg-box/msg-box.service';
 import { FooterState } from '../form-footer/footer-state.model';
 import { Entity, EntityRoutes } from './entity.abstract';
+import { ShanoirError } from '../../models/error.model';
 
 export type Mode =  "view" | "edit" | "create";
 export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy {
@@ -19,18 +20,22 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     @Input() mode: Mode;
     @Output() close: EventEmitter<any> = new EventEmitter();
     private footerState: FooterState;
+    protected onSave: Subject<any> =  new Subject<any>();
+    protected subscribtions: Subscription[] = [];
     protected form: FormGroup;
+    protected saveError: ShanoirError;
+    protected onSubmitValidatedFields: string[] = [];
 
+    /* services */
     private entityRoutes: EntityRoutes;
     protected router: Router;
     private location: Location;
-    private keycloakService: KeycloakService;
     protected formBuilder: FormBuilder;
+    private keycloakService: KeycloakService;
     private msgBoxService: MsgBoxService; 
     protected breadcrumbsService: BreadcrumbsService;
-    protected onSave: Subject<any> =  new Subject<any>();
-    protected subscribtions: Subscription[] = [];
 
+    /* abstract methods */
     abstract initView(): Promise<void>;
     abstract initEdit(): Promise<void>;
     abstract initCreate(): Promise<void>;
@@ -66,13 +71,20 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.entityToReload()) 
                 this.entity = this.breadcrumbsService.reloadSavedEntity<T>();
             this.breadcrumbsService.lastStep.entity = this.entity;
-            this.form = this.buildForm();
-            if (this.form) 
-                this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
-            else 
-                this.footerState.valid = true;
+            this.manageFormSubscriptions();
         });
         this.footerState = new FooterState(this.mode, this.keycloakService.isUserAdminOrExpert());
+    }
+
+    private manageFormSubscriptions() {
+        this.form = this.buildForm();
+        if (this.form) {
+            this.subscribtions.push(
+                this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID')
+            );
+        } else {
+            this.footerState.valid = true;
+        }
     }
 
     private addBCStep() {
@@ -94,12 +106,12 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     formErrors(field: string): any {
         if (!this.form) return;
         const control = this.form.get(field);
-        if (control && control.dirty && !control.valid) {
+        if (control && control.touched && !control.valid) {
             return control.errors;
         }
     }
 
-    hasError(fieldName: string, errors: string[] ) {
+    hasError(fieldName: string, errors: string[]) {
         let formError = this.formErrors(fieldName);
         if (formError) {
             for(let errorName of errors) {
@@ -109,22 +121,62 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         return false;
     }
 
-    protected save(): Promise<void> {
+    /**
+     * Chooses between create() and update(), saves the entity and return a promise
+     */
+    private modeSpecificSave(): Promise<void> {
         if (this.mode == 'create') {
             return this.entity.create().then((entity) => {
-                this.chooseRoute(entity);
+                this.chooseRouteAfterSave(entity);
                 this.msgBoxService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the number ' + entity.id);
             });
         }
         else if (this.mode == 'edit') {
             return this.entity.update().then(() => {
-                this.chooseRoute(this.entity);
+                this.chooseRouteAfterSave(this.entity);
                 this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + this.entity.id + ' has been successfully updated');
             });
         }
     }
 
-    private chooseRoute(entity: Entity) {
+    protected save(): Promise<void> {
+        return this.modeSpecificSave()
+            .then()
+            /* manages "after submit" errors like a unique constraint */      
+            .catch(reason => {
+                if (reason && reason.error && reason.error.code == 422) {
+                    this.saveError = new ShanoirError(reason);
+                    for (let managedField of this.onSubmitValidatedFields) {
+                        let fieldControl: AbstractControl = this.form.get(managedField);
+                        if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
+                        fieldControl.updateValueAndValidity({emitEvent : false});
+                    }
+                    this.footerState.valid = this.form.status == 'VALID';
+                } else throw reason;
+            });
+    }
+
+    /**
+     * Get a validator to manage form errors catched after an entity submited, like a unique contrainte. 
+     * @param constraintName The code name of the contraint, received from the rest service (e.g. 'unique')
+     * @param controlFieldName The field name specified in the FormGroup definition (in buildForm())
+     * @param errorFieldName (optional) The field name of the error received from the rest service if different from controlFieldName
+     */
+    protected registerOnSubmitValidator(constraintName: string, controlFieldName: string, errorFieldName?: string): (control: AbstractControl) => ValidationErrors | null {
+        if (this.onSubmitValidatedFields.indexOf(controlFieldName) == -1) this.onSubmitValidatedFields.push(controlFieldName);        
+        return (control: AbstractControl): ValidationErrors | null => {
+            if (this.saveError && this.saveError.hasFieldError(errorFieldName ? errorFieldName : controlFieldName, constraintName, control.value)
+                    //&& this.form.get(controlFieldName).pristine
+            ) {       
+                let ret = {};
+                ret[constraintName] = true;
+                return ret;
+            }
+            return null;
+        }
+    }
+
+    private chooseRouteAfterSave(entity: Entity) {
         this.breadcrumbsService.lastStep.notifySave(entity);
         if (this.breadcrumbsService.beforeLastStep && this.breadcrumbsService.beforeLastStep.isWaitingFor(this.breadcrumbsService.lastStep)) {
             this.breadcrumbsService.goBack();

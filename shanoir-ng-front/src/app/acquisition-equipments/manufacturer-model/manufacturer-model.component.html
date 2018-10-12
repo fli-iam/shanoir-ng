@@ -45,9 +45,9 @@
 							</ng-template>
 							<ng-template ngSwitchDefault> 
 								<input type="text" id="name" formControlName="name" [(ngModel)]="manufModel.name" (change)="isNameUniqueError=false"/>
-								<label *ngIf="formErrors('name')?.includes('required')" class="form-validation-alert" i18n="ManufModel detail|Name required error@@manufModelDetailNameRequiredError">Name is required!</label>
-								<label *ngIf="formErrors('name')?.includes('length')" class="form-validation-alert" i18n="ManufModel detail|Name length error@@manufModelDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="isNameUniqueError" class="form-validation-alert" i18n="ManufModel detail|Name unique error@@manufModelDetailNameUniqueError">Name should be unique!</label>
+								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="ManufModel detail|Name required error@@manufModelDetailNameRequiredError">Name is required!</label>
+								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="ManufModel detail|Name length error@@manufModelDetailNameLengthError">Name length must be between 2 and 200!</label>
+								<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="ManufModel detail|Name unique error@@manufModelDetailNameUniqueError">Name should be unique!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -60,8 +60,8 @@
 							<ng-template ngSwitchDefault> 
 								<input type="text" pattern="[0-9]+([.][0-9]+)?" id="magneticField" formControlName="magneticField" [(ngModel)]="manufModel.magneticField"/>
                             	Teslas
-								<label *ngIf="formErrors('magneticField')?.includes('required')" class="form-validation-alert" i18n="ManufModel detail|Magnetic field required error@@manufModelDetailMagneticFieldRequiredError">Magnetic field is required!</label>
-								<label *ngIf="formErrors('magneticField')?.includes('pattern')" class="form-validation-alert" i18n="ManufModel detail|Magnetic field pattern error@@manufModelDetailMagneticFieldPatternError">Magnetic field should be a number!</label>
+								<label *ngIf="hasError('magneticField', ['required'])" class="form-validation-alert" i18n="ManufModel detail|Magnetic field required error@@manufModelDetailMagneticFieldRequiredError">Magnetic field is required!</label>
+								<label *ngIf="hasError('magneticField', ['pattern'])" class="form-validation-alert" i18n="ManufModel detail|Magnetic field pattern error@@manufModelDetailMagneticFieldPatternError">Magnetic field should be a number!</label>
 							</ng-template>
 						</span>
 					</li>

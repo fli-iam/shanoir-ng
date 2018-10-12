@@ -14,8 +14,7 @@ import { IMyOptions } from 'mydatepicker';
         </my-date-picker>
     `,
     styles: [
-        ':host() { display: inline-block; height: 19px; }',
-        ':host().ng-invalid.ng-dirty { border: 1px solid var(--color-error); background-color: var(--color-light-error); } '
+        ':host() { display: inline-block; height: 19px; }'
     ],
     providers: [
         {
@@ -28,6 +27,7 @@ import { IMyOptions } from 'mydatepicker';
 export class DatepickerComponent implements ControlValueAccessor {
 
     private inputFieldContent: string;
+    private lastInputFieldContent: string;
     private convertedDate: Object;
     private onTouch: () => void;
     private onChange: (value) => void;
@@ -45,11 +45,13 @@ export class DatepickerComponent implements ControlValueAccessor {
     }
 
     private onInputFieldChanged(event) {
+        this.lastInputFieldContent = this.inputFieldContent;
         this.inputFieldContent = event.value;
     }
 
     onModelChange(event) {
         setTimeout(() => {
+            if (this.inputFieldContent == this.lastInputFieldContent) return;
             if (event && event.epoc) {
                 this.onChange(event.epoc * 1000);
             } else if (this.inputFieldContent) {

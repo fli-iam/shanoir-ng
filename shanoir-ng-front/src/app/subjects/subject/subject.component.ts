@@ -6,7 +6,6 @@ import * as shajs from 'sha.js';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date/date.component';
-import { ShanoirError } from '../../shared/models/error.model';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
@@ -26,7 +25,6 @@ export class SubjectComponent extends EntityComponent<Subject> {
     private readonly HASH_LENGTH: number = 14;
     private studies: IdNameObject[] = [];
     private isAlreadyAnonymized: boolean;
-    private hasNameUniqueError: boolean = false;
     private existingSubjectError: string;
     private firstName: string = "";
     private lastName: string = "";
@@ -62,7 +60,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
-            'name': [this.subject.name, this.nameValidators],
+            'name': [this.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')])],
             'firstName': [this.firstName],
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
@@ -73,13 +71,17 @@ export class SubjectComponent extends EntityComponent<Subject> {
             'personalComments': []
         });
         this.updateFormControl(subjectForm);
-        subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
-            this.isAlreadyAnonymized = false;
-            this.updateFormControl(subjectForm);
-        });
-        subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(val => {
-            this.updateFormControl(subjectForm);
-        });
+        this.subscribtions.push(
+            subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
+                this.isAlreadyAnonymized = false;
+                this.updateFormControl(subjectForm);
+            })
+        );
+        this.subscribtions.push(
+            subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(val => {
+                this.updateFormControl(subjectForm);
+            })
+        );
         return subjectForm;
     }
 
@@ -97,20 +99,18 @@ export class SubjectComponent extends EntityComponent<Subject> {
         formGroup.get('lastName').updateValueAndValidity();
     }
 
+    save(): Promise<void> {
+        if (this.mode == 'create') this.subject.identifier = this.generateSubjectIdentifier();
+        console.log(this.subject.identifier);
+        return super.save();
+    }
+
     loadAllStudies(): void {
         this.studyService
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
             });
-    }  
-
-    save(): Promise<void> {
-        return super.save().catch(reason => {
-            if (reason && reason.error && reason.error.code == 422) {
-                this.hasNameUniqueError = new ShanoirError(reason).hasFieldError('name', 'unique'); 
-            }
-        });
     }
 
     private generateSubjectIdentifier(): string {

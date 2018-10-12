@@ -2,11 +2,10 @@ import { Component } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
-import { ShanoirError } from '../../shared/models/error.model';
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 
 @Component({
     selector: 'center-detail',
@@ -25,7 +24,6 @@ export class CenterComponent extends EntityComponent<Center> {
             private centerService: CenterService) {
 
         super(route, 'center');
-        this.manageSaveErrors();
     }
 
     get center(): Center { return this.entity; }
@@ -50,7 +48,7 @@ export class CenterComponent extends EntityComponent<Center> {
 
     buildForm(): FormGroup {
         return this.formBuilder.group({
-            'name': [this.center.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+            'name': [this.center.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'street': [this.center.street],
             'postalCode': [this.center.postalCode],
             'city': [this.center.city],
@@ -58,17 +56,6 @@ export class CenterComponent extends EntityComponent<Center> {
             'phoneNumber': [this.center.phoneNumber],
             'website': [this.center.website]
         });
-    }
-
-    private manageSaveErrors() {
-        this.subscribtions.push(
-            this.onSave.subscribe(response => {
-                if (response && response instanceof ShanoirError && response.code == 422) {
-                    this.phoneNumberPatternError = response.hasFieldError('phoneNumber', 'Pattern');
-                    this.isNameUniqueError = response.hasFieldError('name', 'unique');   
-                }
-            })
-        );
     }
 
     private goToAcquisitionEquipment(acqE: AcquisitionEquipment) {

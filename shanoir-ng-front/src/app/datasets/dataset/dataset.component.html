@@ -1,5 +1,5 @@
 <div class="content-component">
-	<form *ngIf="dataset" class="max-content" #form="ngForm">
+	<form *ngIf="dataset" class="max-content" [formGroup]="form">
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
@@ -13,7 +13,7 @@
 				</ng-template>
 			</span>
 
-			<common-dataset-details [mode]="mode" [dataset]="dataset"></common-dataset-details>
+			<!-- <common-dataset-details [mode]="mode" [dataset]="dataset"></common-dataset-details> --> 
 			<mr-dataset-details *ngIf="dataset.type == 'Mr'" [mode]="mode" [dataset]="dataset"></mr-dataset-details>
 			<!-- TODO : other types -->
 

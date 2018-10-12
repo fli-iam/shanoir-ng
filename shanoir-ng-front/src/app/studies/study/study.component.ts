@@ -9,7 +9,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { ShanoirError } from '../../shared/models/error.model';
+import { DatepickerComponent } from '../../shared/date/date.component';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
@@ -20,7 +20,6 @@ import { StudyUserType } from '../shared/study-user-type.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { DatepickerComponent } from '../../shared/date/date.component';
 
 declare type Mode = 'create' | 'edit' | 'view';
 
@@ -38,7 +37,6 @@ export class StudyComponent extends EntityComponent<Study> {
     private centers: IdNameObject[];
     private subjects: IdNameObject[];
     private selectedCenter: IdNameObject;
-    private isNameUniqueError: boolean = false;
     
     private browserPaging: BrowserPaging<StudyUser>;
     private columnDefs: any[];
@@ -105,7 +103,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     buildForm(): FormGroup {
         let formGroup = this.formBuilder.group({
-            'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+            'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'startDate': [this.study.startDate, [DatepickerComponent.validator]],
             'endDate': [this.study.endDate, [DatepickerComponent.validator]],
             'studyStatus': [this.study.studyStatus, [Validators.required]],
@@ -140,14 +138,6 @@ export class StudyComponent extends EntityComponent<Study> {
             .getSubjectsNames()
             .then(subjects => {
                 this.subjects = subjects;
-        });
-    }
-
-    save(): Promise<void> {
-        return super.save().catch(reason => {
-            if (reason && reason.error && reason.error.code == 422) {
-                this.isNameUniqueError = new ShanoirError(reason).hasFieldError('name', 'unique'); 
-            }
         });
     }
     

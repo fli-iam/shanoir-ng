@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { Center } from '../../centers/shared/center.model';
@@ -21,11 +21,11 @@ import { IdNameObject } from '../../shared/models/id-name-object.model';
 
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {
 
-    private uniqueSerialError: boolean = false;
     private manufModels: ManufacturerModel[];
     private centers: IdNameObject[];
     private datasetModalityTypeEnumValue: string;
     private nonEditableCenter: boolean = false;
+    private lastSubmittedManufAndSerial: ManufacturerAndSerial;
 
     private get acqEquip(): AcquisitionEquipment { return this.entity; }
     private set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
@@ -37,7 +37,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             private centerService: CenterService) {
 
         super(route, 'acquisition-equipment');
-        this.manageSaveErrors();
     }
 
     initView(): Promise<void> {
@@ -83,11 +82,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     buildForm(): FormGroup {
         this.prefill();
-        return this.formBuilder.group({
-            'serialNumber': [this.acqEquip.serialNumber],
-            'manufacturerModel': [this.acqEquip.manufacturerModel, Validators.required],
+        let form: FormGroup = this.formBuilder.group({
+            'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator]],
+            'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
             'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required], 
         });
+        this.registerManufAndSerialUnicityValidator(form);
+        return form;
     }
 
     private getManufModels(manufModelId?: number): void {
@@ -104,13 +105,32 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         });
     }
 
-    private manageSaveErrors() {
-        this.subscribtions.push(
-            this.onSave.subscribe(response => {
-                if (response && response instanceof ShanoirError && response.code == 422) {
-                    this.uniqueSerialError = response.hasFieldError('manufacturerModel - serialNumber', 'unique'); 
-                }
-            })
-        );
+    private registerManufAndSerialUnicityValidator(form: FormGroup) {
+        this.onSubmitValidatedFields.push('serialNumber');
+        form.get('manufacturerModel').valueChanges.subscribe(value => {
+            form.get('serialNumber').updateValueAndValidity();
+        })
+    }
+
+    private manufAndSerialUnicityValidator = (control: AbstractControl): ValidationErrors | null => {
+        if (this.saveError && this.saveError.hasFieldError('manufacturerModel - serialNumber', 'unique')
+                && this.acqEquip.manufacturerModel.id == this.lastSubmittedManufAndSerial.manuf.id
+                && this.acqEquip.serialNumber == this.lastSubmittedManufAndSerial.serial) {       
+            return {unique: true};
+        }
+        return null;
+    }
+
+    save(): Promise<void> {
+        this.lastSubmittedManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
+        return super.save();
     }
 }
+
+export class ManufacturerAndSerial {
+    constructor(
+        public manuf: ManufacturerModel,
+        public serial: string
+    ) {}
+}
+

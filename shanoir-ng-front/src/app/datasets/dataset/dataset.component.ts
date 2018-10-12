@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { DatepickerComponent } from '../../shared/date/date.component';
 
 import { DicomArchiveService } from '../../import/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -48,7 +49,12 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     buildForm(): FormGroup {
-        return null;
+        let formGroup = this.formBuilder.group({
+            'subject': [this.dataset.subjectId, [Validators.required]],
+            'study': [this.dataset.studyId, [Validators.required]],
+            'creationDate': [this.dataset.creationDate, [DatepickerComponent.validator]]
+        });
+        return formGroup;
     }
     
 

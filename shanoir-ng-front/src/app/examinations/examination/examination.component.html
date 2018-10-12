@@ -91,7 +91,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<datepicker [(ngModel)]="examination.examinationDate" formControlName="examinationDate" required></datepicker>
-								<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit examination|Date valid error@@editExaminationDateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+								<label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: dd/mm/yyyy</label>
+								<label *ngIf="hasError('examinationDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">Required</label>
 							</ng-template>
 						</span>
 					</li>
@@ -144,7 +145,7 @@
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
-									(click)="instAssessment()">
+									disabled (click)="instAssessment()">
 										<i class="fas fa-plus-square"></i>
 										new Instrument Based Assessment										
 									</button>
@@ -160,7 +161,7 @@
 								<ng-template ngSwitchDefault>
 									
 									<button i18n="Examination detail|Attach new files button@@examinationDetailAttachNewFiles"
-									(click)="attachNewFiles()">
+									disabled (click)="attachNewFiles()">
 										<i class="fas fa-plus-square"></i>
 										Attach extra data to existing examinations									
 									</button>

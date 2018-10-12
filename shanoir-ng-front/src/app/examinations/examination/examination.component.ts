@@ -9,6 +9,7 @@ import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import { DatepickerComponent } from '../../shared/date/date.component';
 
 
 @Component({
@@ -66,7 +67,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             // 'Examination executive': [this.examination.examinationExecutive],
             'centerId': [this.examination.centerId, Validators.required],
             // 'Subject': [this.examination.subject],
-            'examinationDate': [this.examination.examinationDate, Validators.required],
+            'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight]

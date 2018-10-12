@@ -63,10 +63,10 @@ form { color: var(--dark-grey); }
   form input[readonly],
   form textarea[readonly],
   form select[readonly] { background-color: var(--light-grey); cursor: default; color : transparent; text-shadow : 0 0 0 var(--greyer);}
-    form input.ng-invalid.ng-dirty,
-    form input.invaliddate,
-    form textarea.ng-invalid.ng-dirty,
-    form select.ng-invalid.ng-dirty { border: 1px solid var(--color-error) !important; background-color: var(--color-light-error) !important; }
+    form input.ng-invalid.ng-touched,
+    form textarea.ng-invalid.ng-touched,
+    form select.ng-invalid.ng-touched,
+    form datepicker.ng-invalid.ng-touched { border: 1px solid var(--color-error) !important; background-color: var(--color-light-error) !important; }
   form input:not([type="checkbox"])::not([type="radio"]):not([type="file"]), form select { height: 20px; }
   form input[type='radio'] { vertical-align: -6; margin: 0 5px 0 0; }
   form input[type='radio'] + input[type='radio'] { margin-left: 20px; }

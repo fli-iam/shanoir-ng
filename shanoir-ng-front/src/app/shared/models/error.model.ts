@@ -1,3 +1,5 @@
+import { findIndex } from "rxjs/operator/findIndex";
+
 export class ShanoirError {
     public code: number;
     public details: any;
@@ -9,10 +11,10 @@ export class ShanoirError {
         this.message = reason.error.message;
     }
 
-    public hasFieldError(field: string, code: string): boolean {
+    public hasFieldError(field: string, code: string, value?: string): boolean {
         if (this.details && this.details.fieldErrors && this.details.fieldErrors[field]) {
             for (let error of this.details.fieldErrors[field]) {
-                if (error.code == code) return true;
+                if (error.code == code && (!value || error.givenValue == value)) return true;
             }
         }
     }

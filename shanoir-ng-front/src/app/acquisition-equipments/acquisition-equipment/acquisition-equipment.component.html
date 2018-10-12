@@ -14,7 +14,6 @@
 			</span>
 			<fieldset>
 				<ol>
-					<label *ngIf="uniqueSerialError" class="form-validation-alert" i18n="Edit acqEquip|Model number unique error@@acqEqptDetailModelNumberUniqueError">This equipment (same manufacturer model and same serial number) already exists!</label>
 					<li *ngIf="mode=='view'">
 						<label i18n="AcqEquip detail|Manufacturer label@@acqEqptDetailManuf">Manufacturer</label>
 						<span class="right-col">
@@ -32,7 +31,7 @@
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select id="manufModel" required formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel" [compareWith]="compareEntities" (change)="uniqueSerialError=false">
+								<select id="manufModel" required formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel" [compareWith]="compareEntities">
 									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</option>
 								</select>
 								<button i18n="AcqEquip detail|Create new model label@@acqEqptDetailNewManufModel" (click)="openNewManufModel()">
@@ -75,7 +74,8 @@
 								{{acqEquip.serialNumber}}
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<input type="text" id="serialNumber" formControlName="serialNumber" [(ngModel)]="acqEquip.serialNumber" (change)="uniqueSerialError=false"/>
+								<input type="text" id="serialNumber" formControlName="serialNumber" [(ngModel)]="acqEquip.serialNumber"/>
+								<label *ngIf="hasError('serialNumber', ['unique'])" class="form-validation-alert" i18n="Edit acqEquip|Model number unique error@@acqEqptDetailModelNumberUniqueError">This equipment (same manufacturer model and same serial number) already exists!</label>
 							</ng-template>
 						</span>
 					</li>

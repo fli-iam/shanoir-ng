@@ -21,9 +21,9 @@
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="center.name" (change)="isNameUniqueError=false" />
-							<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit center|Name required error@@centerDetailNameRequiredError">Name is required!</label>
-							<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit center|Name length error@@centerDetailNameLengthError">Name length must be between 2 and 200!</label>
-							<label *ngIf="isNameUniqueError" class="form-validation-alert" i18n="Edit center|Name unique error@@centerDetailNameUniqueError">Name should be unique!</label>
+							<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit center|Name required error@@centerDetailNameRequiredError">Name is required!</label>
+							<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit center|Name length error@@centerDetailNameLengthError">Name length must be between 2 and 200!</label>
+							<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Edit center|Name unique error@@centerDetailNameUniqueError">Name should be unique!</label>
 						</ng-template>
 					</span>
 				</li>
