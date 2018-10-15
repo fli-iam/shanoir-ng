@@ -1,4 +1,4 @@
-<fieldset ngModelGroup="common">
+<fieldset *ngIf="parentFormGroup" [formGroup]="parentFormGroup">
 	<ol>
 		<li>
 			<label i18n="Dataset detail|Dataset id@@datasetId">Id</label>

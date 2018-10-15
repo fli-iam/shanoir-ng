@@ -5,7 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
-import { ShanoirError } from '../../shared/models/error.model';
 
 @Component({
     selector: 'manufacturer-detail',

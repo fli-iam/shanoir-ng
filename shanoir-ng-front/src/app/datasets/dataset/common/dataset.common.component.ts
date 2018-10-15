@@ -1,32 +1,45 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { Dataset } from '../../shared/dataset.model';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+
+import { Mode } from '../../../shared/components/entity/entity.component.abstract';
+import { Study } from '../../../studies/shared/study.model';
+import { StudyService } from '../../../studies/shared/study.service';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
-import { StudyService } from '../../../studies/shared/study.service';
-import { Study } from '../../../studies/shared/study.model';
-import { NgForm, ControlContainer } from '@angular/forms';
-import { Mode } from '../../../shared/components/entity/entity.component.abstract';
+import { Dataset } from '../../shared/dataset.model';
+import { DatepickerComponent } from '../../../shared/date/date.component';
 
 
 @Component({
     selector: 'common-dataset-details',
-    templateUrl: 'dataset.common.component.html',
-    viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
+    templateUrl: 'dataset.common.component.html'
 })
 
 export class CommonDatasetComponent implements OnChanges {
 
     @Input() private mode: Mode;
     @Input() private dataset: Dataset;
+    @Input() private parentFormGroup: FormGroup;
     private subjects: Subject[] = [];
     private studies: Study[] = [];
     
 
     constructor(
             private studyService: StudyService,
-            private subjectService: SubjectService) {}
+            private subjectService: SubjectService,
+            private formBuilder: FormBuilder) {}
+
+    completeForm() {
+        this.parentFormGroup.addControl('subject', new FormControl(this.dataset.subjectId, [Validators.required]));
+        this.parentFormGroup.addControl('study', new FormControl(this.dataset.studyId, [Validators.required]));
+        this.parentFormGroup.addControl('creationDate', new FormControl(this.dataset.creationDate, [DatepickerComponent.validator]));
+        
+    }
 
     ngOnChanges(changes: SimpleChanges) {
+        if (changes['parentFormGroup']) {
+            this.completeForm();
+        }
         if (changes['mode']) {
             if (this.mode != 'view')  {
                 this.fetchAllSubjects();

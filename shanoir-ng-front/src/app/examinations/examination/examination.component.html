@@ -37,7 +37,7 @@
 								<select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
 									<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
 								</select>
-								<label *ngIf="formErrors('studyId')?.includes('required')" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
+								<label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -66,7 +66,7 @@
 								<select id="centerId" required formControlName="centerId" [(ngModel)]="examination.centerId">
 									<option *ngFor="let center of centers" [ngValue]="center.id">{{center.name}}</option>
 								</select>
-								<label *ngIf="formErrors('centerId')?.includes('required')" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
+								<label *ngIf="hasError('centerId', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -138,36 +138,36 @@
 						</span>
 					</li>
 					<li>
-							<label i18n="Examination detail|Assessments label@@examinationDetailAssessments">Assessments</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-									<!--{{examination.note}}-->
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									<button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
-									disabled (click)="instAssessment()">
-										<i class="fas fa-plus-square"></i>
-										new Instrument Based Assessment										
-									</button>
-								</ng-template>
-							</span>
-						</li>
+						<label i18n="Examination detail|Assessments label@@examinationDetailAssessments">Assessments</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								<!--{{examination.note}}-->
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
+								disabled (click)="instAssessment()">
+									<i class="fas fa-plus-square"></i>
+									new Instrument Based Assessment										
+								</button>
+							</ng-template>
+						</span>
+					</li>
 
-						<li>
-							<label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
-							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'">
-								</ng-template>
-								<ng-template ngSwitchDefault>
-									
-									<button i18n="Examination detail|Attach new files button@@examinationDetailAttachNewFiles"
-									disabled (click)="attachNewFiles()">
-										<i class="fas fa-plus-square"></i>
-										Attach extra data to existing examinations									
-									</button>
-								</ng-template>
-							</span>
-						</li>
+					<li>
+						<label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								
+								<button i18n="Examination detail|Attach new files button@@examinationDetailAttachNewFiles"
+								disabled (click)="attachNewFiles()">
+									<i class="fas fa-plus-square"></i>
+									Attach extra data to existing examinations									
+								</button>
+							</ng-template>
+						</span>
+					</li>
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode=='view'">
@@ -183,15 +183,3 @@
 		</div>
 	</form>
 </div>
-
-<!-- <app-modal modalDialogId="instAssessmentModal" #instAssessmentModal>
-		<div class="app-modal-body">
-		  <instrument-essessment-detail (closing)="closePopin($event)"></instrument-essessment-detail>
-		</div>
-</app-modal>
-
-<app-modal *ngIf="examination" modalDialogId="attachNewFilesModal" #attachNewFilesModal>
-		<div class="app-modal-body">
-		  <upload-extra-data [examination]="examination" [studies]="studies" (closing)="closeAttachedFilePopin($event)"></upload-extra-data>
-		</div>
-</app-modal> -->

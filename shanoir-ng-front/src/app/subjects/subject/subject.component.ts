@@ -25,7 +25,6 @@ export class SubjectComponent extends EntityComponent<Subject> {
     private readonly HASH_LENGTH: number = 14;
     private studies: IdNameObject[] = [];
     private isAlreadyAnonymized: boolean;
-    private existingSubjectError: string;
     private firstName: string = "";
     private lastName: string = "";
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];

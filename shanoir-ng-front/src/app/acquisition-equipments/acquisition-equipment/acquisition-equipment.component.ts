@@ -1,18 +1,16 @@
 import { Component } from '@angular/core';
-import { FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { AbstractControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { Center } from '../../centers/shared/center.model';
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
-import { ShanoirError } from '../../shared/models/error.model';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
 
 @Component({
     selector: 'acquisition-equipment-detail',

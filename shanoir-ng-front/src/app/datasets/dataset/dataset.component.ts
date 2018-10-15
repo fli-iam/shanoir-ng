@@ -49,12 +49,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     buildForm(): FormGroup {
-        let formGroup = this.formBuilder.group({
-            'subject': [this.dataset.subjectId, [Validators.required]],
-            'study': [this.dataset.studyId, [Validators.required]],
-            'creationDate': [this.dataset.creationDate, [DatepickerComponent.validator]]
-        });
-        return formGroup;
+        return this.formBuilder.group({});
     }
     
 

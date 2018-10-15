@@ -76,7 +76,7 @@
 									<i class="fas fa-plus-square"></i>
 									new center
 								</button>
-								<label *ngIf="formErrors('center')?.includes('required')" class="form-validation-alert" i18n="Coil detail|Center required error@@coilDetailCenterRequiredError">Center is required!</label>
+								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Coil detail|Center required error@@coilDetailCenterRequiredError">Center is required!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -96,7 +96,7 @@
 									<i class="fas fa-plus-square"></i>
 									new manufacturer model
 								</button>
-								<label *ngIf="formErrors('manufacturerModel')?.includes('required')" class="form-validation-alert" i18n="Coil detail|Manufacturer model required error@@coilDetailManufModelRequiredError">Acquisition Equipment model is required!</label>
+								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="Coil detail|Manufacturer model required error@@coilDetailManufModelRequiredError">Acquisition Equipment model is required!</label>
 							</ng-template>
 						</span>
 					</li> 

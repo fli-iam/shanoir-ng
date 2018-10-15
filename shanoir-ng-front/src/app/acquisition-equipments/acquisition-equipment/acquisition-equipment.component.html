@@ -37,7 +37,7 @@
 								<button i18n="AcqEquip detail|Create new model label@@acqEqptDetailNewManufModel" (click)="openNewManufModel()">
 									<i class="fas fa-plus-square"></i> new manufacturer model
 								</button>
-								<label *ngIf="formErrors('manufacturerModel')?.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
+								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -59,7 +59,7 @@
 								<select id="center" required formControlName="center" [(ngModel)]="acqEquip.center" [compareWith]="compareEntities">
 									<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
 								</select>
-								<label *ngIf="formErrors('center')?.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
+								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
 								<a [routerLink] = "['/center']" [queryParams]="{mode: 'view', id: acqEquip.center?.id}">details</a>
 							</ng-template>
 						</span>
