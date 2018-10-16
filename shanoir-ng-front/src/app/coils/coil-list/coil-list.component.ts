@@ -56,18 +56,13 @@ export class CoilListComponent {
         this.columnDefs = [
             { headerName: "Name", field: "name" },
             
-            { headerName: "Acquisition Equipment Model", field: "manufacturerModel.name" , type: "link", clickAction: {
-                target: "/manufacturer-model", getParams: function (coil: Coil): Object {
-                    return { id: coil.manufacturerModel.id , mode: "view" };
-                }
-
-            } },
+            { headerName: "Acquisition Equipment Model", field: "manufacturerModel.name" , type: "link", 
+            action: (coil: Coil) => this.router.navigate(['/manufacturer-model/details/' + coil.manufacturerModel.id])
+            },
            
-            { headerName: "Center", field: "center.name" , type: "link", clickAction: {
-                target: "/center", getParams: function (coil: Coil): Object {
-                    return { id: coil.center.id, mode: "view" };
-                }
-            }},
+            { headerName: "Center", field: "center.name" , type: "link", 
+            action: (coil: Coil) => this.router.navigate(['/center/details/' + coil.center.id])
+            },
 
             { headerName: "Coil Type", field: "coilType" },
             { headerName: "Number of channels", field: "numberOfChannels" },

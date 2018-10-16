@@ -49,33 +49,33 @@ export class StudyTreeComponent {
     }
 
     showAcquisitionEquipmentDetails(acquisitionEquipmentId: number) {
-        this.router.navigate(['/acquisition-equipment'], { queryParams: { id: acquisitionEquipmentId, mode: "view" } });
+        this.router.navigate(['/acquisition-equipment/details/' + acquisitionEquipmentId])
     }
 
     showCenterDetails(centerId: number) {
-        this.router.navigate(['/center'], { queryParams: { id: centerId, mode: "view" } });
+        this.router.navigate(['/center/details/' + centerId])
     }
 
     showExaminationDetails(examinationId: number) {
-        this.router.navigate(['/examination'], { queryParams: { id: examinationId, mode: "view" } });
+        this.router.navigate(['/examination/details/' + examinationId])
     }
 
     showMemberDetails(userId: number) {
-        this.router.navigate(['/user'], { queryParams: { id: userId } });
+        this.router.navigate(['/user/details/' + userId])
     }
 
     showSubjectDetails(subjectStudy: SubjectStudy) {
-        this.router.navigate(['/subject'], { queryParams: { id: subjectStudy.subject.id, mode: "view" } });
+        this.router.navigate(['/subject/details/' + subjectStudy.subject.id])
     }
 
     /* TODO: uncomment when dataset-acquisition done
     showDatasetAcquisitionDetails(datasetAcquisitionId: number) {
-        this.router.navigate(['/dataset-acquisition'], { queryParams: { id: datasetAcquisitionId, mode: "view" } });
+        this.router.navigate(['/dataset-acquisition/details/' + datasetAcquisitionId])
     }
     */
 
     showDatasetDetails(datasetId: number) {
-        this.router.navigate(['/dataset'], { queryParams: { id: datasetId, mode: "view" } });
+        this.router.navigate(['/dataset/details/' + datasetId])
     }
 
 }

@@ -31,7 +31,7 @@
             </dropdown-menu>
 
             <dropdown-menu label="Administration" *ngIf="isUserAdmin()">
-                <menu-item label="Manage users" i18n-label="Administration menu|Manage users@@navbarManageUsers" link="user-list" [icon]="ImagesUrlUtil.USERS_1_ICON_PATH"></menu-item>
+                <menu-item label="Manage users" i18n-label="Administration menu|Manage users@@navbarManageUsers" link="user" [icon]="ImagesUrlUtil.USERS_1_ICON_PATH"></menu-item>
                 <li *ngIf="dev" class="horizontal-bar"><hr/></li>
                 <menu-item *ngIf="dev" label="Preferences" i18n-label="Administration menu|Manage user preferences@@navbarUserPreferences" [icon]="ImagesUrlUtil.CONTROLS_ICON_PATH">
                     <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="this.mode == 'pink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>

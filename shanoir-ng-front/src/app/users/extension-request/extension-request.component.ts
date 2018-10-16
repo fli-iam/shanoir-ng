@@ -1,6 +1,5 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Location } from '@angular/common';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 
 import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
@@ -23,7 +22,7 @@ export class ExtensionRequestComponent implements OnInit {
     userId: number;
     selectedDateNormal: string = '';
 
-    constructor(private router: Router, private location: Location, private route: ActivatedRoute,
+    constructor(private router: Router, private route: ActivatedRoute,
         private userService: UserService, private fb: FormBuilder) {
     }
 
@@ -33,17 +32,14 @@ export class ExtensionRequestComponent implements OnInit {
     }
 
      getUser(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                return this.userService.getUser(KeycloakService.auth.userId);
-            })
-            .subscribe((user: User) => {
-                this.extensionRequestInfo.extensionDate = new Date();
-                if (user.expirationDate) {
-                    this.extensionRequestInfo.extensionDate = new Date(user.expirationDate);
-                }
-                this.getDateToDatePicker(this.extensionRequestInfo);
-            });
+        this.userService.getUser(KeycloakService.auth.userId)
+        .then((user: User) => {
+            this.extensionRequestInfo.extensionDate = new Date();
+            if (user.expirationDate) {
+                this.extensionRequestInfo.extensionDate = new Date(user.expirationDate);
+            }
+            this.getDateToDatePicker(this.extensionRequestInfo);
+        });
     }
 
     extensionRequest(): void {

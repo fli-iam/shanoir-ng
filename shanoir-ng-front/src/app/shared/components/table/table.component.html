@@ -87,16 +87,12 @@
         <!-- add a link -->
         <a class="link"
             *ngIf="col.type == 'link'"
-            [routerLink]="col.clickAction.target" 
-            [queryParams]="col.clickAction.getParams? col.clickAction.getParams(item) : null" 
-            ><i class="fas fa-external-link-alt"></i></a>
+            (click)="col.action(item)">
+            <i class="fas fa-external-link-alt"></i>
+        </a>
         
         <!-- display a button -->
         <span class="button" *ngIf="col.type == 'button'">
-            <a *ngIf="col.target" [routerLink]="col.target" [queryParams]="col.getParams ? col.getParams(item) : null" routerLinkActive="active">
-                <img *ngIf="col.img" src="{{col.img}}" />
-                <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
-            </a>
             <span *ngIf="col.action" (click)="col.action(item)">
                 <img *ngIf="col.img" src="{{col.img}}" />
                 <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>

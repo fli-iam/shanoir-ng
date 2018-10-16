@@ -66,7 +66,7 @@ export class DatasetComponent implements OnInit {
 
     private update(): void {
         this.datasetService.update(this.dataset).subscribe((dataset) => {
-            this.router.navigate(['/dataset/details/'+dataset.id])
+            this.router.navigate(['/dataset/details/' + dataset.id])
                 .then(() => {
                     this.msgService.log('info', 'Dataset n°' + this.dataset.id + ' has been updated');
                 });
