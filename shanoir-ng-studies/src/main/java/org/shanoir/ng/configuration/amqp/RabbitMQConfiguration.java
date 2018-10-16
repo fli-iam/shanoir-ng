@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class RabbitMQConfiguration {
+	
+	private static final String MS_USERS_TO_MS_STUDIES_USER_DELETE = "ms_users_to_ms_studies_user_delete";
 
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	private static final String CENTER_QUEUE_NAME_OUT = "center_queue_from_ng";
@@ -40,6 +42,11 @@ public class RabbitMQConfiguration {
 		return new InterMicroservicesCommunicator();
 	}
 
+    @Bean
+    public static Queue getMSUsersToMSStudiesUserDelete() {
+            return new Queue(MS_USERS_TO_MS_STUDIES_USER_DELETE, true);
+    }
+	
 	@Bean
 	public static Queue acqEqptQueueOut() {
 		return new Queue(ACQ_EQPT_QUEUE_NAME_OUT, true);

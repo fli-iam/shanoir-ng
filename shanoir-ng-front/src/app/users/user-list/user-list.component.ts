@@ -20,7 +20,7 @@ export class UserListComponent {
     private usersPromise: Promise<void> = this.getUsersPromise();
     private browserPaging: BrowserPaging<User>;
     private columnDefs: any[];
-    private customActionDefs: any[];
+    private customActionDefs: any[] = [];
     @ViewChild('userTable') table: TableComponent;
 
     constructor(
@@ -29,7 +29,6 @@ export class UserListComponent {
             private viewContainerRef: ViewContainerRef,
             private router: Router,
             private msgService: MsgBoxService) {
-
         this.createColumnDefs();
     }
 
@@ -50,7 +49,7 @@ export class UserListComponent {
     }
 
     private onRowClick(user: User) {
-        this.router.navigate(['/user'], { queryParams: { id: user.id, mode: "view" } });
+        this.router.navigate(['/user/edit/' + user.id])
     }
 
     // Grid columns definition
@@ -81,26 +80,24 @@ export class UserListComponent {
             }},
             {headerName: "Last Login", field: "lastLogin", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.lastLogin);
-            }},
-            {headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target : "/user", getParams: function(item: any): Object {
-                return {id: item.id};
-            }},
-            {headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteUserConfirmDialog}
+            }}, 
+            {headerName: "", type: "button", awesome: "fa-edit", action: (user) => this.router.navigate(['/user/edit/' + user.id])},
+            {headerName: "", type: "button", awesome: "fa-trash", action: this.openDeleteUserConfirmDialog}
         ];
-        this.customActionDefs = [
-            {title: "new user", img: ImagesUrlUtil.ADD_ICON_PATH, target: "../user"},
-        ];
+        this.customActionDefs.push({
+            title: "new user", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/user/create"
+        });
     }
 
     openDeleteUserConfirmDialog = (item: User) => {
-         this.confirmDialogService
-                .confirm('Delete user', 'Are you sure you want to delete user ' + item.firstName + ' ' + item.lastName + '?',
-                    this.viewContainerRef)
-                .subscribe(res => {
-                    if (res) {
-                        this.deleteUser(item.id);
-                    }
-                })
+        this.confirmDialogService
+            .confirm('Delete user', 'Are you sure you want to delete user ' + item.firstName + ' ' + item.lastName + '?',
+                this.viewContainerRef)
+            .subscribe(res => {
+                if (res) {
+                    this.deleteUser(item.id);
+                }
+            })
     }
 
     deleteUser(userId: number) {

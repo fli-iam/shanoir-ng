@@ -22,7 +22,7 @@
 						<label i18n="ManufModel detail|Manufacturer label@@manufModelDetailManuf" class="required-label">Manufacturer</label> 
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
-								<a [routerLink]="['/manufacturer']" [queryParams]="{mode: 'view', id: manufModel?.manufacturer?.id}">
+								<a [routerLink]="['/manufacturer/details/', manufModel?.manufacturer?.id]">
 									{{manufModel.manufacturer?.name}}
 								</a>
 							</ng-template>

@@ -224,19 +224,19 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     }
 
     private showStudyDetails() {
-        window.open('study?id=' + this.study.id + '&mode=view', '_blank');
+        window.open('study/details/' + this.study.id, '_blank');
     }
 
     private showSubjectDetails() {
-        window.open('subject?id=' + this.subject.id + '&mode=view', '_blank');
+        window.open('subject/details/' + this.subject.id, '_blank');
     }
 
     private showStudyCardDetails() {
-        window.open('studycard?id=' + this.studycard.id + '&mode=view', '_blank');
+        window.open('studycard/details/' + this.studycard.id, '_blank');
     }
 
     private showExaminationDetails() {
-        window.open('examination?id=' + this.studycard.id + '&mode=view', '_blank');
+        window.open('examination/details/' + this.examination.id, '_blank');
     }
 
     getValidity(): boolean {
