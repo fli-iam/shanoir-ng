@@ -46,14 +46,6 @@ let appRoutes: Routes = [
         path: 'imports',
         component: ImportComponent
     }, {
-        path: 'manufacturer',
-        component: ManufacturerComponent,
-        canActivate: [AuthNotGuestGuard]
-    }, {
-        path: 'manufacturer-model',
-        component: ManufacturerModelComponent,
-        canActivate: [AuthNotGuestGuard]
-    }, {
         path: 'new-instrument',
         component: NewInstrumentComponent,
         canActivate: [AuthNotGuestGuard]
@@ -68,7 +60,9 @@ appRoutes = appRoutes.concat(
     getRoutesFor('center', CenterComponent, CenterListComponent, AuthNotGuestGuard),
     getRoutesFor('acquisition-equipment', AcquisitionEquipmentComponent, AcquisitionEquipmentListComponent, AuthNotGuestGuard),
     getRoutesFor('coil', CoilComponent, CoilListComponent, AuthNotGuestGuard),
-    getRoutesFor('user', UserComponent, UserListComponent, AuthAdminGuard)
+    getRoutesFor('user', UserComponent, UserListComponent, AuthAdminGuard),
+    getRoutesFor('manufacturer', ManufacturerComponent, HomeComponent, AuthNotGuestGuard),
+    getRoutesFor('manufacturer-model', ManufacturerModelComponent, HomeComponent, AuthNotGuestGuard)
 );
 
 export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes); 

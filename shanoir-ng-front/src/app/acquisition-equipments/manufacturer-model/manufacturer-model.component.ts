@@ -24,7 +24,7 @@ export class ManufacturerModelComponent implements OnInit {
 
     private manufModel: ManufacturerModel = new ManufacturerModel();
     public manufModelForm: FormGroup;
-    private manufModelId: number;
+    private id: number;
     @Input() mode: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     @ViewChild('manufModal') manufModal: ModalComponent;
@@ -40,7 +40,8 @@ export class ManufacturerModelComponent implements OnInit {
         private manufModelService: ManufacturerModelService, private manufService: ManufacturerService,
         private fb: FormBuilder, private location: Location,
         private keycloakService: KeycloakService) {
-
+            this.mode = this.route.snapshot.data['mode'];
+            this.id = +this.route.snapshot.params['id'];
     }
 
     ngOnInit(): void {
@@ -77,25 +78,10 @@ export class ManufacturerModelComponent implements OnInit {
     }
 
     getManufacturerModel(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                let manufModelId = queryParams['id'];
-                if (!this.mode) {
-                    let mode = queryParams['mode'];
-                    if (mode) {
-                        this.mode = mode;
-                    }
-                }
-                if (manufModelId && this.mode !== 'create') {
-                    // view or edit mode
-                    this.manufModelId = manufModelId;
-                    return this.manufModelService.getManufacturerModel(manufModelId);
-                } else {
-                    // create mode
-                    return Observable.of<ManufacturerModel>();
-                }
-            })
-            .subscribe((manufModel: ManufacturerModel) => {
+        if (this.mode == 'create') {
+            this.manufModel = new ManufacturerModel();
+        } else {
+            this.manufModelService.getManufacturerModel(this.id).then((manufModel: ManufacturerModel) => {
                 if (this.mode == "edit") {
                     manufModel.manufacturer = this.getManufById(manufModel.manufacturer.id);
                 }
@@ -104,6 +90,7 @@ export class ManufacturerModelComponent implements OnInit {
                 this.checkDatasetModalityType(this.datasetModalityTypeEnumValue);
                 this.buildForm();
             });
+        }
     }
 
     buildForm(): void {
@@ -171,7 +158,7 @@ export class ManufacturerModelComponent implements OnInit {
     }
 
     edit(): void {
-        this.router.navigate(['/manufacturer-model'], { queryParams: { id: this.manufModelId, mode: "edit" } });
+        this.router.navigate(['/manufacturer-model/edit/', this.id]);
     }
 
     create(): void {
@@ -180,6 +167,7 @@ export class ManufacturerModelComponent implements OnInit {
             this.manufModel.magneticField = null;
         }
         this.manufModelService.create(this.manufModel)
+        
             .subscribe((manufModel) => {
                 this.back(manufModel.id);
             }, (err: String) => {
@@ -194,7 +182,7 @@ export class ManufacturerModelComponent implements OnInit {
         if (!this.isMR) {
             this.manufModel.magneticField = null;
         }
-        this.manufModelService.update(this.manufModelId, this.manufModel)
+        this.manufModelService.update(this.id, this.manufModel)
             .subscribe((manufModel) => {
                 this.back();
             }, (err: String) => {

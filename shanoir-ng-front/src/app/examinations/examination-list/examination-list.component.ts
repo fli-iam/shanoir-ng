@@ -124,5 +124,4 @@ export class ExaminationListComponent {
             console.log("TODO : delete those ids : " + ids);
         }
     }
-
 }

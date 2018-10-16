@@ -64,7 +64,7 @@
 							<label i18n="Coil detail|Center label@@coilDetailCenter" class="required-label">Center</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'">
-									<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: coil.center?.id}">
+									<a [routerLink]="['/center/details/', coil.center?.id]">
 										{{coil.center?.name}}
 									</a> 
 								</ng-template>
@@ -84,7 +84,7 @@
 							<label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel" class="required-label">Acquisition Equipment Model</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'">
-									<a [routerLink]="['/manufacturer-model']" [queryParams]="{mode: 'view', id: coil.manufacturerModel?.id}">
+									<a [routerLink]="['/manufacturer-model/details/', coil.manufacturerModel?.id]">
 										{{coil.manufacturerModel?.name}}
 									</a>
 								</ng-template>

@@ -18,7 +18,7 @@
 					<li *ngIf="mode=='view'">
 						<label i18n="AcqEquip detail|Manufacturer label@@acqEqptDetailManuf">Manufacturer</label>
 						<span class="right-col">
-							<a [routerLink]="['/manufacturer']" [queryParams]="{mode: 'view', id: acqEquip.manufacturerModel?.manufacturer?.id}">
+							<a [routerLink]="['/manufacturer/details', acqEquip.manufacturerModel?.manufacturer?.id]">
 								{{acqEquip.manufacturerModel?.manufacturer?.name}}
 							</a>
 						</span>
@@ -27,7 +27,7 @@
 						<label i18n="AcqEquip detail|Manufacturer model label@@acqEqptDetailManufModel" class="required-label">Manufacturer model</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
-								<a [routerLink]="['/manufacturer-model']" [queryParams]="{mode: 'view', id: acqEquip.manufacturerModel?.id}">
+								<a [routerLink]="['/manufacturer-model/details/', acqEquip.manufacturerModel?.id]">
 									{{acqEquip.manufacturerModel?.name}}
 								</a>
 							</ng-template>
@@ -53,7 +53,7 @@
 						<label i18n="AcqEquip detail|Center label@@acqEqptDetailCenter" class="required-label">Center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
-								<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: acqEquip.center?.id}">
+								<a [routerLink]="['/center/details/', acqEquip.center?.id]">
 									{{acqEquip.center?.name}}
 								</a>
 							</ng-template>
@@ -62,7 +62,7 @@
 									<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
 								</select>
 								<label *ngIf="formErrors.center.includes('required')" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
-								<a [routerLink] = "['/center']" [queryParams]="{mode: 'view', id: acqEquip.center?.id}">details</a>
+								<a [routerLink]="['/center/details/', acqEquip.center?.id]">details</a>
 							</ng-template>
 						</span>
 					</li>

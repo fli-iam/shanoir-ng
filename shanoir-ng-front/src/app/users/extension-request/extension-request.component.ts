@@ -32,17 +32,14 @@ export class ExtensionRequestComponent implements OnInit {
     }
 
      getUser(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                return this.userService.getUser(KeycloakService.auth.userId);
-            })
-            .subscribe((user: User) => {
-                this.extensionRequestInfo.extensionDate = new Date();
-                if (user.expirationDate) {
-                    this.extensionRequestInfo.extensionDate = new Date(user.expirationDate);
-                }
-                this.getDateToDatePicker(this.extensionRequestInfo);
-            });
+        this.userService.getUser(KeycloakService.auth.userId)
+        .then((user: User) => {
+            this.extensionRequestInfo.extensionDate = new Date();
+            if (user.expirationDate) {
+                this.extensionRequestInfo.extensionDate = new Date(user.expirationDate);
+            }
+            this.getDateToDatePicker(this.extensionRequestInfo);
+        });
     }
 
     extensionRequest(): void {
