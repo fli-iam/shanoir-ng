@@ -22,7 +22,6 @@ import { TableComponent } from '../../shared/components/table/table.component';
 export class DatasetListComponent {
     private columnDefs: any[];
     private customActionDefs: any[];
-    private rowClickAction: Object;
     private subjects: Subject[] = [];
     private studies: Study[] = [];
     @ViewChild('dsTable') table: TableComponent;

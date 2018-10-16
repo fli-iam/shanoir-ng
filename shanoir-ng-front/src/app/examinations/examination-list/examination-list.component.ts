@@ -61,19 +61,13 @@ export class ExaminationListComponent {
                 }, width: "100px"
             },
             {
-                headerName: "Research study", field: "studyName", type: "link", clickAction: {
-                    target: "/study", getParams: function (examination: Examination): Object {
-                        return { id: examination.studyId, mode: "view" };
-                    }
-                }
+                headerName: "Research study", field: "studyName", type: "link", 
+                action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.studyId])
             },
             { headerName: "Examination executive", field: "" },
             {
-                headerName: "Center", field: "centerName", type: "link", clickAction: {
-                    target: "/center", getParams: function (examination: Examination): Object {
-                        return { id: examination.centerId, mode: "view" };
-                    }
-                }
+                headerName: "Center", field: "centerName", type: "link", 
+                action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.centerId])
             }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
