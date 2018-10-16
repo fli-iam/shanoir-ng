@@ -60,6 +60,7 @@ keycloak:
 # microservices url
 ms.url:
   shanoir-ng-datasets: http://shanoir-ng-datasets/datasetacquisition
+  dicom2nifti: http://preclinical-bruker2dicom:5000/dicom2nifti
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-import.log

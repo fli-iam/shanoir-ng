@@ -5,20 +5,35 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 public class ShanoirExec {
-	
+
 	/**
 	 * Logger
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirExec.class);
-	
+
 	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.lib}")
-    private String clidcmPathLib;
-	
+	private String clidcmPathLib;
+
+	@Value("${ms.url.dicom2nifti}")
+	private String dicom2niftiMsUrl;
+
+	@Autowired
+	private RestTemplate restTemplate;
+
 	/**
 	 * Exec the clidcm command to convert Dicom files to Nifti files.
 	 *
@@ -47,14 +62,14 @@ public class ShanoirExec {
 		if (!systemEnv.containsKey("VISTAL_FMT")) {
 			size = size + 2;
 		}
-		
+
 		String[] envp = new String[size];
 		int i = 0;
 		for (final String key : systemEnv.keySet()) {
 			envp[i] = key + "=" + systemEnv.get(key);
 			i++;
 		}
-		
+
 		if (!systemEnv.containsKey("VISTAL_FMT")) {
 			envp[i] = "VISTAL_FMT=NII";
 			envp[i + 1] = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + clidcmPathLib;
@@ -65,7 +80,6 @@ public class ShanoirExec {
 		LOG.debug("clidcmExec : End");
 		return result;
 	}
-	
 
 	/**
 	 * Exec the dcm2nii command to convert Dicom files to Nifti files.
@@ -80,9 +94,8 @@ public class ShanoirExec {
 	 * @return the string
 	 */
 	public String dcm2niiExec(final String inputFolder, final String dcm2niiPath, final String outputFolder) {
-		return dcm2niiExec(inputFolder, dcm2niiPath, outputFolder,false);
+		return dcm2niiExec(inputFolder, dcm2niiPath, outputFolder, false);
 	}
-
 
 	/**
 	 * Exec the dcm2nii command to convert Dicom files to Nifti files.
@@ -93,21 +106,22 @@ public class ShanoirExec {
 	 *            the dcm2nii path
 	 * @param outputFolder
 	 *            the output folder
-	 *  @param is4D
+	 * @param is4D
 	 *            is a 4D nifti
 	 *
 	 * @return the string
 	 */
-	public String dcm2niiExec(final String inputFolder, final String dcm2niiPath, final String outputFolder, boolean is4D) {
+	public String dcm2niiExec(final String inputFolder, final String dcm2niiPath, final String outputFolder,
+			boolean is4D) {
 		LOG.debug("dcm2niiExec : Begin");
 		LOG.info("dcm2niiExec : " + dcm2niiPath);
 
 		String[] cmd = null;
 
-		if(dcm2niiPath.contains("dcm2niix")){
+		if (dcm2niiPath.contains("dcm2niix")) {
 			cmd = new String[22];
 			cmd[0] = dcm2niiPath;
-			//BIDS sidecar
+			// BIDS sidecar
 			cmd[1] = "-b";
 			cmd[2] = "y";
 
@@ -119,7 +133,8 @@ public class ShanoirExec {
 			cmd[5] = "-t";
 			cmd[6] = "n";
 
-			// merge 2D slices from same series regardless of study time, echo, coil, orientation, etc.
+			// merge 2D slices from same series regardless of study time, echo, coil,
+			// orientation, etc.
 			cmd[7] = "-m";
 			cmd[8] = "n";
 
@@ -145,19 +160,19 @@ public class ShanoirExec {
 
 			// verbose
 			cmd[19] = "-v";
-			if(LOG.isDebugEnabled()){
+			if (LOG.isDebugEnabled()) {
 				cmd[20] = "y";
-			}else{
+			} else {
 				cmd[20] = "n";
 			}
 
-			//inputFolder
+			// inputFolder
 			cmd[21] = inputFolder;
 
-		}else{
-			if(is4D){
+		} else {
+			if (is4D) {
 				cmd = new String[26];
-			}else{
+			} else {
 				cmd = new String[24];
 			}
 
@@ -207,13 +222,13 @@ public class ShanoirExec {
 			cmd[21] = "-r";
 			cmd[22] = "n";
 
-			if(is4D){
+			if (is4D) {
 				// create 4D volumes
 				cmd[23] = "-4";
 				cmd[24] = "y";
 				// list of dicom images to be converted
 				cmd[25] = inputFolder;
-			}else{
+			} else {
 				// list of dicom images to be converted
 				cmd[23] = inputFolder;
 			}
@@ -226,7 +241,7 @@ public class ShanoirExec {
 		LOG.debug("dcm2niiExec : End");
 		return result;
 	}
-	
+
 	/**
 	 * Exec the mcverter command to convert Dicom files to Nifti files.
 	 *
@@ -239,14 +254,15 @@ public class ShanoirExec {
 	 *
 	 * @return the string
 	 */
-	public String mcverterExec(final String inputFolder, final String mcverterPath, final String outputFolder, boolean is4D) {
+	public String mcverterExec(final String inputFolder, final String mcverterPath, final String outputFolder,
+			boolean is4D) {
 		LOG.debug("mcverterExec : Begin");
 		LOG.info("mcverterExec : " + mcverterPath);
 
 		String[] cmd = null;
-		if(is4D){
+		if (is4D) {
 			cmd = new String[10];
-		}else{
+		} else {
 			cmd = new String[9];
 		}
 		cmd[0] = mcverterPath;
@@ -264,17 +280,17 @@ public class ShanoirExec {
 
 		// naming format outpufile
 		cmd[6] = "-F";
-		//Due to modification on format for latest version change the format
-		if(mcverterPath!=null && mcverterPath.contains("2.0")){
+		// Due to modification on format for latest version change the format
+		if (mcverterPath != null && mcverterPath.contains("2.0")) {
 			cmd[7] = "'-PatientName,-PatientId,-SeriesDate,-SeriesTime,-StudyId,-StudyDescription,+SeriesNumber,-SequenceName,-SeriesDescription,+ProtocolName'";
-		}else{
+		} else {
 			cmd[7] = "-PatientName|-PatientId|-SeriesDate|-SeriesTime|-StudyId|-StudyDescription|+SeriesNumber|-SequenceName|-SeriesDescription|+ProtocolName";
 		}
 
 		// Input folder
 		cmd[8] = inputFolder;
 
-		if(is4D){
+		if (is4D) {
 			cmd[9] = "-d";
 		}
 
@@ -288,10 +304,10 @@ public class ShanoirExec {
 	 * Execute the command to get mcverter exe.
 	 *
 	 * @param mcverterpath
-	 *            the path to mcverter command
-	 * Getting the version of mcverter causes an exit code = 1 even though there is no error
-	 * when exec "mcverter -V" so we get rid of this error in this particular case
-	 * by checking if the cmd is for the version
+	 *            the path to mcverter command Getting the version of mcverter
+	 *            causes an exit code = 1 even though there is no error when exec
+	 *            "mcverter -V" so we get rid of this error in this particular case
+	 *            by checking if the cmd is for the version
 	 *
 	 * @return string containing the version
 	 */
@@ -330,9 +346,11 @@ public class ShanoirExec {
 			// any error???
 			final int exitVal = proc.waitFor();
 
-			/*Getting the version of mcverter causes an exit code = 1 even though there is no error
-			when exec "mcverter -V" so we get rid of this error in this particular case
-			by checking if the cmd is for the version*/
+			/*
+			 * Getting the version of mcverter causes an exit code = 1 even though there is
+			 * no error when exec "mcverter -V" so we get rid of this error in this
+			 * particular case by checking if the cmd is for the version
+			 */
 
 			if (exitVal != 0 && exitVal != 1) {
 				LOG.error("The exit value is " + exitVal + ", an error has probably occured");
@@ -371,10 +389,10 @@ public class ShanoirExec {
 	}
 
 	/**
-	 * Exec the dcm2nii command to get the version of the software
-	 * It returns a full String from which we take the first line :
-	 * Chris Rorden's dcm2nii :: 4AUGUST2014 (Debian) 32bit BSD License
-	 * And extract the version : 4AUGUST2014 (Debian) 32bit BSD License
+	 * Exec the dcm2nii command to get the version of the software It returns a full
+	 * String from which we take the first line : Chris Rorden's dcm2nii ::
+	 * 4AUGUST2014 (Debian) 32bit BSD License And extract the version : 4AUGUST2014
+	 * (Debian) 32bit BSD License
 	 *
 	 * @param dcm2niiPath
 	 *
@@ -391,9 +409,9 @@ public class ShanoirExec {
 		return result;
 	}
 
-
 	/**
 	 * Exec the dicom2nifti command to convert Dicom files to Nifti files.
+	 * https://github.com/lamyj/dicomifier.ws
 	 *
 	 * @param inputFolder
 	 *            the input folder
@@ -404,40 +422,46 @@ public class ShanoirExec {
 	 *
 	 * @return the string
 	 */
-	public String dicom2niftiExec(String inputFolder, final String dicom2niftiPath, final String outputFolder, boolean is4D) {
+	public String dicom2niftiExec(String inputFolder, final String dicom2niftiPath, final String outputFolder,
+			boolean is4D) {
 		LOG.debug("dicom2niftiExec : Begin");
+		String result = "";
+		LOG.debug("dicom2niftiMsUrl : " + dicom2niftiMsUrl);
 
-		LOG.debug("dicom2niftiExec : " + dicom2niftiPath);
+		boolean zip = false;
+		boolean prettyPrint = false;
+		String requestJson = "{\"source\":\"" + inputFolder + "\", \"destination\":\"" + outputFolder + "\",  \"zip\":"
+				+ zip + ", \"pretty-print\": " + prettyPrint + "}";
+		LOG.info("CMD DICOM2NIFTI " + requestJson);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		String[] cmd = null;
-		//Usage: dicom2nifti [OPTIONS] input output
-		cmd = new String[3];
-		cmd[0] = "bash";
-		cmd[1] = "-c";
-		//Then as we use wildcard *, the rest must be done as one command
-		StringBuilder cmdLine = new StringBuilder(dicom2niftiPath);
-		if(LOG.isDebugEnabled()){
-			// verbose
-			cmdLine.append(" -v");
-			cmdLine.append(" debug");
-		}else{
-			cmdLine.append(" -v");
-			cmdLine.append(" warning");
+		// HttpEntity represents the request
+		HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
+
+		// Post to dicom2nifti to start conversion
+		ResponseEntity<String> response = null;
+		try {
+			response = restTemplate.exchange(dicom2niftiMsUrl, HttpMethod.POST, entity, String.class);
+		} catch (RestClientException e) {
+			LOG.error("RestClientException on dicom2nifti microservice request", e);
+			result += "RestClientException while converting dicom2nifti." + e;
+		} catch (Exception e2) {
+			LOG.error("Error on dicom2nifti microservice request", e2);
+			result += "Error while converting dicom2nifti." + e2;
 		}
-		cmdLine.append(" --dtype single ");
 
-		cmdLine.append(inputFolder);
-		cmdLine.append(" ");
-		cmdLine.append(outputFolder);
-		cmd[2] = cmdLine.toString();
-
-		LOG.info("CMD DICOM2NIFTI " + Arrays.asList(cmd).toString());
-
-		final String result = exec(cmd);
+		if (response != null && HttpStatus.OK.equals(response.getStatusCode())
+				|| HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+			result += "dicom2nifti finished: " + requestJson;
+		} else {
+			LOG.error("Error on dicom2nifti microservice request");
+		}
 
 		LOG.debug("dicom2niftiExec : End");
 		return result;
 	}
+
 	/**
 	 * Execute the dcmdjpeg binary to uncompress dicom images.
 	 *
@@ -464,7 +488,7 @@ public class ShanoirExec {
 		LOG.debug("dcmdjpeg : End");
 		return result;
 	}
-	
+
 	/**
 	 * Execute the command line given in argument.
 	 *
@@ -475,17 +499,16 @@ public class ShanoirExec {
 	public String exec(final String[] cmd) {
 		return exec(cmd, null);
 	}
-	
+
 	/**
 	 * Execute the command line given in argument.
 	 *
 	 * @param cmd
 	 *            the command line as a string array
 	 * @param envp
-	 *            array of strings, each element of which has environment
-	 *            variable settings in the format name=value, or null if the
-	 *            subprocess should inherit the environment of the current
-	 *            process.
+	 *            array of strings, each element of which has environment variable
+	 *            settings in the format name=value, or null if the subprocess
+	 *            should inherit the environment of the current process.
 	 *
 	 * @return the output result
 	 */
@@ -521,7 +544,8 @@ public class ShanoirExec {
 			if (exitVal != 0) {
 				LOG.error("The exit value is " + exitVal + ", an error has probably occured");
 			}
-			// let errorGobbler and outputGobbler finish execution before finishing main thread
+			// let errorGobbler and outputGobbler finish execution before finishing main
+			// thread
 			errorGobbler.join();
 			outputGobbler.join();
 

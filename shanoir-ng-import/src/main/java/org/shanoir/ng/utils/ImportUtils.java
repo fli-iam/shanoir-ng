@@ -6,14 +6,21 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.io.Files;
 
 /**
  * Utility class
@@ -23,6 +30,7 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  */
 public class ImportUtils {
 
+	private static final Logger LOG = LoggerFactory.getLogger(ImportUtils.class);
 	/**
 	 * @todo: read from application.yml -> Yao
 	 */
@@ -277,6 +285,134 @@ public class ImportUtils {
 		}
 		s.append('$');
 		return (s.toString());
+	}
+
+	/**
+	 * copyFiles folder into destination,respecting the hierarchy
+	 * 
+	 * @param folder
+	 * @param destination
+	 */
+	public static void copyAllFiles(File folder, File destination) {
+		LOG.debug(" copyAllFiles from " + folder.getName() + " is directory " + folder.isDirectory() + " into "
+				+ destination.getName());
+		if (folder.isDirectory()) {
+			for (File inner : Arrays.asList(folder.listFiles())) {
+				if (inner.isDirectory()) {
+					copyAllFiles(inner, destination);
+				} else {
+					LOG.debug("copyAllFiles copying file " + inner.getName());
+					copyFile(inner, new File(destination + "/" + inner.getName()), false);
+				}
+			}
+		} else {
+			LOG.debug("copyAllFiles directly copying file " + folder.getName());
+			copyFile(folder, new File(destination + "/" + folder.getName()), false);
+		}
+	}
+
+	/***
+	 * 
+	 * Copy File in to file out.
+	 * 
+	 * @param in
+	 *            the in
+	 * @param out
+	 *            the out
+	 * @param overwrite
+	 *            the overwrite
+	 * @return a hashmap with the key=success if the copy is ok and the value is the
+	 *         real output file.
+	 */
+
+	public static HashMap<Boolean, File> copyFile(final File in, final File out, final boolean overwrite) {
+		return moveOrCopyFile(in, out, overwrite, false);
+	}
+
+	/**
+	 * Move or copy the file. It is possible to overwrite or not the destination
+	 * file.
+	 *
+	 * @param in
+	 *            the in
+	 * @param out
+	 *            the out
+	 * @param overwrite
+	 *            the overwrite
+	 * @param move
+	 *            the move
+	 *
+	 * @return the hash map< boolean, file>
+	 */
+	private static HashMap<Boolean, File> moveOrCopyFile(final File in, final File out, final boolean overwrite,
+			final boolean move) {
+		final HashMap<Boolean, File> result = new HashMap<Boolean, File>();
+
+		LOG.debug("moveOrCopyFile : (File in " + in + ", File out " + out + ", overwrite " + overwrite + ", move "
+				+ move + ")");
+
+		// rename the file if needed
+		if (out.exists() && !overwrite) {
+			final String folder = out.getParent();
+			String newName = getRenamedFile(out.getName());
+			File realOut = new File(folder + "/" + newName);
+			return moveOrCopyFile(in, realOut, overwrite, move);
+		} else {
+			result.clear();
+			if (move) { // move file
+				try {
+					Files.move(in, out);
+					result.put(Boolean.TRUE, out);
+				} catch (IOException e) {
+					result.put(Boolean.FALSE, out);
+					LOG.error("Error while moving file " + in + " into " + out, e);
+				} catch (IllegalArgumentException e2) {
+					result.put(Boolean.FALSE, out);
+					LOG.error("Error while moving same file " + in + " into " + out, e2);
+				}
+			} else { // copy file
+				try {
+					FileUtils.copyFile(in, out);
+					result.put(Boolean.TRUE, out);
+				} catch (IOException exc) {
+					LOG.error("moveOrCopyFile : error while copying file : " + exc.getMessage(), exc);
+					result.put(Boolean.FALSE, out);
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Gets a new name for the given filename, by adding the next letter in the
+	 * alphabet, (before extension)
+	 * 
+	 * @param name
+	 * @return new filename
+	 */
+	private static String getRenamedFile(String name) {
+		final String[] alphabet = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q",
+				"R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
+		final List<String> alphabetList = Arrays.asList(alphabet);
+		String newName = null;
+		String nameNoExtension = name;
+		String extension = "";
+		if (name.lastIndexOf(".") != -1) {
+			nameNoExtension = name.substring(0, name.lastIndexOf("."));
+			extension = name.substring(name.lastIndexOf("."), name.length());
+		}
+
+		final String lastCharacter = Character.toString(nameNoExtension.charAt(nameNoExtension.length() - 1));
+		if ("Z".equals(lastCharacter)) {
+			newName = nameNoExtension.substring(0, nameNoExtension.length() - 1) + "AA" + extension;
+		} else if (alphabetList.contains(lastCharacter)) {
+			int index = alphabetList.indexOf(lastCharacter);
+			newName = nameNoExtension.substring(0, nameNoExtension.length() - 1) + alphabetList.get(index + 1)
+					+ extension;
+		} else {
+			newName = nameNoExtension + "A" + extension;
+		}
+		return newName;
 	}
 
 }
