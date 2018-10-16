@@ -30,6 +30,28 @@ public class ShanoirException extends Exception {
 	}
 
 	/**
+	 * Constructor
+	 * 
+	 * @param cause
+	 * @param code
+	 */
+	public ShanoirException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param cause
+	 * @param code
+	 * @param errorCode
+	 */
+	public ShanoirException(final String message, final Throwable cause, final int errorCode) {
+		super(message, cause);
+		this.errorCode = errorCode;
+	}
+
+	/**
 	 * Constructor.
 	 * 
 	 * @param errorCode
