@@ -17,6 +17,7 @@ import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
 import org.shanoir.ng.importer.dcm2nii.NIfTIConverterService;
 import org.shanoir.ng.importer.dicom.DicomDirToJsonReaderService;
 import org.shanoir.ng.importer.dicom.DicomFileAnalyzerService;
+import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
@@ -34,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +46,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.ApiParam;
 
@@ -66,6 +67,8 @@ public class ImporterApiController implements ImporterApi {
 
 	private static final String DICOMDIR = "DICOMDIR";
 
+	private static final String IMPORTJOB = "importJob.json";
+
 	private static final String ZIP = ".zip";
 
 	private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
@@ -84,6 +87,9 @@ public class ImporterApiController implements ImporterApi {
 
 	@Autowired
 	private DicomDirToJsonReaderService dicomDirToJsonReader;
+
+	@Autowired
+	private ImportJobConstructorService importJobConstructorService;
 
 	@Autowired
 	private DicomFileAnalyzerService dicomFileAnalyzer;
@@ -160,7 +166,7 @@ public class ImporterApiController implements ImporterApi {
 			return new ResponseEntity<Void>(HttpStatus.OK);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
-			throw new RestServiceException(
+			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), null));
 		}
 	}
@@ -231,12 +237,48 @@ public class ImporterApiController implements ImporterApi {
 		if (!isZipFile(dicomZipFile))
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Wrong content type of file upload, .zip required.", null));
+
 		try {
 			File tempFile = saveTempFile(dicomZipFile);
-			return importDicomZipFile(tempFile);
+			if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile))
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+						"DICOMDIR is missing in .zip file.", null));
+
+			String fileName = tempFile.getName();
+			int pos = fileName.lastIndexOf(FILE_POINT);
+			if (pos > 0) {
+				fileName = fileName.substring(0, pos);
+			}
+
+			File unzipFolderFile = new File(tempFile.getParentFile().getAbsolutePath() + File.separator + fileName);
+			if (!unzipFolderFile.exists()) {
+				unzipFolderFile.mkdirs();
+			} else {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+						"Error while unzipping file: folder already exists.", null));
+			}
+
+			ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
+
+			File dicomDirFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + DICOMDIR);
+			JsonNode dicomDirJsonNode = null;
+			if (dicomDirFile.exists()) {
+				dicomDirJsonNode = dicomDirToJsonReader.readDicomDirToJsonNode(dicomDirFile);
+			}
+
+			dicomFileAnalyzer.analyzeDicomFiles(dicomDirJsonNode, unzipFolderFile.getAbsolutePath());
+
+			String dicomDirJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
+					.writeValueAsString(dicomDirJsonNode);
+			LOG.info(dicomDirJsonString);
+			Patients patientsDTO = dicomDirToJsonReader.getMapper().readValue(dicomDirJsonString, Patients.class);
+			ImportJob importJob = new ImportJob();
+			importJob.setWorkFolder(unzipFolderFile.getAbsolutePath());
+			importJob.setPatients(patientsDTO.getPatients());
+			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
-			throw new RestServiceException(
+			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
 		}
 	}
@@ -254,6 +296,86 @@ public class ImporterApiController implements ImporterApi {
 		return false;
 	}
 
+	@Override
+	public ResponseEntity<Void> uploadDicomZipFileFromShup(
+			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
+			throws RestServiceException, ShanoirException {
+		// TODO Auto-generated method stub
+		if (dicomZipFile == null)
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+
+		try {
+			File tempFile = saveTempFile(dicomZipFile);
+
+			String fileName = tempFile.getName();
+			int pos = fileName.lastIndexOf(FILE_POINT);
+			if (pos > 0) {
+				fileName = fileName.substring(0, pos);
+			}
+
+			File unzipFolderFile = new File(tempFile.getParentFile().getAbsolutePath() + File.separator + fileName);
+			if (!unzipFolderFile.exists()) {
+				unzipFolderFile.mkdirs();
+			} else {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+						"Error while unzipping file: folder already exists.", null));
+			}
+
+			ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
+
+			File importJobFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + IMPORTJOB);
+			ImportJob importJob = null;
+			if (importJobFile.exists()) {
+				ObjectMapper objectMapper = new ObjectMapper();
+				try {
+					importJob = objectMapper.readValue(importJobFile, ImportJob.class);
+					importJob = importJobConstructorService.reconstructImportJob(importJob, unzipFolderFile);
+					LOG.warn(objectMapper.writeValueAsString(importJob));
+				} catch (IOException ioe) {
+					LOG.error(ioe.getMessage(), ioe);
+					throw new RestServiceException(ioe, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							"Error while mapping importJob.json file to object.", null));
+				}
+			}
+
+			File workFolder = new File(importJob.getWorkFolder());
+			List<Patient> patients = importJob.getPatients();
+			for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
+				Patient patient = (Patient) patientsIt.next();
+				ArrayList<File> dicomFiles = getDicomFilesForPatient(patient, workFolder);
+				Long converterId = importJob.getFrontConverterId();
+				niftiConverter.prepareAndRunConversion(patient, workFolder, converterId);
+			}
+
+			String importJobJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
+					.writeValueAsString(importJob);
+			LOG.info(importJobJsonString);
+
+			// HttpEntity represents the request
+			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
+
+			// Post to dataset MS to finish import
+			ResponseEntity<String> response = null;
+			response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody, String.class);
+
+			return new ResponseEntity<Void>(HttpStatus.OK);
+		} catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+			throw new RestServiceException(e,
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+		} catch (RestClientException e) {
+			LOG.error("Error on dataset microservice request", e);
+			throw new ShanoirException("Error while sending import job", ImportErrorModelCode.SC_MS_COMM_FAILURE);
+		} catch (ShanoirException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RestServiceException(e,
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Authentication issue.", null));
+		}
+
+	}
+	
 	public ResponseEntity<ImportJob> importDicomZipFile(
 			@ApiParam(value = "file detail") @RequestBody String dicomZipFilename) throws RestServiceException {
 		if (dicomZipFilename == null)
