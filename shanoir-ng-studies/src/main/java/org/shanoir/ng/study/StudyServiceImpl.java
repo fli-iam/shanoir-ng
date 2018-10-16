@@ -69,7 +69,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private StudyUserRepository studyUserRepository;
-	
+
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
 
@@ -128,12 +128,18 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
+	public List<IdNameDTO> findIdsAndNamesByUserId(final Long userId) {
+		return studyRepository.findIdsAndNamesByUserId(userId);
+	}
+
+	@Override
 	public List<Study> findStudiesByUserId(final Long userId) {
 		return studyRepository.findByStudyUserList_UserIdOrderByNameAsc(userId);
 	}
-	
-	public List<Study> findStudiesByUserIdAndStudyUserTypeLessThan(final Long userId,final Integer studyUserTypeId) {
-		return studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserTypeLessThanEqualOrderByNameAsc(userId,studyUserTypeId);		
+
+	public List<Study> findStudiesByUserIdAndStudyUserTypeLessThan(final Long userId, final Integer studyUserTypeId) {
+		return studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserTypeLessThanEqualOrderByNameAsc(
+				userId, studyUserTypeId);
 	}
 
 	@Override
@@ -299,11 +305,11 @@ public class StudyServiceImpl implements StudyService {
 	public Study save(final Study study) throws ShanoirStudiesException {
 		for (final StudyCenter studyCenter : study.getStudyCenterList()) {
 			studyCenter.setStudy(study);
-		} 
+		}
 		for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 			subjectStudy.setStudy(study);
 		}
-		for (final StudyUser studyUser: study.getStudyUserList()) {
+		for (final StudyUser studyUser : study.getStudyUserList()) {
 			studyUser.setStudyId(study.getId());
 		}
 		return studyRepository.save(study);
@@ -344,7 +350,7 @@ public class StudyServiceImpl implements StudyService {
 				studyCenterRepository.delete(studyCenterDb.getId());
 			}
 		}
-		
+
 		// Copy list of database links subject/study
 		final List<SubjectStudy> subjectStudyDbList = new ArrayList<>(studyDb.getSubjectStudyList());
 		for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
@@ -368,7 +374,7 @@ public class StudyServiceImpl implements StudyService {
 				subjectStudyRepository.delete(subjectStudyDb.getId());
 			}
 		}
-		
+
 		// Copy list of database links study/user
 		final List<StudyUser> studyUserDbList = new ArrayList<>(studyDb.getStudyUserList());
 		for (final StudyUser studyUser : study.getStudyUserList()) {

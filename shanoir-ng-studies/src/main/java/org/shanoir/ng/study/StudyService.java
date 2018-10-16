@@ -71,6 +71,13 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	List<IdNameDTO> findIdsAndNames();
 
 	/**
+	 * Find id and name for all studies.
+	 * 
+	 * @return list of studies.
+	 */
+	List<IdNameDTO> findIdsAndNamesByUserId(Long userId);
+
+	/**
 	 * Find all studies for a user.
 	 * 
 	 * @param userId
@@ -80,7 +87,8 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	List<Study> findStudiesByUserId(Long userId);
 
 	/**
-	 * Find all studies for a user with permission level (studyUserType) lower than specified value.
+	 * Find all studies for a user with permission level (studyUserType) lower than
+	 * specified value.
 	 * 
 	 * @param userId
 	 *            user id.
@@ -88,7 +96,7 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 *            studyUserType id.
 	 * @return a list of studies.
 	 */
-	List<Study> findStudiesByUserIdAndStudyUserTypeLessThan(final Long userId,final Integer studyUserTypeId);
+	List<Study> findStudiesByUserIdAndStudyUserTypeLessThan(final Long userId, final Integer studyUserTypeId);
 
 	/**
 	 * Find all studies with theirs study cards for a user.
@@ -102,7 +110,7 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 */
 	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(Long userId, EquipmentDicom equipment)
 			throws ShanoirException;
-	
+
 	/**
 	 * Check if an user is responsible of the study.
 	 * 
