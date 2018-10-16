@@ -15,7 +15,7 @@ import org.shanoir.ng.preclinical.contrast_agent.ContrastAgent;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentApiController;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentService;
 import org.shanoir.ng.preclinical.references.RefsService;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ContrastAgentModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +63,7 @@ public class ContrastAgentApiControllerTest {
 	private RefsService referencesServiceMock;
 
 	@Before
-	public void setup() throws ShanoirPreclinicalException {
+	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(agentsServiceMock).deleteById(1L);

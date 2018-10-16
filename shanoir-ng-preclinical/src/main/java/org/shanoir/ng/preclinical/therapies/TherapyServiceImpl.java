@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.therapies;
 import java.util.List;
 import java.util.Optional;
 
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
 
 /**
  * Therapies service implementation.
@@ -34,7 +33,7 @@ public class TherapyServiceImpl implements TherapyService {
 	private TherapyRepository therapiesRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirPreclinicalException {
+	public void deleteById(final Long id) throws ShanoirException {
 		therapiesRepository.delete(id);
 	}
 
@@ -47,48 +46,49 @@ public class TherapyServiceImpl implements TherapyService {
 	public List<Therapy> findBy(final String fieldName, final Object value) {
 		return therapiesRepository.findBy(fieldName, value);
 	}
-	
+
 	@Override
 	public Therapy findById(final Long id) {
 		return therapiesRepository.findOne(id);
 	}
-	
+
 	@Override
 	public Therapy findByName(final String name) {
 		Optional<Therapy> therapy = therapiesRepository.findByName(name);
-		if(therapy.isPresent()) return therapy.get();
+		if (therapy.isPresent())
+			return therapy.get();
 		return null;
 	}
-	
+
 	@Override
 	public List<Therapy> findByTherapyType(final TherapyType type) {
 		return therapiesRepository.findByTherapyType(type);
 	}
 
 	@Override
-	public Therapy save(final Therapy therapy) throws ShanoirPreclinicalException {
+	public Therapy save(final Therapy therapy) throws ShanoirException {
 		Therapy savedTherapy = null;
 		try {
 			savedTherapy = therapiesRepository.save(therapy);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while creating therapy: " + dive.getMessage());
+			LOG.error("Error while creating  therapy:  ", dive);
+			throw new ShanoirException("Error while creating  therapy:  ", dive);
 		}
 		return savedTherapy;
 	}
 
 	@Override
-	public Therapy update(final Therapy therapy) throws ShanoirPreclinicalException {
+	public Therapy update(final Therapy therapy) throws ShanoirException {
 		final Therapy therapyDb = therapiesRepository.findOne(therapy.getId());
 		updateTherapyValues(therapyDb, therapy);
 		try {
 			therapiesRepository.save(therapyDb);
 		} catch (Exception e) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while updating therapy: " + e.getMessage());
+			LOG.error("Error while updating  therapy:  ", e);
+			throw new ShanoirException("Error while updating  therapy:  ", e);
 		}
 		return therapyDb;
 	}
-
-	
 
 	private Therapy updateTherapyValues(final Therapy therapyDb, final Therapy therapy) {
 		therapyDb.setName(therapy.getName());

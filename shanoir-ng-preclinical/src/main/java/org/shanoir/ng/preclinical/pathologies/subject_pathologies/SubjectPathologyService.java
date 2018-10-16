@@ -6,7 +6,7 @@ import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModel;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.subjects.AnimalSubject;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
@@ -22,17 +22,17 @@ public interface SubjectPathologyService extends UniqueCheckableService<SubjectP
 	 * 
 	 * @param id
 	 *            template id.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirPreclinicalException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * delete all subject pathologies for a given animalSubject
 	 * 
 	 * @param animalSubject
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	public void deleteByAnimalSubject(AnimalSubject animalSubject) throws ShanoirPreclinicalException;
+	public void deleteByAnimalSubject(AnimalSubject animalSubject) throws ShanoirException;
 
 	/**
 	 * Get all the references.
@@ -64,9 +64,9 @@ public interface SubjectPathologyService extends UniqueCheckableService<SubjectP
 	 * @param reference
 	 *            reference to create.
 	 * @return created reference.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	SubjectPathology save(SubjectPathology pathos) throws ShanoirPreclinicalException;
+	SubjectPathology save(SubjectPathology pathos) throws ShanoirException;
 
 	/**
 	 * Update a reference.
@@ -74,8 +74,8 @@ public interface SubjectPathologyService extends UniqueCheckableService<SubjectP
 	 * @param reference
 	 *            reference to update.
 	 * @return updated reference.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	SubjectPathology update(SubjectPathology pathos) throws ShanoirPreclinicalException;
+	SubjectPathology update(SubjectPathology pathos) throws ShanoirException;
 
 }

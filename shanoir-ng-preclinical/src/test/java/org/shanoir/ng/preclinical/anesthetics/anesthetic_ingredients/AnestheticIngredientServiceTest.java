@@ -16,7 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredient;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredientRepository;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredientServiceImpl;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -54,7 +54,7 @@ public class AnestheticIngredientServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirPreclinicalException {
+	public void deleteByIdTest() throws ShanoirException {
 		ingredientsService.deleteById(INGREDIENT_ID);
 
 		Mockito.verify(ingredientsRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -90,14 +90,14 @@ public class AnestheticIngredientServiceTest {
 	
 
 	@Test
-	public void saveTest() throws ShanoirPreclinicalException {
+	public void saveTest() throws ShanoirException {
 		ingredientsService.save(createAnestheticIngredient());
 
 		Mockito.verify(ingredientsRepository, Mockito.times(1)).save(Mockito.any(AnestheticIngredient.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirPreclinicalException {
+	public void updateTest() throws ShanoirException {
 		final AnestheticIngredient updatedIngredient = ingredientsService.update(createAnestheticIngredient());
 		Assert.assertNotNull(updatedIngredient);
 		Assert.assertTrue(UPDATED_INGREDIENT_CONCENTRATION.equals(updatedIngredient.getConcentration()));
@@ -107,7 +107,7 @@ public class AnestheticIngredientServiceTest {
 
 /*
 	@Test
-	public void updateFromShanoirOldTest() throws ShanoirPreclinicalException {
+	public void updateFromShanoirOldTest() throws ShanoirException {
 		pathologiesService.updateFromShanoirOld(createPathology());
 
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());

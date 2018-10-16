@@ -14,7 +14,7 @@ import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -64,7 +64,7 @@ public class PathologyModelApiControllerTest {
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
 
 	@Before
-	public void setup() throws ShanoirPreclinicalException {
+	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(modelServiceMock).deleteById(1L);

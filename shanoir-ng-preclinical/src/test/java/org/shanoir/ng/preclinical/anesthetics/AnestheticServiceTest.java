@@ -17,7 +17,7 @@ import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticRepository;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticServiceImpl;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticType;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -54,7 +54,7 @@ public class AnestheticServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirPreclinicalException {
+	public void deleteByIdTest() throws ShanoirException {
 		anestheticsService.deleteById(ANESTHETIC_ID);
 
 		Mockito.verify(anestheticRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -90,14 +90,14 @@ public class AnestheticServiceTest {
 	
 
 	@Test
-	public void saveTest() throws ShanoirPreclinicalException {
+	public void saveTest() throws ShanoirException {
 		anestheticsService.save(createAnesthetic());
 
 		Mockito.verify(anestheticRepository, Mockito.times(1)).save(Mockito.any(Anesthetic.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirPreclinicalException {
+	public void updateTest() throws ShanoirException {
 		final Anesthetic updatedAnesthetic = anestheticsService.update(createAnesthetic());
 		Assert.assertNotNull(updatedAnesthetic);
 		Assert.assertTrue(UPDATED_ANESTHETIC_DATA.equals(updatedAnesthetic.getName()));
@@ -108,7 +108,7 @@ public class AnestheticServiceTest {
 
 /*
 	@Test
-	public void updateFromShanoirOldTest() throws ShanoirPreclinicalException {
+	public void updateFromShanoirOldTest() throws ShanoirException {
 		pathologiesService.updateFromShanoirOld(createPathology());
 
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());

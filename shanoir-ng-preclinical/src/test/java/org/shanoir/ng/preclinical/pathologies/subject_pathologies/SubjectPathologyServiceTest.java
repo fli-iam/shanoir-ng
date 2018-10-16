@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.preclinical.references.RefsRepository;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.PathologyModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
@@ -62,14 +62,14 @@ public class SubjectPathologyServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirPreclinicalException {
+	public void deleteByIdTest() throws ShanoirException {
 		spathosService.deleteById(SPATHO_ID);
 
 		Mockito.verify(spathosRepository, Mockito.times(1)).delete(Mockito.anyLong());
 	}
 
 	@Test
-	public void deleteByAnimalSubjectTest() throws ShanoirPreclinicalException {
+	public void deleteByAnimalSubjectTest() throws ShanoirException {
 		spathosService.deleteByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
 
 		Mockito.verify(spathosRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -137,14 +137,14 @@ public class SubjectPathologyServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirPreclinicalException {
+	public void saveTest() throws ShanoirException {
 		spathosService.save(createSubjectPathology());
 
 		Mockito.verify(spathosRepository, Mockito.times(1)).save(Mockito.any(SubjectPathology.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirPreclinicalException {
+	public void updateTest() throws ShanoirException {
 		final SubjectPathology updatedSpatho = spathosService.update(createSubjectPathology());
 		Assert.assertNotNull(updatedSpatho);
 		Assert.assertTrue(UPDATED_PATHO_NAME.equals(updatedSpatho.getPathology().getName()));
@@ -154,7 +154,7 @@ public class SubjectPathologyServiceTest {
 
 	/*
 	 * @Test public void updateFromShanoirOldTest() throws
-	 * ShanoirPreclinicalException {
+	 * ShanoirException {
 	 * pathologiesService.updateFromShanoirOld(createPathology());
 	 * 
 	 * Mockito.verify(pathologiesRepository,

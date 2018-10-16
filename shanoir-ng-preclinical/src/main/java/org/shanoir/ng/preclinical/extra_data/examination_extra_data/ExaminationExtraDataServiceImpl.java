@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.extra_data.examination_extra_data;
 import java.util.List;
 
 import org.shanoir.ng.preclinical.extra_data.ExtraDataService;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class ExaminationExtraDataServiceImpl implements ExtraDataService<Examina
 	private ExaminationExtraDataRepository extraDataRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirPreclinicalException {
+	public void deleteById(final Long id) throws ShanoirException {
 		extraDataRepository.delete(id);
 	}
 
@@ -53,25 +53,26 @@ public class ExaminationExtraDataServiceImpl implements ExtraDataService<Examina
 	}
 
 	@Override
-	public ExaminationExtraData save(final ExaminationExtraData extradata) throws ShanoirPreclinicalException {
+	public ExaminationExtraData save(final ExaminationExtraData extradata) throws ShanoirException {
 		ExaminationExtraData savedExtraData = null;
 		try {
 			savedExtraData = extraDataRepository.save(extradata);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirPreclinicalException.logAndThrow(LOG,
-					"Error while creating examination extra data: " + dive.getMessage());
+			LOG.error("Error while creating examination extra data:  ", dive);
+			throw new ShanoirException("Error while creating examination extra data:  ", dive);
 		}
 		return savedExtraData;
 	}
 
 	@Override
-	public ExaminationExtraData update(final ExaminationExtraData extradata) throws ShanoirPreclinicalException {
+	public ExaminationExtraData update(final ExaminationExtraData extradata) throws ShanoirException {
 		final ExaminationExtraData extraDataDB = extraDataRepository.findOne(extradata.getId());
 		updateExtraDataValues(extraDataDB, extradata);
 		try {
 			extraDataRepository.save(extraDataDB);
 		} catch (Exception e) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while updating extradata: " + e.getMessage());
+			LOG.error("Error while updating examination extra data:  ", e);
+			throw new ShanoirException("Error while updating examination extra data:  ", e);
 		}
 		return extraDataDB;
 	}

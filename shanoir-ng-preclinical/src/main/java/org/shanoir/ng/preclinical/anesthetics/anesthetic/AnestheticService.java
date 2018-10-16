@@ -2,7 +2,7 @@ package org.shanoir.ng.preclinical.anesthetics.anesthetic;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 
@@ -20,9 +20,9 @@ public interface AnestheticService extends UniqueCheckableService<Anesthetic> {
 	 * 
 	 * @param id
 	 *            anesthetic id.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirPreclinicalException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * Get all the anesthetics.
@@ -55,9 +55,9 @@ public interface AnestheticService extends UniqueCheckableService<Anesthetic> {
 	 * @param anesthetic
 	 *            anesthetic to create.
 	 * @return created anesthetic.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	Anesthetic save(Anesthetic anesthetic) throws ShanoirPreclinicalException;
+	Anesthetic save(Anesthetic anesthetic) throws ShanoirException;
 
 	/**
 	 * Update a anesthetic.
@@ -65,9 +65,9 @@ public interface AnestheticService extends UniqueCheckableService<Anesthetic> {
 	 * @param anesthetic
 	 *            anesthetic to update.
 	 * @return updated anesthetic.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	Anesthetic update(Anesthetic anesthetic) throws ShanoirPreclinicalException;
+	Anesthetic update(Anesthetic anesthetic) throws ShanoirException;
 
 	
 

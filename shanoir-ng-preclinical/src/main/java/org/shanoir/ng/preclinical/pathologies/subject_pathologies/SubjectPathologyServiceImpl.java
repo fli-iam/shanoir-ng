@@ -6,7 +6,7 @@ import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModel;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.subjects.AnimalSubject;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,12 +36,12 @@ public class SubjectPathologyServiceImpl implements SubjectPathologyService {
 	private SubjectPathologyRepository pathosRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirPreclinicalException {
+	public void deleteById(final Long id) throws ShanoirException {
 		pathosRepository.delete(id);
 	}
 
 	@Override
-	public void deleteByAnimalSubject(AnimalSubject animalSubject) throws ShanoirPreclinicalException {
+	public void deleteByAnimalSubject(AnimalSubject animalSubject) throws ShanoirException {
 		List<SubjectPathology> pathologies = findByAnimalSubject(animalSubject);
 		for (SubjectPathology subjectPathology : pathologies) {
 			deleteById(subjectPathology.getId());
@@ -85,25 +85,26 @@ public class SubjectPathologyServiceImpl implements SubjectPathologyService {
 	}
 
 	@Override
-	public SubjectPathology save(final SubjectPathology pathos) throws ShanoirPreclinicalException {
+	public SubjectPathology save(final SubjectPathology pathos) throws ShanoirException {
 		SubjectPathology savedPathos = null;
 		try {
 			savedPathos = pathosRepository.save(pathos);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirPreclinicalException.logAndThrow(LOG,
-					"Error while creating subbject pathology: " + dive.getMessage());
+			LOG.error("Error while creating subbject pathology:  ", dive);
+			throw new ShanoirException("Error while creating subbject pathology:  ", dive);
 		}
 		return savedPathos;
 	}
 
 	@Override
-	public SubjectPathology update(final SubjectPathology pathos) throws ShanoirPreclinicalException {
+	public SubjectPathology update(final SubjectPathology pathos) throws ShanoirException {
 		final SubjectPathology pathosDb = pathosRepository.findOne(pathos.getId());
 		updateModelValues(pathosDb, pathos);
 		try {
 			pathosRepository.save(pathosDb);
 		} catch (Exception e) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while updating a subject pathology: " + e.getMessage());
+			LOG.error("Error while updating subbject pathology:  ", e);
+			throw new ShanoirException("Error while updating subbject pathology:  ", e);
 		}
 		return pathosDb;
 	}

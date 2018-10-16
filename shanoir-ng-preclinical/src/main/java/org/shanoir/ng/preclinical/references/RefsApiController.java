@@ -6,7 +6,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class RefsApiController implements RefsApi {
 				final Reference createdRef = referenceService.save(newRef);
 				return new ResponseEntity<Reference>(createdRef, HttpStatus.OK);
 			}
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -64,7 +64,7 @@ public class RefsApiController implements RefsApi {
 		}
 		try {
 			referenceService.deleteById(toDelete.getId());
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 		}
 		return new ResponseEntity<Void>(HttpStatus.OK);
@@ -159,7 +159,7 @@ public class RefsApiController implements RefsApi {
 			}
 			try {
 				referenceService.update(reference);
-			} catch (ShanoirPreclinicalException e) {
+			} catch (ShanoirException e) {
 				LOG.error("Error while trying to update reference " + toUpdate.getId() + " : ", e);
 				throw new RestServiceException(e,
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));

@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.references;
 import java.util.List;
 import java.util.Optional;
 
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 import org.shanoir.ng.preclinical.references.Reference;
@@ -21,9 +21,9 @@ public interface RefsService extends UniqueCheckableService<Reference> {
 	 * 
 	 * @param id
 	 *            template id.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirPreclinicalException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * Get all the references.
@@ -102,9 +102,9 @@ public interface RefsService extends UniqueCheckableService<Reference> {
 	 * @param reference
 	 *            reference to create.
 	 * @return created reference.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	Reference save(Reference reference) throws ShanoirPreclinicalException;
+	Reference save(Reference reference) throws ShanoirException;
 
 	/**
 	 * Update a reference.
@@ -112,9 +112,9 @@ public interface RefsService extends UniqueCheckableService<Reference> {
 	 * @param reference
 	 *            reference to update.
 	 * @return updated reference.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	Reference update(Reference reference) throws ShanoirPreclinicalException;
+	Reference update(Reference reference) throws ShanoirException;
 
 	
 

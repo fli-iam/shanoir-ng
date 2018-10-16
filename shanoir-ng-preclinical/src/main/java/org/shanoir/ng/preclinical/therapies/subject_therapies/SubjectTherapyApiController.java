@@ -10,7 +10,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
@@ -71,7 +71,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 			try {
 				final SubjectTherapy createdSubTherapy = subtherapiesService.save(subtherapy);
 				return new ResponseEntity<SubjectTherapy>(createdSubTherapy, HttpStatus.OK);
-			} catch (ShanoirPreclinicalException e) {
+			} catch (ShanoirException e) {
 				throw new RestServiceException(e,
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 			}
@@ -96,7 +96,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 			}
 			try {
 				subtherapiesService.deleteById(toDelete.getId());
-			} catch (ShanoirPreclinicalException e) {
+			} catch (ShanoirException e) {
 				return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 			}
 			return new ResponseEntity<Void>(HttpStatus.OK);
@@ -113,7 +113,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 		} else {
 			try {
 				subtherapiesService.deleteByAnimalSubject(animalSubject);
-			} catch (ShanoirPreclinicalException e) {
+			} catch (ShanoirException e) {
 				LOG.error("ERROR while deleting therapies for subject " + animalSubject.getId(), e);
 				return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 			}
@@ -187,7 +187,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 
 		try {
 			subtherapiesService.update(subtherapy);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update subject therapy " + tid + " : ", e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));

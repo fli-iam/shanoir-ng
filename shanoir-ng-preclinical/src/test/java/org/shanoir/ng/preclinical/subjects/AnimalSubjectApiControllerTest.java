@@ -16,7 +16,7 @@ import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -69,7 +69,7 @@ public class AnimalSubjectApiControllerTest {
 	private SubjectTherapyService subjectTherapiesServiceMock;
 
 	@Before
-	public void setup() throws ShanoirPreclinicalException {
+	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(subjectsServiceMock).deleteById(1L);

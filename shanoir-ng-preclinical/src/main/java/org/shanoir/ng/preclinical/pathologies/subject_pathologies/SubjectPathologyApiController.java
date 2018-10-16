@@ -10,7 +10,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
@@ -74,7 +74,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 			try {
 				final SubjectPathology createdPathos = pathosService.save(pathos);
 				return new ResponseEntity<SubjectPathology>(createdPathos, HttpStatus.OK);
-			} catch (ShanoirPreclinicalException e) {
+			} catch (ShanoirException e) {
 				throw new RestServiceException(e,
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 			}
@@ -97,7 +97,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 			}
 			try {
 				pathosService.deleteById(pid);
-			} catch (ShanoirPreclinicalException e) {
+			} catch (ShanoirException e) {
 				return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 			}
 			return new ResponseEntity<Void>(HttpStatus.OK);
@@ -114,7 +114,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 		} else {
 			try {
 				pathosService.deleteByAnimalSubject(animalSubject);
-			} catch (ShanoirPreclinicalException e) {
+			} catch (ShanoirException e) {
 				LOG.error("ERROR while deleting pathologies for subject " + animalSubject.getId(), e);
 				return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 			}
@@ -192,7 +192,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 			}
 			try {
 				pathosService.update(pathos);
-			} catch (ShanoirPreclinicalException e) {
+			} catch (ShanoirException e) {
 				LOG.error("Error while trying to update subject pathology " + pid + " : ", e);
 				throw new RestServiceException(e,
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));

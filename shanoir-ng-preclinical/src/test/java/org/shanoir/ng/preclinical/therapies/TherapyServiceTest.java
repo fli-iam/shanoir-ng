@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.TherapyModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -51,7 +51,7 @@ public class TherapyServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirPreclinicalException {
+	public void deleteByIdTest() throws ShanoirException {
 		therapiesService.deleteById(THERAPY_ID);
 
 		Mockito.verify(therapiesRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -94,14 +94,14 @@ public class TherapyServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirPreclinicalException {
+	public void saveTest() throws ShanoirException {
 		therapiesService.save(createTherapy());
 
 		Mockito.verify(therapiesRepository, Mockito.times(1)).save(Mockito.any(Therapy.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirPreclinicalException {
+	public void updateTest() throws ShanoirException {
 		final Therapy updatedTherapy = therapiesService.update(createTherapy());
 		Assert.assertNotNull(updatedTherapy);
 		Assert.assertTrue(UPDATED_THERAPY_DATA.equals(updatedTherapy.getName()));
@@ -112,7 +112,7 @@ public class TherapyServiceTest {
 
 /*
 	@Test
-	public void updateFromShanoirOldTest() throws ShanoirPreclinicalException {
+	public void updateFromShanoirOldTest() throws ShanoirException {
 		pathologiesService.updateFromShanoirOld(createPathology());
 
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());

@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.extra_data.bloodgas_data;
 import java.util.List;
 
 import org.shanoir.ng.preclinical.extra_data.ExtraDataService;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class BloodGasDataServiceImpl implements ExtraDataService<BloodGasData> {
 	private BloodGasDataRepository bloodGasRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirPreclinicalException {
+	public void deleteById(final Long id) throws ShanoirException {
 		bloodGasRepository.delete(id);
 	}
 
@@ -55,24 +55,26 @@ public class BloodGasDataServiceImpl implements ExtraDataService<BloodGasData> {
 	}
 
 	@Override
-	public BloodGasData save(final BloodGasData extradata) throws ShanoirPreclinicalException {
+	public BloodGasData save(final BloodGasData extradata) throws ShanoirException {
 		BloodGasData savedPhysioData = null;
 		try {
 			savedPhysioData = bloodGasRepository.save(extradata);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while creating blood gas data: " + dive.getMessage());
+			LOG.error("Error while creating blood gas data:  ", dive);
+			throw new ShanoirException("Error while creating blood gas data:  ", dive);
 		}
 		return savedPhysioData;
 	}
 
 	@Override
-	public BloodGasData update(final BloodGasData extradata) throws ShanoirPreclinicalException {
+	public BloodGasData update(final BloodGasData extradata) throws ShanoirException {
 		final BloodGasData bloodgasDataDB = bloodGasRepository.findOne(extradata.getId());
 		updateBloodGasDataValues(bloodgasDataDB, extradata);
 		try {
 			bloodGasRepository.save(bloodgasDataDB);
 		} catch (Exception e) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while updating extradata: " + e.getMessage());
+			LOG.error("Error while updating blood gas data:  ", e);
+			throw new ShanoirException("Error while updating blood gas data:  ", e);
 		}
 		return bloodgasDataDB;
 	}

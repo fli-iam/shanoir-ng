@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.shanoir.ng.preclinical.subjects.AnimalSubject;
 import org.shanoir.ng.preclinical.therapies.Therapy;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
@@ -20,17 +20,17 @@ public interface SubjectTherapyService extends UniqueCheckableService<SubjectThe
 	 * 
 	 * @param id
 	 *            subject therapy id.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirPreclinicalException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * delete all subject therapies for a given animalSubject
 	 * 
 	 * @param animalSubject
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	public void deleteByAnimalSubject(AnimalSubject animalSubject) throws ShanoirPreclinicalException;
+	public void deleteByAnimalSubject(AnimalSubject animalSubject) throws ShanoirException;
 
 	/**
 	 * Get all the subject therapies.
@@ -58,9 +58,9 @@ public interface SubjectTherapyService extends UniqueCheckableService<SubjectThe
 	 * @param subject
 	 *            therapy subject therapy to create.
 	 * @return created SubjectTherapy.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	SubjectTherapy save(SubjectTherapy subtherapy) throws ShanoirPreclinicalException;
+	SubjectTherapy save(SubjectTherapy subtherapy) throws ShanoirException;
 
 	/**
 	 * Update a subject therapy.
@@ -68,8 +68,8 @@ public interface SubjectTherapyService extends UniqueCheckableService<SubjectThe
 	 * @param subject
 	 *            therapy subject therapy to update.
 	 * @return updated SubjectTherapy.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	SubjectTherapy update(SubjectTherapy subtherapy) throws ShanoirPreclinicalException;
+	SubjectTherapy update(SubjectTherapy subtherapy) throws ShanoirException;
 
 }

@@ -10,7 +10,7 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -53,7 +53,7 @@ public class BrukerApiControllerTest {
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
 
 	@Before
-	public void setup() throws ShanoirPreclinicalException {
+	public void setup() throws ShanoirException {
 	}
 
 	@Test

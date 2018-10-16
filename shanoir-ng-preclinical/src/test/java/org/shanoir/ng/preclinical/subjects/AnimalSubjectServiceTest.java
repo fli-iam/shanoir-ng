@@ -15,7 +15,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.references.RefsRepository;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -57,7 +57,7 @@ public class AnimalSubjectServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirPreclinicalException {
+	public void deleteByIdTest() throws ShanoirException {
 		subjectsService.deleteById(SUBJECT_ID);
 
 		Mockito.verify(subjectsRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -91,14 +91,14 @@ public class AnimalSubjectServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirPreclinicalException {
+	public void saveTest() throws ShanoirException {
 		subjectsService.save(createAnimalSubject());
 
 		Mockito.verify(subjectsRepository, Mockito.times(1)).save(Mockito.any(AnimalSubject.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirPreclinicalException {
+	public void updateTest() throws ShanoirException {
 		final AnimalSubject updatedSubject = subjectsService.update(createAnimalSubject());
 		Assert.assertNotNull(updatedSubject);
 		Assert.assertTrue(SUBJECT_ID.equals(updatedSubject.getId()));
@@ -108,7 +108,7 @@ public class AnimalSubjectServiceTest {
 
 	/*
 	 * @Test public void updateFromShanoirOldTest() throws
-	 * ShanoirPreclinicalException {
+	 * ShanoirException {
 	 * subjectsService.updateFromShanoirOld(createSubject());
 	 * 
 	 * Mockito.verify(subjectsRepository,

@@ -6,7 +6,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class PathologyApiController implements PathologyApi {
 		try {
 			final Pathology createdPathology = pathologiesService.save(pathology);
 			return new ResponseEntity<Pathology>(createdPathology, HttpStatus.OK);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -64,7 +64,7 @@ public class PathologyApiController implements PathologyApi {
 		}
 		try {
 			pathologiesService.deleteById(id);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 		}
 		return new ResponseEntity<Void>(HttpStatus.OK);
@@ -105,7 +105,7 @@ public class PathologyApiController implements PathologyApi {
 		}
 		try {
 			pathologiesService.update(pathology);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update pathology " + id + " : ", e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));

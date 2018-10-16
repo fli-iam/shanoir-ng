@@ -2,7 +2,7 @@ package org.shanoir.ng.preclinical.extra_data;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
@@ -18,9 +18,9 @@ public interface ExtraDataService<T> extends UniqueCheckableService {
 	 * 
 	 * @param id
 	 *            examination extra data id.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirPreclinicalException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * Get all the examination extra datas.
@@ -46,9 +46,9 @@ public interface ExtraDataService<T> extends UniqueCheckableService {
 	 * @param examination
 	 *            extra data examination extra data to create.
 	 * @return created examination extra data.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	T save(T extradata) throws ShanoirPreclinicalException;
+	T save(T extradata) throws ShanoirException;
 
 	/**
 	 * Update an examination extra data
@@ -56,8 +56,8 @@ public interface ExtraDataService<T> extends UniqueCheckableService {
 	 * @param examination
 	 *            extra data examination extra data to update.
 	 * @return updated examination extra data.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	T update(T extradata) throws ShanoirPreclinicalException;
+	T update(T extradata) throws ShanoirException;
 
 }

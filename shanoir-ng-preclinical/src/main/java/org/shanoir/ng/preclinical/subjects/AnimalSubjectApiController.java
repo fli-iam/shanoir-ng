@@ -11,7 +11,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.RefValueExistsValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
@@ -72,7 +72,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 		try {
 			final AnimalSubject createdSubject = subjectService.save(animalSubject);
 			return new ResponseEntity<AnimalSubject>(createdSubject, HttpStatus.OK);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -94,7 +94,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 				subjectTherapyService.deleteByAnimalSubject(animalSubject);
 			}
 			subjectService.deleteById(id);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			LOG.error("ERROR while deleting animal subject " + id, e);
 			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 		}
@@ -143,7 +143,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 		/* Update template in db. */
 		try {
 			subjectService.update(animalSubject);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update subject " + id + " : ", e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));

@@ -16,7 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraDataRepository;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraDataServiceImpl;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.shanoir.ng.utils.ExtraDataModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -60,7 +60,7 @@ public class ExtraDataServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirPreclinicalException {
+	public void deleteByIdTest() throws ShanoirException {
 		extraDataService.deleteById(EXTRADATA_ID);
 
 		Mockito.verify(extraDataRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -86,14 +86,14 @@ public class ExtraDataServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirPreclinicalException {
+	public void saveTest() throws ShanoirException {
 		extraDataService.save(createExtraData());
 
 		Mockito.verify(extraDataRepository, Mockito.times(1)).save(Mockito.any(ExaminationExtraData.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirPreclinicalException {
+	public void updateTest() throws ShanoirException {
 		final ExaminationExtraData updatedExtraData = extraDataService.update(createExtraData());
 		Assert.assertNotNull(updatedExtraData);
 		Assert.assertTrue(EXTRADATA_FILENAME.equals(updatedExtraData.getFilename()));
@@ -103,7 +103,7 @@ public class ExtraDataServiceTest {
 
 	/*
 	 * @Test public void updateFromShanoirOldTest() throws
-	 * ShanoirPreclinicalException {
+	 * ShanoirException {
 	 * pathologiesService.updateFromShanoirOld(createPathology());
 	 * 
 	 * Mockito.verify(pathologiesRepository,

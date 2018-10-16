@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.subjects;
 import java.util.List;
 
 import org.shanoir.ng.preclinical.references.Reference;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	private AnimalSubjectRepository subjectsRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirPreclinicalException {
+	public void deleteById(final Long id) throws ShanoirException {
 		subjectsRepository.delete(id);
 	}
 
@@ -48,24 +48,26 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	}
 
 	@Override
-	public AnimalSubject save(final AnimalSubject subject) throws ShanoirPreclinicalException {
+	public AnimalSubject save(final AnimalSubject subject) throws ShanoirException {
 		AnimalSubject savedSubject = null;
 		try {
 			savedSubject = subjectsRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while creating AnimalSubject: " + dive.getMessage());
+			LOG.error("Error while creating  AnimalSubject:  ", dive);
+			throw new ShanoirException("Error while creating  AnimalSubject:  ", dive);
 		}
 		return savedSubject;
 	}
 
 	@Override
-	public AnimalSubject update(final AnimalSubject subject) throws ShanoirPreclinicalException {
+	public AnimalSubject update(final AnimalSubject subject) throws ShanoirException {
 		final AnimalSubject subjectDB = subjectsRepository.findOne(subject.getId());
 		updateSubjectValues(subjectDB, subject);
 		try {
 			subjectsRepository.save(subjectDB);
 		} catch (Exception e) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while updating subject: " + e.getMessage());
+			LOG.error("Error while updating  AnimalSubject:  ", e);
+			throw new ShanoirException("Error while updating  AnimalSubject:  ", e);
 		}
 		return subjectDB;
 	}

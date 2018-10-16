@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -46,7 +46,7 @@ public class ReferenceServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirPreclinicalException {
+	public void deleteByIdTest() throws ShanoirException {
 		referenceService.deleteById(REFERENCE_ID);
 
 		Mockito.verify(refsRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -73,14 +73,14 @@ public class ReferenceServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirPreclinicalException {
+	public void saveTest() throws ShanoirException {
 		referenceService.save(createReference());
 
 		Mockito.verify(refsRepository, Mockito.times(1)).save(Mockito.any(Reference.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirPreclinicalException {
+	public void updateTest() throws ShanoirException {
 		final Reference updatedRef = referenceService.update(createReference());
 		Assert.assertNotNull(updatedRef);
 		Assert.assertTrue(UPDATED_REFERENCE_VALUE.equals(updatedRef.getValue()));

@@ -14,7 +14,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 		try {
 			final PathologyModel createdModel = modelsService.save(model);
 			return new ResponseEntity<PathologyModel>(createdModel, HttpStatus.OK);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -91,7 +91,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 		}
 		try {
 			modelsService.deleteById(id);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 		}
 		return new ResponseEntity<Void>(HttpStatus.OK);
@@ -147,7 +147,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 		try {
 			modelsService.update(model);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update pathology model" + id + " : ", e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -181,7 +181,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 			LOG.error("Error while uploadModelSpecifications: issue with file " + (e == null ? "" : e.getMessage()), e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", null));
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error while uploadModelSpecifications: saving in db " + (e == null ? "" : e.getMessage()), e);
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Error while saving updated model specifications", null));

@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.subjects;
 import java.util.List;
 
 import org.shanoir.ng.preclinical.references.Reference;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
@@ -19,9 +19,9 @@ public interface AnimalSubjectService extends UniqueCheckableService<AnimalSubje
 	 * 
 	 * @param id
 	 *            animalSubject id.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirPreclinicalException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * Get all the AnimalSubject.
@@ -45,9 +45,9 @@ public interface AnimalSubjectService extends UniqueCheckableService<AnimalSubje
 	 * @param AnimalSubject
 	 *            AnimalSubject to create.
 	 * @return created AnimalSubject.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	AnimalSubject save(AnimalSubject subject) throws ShanoirPreclinicalException;
+	AnimalSubject save(AnimalSubject subject) throws ShanoirException;
 
 	/**
 	 * Update a AnimalSubject.
@@ -55,9 +55,9 @@ public interface AnimalSubjectService extends UniqueCheckableService<AnimalSubje
 	 * @param AnimalSubject
 	 *            AnimalSubject to update.
 	 * @return updated AnimalSubject.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	AnimalSubject update(AnimalSubject subject) throws ShanoirPreclinicalException;
+	AnimalSubject update(AnimalSubject subject) throws ShanoirException;
 
 	List<AnimalSubject> findByReference(Reference reference);
 

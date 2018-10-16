@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.preclinical.references.Reference;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
 
 /**
  * Contrast Agent service implementation.
@@ -35,7 +34,7 @@ public class ContrastAgentServiceImpl implements ContrastAgentService {
 	private ContrastAgentRepository contrastAgentsRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirPreclinicalException {
+	public void deleteById(final Long id) throws ShanoirException {
 		contrastAgentsRepository.delete(id);
 	}
 
@@ -48,50 +47,52 @@ public class ContrastAgentServiceImpl implements ContrastAgentService {
 	public List<ContrastAgent> findBy(final String fieldName, final Object value) {
 		return contrastAgentsRepository.findBy(fieldName, value);
 	}
-	
+
 	@Override
 	public ContrastAgent findByProtocolId(final Long protocolId) {
 		Optional<ContrastAgent> ca = contrastAgentsRepository.findByProtocolId(protocolId);
-		if(ca.isPresent()) return ca.get();
+		if (ca.isPresent())
+			return ca.get();
 		return null;
 	}
-	
+
 	@Override
 	public ContrastAgent findById(final Long id) {
 		return contrastAgentsRepository.findOne(id);
 	}
-	
+
 	@Override
 	public ContrastAgent findByName(final Reference name) {
 		Optional<ContrastAgent> ca = contrastAgentsRepository.findByName(name);
-		if(ca.isPresent()) return ca.get();
+		if (ca.isPresent())
+			return ca.get();
 		return null;
 	}
-	
+
 	@Override
-	public ContrastAgent save(final ContrastAgent agent) throws ShanoirPreclinicalException {
+	public ContrastAgent save(final ContrastAgent agent) throws ShanoirException {
 		ContrastAgent savedAgent = null;
 		try {
 			savedAgent = contrastAgentsRepository.save(agent);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while creating contrast agent: " + dive.getMessage());
+			LOG.error("Error while creating contrast agent:  ", dive);
+			throw new ShanoirException("Error while creating contrast agent:  ", dive);
 		}
 		return savedAgent;
 	}
 
 	@Override
-	public ContrastAgent update(final ContrastAgent agent) throws ShanoirPreclinicalException {
+	public ContrastAgent update(final ContrastAgent agent) throws ShanoirException {
 		final ContrastAgent agentDb = contrastAgentsRepository.findOne(agent.getId());
 		updateModelValues(agentDb, agent);
 		try {
 			contrastAgentsRepository.save(agentDb);
 		} catch (Exception e) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while updating contrast agent: " + e.getMessage());
+			LOG.error("Error while updating contrast agent:  ", e);
+			throw new ShanoirException("Error while updating contrast agent:  ", e);
 		}
 		return agentDb;
 	}
-
-	
 
 	private ContrastAgent updateModelValues(final ContrastAgent agentDb, final ContrastAgent agent) {
 		agentDb.setName(agent.getName());

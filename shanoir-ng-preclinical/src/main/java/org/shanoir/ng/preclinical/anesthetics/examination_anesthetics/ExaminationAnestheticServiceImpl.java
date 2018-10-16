@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.anesthetics.examination_anesthetics;
 import java.util.List;
 
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticSe
 	private ExaminationAnestheticRepository examAnestheticsRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirPreclinicalException {
+	public void deleteById(final Long id) throws ShanoirException {
 		examAnestheticsRepository.delete(id);
 	}
 
@@ -58,26 +58,26 @@ public class ExaminationAnestheticServiceImpl implements ExaminationAnestheticSe
 	}
 
 	@Override
-	public ExaminationAnesthetic save(final ExaminationAnesthetic examAnesthetic) throws ShanoirPreclinicalException {
+	public ExaminationAnesthetic save(final ExaminationAnesthetic examAnesthetic) throws ShanoirException {
 		ExaminationAnesthetic savedExamAnesthetic = null;
 		try {
 			savedExamAnesthetic = examAnestheticsRepository.save(examAnesthetic);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirPreclinicalException.logAndThrow(LOG,
-					"Error while creating examination anesthetic: " + dive.getMessage());
+			LOG.error("Error while creating an  examination anesthetic:  ", dive);
+			throw new ShanoirException("Error while creating an  examination anesthetic:  ", dive);
 		}
 		return savedExamAnesthetic;
 	}
 
 	@Override
-	public ExaminationAnesthetic update(final ExaminationAnesthetic examAnesthetic) throws ShanoirPreclinicalException {
+	public ExaminationAnesthetic update(final ExaminationAnesthetic examAnesthetic) throws ShanoirException {
 		final ExaminationAnesthetic examAnestheticDb = examAnestheticsRepository.findOne(examAnesthetic.getId());
 		updateModelValues(examAnestheticDb, examAnesthetic);
 		try {
 			examAnestheticsRepository.save(examAnestheticDb);
 		} catch (Exception e) {
-			ShanoirPreclinicalException.logAndThrow(LOG,
-					"Error while updating an  examination anesthetic: " + e.getMessage());
+			LOG.error("Error while updating an  examination anesthetic:  ", e);
+			throw new ShanoirException("Error while updating an  examination anesthetic:  ", e);
 		}
 		return examAnestheticDb;
 	}

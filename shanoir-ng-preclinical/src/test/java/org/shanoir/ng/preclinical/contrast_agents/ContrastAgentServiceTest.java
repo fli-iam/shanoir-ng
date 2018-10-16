@@ -17,7 +17,7 @@ import org.shanoir.ng.preclinical.contrast_agent.ContrastAgent;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentRepository;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentServiceImpl;
 import org.shanoir.ng.preclinical.references.RefsServiceImpl;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ContrastAgentModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -55,7 +55,7 @@ public class ContrastAgentServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirPreclinicalException {
+	public void deleteByIdTest() throws ShanoirException {
 		agentsService.deleteById(AGENT_ID);
 
 		Mockito.verify(agentsRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -91,14 +91,14 @@ public class ContrastAgentServiceTest {
 	
 
 	@Test
-	public void saveTest() throws ShanoirPreclinicalException {
+	public void saveTest() throws ShanoirException {
 		agentsService.save(createContrastAgent());
 
 		Mockito.verify(agentsRepository, Mockito.times(1)).save(Mockito.any(ContrastAgent.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirPreclinicalException {
+	public void updateTest() throws ShanoirException {
 		final ContrastAgent updatedAgent = agentsService.update(createContrastAgent());
 		Assert.assertNotNull(updatedAgent);
 		Assert.assertTrue(UPDATED_AGENT_DATA.equals(updatedAgent.getManufacturedName()));
@@ -108,7 +108,7 @@ public class ContrastAgentServiceTest {
 
 /*
 	@Test
-	public void updateFromShanoirOldTest() throws ShanoirPreclinicalException {
+	public void updateFromShanoirOldTest() throws ShanoirException {
 		pathologiesService.updateFromShanoirOld(createPathology());
 
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());

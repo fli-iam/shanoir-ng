@@ -9,7 +9,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
@@ -58,7 +58,7 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 		try {
 			final ContrastAgent createdAgent = contrastAgentService.save(contrastagent);
 			return new ResponseEntity<ContrastAgent>(createdAgent, HttpStatus.OK);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -73,7 +73,7 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 		}
 		try {
 			contrastAgentService.deleteById(cid);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 		}
 		return new ResponseEntity<Void>(HttpStatus.OK);
@@ -141,7 +141,7 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 
 		try {
 			contrastAgentService.update(agent);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update contrast agent " + cid + " : ", e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));

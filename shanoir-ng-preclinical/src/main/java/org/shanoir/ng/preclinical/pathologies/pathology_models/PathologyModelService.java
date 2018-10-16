@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.pathologies.pathology_models;
 import java.util.List;
 
 import org.shanoir.ng.preclinical.pathologies.Pathology;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 
@@ -21,9 +21,9 @@ public interface PathologyModelService extends UniqueCheckableService<PathologyM
 	 * 
 	 * @param id
 	 *            template id.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirPreclinicalException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * Get all the references.
@@ -51,9 +51,9 @@ public interface PathologyModelService extends UniqueCheckableService<PathologyM
 	 * @param reference
 	 *            reference to create.
 	 * @return created reference.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	PathologyModel save(PathologyModel model) throws ShanoirPreclinicalException;
+	PathologyModel save(PathologyModel model) throws ShanoirException;
 
 	/**
 	 * Update a reference.
@@ -61,9 +61,9 @@ public interface PathologyModelService extends UniqueCheckableService<PathologyM
 	 * @param reference
 	 *            reference to update.
 	 * @return updated reference.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	PathologyModel update(PathologyModel model) throws ShanoirPreclinicalException;
+	PathologyModel update(PathologyModel model) throws ShanoirException;
 
 	
 

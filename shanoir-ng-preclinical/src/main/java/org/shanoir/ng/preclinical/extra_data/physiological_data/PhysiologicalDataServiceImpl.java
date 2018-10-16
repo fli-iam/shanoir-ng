@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.extra_data.physiological_data;
 import java.util.List;
 
 import org.shanoir.ng.preclinical.extra_data.ExtraDataService;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
 	private PhysiologicalDataRepository physioDataRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirPreclinicalException {
+	public void deleteById(final Long id) throws ShanoirException {
 		physioDataRepository.delete(id);
 	}
 
@@ -55,25 +55,26 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
 	}
 
 	@Override
-	public PhysiologicalData save(final PhysiologicalData extradata) throws ShanoirPreclinicalException {
+	public PhysiologicalData save(final PhysiologicalData extradata) throws ShanoirException {
 		PhysiologicalData savedPhysioData = null;
 		try {
 			savedPhysioData = physioDataRepository.save(extradata);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirPreclinicalException.logAndThrow(LOG,
-					"Error while creating examination extra data: " + dive.getMessage());
+			LOG.error("Error while creating examination extra data:  ", dive);
+			throw new ShanoirException("Error while creating examination extra data:  ", dive);
 		}
 		return savedPhysioData;
 	}
 
 	@Override
-	public PhysiologicalData update(final PhysiologicalData extradata) throws ShanoirPreclinicalException {
+	public PhysiologicalData update(final PhysiologicalData extradata) throws ShanoirException {
 		final PhysiologicalData physiologicalDataDB = physioDataRepository.findOne(extradata.getId());
 		updatePhysiologicalDataValues(physiologicalDataDB, extradata);
 		try {
 			physioDataRepository.save(physiologicalDataDB);
 		} catch (Exception e) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while updating extradata: " + e.getMessage());
+			LOG.error("Error while updating examination extra data:  ", e);
+			throw new ShanoirException("Error while updating examination extra data:  ", e);
 		}
 		return physiologicalDataDB;
 	}

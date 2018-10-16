@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.anesthetics.ingredients;
 import java.util.List;
 
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 
@@ -21,9 +21,9 @@ public interface AnestheticIngredientService extends UniqueCheckableService<Anes
 	 * 
 	 * @param id
 	 *            ingredient id.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirPreclinicalException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * Get all the ingredients.
@@ -57,9 +57,9 @@ public interface AnestheticIngredientService extends UniqueCheckableService<Anes
 	 * @param ingredient
 	 *            ingredient to create.
 	 * @return created ingredient.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	AnestheticIngredient save(AnestheticIngredient ingredient) throws ShanoirPreclinicalException;
+	AnestheticIngredient save(AnestheticIngredient ingredient) throws ShanoirException;
 
 	/**
 	 * Update a ingredient.
@@ -67,9 +67,9 @@ public interface AnestheticIngredientService extends UniqueCheckableService<Anes
 	 * @param ingredient
 	 *            ingredient to update.
 	 * @return updated ingredient.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	AnestheticIngredient update(AnestheticIngredient ingredient) throws ShanoirPreclinicalException;
+	AnestheticIngredient update(AnestheticIngredient ingredient) throws ShanoirException;
 
 	
 

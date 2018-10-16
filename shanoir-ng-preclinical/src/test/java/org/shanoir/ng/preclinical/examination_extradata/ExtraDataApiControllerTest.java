@@ -15,7 +15,7 @@ import org.shanoir.ng.configuration.ShanoirPreclinicalConfiguration;
 import org.shanoir.ng.preclinical.extra_data.ExtraDataApiController;
 import org.shanoir.ng.preclinical.extra_data.ExtraDataService;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ExtraDataModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -75,7 +75,7 @@ public class ExtraDataApiControllerTest {
 	private ShanoirPreclinicalConfiguration preclinicalConfig;
 
 	@Before
-	public void setup() throws ShanoirPreclinicalException {
+	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(extraDataServiceMock).deleteById(1L);

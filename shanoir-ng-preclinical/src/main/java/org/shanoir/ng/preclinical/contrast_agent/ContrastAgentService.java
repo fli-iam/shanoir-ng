@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.contrast_agent;
 import java.util.List;
 
 import org.shanoir.ng.preclinical.references.Reference;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 
@@ -21,9 +21,9 @@ public interface ContrastAgentService extends UniqueCheckableService<ContrastAge
 	 * 
 	 * @param id
 	 *            contrast agent id.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirPreclinicalException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * Get all the contrast agents.
@@ -67,9 +67,9 @@ public interface ContrastAgentService extends UniqueCheckableService<ContrastAge
 	 * @param contrast agent
 	 *            contrast agent to create.
 	 * @return created contrast agent.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	ContrastAgent save(ContrastAgent agent) throws ShanoirPreclinicalException;
+	ContrastAgent save(ContrastAgent agent) throws ShanoirException;
 
 	/**
 	 * Update a contrast agent.
@@ -77,9 +77,9 @@ public interface ContrastAgentService extends UniqueCheckableService<ContrastAge
 	 * @param contrast agent
 	 *            contrast agent to update.
 	 * @return updated contrast agent.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	ContrastAgent update(ContrastAgent agent) throws ShanoirPreclinicalException;
+	ContrastAgent update(ContrastAgent agent) throws ShanoirException;
 
 	
 

@@ -2,7 +2,7 @@ package org.shanoir.ng.preclinical.therapies;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 
@@ -20,9 +20,9 @@ public interface TherapyService extends UniqueCheckableService<Therapy> {
 	 * 
 	 * @param id
 	 *            therapy id.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirPreclinicalException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * Get all the therapies.
@@ -65,9 +65,9 @@ public interface TherapyService extends UniqueCheckableService<Therapy> {
 	 * @param therapy
 	 *            therapy to create.
 	 * @return created therapy.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	Therapy save(Therapy therapy) throws ShanoirPreclinicalException;
+	Therapy save(Therapy therapy) throws ShanoirException;
 
 	/**
 	 * Update a therapy.
@@ -75,9 +75,9 @@ public interface TherapyService extends UniqueCheckableService<Therapy> {
 	 * @param therapy
 	 *            therapy to update.
 	 * @return updated therapy.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	Therapy update(Therapy therapy) throws ShanoirPreclinicalException;
+	Therapy update(Therapy therapy) throws ShanoirException;
 
 	
 

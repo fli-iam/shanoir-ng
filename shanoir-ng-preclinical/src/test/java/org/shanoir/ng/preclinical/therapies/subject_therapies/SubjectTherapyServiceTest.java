@@ -15,7 +15,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.preclinical.references.RefsRepository;
 import org.shanoir.ng.preclinical.subjects.AnimalSubjectRepository;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.TherapyModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -61,14 +61,14 @@ public class SubjectTherapyServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirPreclinicalException {
+	public void deleteByIdTest() throws ShanoirException {
 		stherapiesService.deleteById(STHERAPY_ID);
 
 		Mockito.verify(stherapiesRepository, Mockito.times(1)).delete(Mockito.anyLong());
 	}
 
 	@Test
-	public void deleteByAnimalSubjectTest() throws ShanoirPreclinicalException {
+	public void deleteByAnimalSubjectTest() throws ShanoirException {
 		stherapiesService.deleteByAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
 
 		Mockito.verify(stherapiesRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -114,14 +114,14 @@ public class SubjectTherapyServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirPreclinicalException {
+	public void saveTest() throws ShanoirException {
 		stherapiesService.save(createSubjectTherapy());
 
 		Mockito.verify(stherapiesRepository, Mockito.times(1)).save(Mockito.any(SubjectTherapy.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirPreclinicalException {
+	public void updateTest() throws ShanoirException {
 		final SubjectTherapy updatedStherapy = stherapiesService.update(createSubjectTherapy());
 		Assert.assertNotNull(updatedStherapy);
 		Assert.assertTrue(UPDATED_THERAPY_NAME.equals(updatedStherapy.getTherapy().getName()));
@@ -131,7 +131,7 @@ public class SubjectTherapyServiceTest {
 
 	/*
 	 * @Test public void updateFromShanoirOldTest() throws
-	 * ShanoirPreclinicalException {
+	 * ShanoirException {
 	 * stherapiesService.updateFromShanoirOld(createTherapy());
 	 * 
 	 * Mockito.verify(stherapiesRepository,

@@ -3,7 +3,7 @@ package org.shanoir.ng.preclinical.anesthetics.examination_anesthetics;
 import java.util.List;
 
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
 /**
@@ -19,9 +19,9 @@ public interface ExaminationAnestheticService extends UniqueCheckableService<Exa
 	 * 
 	 * @param id
 	 *            examination anesthetic id.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirPreclinicalException;
+	void deleteById(Long id) throws ShanoirException;
 
 	/**
 	 * Get all the examination anesthetics
@@ -52,9 +52,9 @@ public interface ExaminationAnestheticService extends UniqueCheckableService<Exa
 	 * @param examination
 	 *            anesthetic examination anesthetic to create.
 	 * @return created ExaminationAnesthetic.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	ExaminationAnesthetic save(ExaminationAnesthetic examAnesthetic) throws ShanoirPreclinicalException;
+	ExaminationAnesthetic save(ExaminationAnesthetic examAnesthetic) throws ShanoirException;
 
 	/**
 	 * Update a examination anesthetic
@@ -62,9 +62,9 @@ public interface ExaminationAnestheticService extends UniqueCheckableService<Exa
 	 * @param examination
 	 *            anesthetic examination anesthetic to update.
 	 * @return updated ExaminationAnesthetic.
-	 * @throws ShanoirPreclinicalException
+	 * @throws ShanoirException
 	 */
-	ExaminationAnesthetic update(ExaminationAnesthetic examAnesthetic) throws ShanoirPreclinicalException;
+	ExaminationAnesthetic update(ExaminationAnesthetic examAnesthetic) throws ShanoirException;
 
 	/**
 	 * Get all the examination anesthetics by anesthetic

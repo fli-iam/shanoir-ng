@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -51,7 +51,7 @@ public class ExaminationAnestheticServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirPreclinicalException {
+	public void deleteByIdTest() throws ShanoirException {
 		examAnestheticsService.deleteById(EXAM_ANESTHETIC_ID);
 
 		Mockito.verify(examAnestheticRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -87,14 +87,14 @@ public class ExaminationAnestheticServiceTest {
 	
 
 	@Test
-	public void saveTest() throws ShanoirPreclinicalException {
+	public void saveTest() throws ShanoirException {
 		examAnestheticsService.save(createExaminationAnesthetic());
 
 		Mockito.verify(examAnestheticRepository, Mockito.times(1)).save(Mockito.any(ExaminationAnesthetic.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirPreclinicalException {
+	public void updateTest() throws ShanoirException {
 		final ExaminationAnesthetic updatedExamAnesthetic = examAnestheticsService.update(createExaminationAnesthetic());
 		Assert.assertNotNull(updatedExamAnesthetic);
 		Assert.assertTrue(UPDATED_EXAM_ANESTHETIC_ANESTHETIC_ID.equals(updatedExamAnesthetic.getAnesthetic().getId()));
@@ -104,7 +104,7 @@ public class ExaminationAnestheticServiceTest {
 
 /*
 	@Test
-	public void updateFromShanoirOldTest() throws ShanoirPreclinicalException {
+	public void updateFromShanoirOldTest() throws ShanoirException {
 		pathologiesService.updateFromShanoirOld(createPathology());
 
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).findOne(Mockito.anyLong());

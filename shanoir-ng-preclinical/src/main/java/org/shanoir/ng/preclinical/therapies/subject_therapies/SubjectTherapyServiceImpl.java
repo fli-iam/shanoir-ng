@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.shanoir.ng.preclinical.subjects.AnimalSubject;
 import org.shanoir.ng.preclinical.therapies.Therapy;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +34,12 @@ public class SubjectTherapyServiceImpl implements SubjectTherapyService {
 	private SubjectTherapyRepository subtherapiesRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirPreclinicalException {
+	public void deleteById(final Long id) throws ShanoirException {
 		subtherapiesRepository.delete(id);
 	}
 
 	@Override
-	public void deleteByAnimalSubject(AnimalSubject animalSubject) throws ShanoirPreclinicalException {
+	public void deleteByAnimalSubject(AnimalSubject animalSubject) throws ShanoirException {
 		List<SubjectTherapy> therapies = findAllByAnimalSubject(animalSubject);
 		for (SubjectTherapy subjectTherapy : therapies) {
 			deleteById(subjectTherapy.getId());
@@ -72,24 +72,26 @@ public class SubjectTherapyServiceImpl implements SubjectTherapyService {
 	}
 
 	@Override
-	public SubjectTherapy save(final SubjectTherapy subtherapy) throws ShanoirPreclinicalException {
+	public SubjectTherapy save(final SubjectTherapy subtherapy) throws ShanoirException {
 		SubjectTherapy savedTherapy = null;
 		try {
 			savedTherapy = subtherapiesRepository.save(subtherapy);
 		} catch (DataIntegrityViolationException dive) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while creating subject therapy: " + dive.getMessage());
+			LOG.error("Error while creating subject therapy:  ", dive);
+			throw new ShanoirException("Error while creating subject therapy:  ", dive);
 		}
 		return savedTherapy;
 	}
 
 	@Override
-	public SubjectTherapy update(final SubjectTherapy subtherapy) throws ShanoirPreclinicalException {
+	public SubjectTherapy update(final SubjectTherapy subtherapy) throws ShanoirException {
 		final SubjectTherapy subtherapyDb = subtherapiesRepository.findOne(subtherapy.getId());
 		updateModelValues(subtherapyDb, subtherapy);
 		try {
 			subtherapiesRepository.save(subtherapyDb);
 		} catch (Exception e) {
-			ShanoirPreclinicalException.logAndThrow(LOG, "Error while updating a subject therapy: " + e.getMessage());
+			LOG.error("Error while updating subject therapy:  ", e);
+			throw new ShanoirException("Error while updating subject therapy:  ", e);
 		}
 		return subtherapyDb;
 	}

@@ -15,7 +15,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirPreclinicalException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.slf4j.Logger;
@@ -77,7 +77,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 		} catch (IOException e) {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", null));
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Error while saving updated extradata", null));
 		}
@@ -103,7 +103,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 		try {
 			final ExaminationExtraData createdExtraData = extraDataService.save(extradata);
 			return new ResponseEntity<ExaminationExtraData>(createdExtraData, HttpStatus.OK);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -133,7 +133,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 		try {
 			final PhysiologicalData createdExtraData = physioDataService.save(extradata);
 			return new ResponseEntity<PhysiologicalData>(createdExtraData, HttpStatus.OK);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -160,7 +160,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 		try {
 			final BloodGasData createdExtraData = bloodGasDataService.save(extradata);
 			return new ResponseEntity<BloodGasData>(createdExtraData, HttpStatus.OK);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 		}
@@ -185,7 +185,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 		}
 		try {
 			extraDataService.deleteById(toDelete.getId());
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_ACCEPTABLE);
 		} catch (Exception e) {
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.NOT_FOUND.value(),
@@ -263,7 +263,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 		/* Update template in db. */
 		try {
 			physioDataService.update(physioData);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update extradata " + id + " : ", e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -296,7 +296,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 		/* Update template in db. */
 		try {
 			bloodGasDataService.update(bloodGasData);
-		} catch (ShanoirPreclinicalException e) {
+		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update extradata " + id + " : ", e);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
