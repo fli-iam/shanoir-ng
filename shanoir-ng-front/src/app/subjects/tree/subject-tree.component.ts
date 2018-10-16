@@ -48,7 +48,7 @@ export class SubjectTreeComponent {
     }
 
     showExaminationDetails(examinationId: number) {
-        this.router.navigate(['/examination'], { queryParams: { id: examinationId, mode: "view" } });
+        this.router.navigate(['/examination/details/' + examinationId])
     }
 
 }

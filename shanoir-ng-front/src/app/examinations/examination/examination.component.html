@@ -29,7 +29,7 @@
 						<label i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/study']" [queryParams]="{mode: 'view', id: examination.studyId}">
+								<a [routerLink]="['/study/details/', examination.studyId]">
 									{{examination.studyName}}
 								</a>		
 							</ng-template>
@@ -58,7 +58,7 @@
 						<label i18n="Examination detail|Center label@@examinationDetailCenter" class="required-label">Center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: examination.centerId}">
+								<a [routerLink]="['/center/details/', examination.centerId]">
 									{{examination.centerName}}
 								</a>
 							</ng-template>

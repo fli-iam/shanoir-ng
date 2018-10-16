@@ -172,7 +172,7 @@
 						<label i18n="Study detail|Current centers and investigators label@@studyDetailCurrentCentersAndPI" class="required-label">Current centers and investigators</label>
 						<span class="right-col study-center-list">
 							<div *ngFor="let studyCenter of study.studyCenterList">
-								<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: studyCenter.center.id}">
+								<a [routerLink]="['/center/details/', studyCenter.center.id]">
 									{{studyCenter.center.name}}
 								</a>
 								<span class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.center.id)" *ngIf="mode != 'view'"><i class="fas fa-ban"></i></span>

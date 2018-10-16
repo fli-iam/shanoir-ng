@@ -37,13 +37,6 @@ let appRoutes: Routes = [
         path: 'account-request',
         component: AccountRequestComponent,
     }, {
-        path: 'user',
-        component: UserComponent
-    }, {
-        path: 'user-list',
-        component: UserListComponent,
-        canActivate: [AuthAdminGuard]
-    }, {
         path: 'extension-request',
         component: ExtensionRequestComponent,
     }, {
@@ -53,14 +46,6 @@ let appRoutes: Routes = [
         path: 'imports',
         component: ImportComponent
     }, {
-        path: 'manufacturer',
-        component: ManufacturerComponent,
-        canActivate: [AuthNotGuestGuard]
-    }, {
-        path: 'manufacturer-model',
-        component: ManufacturerModelComponent,
-        canActivate: [AuthNotGuestGuard]
-    }, {
         path: 'new-instrument',
         component: NewInstrumentComponent,
         canActivate: [AuthNotGuestGuard]
@@ -68,18 +53,21 @@ let appRoutes: Routes = [
 ];
 
 appRoutes = appRoutes.concat(
-    getRoutesFor('study', StudyComponent, StudyListComponent),
-    getRoutesFor('subject', SubjectComponent, SubjectListComponent),
-    getRoutesFor('examination', ExaminationComponent, ExaminationListComponent),
-    getRoutesFor('dataset', DatasetComponent, DatasetListComponent),
-    getRoutesFor('center', CenterComponent, CenterListComponent),
-    getRoutesFor('acquisition-equipment', AcquisitionEquipmentComponent, AcquisitionEquipmentListComponent),
-    getRoutesFor('coil', CoilComponent, CoilListComponent),
+    getRoutesFor('study', StudyComponent, StudyListComponent, AuthNotGuestGuard),
+    getRoutesFor('subject', SubjectComponent, SubjectListComponent, AuthNotGuestGuard),
+    getRoutesFor('examination', ExaminationComponent, ExaminationListComponent, AuthNotGuestGuard),
+    getRoutesFor('dataset', DatasetComponent, DatasetListComponent, AuthNotGuestGuard),
+    getRoutesFor('center', CenterComponent, CenterListComponent, AuthNotGuestGuard),
+    getRoutesFor('acquisition-equipment', AcquisitionEquipmentComponent, AcquisitionEquipmentListComponent, AuthNotGuestGuard),
+    getRoutesFor('coil', CoilComponent, CoilListComponent, AuthNotGuestGuard),
+    getRoutesFor('user', UserComponent, UserListComponent, AuthAdminGuard),
+    getRoutesFor('manufacturer', ManufacturerComponent, HomeComponent, AuthNotGuestGuard),
+    getRoutesFor('manufacturer-model', ManufacturerModelComponent, HomeComponent, AuthNotGuestGuard)
 );
 
-export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes);
+export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes); 
 
-function getRoutesFor(entityName: string, entityComponent, listComponent): Routes {
+function getRoutesFor(entityName: string, entityComponent, listComponent, auth): Routes {
     return [
         {
             path: entityName,
@@ -88,19 +76,22 @@ function getRoutesFor(entityName: string, entityComponent, listComponent): Route
         }, {
             path: entityName + '/list',
             component: listComponent,
-            canActivate: [AuthNotGuestGuard],
+            canActivate: [auth],
         }, {
             path: entityName+'/details/:id',
             component: entityComponent,
-            data: { mode: 'view' }
+            data: { mode: 'view' },
+            canActivate: [auth],
         }, {
             path: entityName+'/edit/:id',
             component: entityComponent,
-            data: { mode: 'edit' }
+            data: { mode: 'edit' },
+            canActivate: [auth],
         }, {
             path: entityName+'/create',
             component: entityComponent,
-            data: { mode: 'create' }
+            data: { mode: 'create' },
+            canActivate: [auth],
         }
     ];
 };

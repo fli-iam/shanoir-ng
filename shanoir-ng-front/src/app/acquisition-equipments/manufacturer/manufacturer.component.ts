@@ -1,8 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Location } from '@angular/common';
-import { ActivatedRoute, Router, Params } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 import { Manufacturer } from '../shared/manufacturer.model';
 import { ManufacturerService } from '../shared/manufacturer.service';
@@ -18,7 +17,7 @@ export class ManufacturerComponent implements OnInit {
     
     private manuf: Manufacturer = new Manufacturer();
     public manufForm: FormGroup;
-    private manufId: number;
+    private id: number;
     @Input() mode: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     private isNameUnique: Boolean = true;
@@ -27,7 +26,8 @@ export class ManufacturerComponent implements OnInit {
     constructor (private route: ActivatedRoute, private router: Router,
         private manufService: ManufacturerService,   private fb: FormBuilder,
         private location: Location, private keycloakService: KeycloakService) {
-
+            this.mode = this.route.snapshot.data['mode'];
+            this.id = +this.route.snapshot.params['id'];
     }
 
     ngOnInit(): void {
@@ -36,28 +36,14 @@ export class ManufacturerComponent implements OnInit {
     }
 
     getManufacturer(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                let manufId = queryParams['id'];
-                if (!this.mode) {
-                    let mode = queryParams['mode'];
-                    if (mode) {
-                        this.mode = mode;
-                    }
-                }
-                if (manufId && this.mode !== 'create') {
-                    // view or edit mode
-                    this.manufId = manufId;
-                    return this.manufService.getManufacturer(manufId);
-                } else { 
-                    // create mode
-                    return Observable.of<Manufacturer>();
-                }
-            })
-            .subscribe((manuf: Manufacturer) => {
+        if (this.mode == 'create') {
+            this.manuf = new Manufacturer();
+        } else {
+            this.manufService.getManufacturer(this.id).then((manuf: Manufacturer) => {
                 this.manuf = manuf;
                 this.buildForm();
             });
+        }
     }   
 
     buildForm(): void {
@@ -99,7 +85,7 @@ export class ManufacturerComponent implements OnInit {
     }
 
     edit(): void {
-        this.router.navigate(['/manufacturer'], { queryParams: {id: this.manufId, mode: "edit"}});
+        this.router.navigate(['/manufacturer/edit/', this.id]);
     }
 
     create(): void {
@@ -116,7 +102,7 @@ export class ManufacturerComponent implements OnInit {
 
     update(): void {
         this.manuf = this.manufForm.value;
-        this.manufService.update(this.manufId, this.manuf)
+        this.manufService.update(this.id, this.manuf)
         .subscribe((manuf) => {
             this.back();
         }, (err: String) => {

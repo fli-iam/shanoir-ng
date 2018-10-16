@@ -7,7 +7,7 @@
 </span>
 <ul *ngIf="tab_open">
     <li *ngFor="let o of list">
-        <a [routerLink]="getLink(o)" [queryParams]="{mode: 'view', id: o.id}">
+        <a [routerLink]="[getLink(o) + '/details/', o.id]">
             <span [innerHTML]="getText(o)"></span>
         </a>
     </li>

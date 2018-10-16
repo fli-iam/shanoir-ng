@@ -3,7 +3,7 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
-import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
+import { IMyDate } from 'mydatepicker';
 
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
@@ -25,14 +25,25 @@ export class UserComponent implements OnInit {
     roles: Role[];
     isEmailUnique: boolean = true;
     isDateValid: boolean = true;
-    creationMode: boolean;
-    userId: number;
     selectedDateNormal: IMyDate;
     accountRequestInfo: AccountRequestInfo;
     private accountRequestInfoValid: boolean = false;
+    private id: number;
+    @Input() mode: "view" | "edit" | "create";
 
     constructor(private router: Router, private location: Location, private route: ActivatedRoute,
         private userService: UserService, private roleService: RoleService, private fb: FormBuilder) {
+            this.mode = this.route.snapshot.data['mode'];
+            this.id = +this.route.snapshot.params['id'];
+    }
+
+    ngOnInit(): void {
+        if (this.requestAccountMode) {
+            this.mode = "create";
+        } else {
+            this.getRoles();
+        }
+        this.buildForm();
     }
 
     getRoles(): void {
@@ -49,19 +60,10 @@ export class UserComponent implements OnInit {
     }
 
     getUser(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                let userId = queryParams['id'];
-                if (userId) {
-                    this.creationMode = false;
-                    this.userId = userId;
-                    return this.userService.getUser(userId);
-                } else {
-                    this.creationMode = true;
-                    return Observable.of<User>();
-                }
-            })
-            .subscribe((user: User) => {
+        if (this.mode == 'create') {
+            this.user = new User();
+        } else {
+            this.userService.getUser(this.id).then((user: User) => {
                 user.role = this.getRoleById(user.role.id);
                 this.user = user;
                 if (user.extensionRequestDemand) {
@@ -69,6 +71,7 @@ export class UserComponent implements OnInit {
                 }
                 this.accountRequestInfo = this.user.accountRequestInfo;
             });
+        }
     }
 
     getOut(user: User = null): void {
@@ -85,7 +88,7 @@ export class UserComponent implements OnInit {
 
     accept(): void {
         this.submit();
-        this.userService.confirmAccountRequest(this.userId, this.user)
+        this.userService.confirmAccountRequest(this.id, this.user)
             .subscribe((user) => {
                 this.getOut();
             }, (err: String) => {
@@ -96,7 +99,7 @@ export class UserComponent implements OnInit {
     }
 
     deny(): void {
-        this.userService.denyAccountRequest(this.userId)
+        this.userService.denyAccountRequest(this.id)
             .then(res => {
                 this.getOut();
             })
@@ -135,7 +138,7 @@ export class UserComponent implements OnInit {
 
     update(): void {
         this.submit();
-        this.userService.update(this.userId, this.user)
+        this.userService.update(this.id, this.user)
             .subscribe((user) => {
                 this.getOut(user);
             }, (err: String) => {
@@ -150,7 +153,7 @@ export class UserComponent implements OnInit {
         this.user.accountRequestInfo = this.accountRequestInfo;
     }
 
-    isuserFormValid(): boolean {
+    isUserFormValid(): boolean {
         if (this.userForm.valid && this.isDateValid) {
             if (this.requestAccountMode) {
                 if (this.accountRequestInfoValid) {
@@ -164,15 +167,6 @@ export class UserComponent implements OnInit {
         } else {
             return false;
         }
-    }
-
-    ngOnInit(): void {
-        if (this.requestAccountMode) {
-            this.creationMode = true;
-        } else {
-            this.getRoles();
-        }
-        this.buildForm();
     }
 
     buildForm(): void {

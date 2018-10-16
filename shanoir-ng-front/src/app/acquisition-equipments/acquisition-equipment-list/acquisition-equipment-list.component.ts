@@ -84,26 +84,17 @@ export class AcquisitionEquipmentListComponent {
                 }
             },
             {
-                headerName: "Manufacturer", field: "manufacturerModel.manufacturer.name", type: "link", clickAction: {
-                    target: "/manufacturer", getParams: function (acqEquip: AcquisitionEquipment): Object {
-                        return { id: acqEquip.manufacturerModel.manufacturer.id, mode: "view" };
-                    }
-                }
+                headerName: "Manufacturer", field: "manufacturerModel.manufacturer.name", type: "link", 
+                action: (acqEquip: AcquisitionEquipment) => this.router.navigate(['/manufacturer/details/' + acqEquip.manufacturerModel.manufacturer.id])
             },
             {
-                headerName: "Manufacturer model name", field: "manufacturerModel.name", type: "link", clickAction: {
-                    target: "/manufacturer-model", getParams: function (acqEquip: AcquisitionEquipment): Object {
-                        return { id: acqEquip.manufacturerModel.id, mode: "view" };
-                    }
-                }
+                headerName: "Manufacturer model name", field: "manufacturerModel.name", type: "link", 
+                action: (acqEquip: AcquisitionEquipment) => this.router.navigate(['/manufacturer-model/details/' + acqEquip.manufacturerModel.id])
             },
             { headerName: "Serial number", field: "serialNumber", width: "200px" },
             {
-                headerName: "Center", field: "center.name", type: "link", clickAction: {
-                    target: "/center", getParams: function (acqEquip: AcquisitionEquipment): Object {
-                        return { id: acqEquip.center.id, mode: "view" };
-                    }
-                }
+                headerName: "Center", field: "center.name", type: "link", 
+                action: (acqEquip: AcquisitionEquipment) => this.router.navigate(['/center/details/' + acqEquip.center.id])
             }
         ];
         if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {

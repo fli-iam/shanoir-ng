@@ -22,7 +22,8 @@
                 <select [disabled]="!study" [(ngModel)]="studycard" (ngModelChange)="onSelectStudycard($event)">
                     <option *ngFor="let studycard of studycards" [ngValue]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</option>
                 </select>
-                <button [disabled]="!studycard" (click)="showStudyCardDetails()">details</button>
+                <!-- studycard not available for the moment -->
+                <button disabled (click)="showStudyCardDetails()">details</button>
             </span>
             <br/><span>
                 <label *ngIf="studycardMissingError==true" class="form-validation-alert" i18n="Import|StudycardMissingError label"><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Warning :</strong> no study card is defined for this research study. You cannot import data into this research study.</label>
