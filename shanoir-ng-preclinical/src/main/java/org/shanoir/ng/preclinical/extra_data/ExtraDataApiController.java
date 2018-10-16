@@ -180,8 +180,8 @@ public class ExtraDataApiController implements ExtraDataApi {
 			if (Files.exists(Paths.get(toDelete.getFilepath())))
 				Files.delete(Paths.get(toDelete.getFilepath()));
 		} catch (Exception e) {
-			LOG.error("There was an error tryng to delete files from " + toDelete.getFilepath() + toDelete.getFilename()
-					+ " " + e.getMessage());
+			LOG.error("There was an error trying to delete files from " + toDelete.getFilepath()
+					+ toDelete.getFilename() + " " + e.getMessage(), e);
 		}
 		try {
 			extraDataService.deleteById(toDelete.getId());
@@ -232,7 +232,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 				return ResponseEntity.ok().headers(header).contentLength(toDownload.length())
 						.contentType(MediaType.parseMediaType("application/octet-stream")).body((Resource) resource);
 			} catch (IOException ioe) {
-				LOG.error("Error while getting file to download " + ioe.getMessage());
+				LOG.error("Error while getting file to download " + ioe.getMessage(), ioe);
 				return new ResponseEntity<Resource>(HttpStatus.NOT_FOUND);
 			}
 		}

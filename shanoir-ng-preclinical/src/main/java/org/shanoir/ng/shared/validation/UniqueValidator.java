@@ -20,7 +20,7 @@ import org.springframework.util.StringUtils;
  *
  * @param <T>
  */
-public class UniqueValidator <T extends AbstractGenericItem> {
+public class UniqueValidator<T extends AbstractGenericItem> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UniqueValidator.class);
 
@@ -35,9 +35,9 @@ public class UniqueValidator <T extends AbstractGenericItem> {
 	}
 
 	/**
-	 * Validates what can't be done by Spring/Hibernate validation, in particular unique constraints
-	 * Calls database !!!
-	 * Check equals implementation for your entity !!!
+	 * Validates what can't be done by Spring/Hibernate validation, in particular
+	 * unique constraints Calls database !!! Check equals implementation for your
+	 * entity !!!
 	 *
 	 * @param entity
 	 * @return
@@ -48,22 +48,27 @@ public class UniqueValidator <T extends AbstractGenericItem> {
 			for (Field field : entity.getClass().getDeclaredFields()) {
 				// check @unique
 				if (field.isAnnotationPresent(Unique.class)) {
-					String getterName = "get"+StringUtils.capitalize(field.getName());
+					String getterName = "get" + StringUtils.capitalize(field.getName());
 					try {
 						Method getter = entity.getClass().getMethod(getterName);
 						Object value = getter.invoke(entity);
 						List<T> foundedList = service.findBy(field.getName(), value);
 						// If found entities and it is not the same current entity
-						if (foundedList != null && !foundedList.isEmpty() && !(foundedList.size() == 1 && foundedList.get(0).getId().equals(entity.getId()))) {
+						if (foundedList != null && !foundedList.isEmpty()
+								&& !(foundedList.size() == 1 && foundedList.get(0).getId().equals(entity.getId()))) {
 							List<FieldError> errors = new ArrayList<FieldError>();
-							errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", value));
+							errors.add(new FieldError("unique",
+									"The given value is already taken for this field, choose another", value));
 							errorMap.put(field.getName(), errors);
 						}
 					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 						LOG.error("Error while checking @Unique custom annotation", e);
 					} catch (NoSuchMethodException e) {
-						LOG.error("Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
-								+ getterName + "() for accessing " + entity.getClass().getName() + "." + field.getName());
+						LOG.error(
+								"Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
+										+ getterName + "() for accessing " + entity.getClass().getName() + "."
+										+ field.getName(),
+								e);
 					}
 				}
 			}
@@ -72,7 +77,7 @@ public class UniqueValidator <T extends AbstractGenericItem> {
 		}
 		return errorMap;
 	}
-	
+
 	/**
 	 * Validates a unique value in field but not necesseraly on Id
 	 *
@@ -85,7 +90,7 @@ public class UniqueValidator <T extends AbstractGenericItem> {
 			for (Field field : entity.getClass().getDeclaredFields()) {
 				// check @unique
 				if (field.isAnnotationPresent(Unique.class)) {
-					String getterName = "get"+StringUtils.capitalize(field.getName());
+					String getterName = "get" + StringUtils.capitalize(field.getName());
 					try {
 						Method getter = entity.getClass().getMethod(getterName);
 						Object value = getter.invoke(entity);
@@ -93,14 +98,18 @@ public class UniqueValidator <T extends AbstractGenericItem> {
 						// If found entities and it is not the same current entity
 						if (foundedList != null && !foundedList.isEmpty()) {
 							List<FieldError> errors = new ArrayList<FieldError>();
-							errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", value));
+							errors.add(new FieldError("unique",
+									"The given value is already taken for this field, choose another", value));
 							errorMap.put(field.getName(), errors);
 						}
 					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 						LOG.error("Error while checking @Unique custom annotation", e);
 					} catch (NoSuchMethodException e) {
-						LOG.error("Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
-								+ getterName + "() for accessing " + entity.getClass().getName() + "." + field.getName());
+						LOG.error(
+								"Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
+										+ getterName + "() for accessing " + entity.getClass().getName() + "."
+										+ field.getName(),
+								e);
 					}
 				}
 			}

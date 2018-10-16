@@ -67,7 +67,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 			try {
 				pathos.setAnimalSubject(animalSubject);
 			} catch (Exception e) {
-				LOG.error("Error while parsing subject id for Long cast " + e.getMessage());
+				LOG.error("Error while parsing subject id for Long cast " + e.getMessage(), e);
 			}
 
 			/* Save pathos in db. */

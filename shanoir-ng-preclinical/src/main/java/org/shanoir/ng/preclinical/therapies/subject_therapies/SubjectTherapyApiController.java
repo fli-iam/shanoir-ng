@@ -64,7 +64,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 			try {
 				subtherapy.setAnimalSubject(animalSubject);
 			} catch (Exception e) {
-				LOG.error("Error while parsing subject id for Long cast " + e.getMessage());
+				LOG.error("Error while parsing subject id for Long cast " + e.getMessage(), e);
 			}
 
 			/* Save subject therapy in db. */

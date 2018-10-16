@@ -14,7 +14,6 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 /**
@@ -24,7 +23,7 @@ import org.springframework.util.StringUtils;
  *
  * @param <T>
  */
-public class RefValueExistsValidator <T extends AbstractGenericItem> {
+public class RefValueExistsValidator<T extends AbstractGenericItem> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RefValueExistsValidator.class);
 
@@ -49,24 +48,29 @@ public class RefValueExistsValidator <T extends AbstractGenericItem> {
 			for (Field field : entity.getClass().getDeclaredFields()) {
 				// check @unique
 				if (field.isAnnotationPresent(RefValueExists.class)) {
-					String getterName = "get"+StringUtils.capitalize(field.getName());
+					String getterName = "get" + StringUtils.capitalize(field.getName());
 					try {
 						Method getter = entity.getClass().getMethod(getterName);
-						Reference value = (Reference)getter.invoke(entity);
-						if(value != null){
-							Optional<Reference> foundValue = service.findByTypeAndValue(field.getName(), value.getValue());
+						Reference value = (Reference) getter.invoke(entity);
+						if (value != null) {
+							Optional<Reference> foundValue = service.findByTypeAndValue(field.getName(),
+									value.getValue());
 							// If found entities and it is not the same current entity
 							if (!foundValue.isPresent()) {
 								List<FieldError> errors = new ArrayList<FieldError>();
-								errors.add(new FieldError("invalid value", "The given value do not exists for this field", value.getValue()));
+								errors.add(new FieldError("invalid value",
+										"The given value do not exists for this field", value.getValue()));
 								errorMap.put(field.getName(), errors);
 							}
-						}						
+						}
 					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 						LOG.error("Error while checking @RefValueExists custom annotation", e);
 					} catch (NoSuchMethodException e) {
-						LOG.error("Error while checking @RefValueExists custom annotation, you must implement a method named "
-								+ getterName + "() for accessing " + entity.getClass().getName() + "." + field.getName());
+						LOG.error(
+								"Error while checking @RefValueExists custom annotation, you must implement a method named "
+										+ getterName + "() for accessing " + entity.getClass().getName() + "."
+										+ field.getName(),
+								e);
 					}
 				}
 			}

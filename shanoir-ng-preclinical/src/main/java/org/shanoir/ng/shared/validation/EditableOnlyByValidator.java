@@ -62,7 +62,8 @@ public class EditableOnlyByValidator<T> {
 						LOG.error(
 								"Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
 										+ getterName + "() for accessing " + originalEntity.getClass().getName() + "."
-										+ field.getName());
+										+ field.getName(),
+								e);
 					}
 				}
 			}
@@ -101,7 +102,8 @@ public class EditableOnlyByValidator<T> {
 						LOG.error(
 								"Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
 										+ getterName + "() for accessing " + editedEntity.getClass().getName() + "."
-										+ field.getName());
+										+ field.getName(),
+								e);
 					}
 				}
 			}

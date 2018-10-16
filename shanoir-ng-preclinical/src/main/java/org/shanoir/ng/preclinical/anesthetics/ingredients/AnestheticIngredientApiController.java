@@ -59,7 +59,7 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 			try {
 				ingredient.setAnesthetic(anesthetic);
 			} catch (Exception e) {
-				LOG.error("Error while parsing anesthetic id for Long cast " + e.getMessage());
+				LOG.error("Error while parsing anesthetic id for Long cast " + e.getMessage(), e);
 			}
 			/* Save ingredient in db. */
 			try {
