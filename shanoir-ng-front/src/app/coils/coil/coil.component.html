@@ -69,10 +69,10 @@
 								</a> 
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="center" required formControlName="center" [(ngModel)]="coil.center" (ngModelChange)="updateManufList($event)" [compareWith]="compareEntities">
+								<select id="center" formControlName="center" [(ngModel)]="coil.center"  (change)="updateManufList($event)" [compareWith]="compareEntities">
 									<option *ngFor="let center of centers" [ngValue]="center">{{center?.name}}</option>
 								</select>
-								<button i18n="Coil detail|Create new center label@@coilDetailNewCenter" (click)="openNewCenter()">
+								<button i18n="Coil detail|Create new center label@@coilDetailNewCenter" (click)="openNewCenter()" [disabled]="form.get('center').disabled">
 									<i class="fas fa-plus-square"></i>
 									new center
 								</button>
@@ -81,7 +81,7 @@
 						</span>
 					</li>
 					<li>
-						<label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel" class="required-label">Acquisition Equipment Model</label>
+						<label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel" class="required-label">Manufacturer Model</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/manufacturer-model']" [queryParams]="{mode: 'view', id: coil.manufacturerModel?.id}">
@@ -89,10 +89,10 @@
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="acquiEquipModel" required formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel" [compareWith]="compareEntities">
+								<select formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel" [compareWith]="compareEntities">
 									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel.name}}</option>
 								</select>
-								<button i18n="Coil detail|Create new model label@@coilDetailNewManufModel" (click)="openNewManufModel()">
+								<button i18n="Coil detail|Create new model label@@coilDetailNewManufModel" (click)="openNewManufModel()" [disabled]="form.get('acquiEquipModel').disabled">
 									<i class="fas fa-plus-square"></i>
 									new manufacturer model
 								</button>

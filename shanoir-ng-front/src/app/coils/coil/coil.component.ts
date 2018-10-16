@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
@@ -23,6 +23,8 @@ export class CoilComponent extends EntityComponent<Coil> {
     private centers: Center[] = [];
     private manufModels: ManufacturerModel[] = [];
     private coilTypes: CoilType[] = CoilType.all();
+    private prefilledCenter: Center;
+    private prefilledManuf: ManufacturerModel;
 
     constructor(
             private route: ActivatedRoute,
@@ -59,22 +61,33 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     initCreate(): Promise<void> {
         this.entity = new Coil();
-        return this.centerService.getAll().then(centers => {
-            this.centers = centers;
-        });
+        this.prefilledCenter = this.breadcrumbsService.lastStep.getPrefilledValue('center');
+        if (this.prefilledCenter) {
+            this.coil.center = this.prefilledCenter;
+            this.centers = [this.prefilledCenter];
+        } else {
+            this.centerService.getAll().then(centers => {
+                this.centers = centers;
+            });
+        }
+        this.prefilledManuf = this.breadcrumbsService.lastStep.getPrefilledValue('manufacturerModel');
+        if (this.prefilledManuf) {
+            this.coil.manufacturerModel = this.prefilledManuf;
+            this.manufModels = [this.prefilledManuf];
+        }
+        return Promise.resolve();
     }
 
     buildForm(): FormGroup {
         return this.formBuilder.group({
-            'name': [this.coil.name],
-            'acquiEquipModel': [this.coil.manufacturerModel],
-            'center': [this.coil.center],
+            'name': [this.coil.name, [Validators.required, Validators.minLength(2)]],
+            'acquiEquipModel': [{value: this.coil.manufacturerModel, disabled: this.prefilledManuf}, [Validators.required]],
+            'center': [{value: this.coil.center, disabled: this.prefilledCenter}, [Validators.required]],
             'coilType': [this.coil.coilType],
             'nbChannel': [this.coil.numberOfChannels],
             'serialNb': [this.coil.serialNumber]
         });
     }
-    
 
     private updateManufList(center: Center): void {
         this.manufModels = [];

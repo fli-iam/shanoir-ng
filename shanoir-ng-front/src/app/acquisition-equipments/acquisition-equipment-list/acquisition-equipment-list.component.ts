@@ -1,4 +1,5 @@
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { Step } from 'src/app/breadcrumbs/breadcrumbs.service';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
@@ -6,8 +7,6 @@ import { TableComponent } from '../../shared/components/table/table.component';
 import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
-import { Step } from 'src/app/breadcrumbs/breadcrumbs.service';
-import { Coil } from 'src/app/coils/shared/coil.model';
 
 @Component({
     selector: 'acquisition-equipment-list',
@@ -94,11 +93,10 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
 
     openCreateCoil(acqEquip: AcquisitionEquipment) { 
         let currentStep: Step = this.breadcrumbsService.lastStep;
-        this.router.navigate(['/coil/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.lastStep).subscribe(entity => {
-                let createdCoil = entity as Coil;
-                console.log('TODO : do something with this acqEquipment n°' + acqEquip.id + ' and the newly created coil n°' + createdCoil.id);
-            });
+        this.router.navigate(['/coil/create'], ).then(success => {
+            this.breadcrumbsService.lastStep.addPrefilled('center', acqEquip.center);
+            this.breadcrumbsService.lastStep.addPrefilled('manufacturerModel', acqEquip.manufacturerModel);
+            currentStep.waitFor(this.breadcrumbsService.lastStep);
         });
     }
 

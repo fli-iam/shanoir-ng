@@ -1,30 +1,40 @@
+import { LocationStrategy } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Entity } from '../shared/components/entity/entity.abstract';
 import { Subject } from 'rxjs';
-import { LocationStrategy } from '@angular/common';
+
+import { Entity } from '../shared/components/entity/entity.abstract';
 
 @Injectable()
 export class BreadcrumbsService {
 
     public steps: Step[] = [];
-    private savedStep: Step;
+    public savedStep: Step;
 
     constructor(
             private router: Router, 
-            private location: LocationStrategy) {
+            private locationStrategy: LocationStrategy) {
                 
-        location.onPopState(() => {
+        locationStrategy.onPopState(() => {
             this.notifyBeforeBack();
         });
+
+        // router.events.subscribe( (event: Event) => {
+        //     if (event instanceof NavigationStart) {
+        //         let bcToBeStored =  {steps: this.steps, savedStep: this.savedStep};
+        //         //console.log(JSON.stringify(state), JSON.stringify(state).length);
+        //         sessionStorage.setItem('breadcrumbs', JSON.stringify(bcToBeStored));
+        //     }
+        // });
     }
 
     public addStep(label: string) {
         let step = new Step(label, this.router.url);
-        if (this.lastStep && step.route == this.lastStep.route) return;
-        if (this.beforeLastStep && step.route == this.beforeLastStep.route) {
+        if (this.lastStep && step.route == this.lastStep.route) {
             this.removeStepsAfter(this.nbSteps - 2);
-            this.savedStep = this.lastStep;
+        }
+        if (this.beforeLastStep && step.route == this.beforeLastStep.route) {
+            this.removeStepsAfter(this.nbSteps - 3);
         }
         this.steps.push(step);
     }
@@ -43,7 +53,7 @@ export class BreadcrumbsService {
     private removeStepsAfter(index: number) {
         this.steps = this.steps.slice(0, index + 1);
         if (this.nbSteps > 0) {
-            this.lastStep.disabled = false;
+            // this.lastStep.disabled = false;
             this.lastStep.resetWait();
         }
     }
@@ -95,17 +105,40 @@ export class BreadcrumbsService {
 export class Step {
 
     constructor(
-        public label: string,
-        public route: string,
-        public entity?: Entity
-    ) { }
+            public label: string,
+            public route: string,
+            public entity?: Entity) {
+    }
 
-    private subscribers: number = 0;
-    private onSaveSubject: Subject<Entity> = new Subject<Entity>();
-    private waitStep: Step;
+    // static parse(str: string): Step {
+    //     let json: Step = JSON.parse(str);
+    //     let step: Step = new Step(json.label, json.route, json.entity);
+    //     step.id = step.id;
+    //     step.subscribers = step.subscribers;
+    //     step.disabled = step.disabled;
+    //     step.displayWaitStatus = step.displayWaitStatus;
+    //     step.prefilled = step.prefilled;
+    //     return step;
+    // }
+
+    // stringify(): string {
+    //     console.log('stringify')
+    //     let ignoreList: string[] = ['onSaveSubject'];
+    //     let replacer = (key, value) => {
+    //         if (ignoreList.indexOf(key) > -1) return undefined;
+    //         else if (key == 'entity') return (value as Entity).stringify();
+    //         else return value;
+    //     }
+    //     return JSON.stringify(this, replacer);
+    // }
+
+    public id = new Date().getTime();
+    public subscribers: number = 0;
     public disabled: boolean = false;
-    private displayWaitStatus: boolean = true;
-    private prefilled: any[] = [];
+    public displayWaitStatus: boolean = true;
+    public prefilled: any[] = [];
+    public waitStep: Step;
+    private onSaveSubject: Subject<Entity> = new Subject<Entity>();
 
     private onSave(): Subject<Entity> {
         this.subscribers++;

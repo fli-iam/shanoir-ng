@@ -1,9 +1,17 @@
-import { Component, Input, ContentChildren, forwardRef, QueryList } from '@angular/core';
-import { style, animate, transition, trigger } from '@angular/core';
+import {
+    animate,
+    Component,
+    ContentChildren,
+    forwardRef,
+    Input,
+    QueryList,
+    style,
+    transition,
+    trigger,
+} from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { ImagesUrlUtil } from '../../../utils/images-url.util';
-import { BreadcrumbsService } from '../../../../breadcrumbs/breadcrumbs.service';
 
 export const animDur: number = 100;
 
@@ -45,7 +53,7 @@ export class MenuItemComponent {
 
     public closeAll: () => void;
 
-    constructor(private breadcrumbsService: BreadcrumbsService) {
+    constructor() {
     }
 
     ngAfterViewInit() {
@@ -120,7 +128,6 @@ export class MenuItemComponent {
 
     public click() {
         if (this.link != undefined || this.boolVar == undefined) {
-            this.breadcrumbsService.reset();
             this.cascadingClose();
         }
     }
