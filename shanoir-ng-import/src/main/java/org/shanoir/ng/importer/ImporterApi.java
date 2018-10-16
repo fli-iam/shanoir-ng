@@ -2,6 +2,7 @@ package org.shanoir.ng.importer;
 
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,18 @@ public interface ImporterApi {
         method = RequestMethod.POST)
     ResponseEntity<Void> uploadFiles(@ApiParam(value = "file detail") @RequestPart("files") MultipartFile[] files) throws RestServiceException;
 
+    @ApiOperation(value = "Upload one DICOM .zip file from Shanoir uploader with importJob json file", notes = "Upload DICOM .zip file", response = Void.class, tags={ "Upload one DICOM .zip file from shup", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "success returns file path", response = Void.class),
+        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
+        @ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
+        @ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
+    @RequestMapping(value = "/upload_dicom_shup/",
+        produces = { "application/json" }, 
+        consumes = { "multipart/form-data" },
+        method = RequestMethod.POST)
+    ResponseEntity<Void> uploadDicomZipFileFromShup(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException, ShanoirException;
+    
     @ApiOperation(value = "Upload one DICOM .zip file", notes = "Upload DICOM .zip file", response = Void.class, tags={ "Upload one DICOM .zip file", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "success returns file path", response = Void.class),

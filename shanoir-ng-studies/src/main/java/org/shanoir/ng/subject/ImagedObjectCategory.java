@@ -26,7 +26,7 @@ public enum ImagedObjectCategory {
 	/**
 	 * Anatomical piece
 	 */
-	ANATOMICAL_PIECE(5);
+	ANATOMICAL_PIECE(4);
 
 	private int id;
 
