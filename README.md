@@ -48,7 +48,7 @@ into the folder /docker-compose to be used from there by docker-compose
 	* 3) Angular: Open **/shanoir-ng-front/config/webpack.config.js** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST**
     * **Attention:** you will have to re-compile your code after these changes with Maven!!!
 
-* Just in case you have some old stuff of Shanoir-NG in your docker environment: **docker system prune -a**
+* Just in case you have some old stuff of Shanoir-NG in your docker environment:
     * **docker system prune -a**
     * **docker volume prune**
     * **Attention:** this will clean your entire docker system!
