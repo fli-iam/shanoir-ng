@@ -49,6 +49,8 @@ into the folder /docker-compose to be used from there by docker-compose
     * **Attention:** you will have to re-compile your code after these changes with Maven!!!
 
 * Just in case you have some old stuff of Shanoir-NG in your docker environment: **docker system prune -a**
+    * **docker system prune -a**
+    * **docker volume prune**
     * **Attention:** this will clean your entire docker system!
 * Go to the root folder and execute **docker-compose up --build**
     * If your microservices (studies, users etc.) exit like "keycloak exited with code 1", check if the databases are created.
