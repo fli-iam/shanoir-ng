@@ -1,11 +1,15 @@
 # About Shanoir-NG (next generation)
 
+GitHub is dedicated to developers, if you search more information from an user's
+point of view please see http://shanoir.org.
+
 Shanoir-NG is based on a microservice architecture, that heavily uses Docker.
 Each Docker container integrates one microservice, mostly based on Spring Boot.
 Each microservice exposes a REST interface on using Swagger 2, as definition format.
 The front-end/web interface is implemented on using "Angular 2" (now 5) technology.
 Nginx and Keycloak (on using OpenID-Connect) are used to glue everything together.
 Internally dcm4che3 is used to handle all DICOM concerns and dcm4chee-arc as backup PACS.
+Furthermore dcm2niix is used for the DICOM to NIfTI conversion and Papaya Viewer for DICOM/NIfTI web view.
 
 Many thanks to all these giants: on their shoulders we are standing to develop Shanoir-NG!!!
 
@@ -21,7 +25,7 @@ The installation of Shanoir-NG is based on two components:
 * Get access to the GitHub repository and clone the shanoir-ng repository
 * Execute the Maven build on the parent project with the following commands:
     * cd shanoir-ng-parent/
-    * mvn install -DskipTests
+    * **mvn install -DskipTests**
         * the tests will have to be cleaned up soon
 * The build creates all .jar and .js executable files and copies them
 into the folder /docker-compose to be used from there by docker-compose
@@ -44,8 +48,8 @@ into the folder /docker-compose to be used from there by docker-compose
 	* 3) Angular: Open **/shanoir-ng-front/config/webpack.config.js** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST**
     * **Attention:** you will have to re-compile your code after these changes with Maven!!!
 
-* To be sure: **docker system prune -a**
-    * **Attention:** this will clean all your docker usage before!
+* Just in case you have some old stuff of Shanoir-NG in your docker environment: **docker system prune -a**
+    * **Attention:** this will clean your entire docker system!
 * Go to the root folder and execute **docker-compose up --build**
     * If your microservices (studies, users etc.) exit like "keycloak exited with code 1", check if the databases are created.
       If not, execute the scripts manually in the databases container:
