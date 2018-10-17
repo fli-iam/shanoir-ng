@@ -5,7 +5,7 @@ Each Docker container integrates one microservice, mostly based on Spring Boot.
 Each microservice exposes a REST interface on using Swagger 2, as definition format.
 The front-end/web interface is implemented on using "Angular 2" (now 5) technology.
 Nginx and Keycloak (on using OpenID-Connect) are used to glue everything together.
-Internally dcm4che(e) is used to handle all DICOM concerns and dcm4chee-arc as backup PACS.
+Internally dcm4che3 is used to handle all DICOM concerns and dcm4chee-arc as backup PACS.
 
 Many thanks to all these giants: on their shoulders we are standing to develop Shanoir-NG!!!
 
