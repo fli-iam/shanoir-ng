@@ -12,8 +12,8 @@ Many thanks to all these giants: on their shoulders we are standing to develop S
 Installation of Shanoir-NG
 
 The installation of Shanoir-NG is based on two components:
-    * BUILD (COMPILE): with Maven 3
-    * DEPLOY: with docker-compose, version 3
+* BUILD (COMPILE): with Maven 3
+* DEPLOY: with docker-compose, version 3
 
 --------------- BUILD (COMPILE) ---------------
 
