@@ -1,4 +1,4 @@
-About Shanoir-NG (next generation)
+# About Shanoir-NG (next generation)
 
 Shanoir-NG is based on a microservice architecture, that heavily uses Docker.
 Each Docker container integrates one microservice, mostly based on Spring Boot.
@@ -9,13 +9,13 @@ Internally dcm4che(e) is used to handle all DICOM concerns and dcm4chee-arc as b
 
 Many thanks to all these giants: on their shoulders we are standing to develop Shanoir-NG!!!
 
-Installation of Shanoir-NG
+# Installation of Shanoir-NG
 
 The installation of Shanoir-NG is based on two components:
 * BUILD (COMPILE): with Maven 3
 * DEPLOY: with docker-compose, version 3
 
---------------- BUILD (COMPILE) ---------------
+## --------------- BUILD (COMPILE) ---------------
 
 * Install Maven 3 on your machine/on the server
 * Get access to the GitHub repository and clone the shanoir-ng repository
@@ -26,7 +26,7 @@ The installation of Shanoir-NG is based on two components:
 * The build creates all .jar and .js executable files and copies them
 into the folder /docker-compose to be used from there by docker-compose
 
---------------- DEPLOY ------------------------
+## --------------- DEPLOY ------------------------
 
 
 * Install docker and docker-compose:
