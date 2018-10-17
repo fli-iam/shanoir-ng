@@ -28,17 +28,22 @@ into the folder /docker-compose to be used from there by docker-compose
 
 ## --------------- DEPLOY ------------------------
 
-
 * Install docker and docker-compose:
     * https://docs.docker.com/install/
     * https://docs.docker.com/compose/install/
-* If you are on your developer machine:
+* If you are on your **developer/local machine**:
     * Configure your local /etc/hosts (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
 	* 127.0.0.1       shanoir-ng-nginx
     * For windows 7, increase your RAM and set the port redirection for the virtual box.
-* If you are on a dedicated server (e.g. shanoir-ng.irisa.fr):
+* If you are on a **dedicated server** (e.g. shanoir-ng.irisa.fr):
+    * By default Shanoir-NG is installed with the host shanoir-ng-nginx and the scheme http (dev setup)
+    * If you are on a dedicated server (e.g. shanoir-ng.irisa.fr) you will have to do manual adaptions
+      (we tried to automate as much as possible in a given time and there is still a way to go, but here we are currently):
+	* 1) Keycloak: Open **/docker-compose/keycloak/cfg/shanoir-ng-realm.json** and change **redirectUris** and **webOrigins**
+	* 2) Spring Boot: Open **/.env** and change the host and scheme of all three properties in the file
+	* 3) Angular: Open **/shanoir-ng-front/config/webpack.config.js"** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST** 
 
-* Go to the root folder and execute "docker-compose up --build"
+* Go to the root folder and execute **docker-compose up --build**
     * If your microservices (studies, users etc.) exit, check if the databases are created.
       If not, execute the scripts manually in the databases container:
 	* docker-compose exec database sh
