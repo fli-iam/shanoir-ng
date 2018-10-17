@@ -41,7 +41,7 @@ into the folder /docker-compose to be used from there by docker-compose
       (we tried to automate as much as possible in a given time and there is still a way to go, but here we are currently):
 	* 1) Keycloak: Open **/docker-compose/keycloak/cfg/shanoir-ng-realm.json** and change **redirectUris** and **webOrigins**
 	* 2) Spring Boot: Open **/.env** and change the host and scheme of all three properties in the file
-	* 3) Angular: Open **/shanoir-ng-front/config/webpack.config.js"** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST** 
+	* 3) Angular: Open **/shanoir-ng-front/config/webpack.config.js** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST** 
 
 * Go to the root folder and execute **docker-compose up --build**
     * If your microservices (studies, users etc.) exit, check if the databases are created.
