@@ -44,6 +44,7 @@ into the folder /docker-compose to be used from there by docker-compose
 	* 3) Angular: Open **/shanoir-ng-front/config/webpack.config.js** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST**
     * **Attention:** you will have to re-compile your code after these changes with Maven!!!
 
+* To be sure: **docker system prune -a**
 * Go to the root folder and execute **docker-compose up --build**
     * If your microservices (studies, users etc.) exit like "keycloak exited with code 1", check if the databases are created.
       If not, execute the scripts manually in the databases container:
