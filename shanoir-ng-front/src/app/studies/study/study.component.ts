@@ -105,16 +105,24 @@ export class StudyComponent extends EntityComponent<Study> {
         let formGroup = this.formBuilder.group({
             'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'startDate': [this.study.startDate, [DatepickerComponent.validator]],
-            'endDate': [this.study.endDate, [DatepickerComponent.validator]],
+            'endDate': [this.study.endDate, [DatepickerComponent.validator, this.dateOrdervalidator]],
             'studyStatus': [this.study.studyStatus, [Validators.required]],
             'withExamination': [this.study.withExamination],
             'clinical': [this.study.clinical, [Validators.required]],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
-            'studyCenterList': [this.selectedCenter, [this.validateCenter]]
+            'studyCenterList': [this.selectedCenter, [this.validateCenter]],
+            'subjectStudyList': [this.study.subjectStudyList]
         });
         return formGroup;
+    }
+
+    private dateOrdervalidator = (control: AbstractControl): ValidationErrors | null => {
+        if (this.study.startDate && this.study.endDate && this.study.startDate >= this.study.endDate) {
+            return { order: true}
+        }
+        return null;
     }
 
     private newStudy(): Study {
