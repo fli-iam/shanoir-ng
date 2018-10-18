@@ -8,7 +8,7 @@ Each Docker container integrates one microservice, mostly based on Spring Boot.
 Each microservice exposes a REST interface on using Swagger 2, as definition format.
 The front-end/web interface is implemented on using "Angular 2" (now 5) technology.
 Nginx and Keycloak (on using OpenID-Connect) are used to glue everything together.
-Internally dcm4che3 is used to handle all DICOM concerns and dcm4chee-arc as backup PACS.
+Internally dcm4che3 is used to handle all DICOM concerns and dcm4chee 5 arc-light as backup PACS.
 Furthermore dcm2niix is used for the DICOM to NIfTI conversion and Papaya Viewer for DICOM/NIfTI web view.
 
 Many thanks to all these giants: on their shoulders we are standing to develop Shanoir-NG!!!
@@ -59,14 +59,26 @@ into the folder /docker-compose to be used from there by docker-compose
 * Go to the root folder and execute **docker-compose up --build**
 
 * Access to shanoir-ng: http://shanoir-ng-nginx
-By default, new user accounts have been created in Keycloak by ms users. Please access to Keycloak
-admin interface below to reset the password, when you want to login (Manage users - Edit your desired
-user - Credentials - Reset password and Temporary password: No). When a SMTP server has been configured
-properly, emails with a temporary password will have been sent (not the case in dev environment).
 
+If you want to login, please go to Keycloak:
 
 * Access to Keycloak admin interface: http://localhost:8080/auth/admin/
-* Access to dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/
+
+By default, new user accounts have been created in Keycloak by ms users with temporary passwords.
+Please access to Keycloak admin interface below to reset the password, when you want to login (Manage users
+- Edit your desired user - Credentials - Reset password and Temporary password: No). When a SMTP server has
+been configured properly, emails with a temporary password will have been sent to each user (not the case in dev environment).
+
+Please use the flags **kcAdminClientUsername**, **kcAdminClientPassword**, **syncAllUsersToKeycloak**
+in the file **/docker-compose/users/Dockerfile** of ms users, to configure in production environment
+the behaviour of user account creation with Keycloak. E.g. if you want to start with an empty users
+database in Keycloak in production, please set the flag **syncAllUsersToKeycloak** to false.
+
+**Attention:** for security reasons please change in a production environment the Keycloak admin password
+in the file **/docker-compose/keycloak/variables.env** and in the file **/docker-compose/users/Dockerfile**
+adapt as well the credentials.
+
+* Access to the backup PACS dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/
 
 * This installation uses Docker named volumes, find more here to handle your local data:
 https://docs.docker.com/storage/volumes/
