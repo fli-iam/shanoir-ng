@@ -55,12 +55,18 @@ into the folder /docker-compose to be used from there by docker-compose
     * **docker system prune -a**
     * **docker volume prune**
     * **Attention:** this will clean your entire docker system!
+
 * Go to the root folder and execute **docker-compose up --build**
 
+* Access to shanoir-ng: http://shanoir-ng-nginx
+By default, new user accounts have been created in Keycloak by ms users. Please access to Keycloak
+admin interface below to reset the password, when you want to login (Manage users - Edit your desired
+user - Credentials - Reset password and Temporary password: No). When a SMTP server has been configured
+properly, emails with a temporary password will have been sent (not the case in dev environment).
 
-* Access and use shanoir-ng: http://shanoir-ng-nginx
-* Access to dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/
+
 * Access to Keycloak admin interface: http://localhost:8080/auth/admin/
+* Access to dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/
 
 * This installation uses Docker named volumes, find more here to handle your local data:
 https://docs.docker.com/storage/volumes/
