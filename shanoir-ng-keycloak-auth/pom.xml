@@ -53,8 +53,6 @@
 						<configuration>
 							<target>
 								<copy file="target/${project.build.finalName}.jar"
-									tofile="${basedir}/../shanoir-ng-keycloak/docker/${project.artifactId}.jar" />
-								<copy file="target/${project.build.finalName}.jar"
 									tofile="${basedir}/../docker-compose/keycloak/${project.artifactId}.jar" />
 							</target>
 						</configuration>

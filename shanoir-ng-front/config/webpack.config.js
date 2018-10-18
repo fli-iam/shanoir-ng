@@ -9,17 +9,33 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 /**
  * Webpack Constants
  */
-const ENV = process.env.ENV = process.env.NODE_ENV = 'development';
-const BACKEND_API_ROOT_URL = 'http://shanoir-ng-nginx/shanoir-ng';
+const ENV = process.env.ENV = process.env.NODE_ENV = 'production';
+
+const SHANOIR_NG_URL_SCHEME = 'http://';
+const SHANOIR_NG_URL_HOST = 'shanoir-ng-nginx';
+
+const SHANOIR_NG_URL_BACKEND_API =
+	SHANOIR_NG_URL_SCHEME
+	+ SHANOIR_NG_URL_HOST
+	+ '/shanoir-ng';
+	
+const SHANOIR_NG_URL_KEYCLOAK =
+	SHANOIR_NG_URL_SCHEME
+	+ SHANOIR_NG_URL_HOST
+	+ '/auth';
+
+const SHANOIR_NG_URL_LOGOUT =
+	SHANOIR_NG_URL_SCHEME
+	+ SHANOIR_NG_URL_HOST
+	+ '/shanoir-ng/index.html';
+
 const METADATA = webpackMerge(commonConfig.metadata, {
-    host: 'shanoir-ng-nginx',
-    BACKEND_API_USERS_MS_URL: BACKEND_API_ROOT_URL + '/users',
-    BACKEND_API_STUDIES_MS_URL: BACKEND_API_ROOT_URL + '/studies',
-	BACKEND_API_DATASET_MS_URL: BACKEND_API_ROOT_URL + '/datasets',
-	BACKEND_API_IMPORT_MS_URL: BACKEND_API_ROOT_URL + '/import',
-    KEYCLOAK_BASE_URL: 'http://shanoir-ng-nginx/auth',
-    LOGOUT_REDIRECT_URL: 'http://shanoir-ng-nginx/shanoir-ng/index.html',
-    port: 8080,
+    BACKEND_API_USERS_MS_URL: SHANOIR_NG_URL_BACKEND_API + '/users',
+    BACKEND_API_STUDIES_MS_URL: SHANOIR_NG_URL_BACKEND_API + '/studies',
+	BACKEND_API_DATASET_MS_URL: SHANOIR_NG_URL_BACKEND_API + '/datasets',
+	BACKEND_API_IMPORT_MS_URL: SHANOIR_NG_URL_BACKEND_API + '/import',
+    KEYCLOAK_BASE_URL: SHANOIR_NG_URL_KEYCLOAK,
+    LOGOUT_REDIRECT_URL: SHANOIR_NG_URL_LOGOUT,
     ENV: ENV,
 });
 
@@ -47,7 +63,6 @@ module.exports = webpackMerge(commonConfig, {
             filename: 'index.html',
             template: 'src/index.html'
         }),
-
         new webpack.NoEmitOnErrorsPlugin(),
         new UglifyJsPlugin({
             "sourceMap": false,
@@ -58,17 +73,11 @@ module.exports = webpackMerge(commonConfig, {
             }
         }),
         new ExtractTextPlugin('[name].css'),
-        new webpack.DefinePlugin({
-            'process.env': {
-                'ENV': JSON.stringify(ENV)
-            }
-        }),
         new webpack.LoaderOptionsPlugin({
             htmlLoader: {
                 minimize: false // workaround for ng2
             }
         }),
-
         /**
          * Plugin: DefinePlugin
          * Description: Define free variables.
