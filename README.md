@@ -45,7 +45,10 @@ into the folder /docker-compose to be used from there by docker-compose
       (we tried to automate as much as possible in a given time and there is still a way to go, but here we are currently):
 	* 1) Keycloak: Open **/docker-compose/keycloak/cfg/shanoir-ng-realm.json** and change **redirectUris** and **webOrigins**
 	* 2) Spring Boot: Open **/.env** and change the host and scheme of all three properties in the file
-	* 3) Angular: Open **/shanoir-ng-front/config/webpack.config.js** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST**
+	* 3) Docker Compose: Open **/docker-compose.yml** and change the **container_name** of Nginx to e.g. shanoir-ng.irisa.fr
+	This is necessary, that e.g. ms users and the Keycloak CLI client can access to Keycloak (resolve the host name)
+	* 4) Angular: Open **/shanoir-ng-front/config/webpack.config.js** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST**
+	
     * **Attention:** you will have to re-compile your code after these changes with Maven!!!
 
 * Just in case you have some old stuff of Shanoir-NG in your docker environment:
@@ -53,13 +56,6 @@ into the folder /docker-compose to be used from there by docker-compose
     * **docker volume prune**
     * **Attention:** this will clean your entire docker system!
 * Go to the root folder and execute **docker-compose up --build**
-    * If your microservices (studies, users etc.) exit like "keycloak exited with code 1", check if the databases are created.
-      If not, execute the scripts manually in the databases container:
-	* docker-compose exec database sh
-	* cd docker-entrypoint-initdb.d
-	* ./1_create_databases.sh
-	* ./2_add_users.sql
-	* Exit the docker container and rebuild from your docker-compose file
 
 
 * Access and use shanoir-ng: http://shanoir-ng-nginx
