@@ -179,7 +179,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     private chooseRouteAfterSave(entity: Entity) {
         this.breadcrumbsService.currentStep.notifySave(entity);
-        console.log(this.breadcrumbsService.previousStep.isWaitingFor(this.breadcrumbsService.currentStep))
         if (this.breadcrumbsService.previousStep && this.breadcrumbsService.previousStep.isWaitingFor(this.breadcrumbsService.currentStep)) {
             this.breadcrumbsService.goBack();
         }
