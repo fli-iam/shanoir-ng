@@ -81,7 +81,7 @@
 						</span>
 					</li>
 					<li>
-						<label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel" class="required-label">Manufacturer Model</label>
+						<label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel" class="required-label">Acquisition Equipment Model</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/manufacturer-model/details/', coil.manufacturerModel?.id]">
@@ -94,7 +94,7 @@
 								</select>
 								<button i18n="Coil detail|Create new model label@@coilDetailNewManufModel" (click)="openNewManufModel()" [disabled]="form.get('acquiEquipModel').disabled">
 									<i class="fas fa-plus-square"></i>
-									new manufacturer model
+									new model
 								</button>
 								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="Coil detail|Manufacturer model required error@@coilDetailManufModelRequiredError">Acquisition Equipment model is required!</label>
 							</ng-template>
