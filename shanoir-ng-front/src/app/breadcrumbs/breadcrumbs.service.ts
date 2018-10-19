@@ -1,6 +1,6 @@
 import { LocationStrategy } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import { Event, NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 
 import { Entity } from '../shared/components/entity/entity.abstract';
@@ -9,86 +9,97 @@ import { Entity } from '../shared/components/entity/entity.abstract';
 export class BreadcrumbsService {
 
     public steps: Step[] = [];
-    public savedStep: Step;
+    
+    private popFoundedStepIndex: number;
+    public replace: boolean = false;
+    private currentStepIndex: number;
+    private nextLabel: string;
+    private nextMilestone: boolean = false;
 
     constructor(
             private router: Router, 
             private locationStrategy: LocationStrategy) {
                 
-        locationStrategy.onPopState(() => {
-            this.notifyBeforeBack();
+        locationStrategy.onPopState((event: PopStateEvent) => {
+            /* detect back & forward browser events and find the target step using its timestamp */
+            for (let i=this.steps.length-1; i>=0; i--) {
+                if(this.steps[i].timestamp == event.state) {
+                    this.popFoundedStepIndex = i;
+                    break;
+                }
+            }
         });
 
-        // router.events.subscribe( (event: Event) => {
-        //     if (event instanceof NavigationStart) {
-        //         let bcToBeStored =  {steps: this.steps, savedStep: this.savedStep};
-        //         //console.log(JSON.stringify(state), JSON.stringify(state).length);
-        //         sessionStorage.setItem('breadcrumbs', JSON.stringify(bcToBeStored));
-        //     }
-        // });
+        router.events.subscribe( (event: Event) => {
+            if (event instanceof NavigationEnd) {
+                const timestamp: number = new Date().getTime();
+                if (this.replace) this.steps.pop();
+                if (this.popFoundedStepIndex != undefined && this.popFoundedStepIndex != null && this.popFoundedStepIndex >= 0 && this.popFoundedStepIndex < this.steps.length) {
+                    this.focusStep(this.popFoundedStepIndex);
+                    this.currentStepIndex = this.popFoundedStepIndex;
+                    locationStrategy.replaceState(this.steps[this.popFoundedStepIndex].timestamp, 'todo', this.router.url, '');
+                } else {
+                    this.removeStepsAfter(this.currentStepIndex);
+                    this.steps.push(new Step(this.nextLabel, this.router.url, timestamp));
+                    this.currentStepIndex = this.steps.length - 1;
+                    locationStrategy.replaceState(timestamp, 'todo', this.router.url, '');
+                }
+                if (this.nextMilestone) this.processMilestone();
+                this.nextMilestone = false;
+                this.nextLabel = null;
+                this.popFoundedStepIndex = null;
+                this.currentStep.waitStep = null;
+            }
+        });
+
     }
 
-    public addStep(label: string) {
-        let step = new Step(label, this.router.url);
-        if (this.lastStep && step.route == this.lastStep.route) {
-            this.removeStepsAfter(this.nbSteps - 2);
+    private focusStep(index: number) {
+        for (let i=index; i>=0; i--) {
+            this.steps[i].disabled = false;
+            if (this.steps[i].milestone) break;
         }
-        if (this.beforeLastStep && step.route == this.beforeLastStep.route) {
-            this.removeStepsAfter(this.nbSteps - 3);
+        for (let i=index+1; i<this.steps.length; i++) {
+            this.steps[i].disabled = true;
         }
-        this.steps.push(step);
     }
 
-    public reset() {
-        this.steps = [];
+    public nameStep(label: string) {
+        this.nextLabel = label;
+    }
+
+    public markMilestone() {
+        this.nextMilestone = true;
+    }
+    
+    private processMilestone() {
+        this.currentStep.milestone = true;
+        for (let i=0; i<this.currentStepIndex; i++) {
+            this.steps[i].disabled = true;
+        }
     }
 
     public goToStep(index: number) {
-        this.savedStep = this.steps[index];
-        this.removeStepsAfter(index);
-        this.savedStep.disabled = false;
-        this.router.navigate([this.savedStep.route]);
+        history.go(index - this.currentStepIndex);
     }
 
     private removeStepsAfter(index: number) {
         this.steps = this.steps.slice(0, index + 1);
-        if (this.nbSteps > 0) {
-            // this.lastStep.disabled = false;
-            this.lastStep.resetWait();
+        if (this.currentStep) {
+            this.currentStep.disabled = false;
+            this.currentStep.resetWait();
         }
     }
 
     public goBack() {
-        this.goToStep(this.nbSteps - 2);
+        history.go(-1);
     }
 
-    public disableLastStep() {
-        this.lastStep.disabled = true;
+    public get currentStep(): Step {
+        return this.steps[this.currentStepIndex];
     }
 
-    public notifyBeforeBack() {
-        if (this.nbSteps > 0) {
-            this.steps.pop();
-            if (this.nbSteps > 0) {
-                this.lastStep.disabled = false;
-                this.lastStep.resetWait();
-            }
-        }
-    }
-
-    public entityToReload(): boolean {
-        return this.savedStep && this.savedStep.entity && this.savedStep.route == this.router.url;
-    }
-
-    public reloadSavedEntity<T extends Entity>(): T {
-        return this.savedStep.entity as T
-    }
-
-    public get lastStep(): Step {
-        return this.steps[this.nbSteps - 1];
-    }
-
-    public get beforeLastStep(): Step {
+    public get previousStep(): Step {
         return this.steps[this.nbSteps - 2];
     }
 
@@ -97,7 +108,7 @@ export class BreadcrumbsService {
     }
 
     public isPreviousStateAwaiting(): boolean {
-        return this.beforeLastStep.isWaitingFor(this.lastStep);
+        return this.previousStep.isWaitingFor(this.currentStep);
     }
 
 }
@@ -107,6 +118,7 @@ export class Step {
     constructor(
             public label: string,
             public route: string,
+            public timestamp: number,
             public entity?: Entity) {
     }
 
@@ -139,6 +151,7 @@ export class Step {
     public prefilled: any[] = [];
     public waitStep: Step;
     private onSaveSubject: Subject<Entity> = new Subject<Entity>();
+    public milestone: boolean = false;
 
     private onSave(): Subject<Entity> {
         this.subscribers++;

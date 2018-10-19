@@ -48,8 +48,8 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.completeColDefs();
         this.customActionDefs = this.getCustomActionsDefs();
         this.completeCustomActions();
-        this.breadcrumbsService.reset();
-        this.breadcrumbsService.addStep(capitalizeFirstLetter(ROUTING_NAME) + ' list');       
+        this.breadcrumbsService.markMilestone();
+        this.breadcrumbsService.nameStep(capitalizeFirstLetter(ROUTING_NAME) + ' list');       
     }
 
     private setOptions(options: any) {

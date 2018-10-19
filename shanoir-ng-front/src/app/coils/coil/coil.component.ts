@@ -61,7 +61,7 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     initCreate(): Promise<void> {
         this.entity = new Coil();
-        this.prefilledCenter = this.breadcrumbsService.lastStep.getPrefilledValue('center');
+        this.prefilledCenter = this.breadcrumbsService.currentStep.getPrefilledValue('center');
         if (this.prefilledCenter) {
             this.coil.center = this.prefilledCenter;
             this.centers = [this.prefilledCenter];
@@ -70,7 +70,7 @@ export class CoilComponent extends EntityComponent<Coil> {
                 this.centers = centers;
             });
         }
-        this.prefilledManuf = this.breadcrumbsService.lastStep.getPrefilledValue('manufacturerModel');
+        this.prefilledManuf = this.breadcrumbsService.currentStep.getPrefilledValue('manufacturerModel');
         if (this.prefilledManuf) {
             this.coil.manufacturerModel = this.prefilledManuf;
             this.manufModels = [this.prefilledManuf];
@@ -95,18 +95,20 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
 
     private openNewCenter() {
-        let currentStep: Step = this.breadcrumbsService.lastStep;
+        let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.lastStep).subscribe(entity => {
+            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                console.log('currentStep', currentStep.timestamp);
                 (currentStep.entity as Coil).center = entity as Center;
+                console.log(currentStep.entity['center'])
             });
         });
     }
 
     private openNewManufModel() {
-        let currentStep: Step = this.breadcrumbsService.lastStep;
+        let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.lastStep).subscribe(entity => {
+            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                 (currentStep.entity as Coil).manufacturerModel = entity as ManufacturerModel;
             });
         });

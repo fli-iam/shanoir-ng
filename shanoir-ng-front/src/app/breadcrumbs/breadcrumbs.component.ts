@@ -23,9 +23,4 @@ export class BreadcrumbsComponent {
         if (index < this.service.steps.length - 1)
             this.service.goToStep(index);
     }
-
-    goHome() {
-        this.service.reset();
-        this.router.navigate(['/']);
-    }
 }

@@ -64,9 +64,9 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private prefill() {
-        this.nonEditableCenter = this.breadcrumbsService.lastStep.isPrefilled('center');
+        this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
         if (this.nonEditableCenter) {
-            this.acqEquip.center = this.breadcrumbsService.lastStep.getPrefilledValue('center');
+            this.acqEquip.center = this.breadcrumbsService.currentStep.getPrefilledValue('center');
         }
     }
 
@@ -91,9 +91,9 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     private openNewManufModel() {
-        let currentStep: Step = this.breadcrumbsService.lastStep;
+        let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
-            currentStep.waitFor(this.breadcrumbsService.lastStep).subscribe(entity => {
+            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                 (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
             });
         });
