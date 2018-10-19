@@ -31,4 +31,10 @@ export class BreadcrumbsComponent {
         }
         return !foundHome;
     }
+
+    
+
+    goHome() {
+        this.router.navigate(['/home']);
+    }
 }
