@@ -60,7 +60,7 @@
 									<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
 								</select>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
-								<a [routerLink]="['/center/details/', acqEquip.center?.id]">details</a>
+								<a *ngIf="acqEquip.center" [routerLink]="['/center/details/', acqEquip.center.id]">details</a>
 							</ng-template>
 						</span>
 					</li>

@@ -12,7 +12,7 @@ export class BreadcrumbsService {
     
     private popFoundedStepIndex: number;
     public replace: boolean = false;
-    private currentStepIndex: number;
+    public currentStepIndex: number;
     private nextLabel: string;
     private nextMilestone: boolean = false;
 
