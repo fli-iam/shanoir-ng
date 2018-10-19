@@ -125,7 +125,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	}
 
 	private void createUsersIfNotExisting() {
-		LOG.info("Create users");
+		LOG.info("syncAllUsersToKeycloak");
 		final Iterable<User> users = userRepository.findAll();
 		for (final User user : users) {
 			final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().search(user.getUsername());

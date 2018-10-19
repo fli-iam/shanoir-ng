@@ -60,6 +60,10 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
+      - mail.host
+      - administrator.email
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
     networks:
@@ -81,6 +85,8 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
     networks:
@@ -102,6 +108,8 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "tmp:/tmp"
@@ -124,6 +132,8 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "tmp:/tmp"
