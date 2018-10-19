@@ -54,7 +54,7 @@
 						<br/>Notice that the birth Date will be set to the 1st of January of the birth Year for the same reason.
 					</li>
 					<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
-						<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" class="required-label">First Name</label>
+						<label i18n="Subject detail|First Name label@@SubjectDetailSubjectFirstName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">First Name</label>
 						<span class="right-col">
 							<input type="text" id="firstName" [(ngModel)]="firstName" formControlName="firstName" />
 							<label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Subject detail|FirstName required error@@subjectDetailFirstNameRequiredError">First name is required!</label>
@@ -62,7 +62,7 @@
 						</span>
 					</li>
 					<li *ngIf="!isAlreadyAnonymized && mode == 'create'">
-						<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" class="required-label">Last Name</label>
+						<label i18n="Subject detail|Last Name label@@SubjectDetailSubjectLastName" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Last Name</label>
 						<span class="right-col">
 							<input type="text" id="lastName" [(ngModel)]="lastName" formControlName="lastName" />
 							<label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Subject detail|LastName required error@@subjectDetailLastNameRequiredError">Last name is required!</label>
@@ -70,7 +70,7 @@
 						</span>
 					</li>
 					<li *ngIf="mode == 'create'">
-						<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate" class="required-label">Birth date</label>
+						<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate" [class.required-label]="subject.imagedObjectCategory=='LIVING_HUMAN_BEING'">Birth date</label>
 						<span [ngSwitch]="mode" class="right-col">
 							<ng-template [ngSwitchCase]="'view'">
 								{{subject.birthDate | date: 'dd/MM/yyyy'}}
