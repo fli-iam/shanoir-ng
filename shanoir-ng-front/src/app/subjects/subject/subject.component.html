@@ -69,7 +69,7 @@
 							<label *ngIf="hasError('lastName', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64!</label>
 						</span>
 					</li>
-					<li>
+					<li *ngIf="mode == 'create'">
 						<label i18n="Subject detail|Birth date label@@subjectDetailBirthDate" class="required-label">Birth date</label>
 						<span [ngSwitch]="mode" class="right-col">
 							<ng-template [ngSwitchCase]="'view'">
