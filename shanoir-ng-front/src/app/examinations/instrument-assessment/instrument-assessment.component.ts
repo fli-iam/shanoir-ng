@@ -7,7 +7,7 @@ import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms'
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 
 @Component({
-    selector: 'instrument-essessment-detail',
+    selector: 'instrument-assessment-detail',
     templateUrl: 'instrument-assessment.component.html'
 })
 

@@ -1,40 +1,28 @@
+import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
-import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
 
-import { Dataset, DatasetMetadata } from './dataset.model';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
-import { Pageable } from '../../shared/components/table/pageable.model';
+import { Dataset } from './dataset.model';
 
 @Injectable()
-export class DatasetService {
+export class DatasetService extends EntityService<Dataset> {
 
-    constructor(private http: HttpClient) { }
+    API_URL = AppUtils.BACKEND_API_DATASET_URL;
 
-    create(dataset: Dataset): Observable<Dataset> {
-        return this.http.post<Dataset>(AppUtils.BACKEND_API_DATASET_URL, JSON.stringify(dataset))
-            .map(res => res);
-    }
-
-    delete(id: number): Promise<void> {
-        return this.http.delete<void>(AppUtils.BACKEND_API_DATASET_URL + '/' + id)
-            .toPromise();
-    }
-
-    get(id: number): Promise<Dataset> {
-        return this.http.get<Dataset>(AppUtils.BACKEND_API_DATASET_URL + '/' + id)
-            .toPromise();
+    getEntityInstance(entity: Dataset) { 
+        return AppUtils.getEntityInstance(entity);
     }
 
     getPage(pageable: Pageable): Promise<any> {
         return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL, { 'params': pageable.toParams() })
+            .map((page: Page<Dataset>) => {
+                page.content = page.content.map(ds => Object.assign(ds, this.getEntityInstance(ds)));
+                return page;
+            })
             .toPromise();
-    }
-
-    update(dataset: Dataset): Observable<Dataset> {
-        if (!dataset.id) throw Error('Cannot update a dataset without an id');
-        return this.http.put<Dataset>(AppUtils.BACKEND_API_DATASET_URL + '/' + dataset.id, JSON.stringify(dataset));
     }
 
     download(dataset: Dataset, format: string): void {

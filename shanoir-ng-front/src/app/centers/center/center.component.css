@@ -1,1 +1,6 @@
-.layout { min-width: 410px; }
+
+.list li { cursor: default; height: 15px; min-height: auto; }
+.list legend { cursor: pointer; }
+.link { margin-left: 7px; cursor: pointer; }
+.link svg { vertical-align: -1; color: var(--color-b); }
+legend svg { margin-right: 6px; vertical-align: -2px; }

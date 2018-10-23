@@ -73,7 +73,7 @@ export class ImportComponent  {
                         setTimeout(function () {
                             that.msgService.log('info', 'The data has been successfully imported')
                         }, 0);
-                        this.router.navigate(['/dataset-list']);
+                        this.router.navigate(['/dataset/list']);
                     }).catch(error => {
                         this.importing = false;
                         throw error;

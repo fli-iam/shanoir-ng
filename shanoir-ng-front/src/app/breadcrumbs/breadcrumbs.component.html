@@ -1,0 +1,11 @@
+<div id="my-breadcrumbs">
+	<ul>
+		<li><a (click)="goHome()"><span class="before-icon"><i class="fas fa-home"></i></span>Home</a></li>
+		<ng-container *ngFor="let step of steps; let i = index">
+			<li *ngIf="!step.disabled && step.label" [class.waiting]="step.isWaiting && step.displayWaitStatus">
+				<a (click)="clickStep(i)">{{step.label}}
+				<span class="after-icon" *ngIf="step.isWaiting && step.displayWaitStatus"><i class="fas fa-edit"></i></span></a>
+			</li>
+		</ng-container>
+	</ul>
+</div>

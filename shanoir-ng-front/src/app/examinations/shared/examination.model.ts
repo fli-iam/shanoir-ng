@@ -1,6 +1,9 @@
 import { IdNameObject } from "../../shared/models/id-name-object.model";
+import { ExaminationService } from "./examination.service";
+import { ServiceLocator } from "../../utils/locator.service";
+import { Entity } from "../../shared/components/entity/entity.abstract";
 
-export class Examination {
+export class Examination extends Entity {
     id: number;
     examinationDate: Date;
     examinationExecutive: IdNameObject;
@@ -13,4 +16,6 @@ export class Examination {
     comment: string;
     note: string;
     subjectWeight: number;
+
+    service: ExaminationService = ServiceLocator.injector.get(ExaminationService);
 }

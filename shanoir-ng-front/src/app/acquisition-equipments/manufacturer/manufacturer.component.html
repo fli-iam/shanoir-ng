@@ -1,5 +1,5 @@
 <div class="content-component">
-    <form *ngIf="manufForm" [formGroup]="manufForm" class="max-content" novalidate>
+    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
@@ -21,10 +21,10 @@
 								{{manuf.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<input type="text" id="name" formControlName="name" [(ngModel)]="manuf.name"/>
-								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Manuf detail|Name required error@@manufDetailNameRequiredError">Name is required!</label>
-								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Manuf detail|Name length error@@manufDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Manuf detail|Name unique error@@manufDetailNameUniqueError">Name should be unique!</label>
+								<input type="text" id="name" formControlName="name" [(ngModel)]="manuf.name" (change)="isNameUniqueError=false"/>
+								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Manuf detail|Name required error@@manufDetailNameRequiredError">Name is required!</label>
+								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Manuf detail|Name length error@@manufDetailNameLengthError">Name length must be between 2 and 200!</label>
+								<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Manuf detail|Name unique error@@manufDetailNameUniqueError">Name should be unique!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -32,10 +32,9 @@
 			</fieldset>
 			<form-footer
 				[state]="footerState"
-				(update)="update()"
-				(create)="create()"
-				(edit)="edit()"
-				(back)="back()"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()"
 			></form-footer>
         </div>
     </form>

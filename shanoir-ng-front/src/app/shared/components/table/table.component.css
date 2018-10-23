@@ -9,7 +9,7 @@ th { width: 100%; white-space: normal; }
 			.controls button span { vertical-align: middle; }
 			.controls button img { height: 16px; vertical-align: middle; }
 			.controls .awesome { vertical-align: middle; margin-right: 4px; }
-				.controls .awesome svg { vertical-align: middle; }
+				.controls .awesome svg { vertical-align: -1; color: var(--color-c); }
 		.controls input,
 		.controls select { border: 1px solid var(--grey); border-radius: 2px;  height: 20px; vertical-align: middle; }
 		.controls input { padding: 0 5px; width: 150px; }
@@ -57,3 +57,5 @@ td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-o
 a.link { text-decoration: none; color: inherit; }
 	a.link svg { font-size: 10px; vertical-align: 0; margin-left: 5px; color: var(--greyer); }
 	a.link svg:hover { color: var(--color-a); }
+
+.cell-button svg:hover { color: var(--color-a); }

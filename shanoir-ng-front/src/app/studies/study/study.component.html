@@ -1,6 +1,6 @@
 <div class="content-component detail max-content">
 	<div class="layout" [ngClass]="{'left': mode=='view'}">
-		<form *ngIf="studyForm" [formGroup]="studyForm" novalidate>
+		<form *ngIf="form" [formGroup]="form" novalidate>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</h2>
@@ -23,22 +23,22 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="study.name" />
-								<label *ngIf="formErrors.name.includes('required')" [@slideDown]="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
-								<label *ngIf="formErrors.name.includes('length')" [@slideDown]="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="hasNameUniqueError" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
+								<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
+								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
+								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
 							</ng-template>
 						</span>
 					</li>
 					<li>
 						<label i18n="Study detail|Start date label@@studyDetailStartDate">Start date</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
+						<span class="right-col">
+							<ng-container *ngIf="mode == 'view' || mode == 'edit'">
 								{{study.startDate | date: 'dd/MM/yyyy'}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
+							</ng-container>
+							<ng-container *ngIf="mode == 'create'">
 								<datepicker [(ngModel)]="study.startDate" formControlName="startDate"></datepicker>
-								<label *ngIf="isStartDateValid==false" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
-							</ng-template>
+								<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date vali error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+							</ng-container>
 						</span>
 					</li>
 					<li>
@@ -49,7 +49,8 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<datepicker [(ngModel)]="study.endDate" formControlName="endDate"></datepicker>
-								<label *ngIf="isEndDateValid==false" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+								<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+								<label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
 							</ng-template>
 						</span>
 					</li>
@@ -57,13 +58,14 @@
 						<label i18n="Study detail|Status label@@studyDetailStatus" class="required-label">Status</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{studyStatusEnumValue}}
+								{{studyStatusStr(study.studyStatus)}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="studyStatus" required formControlName="studyStatus" [(ngModel)]="study.studyStatus">
-									<option *ngFor="let studyStatus of studyStatuses" [value]="studyStatus.key">{{studyStatus.value}}</option>
+									<option value="IN_PROGRESS">In Progress</option>
+									<option value="FINISHED">Finished</option>
 								</select>
-								<label *ngIf="formErrors.studyStatus.includes('required')" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
+								<label *ngIf="hasError('studyStatus', ['required'])" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -135,25 +137,23 @@
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view'">
-				<legend>Subjects</legend>
-				<subject-study-list mode="subject" [list]="subjects" [(subjectStudyList)]="study.subjectStudyList"></subject-study-list>
+				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
 			</fieldset>
 			<fieldset>
 				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers and principal investigators</legend>
 				<ol>
 					<li>
-						<div *ngIf="mode == 'view' ; then view_mode else edit_mode"></div>
-						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter" class="required-label">Multicenter</label>
+						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter" [class.required-label]="mode != view">Multi / single center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="!study.monoCenter" class="bool-true">&#x2713;</span>
-								<span *ngIf="study.monoCenter" class="bool-false">&#x2717;</span>
+								<span *ngIf="study.monoCenter">Single center</span>
+								<span *ngIf="!study.monoCenter">Multicenter</span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<ng-template [ngIf]="!studyCenterListHasMultipleElements()">
+								<span [class.disabled]="study.studyCenterList?.length > 1" class="mono">
 									<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="true" i18n="Study detail|Yes label@@noLabel"
 										[checked]="study.monoCenter" />Single center
-								</ng-template>
+								</span>
 								<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="false" i18n="Study detail|No label@@yesLabel"
 									[checked]="!study.monoCenter" />Multicenter
 							</ng-template>
@@ -162,22 +162,22 @@
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigators</label>
 						<span class="right-col">
-							<select [(ngModel)]="selectedCenter" [ngModelOptions]="{standalone: true}">
+							<select [(ngModel)]="selectedCenter" formControlName="studyCenterList" (change)="onCenterChange()">
+								<option *ngIf="!study.studyCenterList || study.studyCenterList.length == 0" [ngValue]="null" disabled>Select a center...</option>
 								<option *ngFor="let center of centers" [ngValue]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</option>
 							</select>
-							<span *ngIf="enableAddIcon()" class="icon icon-clickable" (click)="addCenterToStudy()"><i class="fas fa-plus"></i></span>
+							<span *ngIf="enableAddIcon()" class="icon icon-clickable" (click)="onCenterAdd()"><i class="fas fa-plus"></i></span>
+							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>
-					<li>
-						<label i18n="Study detail|Current centers and investigators label@@studyDetailCurrentCentersAndPI" class="required-label">Current centers and investigators</label>
+					<li *ngIf="mode != 'view' && !study.monoCenter">
+						<label i18n="Study detail|Current centers and investigators label@@studyDetailCurrentCentersAndPI">Current centers and investigators</label>
 						<span class="right-col study-center-list">
 							<div *ngFor="let studyCenter of study.studyCenterList">
-								<a [routerLink]="['/center/details/', studyCenter.center.id]">
-									{{studyCenter.center.name}}
-								</a>
-								<span class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.center.id)" *ngIf="mode != 'view'"><i class="fas fa-ban"></i></span>
+								{{studyCenter.center.name}}
+								<span class="icon icon-clickable" (click)="goToCenter(studyCenter.center.id)"><i class="fas fa-external-link-alt"></i></span>
+								<span *ngIf="study.studyCenterList.length > 1" class="icon icon-clickable" (click)="removeCenterFromStudy(studyCenter.center.id)"><i class="fas fa-ban"></i></span>
 							</div>
-							<span *ngIf="studyCenterListEmpty()" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">No center is currently associated to the research study!</span>
 						</span>
 					</li>
 				</ol>
@@ -193,48 +193,6 @@
 					</li>
 				</ol>
 			</fieldset>
-			<!-- <fieldset>
-				<legend i18n="Study detail|Timepoints label@@studyDetailTimepoints">Timepoints</legend>
-				<ol>
-					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|Add timepoint to this study label@@studyDetailAddTimepoint">Add timepoint to this study</label>
-						<span class="right-col">
-							TODO
-						</span>
-					</li>
-					<li *ngIf="mode != 'view' && study.timepoints">
-						<label i18n="Study detail|Existing timepoints label@@studyDetailExistingTimepoints">Existing timepoints</label>
-						<span class="right-col">
-							<table class="shanoir-table">
-								<thead>
-									<tr>
-										<td i18n="Common|Name label@@nameLabel">Name</td>
-										<td i18n="Common|Days label@@daysLabel">Days</td>
-										<td i18n="Common|Comment label@@commentLabel">Comment</td>
-										<td i18n="Common|Edit label@@editLabel">Edit</td>
-										<td i18n="Common|Remove label@@removeLabel">Remove</td>
-									</tr>
-								</thead>
-								<tbody>
-									<ng-template ngFor let-timepoint [ngForOf]="study.timepoints">
-										<tr>
-											<td>{{timepoint.name}}</td>
-											<td>{{timepoint.days}}</td>
-											<td>{{timepoint.comment}}</td>
-											<td>
-												<img [src]="editIconPath" class="icon icon-clickable" (click)="editTimepoint(timepoint)" />
-											</td>
-											<td>
-												<img [src]="deleteIconPath" class="icon icon-clickable" (click)="removeTimepoint(timepoint)" />
-											</td>
-										</tr>
-									</ng-template>
-								</tbody>
-							</table>
-						</span>
-					</li>
-				</ol>
-			</fieldset> -->
 			<fieldset *ngIf="mode != 'view'">
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
 
@@ -262,10 +220,9 @@
 			</fieldset>
 			<form-footer
 				[state]="footerState"
-				(update)="update()"
-				(create)="create()"
-				(edit)="edit()"
-				(back)="back()"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()"
 			></form-footer>
 		</form>
 	</div>

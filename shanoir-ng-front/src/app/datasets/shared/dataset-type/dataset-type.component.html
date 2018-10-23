@@ -2,19 +2,19 @@
     <ng-template [ngSwitchCase]="'view'">{{model}}</ng-template>
     <ng-template ngSwitchDefault>
         <select required [(ngModel)]="model" (change)="onChange()" [ngModelOptions]="{standalone: true}" [disabled]="disabled">
-            <option [value]="'Calibration'" i18n="Dataset detail|Dataset type@@datasetDetailTypeCalibration">Calibration</option>
-            <option [value]="'Ct'" i18n="Dataset detail|Dataset type@@datasetDetailTypeCt">Ct</option>
-            <option [value]="'Eeg'" i18n="Dataset detail|Dataset type@@datasetDetailTypeEeg">Eeg</option>
-            <option [value]="'Meg'" i18n="Dataset detail|Dataset type@@datasetDetailTypeMeg">Meg</option>
-            <option [value]="'Mesh'" i18n="Dataset detail|Dataset type@@datasetDetailTypeMesh">Mesh</option>
-            <option [value]="'Mr'" i18n="Dataset detail|Dataset type@@datasetDetailTypeMr">Mr</option>
-            <option [value]="'ParameterQuantification'" i18n="Dataset detail|Dataset type@@datasetDetailTypeParameterQuantification">ParameterQuantification</option>
-            <option [value]="'Pet'" i18n="Dataset detail|Dataset type@@datasetDetailTypePet">Pet</option>
-            <option [value]="'Registration'" i18n="Dataset detail|Dataset type@@datasetDetailTypeRegistration">Registration</option>
-            <option [value]="'Segmentation'" i18n="Dataset detail|Dataset type@@datasetDetailTypeSegmentation">Segmentation</option>
-            <option [value]="'Spect'" i18n="Dataset detail|Dataset type@@datasetDetailTypeSpect">Spect</option>
-            <option [value]="'Staticstical'" i18n="Dataset detail|Dataset type@@datasetDetailTypeStatistical">Statistical</option>
-            <option [value]="'Template'" i18n="Dataset detail|Dataset type@@datasetDetailTypeTemplate">Template</option>
+            <!-- <option value="Calibration" i18n="Dataset detail|Dataset type@@datasetDetailTypeCalibration" disabled>Calibration</option>
+            <option value="Ct" i18n="Dataset detail|Dataset type@@datasetDetailTypeCt" disabled>Ct</option>
+            <option value="Eeg" i18n="Dataset detail|Dataset type@@datasetDetailTypeEeg" disabled>Eeg</option>
+            <option value="Meg" i18n="Dataset detail|Dataset type@@datasetDetailTypeMeg" disabled>Meg</option>
+            <option value="Mesh" i18n="Dataset detail|Dataset type@@datasetDetailTypeMesh" disabled>Mesh</option> -->
+            <option value="MR_DATASET" i18n="Dataset detail|Dataset type@@datasetDetailTypeMr">Mr</option>
+            <!-- <option value="ParameterQuantification" i18n="Dataset detail|Dataset type@@datasetDetailTypeParameterQuantification" disabled>ParameterQuantification</option>
+            <option value="Pet" i18n="Dataset detail|Dataset type@@datasetDetailTypePet" disabled>Pet</option>
+            <option value="Registration" i18n="Dataset detail|Dataset type@@datasetDetailTypeRegistration" disabled>Registration</option>
+            <option value="Segmentation" i18n="Dataset detail|Dataset type@@datasetDetailTypeSegmentation" disabled>Segmentation</option>
+            <option value="Spect" i18n="Dataset detail|Dataset type@@datasetDetailTypeSpect" disabled>Spect</option>
+            <option value="Staticstical" i18n="Dataset detail|Dataset type@@datasetDetailTypeStatistical" disabled>Statistical</option>
+            <option value="Template" i18n="Dataset detail|Dataset type@@datasetDetailTypeTemplate" disabled>Template</option> -->
         </select>
     </ng-template>
 </span>

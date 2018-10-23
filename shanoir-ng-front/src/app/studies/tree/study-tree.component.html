@@ -43,12 +43,8 @@
     </ng-template>
 </node>
 <node label="Members" [pictoUrl]="folderIconPath" deploy="true">
-    <ng-template ngFor let-membersCategory [ngForOf]="study.membersCategories">
-        <node [label]="membersCategory.studyUserType.label" [pictoUrl]="folderIconPath" deploy="true">
-            <ng-template ngFor let-member [ngForOf]="membersCategory.members">
-                <node [label]="member.name" [pictoUrl]="userIconPath" [nodeParams]="member.id" link="true" (labelClick)="showMemberDetails($event)">
-                </node>
-            </ng-template>
+    <node *ngFor="let membersCategory of study.membersCategories" [label]="getStudyUserTypeLabel(membersCategory.studyUserType)" [pictoUrl]="folderIconPath" deploy="true">
+        <node *ngFor="let member of membersCategory.members" [label]="member.name" [pictoUrl]="userIconPath" [nodeParams]="member.id" link="true" (labelClick)="showMemberDetails($event)">
         </node>
-    </ng-template>
+    </node>
 </node>
