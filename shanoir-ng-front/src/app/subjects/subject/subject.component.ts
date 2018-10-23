@@ -96,6 +96,7 @@ export class SubjectComponent extends EntityComponent<Subject> {
         }
         formGroup.get('firstName').updateValueAndValidity();
         formGroup.get('lastName').updateValueAndValidity();
+        formGroup.get('birthDate').updateValueAndValidity();
     }
 
     save(): Promise<void> {
