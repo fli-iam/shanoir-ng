@@ -68,6 +68,9 @@ public class SubjectServiceImpl implements SubjectService {
 	private SubjectStudyRepository subjectStudyRepository;
 
 	@Autowired
+	private SubjectRepositoryImpl subjectRepositoryImpl;
+	
+	@Autowired
 	private RestTemplate restTemplate;
 
 	@Autowired
@@ -109,6 +112,11 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectRepository.findOne(id);
 	}
 
+	@Override
+	public Subject findByIdWithSubjecStudies(final Long id) {
+		return subjectRepositoryImpl.findSubjectWithSubjectStudyById(id);
+	}
+	
 	@Override
 	public Subject save(final Subject subject) throws ShanoirStudiesException {
 		try {
@@ -179,6 +187,8 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Override
 	public Subject update(final Subject subject, final SubjectFromShupDTO subjectFromShupDTO) throws ShanoirStudiesException {
+	
+
 		Subject subjectUpdated = updateSubjectValues(subject, subjectFromShupDTO);
 		try {
 			subjectRepository.save(subjectUpdated);
@@ -253,17 +263,43 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
+		
+		// Copy list of database links subject/study
+		final List<SubjectStudy> subjectStudyDbList = new ArrayList<>(subjectDb.getSubjectStudyList());
+		for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+			if (subjectStudy.getId() == null) {
+				// Add link subject/study
+				subjectStudy.setSubject(subjectDb);
+				subjectDb.getSubjectStudyList().add(subjectStudy);
+			}
+		}
+		for (final SubjectStudy subjectStudyDb : subjectStudyDbList) {
+			boolean keepSubjectStudy = false;
+			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				if (subjectStudyDb.getId().equals(subjectStudy.getId())) {
+					keepSubjectStudy = true;
+					break;
+				}
+			}
+			if (!keepSubjectStudy) {
+				// Move link subject/study
+				subjectDb.getSubjectStudyList().remove(subjectStudyDb);
+				subjectStudyRepository.delete(subjectStudyDb.getId());
+			}
+		}
 		return subjectDb;
 	}
 	
 	/*
-	 * Update some values of template to save them in database.
+	 * Update some values of subject to save them in database.
+	 * 
+	 * EXCEPT FOR Attribute UserPersonalCommentList
 	 *
-	 * @param templateDb template found in database.
+	 * @param subjectDB is subject found in DB prior the update
 	 *
-	 * @param template template with new values.
+	 * @param SubjectFromShupDTO contains the new values.
 	 *
-	 * @return database template with new values.
+	 * @return a Subject with new values.
 	 */
 	private Subject updateSubjectValues(final Subject subjectDb, final SubjectFromShupDTO subjectFromShupDTO) {
 
@@ -274,19 +310,39 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setSex(Sex.getSex(subjectFromShupDTO.getSex()));
 		boolean foundStudy = false;
 		for (SubjectStudy ss : subjectDb.getSubjectStudyList()) {
-			if (ss.getId() == subjectFromShupDTO.getStudyId()) {
+			if (ss.getStudy().getId() == subjectFromShupDTO.getStudyId()) {
+				ss.setSubjectType(SubjectType.getType(subjectFromShupDTO.getSubjectType()));
+				ss.setPhysicallyInvolved(subjectFromShupDTO.getPhysicallyInvolved());
 				foundStudy = true;
 			}
 		}
 		if (!foundStudy) {
 			SubjectStudy subjectStudy =  new SubjectStudy();
-
+			subjectStudy.setSubjectType(SubjectType.getType(subjectFromShupDTO.getSubjectType()));
+			subjectStudy.setPhysicallyInvolved(subjectFromShupDTO.getPhysicallyInvolved());
+			subjectStudy.setStudy(studyService.findById(subjectFromShupDTO.getStudyId()));
+			subjectStudy.setSubject(subjectDb);
+			if (subjectDb.getSubjectStudyList() == null) {
+				List<SubjectStudy> subjectStudyList = new ArrayList<SubjectStudy>();
+				subjectStudyList.add(subjectStudy);
+				subjectDb.setSubjectStudyList(subjectStudyList);
+			} else {
+				subjectDb.getSubjectStudyList().add(subjectStudy);
+			}
 		}
 
 		subjectDb.setManualHemisphericDominance(HemisphericDominance.getDominance(subjectFromShupDTO.getManualHemisphericDominance()));
 		subjectDb.setLanguageHemisphericDominance(HemisphericDominance.getDominance(subjectFromShupDTO.getLanguageHemisphericDominance()));
 		subjectDb.setImagedObjectCategory(ImagedObjectCategory.getCategory(subjectFromShupDTO.getImagedObjectCategory()));
-		//subjectDb.setUserPersonalCommentList(subjectFromShupDTO.getUserPersonalCommentList());
+		
+		/**
+		 *  the following line is commented because R/O in shanoir uploader. 
+		 *  If in future version, this is enable in Shanoir Uploader remove the comment
+		 *  on the following line..
+		 */
+				
+		// subjectDb.setUserPersonalCommentList(subjectFromShupDTO.getUserPersonalCommentList());
+		
 		return subjectDb;
 	}
 
