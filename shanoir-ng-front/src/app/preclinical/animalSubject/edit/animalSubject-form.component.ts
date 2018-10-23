@@ -449,7 +449,9 @@ export class AnimalSubjectFormComponent implements OnInit {
         this.selectedStudy.selected = true;
         let newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
-        newSubjectStudy.study = new Study(this.selectedStudy);
+        newSubjectStudy.study = new Study();
+        newSubjectStudy.study.id = this.selectedStudy.id;
+        newSubjectStudy.study.name = this.selectedStudy.name;
         this.subjectStudyList.push(newSubjectStudy);
         this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
     }

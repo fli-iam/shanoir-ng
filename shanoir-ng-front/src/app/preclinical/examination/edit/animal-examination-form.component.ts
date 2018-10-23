@@ -177,9 +177,9 @@ export class AnimalExaminationFormComponent implements OnInit {
 					this.examination = examination;
                 	this.getDateToDatePicker(this.examination);
                     this.setSelectedSubject();
-                	if(this.examination && this.examination.subject && this.examination.subject.id){
+                	if(this.examination && this.examination.subjectId ){
                 		this.animalSubjectService
-        					.findAnimalSubjectBySubjectId(this.examination.subject.id)
+        					.findAnimalSubjectBySubjectId(this.examination.subjectId)
         					.then(animalSubject => this.animalSubjectId = animalSubject.id)
         					.catch((error) => {});
         			}
@@ -189,8 +189,8 @@ export class AnimalExaminationFormComponent implements OnInit {
     }
     
     setSelectedSubject(){
-    	if (this.examination && this.examination.subject && this.examination.subject.id){
-    		this.selectedSubjectId = this.examination.subject.id;
+    	if (this.examination && this.examination.subjectId ){
+    		this.selectedSubjectId = this.examination.subjectId;
     	}
     }
     
@@ -209,7 +209,7 @@ export class AnimalExaminationFormComponent implements OnInit {
     	if (this.selectedSubjectId){
     		let subject : Subject = this.getSubjectById(this.selectedSubjectId);
     		if (subject){
-    			this.examination.subject = new IdNameObject(this.selectedSubjectId, subject.name);
+    			this.examination.subjectId = this.selectedSubjectId;
     			this.examination.subjectName = subject.name;
     		}
     		this.examination.subjectId = this.selectedSubjectId;
@@ -572,7 +572,6 @@ export class AnimalExaminationFormComponent implements OnInit {
             this.examination.comment = this.preFillData.comment;
             this.examination.subjectId = this.preFillData.subjectId;
             this.examination.subjectName = this.preFillData.subjectName;
-            this.examination.subject = new IdNameObject(this.preFillData.subjectId, this.preFillData.subjectName);
             this.setSelectedSubject();
             this.buildForm();
             this.getDateToDatePicker(this.examination);
