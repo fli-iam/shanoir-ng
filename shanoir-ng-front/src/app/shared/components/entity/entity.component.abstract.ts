@@ -90,17 +90,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     private addBCStep() {
         let label: string;
-        switch (this.mode) { 
-            case 'create' : 
-                label = 'New ' + this.ROUTING_NAME;
-                break;
-            case 'edit' : 
-                label = 'Edit ' + this.ROUTING_NAME;
-                break;
-            case 'view' : 
-                label = 'View ' + this.ROUTING_NAME;
-                break;
-        }
+        if (this.mode == "create") label = 'New ' + this.ROUTING_NAME;
+        else if (this.mode == 'edit') label = 'Edit ' + this.ROUTING_NAME;
+        else if (this.mode == 'view') label = 'View ' + this.ROUTING_NAME;
         this.breadcrumbsService.nameStep(label);
     }
 

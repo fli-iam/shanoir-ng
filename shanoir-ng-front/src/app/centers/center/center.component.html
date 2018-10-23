@@ -104,9 +104,7 @@
 			</legend>
 			<ul *ngIf="openAcqEq">
 				<li *ngFor="let o of center.acquisitionEquipments">
-					{{o.manufacturerModel.manufacturer.name}} - {{o.manufacturerModel.name}} 
-					- {{o.manufacturerModel.magneticField ? (o.manufacturerModel.magneticField + "T") : ""}}
-					({{o.manufacturerModel.datasetModalityType}}) - {{o.serialNumber}}
+					{{o | acqEqptLabel}}
 					<span class="link" (click)="goToAcquisitionEquipment(o)"><i class="fas fa-external-link-alt"></i></span>
 				</li>
 			</ul>

@@ -90,7 +90,7 @@
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel" [compareWith]="compareEntities">
-									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel.name}}</option>
+									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</option>
 								</select>
 								<button i18n="Coil detail|Create new model label@@coilDetailNewManufModel" (click)="openNewManufModel()" [disabled]="form.get('acquiEquipModel').disabled">
 									<i class="fas fa-plus-square"></i>

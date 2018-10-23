@@ -15,8 +15,8 @@ export class HomeComponent {
     shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
 
     constructor(private breadcrumbsService: BreadcrumbsService) {
-        this.breadcrumbsService.nameStep('Home');
-        this.breadcrumbsService.markMilestone();;
+        //this.breadcrumbsService.nameStep('Home');
+        this.breadcrumbsService.markMilestone();
     }
 
     isAuthenticated(): boolean {

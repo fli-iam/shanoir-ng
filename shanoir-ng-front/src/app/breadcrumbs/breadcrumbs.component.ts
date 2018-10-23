@@ -22,17 +22,7 @@ export class BreadcrumbsComponent {
     clickStep(index: number) {
         if (index < this.service.steps.length - 1)
             this.service.goToStep(index);
-    }
-
-    private get displayHome(): boolean {
-        let foundHome: boolean = false;
-        for (let i=this.service.currentStepIndex; i>=0; i--) {
-            if (this.service.steps[i].route == '/home') foundHome = true;
-        }
-        return !foundHome;
-    }
-
-    
+    }    
 
     goHome() {
         this.router.navigate(['/home']);

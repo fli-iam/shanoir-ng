@@ -33,12 +33,6 @@ export class SubjectService extends EntityService<Subject> {
             .toPromise();
     }
 
-    create(subject: Subject): Promise<Subject> {
-        return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, JSON.stringify(subject))
-        .map((entity) => Object.assign(new Subject(), entity))
-            .toPromise();
-    }
-
     updateSubjectStudyValues(subjectStudy: SubjectStudy): Promise<SubjectStudy> {
         return this.http.put<SubjectStudy>(AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, JSON.stringify(subjectStudy))
             .toPromise();

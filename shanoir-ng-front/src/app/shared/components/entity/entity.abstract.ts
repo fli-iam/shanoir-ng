@@ -2,7 +2,7 @@ import { EntityService } from "./entity.abstract.service";
 
 export abstract class Entity {
 
-    id: number;
+    abstract id: number;
     
     abstract service: EntityService<Entity>;
 

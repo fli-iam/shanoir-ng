@@ -8,6 +8,7 @@ import { Sex } from './subject.types';
 
 export class Subject extends Entity {
 
+    id: number;
     examinations: Examination[];
     name: string;
     identifier: string;
