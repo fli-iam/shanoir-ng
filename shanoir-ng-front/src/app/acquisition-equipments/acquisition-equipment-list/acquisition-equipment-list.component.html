@@ -5,11 +5,4 @@
     [columnDefs]="columnDefs" 
     [customActionDefs]="customActionDefs" 
     (rowClick)="onRowClick($event)">
-</shanoir-table> 
-
-<!-- create coil popin -->
-<app-modal modalDialogId="coilModal" #coilModal>
-    <div class="app-modal-body">
-        <coil [mode]="'create'" [acqEquip]="selectedAcqEquip"  (closing)="closePopin()"></coil>
-    </div>
-</app-modal>
+</shanoir-table>

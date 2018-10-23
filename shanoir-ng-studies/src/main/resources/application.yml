@@ -38,11 +38,11 @@ spring:
 front.server.url: http://shanoir-ng-nginx
 # keycloak
 keycloak:
+  auth-server-url: http://shanoir-ng-nginx/auth
   cors: true
   realm: shanoir-ng
-  auth-server-url: http://shanoir-ng-nginx/auth
-  ssl-required: external
   resource: shanoir-ng-studies
+  ssl-required: external
   securityConstraints:
     - authRoles: 
       - ROLE_ADMIN

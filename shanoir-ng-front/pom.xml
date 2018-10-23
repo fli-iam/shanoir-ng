@@ -24,7 +24,7 @@
 		<nginx.webapp.directory>${basedir}/../shanoir-ng-nginx/webapp</nginx.webapp.directory>
 		<nginx.webapp.directory.docker.compose>${basedir}/../docker-compose/nginx/webapp</nginx.webapp.directory.docker.compose>
 		<sonar.skip>true</sonar.skip>
-		<npm.build.task>build</npm.build.task>
+		<npm.build.task>build:dev</npm.build.task>
 	</properties>
 
 	<build>
@@ -50,7 +50,7 @@
 			<plugin>
 	            <groupId>com.github.eirslett</groupId>
 	            <artifactId>frontend-maven-plugin</artifactId>
-	            <version>0.0.26</version>
+	            <version>1.6</version>
 	
 	            <executions>
 	
@@ -72,10 +72,8 @@
 	                    <goals>
 	                        <goal>npm</goal>
 	                    </goals>
-	
 	                    <!-- optional: default phase is "generate-resources" -->
 	                    <phase>generate-resources</phase>
-	
 	                    <configuration>
 	                        <!-- optional: The default argument is actually
 	                        "install", so unless you need to run some other npm command,

@@ -28,6 +28,7 @@ import { ConfirmDialogComponent } from "./shared/components/confirm-dialog/confi
 import { ConfirmDialogService } from "./shared/components/confirm-dialog/confirm-dialog.service";
 import { ConsoleComponent } from './shared/console/console.line.component';
 import { ModalComponent } from "./shared/components/modal/modal.component";
+import { ModalsComponent } from "./shared/components/modals/modals.component";
 import { DropdownMenuComponent } from './shared/components/dropdown-menu/dropdown-menu.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
@@ -41,7 +42,6 @@ import { HomeComponent } from './home/home.component';
 import { KeycloakHttpInterceptor } from "./shared/keycloak/keycloak.http.interceptor";
 import { KeycloakService } from "./shared/keycloak/keycloak.service";
 import { ImportComponent } from './import/import.component';
-import { ListComponent } from "./shared/components/list/list.component";
 import { ImportService } from './import/import.service';
 import { LoadingBarComponent } from './shared/components/loading-bar/loading-bar.component';
 import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
@@ -50,7 +50,8 @@ import { ManufacturerModelPipe } from './acquisition-equipments/shared/manufactu
 import { ManufacturerModelService } from './acquisition-equipments/shared/manufacturer-model.service';
 import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
 import { MenuItemComponent } from './shared/components/dropdown-menu/menu-item/menu-item.component';
-import { ModalService} from './shared/components/modal/modal.service';
+//import { ModalService} from './shared/components/modal/modal.service';
+import { ModalService} from './shared/components/modals/modal.service';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { RoleService } from './roles/role.service';
 import { StudyComponent } from './studies/study/study.component';
@@ -97,11 +98,14 @@ import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.compone
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { NewExamComponent } from './examinations/examination/new-exam.component';
 import { SubjectStudyListComponent } from "./shared/components/subject-study-list/subject-study-list.component";
-import { DateValidator } from './shared/date/date.validator';
 import { PagerComponent } from './shared/components/table/pager/pager.component';
 import { TableSearchComponent } from './shared/components/table/search/search.component';
 import { TimesPipe } from './utils/app.utils';
 import { FormFooterComponent } from './shared/components/form-footer/form-footer.component'
+import { ServiceLocator } from './utils/locator.service';
+import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
+import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
+import { Router } from './breadcrumbs/router';
 
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
@@ -188,7 +192,6 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         HeaderComponent,
         HomeComponent,
         ImportComponent,
-        ListComponent,
         LoadingBarComponent,
         ManufacturerComponent,
         ManufacturerModelComponent,
@@ -227,10 +230,11 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         DicomUploadComponent,
         ClinicalContextComponent,
         SubjectStudyListComponent,
-        DateValidator,
         TableSearchComponent,
         TimesPipe,
         FormFooterComponent,
+        ModalsComponent,
+        BreadcrumbsComponent,
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,
@@ -310,11 +314,15 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
             provide: HTTP_INTERCEPTORS,
             useClass: KeycloakHttpInterceptor,
             multi: true
-        }
+        },
+        BreadcrumbsService,
+        Router
     ],
     bootstrap: [AppComponent],
 })
 export class AppModule {
 
-    
+    constructor(private injector: Injector) {
+        ServiceLocator.injector = injector;
+    }
  }

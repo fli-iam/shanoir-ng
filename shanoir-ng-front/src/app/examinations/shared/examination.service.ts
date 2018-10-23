@@ -1,52 +1,27 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
+import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { Examination } from './examination.model';
 import { SubjectExamination } from './subject-examination.model';
-import { Pageable, Page } from '../../shared/components/table/pageable.model';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 
 @Injectable()
-export class ExaminationService {
-    constructor(private http: HttpClient) { }
+export class ExaminationService extends EntityService<Examination> {
+
+    API_URL = AppUtils.BACKEND_API_EXAMINATION_URL;
+
+    getEntityInstance() { return new Examination(); }
 
     countExaminations(): Promise<number> {
         return this.http.get<number>(AppUtils.BACKEND_API_EXAMINATION_COUNT_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while counting examinations', error);
-                return Promise.reject(error.message || error);
-            });
-    }
-
-    create(examination: Examination): Observable<Examination> {
-        return this.http.post<Examination>(AppUtils.BACKEND_API_EXAMINATION_URL, JSON.stringify(examination))
-            .map(response => response);
-    }
-
-    delete(id: number): Promise<void> {
-        return this.http.delete<void>(AppUtils.BACKEND_API_EXAMINATION_URL + '/' + id)
-            .toPromise()
-            .catch((error) => {
-                console.error('Error delete examination', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     findExaminationsBySubjectAndStudy(subjectId: number, studyId: number): Promise<SubjectExamination[]> {
         return this.http.get<SubjectExamination[]>(AppUtils.BACKEND_API_EXAMINATION_URL + '/subject/' + subjectId + '/study/' + studyId)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting examinations by subject id', error);
-                return Promise.reject(error.message || error);
-            });
-    }
-
-    getExamination(id: number): Promise<Examination> {
-        return this.http.get<Examination>(AppUtils.BACKEND_API_EXAMINATION_URL + '/' + id)
             .toPromise();
     }
 
@@ -65,10 +40,4 @@ export class ExaminationService {
             .post(endpoint, formData)
             .map(response => response);
     }
-    
-    update(id: number, examination: Examination): Observable<Examination> {
-        return this.http.put<Examination>(AppUtils.BACKEND_API_EXAMINATION_URL + '/' + id, JSON.stringify(examination))
-            .map(response => response);
-    }
-
 }

@@ -1,6 +1,7 @@
-import { Pageable } from '../shared/components/table/pageable.model';
-import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
+
+import { MrDataset } from '../datasets/dataset/mr/dataset.mr.model';
+import { Dataset } from '../datasets/shared/dataset.model';
 
 // Users http api
 const BACKEND_API_USERS_MS_URL: string = process.env.BACKEND_API_USERS_MS_URL;
@@ -124,4 +125,24 @@ export function allOfEnum<T>(enumClass): Array<T> {
         list.push(enumClass[key]);
     }
     return list;
+}
+
+export function capitalizeFirstLetter(str: string) {
+    if (!str) return;
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function capitalsAndUnderscoresToDisplayable(str: string) {
+    if (!str) return;
+    return capitalizeFirstLetter(str.replace('_', ' ').toLowerCase());
+}
+
+export function getEntityInstance(entity: Dataset) { 
+    if (entity.type == 'Mr') return new MrDataset();
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // TODO : Implement others !!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    else return new MrDataset(); // fixes errors with our test dataset (which have no real types)
+    // TODO : Throw en exception
 }

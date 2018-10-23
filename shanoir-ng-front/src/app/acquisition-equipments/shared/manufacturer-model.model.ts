@@ -1,10 +1,14 @@
+import { Entity } from '../../shared/components/entity/entity.abstract';
+import { ServiceLocator } from '../../utils/locator.service';
+import { ManufacturerModelService } from './manufacturer-model.service';
 import { Manufacturer } from './manufacturer.model';
-import { DatasetModalityType } from "../../shared/enums/dataset-modality-type";
 
-export class ManufacturerModel {
+export class ManufacturerModel extends Entity {
     id: number;
     name: string;
     manufacturer: Manufacturer;
     magneticField: number;
-    datasetModalityType: DatasetModalityType;
+    datasetModalityType: string;
+
+    service: ManufacturerModelService = ServiceLocator.injector.get(ManufacturerModelService);
 }

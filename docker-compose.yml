@@ -5,11 +5,9 @@ services:
   #
   keycloak-database:
     container_name: keycloak-database
-    image: mysql/mysql-server:5.7
+    build: ./docker-compose/keycloak-database
     environment:
       - MYSQL_DATABASE=keycloak
-      - MYSQL_USER=keycloak
-      - MYSQL_PASSWORD=password
     volumes:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
@@ -44,6 +42,8 @@ services:
   database:
     container_name: database
     build: ./docker-compose/database
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
     volumes:
       - "database-data:/var/lib/mysql"
     ports:
@@ -56,6 +56,10 @@ services:
   users:
     container_name: users
     build: ./docker-compose/users
+    environment:
+      - keycloak.auth-server-url
+      - front.server.url
+      - front.server.address
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
     networks:
@@ -73,6 +77,10 @@ services:
   studies:
     container_name: studies
     build: ./docker-compose/studies
+    environment:
+      - keycloak.auth-server-url
+      - front.server.url
+      - front.server.address
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
     networks:
@@ -90,6 +98,10 @@ services:
   import:
     container_name: import
     build: ./docker-compose/import
+    environment:
+      - keycloak.auth-server-url
+      - front.server.url
+      - front.server.address
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "tmp:/tmp"
@@ -108,6 +120,10 @@ services:
   datasets:
     container_name: datasets
     build: ./docker-compose/datasets
+    environment:
+      - keycloak.auth-server-url
+      - front.server.url
+      - front.server.address
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "tmp:/tmp"
@@ -240,7 +256,7 @@ services:
     volumes:
       - "logs:/var/log/nginx"
     networks:
-      - shanoir_ng_network
+      - shanoir_ng_network    
     ports:
      - "80:80"
     depends_on:

@@ -67,13 +67,11 @@ keycloak:
       - patterns:
         - /role/*
 kc:
+# used to verify, that the login date update comes really from Keycloak in the network:
   host.name: shanoir-ng-keycloak
   requests:
     realm: master
     client.id: admin-cli
-    admin:
-      login: admin
-      password: admin
 # logging configuration
 logging:
   file: /vol/log/ms/shanoir-ng-users.log
@@ -126,9 +124,6 @@ kc:
   requests:
     realm: master
     client.id: admin-cli
-    admin:
-      login: admin
-      password: "&a1A&a1A"
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-users.log
@@ -192,6 +187,3 @@ kc:
   requests:
     realm: master
     client.id: admin-cli
-    admin:
-      login:    KEYCLOAK_USER
-      password: KEYCLOAK_PASSWORD

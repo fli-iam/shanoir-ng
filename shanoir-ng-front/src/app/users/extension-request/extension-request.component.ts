@@ -47,8 +47,6 @@ export class ExtensionRequestComponent implements OnInit {
         this.userService.requestExtension(this.extensionRequestInfo)
             .then(() => {
                 this.router.navigate(['/home']);
-            }, (err: String) => {
-                console.log(err);
             });
     }
 

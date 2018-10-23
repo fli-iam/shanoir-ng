@@ -1,12 +1,15 @@
-import { Examination } from "../../examinations/shared/examination.model";
-import { SubjectStudy } from "./subject-study.model";
-import { ImagedObjectCategory } from "./imaged-object-category.enum";
-import { Sex } from "./subject.types";
-import { IdNameObject } from "../../shared/models/id-name-object.model";
+import { Examination } from '../../examinations/shared/examination.model';
+import { Entity } from '../../shared/components/entity/entity.abstract';
+import { ServiceLocator } from '../../utils/locator.service';
+import { ImagedObjectCategory } from './imaged-object-category.enum';
+import { SubjectStudy } from './subject-study.model';
+import { SubjectService } from './subject.service';
+import { Sex } from './subject.types';
 
-export class Subject {
-    examinations: Examination[];
+export class Subject extends Entity {
+
     id: number;
+    examinations: Examination[];
     name: string;
     identifier: string;
     birthDate: Date;
@@ -18,13 +21,6 @@ export class Subject {
     selected: boolean = false;
     subjectStudyList: SubjectStudy[] = [];
 
-    constructor(subject?: IdNameObject) {
-        if (subject) {
-            this.id = subject.id;
-            this.name = subject.name;
-        }
-    }
-
     public static makeSubject(id: number, name: string, identifier: string, subjectStudy: SubjectStudy): Subject {
         let subject = new Subject();
         subject.id = id;
@@ -33,4 +29,6 @@ export class Subject {
         subject.subjectStudyList = [subjectStudy];
         return subject;
     }
+
+    service = ServiceLocator.injector.get(SubjectService);
 }
