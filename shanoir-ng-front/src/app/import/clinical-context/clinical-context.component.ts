@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Examination } from '../../examinations/shared/examination.model';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
@@ -14,7 +15,6 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { PatientDicom } from '../dicom-data.model';
-import { AbstractImportStepComponent } from '../import-step.abstract';
 
 export class ContextData {
     constructor(
@@ -31,10 +31,10 @@ export class ContextData {
     styleUrls: ['clinical-context.component.css', '../import.step.css'],
     animations: [slideDown]
 })
-export class ClinicalContextComponent extends AbstractImportStepComponent implements OnChanges {
+export class ClinicalContextComponent implements OnInit {
     
-    @Input() patient: PatientDicom;
-    @Output() contextChange = new EventEmitter<ContextData>();
+    patient: PatientDicom;
+    //@Output() contextChange = new EventEmitter<ContextData>();
     
     @ViewChild('subjectCreationModal') subjectCreationModal: ModalComponent;
     @ViewChild('examCreationModal') examCreationModal: ModalComponent;
@@ -53,23 +53,30 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     private examinations: SubjectExamination[];
     private examination: SubjectExamination;
     public niftiConverter: IdNameObject;
+    private step: Step;
     
     constructor(
-        private studyService: StudyService,
-        private examinationService: ExaminationService,
-        private router: Router,
-    ) {
-        super();
+            private studyService: StudyService,
+            private examinationService: ExaminationService,
+            private router: Router,
+            private breadcrumbsService: BreadcrumbsService) {
+
+        breadcrumbsService.nameStep('Import : Context');
     }
 
-    ngOnChanges(changes: SimpleChanges) {
-        if(changes['patient'] && changes['patient'].currentValue) {
-            this.studycard = null;
-            this.subject = null;
-            this.examination = null;
-            this.onContextChange();
-            this.fetchStudies();
-        }
+    ngOnInit() {
+        this.step = this.breadcrumbsService.currentStep;
+        let previousStep: Step = this.breadcrumbsService.previousStep;
+        this.setPatient(previousStep.data.patients[0]);
+    }
+
+    setPatient(patient: PatientDicom) {
+        this.patient = patient;
+        this.studycard = null;
+        this.subject = null;
+        this.examination = null;
+        this.onContextChange();
+        this.fetchStudies();
     }
 
     private fetchStudies(): void {
@@ -153,9 +160,9 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     }
 
     private onContextChange() {
-        this.updateValidity();
-        if (this.getValidity()) {
-            this.contextChange.emit(this.getContext());
+        // this.updateValidity();
+        if (this.valid) {
+            this.step.data.context = this.getContext();
         }
     }
     
@@ -239,7 +246,7 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
         window.open('examination/details/' + this.examination.id, '_blank');
     }
 
-    getValidity(): boolean {
+    get valid(): boolean {
         let context = this.getContext();
         return (
             context.study != undefined && context.study != null
@@ -247,5 +254,9 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
             && context.subject != undefined && context.subject != null
             && context.examination != undefined && context.examination != null
         );
+    }
+
+    private next() {
+        this.router.navigate(['imports/finish']);
     }
 }

@@ -1,6 +1,6 @@
 
-<div [class.disabled]="disabled" [class.last-enabled]="lastEnabled" class="header command-zone" (click)="onHeaderClick($event)">3. Set the clinical context</div>
-<fieldset *ngIf="!disabled && open" [@slideDown]="!disabled && open" class="step">
+<div class="header command-zone">3. Set the clinical context</div>
+<fieldset class="step">
 
     <ol>
         <legend>
@@ -108,8 +108,10 @@
     </ol>
 
 </fieldset>
+<button class="next" [disabled]="!valid" (click)="next()">Next</button>
 
-<!-- <app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
+<!-- 
+<app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
     <div class="app-modal-body">
         <subject-detail [mode]="'create'" (closing)="onCloseSubjectPopin($event)" [preFillData]="subjectFromImport"></subject-detail>
     </div>
