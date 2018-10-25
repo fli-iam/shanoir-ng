@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
+import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
 import { DicomArchiveService } from '../dicom-archive.service';
 import { ImportJob } from '../dicom-data.model';
+import { ImportDataService } from '../import.data-service';
 import { ImportService } from '../import.service';
 
 
@@ -16,26 +17,23 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     styleUrls: ['dicom-upload.component.css', '../import.step.css'],
     animations: [slideDown]
 })
-export class DicomUploadComponent implements OnInit {
+export class DicomUploadComponent {
     
     private archiveStatus: Status = 'none';
     private extensionError: boolean;
     private dicomDirMissingError: boolean;
     private modality: string;
-    private step: Step;
 
 
     constructor(
             private importService: ImportService, 
             private dicomArchiveService: DicomArchiveService,
             private router: Router,
-            private breadcrumbsService: BreadcrumbsService) {
+            private breadcrumbsService: BreadcrumbsService,
+            private importDataService: ImportDataService) {
         
-        breadcrumbsService.nameStep('[Import] Upload');
-    }
-    
-    ngOnInit() {
-        this.step = this.breadcrumbsService.currentStep;
+        breadcrumbsService.nameStep('1. Upload');
+        breadcrumbsService.markMilestone();
     }
     
     private uploadArchive(fileEvent: any): void {
@@ -50,7 +48,7 @@ export class DicomUploadComponent implements OnInit {
             .subscribe(_ => {
                 this.dicomArchiveService.extractFileDirectoryStructure()
                 .subscribe(response => {
-                    this.step.data.inMemoryExtracted = response;
+                    this.importDataService.inMemoryExtracted = response;
                 });
             });
     }
@@ -65,7 +63,7 @@ export class DicomUploadComponent implements OnInit {
         this.importService.uploadFile(formData)
             .then((patientDicomList: ImportJob) => {
                 this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
-                this.step.data.archiveUploaded = patientDicomList;
+                this.importDataService.archiveUploaded = patientDicomList;
                 this.setArchiveStatus('uploaded');
             }).catch(error => {
                 this.setArchiveStatus('error');

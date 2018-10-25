@@ -15,15 +15,8 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { PatientDicom } from '../dicom-data.model';
-
-export class ContextData {
-    constructor(
-        public study: Study,
-        public studycard: StudyCard,
-        public subject: SubjectWithSubjectStudy,
-        public examination: SubjectExamination
-    ) {};
-}
+import { ImportDataService, ContextData } from '../import.data-service';
+import { Entity } from 'src/app/shared/components/entity/entity.abstract';
 
 @Component({
     selector: 'clinical-context',
@@ -31,7 +24,7 @@ export class ContextData {
     styleUrls: ['clinical-context.component.css', '../import.step.css'],
     animations: [slideDown]
 })
-export class ClinicalContextComponent implements OnInit {
+export class ClinicalContextComponent {
     
     patient: PatientDicom;
     //@Output() contextChange = new EventEmitter<ContextData>();
@@ -51,29 +44,50 @@ export class ClinicalContextComponent implements OnInit {
     private examinations: SubjectExamination[];
     private examination: SubjectExamination;
     public niftiConverter: IdNameObject;
-    private step: Step;
     
     constructor(
             private studyService: StudyService,
             private examinationService: ExaminationService,
             private router: Router,
-            private breadcrumbsService: BreadcrumbsService) {
+            private breadcrumbsService: BreadcrumbsService,
+            private importDataService: ImportDataService) {
 
-        breadcrumbsService.nameStep('Import : Context');
+        if (!importDataService.patients || !importDataService.patients[0]) {
+            this.router.navigate(['imports'], {replaceUrl: true});
+            return;
+        }
+        breadcrumbsService.nameStep('3. Context');
+        this.setPatient(importDataService.patients[0]);
+        this.reloadSavedData();
     }
 
-    ngOnInit() {
-        this.step = this.breadcrumbsService.currentStep;
-        let previousStep: Step = this.breadcrumbsService.previousStep;
-        this.setPatient(previousStep.data.patients[0]);
+    private reloadSavedData() {
+        if (this.importDataService.contextBackup) {
+            let study = this.importDataService.contextBackup.study;
+            let studycard = this.importDataService.contextBackup.studycard;
+            let subject = this.importDataService.contextBackup.subject;
+            let examination = this.importDataService.contextBackup.examination;
+            if (study) {
+                this.study = study;
+                this.onSelectStudy();
+            }
+            if (studycard) {
+                this.studycard = studycard;
+                this.onSelectStudycard();
+            }
+            if (subject) {
+                this.subject = subject;
+                this.onSelectSubject();
+            }
+            if (examination) {
+                this.examination = examination;
+                this.onSelectExamination();
+            }
+        }
     }
 
     setPatient(patient: PatientDicom) {
         this.patient = patient;
-        this.studycard = null;
-        this.subject = null;
-        this.examination = null;
-        this.onContextChange();
         this.fetchStudies();
     }
 
@@ -158,9 +172,9 @@ export class ClinicalContextComponent implements OnInit {
     }
 
     private onContextChange() {
-        // this.updateValidity();
+        this.importDataService.contextBackup = this.getContext();
         if (this.valid) {
-            this.step.data.context = this.getContext();
+            this.importDataService.contextData = this.getContext();
         }
     }
     
@@ -174,9 +188,7 @@ export class ClinicalContextComponent implements OnInit {
         this.router.navigate(['/subject/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
             currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
-                if (!this.subjects) this.subjects = [];
-                this.subjects.push(this.subject);
+                this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
             });
         });
     }
@@ -208,9 +220,7 @@ export class ClinicalContextComponent implements OnInit {
         this.router.navigate(['/examination/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
             currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.examination = this.examToSubjectExam(entity as Examination);
-                if (!this.examinations) this.examinations = [];
-                this.examinations.push(this.examination);
+                this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
             });
         });
     }
@@ -266,5 +276,9 @@ export class ClinicalContextComponent implements OnInit {
 
     private next() {
         this.router.navigate(['imports/finish']);
+    }
+
+    private compareEntities(e1: Entity, e2: Entity) : boolean {
+        return e1 && e2 && e1.id === e2.id;
     }
 }

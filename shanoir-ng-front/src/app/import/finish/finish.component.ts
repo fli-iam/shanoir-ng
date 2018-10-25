@@ -1,21 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
-import { ContextData } from '../clinical-context/clinical-context.component';
 import { ImportJob, PatientDicom } from '../dicom-data.model';
 import { ImportService } from '../import.service';
-import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { ImportDataService, ContextData } from '../import.data-service';
 
 @Component({
     selector: 'finish-import',
     templateUrl: 'finish.component.html',
     styleUrls: ['finish.component.css', '../import.step.css']
 })
-export class FinishImportComponent implements OnInit {
+export class FinishImportComponent {
 
     private importJob: ImportJob;
     private selectedPatients: PatientDicom[];
@@ -25,24 +25,24 @@ export class FinishImportComponent implements OnInit {
     private readonly ImagesUrlUtil = ImagesUrlUtil;
 
     constructor(
-        private importService: ImportService,
-        private subjectService: SubjectService,
-        private msgService: MsgBoxService,
-        private router: Router,
-        private breadcrumbsService: BreadcrumbsService) {
+            private importService: ImportService,
+            private subjectService: SubjectService,
+            private msgService: MsgBoxService,
+            private router: Router,
+            private breadcrumbsService: BreadcrumbsService,
+            private importDataService: ImportDataService) {
             
-            breadcrumbsService.nameStep('Import : Finish');
-    }
-    
-    ngOnInit() {
-        this.step = this.breadcrumbsService.currentStep;
-        const currentStepIndex: number = this.breadcrumbsService.currentStepIndex;
-        let uploadStep: Step = this.breadcrumbsService.steps[currentStepIndex - 3];
-        let seriesStep: Step = this.breadcrumbsService.steps[currentStepIndex - 2];
-        let contextStep: Step = this.breadcrumbsService.steps[currentStepIndex - 1];
-        this.importJob = uploadStep.data.archiveUploaded;
-        this.selectedPatients = seriesStep.data.patients;
-        this.context = contextStep.data.context;
+        if (!this.importDataService.archiveUploaded || !this.importDataService.inMemoryExtracted
+                || !importDataService.patients || !importDataService.patients[0]
+                || !importDataService.contextData) {
+            this.router.navigate(['imports'], {replaceUrl: true});
+            return;
+        }
+        
+        breadcrumbsService.nameStep('4. Finish');
+        this.importJob = this.importDataService.archiveUploaded;
+        this.selectedPatients = this.importDataService.patients;
+        this.context = this.importDataService.contextData;
     }
 
     private get patient(): PatientDicom {
@@ -58,6 +58,7 @@ export class FinishImportComponent implements OnInit {
                 this.importing = true;
                 this.importData()
                     .then(() => {
+                        this.importDataService.reset();
                         this.importing = false;
                         setTimeout(function () {
                             that.msgService.log('info', 'The data has been successfully imported')

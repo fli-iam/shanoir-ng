@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
 
-import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
+import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
+import { Router } from '../../breadcrumbs/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
 import { PatientDicom, SerieDicom } from '../dicom-data.model';
+import { ImportDataService } from '../import.data-service';
 import { ImportService } from '../import.service';
 
 @Component({
@@ -13,7 +14,7 @@ import { ImportService } from '../import.service';
     styleUrls: ['select-series.component.css', '../import.step.css'],
     animations: [slideDown]
 })
-export class SelectSeriesComponent implements OnInit {
+export class SelectSeriesComponent {
 
     private patients: PatientDicom[];
     private workFolder: string;
@@ -21,23 +22,23 @@ export class SelectSeriesComponent implements OnInit {
     private detailedPatient: Object;
     private detailedSerie: Object;
     private papayaParams: object[];
-    private step: Step;
 
     constructor(
             private importService: ImportService,
             private breadcrumbsService: BreadcrumbsService,
-            private router: Router) {
+            private router: Router,
+            private importDataService: ImportDataService) {
 
-        breadcrumbsService.nameStep('Import : Series');
+        if (!this.importDataService.archiveUploaded || !this.importDataService.inMemoryExtracted) {
+            this.router.navigate(['imports'], {replaceUrl: true});
+            return;
+        }
+        breadcrumbsService.nameStep('2. Series');
+        this.dataFiles = this.importDataService.inMemoryExtracted;
+        this.patients = this.importDataService.archiveUploaded.patients;
+        this.workFolder = this.importDataService.archiveUploaded.workFolder;
     }
-        
-    ngOnInit() {
-        this.step = this.breadcrumbsService.currentStep;
-        let previousStep: Step = this.breadcrumbsService.previousStep;
-        this.dataFiles = previousStep.data.inMemoryExtracted;
-        this.patients = previousStep.data.archiveUploaded.patients;
-        this.workFolder = previousStep.data.archiveUploaded.workFolder;
-    }
+
 
     private showSerieDetails(nodeParams: any): void {
         this.detailedPatient = null;
@@ -58,7 +59,7 @@ export class SelectSeriesComponent implements OnInit {
     }
 
     private onPatientUpdate(): void {
-        this.step.data.patients = this.patients;
+        this.importDataService.patients = this.patients;
     }
 
     private initPapaya(serie: SerieDicom): void {
