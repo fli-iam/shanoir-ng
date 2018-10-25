@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { DicomArchiveService } from '../dicom-archive.service';
 import { ImportJob } from '../dicom-data.model';
 import { ImportService } from '../import.service';
@@ -24,7 +23,6 @@ export class DicomUploadComponent implements OnInit {
     private dicomDirMissingError: boolean;
     private modality: string;
     private step: Step;
-    private readonly ImagesUrlUtil = ImagesUrlUtil;
 
 
     constructor(
@@ -33,7 +31,7 @@ export class DicomUploadComponent implements OnInit {
             private router: Router,
             private breadcrumbsService: BreadcrumbsService) {
         
-        breadcrumbsService.nameStep('Import : Upload');
+        breadcrumbsService.nameStep('[Import] Upload');
     }
     
     ngOnInit() {
@@ -65,13 +63,14 @@ export class DicomUploadComponent implements OnInit {
         let formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         this.importService.uploadFile(formData)
-            .subscribe((patientDicomList: ImportJob) => {
+            .then((patientDicomList: ImportJob) => {
                 this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
                 this.step.data.archiveUploaded = patientDicomList;
                 this.setArchiveStatus('uploaded');
-            }, (err: String) => {
+            }).catch(error => {
                 this.setArchiveStatus('error');
-                this.dicomDirMissingError = err.indexOf("DICOMDIR is missing") != -1
+                if (error && error.error && error.error.message) 
+                    this.dicomDirMissingError = error.error.message.indexOf("DICOMDIR is missing") != -1
             });
     }
 

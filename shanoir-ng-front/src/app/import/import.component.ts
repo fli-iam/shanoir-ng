@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'import-modality',
@@ -6,5 +7,9 @@ import { Component } from '@angular/core';
     styleUrls: ['import.component.css']
 })
 export class ImportComponent {
-    
+
+    constructor(private breadcrumbsService: BreadcrumbsService) {
+        breadcrumbsService.markMilestone();
+    }
+
 }

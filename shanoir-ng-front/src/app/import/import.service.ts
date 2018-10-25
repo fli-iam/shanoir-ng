@@ -10,9 +10,9 @@ export class ImportService {
 
     constructor(private http: HttpClient) { }
 
-    uploadFile(formData: FormData): Observable<ImportJob> {
+    uploadFile(formData: FormData): Promise<ImportJob> {
         return this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_DICOM_URL, formData)
-            .map(response => response);
+            .toPromise();
     }
 
     startImportJob(importJob: ImportJob): Promise<Object> {

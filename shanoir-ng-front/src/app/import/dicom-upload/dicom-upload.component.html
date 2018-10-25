@@ -2,8 +2,7 @@
 <fieldset class="step dicom">
     <p>Please select a DICOM zip archive to import.</p>
     <p><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Important notice :</strong> this archive must contain a DICOMDIR file at its root!</p>
-    <input type="file" (change)="uploadArchive($event)"/>
-    <img class="loader" *ngIf="archiveStatus == 'uploading'" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH" />
+    <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
     
     <label *ngIf="extensionError==true" class="form-validation-alert" i18n="Import|ExtensionError label">
         A DICOM zip archive is required!

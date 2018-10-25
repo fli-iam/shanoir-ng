@@ -106,6 +106,7 @@ import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { Router } from './breadcrumbs/router';
 import { FinishImportComponent } from './import/finish/finish.component';
+import { UploaderComponent } from './shared/components/uploader/uploader.component';
 
 
 @NgModule({
@@ -187,7 +188,8 @@ import { FinishImportComponent } from './import/finish/finish.component';
         FormFooterComponent,
         ModalsComponent,
         BreadcrumbsComponent,
-        FinishImportComponent
+        FinishImportComponent,
+        UploaderComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

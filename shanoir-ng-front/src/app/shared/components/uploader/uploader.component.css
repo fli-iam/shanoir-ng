@@ -1,0 +1,5 @@
+svg { vertical-align: 0; }
+button { margin-right: 10px; }
+span { color: var(--color-a); font-weight: bold; }
+.loader { vertical-align: middle; height: 12px; }
+.error { color: var(--color-error); }
