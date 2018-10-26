@@ -4,6 +4,7 @@ import { Event, NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 
 import { Entity } from '../shared/components/entity/entity.abstract';
+import { Title } from '@angular/platform-browser';
 
 @Injectable()
 export class BreadcrumbsService {
@@ -18,7 +19,8 @@ export class BreadcrumbsService {
 
     constructor(
             private router: Router, 
-            private locationStrategy: LocationStrategy) {
+            private locationStrategy: LocationStrategy,
+            private titleService: Title) {
                 
         locationStrategy.onPopState((event: PopStateEvent) => {
             /* detect back & forward browser events and find the target step using its timestamp */
@@ -43,6 +45,7 @@ export class BreadcrumbsService {
                     this.steps.push(new Step(this.nextLabel, this.router.url, timestamp));
                     this.currentStepIndex = this.steps.length - 1;
                     locationStrategy.replaceState(timestamp, 'todo', this.router.url, '');
+                    titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
                 }
                 if (this.nextMilestone) this.processMilestone();
                 this.nextMilestone = false;
