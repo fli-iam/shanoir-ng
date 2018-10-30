@@ -19,7 +19,7 @@ export const BACKEND_API_CENTER_NAMES_URL: string = BACKEND_API_CENTER_URL + '/n
 
 // Studies http api
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';
-export const BACKEND_API_STUDY_WITH_CARDS_BY_USER_EQUIPMENT_URL: string = BACKEND_API_STUDY_URL + '/listwithcards';
+export const BACKEND_API_STUDY_BY_USER_EQUIPMENT_URL: string = BACKEND_API_STUDY_URL + '/list_for_import';
 export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '/names';
 
 // Subjects http api

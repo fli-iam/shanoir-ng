@@ -29,6 +29,8 @@ public class CenterDTO {
 	private String street;
 
 	private String website;
+	
+	private Boolean compatible = false;
 
 	/**
 	 * Default constructor.
@@ -169,6 +171,14 @@ public class CenterDTO {
 	 */
 	public void setWebsite(String website) {
 		this.website = website;
+	}
+
+	public Boolean getCompatible() {
+		return compatible;
+	}
+
+	public void setCompatible(Boolean compatible) {
+		this.compatible = compatible;
 	}
 
 }

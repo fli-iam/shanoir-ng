@@ -63,9 +63,9 @@ public interface StudyApi {
 			@ApiResponse(code = 403, message = "forbidden", response = SimpleStudyDTO.class),
 			@ApiResponse(code = 404, message = "no study found", response = SimpleStudyDTO.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = SimpleStudyDTO.class) })
-	@RequestMapping(value = "/listwithcards", produces = { "application/json" }, consumes = {
+	@RequestMapping(value = "/list_for_import", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<List<SimpleStudyDTO>> findStudiesWithStudyCardsByUserAndEquipment(
+	ResponseEntity<List<SimpleStudyDTO>> findStudiesByUserAndEquipment(
 			@ApiParam(value = "equipment", required = true) @RequestBody EquipmentDicom equipment, BindingResult result)
 			throws RestServiceException;
 

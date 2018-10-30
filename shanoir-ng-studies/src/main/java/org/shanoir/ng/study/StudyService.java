@@ -80,7 +80,7 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	List<Study> findStudiesByUserId(Long userId);
 
 	/**
-	 * Find all studies for a user with permission level (studyUserType) lower than specified value.
+	 * Find all studies for a user with permission level (studyUserType) lower than or equal to specified value.
 	 * 
 	 * @param userId
 	 *            user id.
@@ -88,7 +88,7 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 *            studyUserType id.
 	 * @return a list of studies.
 	 */
-	List<Study> findStudiesByUserIdAndStudyUserTypeLessThan(final Long userId,final Integer studyUserTypeId);
+	List<Study> findStudiesByUserIdAndStudyUserTypeLessThanEqual(final Long userId,final Integer studyUserTypeId);
 
 	/**
 	 * Find all studies with theirs study cards for a user.
@@ -100,7 +100,7 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @return a list of simple studies.
 	 * @throws ShanoirException
 	 */
-	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(Long userId, EquipmentDicom equipment)
+	List<SimpleStudyDTO> findStudiesByUserAndEquipment(Long userId, EquipmentDicom equipment)
 			throws ShanoirException;
 	
 	/**

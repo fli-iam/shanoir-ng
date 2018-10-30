@@ -1,8 +1,5 @@
 package org.shanoir.ng.acquisitionequipment;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.shanoir.ng.manufacturermodel.ManufacturerModel;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 
@@ -21,15 +18,8 @@ public class AcquisitionEquipmentDTO {
 	private ManufacturerModel manufacturerModel;
 
 	private String serialNumber;
-
-	private List<IdNameDTO> studyCards;
-
-	/**
-	 * Default constructor.
-	 */
-	public AcquisitionEquipmentDTO() {
-		studyCards = new ArrayList<>();
-	}
+	
+	private Boolean compatible = false;
 
 	/**
 	 * @return the center
@@ -91,18 +81,12 @@ public class AcquisitionEquipmentDTO {
 		this.serialNumber = serialNumber;
 	}
 
-	/**
-	 * @return the studyCards
-	 */
-	public List<IdNameDTO> getStudyCards() {
-		return studyCards;
+	public Boolean getCompatible() {
+		return compatible;
 	}
 
-	/**
-	 * @param studyCards the studyCards to set
-	 */
-	public void setStudyCards(List<IdNameDTO> studyCards) {
-		this.studyCards = studyCards;
+	public void setCompatible(Boolean compatible) {
+		this.compatible = compatible;
 	}
 
 }

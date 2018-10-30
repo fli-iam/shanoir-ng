@@ -4,19 +4,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
-import org.dcm4che3.data.VR;
+import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomInputStream;
-import org.dcm4che3.emf.*;
-import org.shanoir.ng.importer.model.EchoTime;
 import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,6 +181,7 @@ public class DicomFileAnalyzerService {
 			checkSeriesDate(serie, datasetAttributes);
 			checkProtocolName(serie, datasetAttributes);
 			addSeriesEquipment(serie, datasetAttributes);
+			addSeriesCenter(serie, datasetAttributes);
 			addSeriesIsCompressed(serie, datasetAttributes);
 		} catch (IOException e) {
 			LOG.error("Error during DICOM file process", e);
@@ -356,6 +353,23 @@ public class DicomFileAnalyzerService {
 			equipment.put("manufacturerModelName", manufacturerModelName);
 			equipment.put("deviceSerialNumber", deviceSerialNumber);
 			((ObjectNode) serie).set("equipment", equipment);
+		}
+	}
+	
+	/**
+	 * Adds the equipment information.
+	 * 
+	 * @param serie
+	 * @param datasetAttributes
+	 */
+	private void addSeriesCenter(JsonNode serie, Attributes datasetAttributes) {
+		if (serie.path("institution").isMissingNode()) {
+			String institutionName = datasetAttributes.getString(Tag.InstitutionName);
+			String institutionAddress = datasetAttributes.getString(Tag.InstitutionAddress);
+			ObjectNode institution = mapper.createObjectNode();
+			institution.put("institutionName", institutionName);
+			institution.put("institutionAddress", institutionAddress);
+			((ObjectNode) serie).set("institution", institution);
 		}
 	}
 

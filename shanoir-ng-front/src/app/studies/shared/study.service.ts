@@ -20,8 +20,8 @@ export class StudyService extends EntityService<Study> {
         .toPromise();
     }
     
-    findStudiesWithStudyCardsByUserAndEquipment(equipment: EquipmentDicom): Promise<Study[]> {
-        return this.http.post<Study[]>(AppUtils.BACKEND_API_STUDY_WITH_CARDS_BY_USER_EQUIPMENT_URL, JSON.stringify(equipment))
+    findStudiesByUserAndEquipment(equipment: EquipmentDicom): Promise<Study[]> {
+        return this.http.post<Study[]>(AppUtils.BACKEND_API_STUDY_BY_USER_EQUIPMENT_URL, JSON.stringify(equipment))
             .map(entities => entities.map((entity) => Object.assign(new Study(), entity)))
             .toPromise();
     }

@@ -74,7 +74,7 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
 
     private fetchStudies(): void {
         this.studyService
-            .findStudiesWithStudyCardsByUserAndEquipment(this.patient.studies[0].series[0].equipment)
+            .findStudiesByUserAndEquipment(this.patient.studies[0].series[0].equipment)
             .then(studies => {
                 this.studies = studies;
                 this.prepareStudyStudycard(studies);
