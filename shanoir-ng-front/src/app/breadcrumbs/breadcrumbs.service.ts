@@ -100,11 +100,8 @@ export class BreadcrumbsService {
     }
 
     public get previousStep(): Step {
-        return this.steps[this.nbSteps - 2];
-    }
-
-    public get nbSteps(): number {
-        return this.steps.length;
+        if (this.currentStepIndex < 1) return;
+        return this.steps[this.currentStepIndex - 1];
     }
 
     public isPreviousStateAwaiting(): boolean {
@@ -118,8 +115,7 @@ export class Step {
     constructor(
             public label: string,
             public route: string,
-            public timestamp: number,
-            public entity?: Entity) {
+            public timestamp: number) {
     }
 
     // static parse(str: string): Step {
@@ -152,6 +148,8 @@ export class Step {
     public waitStep: Step;
     private onSaveSubject: Subject<Entity> = new Subject<Entity>();
     public milestone: boolean = false;
+    public entity: Entity;
+    public data: any = {};
 
     private onSave(): Subject<Entity> {
         this.subscribers++;

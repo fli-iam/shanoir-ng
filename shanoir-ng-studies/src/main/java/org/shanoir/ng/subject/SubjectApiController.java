@@ -260,8 +260,10 @@ public class SubjectApiController implements SubjectApi {
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "subject to update", required = true) @RequestBody SubjectFromShupDTO subjectFromShupDTO,
 			final BindingResult result) throws RestServiceException {
+
 		// IMPORTANT : avoid any confusion that could lead to security breach
-		Subject subject = subjectService.findById(subjectId);
+	
+		Subject subject = subjectService.findByIdWithSubjecStudies(subjectId);
 		if (subject == null) {
 			return new ResponseEntity<Long>(HttpStatus.NO_CONTENT);
 		}
@@ -281,7 +283,7 @@ public class SubjectApiController implements SubjectApi {
 
 		/* Update template in db. */
 		try {
-			subjectService.update(subject);
+			subjectService.update(subject,subjectFromShupDTO);
 			return new ResponseEntity<Long>(subject.getId(), HttpStatus.OK);
 		} catch (ShanoirStudiesException e) {
 			LOG.error("Error while trying to update subject " + subjectId + " : ", e);

@@ -10,7 +10,6 @@ import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectFromShupDTO;
 import org.shanoir.ng.subjectstudy.ExaminationDTO;
-import org.shanoir.ng.subjectstudy.SubjectStudy;
 
 /**
  * Subject service.
@@ -162,6 +161,8 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	public String findSubjectOfsepByCenter(final String centerCode);
 	
 	public List<ExaminationDTO> findExaminationsForSubjectStudyRel(final Long subjectId, final Long studyId) throws ShanoirStudiesException;
+
+	Subject findByIdWithSubjecStudies(Long id);
 
 
 }
