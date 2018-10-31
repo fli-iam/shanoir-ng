@@ -105,6 +105,9 @@ import { ServiceLocator } from './utils/locator.service';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { Router } from './breadcrumbs/router';
+import { FinishImportComponent } from './import/finish/finish.component';
+import { UploaderComponent } from './shared/components/uploader/uploader.component';
+import { ImportDataService } from './import/import.data-service';
 
 
 @NgModule({
@@ -185,7 +188,9 @@ import { Router } from './breadcrumbs/router';
         TimesPipe,
         FormFooterComponent,
         ModalsComponent,
-        BreadcrumbsComponent
+        BreadcrumbsComponent,
+        FinishImportComponent,
+        UploaderComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -223,7 +228,8 @@ import { Router } from './breadcrumbs/router';
             multi: true
         },
         BreadcrumbsService,
-        Router
+        Router,
+        ImportDataService
     ],
     bootstrap: [AppComponent],
 })

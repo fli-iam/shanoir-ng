@@ -8,8 +8,6 @@ import { CenterListComponent } from './centers/center-list/center-list.component
 import { CenterComponent } from './centers/center/center.component';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
-import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
-import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
@@ -25,6 +23,12 @@ import { AccountRequestComponent } from './users/account-request/account-request
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
+import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
+import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { SelectSeriesComponent } from './import/select-series/select-series.component';
+import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { FinishImportComponent } from './import/finish/finish.component';
 
 let appRoutes: Routes = [
     {
@@ -42,7 +46,26 @@ let appRoutes: Routes = [
         component: HomeComponent
     }, {
         path: 'imports',
-        component: ImportComponent
+        component: ImportComponent,
+        children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'upload'
+            }, {
+                path: 'upload',
+                component: DicomUploadComponent
+            }, {
+                path: 'series',
+                component: SelectSeriesComponent
+            }, {
+                path: 'context',
+                component: ClinicalContextComponent
+            }, {
+                path: 'finish',
+                component: FinishImportComponent
+            }
+        ]
     }, {
         path: 'new-instrument',
         component: NewInstrumentComponent,

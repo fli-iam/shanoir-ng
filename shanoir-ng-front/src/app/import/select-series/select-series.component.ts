@@ -1,9 +1,12 @@
-import { Component, Output, EventEmitter, Input, SimpleChanges, OnChanges } from '@angular/core';
-import { PatientDicom, SerieDicom } from "../dicom-data.model";
-import { AbstractImportStepComponent } from '../import-step.abstract';
+import { Component } from '@angular/core';
+
+import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
+import { Router } from '../../breadcrumbs/router';
 import { slideDown } from '../../shared/animations/animations';
-import { ImportService } from '../import.service';
 import * as AppUtils from '../../utils/app.utils';
+import { PatientDicom, SerieDicom } from '../dicom-data.model';
+import { ImportDataService } from '../import.data-service';
+import { ImportService } from '../import.service';
 
 @Component({
     selector: 'select-series',
@@ -11,19 +14,31 @@ import * as AppUtils from '../../utils/app.utils';
     styleUrls: ['select-series.component.css', '../import.step.css'],
     animations: [slideDown]
 })
-export class SelectSeriesComponent extends AbstractImportStepComponent implements OnChanges {
+export class SelectSeriesComponent {
 
-    @Input() patients: PatientDicom[];
-    @Input() workFolder: string;
-    @Input() dataFiles: any;
-    @Output() patientsChange = new EventEmitter<PatientDicom[]>();
+    private patients: PatientDicom[];
+    private workFolder: string;
+    private dataFiles: any;
     private detailedPatient: Object;
     private detailedSerie: Object;
     private papayaParams: object[];
 
-    constructor(private importService: ImportService) {
-        super();
+    constructor(
+            private importService: ImportService,
+            private breadcrumbsService: BreadcrumbsService,
+            private router: Router,
+            private importDataService: ImportDataService) {
+
+        if (!this.importDataService.archiveUploaded || !this.importDataService.inMemoryExtracted) {
+            this.router.navigate(['imports'], {replaceUrl: true});
+            return;
+        }
+        breadcrumbsService.nameStep('2. Series');
+        this.dataFiles = this.importDataService.inMemoryExtracted;
+        this.patients = this.importDataService.archiveUploaded.patients;
+        this.workFolder = this.importDataService.archiveUploaded.workFolder;
     }
+
 
     private showSerieDetails(nodeParams: any): void {
         this.detailedPatient = null;
@@ -44,8 +59,7 @@ export class SelectSeriesComponent extends AbstractImportStepComponent implement
     }
 
     private onPatientUpdate(): void {
-        this.updateValidity();
-        this.patientsChange.emit(this.patients);
+        this.importDataService.patients = this.patients;
     }
 
     private initPapaya(serie: SerieDicom): void {
@@ -69,15 +83,8 @@ export class SelectSeriesComponent extends AbstractImportStepComponent implement
         });
     }
 
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes['patients']) {
-            this.patientsChange.emit(this.patients);
-        }
-        this.updateValidity();
-    }
-
-    getValidity(): boolean {
-        if (!this.patients) return false;
+    get valid(): boolean {
+        if (!this.patients || this.patients.length == 0) return false;
         for (let patient of this.patients) {
             for (let study of patient.studies) {
                 for (let serie of study.series) {
@@ -86,5 +93,9 @@ export class SelectSeriesComponent extends AbstractImportStepComponent implement
             }
         }
         return false;
+    }
+
+    private next() {
+        this.router.navigate(['imports/context']);
     }
 }
