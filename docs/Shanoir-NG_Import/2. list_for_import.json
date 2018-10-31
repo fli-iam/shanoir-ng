@@ -1,0 +1,245 @@
+[
+  {
+    "id": 1,
+    "name": "NATIVE Divers",
+    "centers": [
+      {
+        "acquisitionEquipments": [
+          {
+            "center": {
+              "id": 1,
+              "name": "CHU Rennes"
+            },
+            "id": 95,
+            "manufacturerModel": {
+              "_links": {
+                "self": {
+                  "href": "http://localhost:9900/manufacturermodel/29"
+                }
+              },
+              "id": 29,
+              "name": " LIGHTSPEED VCT64",
+              "datasetModalityType": "MR_DATASET",
+              "magneticField": 0.0,
+              "manufacturer": {
+                "_links": {
+                  "self": {
+                    "href": "http://localhost:9900/manufacturer/1"
+                  }
+                },
+                "id": 1,
+                "name": "GE MEDICAL SYSTEMS"
+              }
+            },
+            "serialNumber": "0000"
+          },
+          {
+            "center": {
+              "id": 1,
+              "name": "CHU Rennes"
+            },
+            "id": 42,
+            "manufacturerModel": {
+              "_links": {
+                "self": {
+                  "href": "http://localhost:9900/manufacturermodel/16"
+                }
+              },
+              "id": 16,
+              "name": "Ingenia",
+              "datasetModalityType": "MR_DATASET",
+              "magneticField": 3.0,
+              "manufacturer": {
+                "_links": {
+                  "self": {
+                    "href": "http://localhost:9900/manufacturer/5"
+                  }
+                },
+                "id": 5,
+                "name": "Philips Healthcare"
+              }
+            },
+            "serialNumber": "71050"
+          },
+          {
+            "center": {
+              "id": 1,
+              "name": "CHU Rennes"
+            },
+            "id": 40,
+            "manufacturerModel": {
+              "_links": {
+                "self": {
+                  "href": "http://localhost:9900/manufacturermodel/16"
+                }
+              },
+              "id": 16,
+              "name": "Ingenia",
+              "datasetModalityType": "MR_DATASET",
+              "magneticField": 3.0,
+              "manufacturer": {
+                "_links": {
+                  "self": {
+                    "href": "http://localhost:9900/manufacturer/5"
+                  }
+                },
+                "id": 5,
+                "name": "Philips Healthcare"
+              }
+            },
+            "serialNumber": "71051"
+          },
+          {
+            "center": {
+              "id": 1,
+              "name": "CHU Rennes"
+            },
+            "id": 94,
+            "manufacturerModel": {
+              "_links": {
+                "self": {
+                  "href": "http://localhost:9900/manufacturermodel/32"
+                }
+              },
+              "id": 32,
+              "name": "ALLURA DSA",
+              "datasetModalityType": "MR_DATASET",
+              "magneticField": 0.0,
+              "manufacturer": {
+                "_links": {
+                  "self": {
+                    "href": "http://localhost:9900/manufacturer/5"
+                  }
+                },
+                "id": 5,
+                "name": "Philips Healthcare"
+              }
+            },
+            "serialNumber": "00000"
+          },
+          {
+            "center": {
+              "id": 1,
+              "name": "CHU Rennes"
+            },
+            "id": 2,
+            "manufacturerModel": {
+              "_links": {
+                "self": {
+                  "href": "http://localhost:9900/manufacturermodel/1"
+                }
+              },
+              "id": 1,
+              "name": "Achieva",
+              "datasetModalityType": "MR_DATASET",
+              "magneticField": 3.0,
+              "manufacturer": {
+                "_links": {
+                  "self": {
+                    "href": "http://localhost:9900/manufacturer/2"
+                  }
+                },
+                "id": 2,
+                "name": "Philips Medical Systems"
+              }
+            },
+            "serialNumber": "17072"
+          },
+          {
+            "center": {
+              "id": 1,
+              "name": "CHU Rennes"
+            },
+            "id": 1,
+            "manufacturerModel": {
+              "_links": {
+                "self": {
+                  "href": "http://localhost:9900/manufacturermodel/3"
+                }
+              },
+              "id": 3,
+              "name": "Verio",
+              "datasetModalityType": "MR_DATASET",
+              "magneticField": 3.0,
+              "manufacturer": {
+                "_links": {
+                  "self": {
+                    "href": "http://localhost:9900/manufacturer/3"
+                  }
+                },
+                "id": 3,
+                "name": "SIEMENS"
+              }
+            },
+            "serialNumber": "40296"
+          },
+          {
+            "center": {
+              "id": 1,
+              "name": "CHU Rennes"
+            },
+            "id": 11,
+            "manufacturerModel": {
+              "_links": {
+                "self": {
+                  "href": "http://localhost:9900/manufacturermodel/5"
+                }
+              },
+              "id": 5,
+              "name": "Sonata",
+              "datasetModalityType": "MR_DATASET",
+              "magneticField": 1.5,
+              "manufacturer": {
+                "_links": {
+                  "self": {
+                    "href": "http://localhost:9900/manufacturer/3"
+                  }
+                },
+                "id": 3,
+                "name": "SIEMENS"
+              }
+            },
+            "serialNumber": "23257"
+          },
+          {
+            "center": {
+              "id": 1,
+              "name": "CHU Rennes"
+            },
+            "id": 64,
+            "manufacturerModel": {
+              "_links": {
+                "self": {
+                  "href": "http://localhost:9900/manufacturermodel/6"
+                }
+              },
+              "id": 6,
+              "name": "Aera",
+              "datasetModalityType": "MR_DATASET",
+              "magneticField": 1.5,
+              "manufacturer": {
+                "_links": {
+                  "self": {
+                    "href": "http://localhost:9900/manufacturer/3"
+                  }
+                },
+                "id": 3,
+                "name": "SIEMENS"
+              }
+            },
+            "serialNumber": "41575"
+          }
+        ],
+        "city": "Rennes",
+        "country": "France",
+        "id": 1,
+        "name": "CHU Rennes",
+        "phoneNumber": "",
+        "postalCode": "",
+        "street": "",
+        "website": ""
+      }
+    ],
+    "compatible": true
+  }
+]
