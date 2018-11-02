@@ -156,8 +156,7 @@
                       "name": "Philips Medical Systems"
                     }
                   },
-                  "serialNumber": "17131",
-                  "studyCards": []
+                  "serialNumber": "17131"
                 },
                 {
                   "center": { "id": 2, "name": "CHU Reims" },
@@ -182,8 +181,7 @@
                       "name": "SIEMENS"
                     }
                   },
-                  "serialNumber": "46055",
-                  "studyCards": []
+                  "serialNumber": "46055"
                 },
                 {
                   "center": { "id": 2, "name": "CHU Reims" },
@@ -208,8 +206,7 @@
                       "name": "SIEMENS"
                     }
                   },
-                  "serialNumber": "0",
-                  "studyCards": []
+                  "serialNumber": "0"
                 },
                 {
                   "center": { "id": 2, "name": "CHU Reims" },
@@ -234,8 +231,7 @@
                       "name": "GE MEDICAL SYSTEMS"
                     }
                   },
-                  "serialNumber": "0001",
-                  "studyCards": []
+                  "serialNumber": "0001"
                 }
               ],
               "city": "Reims",

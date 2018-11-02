@@ -1,6 +1,5 @@
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { User } from '../../users/shared/user.model';
 import { ServiceLocator } from '../../utils/locator.service';
@@ -25,7 +24,6 @@ export class Study extends Entity {
     nbSujects: number;
     protocolFilePathList: string[];
     startDate: Date;
-    studyCards: StudyCard[];
     studyCenterList: StudyCenter[];
     studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
     studyType: StudyType;

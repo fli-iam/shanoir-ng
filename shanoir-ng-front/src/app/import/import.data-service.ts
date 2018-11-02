@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { ImportJob, PatientDicom } from './dicom-data.model';
 import { Study } from '../studies/shared/study.model';
-import { StudyCard } from '../study-cards/shared/study-card.model';
 import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject-study.model';
 import { SubjectExamination } from '../examinations/shared/subject-examination.model';
+import { IdNameObject } from '../shared/models/id-name-object.model';
 
 export class ContextData {
     constructor(
         public study: Study,
-        public studycard: StudyCard,
         public subject: SubjectWithSubjectStudy,
-        public examination: SubjectExamination
+        public examination: SubjectExamination,
+        public niftiConverter: IdNameObject
     ) {};
 }
 
