@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Examination } from '../../examinations/shared/examination.model';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
@@ -14,16 +15,8 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { PatientDicom } from '../dicom-data.model';
-import { AbstractImportStepComponent } from '../import-step.abstract';
-
-export class ContextData {
-    constructor(
-        public study: Study,
-        public studycard: StudyCard,
-        public subject: SubjectWithSubjectStudy,
-        public examination: SubjectExamination
-    ) {};
-}
+import { ImportDataService, ContextData } from '../import.data-service';
+import { Entity } from 'src/app/shared/components/entity/entity.abstract';
 
 @Component({
     selector: 'clinical-context',
@@ -31,10 +24,10 @@ export class ContextData {
     styleUrls: ['clinical-context.component.css', '../import.step.css'],
     animations: [slideDown]
 })
-export class ClinicalContextComponent extends AbstractImportStepComponent implements OnChanges {
+export class ClinicalContextComponent {
     
-    @Input() patient: PatientDicom;
-    @Output() contextChange = new EventEmitter<ContextData>();
+    patient: PatientDicom;
+    //@Output() contextChange = new EventEmitter<ContextData>();
     
     @ViewChild('subjectCreationModal') subjectCreationModal: ModalComponent;
     @ViewChild('examCreationModal') examCreationModal: ModalComponent;
@@ -48,28 +41,54 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     private studycard: StudyCard;
     private subjects: SubjectWithSubjectStudy[]; 
     private subject: SubjectWithSubjectStudy;
-    private subjectFromImport: Subject = new Subject();
-    private examFromImport: Examination = new Examination();
     private examinations: SubjectExamination[];
     private examination: SubjectExamination;
     public niftiConverter: IdNameObject;
     
     constructor(
-        private studyService: StudyService,
-        private examinationService: ExaminationService,
-        private router: Router,
-    ) {
-        super();
+            private studyService: StudyService,
+            private examinationService: ExaminationService,
+            private router: Router,
+            private breadcrumbsService: BreadcrumbsService,
+            private importDataService: ImportDataService) {
+
+        if (!importDataService.patients || !importDataService.patients[0]) {
+            this.router.navigate(['imports'], {replaceUrl: true});
+            return;
+        }
+        breadcrumbsService.nameStep('3. Context');
+        this.setPatient(importDataService.patients[0]);
+        this.reloadSavedData();
     }
 
-    ngOnChanges(changes: SimpleChanges) {
-        if(changes['patient'] && changes['patient'].currentValue) {
-            this.studycard = null;
-            this.subject = null;
-            this.examination = null;
-            this.onContextChange();
-            this.fetchStudies();
+    private reloadSavedData() {
+        if (this.importDataService.contextBackup) {
+            let study = this.importDataService.contextBackup.study;
+            let studycard = this.importDataService.contextBackup.studycard;
+            let subject = this.importDataService.contextBackup.subject;
+            let examination = this.importDataService.contextBackup.examination;
+            if (study) {
+                this.study = study;
+                this.onSelectStudy();
+            }
+            if (studycard) {
+                this.studycard = studycard;
+                this.onSelectStudycard();
+            }
+            if (subject) {
+                this.subject = subject;
+                this.onSelectSubject();
+            }
+            if (examination) {
+                this.examination = examination;
+                this.onSelectExamination();
+            }
         }
+    }
+
+    setPatient(patient: PatientDicom) {
+        this.patient = patient;
+        this.fetchStudies();
     }
 
     private fetchStudies(): void {
@@ -153,9 +172,9 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
     }
 
     private onContextChange() {
-        this.updateValidity();
-        if (this.getValidity()) {
-            this.contextChange.emit(this.getContext());
+        this.importDataService.contextBackup = this.getContext();
+        if (this.valid) {
+            this.importDataService.contextData = this.getContext();
         }
     }
     
@@ -163,37 +182,50 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
         return new ContextData(this.study, this.studycard, this.subject, this.examination);
     }
 
-    private initializePrefillSubject(): void {
+
+    private openCreateSubject = () => {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/subject/create']).then(success => {
+            this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
+            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+            });
+        });
+    }
+
+    private getPrefilledSubject(): Subject {
         let subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
-
         let newSubject = new Subject();
         newSubject.birthDate = this.patient.patientBirthDate;
         newSubject.name = this.patient.patientName;
         newSubject.sex = this.patient.patientSex; 
         newSubject.subjectStudyList = [subjectStudy];
-        this.subjectFromImport = newSubject;
+        return newSubject;
     }
     
-    private onCloseSubjectPopin(subject?: Subject): void {
-        if (subject) {
-            // Add the subject to the select box and select it
-            let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
-            subjectWithSubjectStudy.id = subject.id;
-            subjectWithSubjectStudy.name = subject.name;
-            subjectWithSubjectStudy.identifier = subject.identifier;
-            subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
-            
-            if (!this.subjects) {this.subjects = new Array<SubjectWithSubjectStudy>();}
-            this.subjects.push(subjectWithSubjectStudy);
-            this.subject = subjectWithSubjectStudy;
-            this.onSelectSubject();
-        }
-        this.subjectCreationModal.hide();
+    private subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
+        if (!subject) return;
+        let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
+        subjectWithSubjectStudy.id = subject.id;
+        subjectWithSubjectStudy.name = subject.name;
+        subjectWithSubjectStudy.identifier = subject.identifier;
+        subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
+        return subjectWithSubjectStudy;
     }
 
-    private initializePrefillExam(): void {
+    private openCreateExam = () => {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/examination/create']).then(success => {
+            this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
+            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
+            });
+        });
+    }
+
+    private getPrefilledExam(): Examination {
         let newExam = new Examination();
         newExam.studyId = this.study.id;
         newExam.studyName = this.study.name;
@@ -203,24 +235,17 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
         newExam.subjectName = this.subject.name;
         newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
         newExam.comment = this.patient.studies[0].studyDescription;
-
-        this.examFromImport = newExam;
+        return newExam;
     }
     
-    private onCloseExamPopin(examination?: Examination): void {
-        if (examination) {
-            // Add the new created exam to the select box and select it
-            let subjectExam = new SubjectExamination();
-            subjectExam.id = examination.id;
-            subjectExam.examinationDate = examination.examinationDate;
-            subjectExam.comment = examination.comment;
-
-            if (!this.examinations) {this.examinations = new Array<SubjectExamination>();}
-            this.examinations.push(subjectExam);
-            this.examination = subjectExam;
-            this.onSelectExamination();
-        }
-        this.examCreationModal.hide();
+    private examToSubjectExam(examination: Examination): SubjectExamination {
+        if (!examination) return;
+        // Add the new created exam to the select box and select it
+        let subjectExam = new SubjectExamination();
+        subjectExam.id = examination.id;
+        subjectExam.examinationDate = examination.examinationDate;
+        subjectExam.comment = examination.comment;
+        return subjectExam;
     }
 
     private showStudyDetails() {
@@ -239,7 +264,7 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
         window.open('examination/details/' + this.examination.id, '_blank');
     }
 
-    getValidity(): boolean {
+    get valid(): boolean {
         let context = this.getContext();
         return (
             context.study != undefined && context.study != null
@@ -247,5 +272,13 @@ export class ClinicalContextComponent extends AbstractImportStepComponent implem
             && context.subject != undefined && context.subject != null
             && context.examination != undefined && context.examination != null
         );
+    }
+
+    private next() {
+        this.router.navigate(['imports/finish']);
+    }
+
+    private compareEntities(e1: Entity, e2: Entity) : boolean {
+        return e1 && e2 && e1.id === e2.id;
     }
 }

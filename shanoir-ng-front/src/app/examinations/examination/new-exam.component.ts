@@ -92,7 +92,7 @@ export class NewExamComponent implements OnInit {
     create(): void {
         // this.examination = this.examinationForm.value;
         this.examinationService.create(this.examination)
-            .subscribe((examination) => {
+            .then((examination) => {
                 this.msgService.log('info', 'Examination successfully created');
                 this.back(examination);
             }, (err: any) => {

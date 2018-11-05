@@ -6,6 +6,7 @@ import { TreeNodeComponent } from '../../shared/components/tree/tree-node.compon
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Study } from '../shared/study.model';
+import { StudyUserType } from '../shared/study-user-type.enum';
 
 @Component({
     selector: 'study-tree',
@@ -41,11 +42,6 @@ export class StudyTreeComponent {
                 }
                 component.open();
             })
-            .catch((error) => {
-                component.open();
-                // TODO: display error
-                console.log("error getting examination list!");
-            });
     }
 
     showAcquisitionEquipmentDetails(acquisitionEquipmentId: number) {
@@ -76,6 +72,10 @@ export class StudyTreeComponent {
 
     showDatasetDetails(datasetId: number) {
         this.router.navigate(['/dataset/details/' + datasetId])
+    }
+
+    private getStudyUserTypeLabel(studyUserType: StudyUserType) {
+        return StudyUserType.getLabel(studyUserType);
     }
 
 }

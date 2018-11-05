@@ -1,10 +1,11 @@
 import { Input } from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
+import { Mode } from '../components/entity/entity.component.abstract';
 
 export abstract class AbstractInput implements ControlValueAccessor {
 
-    @Input() private mode: 'create' | 'edit' | 'view';
-    private model: any;
+    @Input() protected mode: Mode;
+    protected model: any;
     private disabled: boolean = false;
     propagateChange = (_: any) => {};
     
