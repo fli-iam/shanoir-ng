@@ -74,12 +74,13 @@ keycloak:
       - name: role secured api
       - patterns:
         - /role/*
-kc:
-# used to verify, that the login date update comes really from Keycloak in the network:
+##### Keycloak admin client, that ms users can directly communicate with keycloak #####
+kc.admin.client:
+  server.url: http://keycloak:8080/auth
+  realm: master
+  client.id: admin-cli
+  # used to verify, that the login date update comes really from Keycloak in the network:
   host.name: keycloak
-  requests:
-    realm: master
-    client.id: admin-cli
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-users.log

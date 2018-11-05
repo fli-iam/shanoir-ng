@@ -71,32 +71,39 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	 * in application.yml. URL, realm and client-id come from application.yml or env configuration.
 	 * 
 	 */
-	private Keycloak keycloak;
-	
-	@Value("${keycloak.auth-server-url}")
+	@Value("${kc.admin.client.server.url}")
 	private String kcAdminClientServerUrl;
-	
-	@Value("${kc.requests.realm}")
+
+	@Value("${kc.admin.client.realm}")
 	private String kcAdminClientRealm;
-	
-	@Value("${kc.requests.client.id}")
+
+	@Value("${kc.admin.client.client.id}")
 	private String kcAdminClientClientId;
+
+	@Value("${kc.admin.client.username}")
+	private String kcAdminClientUsername;
+
+	@Value("${kc.admin.client.password}")
+	private String kcAdminClientPassword;
+
+	@Value("${keycloak.realm}")
+	private String keycloakRealm;
+	
+	private Keycloak keycloak;
 	
 	@Autowired
 	private UserRepository userRepository;
 	
 	@Autowired
 	private EmailService emailService;
-	
-	@Value("${keycloak.realm}")
-	private String keycloakRealm;
+
 	
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		if (args.getOptionNames().isEmpty()) {
 			LOG.info("ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
 		} else {
-			initKeycloakAdminClient(args);
+			initKeycloakAdminClient();
 			if(args.containsOption("createInitialAdminShanoir")) {
 				/**
 				 * @ToDo: implement initial admin Shanoir creation here, in database users and in keycloak, check if dbs are really empty.
@@ -109,19 +116,13 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 		}
 	}
 
-	private void initKeycloakAdminClient(ApplicationArguments args) throws MissingArgumentException {
-		if(args.containsOption("kcAdminClientUsername")
-				&& args.containsOption("kcAdminClientPassword")) {
+	private void initKeycloakAdminClient() throws MissingArgumentException {
 			keycloak = Keycloak.getInstance(
 				kcAdminClientServerUrl,
 				kcAdminClientRealm,
-				args.getOptionValues("kcAdminClientUsername").get(0),
-				args.getOptionValues("kcAdminClientPassword").get(0),
+				kcAdminClientUsername,
+				kcAdminClientPassword,
 				kcAdminClientClientId);
-		} else {
-			LOG.error("Missing kcAdminClientUsername and -Password");
-			throw new MissingArgumentException("Missing kcAdminClientUsername and -Password");
-		}
 	}
 
 	private void createUsersIfNotExisting() {
