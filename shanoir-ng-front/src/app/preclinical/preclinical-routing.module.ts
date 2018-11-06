@@ -1,5 +1,5 @@
 import { NgModule }            from '@angular/core';
-import { RouterModule }        from '@angular/router';
+import { RouterModule, Routes }        from '@angular/router';
 
 import { AnimalSubjectsListComponent } from './animalSubject/list/animalSubject-list.component'; 
 import { AnimalSubjectFormComponent }      from './animalSubject/edit/animalSubject-form.component';
@@ -13,36 +13,22 @@ import { TherapiesListComponent } from './therapies/therapy/list/therapy-list.co
 import { TherapyFormComponent }      from './therapies/therapy/edit/therapy-form.component';
 import { AnestheticsListComponent } from './anesthetics/anesthetic/list/anesthetic-list.component';
 import { AnestheticFormComponent }      from './anesthetics/anesthetic/edit/anesthetic-form.component';
-import { AnestheticIngredientsListComponent } from './anesthetics/ingredients/list/anestheticIngredient-list.component';
-import { AnestheticIngredientFormComponent }      from './anesthetics/ingredients/edit/anestheticIngredient-form.component';
-import { ExaminationAnestheticFormComponent }      from './anesthetics/examination_anesthetic/edit/examinationAnesthetic-form.component';
-import { ExaminationAnestheticsListComponent } from './anesthetics/examination_anesthetic/list/examinationAnesthetic-list.component';
 import { ContrastAgentsListComponent } from './contrastAgent/list/contrastAgent-list.component';
 import { ContrastAgentFormComponent }      from './contrastAgent/edit/contrastAgent-form.component';
 import { AnimalExaminationFormComponent }      from './examination/edit/animal-examination-form.component';
 import { AnimalExaminationListComponent }      from './examination/list/animal-examination-list.component';
-import { ExtraDataFormComponent }      from './extraData/extraData/edit/extradata-form.component';
-import { PhysiologicalDataFormComponent }      from './extraData/physiologicalData/add/physiologicalData-form.component';
-import { ExtraDataListComponent }      from './extraData/extraData/list/extradata-list.component';
-import { BloodGasDataFormComponent }      from './extraData/bloodGasData/add/bloodGasData-form.component';
 import { ImportBrukerComponent } from './importBruker/importBruker.component';
-//import { ReferenceCategoryFormComponent } from './reference/category/category-form.component';
-//import { ReferenceTypeFormComponent } from './reference/type/type-form.component';
+import { AuthNotGuestGuard } from '../shared/roles/auth-not-guest-guard';
 
-@NgModule({
-  imports: [RouterModule.forChild([
+import {getRoutesFor} from '../app.routing'
+
+let routes : Routes= [
     { 
         path: 'preclinical-subjects', 
         component: AnimalSubjectsListComponent 
     },{ 
         path: 'preclinical-subject', 
         component: AnimalSubjectFormComponent 
-    },{ 
-        path: 'preclinical-references', 
-        component: ReferencesListComponent 
-    },{ 
-        path: 'preclinical-reference', 
-        component: ReferenceFormComponent 
     },{ 
         path: 'preclinical-pathologies', 
         component: PathologiesListComponent 
@@ -85,7 +71,14 @@ import { ImportBrukerComponent } from './importBruker/importBruker.component';
     	component: ImportBrukerComponent
   	}
     
-  ])],
-  exports: [RouterModule]
+  ];
+
+  routes = routes.concat(getRoutesFor('preclinical-reference', ReferenceFormComponent, ReferencesListComponent, AuthNotGuestGuard));
+
+@NgModule({
+  imports: [
+    RouterModule.forChild(routes)],
+
+  exports: [RouterModule] 
 })
 export class PreclinicalRoutingModule {}
