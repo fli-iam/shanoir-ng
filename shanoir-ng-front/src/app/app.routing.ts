@@ -67,7 +67,7 @@ appRoutes = appRoutes.concat(
 
 export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes); 
 
-function getRoutesFor(entityName: string, entityComponent, listComponent, auth): Routes {
+export function getRoutesFor(entityName: string, entityComponent, listComponent, auth): Routes {
     return [
         {
             path: entityName,
