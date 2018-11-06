@@ -1,5 +1,5 @@
-<div [class.disabled]="disabled" [class.last-enabled]="lastEnabled" class="header command-zone" (click)="onHeaderClick($event)">2. Select series</div>
-<fieldset class="step" *ngIf="!disabled && open" [@slideDown]="!disabled && open"> 
+<div class="header command-zone">2. Select series</div>
+<fieldset class="step"> 
     <p>Please select only the series useful for your study</p>
     <div class="tree">
         <node 
@@ -97,3 +97,4 @@
         <papaya [params]="papayaParams"></papaya>
     </div>     
 </fieldset>
+<button class="next" [disabled]="!valid" (click)="next()">Next</button>

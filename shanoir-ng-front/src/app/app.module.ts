@@ -9,7 +9,7 @@ import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
 
 import { routing } from './app.routing';
-import { PreclinicalRoutingModule } from './preclinical/preclinical-routing.module'
+import { preclinicalRouting } from './preclinical/preclinical-routing.module'
 
 import { AccountEventsService } from './users/account/account-events.service';
 import { AccountRequestComponent } from "./users/account-request/account-request.component";
@@ -106,6 +106,9 @@ import { ServiceLocator } from './utils/locator.service';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { Router } from './breadcrumbs/router';
+import { FinishImportComponent } from './import/finish/finish.component';
+import { UploaderComponent } from './shared/components/uploader/uploader.component';
+import { ImportDataService } from './import/import.data-service';
 
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
@@ -165,7 +168,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         MyDatePickerModule,
         ReactiveFormsModule,
         routing,
-    	PreclinicalRoutingModule
+    	preclinicalRouting
     ],
     declarations: [
         AccountRequestComponent,
@@ -235,6 +238,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         FormFooterComponent,
         ModalsComponent,
         BreadcrumbsComponent,
+        FinishImportComponent,
+        UploaderComponent,
     	AnimalSubjectsListComponent,   
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,
@@ -269,7 +274,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     	AnimalClinicalContextComponent
     ],
     entryComponents: [
-        ConfirmDialogComponent
+        ConfirmDialogComponent,
+        ModalsComponent
     ],
     providers: [
         AccountEventsService,
@@ -317,7 +323,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
             multi: true
         },
         BreadcrumbsService,
-        Router
+        Router,
+        ImportDataService
     ],
     bootstrap: [AppComponent],
 })
