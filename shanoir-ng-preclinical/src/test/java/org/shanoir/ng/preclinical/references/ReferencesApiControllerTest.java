@@ -43,12 +43,12 @@ import com.google.gson.GsonBuilder;
 public class ReferencesApiControllerTest {
 
 	private static final String REQUEST_PATH = "/refs";
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/";
 	private static final String REQUEST_PATH_CATEGORIES = REQUEST_PATH + "/categories";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/reference/1";
-	private static final String REQUEST_PATH_WITH_CAT_TYPE_VALUE = REQUEST_PATH + "/subject/specie/rat";
-	private static final String REQUEST_PATH_BY_CAT_VALUE = REQUEST_PATH + "/subject";
-	private static final String REQUEST_PATH_BY_CAT_AND_TYPE = REQUEST_PATH + "/subject/specie";
+	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+	private static final String REQUEST_PATH_WITH_CAT_TYPE_VALUE = REQUEST_PATH + "/category/subject/specie/rat";
+	private static final String REQUEST_PATH_BY_CAT_VALUE = REQUEST_PATH + "/category/subject";
+	private static final String REQUEST_PATH_BY_CAT_AND_TYPE = REQUEST_PATH + "/category/subject/specie";
 
 	private Gson gson;
 
