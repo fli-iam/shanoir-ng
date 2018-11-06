@@ -1,10 +1,13 @@
 import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { ImportJob } from '../../../import/dicom-data.model';
-import { ImportBrukerService } from '../importBruker.service';
 import { DicomArchiveService } from '../../../import/dicom-archive.service';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
-import { AbstractImportStepComponent } from '../../../import/import-step.abstract';
 import { slideDown } from '../../../shared/animations/animations';
+import { ImportService } from '../../../import/import.service';
+import { Router } from '../../../breadcrumbs/router';
+import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import { ImportDataService } from '../../../import/import.data-service';
+import { ImportBrukerService } from '../importBruker.service';
 
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
@@ -15,15 +18,13 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     styleUrls: ['bruker-upload.component.css', '../../..//import/import.step.css'],
     animations: [slideDown]
 })
-export class BrukerUploadComponent extends AbstractImportStepComponent {
+export class BrukerUploadComponent {
 
-    @Output() inMemoryExtracted = new EventEmitter<any>();
-    @Output() archiveUploaded = new EventEmitter<ImportJob>();
-    
     private archiveStatus: Status = 'none';
     private extensionError: boolean;
     private dicomDirMissingError: boolean;
     private modality: string;
+    
     private readonly ImagesUrlUtil = ImagesUrlUtil;
     
     public archive: string;
@@ -31,12 +32,27 @@ export class BrukerUploadComponent extends AbstractImportStepComponent {
     uploadProgress: number = 0;
 
 
-    constructor(private importBrukerService: ImportBrukerService, private dicomArchiveService: DicomArchiveService) {
-        super();
+    constructor(
+            private importService: ImportService, 
+            private dicomArchiveService: DicomArchiveService,
+            private router: Router,
+            private breadcrumbsService: BreadcrumbsService,
+            private importDataService: ImportDataService, 
+            private importBrukerService: ImportBrukerService) {
+        
+        breadcrumbsService.nameStep('1. Upload');
+        breadcrumbsService.markMilestone();
     }
     
+    
     private uploadArchive(fileEvent: any): void {
-        this.setArchiveStatus('none');
+        this.setArchiveStatus('uploading');
+        this.uploadBruker(fileEvent);   
+    }
+
+    
+    
+    private uploadBruker(fileEvent: any): void {
         this.dicomDirMissingError = false;
         this.uploadProgress = 0;
     	// checkExtension
@@ -57,8 +73,8 @@ export class BrukerUploadComponent extends AbstractImportStepComponent {
     			this.importBrukerService.importDicomFile(res)
             		.subscribe((patientDicomList: ImportJob) => {
                 		this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
-                		this.archiveUploaded.emit(patientDicomList);
-                		this.setArchiveStatus('uploaded');
+                        this.importDataService.archiveUploaded = patientDicomList;
+                        this.setArchiveStatus('uploaded');
                 		this.uploadProgress = 5;
             		}, (err: String) => {
             			console.log("error in dicom import"+JSON.stringify(err));
@@ -78,13 +94,17 @@ export class BrukerUploadComponent extends AbstractImportStepComponent {
             );
     }
 
-    private setArchiveStatus(status: Status) {
+     private setArchiveStatus(status: Status) {
         this.archiveStatus = status;
-        this.updateValidity();
+        //this.updateValidity();
     }
 
-    getValidity(): boolean {
+    get valid(): boolean {
         return this.archiveStatus == 'uploaded';
+    }
+
+    private next() {
+        this.router.navigate(['importsBruker/series']);
     }
 
 }

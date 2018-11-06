@@ -1,4 +1,3 @@
-import { NgModule }            from '@angular/core';
 import { RouterModule, Routes }        from '@angular/router';
 
 import { AnimalSubjectsListComponent } from './animalSubject/list/animalSubject-list.component'; 
@@ -21,6 +20,11 @@ import { ImportBrukerComponent } from './importBruker/importBruker.component';
 import { AuthNotGuestGuard } from '../shared/roles/auth-not-guest-guard';
 
 import {getRoutesFor} from '../app.routing'
+import { BrukerUploadComponent } from './importBruker/bruker-upload/bruker-upload.component';
+import { BrukerSelectSeriesComponent } from './importBruker/select-series/bruker-select-series.component';
+import { AnimalClinicalContextComponent } from './importBruker/clinical-context/animal-clinical-context.component';
+import { BrukerFinishImportComponent } from './importBruker/finish/bruker-finish.component';
+import { ModuleWithProviders } from '@angular/compiler/src/core';
 
 let routes : Routes= [
     { 
@@ -66,19 +70,32 @@ let routes : Routes= [
         path: 'preclinical-contrastagent', 
         component: ContrastAgentFormComponent 
     },
-    {
-    	path: 'importBruker',
-    	component: ImportBrukerComponent
-  	}
+  	{
+        path: 'importsBruker',
+        component: ImportBrukerComponent,
+        children: [
+            {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'upload'
+            }, {
+                path: 'upload',
+                component: BrukerUploadComponent
+            }, {
+                path: 'series',
+                component: BrukerSelectSeriesComponent
+            }, {
+                path: 'context',
+                component: AnimalClinicalContextComponent
+            }, {
+                path: 'finish',
+                component: BrukerFinishImportComponent
+            }
+        ]
+    }
     
   ];
 
   routes = routes.concat(getRoutesFor('preclinical-reference', ReferenceFormComponent, ReferencesListComponent, AuthNotGuestGuard));
 
-@NgModule({
-  imports: [
-    RouterModule.forChild(routes)],
-
-  exports: [RouterModule] 
-})
-export class PreclinicalRoutingModule {}
+  export const preclinicalRouting: ModuleWithProviders = RouterModule.forRoot(routes); 

@@ -1,15 +1,16 @@
-<div [class.disabled]="disabled" class="header command-zone" (click)="onHeaderClick($event)">1. Select BRUKER archive</div>
-<fieldset *ngIf="!disabled && open" [@slideDown]="!disabled && open" class="step dicom">
+<div class="header command-zone">1. Select BRUKER archive</div>
+<fieldset class="step dicom">
     <p>Please select a BRUKER zip archive to import.</p>
     <p>When uploaded, Bruker archive will be automatically converted to DICOM.</p>
     <p><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Important notice :</strong> this archive must contain at least one 2dseq file!</p>
-    <input type="file" (change)="uploadArchive($event)"/>
+    <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
+    
     <img class="loader" *ngIf="archiveStatus == 'uploading'" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH" />
     <label *ngIf="extensionError==true" class="form-validation-alert" i18n="Import|ExtensionError label">
         A Bruker zip archive is required!
     </label>
     <label *ngIf="dicomDirMissingError==true" class="form-validation-alert" i18n="Import|DicomDirMissingError label">
-        DICOMDIR is missing after conversion!
+        DICOMDIR is missing in .zip file!
     </label>  
     <br/>
     <ul class="progress" [ngSwitch]="uploadProgress">
@@ -22,7 +23,7 @@
                 <span *ngIf="uploadProgress == 2"><i class="fas fa-times"></i> error !</span>
             </span>
         </li>
-
+        
         <li *ngIf="uploadProgress >= 1"><i class="fas fa-angle-right"></i>
             Converting to Dicom
             <span *ngIf="uploadProgress >= 3">....................</span>
@@ -33,9 +34,11 @@
             </span>
         </li>
     </ul>
+        
     <p *ngIf="modality" class="modality">
         The modality of the dataset(s) that you are importing is
         <span *ngIf="modality=='MR'">MRI</span>
         <span *ngIf="modality=='PET'">PET</span>
     </p>
 </fieldset>
+<button class="next" [disabled]="!valid" (click)="next()">Next</button>

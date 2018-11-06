@@ -1,6 +1,6 @@
 
-<div [class.disabled]="disabled" class="header command-zone" (click)="onHeaderClick($event)">3. Set the clinical context</div>
-<fieldset *ngIf="!disabled && open" [@slideDown]="!disabled && open" class="step">
+<div class="header command-zone">3. Set the clinical context</div>
+<fieldset class="step">
 
     <ol>
         <legend>
@@ -10,7 +10,7 @@
         <li class="required">
             <label class="required-label">Select an existing research study</label> 
             <span class="right-col">
-                <select [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)">
+                <select [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)" [compareWith]="compareEntities">
                     <option *ngFor="let study of studies" [ngValue]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study?.name}}</option>
                 </select>
                 <button i18n="Import|StudyDetails label" [disabled]="study == null" (click)="showStudyDetails()">details</button>
@@ -19,10 +19,11 @@
         <li class="required">
             <label class="required-label">Select an existing study card</label> 
             <span class="right-col">
-                <select [disabled]="!study" [(ngModel)]="studycard" (ngModelChange)="onSelectStudycard($event)">
+                <select [disabled]="!study" [(ngModel)]="studycard" (ngModelChange)="onSelectStudycard($event)" [compareWith]="compareEntities">
                     <option *ngFor="let studycard of studycards" [ngValue]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</option>
                 </select>
-                <button [disabled]="!studycard" (click)="showStudyCardDetails()">details</button>
+                <!-- studycard not available for the moment -->
+                <button disabled (click)="showStudyCardDetails()">details</button>
             </span>
             <br/><span>
                 <label *ngIf="studycardMissingError==true" class="form-validation-alert" i18n="Import|StudycardMissingError label"><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Warning :</strong> no study card is defined for this research study. You cannot import data into this research study.</label>
@@ -43,14 +44,14 @@
         <li class="required">
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
-                <select [disabled]="!study || !studycard"  [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)">
+                <select [disabled]="!study || !studycard" [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)" [compareWith]="compareEntities">
                     <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
                 </select>
                 <button [disabled]="!subject" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
-                <button [disabled]="!study || !studycard"  (click)="initializePrefillSubject(); subjectCreationModal.show();">add</button>
+                <button [disabled]="!study || !studycard" (click)="openCreateSubject()">add</button>
             </span>
         </li>
-        <li *ngIf="subject != null && subject.subjectStudy != null">
+        <li *ngIf="subject != null">
             <div>
                 <table>
                     <thead>
@@ -58,7 +59,6 @@
                             <th class="label-col">Common name</th>
                             <th class="input-col">Subject identifier for this study</th>
                             <th class="chkbx-col" title="Physically Involved">PI</th>
-						    <th class="buttons-col"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -68,11 +68,11 @@
                             </td>
                             <td class="input-col">
                                 <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
-                                    [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues()"/>
+                                    [ngModelOptions]="{standalone: true}"/>
                             </td>
                             <td class="chkbx-col">
                                 <input type="checkbox" [(ngModel)]="subject.subjectStudy.physicallyInvolved" 
-                                    [ngModelOptions]="{standalone: true}" (change)="updateSubjectStudyValues()"/>
+                                    [ngModelOptions]="{standalone: true}"/>
                             </td>
                         </tr>
                     </tbody>
@@ -89,25 +89,14 @@
         <li class="required">
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select [disabled]="!subject" [(ngModel)]="examination" (ngModelChange)="onSelectExamination($event)">
+                <select [disabled]="!subject" [(ngModel)]="examination" (ngModelChange)="onSelectExamination($event)" [compareWith]="compareEntities">
                     <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
                 </select>
-                <button [disabled]="!examination"  (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
-                <button [disabled]="!subject" (click)="initializePrefillExamination();examinationCreationModal.show();">add</button>
+                <button [disabled]="!examination" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
+                <button [disabled]="!subject" (click)="openCreateExam()">add</button>
             </span>
         </li>
     </ol>
 
 </fieldset>
-
-<app-modal modalDialogId="subjectCreationModal" #subjectCreationModal>
-    <div class="app-modal-body">
-        <animalSubject-form [mode]="mode"  [preFillData]="subjectFromImport" [displayPathologyTherapy]="false" (closing)="onCloseSubjectPopin($event)"></animalSubject-form>
-    </div>
-</app-modal>
-
-<app-modal modalDialogId="examinationCreationModal" #examinationCreationModal>
-    <div class="app-modal-body">
-        <examination-preclinical-form [mode]="mode"   [preFillData]="examinationFromImport" (closing)="onCloseExaminationPopin($event)"></examination-preclinical-form>
-    </div>
-</app-modal>
+<button class="next" [disabled]="!valid" (click)="next()">Next</button>

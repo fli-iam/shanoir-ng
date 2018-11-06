@@ -1,4 +1,6 @@
-import { Component, Output, EventEmitter, ViewChild, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component,ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
+
 import { PatientDicom } from "../../../import/dicom-data.model";
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { Study } from '../../../studies/shared/study.model';
@@ -6,29 +8,18 @@ import { StudyService } from '../../../studies/shared/study.service';
 import { StudyCard } from '../../../study-cards/shared/study-card.model';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { Subject } from '../../../subjects/shared/subject.model';
-import { SubjectService } from "../../../subjects/shared/subject.service";
 import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
 import { SubjectExamination } from '../../../examinations/shared/subject-examination.model';
 import { IdNameObject } from '../../../shared/models/id-name-object.model';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
-import { Router } from '@angular/router';
-import { AbstractImportStepComponent } from '../../../import/import-step.abstract';
 import { slideDown } from '../../../shared/animations/animations';
-import { Mode } from "../../shared/mode/mode.model";
-import { Modes } from "../../shared/mode/mode.enum";
 import { AnimalSubject } from '../../animalSubject/shared/animalSubject.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 import { Examination } from '../../../examinations/shared/examination.model';
-import { StudyCenter } from '../../../studies/shared/study-center.model';
-
-export class ContextData {
-    constructor(
-        public study: Study,
-        public studycard: StudyCard,
-        public subject: SubjectWithSubjectStudy,
-        public examination: SubjectExamination
-    ) {};
-}
+import { ImportDataService, ContextData } from '../../../import/import.data-service';
+import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
+import { Entity } from '../../../shared/components/entity/entity.abstract';
+import { ConsoleComponent } from 'src/app/shared/console/console.line.component';
 
 @Component({
     selector: 'animal-clinical-context',
@@ -36,14 +27,13 @@ export class ContextData {
     styleUrls: ['../../../import/clinical-context/clinical-context.component.css', '../../../import/import.step.css'],
     animations: [slideDown]
 })
-export class AnimalClinicalContextComponent extends AbstractImportStepComponent implements OnChanges, OnInit {
+export class AnimalClinicalContextComponent  {
     
-    @Input() examinationComment: string;
-    @Input() patient: PatientDicom;
-    @Output() contextChange = new EventEmitter<ContextData>();
+     patient: PatientDicom;
+    //@Output() contextChange = new EventEmitter<ContextData>();
     
     @ViewChild('subjectCreationModal') subjectCreationModal: ModalComponent;
-    @ViewChild('examinationCreationModal') examinationCreationModal: ModalComponent;
+    @ViewChild('examCreationModal') examCreationModal: ModalComponent;
 
     private studycardMissingError: Boolean;
     private studycardNotCompatibleError: Boolean;
@@ -54,44 +44,59 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
     private studycard: StudyCard;
     private subjects: SubjectWithSubjectStudy[]; 
     private subject: SubjectWithSubjectStudy;
-    private subjectFromImport: Subject = new Subject();
-    private animalSubject: AnimalSubject = new AnimalSubject();
     private examinations: SubjectExamination[];
     private examination: SubjectExamination;
     public niftiConverter: IdNameObject;
-    private mode: Mode = new Mode();
-    private examinationFromImport: Examination = new Examination();
+    private animalSubject: AnimalSubject = new AnimalSubject();
+    
     
     constructor(
-        private studyService: StudyService,
-        private examinationService: ExaminationService,
-        private subjectService: SubjectService,
-        private animalSubjectService: AnimalSubjectService,
-        private router: Router,
-    ) {
-        super();
+            private studyService: StudyService,
+            private animalSubjectService: AnimalSubjectService,
+            private examinationService: ExaminationService,
+            private router: Router,
+            private breadcrumbsService: BreadcrumbsService,
+            private importDataService: ImportDataService) {
+
+        if (!importDataService.patients || !importDataService.patients[0]) {
+            this.router.navigate(['importsBruker'], {replaceUrl: true});
+            return;
+        }
+        breadcrumbsService.nameStep('3. Context');
+        this.setPatient(importDataService.patients[0]);
+        this.reloadSavedData();
     }
 
-	ngOnInit(): void {
-	 	this.mode.createMode();
-	 	this.mode.setModeFromParameter("create");
-	}
-	
-	
-    ngOnChanges(changes: SimpleChanges) {
-        if(changes['patient'] && changes['patient'].currentValue) {
-            this.studycard = null;
-            this.subject = null;
-            this.examination = null;
-            this.onContextChange();
-            this.fetchStudies();
+	private reloadSavedData() {
+        if (this.importDataService.contextBackup) {
+            let study = this.importDataService.contextBackup.study;
+            let studycard = this.importDataService.contextBackup.studycard;
+            let subject = this.importDataService.contextBackup.subject;
+            let examination = this.importDataService.contextBackup.examination;
+            if (study) {
+                this.study = study;
+                this.onSelectStudy();
+            }
+            if (studycard) {
+                this.studycard = studycard;
+                this.onSelectStudycard();
+            }
+            if (subject) {
+                this.subject = subject;
+                this.onSelectSubject();
+            }
+            if (examination) {
+                this.examination = examination;
+                this.onSelectExamination();
+            }
         }
     }
 
-    private changeExamComment (editedLabel: string): void {
-        this.examinationComment = editedLabel;
+    setPatient(patient: PatientDicom) {
+        this.patient = patient;
+        this.fetchStudies();
     }
-
+    
     private fetchStudies(): void {
         this.studyService
             .findStudiesWithStudyCardsByUserAndEquipment(this.patient.studies[0].series[0].equipment)
@@ -171,15 +176,16 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
         }
         this.onContextChange();
     }
+    
 
     private onSelectExamination() {
         this.onContextChange();
     }
 
     private onContextChange() {
-        this.updateValidity();
-        if (this.getValidity()) {
-            this.contextChange.emit(this.getContext());
+        this.importDataService.contextBackup = this.getContext();
+        if (this.valid) {
+            this.importDataService.contextData = this.getContext();
         }
     }
     
@@ -187,70 +193,93 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
         return new ContextData(this.study, this.studycard, this.subject, this.examination);
     }
 
-    private updateSubjectStudyValues() {
-    	if (this.subject && this.subject.subjectStudy){
-        	this.subjectService.updateSubjectStudyValues(this.subject.subjectStudy);
-        }
+
+    private openCreateSubject = () => {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/preclinical-subject'],  { queryParams: {  mode: "create" } }).then(success => {
+            this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
+            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+            });
+        });
     }
 
-
-    private initializePrefillSubject(): void {
-        this.mode.createMode();
+    private getPrefilledSubject(): Subject {
         let subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
-
         let newSubject = new Subject();
-        if (this.patient){
-        	newSubject.birthDate = this.patient.patientBirthDate;
-        	newSubject.name = this.patient.patientName;
-        	newSubject.sex = this.patient.patientSex;
-        } 
+        newSubject.birthDate = this.patient.patientBirthDate;
+        newSubject.name = this.patient.patientName;
+        newSubject.sex = this.patient.patientSex; 
         newSubject.subjectStudyList = [subjectStudy];
-        this.subjectFromImport = newSubject;
+        return newSubject;
     }
     
-    private onCloseSubjectPopin(subject?: Subject): void {
-        if (subject && subject.id) {
-            // Add the subject to the select box and select it
-            let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
-            subjectWithSubjectStudy.id = subject.id;
-            subjectWithSubjectStudy.name = subject.name;
-            subjectWithSubjectStudy.identifier = subject.identifier;
-            if (subject.subjectStudyList && subject.subjectStudyList.length > 0){
-            	subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
-            }
-            if (this.subjects == null){
-            	this.subjects = new Array<SubjectWithSubjectStudy>();
-            }
-            this.subjects.push(subjectWithSubjectStudy);
-            this.subject = subjectWithSubjectStudy;
-            this.onSelectSubject();
-        }
-        this.subjectCreationModal.hide();
+    private subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
+        if (!subject) return;
+        let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
+        subjectWithSubjectStudy.id = subject.id;
+        subjectWithSubjectStudy.name = subject.name;
+        subjectWithSubjectStudy.identifier = subject.identifier;
+        subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
+        return subjectWithSubjectStudy;
+    }
+
+    private openCreateExam = () => {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/preclinical-examination'],  { queryParams: {  mode: "create"} }).then(success => {
+            this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
+            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
+            });
+        });
+    }
+
+    private getPrefilledExam(): Examination {
+        let newExam = new Examination();
+        newExam.studyId = this.study.id;
+        newExam.studyName = this.study.name;
+        newExam.centerId = this.studycard.center.id;
+        newExam.centerName = this.studycard.center.name;
+        newExam.subjectId = this.subject.id;
+        newExam.subjectName = this.subject.name;
+        newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
+        newExam.comment = this.patient.studies[0].studyDescription;
+        return newExam;
+    }
+    
+    private examToSubjectExam(examination: Examination): SubjectExamination {
+        if (!examination) return;
+        // Add the new created exam to the select box and select it
+        let subjectExam = new SubjectExamination();
+        subjectExam.id = examination.id;
+        subjectExam.examinationDate = examination.examinationDate;
+        subjectExam.comment = examination.comment;
+        return subjectExam;
     }
 
     private showStudyDetails() {
-        window.open('study?id=' + this.study.id + '&mode=view', '_blank');
+        window.open('study/details/' + this.study.id, '_blank');
     }
 
     private showSubjectDetails() {
     	if (this.animalSubject.id){
         	window.open('preclinical-subject?id=' + this.animalSubject.id + '&mode=view', '_blank');
         }else{
-            window.open('subject?id=' + this.subject.id + '&mode=view', '_blank');
+            window.open('subject/details/' + this.subject.id, '_blank');
         }
     }
 
     private showStudyCardDetails() {
-        window.open('studycard?id=' + this.studycard.id + '&mode=view', '_blank');
+        window.open('studycard/details/' + this.studycard.id, '_blank');
     }
 
     private showExaminationDetails() {
         window.open('preclinical-examination?id=' + this.examination.id + '&mode=view', '_blank');
     }
 
-    getValidity(): boolean {
+    get valid(): boolean {
         let context = this.getContext();
         return (
             context.study != undefined && context.study != null
@@ -259,47 +288,12 @@ export class AnimalClinicalContextComponent extends AbstractImportStepComponent 
             && context.examination != undefined && context.examination != null
         );
     }
-    
-    
-    private onCloseExaminationPopin(examination?: Examination): void {
-    	if (examination && examination.id) {
-     		// Add the examination to the select box and select it
-            let subjectExamination = new SubjectExamination();
-            subjectExamination.id = examination.id;
-            subjectExamination.comment = examination.comment;
-            subjectExamination.examinationDate = examination.examinationDate;
-            if (this.examinations == null){
-            	this.examinations = new Array<SubjectExamination>();
-            }
-            this.examinations.push(subjectExamination);
-            this.examination = subjectExamination;
-            this.onSelectExamination();
-        }
-        this.examinationCreationModal.hide();
+
+    private next() {
+        this.router.navigate(['importsBruker/finish']);
     }
-    
-    private initializePrefillExamination(): void{
-    	this.mode.createMode();
-        let examination = new Examination();
-        if (this.study){
-        	examination.studyId = this.study.id;
-        	examination.studyName = this.study.name;
-        }
-        if (this.studycard && this.studycard.center){
-        	examination.centerId = this.studycard.center.id;
-        	examination.centerName = this.studycard.center.name;
-        }
-        if (this.patient && this.patient.studies && this.patient.studies.length > 0){
-        	examination.comment = this.patient.studies[0].studyDescription;
-        	if (this.patient.studies[0].series.length > 0){
-        		examination.examinationDate = this.patient.studies[0].series[0].seriesDate;
-        	}
-        }
-        if (this.subject){
-        	 examination.subjectId = this.subject.id;
-        	 examination.subjectName = this.subject.name;
-        }
-        this.examinationFromImport = examination;
-        
+
+    private compareEntities(e1: Entity, e2: Entity) : boolean {
+        return e1 && e2 && e1.id === e2.id;
     }
 }

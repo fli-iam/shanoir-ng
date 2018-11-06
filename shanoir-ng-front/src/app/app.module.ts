@@ -156,6 +156,8 @@ import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
 import { ImportBrukerComponent }   from './preclinical/importBruker/importBruker.component';
 import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
+import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
+import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 
 @NgModule({
@@ -271,7 +273,9 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     	BloodGasDataFormComponent, 
     	ImportBrukerComponent, 
     	BrukerUploadComponent,
-    	AnimalClinicalContextComponent
+        AnimalClinicalContextComponent, 
+        BrukerSelectSeriesComponent, 
+        BrukerFinishImportComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
