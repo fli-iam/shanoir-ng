@@ -108,6 +108,7 @@ import { Router } from './breadcrumbs/router';
 import { FinishImportComponent } from './import/finish/finish.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
 import { ImportDataService } from './import/import.data-service';
+import { NiftiConverterService } from './niftiConverters/nifti.converter.service';
 
 
 @NgModule({
@@ -229,7 +230,8 @@ import { ImportDataService } from './import/import.data-service';
         },
         BreadcrumbsService,
         Router,
-        ImportDataService
+        ImportDataService,
+        NiftiConverterService
     ],
     bootstrap: [AppComponent],
 })

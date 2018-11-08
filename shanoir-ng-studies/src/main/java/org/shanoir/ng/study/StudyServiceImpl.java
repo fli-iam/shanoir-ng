@@ -5,14 +5,14 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentDTO;
-import org.shanoir.ng.center.CenterDTO;
-import org.shanoir.ng.center.CenterMapper;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
 import org.shanoir.ng.studycenter.StudyCenter;
+import org.shanoir.ng.studycenter.StudyCenterDTO;
+import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.studyuser.StudyUserRepository;
@@ -40,7 +40,7 @@ public class StudyServiceImpl implements StudyService {
 	private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
 	
 	@Autowired
-	private CenterMapper centerMapper;
+	private StudyCenterMapper studyCenterMapper;
 
 	@Autowired
 	private StudyCenterRepository studyCenterRepository;
@@ -131,11 +131,11 @@ public class StudyServiceImpl implements StudyService {
 			
 			// centerDTO list for study
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
-				CenterDTO center = centerMapper.centerToCenterDTO(studyCenter.getCenter());
-				simpleStudy.getCenters().add(center);
+				StudyCenterDTO studyCenterDTO = studyCenterMapper.studyCenterToStudyCenterDTO(studyCenter);
+				simpleStudy.getStudyCenterList().add(studyCenterDTO);
 				
 				// acquisition equipment for compatibility check
-				for (final AcquisitionEquipmentDTO acquisitionEquipment : center.getAcquisitionEquipments()) {
+				for (final AcquisitionEquipmentDTO acquisitionEquipment : studyCenterDTO.getCenter().getAcquisitionEquipments()) {
 					String serialNumber = acquisitionEquipment.getSerialNumber();
 					String manufacturerModel = acquisitionEquipment.getManufacturerModel().getName();
 					String manufacturer = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
@@ -143,7 +143,7 @@ public class StudyServiceImpl implements StudyService {
 							&& StringUtils.equals(manufacturerModel, equipment.getManufacturerModelName())
 							&& StringUtils.equals(manufacturer, equipment.getManufacturer())) {
 						acquisitionEquipment.setCompatible(true);
-						center.setCompatible(true);
+						studyCenterDTO.setCompatible(true);
 						simpleStudy.setCompatible(true);
 						break;
 					}

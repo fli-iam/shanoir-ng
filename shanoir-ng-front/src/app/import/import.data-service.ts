@@ -1,17 +1,28 @@
 import { Injectable } from '@angular/core';
-import { ImportJob, PatientDicom } from './dicom-data.model';
+import { AcquisitionEquipment } from '../acquisition-equipments/shared/acquisition-equipment.model';
+import { SubjectExamination } from '../examinations/shared/subject-examination.model';
+import { NiftiConverter } from '../niftiConverters/nifti.converter.model';
+import { StudyCenter } from '../studies/shared/study-center.model';
 import { Study } from '../studies/shared/study.model';
 import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject-study.model';
-import { SubjectExamination } from '../examinations/shared/subject-examination.model';
-import { IdNameObject } from '../shared/models/id-name-object.model';
+import { ImportJob, PatientDicom } from './dicom-data.model';
 
 export class ContextData {
-    constructor(
-        public study: Study,
-        public subject: SubjectWithSubjectStudy,
-        public examination: SubjectExamination,
-        public niftiConverter: IdNameObject
-    ) {};
+    public study: Study;
+    public center: StudyCenter;
+    public acquisitionEquipment: AcquisitionEquipment;
+    public subject: SubjectWithSubjectStudy;
+    public examination: SubjectExamination;
+    public niftiConverter: NiftiConverter;
+
+    constructor (contextdata: ContextData) {
+        this.study = contextdata ? contextdata.study : new Study();
+        this.center = contextdata ? contextdata.center: new StudyCenter();
+        this.acquisitionEquipment = contextdata ? contextdata.acquisitionEquipment: new AcquisitionEquipment();
+        this.niftiConverter = contextdata ? contextdata.niftiConverter: new NiftiConverter();
+        this.subject = contextdata ? contextdata.subject: new SubjectWithSubjectStudy();
+        this.examination = contextdata ? contextdata.examination: new SubjectExamination();
+    }
 }
 
 @Injectable()

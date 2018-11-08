@@ -21,6 +21,8 @@ public class StudyCenterDTO {
 	// private InvestigatorFunction investigatorFunction;
 
 	private Long studyId;
+	
+	private Boolean compatible = false;
 
 	/**
 	 * @return the center
@@ -65,6 +67,20 @@ public class StudyCenterDTO {
 	 */
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
+	}
+
+	/**
+	 * @return the compatible
+	 */
+	public Boolean getCompatible() {
+		return compatible;
+	}
+
+	/**
+	 * @param compatible the compatible to set
+	 */
+	public void setCompatible(Boolean compatible) {
+		this.compatible = compatible;
 	}
 
 }

@@ -88,6 +88,7 @@ export class FinishImportComponent {
             importJob.fromDicomZip = true;
             importJob.examinationId = this.context.examination.id;
             importJob.frontStudyId = this.context.study.id;
+            importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;
             importJob.frontConverterId = this.context.niftiConverter.id;
             return this.importService.startImportJob(importJob);
         }

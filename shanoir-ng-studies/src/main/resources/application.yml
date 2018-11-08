@@ -56,7 +56,6 @@ keycloak:
 # microservices url
 ms.url:
   shanoir-ng-studycards: http://shanoir-ng-datasets/
-  shanoir-ng-import: http://shanoir-ng-importer/
   shanoir-ng-examinations: http://shanoir-ng-datasets/
 # logging configuration
 logging:

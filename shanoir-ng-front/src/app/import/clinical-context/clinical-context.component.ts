@@ -1,22 +1,22 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
+import { Center } from '../../centers/shared/center.model';
 import { Examination } from '../../examinations/shared/examination.model';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
+import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
+import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { slideDown } from '../../shared/animations/animations';
-import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { PatientDicom } from '../dicom-data.model';
-import { ImportDataService, ContextData } from '../import.data-service';
-import { Entity } from 'src/app/shared/components/entity/entity.abstract';
+import { ContextData, ImportDataService } from '../import.data-service';
 
 @Component({
     selector: 'clinical-context',
@@ -27,26 +27,17 @@ import { Entity } from 'src/app/shared/components/entity/entity.abstract';
 export class ClinicalContextComponent {
     
     patient: PatientDicom;
-    //@Output() contextChange = new EventEmitter<ContextData>();
-    
-    @ViewChild('subjectCreationModal') subjectCreationModal: ModalComponent;
-    @ViewChild('examCreationModal') examCreationModal: ModalComponent;
-
-    private studycardMissingError: Boolean;
-    private studycardNotCompatibleError: Boolean;
-
-    private studies: Study[];
-    private study: Study;
-    private studycards: StudyCard[];
-    private studycard: StudyCard;
-    private subjects: SubjectWithSubjectStudy[]; 
-    private subject: SubjectWithSubjectStudy;
-    private examinations: SubjectExamination[];
-    private examination: SubjectExamination;
-    public niftiConverter: IdNameObject;
+    private contextData: ContextData = new ContextData(null);
+    private studies: Study[] = [];
+    private centers: Center[] = [];
+    private acquisitionEquipments: AcquisitionEquipment[] = [];
+    private subjects: SubjectWithSubjectStudy[] = [];
+    private examinations: SubjectExamination[] = [];
+    private niftiConverters: NiftiConverter[] = [];
     
     constructor(
             private studyService: StudyService,
+            private niftiConverterService: NiftiConverterService,
             private examinationService: ExaminationService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
@@ -64,24 +55,34 @@ export class ClinicalContextComponent {
     private reloadSavedData() {
         if (this.importDataService.contextBackup) {
             let study = this.importDataService.contextBackup.study;
-            let studycard = this.importDataService.contextBackup.studycard;
+            let center = this.importDataService.contextBackup.center;
+            let acquisitionEquipment = this.importDataService.contextBackup.acquisitionEquipment;
             let subject = this.importDataService.contextBackup.subject;
             let examination = this.importDataService.contextBackup.examination;
+            let niftiConverter = this.importDataService.contextBackup.niftiConverter;
             if (study) {
-                this.study = study;
+                this.contextData.study = study;
                 this.onSelectStudy();
             }
-            if (studycard) {
-                this.studycard = studycard;
-                this.onSelectStudycard();
+            if (center) {
+                this.contextData.center = center;
+                this.onSelectCenter();
+            }
+            if (acquisitionEquipment) {
+                this.contextData.acquisitionEquipment = acquisitionEquipment;
+                this.onSelectAcquisitonEquipment();
+            }
+            if (niftiConverter) {
+                this.contextData.niftiConverter = niftiConverter;
+                this.onSelectNiftiConverter();
             }
             if (subject) {
-                this.subject = subject;
+                this.contextData.subject = subject;
                 this.onSelectSubject();
             }
             if (examination) {
-                this.examination = examination;
-                this.onSelectExamination();
+                this.contextData.examination = examination;
+                this.onContextChange();
             }
         }
     }
@@ -93,14 +94,14 @@ export class ClinicalContextComponent {
 
     private fetchStudies(): void {
         this.studyService
-            .findStudiesByUserAndEquipment(this.patient.studies[0].series[0].equipment)
+            .findStudiesByUserAndEquipment(this.patient.studies[0].series[0].equipment) // For the moment, we import only zip files with the same equipment
             .then(studies => {
                 this.studies = studies;
-                this.prepareStudyStudycard(studies);
+                this.preSelectStudy(studies);
             });
     }
 
-    private prepareStudyStudycard(studies: Study[]): void {
+    private preSelectStudy(studies: Study[]): void {
         let compatibleStudies: Study[] = [];
         for (let study of studies) {
             if (study.compatible) {
@@ -108,66 +109,49 @@ export class ClinicalContextComponent {
             }
         }
         if (compatibleStudies.length == 1) {
-            this.study = compatibleStudies[0];
-            this.studycards = this.study.studyCards;
+            this.contextData.study = compatibleStudies[0];
+            this.onSelectStudy();
         }
     }
     
     private onSelectStudy(): void {
-        this.studycards = null;
-        this.studycard = null;
-        this.subjects = null;
-        this.subject = null;
-        this.examinations = null;
-        this.examination = null;
-        if (this.study) {
-            if (this.study.studyCards.length == 0) {
-                this.studycardMissingError = true;
-            } else {
-                this.studycardMissingError = false;
-                let compatibleStudycards: StudyCard[] = [];
-                for (let studycard of this.study.studyCards) {
-                    if (studycard.compatible) {
-                        compatibleStudycards.push(studycard);
-                    }
-                }
-                if (compatibleStudycards.length == 1) {
-                    // autoselect studycard
-                    this.studycard = compatibleStudycards[0];
-                } 
-                this.studycards = this.study.studyCards;
+        if (this.contextData.study && this.contextData.study.studyCenterList) {
+            for (let center of this.contextData.study.studyCenterList) {
+                this.centers.push(center.center);
             }
         }
         this.onContextChange();
     }
 
-    private onSelectStudycard(): void {
-        if (this.studycard) {
-            if (this.studycard.compatible) {
-                this.studycardNotCompatibleError = false;
-            } else {
-                this.studycardNotCompatibleError = true;
-            }
-            this.niftiConverter = this.studycard.niftiConverter;
+    private onSelectCenter(): void {
+        if (this.contextData.center.center && this.contextData.center.center.acquisitionEquipments) {
+            this.acquisitionEquipments = this.contextData.center.center.acquisitionEquipments;
+        }
+        this.onContextChange();
+    }
+
+    private onSelectAcquisitonEquipment(): void {
+        if (this.contextData.acquisitionEquipment) {
+            this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
+        }
+        this.onContextChange();
+    }
+
+    private onSelectNiftiConverter(): void {
+        if(this.contextData.niftiConverter) {
             this.studyService
-                .findSubjectsByStudyId(this.study.id)
+                .findSubjectsByStudyId(this.contextData.study.id)
                 .then(subjects => this.subjects = subjects);
         }
         this.onContextChange();
     }
 
     private onSelectSubject(): void {
-        this.examinations = null;
-        this.examination = null;
-        if (this.subject) {
+        if (this.contextData.subject) {
             this.examinationService
-                .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
+                .findExaminationsBySubjectAndStudy(this.contextData.subject.id, this.contextData.study.id)
                 .then(examinations => this.examinations = examinations);
         }
-        this.onContextChange();
-    }
-
-    private onSelectExamination() {
         this.onContextChange();
     }
 
@@ -179,9 +163,8 @@ export class ClinicalContextComponent {
     }
     
     private getContext(): ContextData {
-        return new ContextData(this.study, this.studycard, this.subject, this.examination);
+        return new ContextData(this.contextData);
     }
-
 
     private openCreateSubject = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
@@ -195,7 +178,7 @@ export class ClinicalContextComponent {
 
     private getPrefilledSubject(): Subject {
         let subjectStudy = new SubjectStudy();
-        subjectStudy.study = this.study;
+        subjectStudy.study = this.contextData.study;
         subjectStudy.physicallyInvolved = false;
         let newSubject = new Subject();
         newSubject.birthDate = this.patient.patientBirthDate;
@@ -227,12 +210,12 @@ export class ClinicalContextComponent {
 
     private getPrefilledExam(): Examination {
         let newExam = new Examination();
-        newExam.studyId = this.study.id;
-        newExam.studyName = this.study.name;
-        newExam.centerId = this.studycard.center.id;
-        newExam.centerName = this.studycard.center.name;
-        newExam.subjectId = this.subject.id;
-        newExam.subjectName = this.subject.name;
+        newExam.studyId = this.contextData.study.id;
+        newExam.studyName = this.contextData.study.name;
+        newExam.centerId = this.contextData.center.id;
+        newExam.centerName = this.contextData.center.center.name;
+        newExam.subjectId = this.contextData.subject.id;
+        newExam.subjectName = this.contextData.subject.name;
         newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
         newExam.comment = this.patient.studies[0].studyDescription;
         return newExam;
@@ -249,26 +232,32 @@ export class ClinicalContextComponent {
     }
 
     private showStudyDetails() {
-        window.open('study/details/' + this.study.id, '_blank');
+        window.open('study/details/' + this.contextData.study.id, '_blank');
+    }
+
+    private showCenterDetails() {
+        window.open('center/details/' + this.contextData.center.id, '_blank');
+    }
+
+    private showAcquistionEquipmentDetails() {
+        window.open('acquisition-equipment/details/' + this.contextData.acquisitionEquipment.id, '_blank');
     }
 
     private showSubjectDetails() {
-        window.open('subject/details/' + this.subject.id, '_blank');
-    }
-
-    private showStudyCardDetails() {
-        window.open('studycard/details/' + this.studycard.id, '_blank');
+        window.open('subject/details/' + this.contextData.subject.id, '_blank');
     }
 
     private showExaminationDetails() {
-        window.open('examination/details/' + this.examination.id, '_blank');
+        window.open('examination/details/' + this.contextData.examination.id, '_blank');
     }
 
     get valid(): boolean {
         let context = this.getContext();
         return (
             context.study != undefined && context.study != null
-            && context.studycard != undefined && context.studycard != null
+            && context.center != undefined && context.center != null
+            && context.acquisitionEquipment != undefined && context.acquisitionEquipment != null
+            && context.niftiConverter != undefined && context.niftiConverter != null
             && context.subject != undefined && context.subject != null
             && context.examination != undefined && context.examination != null
         );

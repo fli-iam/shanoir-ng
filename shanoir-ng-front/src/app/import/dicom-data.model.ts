@@ -7,9 +7,9 @@ export class ImportJob {
     fromPacs: boolean;
     workFolder: string;
     patients: PatientDicom[];
-    frontExperimentalGroupOfSubjectId: number;
     examinationId: number;
     frontStudyId: number;
+    frontAcquisitionEquipmentId: number;
     frontConverterId: number;
 }
 

@@ -10,29 +10,39 @@
         <li class="required">
             <label class="required-label">Select an existing research study</label> 
             <span class="right-col">
-                <select [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let study of studies" [ngValue]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study?.name}}</option>
+                <select [(ngModel)]="contextData.study" (ngModelChange)="onSelectStudy($event)" [compareWith]="compareEntities">
+                    <option *ngFor="let study of studies" [ngValue]="study" [ngStyle]="{'color':study?.compatible == true ? 'green' : 'red' }">{{study?.name}}</option>
                 </select>
-                <button i18n="Import|StudyDetails label" [disabled]="study == null" (click)="showStudyDetails()">details</button>
+                <button i18n="Import|StudyDetails label" [disabled]="!contextData.study.id" (click)="showStudyDetails()">details</button>
             </span>
         </li>
         <li class="required">
-            <label class="required-label">Select an existing study card</label> 
+            <label class="required-label">Select a center</label> 
             <span class="right-col">
-                <select [disabled]="!study" [(ngModel)]="studycard" (ngModelChange)="onSelectStudycard($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let studycard of studycards" [ngValue]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</option>
+                <select [(ngModel)]="contextData.center.center" (ngModelChange)="onSelectCenter($event)" [compareWith]="compareEntities">
+                    <option *ngFor="let center of centers" [ngValue]="center" [ngStyle]="{'color':center?.center?.compatible == true ? 'green' : 'red' }">{{center?.name}}</option>
                 </select>
-                <!-- studycard not available for the moment -->
-                <button disabled (click)="showStudyCardDetails()">details</button>
-            </span>
-            <br/><span>
-                <label *ngIf="studycardMissingError==true" class="form-validation-alert" i18n="Import|StudycardMissingError label"><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Warning :</strong> no study card is defined for this research study. You cannot import data into this research study.</label>
-                <label *ngIf="studycardNotCompatibleError==true" class="form-validation-alert" i18n="Import|StudycardNotCompatibleError label"><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Warning :</strong> The Acquisition Equipment defined in the study card is not compatible with the data that you are importing.</label>
+                <button i18n="Import|CenterDetails label" [disabled]="!contextData.center.center" (click)="showCenterDetails()">details</button>
             </span>
         </li>
         <li class="required">
-            <label>Nifti converter</label> 
-            <span class="right-col">{{niftiConverter?.name}}</span>
+            <label class="required-label">Select an acquisition equipment</label> 
+            <span class="right-col">
+                <select [(ngModel)]="contextData.acquisitionEquipment" (ngModelChange)="onSelectAcquisitonEquipment($event)" [compareWith]="compareEntities">
+                    <option *ngFor="let acquisitionEquipment of acquisitionEquipments" [ngValue]="acquisitionEquipment" [ngStyle]="{'color':acquisitionEquipment?.compatible == true ? 'green' : 'red' }">{{acquisitionEquipment | acqEqptLabel}}</option>
+                </select>
+                <button i18n="Import|AcquisitionEquipmentDetails label" [disabled]="!contextData.acquisitionEquipment.id" (click)="showAcquistionEquipmentDetails()">details</button>
+            </span>
+        </li>
+        <li class="required">
+            <label label class="required-label">Select a Nifti converter</label> 
+            <span class="right-col">
+                <select [(ngModel)]="contextData.niftiConverter" (ngModelChange)="onSelectNiftiConverter($event)" [compareWith]="compareEntities">
+                    <option *ngFor="let niftiConverter of niftiConverters" [ngValue]="niftiConverter">{{niftiConverter?.name}}</option>
+                </select>
+                <!-- TODO when nifti converters page is done -->
+                <button i18n="Import|NiftiConverterDetails label" [disabled]="true">details</button>
+            </span>
         </li>
     </ol>
 
@@ -44,14 +54,14 @@
         <li class="required">
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
-                <select [disabled]="!study || !studycard" [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)" [compareWith]="compareEntities">
+                <select [disabled]="!contextData.study.id || !contextData.niftiConverter.id" [(ngModel)]="contextData.subject" (ngModelChange)="onSelectSubject($event)" [compareWith]="compareEntities">
                     <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
                 </select>
-                <button [disabled]="!subject" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
-                <button [disabled]="!study || !studycard" (click)="openCreateSubject()">add</button>
+                <button [disabled]="!contextData.subject.id" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
+                <button [disabled]="!contextData.study.id || !contextData.niftiConverter.id" (click)="openCreateSubject()">add</button>
             </span>
         </li>
-        <li *ngIf="subject != null">
+        <li *ngIf="contextData.subject.id !== undefined">
             <div>
                 <table>
                     <thead>
@@ -65,18 +75,18 @@
                     <tbody>
                         <tr>
                             <td class="label-col">
-                                {{subject.name}}
+                                {{contextData.subject.name}}
                             </td>
                             <td class="input-col">
-                                <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
+                                <input type="text" id="subjectStudyIdentifier" [(ngModel)]="contextData.subject.subjectStudy.subjectStudyIdentifier" 
                                     [ngModelOptions]="{standalone: true}"/>
                             </td>
                             <td class="chkbx-col">
-                                <input type="checkbox" [(ngModel)]="subject.subjectStudy.physicallyInvolved" 
+                                <input type="checkbox" [(ngModel)]="contextData.subject.subjectStudy.physicallyInvolved" 
                                     [ngModelOptions]="{standalone: true}"/>
                             </td>
                             <td class="dropdown-col">
-                                <select id="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" 
+                                <select id="subjectType" [(ngModel)]="contextData.subject.subjectStudy.subjectType" 
                                     [ngModelOptions]="{standalone: true}">
                                         <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
                                         <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
@@ -98,11 +108,11 @@
         <li class="required">
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select [disabled]="!subject" [(ngModel)]="examination" (ngModelChange)="onSelectExamination($event)" [compareWith]="compareEntities">
+                <select [disabled]="!contextData.study.id || !contextData.niftiConverter.id || !contextData.subject.id" [(ngModel)]="contextData.examination" (ngModelChange)="onContextChange($event)" [compareWith]="compareEntities">
                     <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
                 </select>
-                <button [disabled]="!examination" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
-                <button [disabled]="!subject" (click)="openCreateExam()">add</button>
+                <button [disabled]="!contextData.examination.id" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
+                <button [disabled]="!contextData.study.id || !contextData.niftiConverter.id || !contextData.subject.id" (click)="openCreateExam()">add</button>
             </span>
         </li>
     </ol>

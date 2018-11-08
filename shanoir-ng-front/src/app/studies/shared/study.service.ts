@@ -33,6 +33,7 @@ export class StudyService extends EntityService<Study> {
     
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
+            .map(entities => entities.map((entity) => Object.assign(new SubjectWithSubjectStudy(), entity)))
             .toPromise();
     }
 }
