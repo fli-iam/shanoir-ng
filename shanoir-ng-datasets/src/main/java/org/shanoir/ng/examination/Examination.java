@@ -1,6 +1,6 @@
 package org.shanoir.ng.examination;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -17,11 +17,9 @@ import javax.validation.constraints.NotNull;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
-import org.shanoir.ng.shared.jackson.LocalDateDeserializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Examination.
@@ -43,8 +41,8 @@ public class Examination extends HalEntity {
 	private Long centerId;
 
 	/**
-	 * A comment on the dataset. In case of importing from dicom files, it could
-	 * be the series description for instance.
+	 * A comment on the dataset. In case of importing from dicom files, it could be
+	 * the series description for instance.
 	 */
 	private String comment;
 
@@ -55,8 +53,8 @@ public class Examination extends HalEntity {
 
 	/** Examination date. */
 	@NotNull
-	@JsonDeserialize(using = LocalDateDeserializer.class)
-	private LocalDate examinationDate;
+	// @JsonDeserialize(using = LocalDateDeserializer.class)
+	private Date examinationDate;
 
 	/**
 	 * Experimental group of subjects. Can be null only if subject is not null.
@@ -109,10 +107,10 @@ public class Examination extends HalEntity {
 	/** The unit of weight, can be in kg or g */
 	private Integer weightUnitOfMeasure;
 
-	/** Flag to set the examination as pre-clinical  */ 
-	@Column(nullable=false, columnDefinition="BOOLEAN DEFAULT false")
+	/** Flag to set the examination as pre-clinical */
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
 	private boolean preclinical;
-		
+
 	/**
 	 * Init HATEOAS links
 	 */
@@ -169,7 +167,7 @@ public class Examination extends HalEntity {
 	/**
 	 * @return the examinationDate
 	 */
-	public LocalDate getExaminationDate() {
+	public Date getExaminationDate() {
 		return examinationDate;
 	}
 
@@ -177,7 +175,7 @@ public class Examination extends HalEntity {
 	 * @param examinationDate
 	 *            the examinationDate to set
 	 */
-	public void setExaminationDate(LocalDate examinationDate) {
+	public void setExaminationDate(Date examinationDate) {
 		this.examinationDate = examinationDate;
 	}
 
@@ -364,7 +362,7 @@ public class Examination extends HalEntity {
 			this.weightUnitOfMeasure = weightUnitOfMeasure.getId();
 		}
 	}
-	
+
 	public boolean isPreclinical() {
 		return preclinical;
 	}
