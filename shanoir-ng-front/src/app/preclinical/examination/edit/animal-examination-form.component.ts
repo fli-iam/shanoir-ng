@@ -25,15 +25,13 @@ import { Subject } from '../../../subjects/shared/subject.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
-import { ImagesUrlUtil } from "../../../shared/utils/images-url.util";
 
-import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
 
 import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
 
 import { Mode } from "../../shared/mode/mode.model";
-import { Modes } from "../../shared/mode/mode.enum";
 import { ModesAware } from "../../shared/mode/mode.decorator";
+import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -42,20 +40,11 @@ import { ModesAware } from "../../shared/mode/mode.decorator";
     styleUrls: ['animal-examination.component.css']
 })
 @ModesAware
-export class AnimalExaminationFormComponent implements OnInit {
+export class AnimalExaminationFormComponent extends EntityComponent<Examination>{
 
 	@ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
     
-    @Input() mode: Mode = new Mode();
-    @Input() preFillData: Examination;
-    public examination_id: number;
-    public examination: Examination = new Examination();
-    //TO BE RETRIEVED THROUGH DATASET EXAMINATION
-    public protocol_id: number;
-    @Output() closing = new EventEmitter();
-    newExamForm: FormGroup;
-    private canModify: Boolean = false;
     urlupload: string;
     physioData: PhysiologicalData;
     examinationPhysioData: PhysiologicalData = new PhysiologicalData();
@@ -70,75 +59,119 @@ export class AnimalExaminationFormComponent implements OnInit {
     centers: IdNameObject[] = [];
     studies: IdNameObject[] = [];
     subjects: Subject[] = [];
-    private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
-    isDateValid: boolean = true;
-    selectedDateNormal: IMyDate;
     hasStudyCenterData : boolean = false;
     animalSubjectId: number;
     selectedSubjectId: number;
     
-
     constructor(
+        private route: ActivatedRoute,
+        private animalExaminationService: AnimalExaminationService, 
         private examAnestheticService: ExaminationAnestheticService,
         private extradatasService: ExaminationExtraDataService,
         private contrastAgentsService: ContrastAgentService,
+        private animalSubjectService: AnimalSubjectService, 
         private centerService: CenterService,
-        private studyService: StudyService,
-        private animalExaminationService: AnimalExaminationService,
-        private animalSubjectService: AnimalSubjectService,
-        private keycloakService: KeycloakService,
-        public router: Router,
-        private fb: FormBuilder,
-        private route: ActivatedRoute,
-        private location: Location) {
+        private studyService: StudyService) 
+    {
 
+        super(route, 'preclinical-examination');
+        this.manageSaveEntity();
     }
     
+    get examination(): Examination { return this.entity; }
+    set examination(examination: Examination) { this.entity = examination; }
+
+    initView(): Promise<void> {
+        this.getSubjects();
+        return this.animalExaminationService.get(this.id).then(examination => {
+            this.examination = examination; 
+            this.setSelectedSubject();
+            //this.loadExaminationAnesthetic();
+            this.loadExtraDatas();
+        });
+    }
+
     
-    ngOnInit(): void {
-    	this.getCenters();
+    initEdit(): Promise<void> {
+        this.getCenters();
         this.getStudies();
         this.getSubjects();
-        this.getExamination();
-        this.buildForm();
-        this.initPrefillData();
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.canModify = true;
-        }
-    }
-    
-    ngOnChanges(changes: SimpleChanges) {
-        this.getSubjects();
-        if (changes['preFillData']) this.initPrefillData();
+        return this.animalExaminationService.get(this.id).then(examination => {
+            this.examination = examination;
+            //this.loadExaminationAnesthetic(this.id);
+            this.setSelectedSubject();
+            if(this.examination && this.examination.subjectId ){
+                this.animalSubjectService
+        			.findAnimalSubjectBySubjectId(this.examination.subjectId)
+        			.then(animalSubject => this.animalSubjectId = animalSubject.id)
+                    .catch((error) => {});
+                
+        	}
+            this.loadExtraDatas();
+        });
+
     }
 
+    initCreate(): Promise<void> {
+        this.entity = new Examination();
+        this.examination.preclinical = true;
+        this.getCenters();
+        this.getStudies();
+        this.getSubjects();
+        return Promise.resolve();
+    }
     
+
+    buildForm(): FormGroup {
+        return this.formBuilder.group({
+            'id': [this.examination.id],
+            'studyId': [this.examination.studyId, Validators.required],
+            // 'Examination executive': [this.examination.examinationExecutive],
+            'centerId': [this.examination.centerId, Validators.required],
+            'subject': [this.selectedSubjectId, Validators.required],
+            'examinationDate': [this.examination.examinationDate, Validators.required],
+            'comment': [this.examination.comment],
+            'note': [this.examination.note],
+            'subjectWeight': [this.examination.subjectWeight], 
+             //regarding examination anesthetic
+            newExamAnestheticForm: this.formBuilder.group({
+                'anesthetic': [this.examAnesthetic.anesthetic],
+                'injectionInterval': [this.examAnesthetic.injection_interval],
+                'injectionSite': [this.examAnesthetic.injection_site],
+                'injectionType': [this.examAnesthetic.injection_type],
+                'dose': [this.examAnesthetic.dose],
+                'dose_unit': [this.examAnesthetic.dose_unit]
+               // 'startDate': [this.examAnesthetic.startDate],
+               // 'endDate': [this.examAnesthetic.endDate]
+            }), 
+        });
+    }
+
+    private instAssessment() {
+    }
+
+    private attachNewFiles() {
+    }
     
-    getCenters(): void {
-    	this.centers = [];
+    private getCenters(): void {
+        this.centers = [];
         this.centerService
             .getCentersNamesForExamination()
             .then(centers => {
                 this.centers = centers;
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting center list!");
             });
     }
 
-    getStudies(): void {
-    	this.studies = [];
+    private getStudies(): void {
+        this.studies = [];
         this.studyService
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
-            })
-            .catch((error) => {
-                // TODO: display error
-                console.log("error getting study list!");
             });
     }
+    
+    
     
     getSubjects(): void{
     	this.subjects = [];
@@ -153,45 +186,12 @@ export class AnimalExaminationFormComponent implements OnInit {
     }
 
 
-	getExamination(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                let examId = queryParams['id'];
-                let mode = queryParams['mode'];
-                if (mode) {
-                    this.mode.setModeFromParameter(mode);
-                }
-                if (examId) {
-                    // view or edit mode
-                    this.examination_id = examId;
-                    this.loadExaminationAnesthetic();
-                    this.loadExtraDatas();
-                    return this.animalExaminationService.getExamination(examId);
-                } else {
-                    // create mode
-                    return Observable.of<Examination>();
-                }
-            })
-            .subscribe(examination => {
-                if (!this.mode.isCreateMode()) {
-					this.examination = examination;
-                	this.getDateToDatePicker(this.examination);
-                    this.setSelectedSubject();
-                	if(this.examination && this.examination.subjectId ){
-                		this.animalSubjectService
-        					.findAnimalSubjectBySubjectId(this.examination.subjectId)
-        					.then(animalSubject => this.animalSubjectId = animalSubject.id)
-        					.catch((error) => {});
-        			}
-                }
-                
-            });
-    }
+	
     
     setSelectedSubject(){
-    	if (this.examination && this.examination.subjectId ){
-    		this.selectedSubjectId = this.examination.subjectId;
-    	}
+        if (this.examination && this.examination.subject){
+            this.selectedSubjectId = this.examination.subject.id;
+        }
     }
     
     getSubjectById(id: number): Subject{
@@ -216,10 +216,22 @@ export class AnimalExaminationFormComponent implements OnInit {
     	}
     }
     
-    
+    loadExaminationAnesthetic(examination_id: number) {
+        this.examAnestheticService.getExaminationAnesthetics(examination_id)
+            .then(examAnesthetics => {
+                if (examAnesthetics && examAnesthetics.length > 0) {
+                    //Should be only one
+                    let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
+                    //examAnesthetic.dose_unit = this.getReferenceById(examAnesthetic.dose_unit);
+                    //examAnesthetic.anesthetic = this.getAnestheticById(examAnesthetic.anesthetic);    
+                    this.examAnesthetic = examAnesthetic;
+                }
+            });
+
+    }
     
     loadExtraDatas(){
-        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+        this.extradatasService.getExtraDatas(this.examination.id).then(extradatas => {
             if(extradatas){
                 this.examinationExtradatas = extradatas;
             }else{
@@ -241,155 +253,41 @@ export class AnimalExaminationFormComponent implements OnInit {
     		}
     	}
     }
-    
-      
-    loadExaminationAnesthetic() {
-        this.examAnestheticService.getExaminationAnesthetics(this.examination_id)
-            .then(examAnesthetics => {
-                if (examAnesthetics && examAnesthetics.length > 0) {
-                    //Should be only one
-                    let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
-                    //examAnesthetic.dose_unit = this.getReferenceById(examAnesthetic.dose_unit);
-                    //examAnesthetic.anesthetic = this.getAnestheticById(examAnesthetic.anesthetic);    
-                    this.examAnesthetic = examAnesthetic;
-                }
-            });
-    }
-    
 
-    buildForm(): void {
-        this.newExamForm = this.fb.group({
-        	'id': [this.examination.id],
-            'studyId': [this.examination.studyId, Validators.required],
-            // 'Examination executive': [this.examination.examinationExecutive],
-            'centerId': [this.examination.centerId, Validators.required],
-            // 'Subject': [this.examination.subject],
-            'subject': [this.selectedSubjectId, Validators.required],
-            'examinationDate': [this.examination.examinationDate],
-            'comment': [this.examination.comment],
-            'note': [this.examination.note],
-            'subjectWeight': [this.examination.subjectWeight],
-            //regarding examination anesthetic
-            newExamAnestheticForm: this.fb.group({
-                'anesthetic': [this.examAnesthetic.anesthetic],
-                'injectionInterval': [this.examAnesthetic.injection_interval],
-                'injectionSite': [this.examAnesthetic.injection_site],
-                'injectionType': [this.examAnesthetic.injection_type],
-                'dose': [this.examAnesthetic.dose],
-                'dose_unit': [this.examAnesthetic.dose_unit]
-               // 'startDate': [this.examAnesthetic.startDate],
-               // 'endDate': [this.examAnesthetic.endDate]
-            }),
-            //regarding contrast agent
-            //newAgentForm : this.fb.group({
-            //    'name': [this.contrastAgent.name,Validators.required],
-            //    'manufactured_name': [this.contrastAgent.manufactured_name],
-             //   'dose': [this.contrastAgent.dose],
-             //   'dose_unit': [this.contrastAgent.dose_unit],
-              //  'concentration': [this.contrastAgent.concentration],
-             //   'concentration_unit': [this.contrastAgent.concentration_unit],
-             //   'injectionInterval': [this.contrastAgent.injection_interval],
-             //   'injectionSite': [this.contrastAgent.injection_site],
-             //   'injectionType': [this.contrastAgent.injection_type]
-           // })
-        });
 
-        this.newExamForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
-        this.onValueChanged();
+    manageSaveEntity(): void {
+        this.subscribtions.push(
+            this.onSave.subscribe(response => {
+                this.manageExaminationAnesthetic(response.id);
+                //this.manageContrastAgent();
+                this.addExtraDataToExamination(response.id, false);
+            })
+        );
+       
     }
 
-    onValueChanged(data?: any) {
-        if (!this.newExamForm) { return; }
-        const form = this.newExamForm;
-        for (const field in this.formErrors) {
-            // clear previous error message (if any)
-            this.formErrors[field] = '';
-            const control = form.get(field);
-            if (control && control.dirty && !control.valid) {
-                for (const key in control.errors) {
-                    this.formErrors[field] += key;
-                }
-            }
-        }
-    }
 
-    formErrors = {
-        'centerId': '',
-        'studyId': '', 
-        'subject': ''
-    };
-
-    back(examination?: Examination): void {
-        if (this.closing.observers.length > 0) {
-        	if (examination){
-            	this.closing.emit(examination);
-            	this.examination = new Examination();
-            }else{
-            	this.closing.emit(new Examination());
-            }
-        } else {
-            this.location.back();
-        }
-    }
-
-    edit(): void {
-        this.router.navigate(['/preclinical-examination'], { queryParams: { id: this.examination_id, mode: "edit" } });
-    }
-    
-    
-    
-    create() {
-        this.setDateFromDatePicker();
-        this.examination.preclinical = true;
+    protected save(): Promise<void> {
         this.updateSubject();
-        this.animalExaminationService.create(this.examination)
-            .subscribe((examination) => {
-            	this.examination_id = examination.id;
-                //Following functions should be called after examination creation
-        		this.manageExaminationAnesthetic();
-        		//this.manageContrastAgent();
-        		this.addExtraDataToExamination(this.examination_id, false);
-
-        		this.back(examination);
-            }, (err: String) => {
-
-       });
+        return super.save();
     }
 
-
-    update() {
-    	this.setDateFromDatePicker();
-        this.examination.preclinical = true;
-        this.updateSubject();
-        this.animalExaminationService.update(this.examination_id, this.examination)
-            .subscribe((examination) => {
-        		this.manageExaminationAnesthetic();
-       			//this.manageContrastAgent();
-        		this.addExtraDataToExamination(this.examination_id, true);
-
-        		this.back();
-            }, (err: String) => {
-
-       });
-    }
-
-    manageExaminationAnesthetic() {
+    manageExaminationAnesthetic(examination_id : number) {
         if (this.examAnesthetic) {
-            this.examAnesthetic.examination_id = this.examination_id;
+            this.examAnesthetic.examination_id = examination_id;
             if (this.examAnesthetic.id) {
-                this.examAnestheticService.update(this.examination_id, this.examAnesthetic)
+                this.examAnestheticService.updateAnesthetic(examination_id, this.examAnesthetic)
                     .subscribe(examAnesthetic => {
                     });
             } else if (this.examAnesthetic.anesthetic){
-                this.examAnestheticService.create(this.examination_id, this.examAnesthetic)
+                this.examAnestheticService.createAnesthetic(examination_id, this.examAnesthetic)
                     .subscribe(examAnesthetic => {
                     });
             }
         }
     }
 
-    manageContrastAgent() {
+  /*  manageContrastAgent() {
         if (this.protocol_id && this.contrastAgent) {
             if (this.contrastAgent.id) {
                 this.contrastAgentsService.update(this.protocol_id, this.contrastAgent)
@@ -401,7 +299,7 @@ export class AnimalExaminationFormComponent implements OnInit {
                     });
             }
         }
-    }
+    }*/
 
     addExtraDataToExamination(examination_id: number, isUpdate: boolean) {
         if (!examination_id) { return; }
@@ -516,67 +414,7 @@ export class AnimalExaminationFormComponent implements OnInit {
         this.attachNewFilesModal.hide();
     }
     
-    setDateFromDatePicker(): void {
-        if (this.selectedDateNormal) {
-            this.examination.examinationDate = new Date(this.selectedDateNormal.year, this.selectedDateNormal.month - 1,
-                this.selectedDateNormal.day);
-        } else {
-            this.examination.examinationDate = null;
-        }
-    }
-
-    getDateToDatePicker(examination: Examination): void {
-        if (examination && examination.examinationDate && !isNaN(new Date(examination.examinationDate).getTime())) {
-            let expirationDate: Date = new Date(examination.examinationDate);
-            this.selectedDateNormal = {
-                year: expirationDate.getFullYear(), month: expirationDate.getMonth() + 1,
-                day: expirationDate.getDate()
-            };
-            
-        }
-    }
     
-    onInputFieldChanged(event: IMyInputFieldChanged) {
-        if (event.value !== '') {
-            if (!event.valid) {
-                this.isDateValid = false;
-            } else {
-                this.isDateValid = true;
-            }
-        } else {
-            this.isDateValid = true;
-            //setTimeout(():void => this.selectedDateNormal = null);
-        }
-    }
-
-    private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'dd/mm/yyyy',
-        height: '20px',
-        width: '160px'
-    };
-
-    onDateChanged(event: IMyDateModel) {
-        if (event.formatted !== '') {
-            this.selectedDateNormal = event.date;
-        }
-    }
-    
-    initPrefillData() {
-        if (this.preFillData && this.examination) {
-        	this.hasStudyCenterData = true;
-            this.examination.studyId = this.preFillData.studyId;
-            this.examination.studyName = this.preFillData.studyName;
-            this.examination.centerId = this.preFillData.centerId;
-            this.examination.centerName = this.preFillData.centerName;
-            this.examination.examinationDate = this.preFillData.examinationDate;
-            this.examination.comment = this.preFillData.comment;
-            this.examination.subjectId = this.preFillData.subjectId;
-            this.examination.subjectName = this.preFillData.subjectName;
-            this.setSelectedSubject();
-            this.buildForm();
-            this.getDateToDatePicker(this.examination);
-        }
-    }
     
 
 }

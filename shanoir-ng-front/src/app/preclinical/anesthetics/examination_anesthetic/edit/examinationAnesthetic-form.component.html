@@ -1,32 +1,33 @@
-<div class="ExamAnestheticFormComponent content-component" [formGroup]="newExamAnestheticForm">
-
-	<span *ngIf="isStandalone" [ngSwitch]="mode.state">
-		<ng-template [ngSwitchCase]="Modes.view"> 
-			<div class="header command-zone" i18n="View examAnesthetic|Title">View examination anesthetic</div>
+<div class="content-component">
+    <form *ngIf="form && examinationAnesthetic" [formGroup]="form" class="max-content" novalidate>
+	<span *ngIf="isStandalone"  [ngSwitch]="mode">
+		<ng-template [ngSwitchCase]="'view'">
+			<h2 class="header command-zone"i18n="View examAnesthetic|Title@@examinationDetailViewTitle">Details on examination anesthetic</h2>
 		</ng-template>
-		<ng-template [ngSwitchCase]="Modes.edit"> 
-			<div class="header command-zone" i18n="Edit examAnesthetic|Title">Edit examination anesthetic</div>
+		<ng-template [ngSwitchCase]="'edit'">
+			<h2 class="header command-zone"i18n="Edit examAnesthetic|Title@@examinationDetailEditTitle">Edit examination anesthetic</h2>
 		</ng-template>
-		<ng-template [ngSwitchCase]="Modes.create"> 
-			<div class="header command-zone" i18n="Create examAnesthetic|Title">Add examination anesthetic</div>
+		<ng-template [ngSwitchCase]="'create'">
+			<h2 class="header command-zone"i18n="Create examAnesthetic|Title@@examinationDetailCreateTitle">Create examination anesthetic</h2>
 		</ng-template>
 	</span>
+	
 
 	<fieldset>
 		<legend *ngIf="!isStandalone">Examination anesthetic</legend>
 		<ol>
 			<li >
 				<label i18n="Edit examAnesthetic|Anesthetic label" >Anesthetic</label>
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
-							{{examAnesthetic?.anesthetic?.name}}
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{examinationAnesthetic?.anesthetic?.name}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<select id="anesthetic"  formControlName="anesthetic" [(ngModel)]="examAnesthetic.anesthetic" (ngModelChange)="eaChange($event)">
+						<select id="anesthetic"  formControlName="anesthetic" [(ngModel)]="examinationAnesthetic.anesthetic" (ngModelChange)="eaChange($event)">
 							<option *ngFor="let anesthetic of anesthetics" [ngValue]="anesthetic">{{anesthetic.name}}</option>
 						</select>
 						<button i18n="Edit examAnesthetic|Add a new anesthetic" (click)="goToAddAnesthetic()">
-							<img [src]="addIconPath"/>
+							<i class="fas fa-plus-square"></i>
 							new anesthetic
 						</button>
 					</ng-template>
@@ -34,12 +35,12 @@
 			</li>
 			<li >
 				<label i18n="Edit examAnesthetic|InjectionInterval label">Injection interval</label>
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
-							{{enumUtils.getEnumValue(intervals,examAnesthetic.injection_interval)}}
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{enumUtils.getEnumValue(intervals,examinationAnesthetic?.injection_interval)}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<select id="injectionInterval" formControlName="injectionInterval" [(ngModel)]="examAnesthetic.injection_interval" (ngModelChange)="eaChange($event)">
+						<select id="injectionInterval" formControlName="injectionInterval" [(ngModel)]="examinationAnesthetic.injection_interval" (ngModelChange)="eaChange($event)">
 							<option *ngFor="let interval of intervals" [value]="interval.key">{{interval.value}}</option>
 						</select>
 					</ng-template>
@@ -47,12 +48,12 @@
 			</li>
 			<li >
 				<label i18n="Edit examAnesthetic|InjectionSite label">Injection site</label>
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
-							{{enumUtils.getEnumValue(sites,examAnesthetic.injection_site)}}
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{enumUtils.getEnumValue(sites,examinationAnesthetic?.injection_site)}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<select id="injectionSite" formControlName="injectionSite" [(ngModel)]="examAnesthetic.injection_site" (ngModelChange)="eaChange($event)">
+						<select id="injectionSite" formControlName="injectionSite" [(ngModel)]="examinationAnesthetic.injection_site" (ngModelChange)="eaChange($event)">
 							<option *ngFor="let site of sites" [value]="site.key">{{site.value}}</option>
 						</select>
 					</ng-template>
@@ -60,12 +61,12 @@
 			</li>
 			<li>
 				<label i18n="Edit examAnesthetic|InjectionType label">Injection type</label> 
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view">
-							{{enumUtils.getEnumValue(injtypes,examAnesthetic.injection_type)}}
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'">
+							{{enumUtils.getEnumValue(injtypes,examinationAnesthetic?.injection_type)}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<select id="injectionType" formControlName="injectionType" [(ngModel)]="examAnesthetic.injection_type" (ngModelChange)="eaChange($event)">
+						<select id="injectionType" formControlName="injectionType" [(ngModel)]="examinationAnesthetic.injection_type" (ngModelChange)="eaChange($event)">
 							<option *ngFor="let injtype of injtypes" [value]="injtype.key">{{injtype.value}}</option>
 						</select>
 					</ng-template>
@@ -73,23 +74,23 @@
 			</li>
 			<li>
 				<label i18n="Edit examAnesthetic|Dose label">Dose</label>
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
-							{{examAnesthetic?.dose}}
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{examinationAnesthetic?.dose}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<input type="text" id="dose" formControlName="dose" [(ngModel)]="examAnesthetic.dose" (ngModelChange)="eaChange($event)"/>
+						<input type="text" id="dose" formControlName="dose" [(ngModel)]="examinationAnesthetic.dose" (ngModelChange)="eaChange($event)"/>
 					</ng-template>
 				</span> 
 			</li>
 			<li>
 				<label i18n="Edit examAnesthetic|DoseUnit label">Dose Unit</label>
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
-							{{examAnesthetic?.dose_unit?.value}}
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{examinationAnesthetic?.dose_unit?.value}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<select id="dose_unit" formControlName="dose_unit" [(ngModel)]="examAnesthetic.dose_unit" (ngModelChange)="eaChange($event)">
+						<select id="dose_unit" formControlName="dose_unit" [(ngModel)]="examinationAnesthetic.dose_unit" (ngModelChange)="eaChange($event)">
 							<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
 						</select>
 					</ng-template>
@@ -98,12 +99,12 @@
 			<!-- 
 			<li>
 				<label i18n="Edit examAnesthetic|startDate label">Start date</label> 
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
-							{{examAnesthetic?.startDate}}
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{examinationAnesthetic?.startDate}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<my-date-picker id="startDate" [options]="myDatePickerOptions" formControlName="startDate" [(ngModel)]="examAnesthetic.startDate" (ngModelChange)="eaChange($event)" 
+						<my-date-picker id="startDate" [options]="myDatePickerOptions" formControlName="startDate" [(ngModel)]="examinationAnesthetic.startDate" (ngModelChange)="eaChange($event)" 
 							(dateChanged)="onDateChanged($event,'start')" (inputFieldChanged)="onInputFieldChanged($event,'start')" [selDate]="selectedStartDate">
 						</my-date-picker>
 					</ng-template>
@@ -112,12 +113,12 @@
 			</li>
 			<li>
 				<label i18n="Edit examAnesthetic|endDate label">End date</label> 
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
-							{{examAnesthetic?.endDate}}
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
+							{{examinationAnesthetic?.endDate}}
 					</ng-template>
 					<ng-template ngSwitchDefault>
-						<my-date-picker id="endDate" [options]="myDatePickerOptions" formControlName="endDate" [(ngModel)]="examAnesthetic.endDate"  (ngModelChange)="eaChange($event)"
+						<my-date-picker id="endDate" [options]="myDatePickerOptions" formControlName="endDate" [(ngModel)]="examinationAnesthetic.endDate"  (ngModelChange)="eaChange($event)"
 							(dateChanged)="onDateChanged($event,'end')" (inputFieldChanged)="onInputFieldChanged($event,'end')" [selDate]="selectedEndDate">
 						</my-date-picker>
 					</ng-template>
@@ -128,9 +129,13 @@
 		</ol>
 	</fieldset>
     
-	<div *ngIf="isStandalone" class="footer command-zone">
-			<button type="button" i18n="Edit examAnesthetic|CancelButton label" class="Button" (click)="getOut()">Cancel</button>
-			<button type="button" *ngIf="canModify && mode.isCreateMode()" i18n="Edit examAnesthetic|CreateButton label" (click)="addExaminationAnesthetic()" class="Button" [disabled]="!newExamAnestheticForm.valid">Create</button>
-			<button type="button" *ngIf="canModify && mode.isEditMode()" (click)="updateExaminationAnesthetic()" i18n="Edit examAnesthetic|SaveButton label" class="Button" [disabled]="!newExamAnestheticForm.valid">Save</button>
-	</div>    
+	<div *ngIf="isStandalone">
+		<form-footer
+			[state]="footerState"
+			(save)="save()"
+			(edit)="goToEdit()"
+			(back)="goBack()">
+		</form-footer>
+	</div> 
+	</form>   
 </div>

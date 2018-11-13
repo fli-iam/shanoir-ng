@@ -1,85 +1,69 @@
-<div class="ExaminationFormComponent content-component">
-    <form [formGroup]="newExamForm" class="ExaminationFormComponent max-content" novalidate>
-
-		<span [ngSwitch]="mode.state">
-			<ng-template [ngSwitchCase]="Modes.view"> 
-				<div class="header command-zone" i18n="View examination|Title">View examination</div>
-			</ng-template>
-			<ng-template [ngSwitchCase]="Modes.edit"> 
-				<div class="header command-zone" i18n="Edit examination|Title">Edit examination</div>
-			</ng-template>
-			<ng-template [ngSwitchCase]="Modes.create"> 
-				<div class="header command-zone" i18n="Create examination|Title">Add examination</div>
-			</ng-template>
-		</span>
+<div class="content-component">
+    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+		<div class="layout" [ngClass]="{'left': mode=='view'}">
+			<span [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">
+					<h2 class="header command-zone"i18n="View examination|Title@@examinationDetailViewTitle">Details on examination</h2>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'">
+					<h2 class="header command-zone"i18n="Edit examination|Title@@examinationDetailEditTitle">Edit examination</h2>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'">
+					<h2 class="header command-zone"i18n="Create examination|Title@@examinationDetailCreateTitle">Create examination</h2>
+				</ng-template>
+			</span>
 
 		<fieldset>
 			<ol>
 				<li>
 					<label i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</label>
-					<span class="right-col" [ngSwitch]="mode.state">
-						<ng-template [ngSwitchCase]="Modes.view">
-							<a [routerLink]="['/study']" [queryParams]="{mode: 'view', id: examination.studyId}">
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							<a [routerLink]="['/study/details/', examination.studyId]">
 								{{examination.studyName}}
 							</a>		
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<div [ngSwitch]="hasStudyCenterData">
-								<ng-template [ngSwitchCase]="true">
-								   {{examination.studyName}}
-								</ng-template>
-								<ng-template [ngSwitchCase]="false">
-									<select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
-										<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
-									</select>
-									<label *ngIf="formErrors.studyId.includes('required')" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
-								</ng-template>
-							</div>
+							<select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
+								<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
+							</select>
+							<label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 						</ng-template>
 					</span>
 				</li>
-				<!--
 				<li>
 					<label i18n="Examination detail|Examination executive label@@examinationDetailExaminationExecutive">Examination executive</label>
-					<span class="right-col" [ngSwitch]="mode.state">
-						<ng-template [ngSwitchCase]="Modes.view">
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
 							{{examination.examinationExecutive?.name}}
 						</ng-template>
-						<ng-template ngSwitchDefault>
+						<!--<ng-template ngSwitchDefault>
 							<select id="examinationExecutive" required formControlName="Examination executive" [(ngModel)]="examination.examinationExecutive">
 								<option *ngFor="let examinationExecutive of examinationExecutives" [ngValue]="subject">{{examinationExecutive.name}}</option>
 							</select>
-						</ng-template>
+						</ng-template>-->
 					</span>
 				</li> 
-				-->
 				<li>
 					<label i18n="Examination detail|Center label@@examinationDetailCenter" class="required-label">Center</label>
-					<span class="right-col" [ngSwitch]="mode.state">
-						<ng-template [ngSwitchCase]="Modes.view">
-							<a [routerLink]="['/center']" [queryParams]="{mode: 'view', id: examination.centerId}">
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							<a [routerLink]="['/center/details/', examination.centerId]">
 								{{examination.centerName}}
 							</a>
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<div [ngSwitch]="hasStudyCenterData">
-								<ng-template [ngSwitchCase]="true">
-									{{examination.centerName}}
-								</ng-template>
-								<ng-template [ngSwitchCase]="false">
-									<select id="centerId" required formControlName="centerId" [(ngModel)]="examination.centerId">
-										<option *ngFor="let center of centers" [ngValue]="center.id">{{center.name}}</option>
-									</select>
-									<label *ngIf="formErrors.centerId.includes('required')" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
-								</ng-template>
-							</div>
+							<select id="centerId" required formControlName="centerId" [(ngModel)]="examination.centerId">
+								<option *ngFor="let center of centers" [ngValue]="center.id">{{center.name}}</option>
+							</select>
+							<label *ngIf="hasError('centerId', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
 						</ng-template>
 					</span>
 				</li>
 				<li>
 					<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
-					<span class="right-col" [ngSwitch]="mode.state">
-						<ng-template [ngSwitchCase]="Modes.view">
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
 							<a [routerLink]="['/preclinical-subject']" [queryParams]="{mode: 'view', id: animalSubjectId}">
 								{{examination.subject?.name}}
 							</a>
@@ -93,30 +77,29 @@
 									<select id="subject" required formControlName="subject" [(ngModel)]="selectedSubjectId" >
 										<option *ngFor="let subject of subjects" [ngValue]="subject.id">{{subject.name}}</option>
 									</select>
-									<label *ngIf="formErrors.subject.includes('required')" class="form-validation-alert" i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">Subject is required!</label>
+									<label *ngIf="hasError('subject', ['required'])" class="form-validation-alert" i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">Subject is required!</label>
 								</ng-template>
 							</div>
 						</ng-template>
 					</span>
-				</li> 
+				</li>
 				<li>
 					<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</label>
-					<span class="right-col" [ngSwitch]="mode.state">
-						<ng-template [ngSwitchCase]="Modes.view">
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
 							{{examination.examinationDate | date: 'dd/MM/yyyy'}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<my-date-picker id="examinationDate" [options]="myDatePickerOptions" formControlName="examinationDate" [(ngModel)]="examinationDate"
-								(dateChanged)="onDateChanged($event)" (inputFieldChanged)="onInputFieldChanged($event)" [selDate]="selectedDateNormal">
-							</my-date-picker>
-							<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit examination|Date valid error@@editExaminationDateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+							<datepicker [(ngModel)]="examination.examinationDate" formControlName="examinationDate" required></datepicker>
+							<label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: dd/mm/yyyy</label>
+							<label *ngIf="hasError('examinationDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">Required</label>
 						</ng-template>
 					</span>
 				</li>
 				<li>
-					<label i18n="Examination mode.state label@@examinationDetailComment">Comment</label>
-					<span class="right-col" [ngSwitch]="mode.state">
-						<ng-template [ngSwitchCase]="Modes.view">
+					<label i18n="Examination detail|Comment label@@examinationDetailComment">Comment</label>
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
 							{{examination.comment}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
@@ -126,8 +109,8 @@
 				</li>
 				<li>
 					<label i18n="Examination detail|Note label@@examinationDetailNote">Note</label>
-					<span class="right-col" [ngSwitch]="mode.state">
-						<ng-template [ngSwitchCase]="Modes.view">
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
 							{{examination.note}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
@@ -137,8 +120,8 @@
 				</li>
 				<li>
 					<label i18n="Examination detail|Subject weight label@@examinationDetailSubjectWeight">Subject weight</label>
-					<span class="right-col" [ngSwitch]="mode.state">
-						<ng-template [ngSwitchCase]="Modes.view">
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
 							{{examination.subjectWeight}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
@@ -156,14 +139,14 @@
 				</li>
 				<li>
 					<label i18n="Examination detail|Assessments label@@examinationDetailAssessments">Assessments</label>
-					<span class="right-col" [ngSwitch]="mode.state">
-						<ng-template [ngSwitchCase]="Modes.view">
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
 							<!--{{examination.note}}-->
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
-							(click)="instAssessmentModal.show()">
-								<img [src]="addIconPath"/>
+							disabled (click)="instAssessment()">
+								<i class="fas fa-plus-square"></i>
 								new Instrument Based Assessment										
 							</button>
 						</ng-template>
@@ -171,14 +154,14 @@
 				</li>
 				<li>
 					<label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
-					<span class="right-col" [ngSwitch]="mode.state">
-						<ng-template [ngSwitchCase]="Modes.view">
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							
 							<button i18n="Examination detail|Attach new files button@@examinationDetailAttachNewFiles"
-							(click)="attachNewFilesModal.show()">
-								<img [src]="addIconPath"/>
+							disabled (click)="attachNewFiles()">
+								<i class="fas fa-plus-square"></i>
 								Attach extra data to existing examinations									
 							</button>
 						</ng-template>
@@ -188,11 +171,9 @@
 		</fieldset>
 
 		<examination-anesthetic-form
-			[examAnesthetic]="examAnesthetic" 
-			[examination_id]="examination_id" 
-			[newExamAnestheticForm]="newExamForm.controls.newExamAnestheticForm" 
+			[examination_id]="examination.id" 
 			[mode]="mode" 
-			[canModify]="canModify" 
+			[form]="form.controls.newExamAnestheticForm"
 			(examAnestheticChange)="onExamAnestheticChange($event)">
 		</examination-anesthetic-form>
 
@@ -205,52 +186,32 @@
 			[canModify]="canModify" 
 			(agentChange)="onAgentChange($event)">
 		</contrast-agent-form>
-		-->
+		
 
 		<physiological-data-upload-form 
 			(physioDataReady)="onUploadPhysiologicalData($event)"
 			[mode]="mode"
-			[canModify]="canModify"
+			[canModify]="true"
 			[physioData]="examinationPhysioData">
 		</physiological-data-upload-form>
 
 		<bloodgas-data-upload-form 
 			(bloodGasDataReady)="onUploadBloodGasData($event)"
 			[mode]="mode"
-			[canModify]="canModify"
+			[canModify]="true"
 			[bloodGasData]="examinationBloodGasData">
 		</bloodgas-data-upload-form>
-			
+-->
+		<fieldset *ngIf="mode=='view'">
+			<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
+			<examination-tree *ngIf="examination" [examination]="examination"></examination-tree> 
+		</fieldset>
+		<form-footer
+			[state]="footerState"
+			(save)="save()"
+			(edit)="goToEdit()"
+			(back)="goBack()"
+		></form-footer>
+	</div>
 	</form>
   
-    <div>
-		<div class="footer command-zone">
-			<span [ngSwitch]="mode.state">
-				<button i18n="View examination|BackButton label" class="Button" (click)="back()">Back</button>	
-				<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
-					<button type="button" i18n="View examination|EditButton label" (click)="edit()" class="Button">Edit</button>
-				</ng-template>
-				<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
-					<button type="button" i18n="Edit examination|UpdateButton label" (click)="update()" class="Button" [disabled]="!newExamForm.valid">Update</button>
-				</ng-template>
-				<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify"> 
-					<button type="button" i18n="Edit examination|CreateButton label" (click)="create()" class="Button" [disabled]="!newExamForm.valid">Create</button>
-				</ng-template>
-			</span>
-		</div>
-   	</div>
-    
-</div>
-
-
-<app-modal modalDialogId="instAssessmentModal" #instAssessmentModal>
-		<div class="app-modal-body">
-		  <instrument-assessment-detail  (closing)="closePopin($event)"></instrument-assessment-detail>
-		</div>
-</app-modal>
-
-<app-modal modalDialogId="attachNewFilesModal" #attachNewFilesModal>
-		<div class="app-modal-body">
-		  <upload-extra-data  [examination]="examination" [studies]="studies" (closing)="closeAttachedFilePopin($event)"></upload-extra-data>
-		</div>
-</app-modal>

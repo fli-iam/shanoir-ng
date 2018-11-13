@@ -1,15 +1,9 @@
 import {Component, Input, ViewChild, ViewContainerRef} from '@angular/core'
-import { Router } from '@angular/router'; 
-
-import { ConfirmDialogService } from "../../../../shared/components/confirm-dialog/confirm-dialog.service";
-import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
 
 import { ExaminationAnesthetic } from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
-import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
-import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
-import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { TableComponent } from '../../../../shared/components/table/table.component';
+import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 
 @Component({
   selector: 'examination-anesthetics-list',
@@ -17,52 +11,20 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
   styleUrls: ['examinationAnesthetic-list.component.css'], 
   providers: [ExaminationAnestheticService]
 })
-export class ExaminationAnestheticsListComponent {
-  @Input() examination_id:number;
+export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityListComponent<ExaminationAnesthetic>{
   @ViewChild('examinationAnestheticTable') table: TableComponent; 
-  public examAnesthetics: ExaminationAnesthetic[];
-  private examAnestheticsPromise: Promise<void> = this.getExaminationAnesthetics(this.examination_id);
-  private browserPaging: BrowserPaging<ExaminationAnesthetic>;
-  public rowClickAction: Object;
-  public columnDefs: any[];
-  public customActionDefs: any[];
     
-    constructor(
-        public examAnestheticsService: ExaminationAnestheticService,
-        public router: Router,
-        private keycloakService: KeycloakService,
-        public confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
-            this.createColumnDefs();
+    
+     constructor(
+        private examAnestheticsService: ExaminationAnestheticService) {
+            super('preclinical-examination-anesthetics');
      }
     
-    
-    getPage(pageable: FilterablePageable): Promise<Page<ExaminationAnesthetic>> {
-        return new Promise((resolve) => {
-            this.examAnestheticsPromise.then(() => {
-                resolve(this.browserPaging.getPage(pageable));
-            });
-        });
+    getEntities(): Promise<ExaminationAnesthetic[]> {
+        return this.examAnestheticsService.getAll();
     }
     
-    getExaminationAnesthetics(examination_id:number): Promise<void> {
-        this.examAnesthetics = [];
-        return this.examAnestheticsService.getExaminationAnesthetics(examination_id).then(examAnesthetics => {
-            this.examAnesthetics = examAnesthetics;
-        	this.browserPaging = new BrowserPaging(this.examAnesthetics, this.columnDefs);
-        }) 
-    }
-     
-    
-    delete(examAnesthetic: ExaminationAnesthetic): void {      
-      this.examAnestheticsService.delete(examAnesthetic).then((res) => this.getExaminationAnesthetics(this.examination_id));
-    }
-    
-    viewExamAnesthetic = (examAnesthetic: ExaminationAnesthetic) => {
-        this.router.navigate(['/preclinical-examination-edit/', examAnesthetic.id]);
-    }
-    
-    // Grid columns definition
-    private createColumnDefs() {
+    getColumnDefs(): any[] {
         function dateRenderer(date) {
             if (date) {
                 return new Date(date).toLocaleDateString();
@@ -84,10 +46,7 @@ export class ExaminationAnestheticsListComponent {
             }
             return '';
         };
-        this.columnDefs = [
-            /*{headerName: "ID", field: "id", type: "id", cellRenderer: function (params: any) {
-                return castToString(params.data.id);
-            }},*/
+        let colDef: any[] = [
             {headerName: "Anesthetic", field: "anesthetic.name"},
             {headerName: "Dose", field: "dose", type: "dose", cellRenderer: function (params: any) {
                 return checkNullValue(params.data.dose);
@@ -103,67 +62,16 @@ export class ExaminationAnestheticsListComponent {
             }},
             {headerName: "End Date", field: "endDate", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.endDate);
-            }}   
+            }}      
         ];
-        
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({ headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteExamAnestheticConfirmDialog },
-                {
-                    headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target: "/preclinical-examination", getParams: function(item: any): Object {
-                        return { id: item.id, mode: "edit" };
-                    }
-                });
-        }
-        if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({
-                headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target: "/preclinical-examination", getParams: function(item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
-            });
-        }
-        this.customActionDefs = [];
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.customActionDefs.push({
-                title: "new anesthetic", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/preclinical-examination", getParams: function(item: any): Object {
-                    return { mode: "create" };
-                }
-            });
-            this.customActionDefs.push({ title: "delete selected", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.deleteAll });
-        }
-        if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {
-                target: "/preclinical-examination", getParams: function(item: any): Object {
-                    return { id: item.id, mode: "view" };
-                }
-            };
-        }
-    }
-    
-    openDeleteExamAnestheticConfirmDialog = (item: ExaminationAnesthetic) => {
-         this.confirmDialogService
-                .confirm('Delete subject', 'Are you sure you want to delete examination anesthetic ' + item.id + '?', 
-                    this.viewContainerRef)
-                .subscribe(res => {
-                    if (res) {
-                        this.delete(item);
-                    }
-                });
-    }
-    
-    deleteAll = () => {
-        let ids: number[] = [];
-        for (let examAnesthetic of this.examAnesthetics) {
-            if (examAnesthetic["isSelectedInTable"]) ids.push(examAnesthetic.id);
-        }
-        if (ids.length > 0) {
-            console.log("TODO : delete those ids : " + ids);
-        }
-    }
-    
-    private onRowClick(item: ExaminationAnesthetic) {
-        if (!this.keycloakService.isUserGuest()) {
-             this.router.navigate(['/preclinical-examination'], { queryParams: { id: item.id, mode: "view" } });
-        }
+        return colDef;       
     }
 
+    getCustomActionsDefs(): any[] {
+        return [];
+    }
+    
+    
+    
+    
 }

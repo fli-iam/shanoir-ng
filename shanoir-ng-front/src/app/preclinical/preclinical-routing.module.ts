@@ -16,6 +16,8 @@ import { ContrastAgentsListComponent } from './contrastAgent/list/contrastAgent-
 import { ContrastAgentFormComponent }      from './contrastAgent/edit/contrastAgent-form.component';
 import { AnimalExaminationFormComponent }      from './examination/edit/animal-examination-form.component';
 import { AnimalExaminationListComponent }      from './examination/list/animal-examination-list.component';
+import {ExaminationAnestheticsListComponent} from './anesthetics/examination_anesthetic/list/examinationAnesthetic-list.component';
+import {ExaminationAnestheticFormComponent} from './anesthetics/examination_anesthetic/edit/examinationAnesthetic-form.component';
 import { ImportBrukerComponent } from './importBruker/importBruker.component';
 import { AuthNotGuestGuard } from '../shared/roles/auth-not-guest-guard';
 
@@ -58,12 +60,6 @@ let routes : Routes= [
         path: 'preclinical-anesthetic', 
         component: AnestheticFormComponent 
     },{ 
-        path: 'preclinical-examinations', 
-        component: AnimalExaminationListComponent 
-    },{ 
-        path: 'preclinical-examination',
-        component: AnimalExaminationFormComponent 
-    },{ 
         path: 'preclinical-contrastagents', 
         component: ContrastAgentsListComponent 
     },{ 
@@ -96,6 +92,10 @@ let routes : Routes= [
     
   ];
 
-  routes = routes.concat(getRoutesFor('preclinical-reference', ReferenceFormComponent, ReferencesListComponent, AuthNotGuestGuard));
+  routes = routes.concat(
+      getRoutesFor('preclinical-reference', ReferenceFormComponent, ReferencesListComponent, AuthNotGuestGuard), 
+      getRoutesFor('preclinical-examination', AnimalExaminationFormComponent, AnimalExaminationListComponent, AuthNotGuestGuard),
+      getRoutesFor('preclinical-examination-anesthetics', ExaminationAnestheticFormComponent, ExaminationAnestheticsListComponent, AuthNotGuestGuard)
+  );
 
   export const preclinicalRouting: ModuleWithProviders = RouterModule.forRoot(routes); 
