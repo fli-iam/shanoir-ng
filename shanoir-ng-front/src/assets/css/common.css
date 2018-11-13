@@ -85,8 +85,8 @@ form { color: var(--dark-grey); }
     form fieldset li input,
     form fieldset li select,
     form fieldset li button { height: 21px; }
-    form li.info { margin: 4px 0 13px; background-color: lightgoldenrodyellow; padding: 10px 15px; overflow: hidden; width: 473px; }
-      form li.info .icon { margin-right: 6px; vertical-align: middle; color: var(--color-b); font-size: 16px; }
+    form li.info { margin: 4px 0 13px; background-color: var(--color-b-light); padding: 10px 15px; overflow: hidden; width: 473px; border-radius: 2px; }
+      form li.info svg { margin-right: 6px; vertical-align: -3; color: var(--color-b); font-size: 16px; }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { padding: 6px 15px; }
   form .header { color: var(--color-b); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
