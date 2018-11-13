@@ -92,7 +92,7 @@ export class PathologyModelFormComponent {
     }
 
     loadData() {
-        this.pathologyService.getPathologies().then(pathologies => {
+        this.pathologyService.getAll().then(pathologies => {
             this.pathologies = pathologies;
             this.getPathologyModel();
         });
