@@ -48,12 +48,6 @@ let routes : Routes= [
         path: 'preclinical-pathologies-model',
         component: PathologyModelFormComponent 
     },{ 
-        path: 'preclinical-therapies', 
-        component: TherapiesListComponent 
-    },{ 
-        path: 'preclinical-therapy', 
-        component: TherapyFormComponent 
-    },{ 
         path: 'preclinical-anesthetics', 
         component: AnestheticsListComponent 
     },{ 
@@ -95,7 +89,8 @@ let routes : Routes= [
   routes = routes.concat(
       getRoutesFor('preclinical-reference', ReferenceFormComponent, ReferencesListComponent, AuthNotGuestGuard), 
       getRoutesFor('preclinical-examination', AnimalExaminationFormComponent, AnimalExaminationListComponent, AuthNotGuestGuard),
-      getRoutesFor('preclinical-examination-anesthetics', ExaminationAnestheticFormComponent, ExaminationAnestheticsListComponent, AuthNotGuestGuard)
+      getRoutesFor('preclinical-examination-anesthetics', ExaminationAnestheticFormComponent, ExaminationAnestheticsListComponent, AuthNotGuestGuard),
+      getRoutesFor('preclinical-therapy', TherapyFormComponent, TherapiesListComponent, AuthNotGuestGuard)
   );
 
   export const preclinicalRouting: ModuleWithProviders = RouterModule.forRoot(routes); 

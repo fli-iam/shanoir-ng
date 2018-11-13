@@ -1,15 +1,15 @@
 <div class="TherapyFormComponent content-component">
-    <form [formGroup]="newTherapyForm" class="TherapyFormComponent max-content" novalidate>
+    <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
 						<div class="header command-zone" i18n="View therapy|Title">View therapy</div>
 					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.edit"> 
+					<ng-template [ngSwitchCase]="'edit'"> 
 						<div class="header command-zone" i18n="Edit therapy|Title">Edit therapy</div>
 					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.create"> 
+					<ng-template [ngSwitchCase]="'create'"> 
 						<div class="header command-zone" i18n="Create therapy|Title">Add therapy</div>
 					</ng-template>
 				</span>
@@ -21,34 +21,34 @@
 						<label *ngIf="isTherapyUnique==false" class="form-validation-alert" i18n="Edit therapy|TherapyUniqueError label">This therapy already exists!</label>
 						<li class="required">
 							<label i18n="Edit therapy|Name label" class="required-label">Name</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{therapy?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<input type="text" id="name" formControlName="name" [(ngModel)]="therapy.name"/>
-									<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit therapy|NameRequiredError label">Name is required!</label>
+									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit therapy|Name required error@@therapyDetailNameRequiredError">Name is required!</label>
 								</ng-template>
 							</span>
 						</li>
 						<li class="required">
 							<label i18n="Edit therapy|Location label" class="required-label">Type</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view">
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'">
 										{{enumUtils.getEnumValue(therapyTypes,therapy.therapyType)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<select id="therapyType" required formControlName="therapyType" [(ngModel)]="therapy.therapyType">
 										<option *ngFor="let therapyType of therapyTypes" [value]="therapyType.key">{{therapyType.value}}</option>
 									</select>
-									<label *ngIf="formErrors.therapyType.includes('required')" class="form-validation-alert" i18n="Edit therapy|TherapyTypeRequiredError label">Type is required!</label>
+									<label *ngIf="hasError('therapyType', ['required'])" [@slideDown]="hasError('therapyType', ['required'])" class="form-validation-alert" i18n="Edit therapy|therapyType required error@@therapyDetailTherapyTypeRequiredError">Type is required!</label>
 								</ng-template>
 							</span>
 						</li>
 						<li class="required">
 							<label i18n="Edit therapy|Comment label">Comment</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{therapy?.comment}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -61,21 +61,12 @@
 					</fieldset>
 				</td>				
 			</tr>
-			
-			<tr><td colspan="2"><div class="footer command-zone">
-				<span [ngSwitch]="mode.state">
-						<button i18n="View therapy|BackButton label" class="Button" (click)="getOut()">Back</button>	
-						<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
-							<button type="button" i18n="View therapy|EditButton label" (click)="goToEditPage()" class="Button">Edit</button>
-						</ng-template>
-						<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
-							<button type="button" i18n="Edit therapy|UpdateButton label" (click)="updateTherapy()" class="Button" [disabled]="!newTherapyForm.valid">Update</button>
-						</ng-template>
-						<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify"> 
-							<button type="button" i18n="Edit therapy|CreateButton label" (click)="addTherapy()" class="Button" [disabled]="!newTherapyForm.valid">Create</button>
-						</ng-template>
-					</span>
-			</div></td></tr>
 		</table>
+		<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()">
+		</form-footer>
     </form>
 </div>

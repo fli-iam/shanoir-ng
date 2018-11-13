@@ -1,18 +1,13 @@
-import {Component, ViewChild, ViewContainerRef} from '@angular/core'
-import { Router } from '@angular/router'; 
-
-import { ConfirmDialogService } from "../../../../shared/components/confirm-dialog/confirm-dialog.service";
-import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
+import {Component, ViewChild} from '@angular/core'
 
 import { Therapy } from '../shared/therapy.model';
 import { TherapyService } from '../shared/therapy.service';
 import { TherapyType } from "../../../shared/enum/therapyType";
-import { EnumUtils } from "../../../shared/enum/enumUtils";
-import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 import { SubjectTherapyService } from '../../subjectTherapy/shared/subjectTherapy.service';
-import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
-import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { TableComponent } from '../../../../shared/components/table/table.component';
+import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
+import { ServiceLocator } from '../../../../utils/locator.service';
+import { ShanoirError } from '../../../../shared/models/error.model';
 
 
 @Component({
@@ -21,134 +16,78 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
   styleUrls: ['therapy-list.component.css'], 
   providers: [TherapyService]
 })
-export class TherapiesListComponent {
-  public therapies: Therapy[];
-  private therapiesPromise: Promise<void> = this.getTherapies();
-  private browserPaging: BrowserPaging<Therapy>;
-  public rowClickAction: Object;
-  public columnDefs: any[];
-  public customActionDefs: any[];
+export class TherapiesListComponent  extends BrowserPaginEntityListComponent<Therapy>{
   @ViewChild('therapiesTable') table: TableComponent;
     
     constructor(
-        public therapyService: TherapyService,
-        public router: Router,
-        private keycloakService: KeycloakService,
-        public confirmDialogService: ConfirmDialogService,
-        public subjectTherapyService: SubjectTherapyService, 
-        private viewContainerRef: ViewContainerRef) {
-            this.createColumnDefs();
-     }   
-    
-    
-    getPage(pageable: FilterablePageable): Promise<Page<Therapy>> {
-        return new Promise((resolve) => {
-            this.therapiesPromise.then(() => {
-                resolve(this.browserPaging.getPage(pageable));
-            });
-        });
+        private therapyService: TherapyService, 
+        private subjectTherapyService: SubjectTherapyService) {
+            super('preclinical-therapy');
+        }
+
+    getEntities(): Promise<Therapy[]> {
+        return this.therapyService.getAll();
     }
-    getTherapies(): Promise<void> {
-    	this.therapies = [];  
-        this.browserPaging = new BrowserPaging(this.therapies, this.columnDefs);
-        return this.therapyService.getTherapies().then(therapies => {
-            this.therapies = therapies;
-            this.browserPaging.setItems(therapies);
-            this.browserPaging.setColumnDefs(this.columnDefs);
-            this.table.refresh();
-        })            
-    }
-    
-    
-    delete(therapy: Therapy): void {      
-      this.therapyService.delete(therapy.id).then((res) => this.getTherapies());
-    }
-        
-    // Grid columns definition
-    private createColumnDefs() {
-        function castToString(id: number) {
-            return String(id);
-        };
-        this.columnDefs = [
-            /*{headerName: "ID", field: "id", type: "id", cellRenderer: function (params: any) {
-                return castToString(params.data.id);
-            }},*/
+
+    getColumnDefs(): any[] {
+        let colDef: any[] = [
             {headerName: "Name", field: "name"},
             {headerName: "Type", field: "therapyType", type: "Enum", cellRenderer: function (params: any) {
                 return TherapyType[params.data.therapyType];
             }},
-            {headerName: "Comment", field: "comment"}
+            {headerName: "Comment", field: "comment"}   
         ];
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.checkSubjectsForTherapy},
-            {headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target : "/preclinical-therapy", getParams: function(item: any): Object {
-                return {id: item.id, mode: "edit"};
-            }});
-        }
-        if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target : "/preclinical-therapy", getParams: function(item: any): Object {
-                return {id: item.id, mode: "view"};
-            }});
-        }
-        this.customActionDefs = [];
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-        this.customActionDefs.push({title: "new therapy", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/preclinical-therapy", getParams: function(item: any): Object {
-                return {mode: "create"};
-        }});
-        this.customActionDefs.push({title: "delete selected", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.deleteAll });
-        }
-        if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {target : "/preclinical-therapy", getParams: function(item: any): Object {
-                    return {id: item.id, mode: "view"};
-            }};
-        }
+        return colDef;       
     }
-    
-    private onRowClick(item: Therapy) {
-        if (!this.keycloakService.isUserGuest()) {
-            this.router.navigate(['/preclinical-therapy'], { queryParams: { id: item.id, mode: "view" } });
-        }
+
+    getCustomActionsDefs(): any[] {
+        return [];
     }
-    
-    openDeleteTherapyConfirmDialog = (item: Therapy) => {
-         this.confirmDialogService
-                .confirm('Delete therapy', 'Are you sure you want to delete therapy ' + item.name + '?', 
-                    this.viewContainerRef)
-                .subscribe(res => {
-                    if (res) {
-                        this.delete(item);
-                    }
-                });
-    }
-    
-    deleteAll = () => {
-        let ids: number[] = [];
-        for (let therapy of this.therapies) {
-            if (therapy["isSelectedInTable"]) ids.push(therapy.id);
-        }
-        if (ids.length > 0) {
-            console.log("TODO : delete those ids : " + ids);
-        }
-    }
-    
-    checkSubjectsForTherapy= (item: Therapy) => {
- 		 this.subjectTherapyService.getAllSubjectForTherapy(item.id).then(subjectTherapies => {
+
+
+    protected openDeleteConfirmDialog = (entity: Therapy) => {
+        this.subjectTherapyService.getAllSubjectForTherapy(entity.id).then(subjectTherapies => {
     		if (subjectTherapies){
     			let hasSubjects: boolean  = false;
     			hasSubjects = subjectTherapies.length > 0;
     			if (hasSubjects){
     				this.confirmDialogService
                 		.confirm('Delete therapy', 'This therapy is linked to subjects, it can not be deleted', 
-                    		this.viewContainerRef)
+                        ServiceLocator.rootViewContainerRef)
     			}else{
-    				this.openDeleteTherapyConfirmDialog(item);
+    				this.openDeleteTherapyConfirmDialog(entity);
     			}
     		}else{
-    			this.openDeleteTherapyConfirmDialog(item);
+    			this.openDeleteTherapyConfirmDialog(entity);
     		}
     	}).catch((error) => {
     		console.log(error);
-    		this.openDeleteTherapyConfirmDialog(item);
+    		this.openDeleteTherapyConfirmDialog(entity);
     	});    
- 	}
+    }   
+
+    private openDeleteTherapyConfirmDialog = (entity: Therapy) => {
+        if (this.keycloakService.isUserGuest()) return;
+        this.confirmDialogService
+            .confirm(
+                'Delete', 'Are you sure you want to delete preclinical-therapy n° ' + entity.id + ' ?',
+                ServiceLocator.rootViewContainerRef
+            ).subscribe(res => {
+                if (res) {
+                    entity.delete().then(() => {
+                        this.onDelete.next(entity);
+                        this.table.refresh();
+                        this.msgBoxService.log('info', 'The preclinical-therapy sucessfully deleted');
+                    }).catch(reason => {
+                        if (reason && reason.error) {
+                            this.onDelete.next(new ShanoirError(reason));
+                            if (reason.error.code != 422) throw Error(reason);
+                        }
+                    });                    
+                }
+            })
+    }
+
+    
+    
 }
