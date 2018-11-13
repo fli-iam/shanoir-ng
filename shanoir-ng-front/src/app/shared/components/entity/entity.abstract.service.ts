@@ -39,7 +39,7 @@ export abstract class EntityService<T extends Entity> {
             .toPromise();
     }
 
-    private toRealObject(entity: T) {
+    protected toRealObject(entity: T) {
         return Object.assign(this.getEntityInstance(entity), entity);
     }
 }
