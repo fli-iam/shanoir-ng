@@ -9,6 +9,7 @@ export class AcquisitionEquipment extends Entity {
     serialNumber: string;
     center: Center;
     manufacturerModel: ManufacturerModel;
+    compatible: boolean;
 
     service: AcquisitionEquipmentService = ServiceLocator.injector.get(AcquisitionEquipmentService);
 }

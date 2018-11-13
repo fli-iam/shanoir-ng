@@ -9,7 +9,7 @@ import { ImportJob, PatientDicom } from './dicom-data.model';
 
 export class ContextData {
     public study: Study;
-    public center: StudyCenter;
+    public studyCenter: StudyCenter;
     public acquisitionEquipment: AcquisitionEquipment;
     public subject: SubjectWithSubjectStudy;
     public examination: SubjectExamination;
@@ -17,7 +17,7 @@ export class ContextData {
 
     constructor (contextdata: ContextData) {
         this.study = contextdata ? contextdata.study : new Study();
-        this.center = contextdata ? contextdata.center: new StudyCenter();
+        this.studyCenter = contextdata ? contextdata.studyCenter: new StudyCenter();
         this.acquisitionEquipment = contextdata ? contextdata.acquisitionEquipment: new AcquisitionEquipment();
         this.niftiConverter = contextdata ? contextdata.niftiConverter: new NiftiConverter();
         this.subject = contextdata ? contextdata.subject: new SubjectWithSubjectStudy();

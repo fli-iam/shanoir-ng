@@ -4,5 +4,4 @@ export class StudyCenter {
     center: Center;
     id: number;
     studyId: number;
-    compatible: boolean;
 }

@@ -143,7 +143,7 @@ public class StudyServiceImpl implements StudyService {
 							&& StringUtils.equals(manufacturerModel, equipment.getManufacturerModelName())
 							&& StringUtils.equals(manufacturer, equipment.getManufacturer())) {
 						acquisitionEquipment.setCompatible(true);
-						studyCenterDTO.setCompatible(true);
+						studyCenterDTO.getCenter().setCompatible(true);
 						simpleStudy.setCompatible(true);
 						break;
 					}
