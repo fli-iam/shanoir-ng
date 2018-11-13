@@ -43,7 +43,7 @@ import com.google.gson.GsonBuilder;
 public class TherapyApiControllerTest {
 
 	private static final String REQUEST_PATH = "/therapy";
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH_ALL = REQUEST_PATH ;
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 	private static final String REQUEST_PATH_TYPE = REQUEST_PATH + "/type/Drug";
 

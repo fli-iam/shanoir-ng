@@ -70,7 +70,7 @@ public interface TherapyApi {
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of therapies", response = Therapy.class),
         @ApiResponse(code = 500, message = "Unexpected error", response = Therapy.class) })
-    @RequestMapping(value = "/all",
+    @RequestMapping(value = "",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<List<Therapy>> getTherapies();
