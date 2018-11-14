@@ -1,15 +1,15 @@
 <div class="PathologyModelFormComponent content-component">
-    <form [formGroup]="newModelForm" class="PathologyModelFormComponent max-content" novalidate>
+    <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
 						<div class="header command-zone" i18n="View model|Title">View pathology model</div>
 					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.edit"> 
+					<ng-template [ngSwitchCase]="'edit'"> 
 						<div class="header command-zone" i18n="Edit model|Title">Edit pathology model</div>
 					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.create"> 
+					<ng-template [ngSwitchCase]="'create'"> 
 						<div class="header command-zone" i18n="Create model|Title">Add pathology model</div>
 					</ng-template>
 				</span>
@@ -21,38 +21,38 @@
 						<label *ngIf="isModelUnique==false" class="form-validation-alert" i18n="Edit model|PathologyModelUniqueError label">This pathology model already exists!</label>
 						<li class="required">
 							<label i18n="Edit model|Name label" class="required-label">Name</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{model?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<input type="text" id="name" formControlName="name" [(ngModel)]="model.name"/>
-									<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit model|NameRequiredError label">Name is required!</label>
+									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit pathologyModelName|Name required error@@pathologyModelDetailNameRequiredError">Name is required!</label>
 								</ng-template>
 							</span>
 						</li>
 						<li class="required">
 							<label i18n="Edit model|Pathology label" class="required-label">Pathology</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{model?.pathology?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<select id="pathology" required formControlName="pathology" [(ngModel)]="model.pathology">
 										<option *ngFor="let pathology of pathologies" [ngValue]="pathology">{{pathology.name}}</option>
 									</select>
-									<button *ngIf="canModify" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
-										<img [src]="addIconPath"/>
+									<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
+										<i class="fas fa-plus-square"></i>
 										new pathology
 									</button>
-									<label *ngIf="formErrors.pathology.includes('required')" class="form-validation-alert" i18n="Edit model|PathologyRequiredError label">Pathology is required!</label>
+									<label *ngIf="hasError('pathology', ['required'])" [@slideDown]="hasError('pathology', ['required'])" class="form-validation-alert" i18n="Edit pathologyModelPathology|Pathology required error@@pathologyModelDetailPathologyRequiredError">Pathology is required!</label>
 								</ng-template>
 							</span>
 						</li>
 						<li>
 							<label i18n="Edit model|Comments label">Comment</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{model?.comment}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -62,14 +62,14 @@
 						</li>
 						<li>
 							<label i18n="Edit model|Specifications label">Specifications</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template  [ngSwitchCase]="Modes.view">
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template  [ngSwitchCase]="'view'">
 									{{model?.filename}}
 								</ng-template>
-								<ng-template  [ngSwitchCase]="Modes.create">
+								<ng-template  [ngSwitchCase]="'create'">
 									<input type="file" id="pathologyFile" name="pathologyFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
 								</ng-template>
-								<ng-template  [ngSwitchCase]="Modes.edit">
+								<ng-template  [ngSwitchCase]="'edit'">
 									{{model?.filename}}
 									<input type="file" id="pathologyFile" name="pathologyFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
 								</ng-template>
@@ -81,20 +81,12 @@
 				</td>				
 			</tr>
 			
-			<tr><td colspan="2"><div class="footer command-zone">
-				<span [ngSwitch]="mode.state">
-					<button i18n="View model|BackButton label" class="Button" (click)="getOut()">Back</button>	
-					<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
-						<button type="button" i18n="View model|EditButton label" (click)="goToEditPage()" class="Button">Edit</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
-						<button type="button" i18n="Edit model|UpdateButton label" (click)="updatePathologyModel()" class="Button" [disabled]="!newModelForm.valid">Update</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify"> 
-						<button type="button" i18n="Edit model|CreateButton label" (click)="addPathologyModel()" class="Button" [disabled]="!newModelForm.valid">Create</button>
-					</ng-template>
-				</span>
-			</div></td></tr>
 		</table>
+		<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()">
+		</form-footer>
     </form>
 </div>

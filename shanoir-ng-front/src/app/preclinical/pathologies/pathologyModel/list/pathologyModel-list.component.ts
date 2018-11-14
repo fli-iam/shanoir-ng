@@ -1,17 +1,12 @@
-import {Component,ViewChild, ViewContainerRef} from '@angular/core'
-import { Router } from '@angular/router';
-
-import { ConfirmDialogService } from "../../../../shared/components/confirm-dialog/confirm-dialog.service";
-import { ConfirmDialogComponent } from "../../../../shared/components/confirm-dialog/confirm-dialog.component";
-import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
+import {Component,ViewChild} from '@angular/core';
 
 import { PathologyModel } from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
-import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
-import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
-import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
-import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { TableComponent } from '../../../../shared/components/table/table.component';
+import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
+import { ServiceLocator } from '../../../../utils/locator.service';
+import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
+import { ShanoirError } from '../../../../shared/models/error.model';
 
 
 @Component({
@@ -20,49 +15,47 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
   styleUrls: ['pathologyModel-list.component.css'], 
   providers: [PathologyModelService]
 })
-export class PathologyModelsListComponent {
-  public models: PathologyModel[];
-  private modelsPromise: Promise<void> = this.getPathologyModels();
-  private browserPaging: BrowserPaging<PathologyModel>;
-  public rowClickAction: Object;
-  public columnDefs: any[];
-  public customActionDefs: any[];
+export class PathologyModelsListComponent   extends BrowserPaginEntityListComponent<PathologyModel> {
   @ViewChild('modelsTable') table: TableComponent;
     
-    constructor(
-        public modelService: PathologyModelService,
-        public router: Router,
-        private keycloakService: KeycloakService,
-        public confirmDialogService: ConfirmDialogService, 
-        public subjectPathologyService: SubjectPathologyService,
-        private viewContainerRef: ViewContainerRef) {
-            this.createColumnDefs();
-     }
-    
-    
-    getPage(pageable: FilterablePageable): Promise<Page<PathologyModel>> {
-        return new Promise((resolve) => {
-            this.modelsPromise.then(() => {
-                resolve(this.browserPaging.getPage(pageable));
-            });
-        });
+  constructor(
+    private modelService: PathologyModelService, 
+    private subjectPathologyService: SubjectPathologyService) 
+    {
+        super('preclinical-pathology-model');
     }
-    
-    getPathologyModels():  Promise<void> {
-    	this.models = [];
-        this.browserPaging = new BrowserPaging(this.models, this.columnDefs);
-        return this.modelService.getPathologyModels().then(models => {
-            this.models = models;
-            this.browserPaging.setItems(models);
-            this.browserPaging.setColumnDefs(this.columnDefs);
-            this.table.refresh();
-        }); 
+
+    getEntities(): Promise<PathologyModel[]> {
+        return this.modelService.getAll();
     }
-    
-    
-    delete(model: PathologyModel): void {      
-      this.modelService.delete(model.id).then((res) => this.getPathologyModels());
+
+    getColumnDefs(): any[] {
+        function checkNullValue(value: any) {
+            if(value){
+                return value;
+            }
+            return '';
+        };
+        let colDef: any[] = [
+            {headerName: "Name", field: "name"},
+            {headerName: "Pathology", field: "pathology.name"},
+            {headerName: "Comment", field: "comment"},
+            {headerName: "Specifications file", field: "filename", type: "string", cellRenderer: function (params: any) {
+                return checkNullValue(params.data.filename);
+            }} 
+            
+        ];
+        if (!this.keycloakService.isUserGuest()) {
+            colDef.push({headerName: "", type: "button", awesome: "fa-download",action: item => this.downloadModelSpecifications(item) });
+        }
+        return colDef;       
     }
+
+    getCustomActionsDefs(): any[] {
+        return [];
+    }
+
+    
         
     downloadModelSpecifications = (model:PathologyModel) => {
     	if (model.filename){
@@ -75,110 +68,55 @@ export class PathologyModelsListComponent {
     openInformationDialog = (model:PathologyModel) => {
         this.confirmDialogService
             .confirm('Download Specifications', 'No specifications have been found for '+model.name,
-            this.viewContainerRef)
+            ServiceLocator.rootViewContainerRef)
             .subscribe(res => {
                 
             })
     }
     
     
-    // Grid columns definition
-    private createColumnDefs() {
-        function castToString(id: number) {
-            return String(id);
-        };
-        function checkNullValue(value: any) {
-            if(value){
-                return value;
-            }
-            return '';
-        };
-        this.columnDefs = [
-            /*{headerName: "ID", field: "id", type: "id", cellRenderer: function (params: any) {
-                return castToString(params.data.id);
-            }},*/
-            {headerName: "Name", field: "name"},
-            {headerName: "Pathology", field: "pathology.name"},
-            {headerName: "Comment", field: "comment"},
-            {headerName: "Specifications file", field: "filename", type: "string", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.filename);
-            }}
-        ];
-        if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.DOWNLOAD_ICON_PATH, action: this.downloadModelSpecifications,component:this});
-        }
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.checkSubjectsForPathologyModel},
-            {headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target : "/preclinical-pathologies-model", getParams: function(item: any): Object {
-                return {id: item.id, mode: "edit"};
-            }});
-        }
-        if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target : "/preclinical-pathologies-model", getParams: function(item: any): Object {
-                return {id: item.id, mode: "view"};
-            }});
-        }
-        this.customActionDefs = [];
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-        this.customActionDefs.push({title: "new pathology model", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/preclinical-pathologies-model", getParams: function(item: any): Object {
-                return {mode: "create"};
-        }});
-        this.customActionDefs.push({title: "delete selected", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.deleteAll });
-        }
-        if (!this.keycloakService.isUserGuest()) {
-            this.rowClickAction = {target : "/preclinical-pathologies-model", getParams: function(item: any): Object {
-                    return {id: item.id, mode: "view"};
-            }};
-        }
-    }
-    
-    private onRowClick(item: PathologyModel) {
-        if (!this.keycloakService.isUserGuest()) {
-            this.router.navigate(['/preclinical-pathologies-model'], { queryParams: { id: item.id, mode: "view" } });
-        }
-    }
-    
-    openDeletePathologyModelConfirmDialog = (item: PathologyModel) => {
-         this.confirmDialogService
-                .confirm('Delete pathology model', 'Are you sure you want to delete pathology model ' + item.name + '?', 
-                    this.viewContainerRef)
-                .subscribe(res => {
-                    if (res) {
-                        this.delete(item);
-                    }
-                });
-    }
- 
- 
- 	checkSubjectsForPathologyModel= (item: PathologyModel) => {
- 		 this.subjectPathologyService.getAllSubjectForPathologyModel(item.id).then(subjectPathologies => {
+    protected openDeleteConfirmDialog = (entity: PathologyModel) => {
+        this.subjectPathologyService.getAllSubjectForPathologyModel(entity.id).then(subjectPathologies => {
     		if (subjectPathologies){
     			let hasSubjects: boolean  = false;
     			hasSubjects = subjectPathologies.length > 0;
     			if (hasSubjects){
     				this.confirmDialogService
                 		.confirm('Delete pathology model', 'This pathology model is linked to subjects, it can not be deleted', 
-                    		this.viewContainerRef)
+                        ServiceLocator.rootViewContainerRef)
     			}else{
-    				this.openDeletePathologyModelConfirmDialog(item);
+    				this.openDeletePathologyModelConfirmDialog(entity);
     			}
     		}else{
-    			this.openDeletePathologyModelConfirmDialog(item);
+    			this.openDeletePathologyModelConfirmDialog(entity);
     		}
     	}).catch((error) => {
     		console.log(error);
-    		this.openDeletePathologyModelConfirmDialog(item);
-    	});    
+    		this.openDeletePathologyModelConfirmDialog(entity);
+    	});     
+    }   
+    
+ 
+    private openDeletePathologyModelConfirmDialog = (entity: PathologyModel) => {
+        if (this.keycloakService.isUserGuest()) return;
+        this.confirmDialogService
+            .confirm(
+                'Delete', 'Are you sure you want to delete preclinical-pathology-model n° ' + entity.id + ' ?',
+                ServiceLocator.rootViewContainerRef
+            ).subscribe(res => {
+                if (res) {
+                    entity.delete().then(() => {
+                        this.onDelete.next(entity);
+                        this.table.refresh();
+                        this.msgBoxService.log('info', 'The preclinical-pathology-model sucessfully deleted');
+                    }).catch(reason => {
+                        if (reason && reason.error) {
+                            this.onDelete.next(new ShanoirError(reason));
+                            if (reason.error.code != 422) throw Error(reason);
+                        }
+                    });                    
+                }
+            }) 
  	}
  
-
-    deleteAll = () => {
-        let ids: number[] = [];
-        for (let model of this.models) {
-            if (model["isSelectedInTable"]) ids.push(model.id);
-        }
-        if (ids.length > 0) {
-            console.log("TODO : delete those ids : " + ids);
-        }
-    }
 }

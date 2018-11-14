@@ -65,11 +65,11 @@ export class SubjectPathologyFormComponent implements OnChanges {
 
 
     loadPathologies() {
-        this.pathologyService.getPathologies().then(pathologies => this.pathologies = pathologies);
+        this.pathologyService.getAll().then(pathologies => this.pathologies = pathologies);
     }
 
     loadModels() {
-        this.modelService.getPathologyModels().then(models => this.models = models);
+        this.modelService.getAll().then(models => this.models = models);
     }
 
     loadReferences() {
