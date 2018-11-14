@@ -105,6 +105,9 @@ import { ServiceLocator } from './utils/locator.service';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { Router } from './breadcrumbs/router';
+import { GlobalService } from './shared/services/global.service';
+import { SelectBoxComponent } from './shared/select/select.component';
+import { SelectOptionComponent } from './shared/select/select.option.component';
 
 
 @NgModule({
@@ -185,7 +188,9 @@ import { Router } from './breadcrumbs/router';
         TimesPipe,
         FormFooterComponent,
         ModalsComponent,
-        BreadcrumbsComponent
+        BreadcrumbsComponent,
+        SelectBoxComponent,
+        SelectOptionComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -223,7 +228,8 @@ import { Router } from './breadcrumbs/router';
             multi: true
         },
         BreadcrumbsService,
-        Router
+        Router,
+        GlobalService
     ],
     bootstrap: [AppComponent],
 })
