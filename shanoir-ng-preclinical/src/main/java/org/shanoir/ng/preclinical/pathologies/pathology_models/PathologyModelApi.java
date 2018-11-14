@@ -63,7 +63,7 @@ public interface PathologyModelApi {
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of pathology models", response = PathologyModel.class),
         @ApiResponse(code = 500, message = "Unexpected error", response = PathologyModel.class) })
-    @RequestMapping(value = "/pathology/model/all",
+    @RequestMapping(value = "/pathology/model",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<List<PathologyModel>> getPathologyModels();

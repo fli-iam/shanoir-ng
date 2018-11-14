@@ -46,7 +46,7 @@ import com.google.gson.GsonBuilder;
 public class PathologyModelApiControllerTest {
 
 	private static final String REQUEST_PATH = "/pathology/model";
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH_ALL = REQUEST_PATH ;
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 	private static final String REQUEST_PATH_WITH_PATHOLOGY_ID = "/pathology/1/model/all";
 	private static final String REQUEST_PATH_UPLOAD_SPECS = REQUEST_PATH + "/upload/specs/1";
