@@ -41,6 +41,10 @@ form { margin: 0; }
 select:disabled { opacity: 0.5; }
 svg { vertical-align: -1; }
 
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px white inset;
+}
+
 table.layout { border: none; border-collapse: collapse; }
   table.layout td { padding: 0;	vertical-align: top; }
   table.layout td + td { border-left: 3px dashed var(--light-grey); }
