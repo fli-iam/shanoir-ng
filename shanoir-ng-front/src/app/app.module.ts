@@ -109,6 +109,7 @@ import { FinishImportComponent } from './import/finish/finish.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
 import { ImportDataService } from './import/import.data-service';
 import { NiftiConverterService } from './niftiConverters/nifti.converter.service';
+import { CenterHelpComponent } from './centers/shared/help/center-help.component';
 
 
 @NgModule({
@@ -191,7 +192,8 @@ import { NiftiConverterService } from './niftiConverters/nifti.converter.service
         ModalsComponent,
         BreadcrumbsComponent,
         FinishImportComponent,
-        UploaderComponent
+        UploaderComponent,
+        CenterHelpComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
