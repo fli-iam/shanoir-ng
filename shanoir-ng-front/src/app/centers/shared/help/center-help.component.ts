@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 
 import { ImportDataService } from '../../../import/import.data-service';
+import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 
 
 @Component({
@@ -11,9 +12,10 @@ import { ImportDataService } from '../../../import/import.data-service';
 export class CenterHelpComponent  {
 
     private institution: any;
+    private inImport: boolean;
 
     
-    constructor(private importDataService: ImportDataService) {
+    constructor(private importDataService: ImportDataService, private breadcrumbsService: BreadcrumbsService) {
         
         if (importDataService.patients && importDataService.patients[0]
                 && importDataService.patients[0].studies && importDataService.patients[0].studies[0]
@@ -21,5 +23,7 @@ export class CenterHelpComponent  {
 
             this.institution = importDataService.patients[0].studies[0].series[0].institution;
         }
+
+        this.inImport = breadcrumbsService.isImporting();
     }
 }
