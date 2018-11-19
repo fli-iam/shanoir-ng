@@ -216,7 +216,7 @@
 			</fieldset>
 			<div *ngIf="displayPathologyTherapy">
 				<subject-pathology-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [mode]="mode" [canModify]="canModify"></subject-pathology-list>
-				<subject-therapy-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [mode]="mode" [canModify]="canModify"></subject-therapy-list>
+				<subject-therapy-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [canModify]="canModify"></subject-therapy-list>
 			</div>
 			<div class="footer command-zone">
 				<span [ngSwitch]="mode.state">

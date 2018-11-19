@@ -1,189 +1,213 @@
-import { Component, OnInit, Output, EventEmitter, OnChanges } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { Location } from '@angular/common';
-
-import { Anesthetic }    from '../shared/anesthetic.model';
-import { AnestheticService } from '../shared/anesthetic.service';
-import { Reference }   from '../../../reference/shared/reference.model';
-import { ReferenceService } from '../../../reference/shared/reference.service';
-import { AnestheticIngredient }   from '../../ingredients/shared/anestheticIngredient.model';
-import { AnestheticIngredientService } from '../../ingredients/shared/anestheticIngredient.service';
+import { Component, ViewChild} from '@angular/core';
+import { Validators, FormGroup } from '@angular/forms';
+import {  ActivatedRoute } from '@angular/router';
 
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
+import { Anesthetic }    from '../shared/anesthetic.model';
+import { AnestheticService } from '../shared/anesthetic.service';
+import { AnestheticIngredient }   from '../../ingredients/shared/anestheticIngredient.model';
+import { AnestheticIngredientService } from '../../ingredients/shared/anestheticIngredient.service';
 import { AnestheticType } from "../../../shared/enum/anestheticType";
+import { ReferenceService } from '../../../reference/shared/reference.service';
+import { Reference }    from '../../../reference/shared/reference.model';
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { Enum } from "../../../../shared/utils/enum";
-
-import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
-import { Mode } from "../../../shared/mode/mode.model";
-import { Modes } from "../../../shared/mode/mode.enum";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
-
+import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
+import { slideDown } from '../../../../shared/animations/animations';
+import { TableComponent } from '../../../../shared/components/table/table.component';
+import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
+import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'anesthetic-form',
     templateUrl: 'anesthetic-form.component.html',
     styleUrls: ['anesthetic-form.component.css'],
-    providers: [AnestheticService, ReferenceService, AnestheticIngredientService]
+    providers: [AnestheticService,  AnestheticIngredientService],
+    animations: [slideDown]
 })
 @ModesAware
-export class AnestheticFormComponent implements OnInit {
+export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
-    public anesthetic: Anesthetic = new Anesthetic();
-    @Output() closing = new EventEmitter();
-    newAnestheticForm: FormGroup;
-    private mode: Mode = new Mode();
-    private anestheticId: number;
-    private canModify: Boolean = false;
+    @ViewChild('ingredientsTable') table: TableComponent; 
+
     private anestheticTypes: Enum[] = [];
     ingredientsToDelete: AnestheticIngredient[] = [];
     ingredientsToCreate: AnestheticIngredient[] = [];
     private isAnestheticUnique: Boolean = true;
+    names: Reference[];
+    units: Reference[];
+
+    private browserPaging: BrowserPaging<AnestheticIngredient>;
+    private columnDefs: any[];
+    private ingredientsPromise: Promise<any>;
+
+    public toggleFormAI: boolean = false;
+    public createAIMode: boolean = false;
+    public ingredientSelected : AnestheticIngredient;
+
 
     constructor(
-        private anestheticsService: AnestheticService,
-        private referenceService: ReferenceService,
-        private ingredientsService: AnestheticIngredientService,
-        private keycloakService: KeycloakService,
-        private enumUtils: EnumUtils,
-        private fb: FormBuilder,
         private route: ActivatedRoute,
-        private router: Router,
-        private location: Location) {
+        private anestheticService: AnestheticService,
+        private ingredientService: AnestheticIngredientService,
+        private referenceService: ReferenceService,
+        private enumUtils: EnumUtils) {
 
+        super(route, 'preclinical-anesthetic');
+        this.manageSaveEntity();
     }
 
+    get anesthetic(): Anesthetic { return this.entity; }
+    set anesthetic(anesthetic: Anesthetic) { this.entity = anesthetic; }
 
-    getAnesthetic(): void {
-        //Must initiate ingredient array
-        this.anesthetic.ingredients = [];
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                let anestheticId = queryParams['id'];
-                let mode = queryParams['mode'];
-                if (mode) {
-                    this.mode.setModeFromParameter(mode);
-                }
-                if (anestheticId) {
-                    // view or edit mode
-                    this.anestheticId = anestheticId;
-                    return this.anestheticsService.getAnesthetic(anestheticId);
-                } else {
-                    // create mode
-                    return Observable.of<Anesthetic>();
-                }
-            })
-            .subscribe(anesthetic => {
-                if (!this.mode.isCreateMode()) {
-                	if (anesthetic){
-                    	this.anesthetic = anesthetic;
-                    }
-               	 }
-            });
-    }
 
-    ngOnInit(): void {
-        //this.loadData();
+    initView(): Promise<void> {
+        this.createColumnDefs();
+        this.ingredientsPromise = Promise.resolve().then(() => {
+            this.browserPaging = new BrowserPaging([], this.columnDefs);
+        });
         this.getEnum();
-        this.getAnesthetic();
-        this.buildForm();
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.canModify = true;
+        this.loadUnits();
+        this.loadNames();  
+        this.entity = new Anesthetic();
+        this.anesthetic.ingredients = [];
+        return this.anestheticService.get(this.id).then(anesthetic => {
+            this.anesthetic = anesthetic;
+            if (this.anesthetic && this.anesthetic.id){
+                this.ingredientService.getIngredients(this.anesthetic).then(ingredients => {
+                    if (ingredients){
+                        this.anesthetic.ingredients = ingredients;
+                        this.browserPaging.setItems(ingredients);
+                        this.table.refresh();
+                    }
+                });
+            }
+        });
+    }
+
+    initEdit(): Promise<void> {
+        this.createColumnDefs();
+        this.ingredientsPromise = Promise.resolve().then(() => {
+            this.browserPaging = new BrowserPaging([], this.columnDefs);
+        });
+        this.getEnum();
+        this.loadUnits();
+        this.loadNames();  
+        this.entity = new Anesthetic();
+        this.anesthetic.ingredients = [];
+        this.anestheticService.get(this.id).then(anesthetic => {
+            this.anesthetic = anesthetic;
+            if (this.anesthetic && this.anesthetic.id){
+                this.ingredientService.getIngredients(this.anesthetic).then(ingredients => {
+                    if (ingredients){
+                        this.anesthetic.ingredients = ingredients;
+                        this.browserPaging.setItems(ingredients);
+                        this.table.refresh();
+                    }
+                });
+            }
+        });
+        return Promise.resolve();
+    }
+
+    initCreate(): Promise<void> {
+        this.entity = new Anesthetic();
+        this.anesthetic.ingredients = [];
+        this.ingredientsPromise = Promise.resolve().then(() => {
+            this.browserPaging = new BrowserPaging([], this.columnDefs);
+        });
+        this.getEnum();
+        this.loadUnits();
+        this.loadNames();  
+        this.createColumnDefs();
+        return Promise.resolve();
+    }
+
+    buildForm(): FormGroup {
+        return this.formBuilder.group({
+            'name': [this.anesthetic.name],
+            'comment': [this.anesthetic.comment],
+            'anestheticType': [this.anesthetic.anestheticType, Validators.required], 
+            'ingredientsList': [this.anesthetic.ingredients]
+        });
+    }
+
+    getPage(pageable: FilterablePageable): Promise<Page<AnestheticIngredient>> {
+        return new Promise((resolve) => {
+            this.ingredientsPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
+    }
+
+    private createColumnDefs() {
+        function checkNullValueReference(reference: any) {
+            if(reference){
+                return reference.value;
+            }
+            return '';
+        };
+        function checkNullValue(value: any) {
+            if(value){
+                return value;
+            }
+            return '';
+        };
+        this.columnDefs = [
+            {headerName: "Name", field: "name.value", type: "reference", cellRenderer: function (params: any) {
+                return checkNullValueReference(params.data.name);
+            }},
+            {headerName: "Concentration", field: "concentration", type: "number", cellRenderer: function (params: any) {
+                return checkNullValue(params.data.concentration);
+            }},
+            {headerName: "Concentration Unit", field: "concentration_unit.value", type: "reference", cellRenderer: function (params: any) {
+                return checkNullValueReference(params.data.concentration_unit);
+            }}
+        ];
+
+        if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.editIngredient(item) });
+        }
+        if (this.mode != 'view' && !this.keycloakService.isUserGuest()) {
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeIngredient(item) });
         }
     }
 
-    goToEditPage(): void {
-        this.router.navigate(['/preclinical-anesthetic'], { queryParams: { id: this.anestheticId, mode: "edit" } });
-    }
+    
 
     getEnum(): void {
         this.anestheticTypes = this.enumUtils.getEnumArrayFor('AnestheticType');
     }
 
-    buildForm(): void {
-        this.newAnestheticForm = this.fb.group({
-            'name': [this.anesthetic.name],
-            'comment': [this.anesthetic.comment],
-            'anestheticType': [this.anesthetic.anestheticType, Validators.required]
-        });
+    loadUnits(){
+        this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT,PreclinicalUtils.PRECLINICAL_UNIT_CONCENTRATION).then(units => this.units = units);
+     }
+     
+     loadNames(){
+        this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_ANESTHETIC,PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT).then(names => this.names = names);
+     }
 
-        this.newAnestheticForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
-        this.onValueChanged();
-    }
 
-    onValueChanged(data?: any) {
-        if (!this.newAnestheticForm) { return; }
-        const form = this.newAnestheticForm;
-        for (const field in this.formErrors) {
-            // clear previous error message (if any)
-            this.formErrors[field] = '';
-            const control = form.get(field);
-            if (control && control.dirty && !control.valid) {
-                for (const key in control.errors) {
-                    this.formErrors[field] += key;
-                }
-            }
-        }
-    }
-
-    formErrors = {
-        'name': '',
-        'anestheticType': ''
-    };
-
-    getOut(anesthetic: Anesthetic = null): void {
-        if (this.closing.observers.length > 0) {
-            this.closing.emit(anesthetic);
-            this.location.back();
-        } else {
-            this.location.back();
-        }
-    }
-
-    addAnesthetic() {
-        if (!this.anesthetic) { return; }
-        this.anestheticsService.create(this.anesthetic)
-            .subscribe(anesthetic => {
-                if (this.ingredientsToCreate) {
-                    for (let ingredient of this.ingredientsToCreate) {
-                        this.ingredientsService.create(anesthetic, ingredient).subscribe();
-                    }
-                }
-                this.getOut(anesthetic);
-            }, (err: String) => {
-                console.log('error in update ' + err);
-                if (err.indexOf("should be unique") != -1) {
-                    this.isAnestheticUnique = false;
-                }
-            });
-    }
-
-    updateAnesthetic(): void {
-        this.anestheticsService.update(this.anesthetic)
-            .subscribe(anesthetic => {
+    manageSaveEntity(): void {
+        this.subscribtions.push(
+            this.onSave.subscribe(response => {
                 if (this.ingredientsToDelete) {
                     for (let ingredient of this.ingredientsToDelete) {
-                        this.ingredientsService.delete(this.anesthetic.id, ingredient.id);
+                        this.ingredientService.deleteAnestheticIngredient(response.id, ingredient.id);
                     }
                 }
                 if (this.ingredientsToCreate) {
                     for (let ingredient of this.ingredientsToCreate) {
-                        if (ingredient.id === undefined) {
-                            this.ingredientsService.create(this.anesthetic, ingredient).subscribe();
-                        }
+                        this.ingredientService.createAnestheticIngredient(response.id, ingredient).subscribe();
                     }
                 }
-                this.getOut(anesthetic);
-            }, (err: String) => {
-                console.log('error in update ' + err);
-                if (err.indexOf("should be unique") != -1) {
-                    this.isAnestheticUnique = false;
-                }
-            });
+            })
+        );
+       
     }
+
 
     onChangeType() {
         let generatedName = '';
@@ -212,14 +236,47 @@ export class AnestheticFormComponent implements OnInit {
 
     }
 
-    addToCreate(ingredientsToCreate: AnestheticIngredient[]) {
-        this.ingredientsToCreate = ingredientsToCreate;
-        this.anesthetic.ingredients = ingredientsToCreate;
+    
+
+    goToAddIngredient(){
+        this.ingredientSelected = new AnestheticIngredient();
+        this.createAIMode = true;
+        if(this.toggleFormAI==false){
+            this.toggleFormAI = true;
+        }else if(this.toggleFormAI==true){
+            this.toggleFormAI = false;
+        }else{
+            this.toggleFormAI = true;
+        }
+    }
+    
+    private editIngredient = (item: AnestheticIngredient) => {
+        this.ingredientSelected = item;
+        this.toggleFormAI = true;
+        this.createAIMode = false;
+    }
+
+    refreshDisplay(ingredient: AnestheticIngredient){
+        this.toggleFormAI = false;
+        this.createAIMode = false;
+        if (ingredient && ingredient != null && !ingredient.id ){
+            this.ingredientsToCreate.push(ingredient);
+        }
         this.refreshName('');
+        this.browserPaging.setItems(this.anesthetic.ingredients);
+        this.table.refresh();
     }
 
-    addToDelete(ingredientToDelete: AnestheticIngredient) {
-        this.ingredientsToDelete.push(ingredientToDelete);
+    private removeIngredient = (item: AnestheticIngredient) => {
+        const index: number = this.anesthetic.ingredients.indexOf(item);
+        if (index !== -1) {
+            this.anesthetic.ingredients.splice(index, 1);
+        }
+        this.ingredientsToDelete.push(item);
+        this.browserPaging.setItems(this.anesthetic.ingredients);
+        this.table.refresh();
     }
 
+    
+    
 }

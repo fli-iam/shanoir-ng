@@ -1,5 +1,5 @@
 <div *ngIf="toggleForm" class="AnestheticIngredientFormComponent content-component">
-    <form [formGroup]="newIngredientForm" class="AnestheticIngredientFormComponent max-content" novalidate>
+	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
 				<div class="header command-zone" *ngIf="createAIMode" i18n="Create anestheticingredient|Title">Add ingredient</div>
@@ -11,8 +11,8 @@
 					<ol>
 						<li class="required">
 							<label i18n="Edit anestheticingredient|Name label" class="required-label">Name</label>  
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{ingredient?.name?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -20,17 +20,17 @@
 										<option *ngFor="let name of names" [ngValue]="name">{{name.value}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit anestheticingredient|Add a new ingredient name" (click)="goToRefPage('anesthetic','ingredient')">
-										<img [src]="addIconPath"/>
+										<i class="fas fa-plus-square"></i>
 										new ingredient name
 									</button>
-								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit anestheticingredient|NameRequiredError label">Name is required!</label>
+								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit anestheticIngredient|NameRequiredError label">Name is required!</label>
 								</ng-template>
 							</span>
 						</li>
 						<li class="required">
 							<label i18n="Edit anestheticingredient|Concentration label" class="required-label">Concentration</label> 
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{ingredient?.concentration}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -40,8 +40,8 @@
 						</li>
 						<li class="required">
 							<label i18n="Edit anestheticingredient|ConcentrationUnit label" class="required-label">Concentration Unit</label> 
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{ingredient?.concentration_unit?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -49,7 +49,7 @@
 										<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit anestheticingredient|Add a new concentration unit" (click)="goToRefPage('unit','concentration')">
-										<img [src]="addIconPath"/>
+										<i class="fas fa-plus-square"></i>
 										new concentration unit
 									</button>
 								</ng-template>
@@ -59,12 +59,12 @@
 					</fieldset>
 				</td>				
 			</tr>
-			
-			<tr><td colspan="2"><div class="footer command-zone">
-				<button type="button" i18n="Edit anestheticingredient|CancelButton label" class="Button" (click)="cancelIngredient()">Cancel</button>
-				<button type="button" *ngIf="createAIMode && !mode.isViewMode()" i18n="Edit anestheticingredient|CreateButton label" (click)="addIngredient()" class="Button" [disabled]="!newIngredientForm.valid">Add</button>
-				<button type="button" *ngIf="!createAIMode && canModify && !mode.isViewMode()" (click)="updateIngredient()" i18n="Edit anestheticingredient|SaveButton label" class="Button" [disabled]="!newIngredientForm.valid">Save</button>
-			</div></td></tr>
 		</table>
+		<div class="footer command-zone">
+			<button type="button" i18n="Edit anestheticingredient|CancelButton label" class="Button right-icon" (click)="cancelIngredient()">Cancel<i class="fas fa-angle-left"></i></button>
+			<button type="button" *ngIf="canUpdateIngredient()" (click)="updateIngredient()" i18n="Edit anestheticingredient|SaveButton label" class="Button right-icon" [disabled]="!form.valid">Update<i class="far fa-save"></i></button>
+			<button type="button" *ngIf="canAddIngredient()" i18n="Edit anestheticingredient|CreateButton label" (click)="addIngredient()" class="Button right-icon" [disabled]="!form.valid">Create<i class="far fa-save"></i></button>
+			
+		</div>
     </form>
 </div>

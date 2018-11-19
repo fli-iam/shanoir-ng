@@ -341,7 +341,7 @@ export class AnimalSubjectFormComponent implements OnInit {
                 					//Then add therapies
                 					if (this.preclinicalSubject && this.preclinicalSubject.therapies) {
                     					for (let therapy of this.preclinicalSubject.therapies) {
-                        					this.subjectTherapyService.create(this.preclinicalSubject, therapy)
+                        					this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy)
                             					.subscribe(subjectTherapy => {
 
                             					});

@@ -1,8 +1,6 @@
-import { Component, Input, Output, EventEmitter,OnInit, OnChanges, ChangeDetectionStrategy } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Location } from '@angular/common';
-import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { FormGroup,  Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { AnestheticIngredient } from '../shared/anestheticIngredient.model';
 import { AnestheticIngredientService } from '../shared/anestheticIngredient.service';
@@ -11,151 +9,134 @@ import { Anesthetic }   from '../../anesthetic/shared/anesthetic.model';
 
 import { ReferenceService } from '../../../reference/shared/reference.service';
 import { Reference }    from '../../../reference/shared/reference.model';
-import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
+import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { slideDown } from '../../../../shared/animations/animations';
 
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { Mode } from "../../../shared/mode/mode.model";
-import { Modes } from "../../../shared/mode/mode.enum";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
-
-import { ImagesUrlUtil } from "../../../../shared/utils/images-url.util";
+import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 
 
 @Component({
   selector: 'anesthetic-ingredient-form',
   templateUrl: 'anestheticIngredient-form.component.html',
-  providers: [AnestheticIngredientService,ReferenceService]
+  providers: [AnestheticIngredientService,ReferenceService],
+  animations: [slideDown]
 })
 @ModesAware   
-export class AnestheticIngredientFormComponent {
+export class AnestheticIngredientFormComponent extends EntityComponent<AnestheticIngredient>{
       
-  ingredient = new AnestheticIngredient();
-  @Input() anesthetic: Anesthetic;
-  @Input() mode:Mode = new Mode();
-  @Input() canModify: Boolean = false;
-  @Input('toggleForm') toggleForm: boolean;
-  @Input() ingredientSelected: AnestheticIngredient;
-  @Output() onEvent = new EventEmitter();
-  @Input() createAIMode: boolean;
-  newIngredientForm: FormGroup;
-  names: Reference[];
-  units: Reference[];
-  private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
-  
-  
-  constructor(
-        private ingredientsService: AnestheticIngredientService,
-        private referenceService: ReferenceService,
-        private keycloakService: KeycloakService,
-        private fb: FormBuilder,
+    @Input() anesthetic: Anesthetic;
+    @Input('toggleForm') toggleForm: boolean = true;
+    @Input() ingredientSelected: AnestheticIngredient;
+    @Output() onEvent = new EventEmitter();
+    @Input() createAIMode: boolean;
+    names: Reference[];
+    units: Reference[];
+    
+    constructor(
         private route: ActivatedRoute,
-        private router: Router,
-        private location: Location) { }  
-    
-           
-   loadUnits(){
-       this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT,PreclinicalUtils.PRECLINICAL_UNIT_CONCENTRATION).then(units => this.units = units);
-   }
-    
-   loadNames(){
-       this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_ANESTHETIC,PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT).then(names => this.names = names);
-   }
-           
-   ngOnInit(): void {
-      this.loadUnits();
-      this.loadNames();      
-      if(this.ingredientSelected){
-          this.ingredient = this.ingredientSelected;
-      }
-      if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.canModify = true;
-      }
-  }
-      
-  toggleFormAI(creation: boolean): void {
-    if(this.toggleForm==false){
-        this.toggleForm = true;
-    }else if(this.toggleForm==true){
-        this.toggleForm = false;
-        this.onEvent.emit(false);
-    }else{
-        this.toggleForm = false;
-        this.onEvent.emit(false);
-    }      
-    this.createAIMode = creation;
-  }
-   
-  ngOnChanges(){
-   if(this.ingredientSelected){
-      this.loadIngredientAttributesForSelect(this.ingredientSelected);
+        private ingredientsService: AnestheticIngredientService,
+        private referenceService: ReferenceService) 
+    {
+
+        super(route, 'preclinical-anesthetic-ingredient');
     }
-    if(this.toggleForm){
-        this.buildForm();
+
+    get ingredient(): AnestheticIngredient { return this.entity; }
+    set ingredient(ingredient: AnestheticIngredient) { this.entity = ingredient; }
+  
+    initView(): Promise<void> {
+        this.loadUnits();
+        this.loadNames();   
+        return this.ingredientsService.get(this.id).then(ingredient => {
+            this.ingredient = ingredient;
+        });
     }
-  }
-    
-  loadIngredientAttributesForSelect(ingredientSelected:AnestheticIngredient){
-      this.ingredient = ingredientSelected;
-      
-      if(this.units){
-           for (let unit of this.units) {
-               if(ingredientSelected.concentration_unit){
-                   if (ingredientSelected.concentration_unit.id == unit.id) {
-                       this.ingredient.concentration_unit = unit;
-                   }
-               }
-            }
-      }
-      if(this.names){   
-            for (let name of this.names) { 
-                if(ingredientSelected.name){
-                    if (ingredientSelected.name.id == name.id) {
-                        this.ingredient.name = name;
-                    }
-                }    
-            }
-      }        
-  }
-    
-  buildForm(): void {
-        this.newIngredientForm = this.fb.group({
+
+    initEdit(): Promise<void> {
+        this.loadUnits();
+        this.loadNames(); 
+        return this.ingredientsService.get(this.id).then(ingredient => {
+            this.ingredient = ingredient;
+        });
+    }
+
+    initCreate(): Promise<void> {
+        this.entity = new AnestheticIngredient();
+        this.loadUnits();
+        this.loadNames();  
+        return Promise.resolve();
+    }
+
+    buildForm(): FormGroup {
+        return this.formBuilder.group({
             'name': [this.ingredient.name, Validators.required],
             'concentration': [this.ingredient.concentration, Validators.required],
             'concentration_unit': [this.ingredient.concentration_unit, Validators.required]
         });
-
-        this.newIngredientForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
-        this.onValueChanged();
+    }
+           
+    loadUnits(){
+       this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT,PreclinicalUtils.PRECLINICAL_UNIT_CONCENTRATION).then(units => this.units = units);
+    }
+    
+    loadNames(){
+       this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_ANESTHETIC,PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT).then(names => this.names = names);
     }
 
-    onValueChanged(data?: any) {
-        if (!this.newIngredientForm) { return; }
-        const form = this.newIngredientForm;
-        for (const field in this.formErrors) {
-            // clear previous error message (if any)
-            this.formErrors[field] = '';
-            const control = form.get(field);
-            if (control && control.dirty && !control.valid) {
-                for (const key in control.errors) {
-                    this.formErrors[field] += key;
-                }
-            }
+      
+    toggleFormAI(creation: boolean): void {
+        if(this.toggleForm==false){
+            this.toggleForm = true;
+        }else if(this.toggleForm==true){
+            this.toggleForm = false;
+            this.onEvent.emit(null);
+        }else{
+            this.toggleForm = false;
+            this.onEvent.emit(null);
+        }      
+        this.createAIMode = creation;
+    }
+   
+    ngOnChanges(){
+    if(this.ingredientSelected){
+        this.loadIngredientAttributesForSelect(this.ingredientSelected);
+        }
+        if(this.toggleForm){
+            this.buildForm();
         }
     }
-
-    formErrors = {
-        'name': '',
-        'concentration': '',
-        'concentration_unit': ''
-    };
+    
+    loadIngredientAttributesForSelect(ingredientSelected:AnestheticIngredient){
+        this.ingredient = ingredientSelected;
+        
+        if(this.units){
+            for (let unit of this.units) {
+                if(ingredientSelected.concentration_unit){
+                    if (ingredientSelected.concentration_unit.id == unit.id) {
+                        this.ingredient.concentration_unit = unit;
+                    }
+                }
+                }
+        }
+        if(this.names){   
+                for (let name of this.names) { 
+                    if(ingredientSelected.name){
+                        if (ingredientSelected.name.id == name.id) {
+                            this.ingredient.name = name;
+                        }
+                    }    
+                }
+        }        
+    }
     
   
-  cancelIngredient(){
-      this.toggleFormAI(false);
-  }
+    cancelIngredient(){
+        this.toggleFormAI(false);
+    }
    
-  addIngredient() {
+    addIngredient(): Promise<void> {
         if (!this.ingredient) { 
             console.log('nothing to create');
             return; 
@@ -169,28 +150,46 @@ export class AnestheticIngredientFormComponent {
         }
         this.toggleForm = false;
         this.ingredient = new AnestheticIngredient();
-   }
+    }
     
-  updateIngredient(): void {
-      this.ingredientsService.update(this.anesthetic.id, this.ingredient)
-        .subscribe(ingredient =>{
-            if (this.onEvent.observers.length > 0) {
-                this.onEvent.emit(this.ingredient);
-            }    
-        });
-      this.toggleForm = false;
-      this.ingredient = new AnestheticIngredient();
-  }
+    updateIngredient(): void {
+        this.ingredientsService.updateAnestheticIngredient(this.anesthetic.id, this.ingredient)
+            .subscribe(ingredient =>{
+                if (this.onEvent.observers.length > 0) {
+                    this.onEvent.emit(this.ingredient);
+                }    
+            });
+        this.toggleForm = false;
+        this.ingredient = new AnestheticIngredient();
+    }
   
+    canUpdateIngredient(): boolean{
+        return !this.createAIMode && this.keycloakService.isUserAdminOrExpert && this.mode != 'view';
+    }
+
+    canAddIngredient(): boolean{
+        return this.createAIMode && this.mode != 'view';
+    }
   
-  //params should be anesthetic&ingredient or unit&concentration
+    //params should be anesthetic&ingredient or unit&concentration
     goToRefPage(...params: string[]): void {
         let category;
         let reftype;
         if (params && params[0]) category = params[0];
         if (params && params[1]) reftype = params[1];
-        if (category && reftype) this.router.navigate(['/preclinical-reference'], { queryParams: { mode: "create", category: category, reftype: reftype} });
-        
+                    
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/preclinical-reference/create'], { queryParams: { category: category, reftype: reftype} }).then(success => {
+            currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                if (reftype == 'ingredient'){
+                    this.names.push(entity as Reference);
+                    (currentStep.entity as AnestheticIngredient).name = entity as Reference;
+                }else if (reftype == 'concentration'){
+                    this.units.push(entity as Reference);
+                    (currentStep.entity as AnestheticIngredient).concentration_unit = entity as Reference;
+                }
+        });
+        });
     }
    
 }

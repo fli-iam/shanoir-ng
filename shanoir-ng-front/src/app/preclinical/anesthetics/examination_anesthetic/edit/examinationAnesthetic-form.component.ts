@@ -116,7 +116,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
 
     loadAnesthetics() {
-        this.anestheticService.getAnesthetics().then(anesthetics => {
+        this.anestheticService.getAll().then(anesthetics => {
             this.anesthetics = anesthetics;
             this.references = this.units;
         });

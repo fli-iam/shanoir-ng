@@ -1,2 +1,12 @@
-.anesthetics_buttons {margin-top:15px;}
-.label_light{color:var(--dark-grey);}
+table { margin-top: 15px; padding: 5px 0; width: 100%; font-weight: normal; border-collapse: collapse; background-color: var(--light-grey); }
+th { color: var(--color-a); padding: 10px 5px; }
+th, td { text-align: left; }
+td { padding: 3px 5px; }
+td.buttons-col { color: var(--color-error); }
+.label-col { min-width: 140px; }
+.input-col, .input-col input { width: 127px; }
+.chkbx-col { width: 20px; }
+.dropdown-col, .dropdown-col select { width: 125px; }
+.buttons-col { width: 0px; }
+.buttons-col .button { cursor: pointer; }
+table tr:last-child td { padding-bottom: 13px; }

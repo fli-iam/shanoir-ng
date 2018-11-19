@@ -1,15 +1,15 @@
 <div class="AnestheticFormComponent content-component">
-    <form [formGroup]="newAnestheticForm" class="AnestheticFormComponent max-content" novalidate>
+    <form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
 						<div class="header command-zone" i18n="View anesthetic|Title">View anesthetic</div>
 					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.edit"> 
+					<ng-template [ngSwitchCase]="'edit'"> 
 						<div class="header command-zone" i18n="Edit anesthetic|Title">Edit anesthetic</div>
 					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.create"> 
+					<ng-template [ngSwitchCase]="'create'"> 
 						<div class="header command-zone" i18n="Create anesthetic|Title">Add anesthetic</div>
 					</ng-template>
 				</span>
@@ -27,28 +27,55 @@
 						</li>
 						<li class="required">
 							<label i18n="Edit anesthetic|AnestheticType label" class="required-label">Type</label> 
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{enumUtils.getEnumValue(anestheticTypes,anesthetic.anestheticType)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<select id="anestheticType" required formControlName="anestheticType" [(ngModel)]="anesthetic.anestheticType" (change)="onChangeType()">
 										<option *ngFor="let anestheticType of anestheticTypes" [value]="anestheticType.key">{{anestheticType.value}}</option>
 									</select>
-									<label *ngIf="formErrors.anestheticType.includes('required')" class="form-validation-alert" i18n="Edit anestheticType|AnestheticTypeRequiredError label">Type is required!</label>
+									<label *ngIf="hasError('anestheticType', ['required'])" [@slideDown]="hasError('anestheticType', ['required'])" class="form-validation-alert" i18n="Edit anestheticType|Type required error@@anestheticDetailTypeRequiredError">Type is required!</label>
 								</ng-template>
 							</span>
 						</li>
 						<li class="required">
 							<label i18n="Edit anesthetic|Comment label">Comment</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{anesthetic?.comment}}
 								</ng-template>
 								<ng-template ngSwitchDefault>							
 									<textarea rows="4"  id="comment" formControlName="comment" [(ngModel)]="anesthetic.comment"></textarea>
 								</ng-template>							
 							</span>
+						</li>
+						<li>
+							<legend i18n="AnestheticDetail|Ingredients label@@anestheticDetailIngredients">Ingredients</legend>
+							
+							<div [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'edit'">
+									<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new ingredient" (click)="goToAddIngredient()">
+										<i class="fas fa-plus-square"></i>
+										new ingredient
+									</button>
+								</ng-template>
+								<ng-template [ngSwitchCase]="'create'" *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()">
+									<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new ingredient" (click)="goToAddIngredient()">
+										<i class="fas fa-plus-square"></i>
+										new ingredient
+									</button>
+								</ng-template>
+							</div>
+							<div>
+								<anesthetic-ingredient-form [anesthetic]="anesthetic" [createAIMode]="createAIMode"  
+											[toggleForm]="toggleFormAI" [ingredientSelected]="ingredientSelected" (onEvent)="refreshDisplay($event)"></anesthetic-ingredient-form>
+							</div>
+							<shanoir-table #ingredientsTable
+								[getPage]="getPage.bind(this)" 
+								[columnDefs]="columnDefs">
+							</shanoir-table>
+							
 						</li>
 					</ol>
 					</fieldset>
@@ -57,26 +84,11 @@
 		</table>
     </form>
     
-    
-    <ingredients-list [anesthetic]="anesthetic" [mode]="mode" [canModify]="canModify" (onIngredientAdded)="addToCreate($event)" (onIngredientDeleted)="addToDelete($event)" ></ingredients-list>
-    
-    <div>
-	    <table class="anesthetics_buttons">
-			<tr><td colspan="2"><div class="footer command-zone">
-				<span [ngSwitch]="mode.state">
-					<button i18n="View anesthetic|BackButton label" class="Button" (click)="getOut()">Back</button>	
-					<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
-						<button type="button" i18n="View anesthetic|EditButton label" (click)="goToEditPage()" class="Button">Edit</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
-						<button type="button" i18n="Edit anesthetic|UpdateButton label" (click)="updateAnesthetic()" class="Button" [disabled]="!newAnestheticForm.valid">Update</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify"> 
-						<button type="button" i18n="Edit anesthetic|CreateButton label" (click)="addAnesthetic()" class="Button" [disabled]="!newAnestheticForm.valid">Create</button>
-					</ng-template>
-				</span>
-				</div></td></tr>
-	    </table>
-   	</div>
+    <form-footer
+			[state]="footerState"
+			(save)="save()"
+			(edit)="goToEdit()"
+			(back)="goBack()">
+	</form-footer>
     
 </div>

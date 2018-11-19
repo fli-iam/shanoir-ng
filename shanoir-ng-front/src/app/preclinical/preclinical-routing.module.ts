@@ -29,6 +29,8 @@ import { BrukerFinishImportComponent } from './importBruker/finish/bruker-finish
 import { ModuleWithProviders } from '@angular/compiler/src/core';
 import { SubjectTherapyFormComponent } from './therapies/subjectTherapy/edit/subjectTherapy-form.component';
 import { SubjectTherapiesListComponent } from './therapies/subjectTherapy/list/subjectTherapy-list.component';
+import { AnestheticIngredientFormComponent } from './anesthetics/ingredients/edit/anestheticIngredient-form.component';
+import { AnestheticIngredientsListComponent } from './anesthetics/ingredients/list/anestheticIngredient-list.component';
 
 let routes : Routes= [
     { 
@@ -37,18 +39,6 @@ let routes : Routes= [
     },{ 
         path: 'preclinical-subject', 
         component: AnimalSubjectFormComponent 
-    },{ 
-        path: 'preclinical-pathologies', 
-        component: PathologiesListComponent 
-    },{ 
-        path: 'preclinical-pathology', 
-        component: PathologyFormComponent 
-    },{ 
-        path: 'preclinical-anesthetics', 
-        component: AnestheticsListComponent 
-    },{ 
-        path: 'preclinical-anesthetic', 
-        component: AnestheticFormComponent 
     },{ 
         path: 'preclinical-contrastagents', 
         component: ContrastAgentsListComponent 
@@ -89,7 +79,9 @@ let routes : Routes= [
       getRoutesFor('preclinical-therapy', TherapyFormComponent, TherapiesListComponent, AuthNotGuestGuard),
       getRoutesFor('preclinical-subject-therapy', SubjectTherapyFormComponent, SubjectTherapiesListComponent, AuthNotGuestGuard),
       getRoutesFor('preclinical-pathology', PathologyFormComponent,PathologiesListComponent, AuthNotGuestGuard), 
-      getRoutesFor('preclinical-pathology-model', PathologyModelFormComponent,PathologyModelsListComponent, AuthNotGuestGuard)
+      getRoutesFor('preclinical-pathology-model', PathologyModelFormComponent,PathologyModelsListComponent, AuthNotGuestGuard),
+      getRoutesFor('preclinical-anesthetic-ingredient', AnestheticIngredientFormComponent,AnestheticIngredientsListComponent, AuthNotGuestGuard),
+      getRoutesFor('preclinical-anesthetic', AnestheticFormComponent,AnestheticsListComponent, AuthNotGuestGuard)
   );
 
   export const preclinicalRouting: ModuleWithProviders = RouterModule.forRoot(routes); 
