@@ -318,7 +318,8 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     	ExaminationAnestheticService,
     	ContrastAgentService,
     	ExaminationExtraDataService,
-    	AnimalExaminationService,
+        AnimalExaminationService,
+        AnestheticService,
     	ImportBrukerService,
     	EnumUtils,
         {
