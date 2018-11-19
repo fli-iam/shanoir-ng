@@ -4,7 +4,7 @@ import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnestheticService } from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
-import { ExaminationExtraDataService } from '../../extraData/extraData/shared/extradata.service';
+import { ExtraDataService } from '../../extraData/extraData/shared/extradata.service';
 
 import {  Page, Pageable } from '../../../shared/components/table/pageable.model';
 import { TableComponent } from '../../../shared/components/table/table.component';
@@ -23,7 +23,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     constructor(
         private animalExaminationService: AnimalExaminationService, 
         private examAnestheticsService: ExaminationAnestheticService,
-    	private extradataService: ExaminationExtraDataService)
+    	private extradataService: ExtraDataService)
     	
     {
             super('preclinical-examination');
@@ -127,7 +127,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
         this.extradataService.getExtraDatas(examinationId).then(extradatas => {
             if(extradatas && extradatas.length > 0){
             	for (let data of extradatas) {
-            		this.extradataService.delete(data).then((res) => {});
+            		this.extradataService.deleteExtradata(data).then((res) => {});
             	}
             }
         });

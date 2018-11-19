@@ -1,101 +1,89 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Location } from '@angular/common';
+import { Component,  Input, Output, EventEmitter } from '@angular/core';
+import { FormGroup} from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { BloodGasData }    from '../shared/bloodGasData.model';
 import { BloodGasDataFile }    from '../shared/bloodGasDataFile.model';
-import { ExaminationExtraDataService } from '../../extraData/shared/extradata.service';
+import { ExtraDataService } from '../../extraData/shared/extradata.service';
 
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { Mode } from "../../../shared/mode/mode.model";
-import { Modes } from "../../../shared/mode/mode.enum";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
+import { slideDown } from '../../../../shared/animations/animations';
+import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { ExtraData } from '../../extraData/shared/extradata.model';
 
 @Component({
   selector: 'bloodgas-data-upload-form',
   templateUrl: 'bloodGasData-form.component.html',
-  providers: [ExaminationExtraDataService]
+  providers: [ExtraDataService],
+  animations: [slideDown]
 })
 @ModesAware
-export class BloodGasDataFormComponent implements OnInit {
+export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
 
-  @Input() bloodGasData:BloodGasData = new BloodGasData();
-  @Input() examination_id:number;
-  @Input() isStandalone:boolean = false;
-  @Output() closing = new EventEmitter();
-  @Input() mode: Mode = new Mode();
-  @Input() canModify: Boolean = false;
-  newBloodGasdataForm: FormGroup;
-  //urlupload:string;
+    @Input() examination_id:number;
+    @Input() isStandalone:boolean = false;
+    @Input() canModify: Boolean = false;
   
-   fileToUpload: File = null;
-  @Output() bloodGasDataReady = new EventEmitter();
-    
-  constructor(
-        private extradatasService: ExaminationExtraDataService,
-        private fb: FormBuilder,
+    fileToUpload: File = null;
+    @Output() bloodGasDataReady = new EventEmitter();
+
+    constructor(
         private route: ActivatedRoute,
-        private location: Location) {             
-          
-        }  
+        private extradatasService: ExtraDataService) {
+
+        super(route, 'preclinical-bloodgasdata');
+    }
+
+    get bloodGasData(): BloodGasData { return this.entity; }
+    set bloodGasData(bloodGasData: BloodGasData) { this.entity = bloodGasData; }
+    
    
-    
-  ngOnInit(): void {
-      this.buildForm();
-  }
-    
-  buildForm(): void {
-        this.newBloodGasdataForm = this.fb.group({
-            
+    initView(): Promise<void> {
+        this.entity = new BloodGasData();
+        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+            this.loadExaminationExtraDatas(extradatas);
         });
-
-        this.newBloodGasdataForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
-        this.onValueChanged(); 
+        return Promise.resolve();
     }
 
-    onValueChanged(data?: any) {
-        if (!this.newBloodGasdataForm) { return; }
-        const form = this.newBloodGasdataForm;
-        for (const field in this.formErrors) {
-            // clear previous error message (if any)
-            this.formErrors[field] = '';
-            const control = form.get(field);
-            if (control && control.dirty && !control.valid) {
-                for (const key in control.errors) {
-                    this.formErrors[field] += key;
-                }
-            }
-        }
+    initEdit(): Promise<void> {
+        this.entity = new BloodGasData();
+        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+            this.loadExaminationExtraDatas(extradatas);
+        });
+        return Promise.resolve();
     }
 
-    formErrors = {
-        
-    };
-    
-  getOut(bloodgas: BloodGasData = null): void {
-      if (this.closing.observers.length > 0) {
-          this.closing.emit(bloodgas);
-          this.location.back();
-      } else {
-          this.location.back();
-      }
-  }
-    
-  createBloodGasData() {
-        //if (!this.bloodGasData && !this.bloodGasData.fileUploadReady && !this.examination_id) { return; }
-        if (!this.bloodGasData && !this.examination_id) { return; }
-        this.extradatasService.create(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA,this.bloodGasData)
-            .subscribe(bloodGasData => {
-                //Then upload the file
-               // bloodGasData.fileUploadReady = this.bloodGasData.fileUploadReady;
-                //let uploadUrl:string = PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL+"/"+PreclinicalUtils.PRECLINICAL_EXTRA_DATA+PreclinicalUtils.PRECLINICAL_UPLOAD_URL+"/";
-                //bloodGasData.fileUploadReady.launchRequest(uploadUrl.concat(bloodGasData.id)).subscribe();
-                this.getOut(bloodGasData);
+    initCreate(): Promise<void> {
+        this.entity = new BloodGasData();
+        return Promise.resolve();
+    }
+
+    loadExaminationExtraDatas(extradatas: ExtraData[]){
+    	for (let ex of extradatas) {
+    		// instanceof does not work??
+    		if (ex.extradatatype != "Physiological data"){
+    			this.bloodGasData = <BloodGasData>ex;
+    		}
+    	}
+    }
+
+    buildForm(): FormGroup {
+        return this.formBuilder.group({
         });
-  }
-  
+    }
+
+
+    protected save(): Promise<void> {
+        this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA,this.bloodGasData).subscribe((bloodGasData) => {
+            this.chooseRouteAfterSave(this.bloodGasData);
+            this.msgBoxService.log('info', 'The new preclinical-bloodgasdata has been successfully saved under the number ' + bloodGasData.id);
+        });
+        return Promise.resolve();
+    }
+    
+    
   
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);

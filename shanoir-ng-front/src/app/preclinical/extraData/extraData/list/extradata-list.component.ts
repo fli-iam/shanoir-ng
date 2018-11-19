@@ -5,101 +5,43 @@ import { ConfirmDialogService } from "../../../../shared/components/confirm-dial
 import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
 
 import { ExtraData } from '../shared/extradata.model';
-import { ExaminationExtraDataService } from '../shared/extradata.service';
+import {ExtraDataService } from '../shared/extradata.service';
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { TableComponent } from '../../../../shared/components/table/table.component';
+import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
+
 
 @Component({
   selector: 'extradata-list',
   templateUrl:'extradata-list.component.html',
   styleUrls: ['extradata-list.component.css'], 
-  providers: [ExaminationExtraDataService]
+  providers: [ExtraDataService]
 })
-export class ExtraDataListComponent {
-  @Input() examination_id:number;
-  @Input() extradatas: ExtraData[] = [];
-  private extraDataPromise: Promise<void> = this.getExtraDatas(this.examination_id);
-  private browserPaging: BrowserPaging<ExtraData>;
-  public rowClickAction: Object;
-  public columnDefs: any[];
-  public customActionDefs: any[];
-  @ViewChild('extradataTable') table: TableComponent;
-      
+export class ExtraDataListComponent  extends BrowserPaginEntityListComponent<ExtraData> {
+    @Input() examination_id:number;
+    @ViewChild('extradataTable') table: TableComponent;
+
     constructor(
-        public extradataService: ExaminationExtraDataService,
-        public router: Router,
-        private keycloakService: KeycloakService,
-        public confirmDialogService: ConfirmDialogService, private viewContainerRef: ViewContainerRef) {
-            
+        private extradataService: ExtraDataService) {
+            super('preclinical-extradata');
      }
     
-    ngOnInit(){
-        //this.getExtraDatas(this.examination_id);
-        this.createColumnDefs();
-    }
-    
-    ngOnChanges(){
+    getEntities(): Promise<ExtraData[]> {
         if(this.examination_id){
-          //this.getExtraDatas(this.examination_id);
-        }
-        if(this.extradatas && this.extradatas.length > 0){
-          //this.getExtraDatas(this.examination_id);
-          this.createColumnDefs();
+            return this.extradataService.getExtraDatas(this.examination_id);
         }
     }
     
-    getPage(pageable: FilterablePageable): Promise<Page<ExtraData>> {
-        return new Promise((resolve) => {
-            this.extraDataPromise.then(() => {
-                resolve(this.browserPaging.getPage(pageable));
-            });
-        });
-    }
-    
-    
-    getExtraDatas(examId:number):Promise<void> {
-    	this.extradatas = [];
-    	this.browserPaging = new BrowserPaging(this.extradatas, this.columnDefs);
-        if(this.examination_id){
-            return this.extradataService.getExtraDatas(examId).then(extradatas => {
-                this.extradatas = extradatas;
-                
-                this.browserPaging.setItems(extradatas);
-            	this.browserPaging.setColumnDefs(this.columnDefs);
-                this.table.refresh();
-            })
-         }
-    }
-    
-    downloadExtraData = (extradata:ExtraData) => {
-        window.open(this.extradataService.getDownloadUrl(extradata));
-    }
-    
-    delete(extradata:ExtraData): void {      
-      this.extradataService.delete(extradata).then((res) => this.getExtraDatas(this.examination_id));
-    }
-    
-    
-    // Grid columns definition
-    private createColumnDefs() {
-        function castToString(id: number) {
-            return String(id);
-        };
+    getColumnDefs(): any[] {
         function checkNullValue(value: any) {
             if(value){
                 return value;
             }
             return '';
         };
-        function checkNullValueReference(reference: any) {
-            if(reference){
-                return reference.value;
-            }
-            return '';
-        };
-        this.columnDefs = [
+        let colDef: any[] = [
             {headerName: "Filename", field: "filename"},
             {headerName: "Data type", field: "extradatatype"},
             {headerName: "Has heart rate", field: "has_heart_rate", type: "boolean", cellRenderer: function (params: any) {
@@ -115,44 +57,17 @@ export class ExtraDataListComponent {
                 return checkNullValue(params.data.has_temperature);
             }}
         ];
-        
-        if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({headerName: "", type: "button", img:  ImagesUrlUtil.DOWNLOAD_ICON_PATH, action: this.downloadExtraData,component:this});
-        }
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteExtraDataConfirmDialog});
-        }
-       
-        this.customActionDefs = [];        
-        this.customActionDefs.push({title: "delete selected", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.deleteAll });
-          
-    }
-    
-    private onRowClick(item: ExtraData) {
-        if (!this.keycloakService.isUserGuest()) {
-            this.router.navigate(['/preclinical-extradata'], { queryParams: { id: item.id, mode: "view" } });
-        }
-    }
-    
-    openDeleteExtraDataConfirmDialog = (item: ExtraData) => {
-         this.confirmDialogService
-                .confirm('Delete extra data', 'Are you sure you want to delete extra data ' + item.id + '?', 
-                    this.viewContainerRef)
-                .subscribe(res => {
-                    if (res) {
-                        this.delete(item);
-                    }
-                });
-    }
-    
-    deleteAll = () => {
-        let ids: number[] = [];
-        for (let extradata of this.extradatas) {
-            if (extradata["isSelectedInTable"]) ids.push(extradata.id);
-        }
-        if (ids.length > 0) {
-            console.log("TODO : delete those ids : " + ids);
-        }
+        return colDef;       
     }
 
+    getCustomActionsDefs(): any[] {
+        return [];
+    }
+      
+    downloadExtraData = (extradata:ExtraData) => {
+        window.open(this.extradataService.getDownloadUrl(extradata));
+    }
+    
+    
+    
 }

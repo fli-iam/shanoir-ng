@@ -1,96 +1,78 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Component,  Input, Output, EventEmitter } from '@angular/core';
+import { FormGroup, FormBuilder } from '@angular/forms';
+import {  ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 
 import { ExtraData }    from '../shared/extradata.model';
-import { ExaminationExtraDataService } from '../shared/extradata.service';
+import { ExtraDataService } from '../shared/extradata.service';
 
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { Mode } from "../../../shared/mode/mode.model";
-import { Modes } from "../../../shared/mode/mode.enum";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
+import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { slideDown } from '../../../../shared/animations/animations';
 
 @Component({
     selector: 'extra-data-upload-form',
     templateUrl: 'extradata-form.component.html',
-    providers: [ExaminationExtraDataService]
+    providers: [ExtraDataService],
+    animations: [slideDown]
 })
 @ModesAware
-export class ExtraDataFormComponent implements OnInit {
+export class ExtraDataFormComponent extends EntityComponent<ExtraData>{
 
-    @Input() extradata: ExtraData;
     @Input() examination_id: number;
     @Input() isStandalone: boolean = false;
-    @Output() closing = new EventEmitter();
-    @Input() mode: Mode = new Mode();
     @Input() canModify: Boolean = false;
-    newExtradataForm: FormGroup;
     @Output() extradataReady = new EventEmitter();
 
     constructor(
-        private extradataService: ExaminationExtraDataService,
-        private fb: FormBuilder,
         private route: ActivatedRoute,
-        private location: Location) {
+        private extradataService: ExtraDataService) {
 
+        super(route, 'preclinical-extradata');
     }
 
+    get extradata(): ExtraData { return this.entity; }
+    set extradata(extradata: ExtraData) { this.entity = extradata; }
 
-    ngOnInit(): void {
-        if (!this.extradata) this.extradata = new ExtraData();
-        this.buildForm();
-    }
-
-    buildForm(): void {
-        this.newExtradataForm = this.fb.group({
-
+    initView(): Promise<void> {
+        return this.extradataService.getExtraData(""+this.examination_id).then(extradata => {
+            this.extradata = extradata;
         });
-
-        this.newExtradataForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
-        this.onValueChanged();
     }
 
-    onValueChanged(data?: any) {
-        if (!this.newExtradataForm) { return; }
-        const form = this.newExtradataForm;
-        for (const field in this.formErrors) {
-            // clear previous error message (if any)
-            this.formErrors[field] = '';
-            const control = form.get(field);
-            if (control && control.dirty && !control.valid) {
-                for (const key in control.errors) {
-                    this.formErrors[field] += key;
-                }
-            }
-        }
+    initEdit(): Promise<void> {
+        return this.extradataService.getExtraData(""+this.examination_id).then(extradata => {
+            this.extradata = extradata;
+        });
     }
 
-    formErrors = {
-
-    };
-
-    getOut(extradata: ExtraData = null): void {
-        if (this.closing.observers.length > 0) {
-            this.closing.emit(extradata);
-            this.location.back();
-        } else {
-            this.location.back();
-        }
+    initCreate(): Promise<void> {
+        this.entity = new ExtraData();
+        return Promise.resolve();
     }
+
+
+    buildForm(): FormGroup {
+        return this.formBuilder.group({
+        });
+    }
+
+
+    
+
 
     createExtraData() {
         //if (!this.extradata && !this.extradata.fileUploadReady && !this.examination_id) { return; }
         if (!this.extradata && !this.examination_id) { return; }
         this.extradata.examination_id = this.examination_id;
-        this.extradataService.create(PreclinicalUtils.PRECLINICAL_EXTRA_DATA, this.extradata)
+        this.extradataService.createExtraData(PreclinicalUtils.PRECLINICAL_EXTRA_DATA, this.extradata)
             .subscribe(extradata => {
                 //Then upload the file
                 //extradata.fileUploadReady = this.extradata.fileUploadReady;
                 //let uploadUrl: string = PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL + "/" + PreclinicalUtils.PRECLINICAL_EXTRA_DATA + PreclinicalUtils.PRECLINICAL_UPLOAD_URL + "/";
                 //extradata.fileUploadReady.launchRequest(uploadUrl.concat(extradata.id)).subscribe();
-                this.getOut(extradata);
             });
     }
 

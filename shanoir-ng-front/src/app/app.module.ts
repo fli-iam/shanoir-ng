@@ -148,7 +148,7 @@ import { AnimalExaminationListComponent }      from './preclinical/examination/l
 import { AnimalExaminationService }   from './preclinical/examination/shared/animal-examination.service';
 import { ExtraDataListComponent }      from './preclinical/extraData/extraData/list/extradata-list.component';
 import { ExtraDataFormComponent }      from './preclinical/extraData/extraData/edit/extradata-form.component';
-import { ExaminationExtraDataService }      from './preclinical/extraData/extraData/shared/extradata.service';
+import { ExtraDataService }      from './preclinical/extraData/extraData/shared/extradata.service';
 import { PhysiologicalDataFormComponent }      from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent }      from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { FileUploadComponent }      from './preclinical/fileupload/fileupload.component';
@@ -317,7 +317,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
     	AnestheticIngredientService,
     	ExaminationAnestheticService,
     	ContrastAgentService,
-    	ExaminationExtraDataService,
+    	ExtraDataService,
         AnimalExaminationService,
         AnestheticService,
     	ImportBrukerService,

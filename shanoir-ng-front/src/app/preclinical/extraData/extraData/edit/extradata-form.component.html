@@ -1,9 +1,9 @@
 <div class="ExtradataFormComponent content-component">
-    <form [formGroup]="newExtradataForm" class="ExtradataFormComponent max-content" novalidate >
+		<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
 						<div class="header command-zone" i18n="View extradata|Title">View extra data</div>
 					</ng-template>
 					<ng-template ngSwitchDefault> 
@@ -17,8 +17,8 @@
 					<ol>
 						<li class="required">
 							<label i18n="Edit extradata|File label" class="required-label">File</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										<a i18n="Edit extradata|download" (onClick)="downloadExtraData(extradata)">{{extradata?.filename}}</a>
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -34,12 +34,12 @@
     </form>
     
     <div *ngIf="isStandalone">
-	    <table>
-			<tr><td colspan="2"><div class="footer command-zone">
-				<button type="button" i18n="Edit extradata|CancelButton label" class="Button" (click)="getOut()">Cancel</button>
-				<button type="button" *ngIf="canModify && mode.isCreateMode()" i18n="Edit extradata|CreateButton label" (click)="createExtraData()" class="Button" [disabled]="!newExtradataForm.valid">Create</button>
-			</div></td></tr>
-	    </table>
+		<form-footer
+			[state]="footerState"
+			(save)="save()"
+			(edit)="goToEdit()"
+			(back)="goBack()">
+		</form-footer>
    	</div>
     
 </div>

@@ -186,22 +186,22 @@
 			[canModify]="canModify" 
 			(agentChange)="onAgentChange($event)">
 		</contrast-agent-form>
-		
+-->		
 
 		<physiological-data-upload-form 
 			(physioDataReady)="onUploadPhysiologicalData($event)"
 			[mode]="mode"
-			[canModify]="true"
-			[physioData]="examinationPhysioData">
+			[canModify]="true" 
+			[examination_id]="examination.id">
 		</physiological-data-upload-form>
 
 		<bloodgas-data-upload-form 
 			(bloodGasDataReady)="onUploadBloodGasData($event)"
 			[mode]="mode"
 			[canModify]="true"
-			[bloodGasData]="examinationBloodGasData">
+			[examination_id]="examination.id">
 		</bloodgas-data-upload-form>
--->
+
 		<fieldset *ngIf="mode=='view'">
 			<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
 			<examination-tree *ngIf="examination" [examination]="examination"></examination-tree> 

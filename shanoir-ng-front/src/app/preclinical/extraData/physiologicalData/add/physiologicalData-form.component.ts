@@ -1,111 +1,98 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { FormGroup, FormBuilder } from '@angular/forms';
+import {  ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 
 
 import { PhysiologicalData }    from '../shared/physiologicalData.model';
 import { PhysiologicalDataFile }    from '../shared/physiologicalDataFile.model';
-import { ExaminationExtraDataService } from '../../extraData/shared/extradata.service';
+import { ExtraDataService } from '../../extraData/shared/extradata.service';
 
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { Mode } from "../../../shared/mode/mode.model";
-import { Modes } from "../../../shared/mode/mode.enum";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
+import { slideDown } from '../../../../shared/animations/animations';
+import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { ExtraData } from '../../extraData/shared/extradata.model';
 
 @Component({
   selector: 'physiological-data-upload-form',
   templateUrl: 'physiologicalData-form.component.html',
-  providers: [ExaminationExtraDataService]
+  providers: [ExtraDataService],
+  animations: [slideDown]
 })
 @ModesAware
-export class PhysiologicalDataFormComponent implements OnInit {
+export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalData> {
 
-  @Input() physioData:PhysiologicalData = new PhysiologicalData();
-  @Input() examination_id:number;
-  @Input() isStandalone:boolean = false;
-  @Output() closing = new EventEmitter();
-  @Input() mode: Mode = new Mode();
-  @Input() canModify: Boolean = false;
-  newPhysiodataForm: FormGroup;
-  urlupload:string;
-  @Output() physioDataReady = new EventEmitter();
-  fileToUpload: File = null;
+    @Input() examination_id:number;
+    @Input() isStandalone:boolean = false;
+    @Input() canModify: Boolean = false;
+    @Output() physioDataReady = new EventEmitter();
   
-  
-  constructor(
-        private extradatasService: ExaminationExtraDataService,
-        private fb: FormBuilder,
+    urlupload:string;
+    fileToUpload: File = null;
+    @Output() bloodGasDataReady = new EventEmitter();
+
+    constructor(
         private route: ActivatedRoute,
-        private location: Location) {             
-          
-        }  
-   
-    
-  ngOnInit(): void {
-      this.buildForm();
-  }
-    
-  buildForm(): void {
-        this.newPhysiodataForm = this.fb.group({
+        private extradatasService: ExtraDataService) {
+
+        super(route, 'preclinical-physiogicaldata');
+    }
+
+    get physioData(): PhysiologicalData { return this.entity; }
+    set physioData(physioData: PhysiologicalData) { this.entity = physioData; }
+
+    initView(): Promise<void> {
+        this.entity = new PhysiologicalData();
+        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+            this.loadExaminationExtraDatas(extradatas);
+        });
+        return Promise.resolve();
+    }
+
+    initEdit(): Promise<void> {
+        this.entity = new PhysiologicalData();
+        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
+            this.loadExaminationExtraDatas(extradatas);
+        });
+        return Promise.resolve();
+    }
+
+    initCreate(): Promise<void> {
+        this.entity = new PhysiologicalData();
+        return Promise.resolve();
+    }
+
+    loadExaminationExtraDatas(extradatas: ExtraData[]){
+    	for (let ex of extradatas) {
+    		// instanceof does not work??
+    		if (ex.extradatatype == "Physiological data"){
+    			this.physioData = <PhysiologicalData>ex;
+    		}
+    	}
+    }
+
+    buildForm(): FormGroup {
+        return this.formBuilder.group({
             'has_heart_rate':[this.physioData.has_heart_rate],
             'has_respiratory_rate':[this.physioData.has_respiratory_rate],
             'has_sao2':[this.physioData.has_sao2],
             'has_temperature':[this.physioData.has_temperature],
         });
-
-        this.newPhysiodataForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
-        this.onValueChanged(); 
     }
 
-    onValueChanged(data?: any) {
-        if (!this.newPhysiodataForm) { return; }
-        const form = this.newPhysiodataForm;
-        for (const field in this.formErrors) {
-            // clear previous error message (if any)
-            this.formErrors[field] = '';
-            const control = form.get(field);
-            if (control && control.dirty && !control.valid) {
-                for (const key in control.errors) {
-                    this.formErrors[field] += key;
-                }
-            }
-        }
-    }
-
-  formErrors = {
-        'has_heart_rate':'',
-        'has_respiratory_rate':'',
-        'has_sao2':'',
-        'has_temperature':''
-  };
-    
-  getOut(physiodata: PhysiologicalData = null): void {
-      if (this.closing.observers.length > 0) {
-          this.closing.emit(physiodata);
-          this.location.back();
-      } else {
-          this.location.back();
-      }
-  }
-    
-  createPhysioData() {
-        //if (!this.physioData && !this.physioData.fileUploadReady && !this.examination_id) { return; }
-        if (!this.physioData  && !this.examination_id) { return; }
-      
-        this.physioData.examination_id = this.examination_id;
-        this.extradatasService.create(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.physioData)
-            .subscribe(physioData => {
-                //Then upload the file
-                //physioData.fileUploadReady = this.physioData.fileUploadReady;
-                //let uploadUrl:string = PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL+"/"+PreclinicalUtils.PRECLINICAL_EXTRA_DATA+PreclinicalUtils.PRECLINICAL_UPLOAD_URL+"/";
-                //physioData.fileUploadReady.launchRequest(uploadUrl.concat(physioData.id)).subscribe();
-                this.getOut(physioData);
+    protected save(): Promise<void> {
+        this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.physioData).subscribe((physioData) => {
+            this.chooseRouteAfterSave(this.physioData);
+            this.msgBoxService.log('info', 'The new preclinical-physiogicaldata has been successfully saved under the number ' + physioData.id);
         });
-  }
+        return Promise.resolve();
+    }
+
+    
   
-  fileChangeEvent(files: FileList){
+    fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
     	this.physioData.filename= this.fileToUpload.name;
     	let physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
@@ -119,25 +106,25 @@ export class PhysiologicalDataFormComponent implements OnInit {
       	this.physioData = new PhysiologicalData();
     }
     
-  isYesOrNo(value:boolean): string{
-      if(value) return 'Yes';
-      return 'No';
-  }
-  
-  emitEvent(physioDataFile : PhysiologicalDataFile) {
-  	if(!this.isStandalone){
-    	this.physioDataReady.emit(physioDataFile);
+    isYesOrNo(value:boolean): string{
+        if(value) return 'Yes';
+        return 'No';
     }
-  }
   
-  changePhysio(){
-  	let physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
-    physioDataFile.filename = this.physioData.filename;
-    physioDataFile.has_heart_rate = this.physioData.has_heart_rate;
-    physioDataFile.has_respiratory_rate = this.physioData.has_respiratory_rate;
-    physioDataFile.has_sao2 = this.physioData.has_sao2;
-    physioDataFile.has_temperature = this.physioData.has_temperature;
-  	this.emitEvent(physioDataFile);
-  }
+    emitEvent(physioDataFile : PhysiologicalDataFile) {
+        if(!this.isStandalone){
+            this.physioDataReady.emit(physioDataFile);
+        }
+    }
+  
+    changePhysio(){
+        let physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
+        physioDataFile.filename = this.physioData.filename;
+        physioDataFile.has_heart_rate = this.physioData.has_heart_rate;
+        physioDataFile.has_respiratory_rate = this.physioData.has_respiratory_rate;
+        physioDataFile.has_sao2 = this.physioData.has_sao2;
+        physioDataFile.has_temperature = this.physioData.has_temperature;
+        this.emitEvent(physioDataFile);
+    }
     
 }

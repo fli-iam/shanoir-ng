@@ -19,7 +19,6 @@ import { Examination } from '../../../examinations/shared/examination.model';
 import { ImportDataService, ContextData } from '../../../import/import.data-service';
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { Entity } from '../../../shared/components/entity/entity.abstract';
-import { ConsoleComponent } from 'src/app/shared/console/console.line.component';
 
 @Component({
     selector: 'animal-clinical-context',
@@ -228,7 +227,7 @@ export class AnimalClinicalContextComponent  {
 
     private openCreateExam = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/preclinical-examination'],  { queryParams: {  mode: "create"} }).then(success => {
+        this.router.navigate(['/preclinical-examination/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
             currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                 this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
