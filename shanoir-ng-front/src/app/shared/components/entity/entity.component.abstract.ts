@@ -32,7 +32,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected router: Router;
     private location: Location;
     protected formBuilder: FormBuilder;
-    private keycloakService: KeycloakService;
+    protected keycloakService: KeycloakService;
     private msgBoxService: MsgBoxService; 
     protected breadcrumbsService: BreadcrumbsService;
 
