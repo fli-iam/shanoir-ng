@@ -33,7 +33,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private location: Location;
     protected formBuilder: FormBuilder;
     protected keycloakService: KeycloakService;
-    private msgBoxService: MsgBoxService; 
+    protected msgBoxService: MsgBoxService; 
     protected breadcrumbsService: BreadcrumbsService;
 
     /* abstract methods */
@@ -171,7 +171,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
     }
 
-    private chooseRouteAfterSave(entity: Entity) {
+    protected chooseRouteAfterSave(entity: Entity) {
         this.breadcrumbsService.currentStep.notifySave(entity);
         if (this.breadcrumbsService.previousStep && this.breadcrumbsService.previousStep.isWaitingFor(this.breadcrumbsService.currentStep)) {
             this.breadcrumbsService.goBack();
