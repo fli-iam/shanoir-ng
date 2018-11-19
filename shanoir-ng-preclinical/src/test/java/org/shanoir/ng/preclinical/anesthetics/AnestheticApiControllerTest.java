@@ -46,7 +46,7 @@ import com.google.gson.GsonBuilder;
 public class AnestheticApiControllerTest {
 
 	private static final String REQUEST_PATH = "/anesthetic";
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH_ALL = REQUEST_PATH ;
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 	private static final String ANESTHETIC_TYPE = "Gas";
 	private static final String REQUEST_PATH_WITH_TYPE_NAME = REQUEST_PATH + "/type/" + ANESTHETIC_TYPE;

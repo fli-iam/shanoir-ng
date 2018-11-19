@@ -60,7 +60,7 @@ public interface AnestheticApi {
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of anesthetics", response = Anesthetic.class),
         @ApiResponse(code = 500, message = "Unexpected error", response = Anesthetic.class) })
-    @RequestMapping(value = "/all",
+    @RequestMapping(value = "",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<List<Anesthetic>> getAnesthetics();

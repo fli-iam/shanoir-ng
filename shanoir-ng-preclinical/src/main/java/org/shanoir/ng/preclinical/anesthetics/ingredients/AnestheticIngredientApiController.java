@@ -107,9 +107,9 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 					new ErrorModel(HttpStatus.NO_CONTENT.value(), "Anesthetic not found", new ErrorDetails()));
 		} else {
 			final List<AnestheticIngredient> ingredients = ingredientsService.findByAnesthetic(anesthetic);
-			if (ingredients.isEmpty()) {
+			/*if (ingredients.isEmpty()) {
 				return new ResponseEntity<List<AnestheticIngredient>>(HttpStatus.NO_CONTENT);
-			}
+			}*/
 			return new ResponseEntity<List<AnestheticIngredient>>(ingredients, HttpStatus.OK);
 		}
 	}

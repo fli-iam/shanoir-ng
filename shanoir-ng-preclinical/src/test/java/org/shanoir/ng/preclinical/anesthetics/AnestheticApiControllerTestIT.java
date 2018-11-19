@@ -34,7 +34,7 @@ public class AnestheticApiControllerTestIT extends KeycloakControllerTestIT {
 	
 	private static final String REQUEST_PATH = "/anesthetic";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH_ALL = REQUEST_PATH ;
 
 	@Autowired
 	private TestRestTemplate restTemplate;
