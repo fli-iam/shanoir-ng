@@ -28,7 +28,7 @@ public class LoginApiController extends AbstractUserRequestApiController impleme
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(LoginApiController.class);
 
-	@Value("${keycloak.admin.client.host.name}")
+	@Value("${kc.admin.client.host.name}")
 	private String kcAdminClientHostName;
 
 	public ResponseEntity<Void> login(
