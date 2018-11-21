@@ -11,13 +11,6 @@ VALUES
 	(3,100,'User','ROLE_USER'),
 	(4,200,'Expert','ROLE_EXPERT');
 
-INSERT INTO account_request_info
-	(id, contact, function, institution, service, study, work)
-VALUES
-	(1, 'contact1', 'function1', 'institution1', 'service1', 'study1', 'work1'),
-	(2, 'contact2', 'function2', 'institution2', 'service2', 'study2', 'work2'),
-	(3, 'contact3', 'function3', 'institution3', 'service3', 'study3', 'work3');
-
 INSERT INTO users
 	(id, account_request_demand, account_request_info_id, can_access_to_dicom_association, creation_date, email, expiration_date, extension_date, extension_motivation, extension_request_demand, first_name, first_expiration_notification_sent, second_expiration_notification_sent, last_name, username, role_id)
 VALUES
