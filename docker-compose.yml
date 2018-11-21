@@ -58,10 +58,20 @@ services:
     build: ./docker-compose/users
     environment:
       - keycloak.auth-server-url
+      - kc.admin.client.server.url
+      - kc.admin.client.realm
+      - kc.admin.client.client.id
+      - kc.admin.client.username
+      - kc.admin.client.password
       - front.server.url
       - front.server.address
+      - mail.host
+      - administrator.email
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java
     networks:
       - shanoir_ng_network
     ports:
@@ -81,8 +91,11 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java:ro
     networks:
       - shanoir_ng_network
     ports:
@@ -92,6 +105,7 @@ services:
       - "keycloak"
       - "database"
       - "rabbitmq"
+      - "users"
   #
   # Import microservice
   #
@@ -102,8 +116,11 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java:ro
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
@@ -114,6 +131,7 @@ services:
       - "keycloak"
       - "database"
       - "rabbitmq"
+      - "users"
   #
   # Datasets microservice
   #
@@ -124,8 +142,11 @@ services:
       - keycloak.auth-server-url
       - front.server.url
       - front.server.address
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java:ro
       - "tmp:/tmp"
       - "datasets-data:/var/datasets-data"
     networks:
@@ -137,7 +158,7 @@ services:
       - "keycloak"
       - "database"
       - "rabbitmq"
-      
+      - "users"
   #
   # Preclinical microservice
   #
@@ -172,7 +193,6 @@ services:
      - "5000:5000"
     depends_on:
       - "preclinical"
-      
   #
   # Solr microservice for Shanoir-NG search
   #
@@ -255,10 +275,12 @@ services:
     build: ./docker-compose/nginx
     volumes:
       - "logs:/var/log/nginx"
+      - "/home/mbodin/Shanoir/shanoir-ng/shanoir-ng-front/mnt-dist:/etc/nginx/html" 
+      - certificate-share-data:/opt/ssl:ro
     networks:
       - shanoir_ng_network    
     ports:
-     - "80:80"
+     - "443:443"
     depends_on:
       - "keycloak"
       - "users"
@@ -279,6 +301,7 @@ volumes:
   dcm4chee-arc-wildfly-data:
   dcm4chee-arc-storage-data:
   solr-data:
+  certificate-share-data:
   tmp:
   logs:
 

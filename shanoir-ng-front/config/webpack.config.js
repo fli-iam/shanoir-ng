@@ -11,7 +11,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
  */
 const ENV = process.env.ENV = process.env.NODE_ENV = 'production';
 
-const SHANOIR_NG_URL_SCHEME = 'http://';
+const SHANOIR_NG_URL_SCHEME = 'https://';
 const SHANOIR_NG_URL_HOST = 'shanoir-ng-nginx';
 
 const SHANOIR_NG_URL_BACKEND_API =

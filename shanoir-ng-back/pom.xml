@@ -29,7 +29,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<keycloak.version>3.1.0.Final</keycloak.version>
+		<keycloak.version>3.4.3.Final</keycloak.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<springfox-version>2.5.0</springfox-version>
@@ -119,7 +119,7 @@
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-spring-security-adapter</artifactId>
-			<version>${keycloak.version}</version>
+			<version>4.5.0.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.keycloak</groupId>
