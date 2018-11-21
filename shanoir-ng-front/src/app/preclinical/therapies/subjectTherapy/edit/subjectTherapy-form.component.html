@@ -1,9 +1,9 @@
-<div *ngIf="toggleForm" class="SubjectTherapyFormComponent content-component">
-    <form [formGroup]="newSubjectTherapyForm" class="SubjectTherapyFormComponent max-content" novalidate>
+<div  *ngIf="toggleForm" class="RefFormComponent content-component">
+	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
 		<table class="layout">
 			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
 						<div class="header command-zone" i18n="View therapy|Title">View therapy details</div>
 					</ng-template>
 					<ng-template ngSwitchDefault> 
@@ -18,8 +18,8 @@
 					<ol>
 						<li class="required">
 							<label i18n="Edit subjectTherapy|Therapy label" class="required-label">Therapy</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{subjectTherapy?.therapy?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -30,15 +30,15 @@
 										<img [src]="addIconPath"/>
 										new therapy
 									</button>
-									<label *ngIf="formErrors.therapy.includes('required')" class="form-validation-alert" i18n="Edit model|TherapyRequiredError label">Therapy is required!</label>
+									<label *ngIf="hasError('therapy', ['required'])" [@slideDown]="hasError('therapy', ['required'])" class="form-validation-alert" i18n="Edit subjectTherapy|Therapy required error@@subjectTherapyDetailTherapyRequiredError">Therapy is required!</label>
 								</ng-template>
 							</span>
 						</li>
 						<div *ngIf="displayDoseFrequency()">
 							<li class="required">
 								<label i18n="Edit subjectTherapy|Dose label" class="required-label">Dose</label>
-								<span class="right-col" [ngSwitch]="mode.state">
-									<ng-template [ngSwitchCase]="Modes.view"> 
+								<span class="right-col" [ngSwitch]="mode">
+									<ng-template [ngSwitchCase]="'view'"> 
 											{{subjectTherapy?.dose}}
 									</ng-template>
 									<ng-template ngSwitchDefault>
@@ -48,8 +48,8 @@
 							</li>
 							<li class="required">
 								<label i18n="Edit subjectTherapy|DoseUnit label" class="required-label">Dose Unit</label>
-								<span class="right-col" [ngSwitch]="mode.state">
-									<ng-template [ngSwitchCase]="Modes.view"> 
+								<span class="right-col" [ngSwitch]="mode">
+									<ng-template [ngSwitchCase]="'view'"> 
 											{{subjectTherapy?.dose_unit?.value}}
 									</ng-template>
 									<ng-template ngSwitchDefault>
@@ -61,8 +61,8 @@
 							</li>
 							<li class="required">
 								<label i18n="Edit subjectTherapy|Frequency label" class="required-label">Frequency</label>
-								<span class="right-col" [ngSwitch]="mode.state">
-									<ng-template [ngSwitchCase]="Modes.view"> 
+								<span class="right-col" [ngSwitch]="mode">
+									<ng-template [ngSwitchCase]="'view'"> 
 											{{enumUtils.getEnumValue(frequencies,subjectTherapy.frequency)}}
 									</ng-template>
 									<ng-template ngSwitchDefault>
@@ -75,8 +75,8 @@
 						</div>
 						<li>
 							<label i18n="Edit subjectTherapy|startDate label">Start date</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{subjectTherapy?.startDate}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -89,8 +89,8 @@
 						</li>
 						<li>
 							<label i18n="Edit subjectTherapy|endDate label">End date</label> 
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{subjectTherapy?.startDate}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -106,11 +106,12 @@
 				</td>				
 			</tr>
 			
-			<tr><td colspan="2"><div class="footer command-zone">
-				<button type="button" i18n="Edit therapy|CancelButton label" class="Button" (click)="toggleFormSTAndReset()">Close</button>
-				<button type="button" *ngIf="createSTMode && canModify && !mode.isViewMode()" i18n="Edit therapy|CreateButton label" (click)="addSubjectTherapy()" class="Button" [disabled]="!newSubjectTherapyForm.valid">Add</button>
-				<button type="button" *ngIf="!createSTMode && canModify && !mode.isViewMode()" (click)="updateSubjectTherapy()" i18n="Edit therapy|SaveButton label" class="Button" [disabled]="!newSubjectTherapyForm.valid">Save</button>
-			</div></td></tr>
 		</table>
+		<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()">
+		</form-footer>
     </form>
 </div>
