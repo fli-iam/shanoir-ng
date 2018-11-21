@@ -24,6 +24,7 @@ export class SubjectStudyListComponent extends AbstractInput {
     @Input() subject: Subject;
     @Input() study: Study;
     @Input() selectableList: Subject[] | Study[];
+    @Input() displaySubjectType: boolean = true;
     private selected: any;
 
     private get legend(): string {
