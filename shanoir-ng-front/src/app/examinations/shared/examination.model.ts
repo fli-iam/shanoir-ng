@@ -18,6 +18,7 @@ export class Examination extends Entity {
     note: string;
     subjectWeight: number;
     preclinical: boolean;
+    hasStudyCenterData: boolean = false;
     
     service: ExaminationService = ServiceLocator.injector.get(ExaminationService);
 }
