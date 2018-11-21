@@ -1,8 +1,8 @@
-<div class="SubjectFormComponent content-component detail">
-    <form [formGroup]="newSubjectForm" class="SubjectFormComponent max-content" novalidate>
-		<div class="layout" [ngClass]="{'left': mode.state==Modes.view}">
-			<span class="commands" [ngSwitch]="mode.state">
-				<ng-template [ngSwitchCase]="Modes.view"> 
+<div class="content-component detail" [@preventInitialChildAnimations]>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+		<div class="layout" [ngClass]="{'left': mode=='view'}">
+			<span class="right-col" [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">
 					<div class="header command-zone" i18n="View subject|Title">View subject</div>
 				</ng-template>
 				<ng-template [ngSwitchCase]="Modes.edit"> 
@@ -14,11 +14,12 @@
 			</span>
 
 			<fieldset>
+				<legend *ngIf="mode !== 'view'" i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
 				<ol>
 					<li>
 						<label i18n="Subject detail|Subject Imaged object category label@@SubjectDetailSubjectImagedObjectCategory" class="required-label">Imaged object category</label>
-						<span class="right-col" [ngSwitch]="mode.state">
-							<ng-template [ngSwitchCase]="Modes.view">
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
 								<div [ngSwitch]="preclinicalSubject.subject.imagedObjectCategory">
 									<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
 									<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_ANIMAL">Living animal</ng-template>
@@ -39,31 +40,31 @@
 											<ng-template ngSwitchDefault>{{cat}}</ng-template>
 									</option>
 								</select>
-								<label *ngIf="formErrors.imagedObjectCategory.includes('required')" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
+								<label *ngIf="hasError('imagedObjectCategory', ['required'])" class="form-validation-alert" i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">Imaged object category is required!</label>
 							</ng-template>
 						</span>
 					</li>
-					<li class="required">
+					<li>
 						<label i18n="Edit subject|Name label" class="required-label">Common name</label>
-						<span class="right-col" [ngSwitch]="mode.state">
-							<ng-template [ngSwitchCase]="Modes.view"> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.subject?.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="name" required minlength="2" maxlength="255"  formControlName="name" [(ngModel)]="preclinicalSubject.subject.name" (keyup)="isNameUnique=true" />
-								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit subject|NameRequiredError label">Common Name is required!</label>
-								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 255!</label>
-								<label *ngIf="hasNameUniqueError" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">Common Name should be unique!</label>
-								<label *ngIf="existingSubjectError" class="form-validation-alert" i18n="Subject detail|Existing subject error@@existingSubjectError">
-									This subject already exists and his common name is: {{existingSubjectError}}
-								</label>
-							</ng-template>		
+									<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="preclinicalSubject.subject.name"/>
+									<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
+									<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64 !</label>
+									<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
+									<label *ngIf="existingSubjectError" class="form-validation-alert" i18n="Subject detail|Existing subject error@@existingSubjectError">
+										This subject already exists and his common name is {{existingSubjectError}}
+									</label>
+								</ng-template>	
 						</span>
 					</li>
 					<li *ngIf="displaySex()">
 						<label i18n="Subject detail|Sex label@@subjectDetailSex" class="required-label">Sex</label>
-						<span class="right-col" [ngSwitch]="mode.state">
-							<ng-template [ngSwitchCase]="Modes.view"> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
 								<div [ngSwitch]="preclinicalSubject.subject.sex">
 									<ng-template [ngSwitchCase]="'F'">Female</ng-template>
 									<ng-template [ngSwitchCase]="'M'">Male</ng-template>
@@ -78,28 +79,28 @@
 							</ng-template>
 						</span>
 					</li>
-					<li class="required">
+					<li>
 						<label i18n="Edit subject|Specie label" class="required-label">Species</label>
-						<span class="right-col" [ngSwitch]="mode.state">
-							<ng-template [ngSwitchCase]="Modes.view"> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.animalSubject?.specie?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="specie" required formControlName="specie" [(ngModel)]="preclinicalSubject.animalSubject.specie">
 									<option *ngFor="let specie of species" [ngValue]="specie">{{specie.value}}</option>
 								</select>
-								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new species" (click)="goToRefPage('subject','specie')">
-									<img [src]="addIconPath"/>
+								<button  *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new species" (click)="goToRefPage('subject','specie')">
+									<i class="fas fa-plus-square"></i>
 									new species
 								</button>
-								<label *ngIf="formErrors.specie.includes('required')" class="form-validation-alert" i18n="Edit species|SpecieRequiredError label">Species is required!</label>
+								<label *ngIf="hasError('specie', ['required'])" [@slideDown]="hasError('specie', ['required'])" class="form-validation-alert" i18n="Edit subjectSpecie|Specie required error@@animalSubjectDetailSpecieRequiredError">Species is required!</label>
 							</ng-template>
 						</span>
 					</li>
-					<li class="required">
+					<li >
 						<label i18n="Edit subject|Strain label" class="required-label">Strain</label>
-						<span class="right-col" [ngSwitch]="mode.state">
-							<ng-template [ngSwitchCase]="Modes.view"> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.animalSubject?.strain?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -107,17 +108,17 @@
 									<option *ngFor="let strain of strains" [ngValue]="strain">{{strain.value}}</option>
 								</select>
 								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new strain" (click)="goToRefPage('subject','strain')">
-									<img [src]="addIconPath"/>
+										<i class="fas fa-plus-square"></i>
 									new strain
 								</button>
-								<label *ngIf="formErrors.strain.includes('required')" class="form-validation-alert" i18n="Edit strain|StrainRequiredError label">Strain is required!</label>
+								<label *ngIf="hasError('strain', ['required'])" [@slideDown]="hasError('strain', ['required'])" class="form-validation-alert" i18n="Edit subjectStrain|Strain required error@@animalSubjectDetailStrainRequiredError">Strain is required!</label>
 							</ng-template>
 						</span>
 					</li>
-					<li class="required">
+					<li >
 						<label i18n="Edit subject|Biotype label" class="required-label">Biological type</label> 
-						<span class="right-col" [ngSwitch]="mode.state">
-							<ng-template [ngSwitchCase]="Modes.view"> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.animalSubject?.biotype?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -125,17 +126,17 @@
 									<option *ngFor="let biotype of biotypes" [ngValue]="biotype">{{biotype.value}}</option>
 								</select>
 								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a new biotype" (click)="goToRefPage('subject','biotype')">
-									<img [src]="addIconPath"/>
+										<i class="fas fa-plus-square"></i>
 									new biological type
 								</button>
-								<label *ngIf="formErrors.biotype.includes('required')" class="form-validation-alert" i18n="Edit biotype|BiotypeRequiredError label">Biotype is required!</label>
+								<label *ngIf="hasError('biotype', ['required'])" [@slideDown]="hasError('biotype', ['required'])" class="form-validation-alert" i18n="Edit subjectBiotype|Biotype required error@@animalSubjectDetailBiotypeRequiredError">Biological type is required!</label>
 							</ng-template>
 						</span>							
 					</li>
-					<li class="required">
+					<li >
 						<label i18n="Edit subject|Provider label" class="required-label">Provider</label>
-						<span class="right-col" [ngSwitch]="mode.state">
-							<ng-template [ngSwitchCase]="Modes.view"> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.animalSubject?.provider?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -143,17 +144,17 @@
 									<option *ngFor="let provider of providers" [ngValue]="provider">{{provider.value}}</option>
 								</select>
 								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a provider" (click)="goToRefPage('subject','provider')">
-									<img [src]="addIconPath"/>
+										<i class="fas fa-plus-square"></i>
 									new provider
 								</button>
-								<label *ngIf="formErrors.provider.includes('required')" class="form-validation-alert" i18n="Edit provider|ProviderRequiredError label">Provider is required!</label>
+								<label *ngIf="hasError('provider', ['required'])" [@slideDown]="hasError('provider', ['required'])" class="form-validation-alert" i18n="Edit subjectProvider|Provider required error@@animalSubjectDetailProviderRequiredError">Provider is required!</label>
 							</ng-template>
 						</span>
 					</li>
-					<li class="required">
+					<li>
 						<label i18n="Edit subject|Stabulation label" class="required-label">Stabulation</label> 
-						<span class="right-col" [ngSwitch]="mode.state">
-							<ng-template [ngSwitchCase]="Modes.view"> 
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'"> 
 									{{preclinicalSubject?.animalSubject?.stabulation?.value}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -161,77 +162,35 @@
 									<option *ngFor="let stabulation of stabulations" [ngValue]="stabulation">{{stabulation.value}}</option>
 								</select>
 								<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subject|Add a stabulation" (click)="goToRefPage('subject','stabulation')">
-									<img [src]="addIconPath"/>
+										<i class="fas fa-plus-square"></i>
 									new stabulation
 								</button>
-								<label *ngIf="formErrors.stabulation.includes('required')" class="form-validation-alert" i18n="Edit stabulation|StabulationRequiredError label">Stabulation is required!</label>
+								<label *ngIf="hasError('stabulation', ['required'])" [@slideDown]="hasError('stabulation', ['required'])" class="form-validation-alert" i18n="Edit subjectStabulation|Stabulation required error@@animalSubjectDetailStabulationRequiredError">Stabulation is required!</label>
 							</ng-template>
 						</span>
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode.state!=Modes.view">
-				<legend i18n="Subject detail|Name label@@subjectDetailGeneral">Studies</legend>
-				<ol>
-					<li>
-						<label i18n="Subject detail|List of the studies label@@subjectDetailListOfStudies">List of the studies available</label>
-						<span class="right-col">
-							<select id="studies" formControlName="studies"  [(ngModel)]="selectedStudy" (change)="onStudySelect()" >
-								<option disabled>Please select...</option>
-								<option *ngFor="let study of studies" [ngValue]="study" [disabled]="study.selected">{{study.name}}</option>
-							</select>
-						</span>
-					</li>
-					<li *ngIf="subjectStudyList != null && subjectStudyList.length != 0">
-						<table>
-							<thead>
-								<tr>
-									<th class="label-col">Study name</th>
-									<th class="input-col">Subject id for this study</th>
-									<th class="chkbx-col" title="Physically Involved">PI</th>
-									<th class="buttons-col"></th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr *ngFor="let subjectStudy of subjectStudyList; let i = index">
-									<td class="label-col">
-										<div *ngFor="let study of studies">
-											<span *ngIf="study.id == subjectStudy.study.id">
-												{{study.name}}
-											</span>
-										</div>
-									</td>
-									<td class="input-col">
-										<input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
-									</td>
-									<td class="chkbx-col">
-										<input type="checkbox" [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"/>
-									</td>
-									<td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-ban"></i></span>
-								</tr>
-							</tbody>
-						</table>
-					</li>
-				</ol>
+			
+			<fieldset *ngIf="mode !== 'view'">
+					<subject-study-list [subject]="preclinicalSubject.subject" [displaySubjectType]="false" [selectableList]="studies" [(ngModel)]="preclinicalSubject.subject.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
 			</fieldset>
+			<fieldset *ngIf="mode == 'view'">
+					<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
+					<subject-tree [subject]="preclinicalSubject.subject" [studies]="studies"></subject-tree>
+			</fieldset>	
+			<!-- 
 			<div *ngIf="displayPathologyTherapy">
-				<subject-pathology-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [mode]="mode" [canModify]="canModify"></subject-pathology-list>
-				<subject-therapy-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [canModify]="canModify"></subject-therapy-list>
+				<subject-pathology-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [mode]="mode" ></subject-pathology-list>
+				<subject-therapy-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" ></subject-therapy-list>
 			</div>
-			<div class="footer command-zone">
-				<span [ngSwitch]="mode.state">
-					<button i18n="View subject|BackButton label" class="Button" (click)="getOut()">Back</button>	
-					<ng-template [ngSwitchCase]="Modes.view" *ngIf="canModify"> 
-						<button type="button" i18n="View subject|EditButton label" (click)="goToUpdate()" class="Button">Edit</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify"> 
-						<button type="button" i18n="Edit subject|UpdateButton label" (click)="updateSubject()" class="Button" [disabled]="!newSubjectForm.valid">Update</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify"> 
-						<button type="button" i18n="Edit subject|CreateButton label" (click)="addSubject()" class="Button" [disabled]="!newSubjectForm.valid">Create</button>
-					</ng-template>
-				</span>
-			</div>
+			-->
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()">
+			</form-footer>
 		</div>
     </form>
 </div>

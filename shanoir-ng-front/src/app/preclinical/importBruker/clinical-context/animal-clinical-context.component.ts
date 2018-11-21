@@ -19,6 +19,7 @@ import { Examination } from '../../../examinations/shared/examination.model';
 import { ImportDataService, ContextData } from '../../../import/import.data-service';
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { Entity } from '../../../shared/components/entity/entity.abstract';
+import { PreclinicalSubject } from '../../animalSubject/shared/preclinicalSubject.model';
 
 @Component({
     selector: 'animal-clinical-context',
@@ -195,24 +196,30 @@ export class AnimalClinicalContextComponent  {
 
     private openCreateSubject = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/preclinical-subject'],  { queryParams: {  mode: "create" } }).then(success => {
+        this.router.navigate(['/preclinical-subject/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
             currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+                this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy((entity as PreclinicalSubject).subject);
             });
         });
     }
 
-    private getPrefilledSubject(): Subject {
+    private getPrefilledSubject(): PreclinicalSubject {
         let subjectStudy = new SubjectStudy();
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
+        let newPreclinicalSubject = new PreclinicalSubject();
         let newSubject = new Subject();
+        let newAnimalSubject = new AnimalSubject();
         newSubject.birthDate = this.patient.patientBirthDate;
         newSubject.name = this.patient.patientName;
-        newSubject.sex = this.patient.patientSex; 
+        if (this.patient.patientSex){
+            newSubject.sex = this.patient.patientSex; 
+        }
         newSubject.subjectStudyList = [subjectStudy];
-        return newSubject;
+        newPreclinicalSubject.subject = newSubject;
+        newPreclinicalSubject.animalSubject = newAnimalSubject;
+        return newPreclinicalSubject;
     }
     
     private subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
@@ -237,12 +244,15 @@ export class AnimalClinicalContextComponent  {
 
     private getPrefilledExam(): Examination {
         let newExam = new Examination();
+        newExam.preclinical = true;
+        newExam.hasStudyCenterData = true;
         newExam.studyId = this.study.id;
         newExam.studyName = this.study.name;
         newExam.centerId = this.studycard.center.id;
         newExam.centerName = this.studycard.center.name;
         newExam.subjectId = this.subject.id;
         newExam.subjectName = this.subject.name;
+        newExam.subject = new IdNameObject(this.subject.id,this.subject.name, true );
         newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
         newExam.comment = this.patient.studies[0].studyDescription;
         return newExam;
@@ -264,7 +274,7 @@ export class AnimalClinicalContextComponent  {
 
     private showSubjectDetails() {
     	if (this.animalSubject.id){
-        	window.open('preclinical-subject?id=' + this.animalSubject.id + '&mode=view', '_blank');
+        	window.open('preclinical-subject/details/' + this.animalSubject.id , '_blank');
         }else{
             window.open('subject/details/' + this.subject.id, '_blank');
         }
@@ -275,8 +285,11 @@ export class AnimalClinicalContextComponent  {
     }
 
     private showExaminationDetails() {
-        window.open('preclinical-examination?id=' + this.examination.id + '&mode=view', '_blank');
+        window.open('preclinical-examination/details/' + this.examination.id , '_blank');
     }
+
+    
+
 
     get valid(): boolean {
         let context = this.getContext();

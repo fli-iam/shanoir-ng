@@ -1,8 +1,5 @@
-import { Component, OnInit, Input,  Output, EventEmitter, ViewChild, ElementRef, OnChanges, ChangeDetectorRef , SimpleChanges} from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { Location } from '@angular/common';
+import { Component, ViewChild, ElementRef, OnChanges, Input} from '@angular/core';
+import { FormGroup,  Validators } from '@angular/forms';
 
 import { ContrastAgent }    from '../../contrastAgent/shared/contrastAgent.model';
 import { ContrastAgentService } from '../../contrastAgent/shared/contrastAgent.service';
@@ -11,7 +8,6 @@ import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthet
 import { ExaminationAnestheticService }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExtraData }    from '../../extraData/extraData/shared/extradata.model';
-import { ExtraDataListComponent } from '../../extraData/extraData/list/extradata-list.component';
 import { BloodGasData }    from '../../extraData/bloodGasData/shared/bloodGasData.model';
 import { BloodGasDataFile }    from '../../extraData/bloodGasData/shared/bloodGasDataFile.model';
 import { PhysiologicalData }    from '../../extraData/physiologicalData/shared/physiologicalData.model';
@@ -23,15 +19,10 @@ import { IdNameObject } from '../../../shared/models/id-name-object.model';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
-
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
-
-
-import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
-
-import { Mode } from "../../shared/mode/mode.model";
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -59,9 +50,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     centers: IdNameObject[] = [];
     studies: IdNameObject[] = [];
     subjects: Subject[] = [];
-    hasStudyCenterData : boolean = false;
     animalSubjectId: number;
-    selectedSubjectId: number;
     
     constructor(
         private route: ActivatedRoute,
@@ -85,8 +74,15 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.getSubjects();
         return this.animalExaminationService.get(this.id).then(examination => {
             this.examination = examination; 
-            this.setSelectedSubject();
+            this.updateSubject();
             //this.loadExaminationAnesthetic();
+            if(this.examination && this.examination.subjectId ){
+                this.animalSubjectService
+        			.findAnimalSubjectBySubjectId(this.examination.subjectId)
+        			.then(animalSubject => this.animalSubjectId = animalSubject.id)
+                    .catch((error) => {});
+                
+        	}
         });
     }
 
@@ -97,8 +93,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.getSubjects();
         return this.animalExaminationService.get(this.id).then(examination => {
             this.examination = examination;
+            this.updateSubject();
             //this.loadExaminationAnesthetic(this.id);
-            this.setSelectedSubject();
             if(this.examination && this.examination.subjectId ){
                 this.animalSubjectService
         			.findAnimalSubjectBySubjectId(this.examination.subjectId)
@@ -118,7 +114,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.getSubjects();
         return Promise.resolve();
     }
-    
 
     buildForm(): FormGroup {
         return this.formBuilder.group({
@@ -126,7 +121,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'studyId': [this.examination.studyId, Validators.required],
             // 'Examination executive': [this.examination.examinationExecutive],
             'centerId': [this.examination.centerId, Validators.required],
-            'subject': [this.selectedSubjectId, Validators.required],
+            'subject': [this.examination.subjectId, Validators.required],
             'examinationDate': [this.examination.examinationDate, Validators.required],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
@@ -186,12 +181,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
 	
     
-    setSelectedSubject(){
-        if (this.examination && this.examination.subject){
-            this.selectedSubjectId = this.examination.subject.id;
-        }
-    }
-    
     getSubjectById(id: number): Subject{
     	if (this.subjects){
     		for (let s of this.subjects) {
@@ -204,13 +193,9 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
     
     updateSubject(){
-    	if (this.selectedSubjectId){
-    		let subject : Subject = this.getSubjectById(this.selectedSubjectId);
-    		if (subject){
-    			this.examination.subjectId = this.selectedSubjectId;
-    			this.examination.subjectName = subject.name;
-    		}
-    		this.examination.subjectId = this.selectedSubjectId;
+    	if (this.examination && this.examination.subject){
+    		this.examination.subjectId = this.examination.subject.id;
+    		this.examination.subjectName = this.examination.subject.name;
     	}
     }
     
@@ -241,7 +226,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
 
     protected save(): Promise<void> {
-        this.updateSubject();
+        //this.updateSubject();
         return super.save();
     }
 
@@ -386,8 +371,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     closeAttachedFilePopin(id?: number) {
         this.attachNewFilesModal.hide();
     }
-    
-    
     
 
 }

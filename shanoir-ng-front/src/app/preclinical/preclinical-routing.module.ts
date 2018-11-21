@@ -34,12 +34,6 @@ import { AnestheticIngredientsListComponent } from './anesthetics/ingredients/li
 
 let routes : Routes= [
     { 
-        path: 'preclinical-subjects', 
-        component: AnimalSubjectsListComponent 
-    },{ 
-        path: 'preclinical-subject', 
-        component: AnimalSubjectFormComponent 
-    },{ 
         path: 'preclinical-contrastagents', 
         component: ContrastAgentsListComponent 
     },{ 
@@ -81,7 +75,8 @@ let routes : Routes= [
       getRoutesFor('preclinical-pathology', PathologyFormComponent,PathologiesListComponent, AuthNotGuestGuard), 
       getRoutesFor('preclinical-pathology-model', PathologyModelFormComponent,PathologyModelsListComponent, AuthNotGuestGuard),
       getRoutesFor('preclinical-anesthetic-ingredient', AnestheticIngredientFormComponent,AnestheticIngredientsListComponent, AuthNotGuestGuard),
-      getRoutesFor('preclinical-anesthetic', AnestheticFormComponent,AnestheticsListComponent, AuthNotGuestGuard)
+      getRoutesFor('preclinical-anesthetic', AnestheticFormComponent,AnestheticsListComponent, AuthNotGuestGuard),
+      getRoutesFor('preclinical-subject', AnimalSubjectFormComponent,AnimalSubjectsListComponent, AuthNotGuestGuard)
   );
 
   export const preclinicalRouting: ModuleWithProviders = RouterModule.forRoot(routes); 

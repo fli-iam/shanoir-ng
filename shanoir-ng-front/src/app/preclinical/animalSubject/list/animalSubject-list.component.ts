@@ -1,19 +1,16 @@
-import {Component, ViewChild, ViewContainerRef} from '@angular/core'
-import { Router } from '@angular/router'; 
-
-import { ConfirmDialogService } from "../../../shared/components/confirm-dialog/confirm-dialog.service";
-import { KeycloakService } from "../../../shared/keycloak/keycloak.service";
-
+import {Component, ViewChild} from '@angular/core'
 
 import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
-import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
-import { FilterablePageable, Page } from '../../../shared/components/table/pageable.model';
-import { BrowserPaging } from '../../../shared/components/table/browser-paging.model';
 import { TableComponent } from '../../../shared/components/table/table.component';
+import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
+import { ServiceLocator } from '../../../utils/locator.service';
+import { ShanoirError } from '../../../shared/models/error.model';
+import { resolve } from 'url';
+
 
 @Component({
   selector: 'animalSubject-list',
@@ -21,103 +18,48 @@ import { TableComponent } from '../../../shared/components/table/table.component
   styleUrls: ['animalSubject-list.component.css'], 
   providers: [AnimalSubjectService]
 })
-export class AnimalSubjectsListComponent {
-  public preclinicalSubjects: PreclinicalSubject[];
-  public animalSubjects: AnimalSubject[];
-  public subjects: Subject[];
-  private animalSubjectsPromise: Promise<void> = this.getAnimalSubjects();
-  private browserPaging: BrowserPaging<PreclinicalSubject>;
-  public rowClickAction: Object;
-  
-  private columnDefs: any[];
-  private customActionDefs: any[];
-  @ViewChild('preclinicalSubjectsTable') table: TableComponent;
-    
+export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponent<PreclinicalSubject>{
+
+    @ViewChild('preclinicalSubjectsTable') table: TableComponent;
+
+    public preclinicalSubjects: PreclinicalSubject[];
+    public animalSubjects: AnimalSubject[];
+    public subjects: Subject[];
+
     constructor(
-        public animalSubjectService: AnimalSubjectService,
-        public router: Router,
-        public confirmDialogService: ConfirmDialogService, 
-        private keycloakService: KeycloakService,
-        private viewContainerRef: ViewContainerRef) {
-        
-            this.createColumnDefs();
-     }
-     
-     getPage(pageable: FilterablePageable): Promise<Page<PreclinicalSubject>> {
-        return new Promise((resolve) => {
-            this.animalSubjectsPromise.then(() => {
-                resolve(this.browserPaging.getPage(pageable));
+        private animalSubjectService: AnimalSubjectService) {
+            super('preclinical-subject');
+    }
+
+
+    getEntities(): Promise<PreclinicalSubject[]> {
+        return new  Promise<PreclinicalSubject[]>(resolve => {
+            this.preclinicalSubjects = [];
+            this.animalSubjects = [];
+            this.subjects = [];
+            Promise.all([
+                this.animalSubjectService.getSubjects(),
+                this.animalSubjectService.getAnimalSubjects()
+            ]).then(([subjects, animalSubjects]) => {
+                this.subjects = subjects;
+                this.animalSubjects = animalSubjects;
+                if (this.animalSubjects){
+                    for (let s of this.animalSubjects){
+                        let preSubject: PreclinicalSubject = new PreclinicalSubject();
+                        preSubject.animalSubject = s;
+                        preSubject.id = s.id;
+                        preSubject.subject = this.getSubjectWithId(s.subjectId);
+                        this.preclinicalSubjects.push(preSubject);
+                    }
+                }
+                resolve(this.preclinicalSubjects);
             });
         });
     }
     
-    getAnimalSubjects(): Promise<void> {
-    	this.preclinicalSubjects = [];
-    	
-        this.browserPaging = new BrowserPaging(this.preclinicalSubjects, this.columnDefs);
-        return this.animalSubjectService.getSubjects().then(subjects => {
-            	
-        	this.animalSubjectService.getAnimalSubjects().then(animalSubjects => {
-            	if(animalSubjects){
-                	this.animalSubjects = animalSubjects;
-            	}else{
-                	this.animalSubjects = [];
-            	}
-        
-            	if(subjects){
-                	this.subjects = subjects;
-                	// build preclinical subject
-                	this.preclinicalSubjects = [];
-    				if (this.animalSubjects){
-    					for (let s of this.animalSubjects){
-    						let preSubject: PreclinicalSubject = new PreclinicalSubject();
-    						preSubject.animalSubject = s;
-    						preSubject.id = s.id;
-    						preSubject.subject = this.getSubjectWithId(s.subjectId);
-    						this.preclinicalSubjects.push(preSubject);
-    					}
-    				}
-            	}else{
-                	this.subjects = [];
-            	}
-               this.browserPaging = new BrowserPaging(this.preclinicalSubjects, this.columnDefs);
-                this.table.refresh();
-        	});
-        
-        	}) ;
-            
-        
-    }
-    
-    
-    
-    
-    getSubjectWithId(subjectId: number): Subject {
-    	if (this.subjects){
-    		for (let s of this.subjects){
-    			if (s.id == subjectId){
-    				return s;
-    			}
-    		}
-    	}
-    }
-    
-    
-    delete(preclinicalSubject: PreclinicalSubject): void {    
-      this.animalSubjectService.delete(preclinicalSubject.animalSubject.id).then((res) => {
-      	this.animalSubjectService.deleteSubject(preclinicalSubject.subject.id).then((res2) => {
-      		this.getAnimalSubjects();
-      	})
-      }
-      );
-    }
-        
-    // Grid columns definition
-    private createColumnDefs() {
-        function castToString(id: number) {
-            return String(id);
-        };
-        this.columnDefs = [
+
+    getColumnDefs(): any[] {
+        let colDef: any[] = [
             {headerName: "Common name", field: "subject.name"},
             {headerName: "Imaged object category", field: "subject.imagedObjectCategory", cellRenderer: function (params: any) {
                     let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory>params.data.subject.imagedObjectCategory;
@@ -137,63 +79,54 @@ export class AnimalSubjectsListComponent {
             {headerName: "Strain", field: "animalSubject.strain.value"},
             {headerName: "Biological type", field: "animalSubject.biotype.value"},
             {headerName: "Provider", field: "animalSubject.provider.value"},
-            {headerName: "Stabulation", field: "animalSubject.stabulation.value"}
-           
+            {headerName: "Stabulation", field: "animalSubject.stabulation.value"} 
         ];
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.columnDefs.push(
-            	{headerName: "", type: "button", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.openDeleteSubjectConfirmDialog},
-            	{headerName: "", type: "button", img: ImagesUrlUtil.EDIT_ICON_PATH, target : "/preclinical-subject", getParams: function(item: any): Object {
-                	return {id: item.id, mode: "edit"};
-            	}}
-            );
-        }
-        if (!this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({headerName: "", type: "button", img: ImagesUrlUtil.VIEW_ICON_PATH, target : "/preclinical-subject", getParams: function(item: any): Object {
-                return {id: item.id, mode: "view"};
-            }});
-        }
-        
-        
-        this.customActionDefs = [];
-            if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
-            this.customActionDefs.push({title: "new subject", img: ImagesUrlUtil.ADD_ICON_PATH, target: "/preclinical-subject", getParams: function(item: any): Object {
-                    return {mode: "create"};
-            }});
-            this.customActionDefs.push({title: "delete selected", img: ImagesUrlUtil.GARBAGE_ICON_PATH, action: this.deleteAll });
-            }
-            if (!this.keycloakService.isUserGuest()) {
-                this.rowClickAction = {target : "/preclinical-subject", getParams: function(item: any): Object {
-                        return {id: item.id, mode: "view"};
-                }};
-            }
-    }
-    
-    private onRowClick(item: PreclinicalSubject) {
-        if (!this.keycloakService.isUserGuest()) {
-            this.router.navigate(['/preclinical-subject'], { queryParams: { id: item.id, mode: "view" } });
-        }
-    }
-    
-    openDeleteSubjectConfirmDialog = (item: PreclinicalSubject) => {
-         this.confirmDialogService
-                .confirm('Delete subject', 'Are you sure you want to delete subject ' + item.animalSubject.id + '?', 
-                    this.viewContainerRef)
-                .subscribe(res => {
-                    if (res) {
-                        this.delete(item);
-                    }
-                });
-    }
-    
-    deleteAll = () => {
-        let ids: number[] = [];
-        for (let subject of this.preclinicalSubjects) {
-            if (subject["isSelectedInTable"]) ids.push(subject.animalSubject.id);
-        }
-        if (ids.length > 0) {
-            console.log("TODO : delete those ids : " + ids);
-        }
+        return colDef;       
     }
 
+    getCustomActionsDefs(): any[] {
+        return [];
+    }
+
+    getSubjectWithId(subjectId: number): Subject {
+    	if (this.subjects){
+    		for (let s of this.subjects){
+    			if (s.id == subjectId){
+    				return s;
+    			}
+    		}
+    	}
+    }
+    
+    protected openDeleteConfirmDialog = (entity: PreclinicalSubject) => {
+        if (this.keycloakService.isUserGuest()) return;
+        this.confirmDialogService
+            .confirm(
+                'Delete', 'Are you sure you want to delete preclinical-subject n° ' + entity.animalSubject.id+ ' ?',
+                ServiceLocator.rootViewContainerRef
+            ).subscribe(res => {
+                if (res) {
+                    this.animalSubjectService.delete(entity.animalSubject.id).then((res) => {
+                        this.animalSubjectService.deleteSubject(entity.subject.id).then((res2) => {
+                            const index: number = this.preclinicalSubjects.indexOf(entity);
+                            if (index !== -1) {
+                                this.preclinicalSubjects.splice(index);
+                            }
+                            this.table.refresh();
+                            this.msgBoxService.log('info', 'The preclinical-subject sucessfully deleted');
+                        })
+                    }
+                    ).catch(reason => {
+                        if (reason && reason.error) {
+                            this.onDelete.next(new ShanoirError(reason));
+                            if (reason.error.code != 422) throw Error(reason);
+                        }
+                    });                
+                }
+            }
+        )
+    }
+
+    
+    
 }

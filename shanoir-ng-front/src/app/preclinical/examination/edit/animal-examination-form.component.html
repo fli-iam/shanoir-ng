@@ -24,10 +24,17 @@
 							</a>		
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
-								<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
-							</select>
-							<label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
+							<div [ngSwitch]="examination.hasStudyCenterData">
+								<ng-template [ngSwitchCase]="true">
+									{{examination.studyName}}
+								</ng-template>
+								<ng-template [ngSwitchCase]="false">
+									<select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
+										<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
+									</select>
+									<label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
+								</ng-template>
+							</div>
 						</ng-template>
 					</span>
 				</li>
@@ -53,10 +60,17 @@
 							</a>
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="centerId" required formControlName="centerId" [(ngModel)]="examination.centerId">
-								<option *ngFor="let center of centers" [ngValue]="center.id">{{center.name}}</option>
-							</select>
-							<label *ngIf="hasError('centerId', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
+							<div [ngSwitch]="examination.hasStudyCenterData">
+								<ng-template [ngSwitchCase]="true">
+									{{examination.centerName}}
+								</ng-template>
+								<ng-template [ngSwitchCase]="false">
+									<select id="centerId" required formControlName="centerId" [(ngModel)]="examination.centerId">
+										<option *ngFor="let center of centers" [ngValue]="center.id">{{center.name}}</option>
+									</select>
+									<label *ngIf="hasError('centerId', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
+								</ng-template>
+							</div>
 						</ng-template>
 					</span>
 				</li>
@@ -64,17 +78,17 @@
 					<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
-							<a [routerLink]="['/preclinical-subject']" [queryParams]="{mode: 'view', id: animalSubjectId}">
+							<a [routerLink]="['/preclinical-subject/details/', animalSubjectId]">
 								{{examination.subject?.name}}
 							</a>
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<div [ngSwitch]="hasStudyCenterData">
+							<div [ngSwitch]="examination.hasStudyCenterData">
 								<ng-template [ngSwitchCase]="true">
 									{{examination.subjectName}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="false">
-									<select id="subject" required formControlName="subject" [(ngModel)]="selectedSubjectId" >
+									<select id="subject" required formControlName="subject" [(ngModel)]="examination.subjectId" >
 										<option *ngFor="let subject of subjects" [ngValue]="subject.id">{{subject.name}}</option>
 									</select>
 									<label *ngIf="hasError('subject', ['required'])" class="form-validation-alert" i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">Subject is required!</label>

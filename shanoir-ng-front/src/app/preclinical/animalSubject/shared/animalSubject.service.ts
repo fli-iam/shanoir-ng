@@ -1,126 +1,90 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
 
 import { AnimalSubject } from './animalSubject.model';
 import { Subject }    from '../../../subjects/shared/subject.model';
-import { PreclinicalSubject } from './preclinicalSubject.model';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import * as AppUtils from '../../../utils/app.utils';
+import { EntityService } from '../../../shared/components/entity/entity.abstract.service';
+import { PreclinicalSubject } from './preclinicalSubject.model';
 
 @Injectable()
-export class AnimalSubjectService {
+export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
+
+    API_URL = PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL;
+
+    getEntityInstance() { return new PreclinicalSubject(); }
+
              
-        constructor(private http: HttpClient) { }    
-    
-    
-        getAnimalSubjects(): Promise<AnimalSubject[]>{
-            return this.http.get<AnimalSubject[]>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_ALL_URL)
-                    .toPromise();
-        }
-        
-        getSubjects(): Promise<Subject[]> {
-        	return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL)
-            	.toPromise();
-    	}
-    	
-    	getPreclinicalSubjects(preclinical : boolean): Promise<Subject[]> {
-        	return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_FILTER_URL+"/"+preclinical)
-            	.toPromise();
-    	}
-  
-        getAnimalSubject(id: number): Promise<AnimalSubject>{
-            return this.http.get<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL+"/"+id)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting AnimalSubject', error);
-                        return Promise.reject(error.message || error);
-            });
-        }
-        
-        getSubject(id: number): Promise<Subject> {
-        	return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id)
-            	.toPromise()
-            	.then(res => res)
-            	.catch((error) => {
-                	console.error('Error while getting subject', error);
-                	return Promise.reject(error.message || error);
-            	});
-    	}
-  
-    
-        update(animalSubject: AnimalSubject): Observable<AnimalSubject> {
-          const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/`+animalSubject.id;
-          return this.http
-            .put<AnimalSubject>(url, JSON.stringify(animalSubject))
-            .map(response => response);
-        }
-        
-        updateSubject(id: number, subject: Subject): Observable<Subject> {
-        	return this.http.put<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id, JSON.stringify(subject))
-            	.map(response => response);
-    	}
-        
-    
-        create(animalSubject: AnimalSubject): Observable<AnimalSubject> {
-        	return this.http.post<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, JSON.stringify(animalSubject))
-            	.map(res => res);
-    	}
-    	
-    	
-    	createSubject(subject: Subject): Promise<Subject> {
-       		return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, JSON.stringify(subject))
-            	.toPromise();
-    	}
-    	
-    
-        
-        delete(id: number): Promise<void> {
-        	return this.http.delete<void>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL + '/' + id)
-            	.toPromise()
-            	.catch((error) => {
-                	console.error('Error delete animalSubject', error);
-                	return Promise.reject(error);
-            	});
-    	}
-    	
-    	deleteSubject(id: number): Promise<void> {
-        	return this.http.delete<void>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id)
-           		.toPromise()
-            	.catch((error) => {
-                	console.error('Error delete subject', error);
-                	return Promise.reject(error);
-            });
-    	}
- 
-        /*This method is to avoid unexpected error if returned object is null*/
-        private extractData(res: Response) {
-            let body;        
-            // check if empty, before call json
-            if (res.text()) {
-                body = res.json();
-            }
-            return body || {};
-        }
-        
-        findAnimalSubjectBySubjectId(subjectId: number){
-        	return this.http.get<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECT_FIND_URL+"/"+subjectId)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting AnimalSubject by subject', error);
-                        return Promise.reject(error.message || error);
-            });
-        }
-        
-        findSubjectByIdentifier(identifier: string): Promise<Subject> {
-        	return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
-            .toPromise()
-            .catch((error)=> {
-                console.error('Error while finding subject by identifier', error);
-                return Promise.reject(error.message || error);
-        });
+    getAnimalSubjects(): Promise<AnimalSubject[]>{
+        return this.http.get<AnimalSubject[]>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_ALL_URL)
+            .toPromise();
     }
     
+    getSubjects(): Promise<Subject[]> {
+        return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL)
+            .toPromise();
+    }
+    
+    getPreclinicalSubjects(preclinical : boolean): Promise<Subject[]> {
+        return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_FILTER_URL+"/"+preclinical)
+            .toPromise();
+    }
+
+    getAnimalSubject(id: number): Promise<AnimalSubject>{
+        return this.http.get<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL+"/"+id)
+            .toPromise();
+    }
+    
+    getSubject(id: number): Promise<Subject> {
+        return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id)
+            .toPromise();
+    }
+
+
+    updateAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
+      const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/`+animalSubject.id;
+      return this.http
+        .put<AnimalSubject>(url, JSON.stringify(animalSubject))
+        .map(response => response).toPromise();
+    }
+    
+    updateSubject(id: number, subject: Subject): Promise<Subject> {
+        return this.http.put<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id, JSON.stringify(subject))
+            .map(response => response).toPromise();
+    }
+    
+
+    createAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
+        return this.http.post<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, JSON.stringify(animalSubject))
+            .map(res => res).toPromise();
+    }
+
+    
+    
+    createSubject(subject: Subject): Promise<Subject> {
+        return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, JSON.stringify(subject))
+            .toPromise();
+    }
+    
+
+    
+    delete(id: number): Promise<void> {
+        return this.http.delete<void>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL + '/' + id)
+            .toPromise();
+    }
+    
+    deleteSubject(id: number): Promise<void> {
+        return this.http.delete<void>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id)
+            .toPromise();
+    }
+    
+    findAnimalSubjectBySubjectId(subjectId: number){
+        return this.http.get<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECT_FIND_URL+"/"+subjectId)
+            .toPromise();
+    }
+    
+    findSubjectByIdentifier(identifier: string): Promise<Subject> {
+        return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
+        .toPromise()    ;
+    }
 }
