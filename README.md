@@ -56,7 +56,9 @@ into the folder /docker-compose to be used from there by docker-compose
     * **docker volume prune**
     * **Attention:** this will clean your entire docker system!
 
-* Go to the root folder and execute **docker-compose up --build**
+* Go to the root folder (/shanoir-ng) and execute **docker-compose up --build**
+**Attention:** the file .env in the root folder is used to set environment variables
+and will not be found if you run docker-compose elsewhere; results in errors after
 
 * Access to shanoir-ng: http://shanoir-ng-nginx
 
