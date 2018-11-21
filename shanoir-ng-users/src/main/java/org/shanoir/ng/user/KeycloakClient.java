@@ -33,23 +33,23 @@ public class KeycloakClient {
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(KeycloakClient.class);
 
+	@Value("${kc.admin.client.server.url}")
+	private String kcAdminClientServerUrl;
+
+	@Value("${kc.admin.client.realm}")
+	private String kcAdminClientRealm;
+
+	@Value("${kc.admin.client.client.id}")
+	private String kcAdminClientClientId;
+
+	@Value("${kc.admin.client.username}")
+	private String kcAdminClientUsername;
+
+	@Value("${kc.admin.client.password}")
+	private String kcAdminClientPassword;
+	
 	@Value("${keycloak.realm}")
 	private String keycloakRealm;
-
-	@Value("${kc.requests.admin.login}")
-	private String keycloakRequestsAdminLogin;
-
-	@Value("${kc.requests.admin.password}")
-	private String keycloakRequestsAdminPassword;
-
-	@Value("${keycloak.auth-server-url}")
-	private String keycloakRequestsAuthServerUrl;
-
-	@Value("${kc.requests.client.id}")
-	private String keycloakRequestsClientId;
-
-	@Value("${kc.requests.realm}")
-	private String keycloakRequestsRealm;
 
 	private Keycloak keycloak;
 
@@ -58,8 +58,8 @@ public class KeycloakClient {
 
 	protected Keycloak getKeycloak() {
 		if (keycloak == null) {
-			keycloak = Keycloak.getInstance(keycloakRequestsAuthServerUrl, keycloakRequestsRealm,
-					keycloakRequestsAdminLogin, keycloakRequestsAdminPassword, keycloakRequestsClientId);
+			keycloak = Keycloak.getInstance(kcAdminClientServerUrl, kcAdminClientRealm,
+					kcAdminClientUsername, kcAdminClientPassword, kcAdminClientClientId);
 		}
 		return keycloak;
 	}
