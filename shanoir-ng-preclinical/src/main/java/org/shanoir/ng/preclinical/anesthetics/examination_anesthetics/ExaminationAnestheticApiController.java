@@ -96,9 +96,6 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
 		final List<ExaminationAnesthetic> examAnesthetics = examAnestheticsService.findByExaminationId(id);
-		if (examAnesthetics.isEmpty()) {
-			return new ResponseEntity<List<ExaminationAnesthetic>>(HttpStatus.NO_CONTENT);
-		}
 		return new ResponseEntity<List<ExaminationAnesthetic>>(examAnesthetics, HttpStatus.OK);
 	}
 

@@ -207,9 +207,6 @@ public class ExtraDataApiController implements ExtraDataApi {
 	public ResponseEntity<List<ExaminationExtraData>> getExaminationExtraData(
 			@ApiParam(value = "ID of examination from which we get extradata", required = true) @PathVariable("id") Long id) {
 		final List<ExaminationExtraData> extradatas = extraDataService.findAllByExaminationId(id);
-		if (extradatas.isEmpty()) {
-			return new ResponseEntity<List<ExaminationExtraData>>(HttpStatus.NO_CONTENT);
-		}
 		return new ResponseEntity<List<ExaminationExtraData>>(extradatas, HttpStatus.OK);
 	}
 
