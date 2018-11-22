@@ -46,7 +46,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             return null;
         };
         return [
-            {headerName: "Id", field: "id", type: "number", width: "30px"},
+            {headerName: "Id", field: "id", type: "number", width: "30px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Name", field: "name", orderBy: ["updatedMetadata.name", "originMetadata.name", "id"]},
             {headerName: "Type", field: "type", width: "50px", suppressSorting: true},
             {headerName: "Subject", field: "subjectId", cellRenderer: (params: any) => this.getSubjectName(params.data.subjectId)},

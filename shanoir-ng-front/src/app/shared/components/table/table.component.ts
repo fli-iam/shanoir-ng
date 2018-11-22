@@ -35,6 +35,7 @@ export class TableComponent implements OnInit {
 
 
     ngOnInit() {
+        this.getDefaultSorting();
         this.goToPage(1);
     }
 
@@ -246,6 +247,16 @@ export class TableComponent implements OnInit {
         if (!this.items) return;
         for (let item of this.items) {
             item["isSelectedInTable"] = false;
+        }
+    }
+
+    private getDefaultSorting() {
+        for (let col of this.columnDefs) {
+            if (col.defaultSortCol) {
+                this.lastSortedCol = col;
+                this.lastSortedAsc = col.defaultAsc != undefined ? col.defaultAsc : true;
+            }
+            return;
         }
     }
 
