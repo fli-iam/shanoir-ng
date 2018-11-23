@@ -20,11 +20,8 @@ th { width: 100%; white-space: normal; }
 			.controls .options .max-results { width: 40px; text-align: right; }
 	.select-ctrl button { padding: 0 5px; }
 	.select-ctrl input[type="checkbox"] { margin: 0; width: 15px; }
-	th.sortable { cursor: pointer; position: relative; }
-		th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
+	th.sortable { cursor: pointer; position: relative; z-index: 0; }
 	th.checkbox-col { width: 21px; }
-	th.active { z-index: 10; background-color: var(--color-b-light2); }
-	th.sortable:hover { z-index: 5; background-color: var(--color-b-light2); }
 	th.col-date { width: 70px; }
 	th.col-boolean { width: 20px; }
 	th.col-button { width: 20px; }
@@ -59,3 +56,8 @@ a.link { text-decoration: none; color: inherit; }
 	a.link svg:hover { color: var(--color-a); }
 
 .cell-button svg:hover { color: var(--color-a); }
+
+.triangle { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; }
+	.triangle svg { width: 100%; max-width: 150px; height: 100%;}
+	.triangle svg polygon { fill: var(--color-b-light2); }
+.col-title { z-index: 1; }

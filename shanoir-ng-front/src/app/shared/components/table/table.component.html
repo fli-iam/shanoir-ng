@@ -34,11 +34,14 @@
         [class.active]="lastSortedCol==col"
         [attr.title]="col.tip != undefined ? col.tip : col.headerName"
         [style.width]="col.width"
-        >{{col.headerName}}
-            <span class="sort-arrow" *ngIf="!col.suppressSorting && col.type!='button'">
-                <span *ngIf="lastSortedCol?.field==col.field && !lastSortedAsc" class="arrow arrowUp">&#9652;</span>   
-                <span *ngIf="lastSortedCol?.field==col.field && lastSortedAsc" class="arrow arrowDown">&#9662;</span>
+        >
+            <span class="triangle" *ngIf="lastSortedCol?.field==col.field && !col.suppressSorting && col.type!='button'">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon *ngIf="lastSortedAsc" points="0,0 100,0 50,100" />
+                    <polygon *ngIf="!lastSortedAsc" points="0,100 100,100 50,0" />
+                </svg>
             </span>
+            <span class="col-title">{{col.headerName}}</span>
     </th>
 </tr>
 </thead>
