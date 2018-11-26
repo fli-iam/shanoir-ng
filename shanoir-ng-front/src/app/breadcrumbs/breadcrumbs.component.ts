@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { BreadcrumbsService, Step } from './breadcrumbs.service';
 import { Router } from '@angular/router';
 
@@ -26,5 +26,11 @@ export class BreadcrumbsComponent {
 
     goHome() {
         this.router.navigate(['/home']);
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == 'œ') {
+            console.log('breadcrumbs', this.service.steps);
+        }
     }
 }

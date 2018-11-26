@@ -108,6 +108,9 @@ import { Router } from './breadcrumbs/router';
 import { GlobalService } from './shared/services/global.service';
 import { SelectBoxComponent } from './shared/select/select.component';
 import { SelectOptionComponent } from './shared/select/select.option.component';
+import { FinishImportComponent } from './import/finish/finish.component';
+import { UploaderComponent } from './shared/components/uploader/uploader.component';
+import { ImportDataService } from './import/import.data-service';
 
 
 @NgModule({
@@ -191,6 +194,8 @@ import { SelectOptionComponent } from './shared/select/select.option.component';
         BreadcrumbsComponent,
         SelectBoxComponent,
         SelectOptionComponent
+        FinishImportComponent,
+        UploaderComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -230,6 +235,7 @@ import { SelectOptionComponent } from './shared/select/select.option.component';
         BreadcrumbsService,
         Router,
         GlobalService
+        ImportDataService
     ],
     bootstrap: [AppComponent],
 })

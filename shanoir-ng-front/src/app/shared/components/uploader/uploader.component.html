@@ -1,0 +1,4 @@
+<input #input hidden type="file" (change)="changeFile($event)"/>
+<button (click)="click()" [disabled]="loading" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
+<div class="filename" *ngIf="!loading && filename" [class.error]="error"><i class="far fa-file-archive"></i>{{filename}}</div>
+<img class="loader" *ngIf="loading" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH" />

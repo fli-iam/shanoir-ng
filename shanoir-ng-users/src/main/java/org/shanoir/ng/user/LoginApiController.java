@@ -28,14 +28,14 @@ public class LoginApiController extends AbstractUserRequestApiController impleme
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(LoginApiController.class);
 
-	@Value("${kc.host.name}")
-	private String keycloakHostName;
+	@Value("${kc.admin.client.host.name}")
+	private String kcAdminClientHostName;
 
 	public ResponseEntity<Void> login(
 			@ApiParam(value = "username of user for login date update", required = true) @RequestBody final String username,
 			@Context final HttpServletRequest httpRequest) {
 		try {
-			final InetAddress address = InetAddress.getByName(keycloakHostName);
+			final InetAddress address = InetAddress.getByName(kcAdminClientHostName);
 			if (!httpRequest.getRemoteAddr().equals(address.getHostAddress())) {
 				LOG.error("Request does not come from local keycloak server.");
 				return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);

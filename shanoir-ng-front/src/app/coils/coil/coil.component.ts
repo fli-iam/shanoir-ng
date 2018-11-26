@@ -105,9 +105,7 @@ export class CoilComponent extends EntityComponent<Coil> {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                console.log('currentStep', currentStep.timestamp);
                 (currentStep.entity as Coil).center = entity as Center;
-                console.log(currentStep.entity['center'])
             });
         });
     }
