@@ -125,18 +125,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'examinationDate': [this.examination.examinationDate, Validators.required],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
-            'subjectWeight': [this.examination.subjectWeight], 
-             //regarding examination anesthetic
-            newExamAnestheticForm: this.formBuilder.group({
-                'anesthetic': [this.examAnesthetic.anesthetic],
-                'injectionInterval': [this.examAnesthetic.injection_interval],
-                'injectionSite': [this.examAnesthetic.injection_site],
-                'injectionType': [this.examAnesthetic.injection_type],
-                'dose': [this.examAnesthetic.dose],
-                'dose_unit': [this.examAnesthetic.dose_unit]
-               // 'startDate': [this.examAnesthetic.startDate],
-               // 'endDate': [this.examAnesthetic.endDate]
-            }), 
+            'subjectWeight': [this.examination.subjectWeight]
         });
     }
 
@@ -199,19 +188,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     	}
     }
     
-    loadExaminationAnesthetic(examination_id: number) {
-        this.examAnestheticService.getExaminationAnesthetics(examination_id)
-            .then(examAnesthetics => {
-                if (examAnesthetics && examAnesthetics.length > 0) {
-                    //Should be only one
-                    let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
-                    //examAnesthetic.dose_unit = this.getReferenceById(examAnesthetic.dose_unit);
-                    //examAnesthetic.anesthetic = this.getAnestheticById(examAnesthetic.anesthetic);    
-                    this.examAnesthetic = examAnesthetic;
-                }
-            });
-
-    }
 
     manageSaveEntity(): void {
         this.subscribtions.push(
@@ -233,13 +209,13 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     manageExaminationAnesthetic(examination_id : number) {
         if (this.examAnesthetic) {
             this.examAnesthetic.examination_id = examination_id;
-            if (this.examAnesthetic.id) {
+            if (this.examAnesthetic  && this.examAnesthetic.internal_id) {
                 this.examAnestheticService.updateAnesthetic(examination_id, this.examAnesthetic)
-                    .subscribe(examAnesthetic => {
+                    .then(examAnesthetic => {
                     });
-            } else if (this.examAnesthetic.anesthetic){
+            } else if (this.examAnesthetic.anesthetic ){
                 this.examAnestheticService.createAnesthetic(examination_id, this.examAnesthetic)
-                    .subscribe(examAnesthetic => {
+                    .then(examAnesthetic => {
                     });
             }
         }

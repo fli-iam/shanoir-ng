@@ -1,5 +1,5 @@
 import { Component,  Input, Output,  EventEmitter  } from '@angular/core';
-import {  ActivatedRoute} from '@angular/router';
+import {  ActivatedRoute, ResolveEnd} from '@angular/router';
 import { FormGroup } from '@angular/forms';
 
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
@@ -13,6 +13,7 @@ import { Enum } from "../../../../shared/utils/enum";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { resolve } from 'path';
 
 @Component({
     selector: 'examination-anesthetic-form',
@@ -53,19 +54,23 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     initView(): Promise<void> {
         this.getEnums();
-        this.loadData();
-        return this.examAnestheticService.getExaminationAnesthetics(this.examination_id).then(examAnesthetics => {
-            if (examAnesthetics && examAnesthetics.length > 0) {
-                //Should be only one
-                let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
-                this.examinationAnesthetic = examAnesthetic;
-            }
+        this.examinationAnesthetic = new ExaminationAnesthetic();
+        return this.loadData().then(() => {
+            this.examAnestheticService.getExaminationAnesthetics(this.examination_id).then(examAnesthetics => {
+                if (examAnesthetics && examAnesthetics.length > 0) {
+                    //Should be only one
+                    let examAnesthetic: ExaminationAnesthetic = examAnesthetics[0];
+                    this.examinationAnesthetic = examAnesthetic;
+                    this.examinationAnesthetic.internal_id = examAnesthetic.id;
+                }
+            });
         });
     }
 
     
     initEdit(): Promise<void> {
         this.getEnums();
+        this.examinationAnesthetic = new ExaminationAnesthetic();
         return this.loadData().then(() => {
             this.examAnestheticService.getExaminationAnesthetics(this.examination_id).then(examAnesthetics => {
                 if (examAnesthetics && examAnesthetics.length > 0) {
@@ -74,6 +79,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
                     this.examinationAnesthetic = examAnesthetic;
                     this.examinationAnesthetic.dose_unit = this.getReferenceById(examAnesthetic.dose_unit);
                     this.examinationAnesthetic.anesthetic = this.getAnestheticById(examAnesthetic.anesthetic);
+                    this.examinationAnesthetic.internal_id = examAnesthetic.id;
                 }
             });
         });
@@ -161,7 +167,39 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     
 
     goToAddAnesthetic(){
-        this.router.navigate(['/preclinical-anesthetic'], { queryParams: { mode: "create"} });
+        this.router.navigate(['/preclinical-anesthetic/create']);
+    }
+
+    protected save(): Promise<void> {
+        return new  Promise<void>(resolve => {
+            if (this.examinationAnesthetic.id){
+                this.updateExaminationAnesthetic().then(() => {
+                    this.onSave.next(this.examinationAnesthetic);
+                    this.chooseRouteAfterSave(this.entity);
+                    this.msgBoxService.log('info', 'The preclinical-examination n°' + this.examinationAnesthetic.id + ' has been successfully updated');
+                });
+            }else{
+                this.addExaminationAnesthetic().then( () => {
+                    this.onSave.next(this.examinationAnesthetic);
+                    this.chooseRouteAfterSave(this.entity);
+                    this.msgBoxService.log('info', 'The new preclinical-examination has been successfully saved under the number ' + this.examinationAnesthetic.id);
+                });
+                
+            }
+            resolve();
+        });
+    }
+
+    addExaminationAnesthetic(): Promise<void> {
+        if (!this.examinationAnesthetic) { 
+            return Promise.resolve(); 
+        }
+        Promise.resolve(this.examAnestheticService.createAnesthetic(this.examinationAnesthetic.examination_id, this.examinationAnesthetic))
+        .then(() =>resolve());
+    }
+
+    updateExaminationAnesthetic(): Promise<void> {
+        return this.examAnestheticService.update(this.examinationAnesthetic.examination_id, this.examinationAnesthetic);
     }
 
 

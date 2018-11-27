@@ -9,6 +9,7 @@ import { ServiceLocator } from "../../../../utils/locator.service";
 
 export class ExaminationAnesthetic extends Entity {
   id: number;
+  internal_id: number;
   examination_id: number;
   anesthetic:Anesthetic;
   dose:number;

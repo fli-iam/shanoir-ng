@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import { ExaminationAnesthetic } from './examinationAnesthetic.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
@@ -37,18 +35,20 @@ export class ExaminationAnestheticService extends EntityService<ExaminationAnest
          			});
         }
         
-        updateAnesthetic(examination_id:number, examAnesthetic: ExaminationAnesthetic): Observable<ExaminationAnesthetic> {
-            const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examination_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}/${examAnesthetic.id}`;
+        updateAnesthetic(examination_id:number, examAnesthetic: ExaminationAnesthetic): Promise<ExaminationAnesthetic> {
+            const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examination_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}/${examAnesthetic.internal_id}`;
             return this.http
               .put<ExaminationAnesthetic>(url, JSON.stringify(examAnesthetic))
-              .map(response => response);
+              .map(response => response)
+              .toPromise();
           }
       
-        createAnesthetic(examination_id:number, examAnesthetic: ExaminationAnesthetic): Observable<ExaminationAnesthetic> {
+        createAnesthetic(examination_id:number, examAnesthetic: ExaminationAnesthetic): Promise<ExaminationAnesthetic> {
             const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examination_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}`;
               return this.http
               .post<ExaminationAnesthetic>(url, JSON.stringify(examAnesthetic))
-              .map(res => res);
+              .map(res => res)
+              .toPromise();
           }
 
         deleteAnesthetic(examAnesthetic: ExaminationAnesthetic): Promise<void> {
