@@ -146,9 +146,6 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 			return new ResponseEntity<List<SubjectPathology>>(HttpStatus.NOT_FOUND);
 		} else {
 			final List<SubjectPathology> pathos = pathosService.findByAnimalSubject(animalSubject);
-			if (pathos.isEmpty()) {
-				return new ResponseEntity<List<SubjectPathology>>(HttpStatus.NO_CONTENT);
-			}
 			return new ResponseEntity<List<SubjectPathology>>(pathos, HttpStatus.OK);
 		}
 	}

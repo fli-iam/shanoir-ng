@@ -146,9 +146,6 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Subject not found", new ErrorDetails()));
 		} else {
 			final List<SubjectTherapy> subtherapies = subtherapiesService.findAllByAnimalSubject(animalSubject);
-			if (subtherapies.isEmpty()) {
-				return new ResponseEntity<List<SubjectTherapy>>(HttpStatus.NO_CONTENT);
-			}
 			return new ResponseEntity<List<SubjectTherapy>>(subtherapies, HttpStatus.OK);
 		}
 	}
