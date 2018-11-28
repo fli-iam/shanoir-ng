@@ -27,7 +27,7 @@
 										<option *ngFor="let therapy of therapies" [ngValue]="therapy">{{therapy.name}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin() " i18n="Edit subjectTherapy|Add a new therapy" (click)="goToAddTherapy()">
-										<img [src]="addIconPath"/>
+										<i class="fas fa-plus-square"></i>
 										new therapy
 									</button>
 									<label *ngIf="hasError('therapy', ['required'])" [@slideDown]="hasError('therapy', ['required'])" class="form-validation-alert" i18n="Edit subjectTherapy|Therapy required error@@subjectTherapyDetailTherapyRequiredError">Therapy is required!</label>

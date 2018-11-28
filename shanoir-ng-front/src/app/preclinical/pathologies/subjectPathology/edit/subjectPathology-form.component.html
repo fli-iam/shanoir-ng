@@ -28,7 +28,7 @@
 										<option *ngFor="let pathology of pathologies" [ngValue]="pathology">{{pathology.name}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subPatho|Add a new pathology" (click)="goToAddPathology()">
-										<img [src]="addIconPath"/>
+										<i class="fas fa-plus-square"></i>
 										new pathology
 									</button>
 									<label *ngIf="hasError('pathology', ['required'])" [@slideDown]="hasError('pathology', ['required'])" class="form-validation-alert" i18n="Edit subjectPathology|Pathology required error@@subjectPathologyDetailPathologyRequiredError">Pathology is required!</label>
@@ -46,7 +46,7 @@
 										<option *ngFor="let model of modelsDisplay" [ngValue]="model">{{model.name}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subPatho|Add a new pathology model" (click)="goToAddPathologyModel()">
-										<img [src]="addIconPath"/>
+										<i class="fas fa-plus-square"></i>
 										new model
 									</button>
 									<label *ngIf="hasError('pathologyModel', ['required'])" [@slideDown]="hasError('pathologyModel', ['required'])" class="form-validation-alert" i18n="Edit subjectPathology|PathologyModel required error@@subjectPathologyDetailPathologyModelRequiredError">Pathology model is required!</label>
@@ -64,7 +64,7 @@
 										<option *ngFor="let location1 of locations" [ngValue]="location1">{{location1.value}}</option>
 									</select>
 									<button *ngIf="keycloakService.isUserAdmin()" i18n="Edit subPatho|Add a new location" (click)="goToAddLocation()">
-										<img [src]="addIconPath"/>
+										<i class="fas fa-plus-square"></i>
 										new location
 									</button>
 									<label *ngIf="hasError('location', ['required'])" [@slideDown]="hasError('location', ['required'])" class="form-validation-alert" i18n="Edit subjectPathology|Location required error@@subjectPathologyDetailLocationRequiredError">Location is required!</label>
