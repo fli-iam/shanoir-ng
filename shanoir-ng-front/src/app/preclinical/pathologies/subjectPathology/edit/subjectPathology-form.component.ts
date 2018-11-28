@@ -246,13 +246,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     }
 
 
-    private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'yyyy-mm-dd',
-        height: '20px',
-        width: '160px'
-    };
-
-    
 
 
     canUpdatePathology(): boolean{

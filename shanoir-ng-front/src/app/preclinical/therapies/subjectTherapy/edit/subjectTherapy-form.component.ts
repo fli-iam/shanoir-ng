@@ -214,12 +214,6 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         this.toggleFormSTAndReset(false);
     }
 
-    private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'yyyy-mm-dd',
-        height: '20px',
-        width: '160px'
-    };
-
     
     canUpdateTherapy(): boolean{
         return !this.createSTMode && this.keycloakService.isUserAdminOrExpert && this.mode != 'view';
