@@ -69,9 +69,7 @@ let routes : Routes= [
   routes = routes.concat(
       getRoutesFor('preclinical-reference', ReferenceFormComponent, ReferencesListComponent, AuthNotGuestGuard), 
       getRoutesFor('preclinical-examination', AnimalExaminationFormComponent, AnimalExaminationListComponent, AuthNotGuestGuard),
-      getRoutesFor('preclinical-examination-anesthetics', ExaminationAnestheticFormComponent, ExaminationAnestheticsListComponent, AuthNotGuestGuard),
       getRoutesFor('preclinical-therapy', TherapyFormComponent, TherapiesListComponent, AuthNotGuestGuard),
-      getRoutesFor('preclinical-subject-therapy', SubjectTherapyFormComponent, SubjectTherapiesListComponent, AuthNotGuestGuard),
       getRoutesFor('preclinical-pathology', PathologyFormComponent,PathologiesListComponent, AuthNotGuestGuard), 
       getRoutesFor('preclinical-pathology-model', PathologyModelFormComponent,PathologyModelsListComponent, AuthNotGuestGuard),
       getRoutesFor('preclinical-anesthetic-ingredient', AnestheticIngredientFormComponent,AnestheticIngredientsListComponent, AuthNotGuestGuard),
