@@ -1,15 +1,15 @@
 <div class="ContrastAgentFormComponent content-component">
-     <form [formGroup]="newContrastAgentForm" class="ContrastAgentFormComponent max-content" novalidate> 
+	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>validate> 
 		<table class="layout">
 			<tr><td colspan="2">
-				<span class="right-col" [ngSwitch]="mode.state">
-					<ng-template [ngSwitchCase]="Modes.view"> 
+				<span class="right-col" [ngSwitch]="mode">
+					<ng-template [ngSwitchCase]="'view'"> 
 						<div class="header command-zone" i18n="View contrastagent|Title">View contrast agent</div>
 					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.edit"> 
+					<ng-template [ngSwitchCase]="'edit'"> 
 						<div class="header command-zone" i18n="Edit contrastagent|Title">Edit contrast agent</div>
 					</ng-template>
-					<ng-template [ngSwitchCase]="Modes.create"> 
+					<ng-template [ngSwitchCase]="'create'"> 
 						<div class="header command-zone" i18n="Create contrastagent|Title">Add contrast agent</div>
 					</ng-template>
 				</span>
@@ -20,8 +20,8 @@
 					<ol>
 						<li class="required">
 							<label i18n="Edit contrastagent|Name label" class="required-label">Name</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{agent?.name?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -29,17 +29,17 @@
 										<option *ngFor="let name of agentNames" [ngValue]="name">{{name?.value}}</option>
 									</select>
 									<button  i18n="Edit contrastagent|Add a new contrast agent name" (click)="goToAddContrastAgent()">
-										<img [src]="addIconPath"/>
+										<i class="fas fa-plus-square"></i>
 										new contrast agent name
 									</button>
-									<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit contrastagent|NameRequiredError label">Name is required!</label>
+									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit ContrastAgent|Name required error@@constrastAgentDetailNameRequiredError">Name is required!</label>
 								</ng-template>
 							</span>
 						</li>
 						<li>
 							<label i18n="Edit contrastagent|ManufacturedName label">Manufactured Name</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{agent?.manufactured_name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -49,8 +49,8 @@
 						</li>
 						<li>
 							<label i18n="Edit contrastagent|Dose label">Dose</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{agent?.dose}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -60,8 +60,8 @@
 						</li>
 						<li>
 							<label i18n="Edit contrastagent|DoseUnit label">Dose Unit</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{agent?.dose_unit?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -73,8 +73,8 @@
 						</li>
 						<li>
 							<label i18n="Edit contrastagent|Concentration label">Concentration</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{agent?.concentration}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -84,8 +84,8 @@
 						</li>
 						<li>
 							<label i18n="Edit contrastagent|ConcentrationUnit label">Concentration Unit</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{agent?.concentration_unit?.value}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -97,8 +97,8 @@
 						</li>
 						<li>
 							<label i18n="Edit contrastagent|InjectionInterval label">Injection interval</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{enumUtils.getEnumValue(intervals,agent.injection_interval)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -110,8 +110,8 @@
 						</li>
 						<li>
 							<label i18n="Edit contrastagent|InjectionSite label">Injection site</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{enumUtils.getEnumValue(sites,agent.injection_site)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -123,8 +123,8 @@
 						</li>
 						<li>
 							<label i18n="Edit contrastagent|InjectionType label">Injection type</label>
-							<span class="right-col" [ngSwitch]="mode.state">
-								<ng-template [ngSwitchCase]="Modes.view"> 
+							<span class="right-col" [ngSwitch]="mode">
+								<ng-template [ngSwitchCase]="'view'"> 
 										{{enumUtils.getEnumValue(injtypes,agent.injection_type)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -142,13 +142,12 @@
 		
 		
     <div *ngIf="isStandalone">
-	    <table class="contrast_agents_buttons">
-			<tr><td colspan="2"><div class="footer command-zone">
-				<button type="button" i18n="Edit contrastagent|CancelButton label" class="Button" (click)="getOut()">Cancel</button>
-				<button type="button" *ngIf="canModify && mode.isCreateMode()" i18n="Edit contrastagent|CreateButton label" (click)="addContrastAgent()" class="Button" [disabled]="!newContrastAgentForm.valid">Create</button>
-				<button type="button" *ngIf="canModify && mode.isEditMode()" (click)="updateContrastAgent()" i18n="Edit contrastagent|SaveButton label" class="Button" [disabled]="!newContrastAgentForm.valid">Save</button>
-			</div></td></tr>
-	    </table>
+		<form-footer
+			[state]="footerState"
+			(save)="save()"
+			(edit)="goToEdit()"
+			(back)="goBack()">
+		</form-footer>
    	</div>
    	
      </form> 

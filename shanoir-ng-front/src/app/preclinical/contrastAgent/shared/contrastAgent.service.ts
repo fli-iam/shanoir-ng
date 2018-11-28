@@ -1,66 +1,52 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
-
+import { EntityService } from '../../../shared/components/entity/entity.abstract.service';
 import { ContrastAgent } from './contrastAgent.model';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 
 @Injectable()
-export class ContrastAgentService {
+export class ContrastAgentService extends EntityService<ContrastAgent>{
              
-        constructor(private http: HttpClient) { }    
+    API_URL = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL;
+
+    getEntityInstance() { return new ContrastAgent(); }
+      
         
-        getContrastAgents(protocolId:number): Promise<ContrastAgent[]>{
-            const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA+PreclinicalUtils.PRECLINICAL_ALL_URL;
-            return this.http.get<ContrastAgent[]>(url)
-                    .toPromise();
-        }
+    getContrastAgents(protocolId:number): Promise<ContrastAgent[]>{
+        const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA+PreclinicalUtils.PRECLINICAL_ALL_URL;
+        return this.http.get<ContrastAgent[]>(url)
+            .map(entities => entities.map((entity) => this.toRealObject(entity)))    
+            .toPromise();
+    }
   
-        getContrastAgent(protocolId:number): Promise<ContrastAgent>{
-            const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA;
-            return this.http.get<ContrastAgent>(url)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting contrast agent', error);
-                        return Promise.reject(error.message || error);
-            });
-        }
+    getContrastAgent(protocolId:number): Promise<ContrastAgent>{
+        const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA;
+        return this.http.get<ContrastAgent>(url)
+            .map((entity) => this.toRealObject(entity)) 
+            .toPromise();
+    }
   
     
-        update(protocolId:number,agent: ContrastAgent): Observable<ContrastAgent> {
-          const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA+"/"+agent.id;
-          return this.http
+    updateConstrastAgent(protocolId:number,agent: ContrastAgent): Promise<ContrastAgent> {
+        const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA+"/"+agent.id;
+        return this.http
             .put<ContrastAgent>(url, JSON.stringify(agent))
-            .map(response => response);
-        }
+            .map((entity) => this.toRealObject(entity))
+            .toPromise();
+    }
     
-        create(protocolId:number,agent: ContrastAgent): Observable<ContrastAgent> {
-            const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA;
-            return this.http
+    createConstrastAgent(protocolId:number,agent: ContrastAgent): Promise<ContrastAgent> {
+        const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA;
+        return this.http
             .post<ContrastAgent>(url, JSON.stringify(agent))
-            .map(res => res);
-        }
+            .map((entity) => this.toRealObject(entity))
+            .toPromise();
+    }
         
-        delete(protocolId:number,id: number): Promise<void> {
-        	const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA+"/"+id;
-          	return this.http.delete<void>(url)
-            	.toPromise()
-            	.catch((error) => {
-                	console.error('Error delete ContrastAgent', error);
-                	return Promise.reject(error);
-            	});
-    	}
+    deletConstrastAgent(protocolId:number,id: number): Promise<void> {
+        const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA+"/"+id;
+        return this.http.delete<void>(url)
+            .toPromise();
+    }
  
-    
-        /*This method is to avoid unexpected error if returned object is null*/
-        private extractData(res: Response) {
-            let body;        
-            // check if empty, before call json
-            if (res.text()) {
-                body = res.json();
-            }
-            return body || {};
-        }
     
 }
