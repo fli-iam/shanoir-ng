@@ -113,6 +113,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     }
 
     initCreate(): Promise<void> {
+        this.createColumnDefs();
         this.entity = new Anesthetic();
         this.anesthetic.ingredients = [];
         this.ingredientsPromise = Promise.resolve().then(() => {

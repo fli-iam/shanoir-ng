@@ -80,10 +80,8 @@
 										{{subjectTherapy?.startDate}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<my-date-picker id="subjectTherapyStartDate" [options]="myDatePickerOptions" formControlName="startDate" [(ngModel)]="subjectTherapy.startDate" 
-									(dateChanged)="onDateChanged($event,'start')" (inputFieldChanged)="onInputFieldChanged($event,'start')" [selDate]="selectedStartDate">
-									</my-date-picker>
-									<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: yyyy-mm-dd</label>
+									<datepicker id="subjectTherapyStartDate"  [(ngModel)]="subjectTherapy.startDate" formControlName="startDate" ></datepicker>
+									<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="SubjectTherapy detail|Date valid error@@dateValidError">Start Date should be valid ! Date format: dd/mm/yyyy</label>
 								</ng-template>
 							</span>
 						</li>
@@ -94,10 +92,8 @@
 										{{subjectTherapy?.startDate}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<my-date-picker id="subjectTherapyEndDate" [options]="myDatePickerOptions" formControlName="endDate" [(ngModel)]="subjectTherapy.endDate" 
-									(dateChanged)="onDateChanged($event,'end')" (inputFieldChanged)="onInputFieldChanged($event,'end')" [selDate]="selectedEndDate">
-									</my-date-picker>
-									<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: yyyy-mm-dd</label>
+									<datepicker id="subjectTherapyEndDate"  [(ngModel)]="subjectTherapy.endDate" formControlName="endDate" ></datepicker>
+									<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="SubjectTherapy detail|Date valid error@@dateValidError">End Date should be valid ! Date format: dd/mm/yyyy</label>
 								</ng-template>
 							</span>
 						</li>
@@ -107,11 +103,12 @@
 			</tr>
 			
 		</table>
-		<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-				(back)="goBack()">
-		</form-footer>
+
+		<div class="footer command-zone">
+			<button type="button" i18n="Edit subjectTherapy|CancelButton label" class="Button right-icon" (click)="cancelTherapy()">Cancel<i class="fas fa-angle-left"></i></button>
+			<button type="button" *ngIf="canUpdateTherapy()" (click)="updateTherapy()" i18n="Edit subjectTherapy|SaveButton label" class="Button right-icon" [disabled]="!form.valid">Update<i class="far fa-save"></i></button>
+			<button type="button" *ngIf="canAddTherapy()" i18n="Edit subjectTherapy|CreateButton label" (click)="addTherapy()" class="Button right-icon" [disabled]="!form.valid">Create<i class="far fa-save"></i></button>
+				
+		</div>
     </form>
 </div>

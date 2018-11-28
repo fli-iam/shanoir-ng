@@ -1,21 +1,21 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
-
-
+import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import { SubjectPathology } from './subjectPathology.model';
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
-
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 
 @Injectable()
-export class SubjectPathologyService {
+export class SubjectPathologyService extends EntityService<SubjectPathology>{
 
-    constructor(private http: HttpClient) { }
+    API_URL = PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL;
 
+    getEntityInstance() { return new SubjectPathology(); }
+
+    
     getSubjectPathologies(preclinicalSubject: PreclinicalSubject): Promise<SubjectPathology[]> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<SubjectPathology[]>(url)
+            .map(entities => entities.map((entity) => this.toRealObject(entity)))    
             .toPromise();
     }
     
@@ -23,51 +23,46 @@ export class SubjectPathologyService {
     getSubjectPathology(preclinicalSubject: PreclinicalSubject, pid: string): Promise<SubjectPathology>{
     	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${pid}`;
         return this.http.get<SubjectPathology>(url)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting SubjectPathology', error);
-                        return Promise.reject(error.message || error);
-         			});
+            .map((entity) => this.toRealObject(entity))
+            .toPromise();
     }
   
 
 
-    update(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Observable<SubjectPathology> {
+    updateSubjectPathology(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Promise<SubjectPathology> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${subjectPathology.id}`;
         return this.http
             .put<SubjectPathology>(url, JSON.stringify(subjectPathology))
-            .map(response => response);
+            .map((entity) => this.toRealObject(entity))
+            .toPromise();
     }
 
-    create(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Observable<SubjectPathology> {
+    createSubjectPathology(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Promise<SubjectPathology> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}`;
         return this.http
             .post<SubjectPathology>(url, JSON.stringify(subjectPathology))
-            .map(res => res);
+            .map((entity) => this.toRealObject(entity))
+            .toPromise();
     }
 
-    delete(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Observable<any> {
+    deleteSubjectPathology(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Promise<any> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${subjectPathology.id}`;
-        return this.http.delete(url)
-            .map(res => res);
+        return this.http.delete<void>(url)
+            .toPromise();
     }
     
-    deleteAllPathologiesForAnimalSubject(animalSubjectId: number): Observable<any> {
+    deleteAllPathologiesForAnimalSubject(animalSubjectId: number): Promise<any> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${animalSubjectId}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.delete(url)
-            .map(res => res);
+            .map(res => res)
+            .toPromise();
     }
 
     getAllSubjectForPathologyModel(pid: number): Promise<SubjectPathology[]> {
     	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}${PreclinicalUtils.PRECLINICAL_ALL_URL}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${pid}`;
     	return this.http.get<SubjectPathology[]>(url)
-                    .toPromise()
-                    .then(response => response)
-                    .catch((error) => {
-                        console.error('Error while getting SubjectPathology for a PathologyModel', error);
-                        return Promise.reject(error.message || error);
-         			});
+            .map(entities => entities.map((entity) => this.toRealObject(entity)))            
+            .toPromise();
     }
 
 }

@@ -5,17 +5,12 @@ import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
 
 import { SubjectTherapy }    from '../shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../shared/subjectTherapy.service';
-
 import { TherapyService } from '../../therapy/shared/therapy.service';
 import { Therapy }   from '../../therapy/shared/therapy.model';
-
 import { ReferenceService } from '../../../reference/shared/reference.service';
 import { Reference }    from '../../../reference/shared/reference.model';
-
 import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
-
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-
 import { Enum } from "../../../../shared/utils/enum";
 import { TherapyType } from "../../../shared/enum/therapyType";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
@@ -36,15 +31,13 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     @Input() canModify: Boolean = false;
     @Input('toggleForm') toggleForm: boolean;
     @Input() subTherapySelected: SubjectTherapy;
+    @Output() onEvent = new EventEmitter();
     @Output() onCreated = new EventEmitter();
     @Output() onCancel = new EventEmitter();
     @Input() createSTMode: boolean;
     therapies: Therapy[];
     units: Reference[];
     frequencies: Enum[] = [];
-    isDateValid: boolean = true;
-    selectedStartDate: string = null;
-    selectedEndDate: string = null;
 
     constructor(
         private route: ActivatedRoute,
@@ -61,29 +54,37 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     set subjectTherapy(subjectTherapy: SubjectTherapy) { this.entity = subjectTherapy; }
 
     initView(): Promise<void> {
-        this.getEnums();
-        this.loadTherapies();
-        this.loadUnits();
-        if (this.subTherapySelected) {
-            this.subjectTherapy = this.subTherapySelected;
-        }
-        this.subjectTherapyService.get(this.id).then(subjectTherapy => {
-            this.subjectTherapy = subjectTherapy;
+        return new  Promise<void>(resolve => {
+            this.subjectTherapy = new SubjectTherapy();
+            this.getEnums();
+            this.loadTherapies();
+            this.loadUnits();
+            if (this.subTherapySelected) {
+                this.subjectTherapy = this.subTherapySelected;
+            }
+            this.subjectTherapyService.get(this.id).then(subjectTherapy => {
+                this.subjectTherapy = subjectTherapy;
+                resolve();
+            });
         });
-        return Promise.resolve();
+
+        
     }
 
     initEdit(): Promise<void> {
-        this.getEnums();
-        this.loadTherapies();
-        this.loadUnits();
-        if (this.subTherapySelected) {
-            this.subjectTherapy = this.subTherapySelected;
-        }
-        this.subjectTherapyService.get(this.id).then(subjectTherapy => {
-            this.subjectTherapy = subjectTherapy;
+        return new  Promise<void>(resolve => {
+            this.subjectTherapy = new SubjectTherapy();
+            this.getEnums();
+            this.loadTherapies();
+            this.loadUnits();
+            if (this.subTherapySelected) {
+                this.subjectTherapy = this.subTherapySelected;
+            }
+            this.subjectTherapyService.get(this.id).then(subjectTherapy => {
+                this.subjectTherapy = subjectTherapy;
+                resolve();
+            });
         });
-        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -109,7 +110,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     
     
     loadTherapies() {
-        this.therapyService.getTherapies().then(therapies => this.therapies = therapies);
+        this.therapyService.getAll().then(therapies => this.therapies = therapies);
     }
 
     loadUnits() {
@@ -176,11 +177,10 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
                 }
             }
         }
-        this.getDateToDatePicker(this.subjectTherapy);
     }
     
     goToAddTherapy(){
-        this.router.navigate(['/preclinical-therapy'], { queryParams: { mode: "create" } });
+        this.router.navigate(['/preclinical-therapy/create']);
     }
 
 
@@ -190,7 +190,6 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             console.log('nothing to create');
             return;
         }
-        this.setDateFromDatePicker();
         if (this.mode == 'create' ) {
             if (this.preclinicalSubject.therapies === undefined) {
                 this.preclinicalSubject.therapies = [];
@@ -201,7 +200,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             }
         } else {
             this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, this.subjectTherapy)
-                .subscribe(subjectTherapy => {
+                .then(subjectTherapy => {
                     if (this.onCreated.observers.length > 0) {
                         this.onCreated.emit(subjectTherapy);
                     }
@@ -211,9 +210,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     }
 
     updateSubjectTherapy(): void {
-        this.setDateFromDatePicker();
-        this.subjectTherapyService.updateSubjectTherapy(this.preclinicalSubject, this.subjectTherapy)
-            .subscribe();
+        this.subjectTherapyService.updateSubjectTherapy(this.preclinicalSubject, this.subjectTherapy);
         this.toggleFormSTAndReset(false);
     }
 
@@ -223,55 +220,44 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         width: '160px'
     };
 
-    onDateChanged(event: IMyDateModel, date: string) {
-        if (event.formatted !== '') {
-            if (date == 'start') {
-                this.selectedStartDate = event.formatted;
-            } else if (date == 'end') {
-                this.selectedEndDate = event.formatted;
-            }
-        }
+    
+    canUpdateTherapy(): boolean{
+        return !this.createSTMode && this.keycloakService.isUserAdminOrExpert && this.mode != 'view';
     }
 
-    onInputFieldChanged(event: IMyInputFieldChanged, date: string) {
-        if (event.value !== '') {
-            if (!event.valid) {
-                this.isDateValid = false;
-            } else {
-                this.isDateValid = true;
-            }
-        } else {
-            this.isDateValid = true;
-            if (date == 'start') {
-                this.selectedStartDate = null;
-            } else if (date == 'end') {
-                this.selectedEndDate = null;
-            }
-        }
+    canAddTherapy(): boolean{
+        return this.createSTMode && this.mode != 'view';
     }
 
-    setDateFromDatePicker(): void {
-        if (this.selectedStartDate && !isNaN(new Date(this.selectedStartDate).getTime())) {
-                this.subjectTherapy.startDate = new Date(this.selectedStartDate);
-        } else {
-            this.subjectTherapy.startDate = null;
-        }
-        if (this.selectedEndDate && !isNaN(new Date(this.selectedEndDate).getTime())) {
-                this.subjectTherapy.endDate = new Date(this.selectedEndDate);
-        } else {
-            this.subjectTherapy.endDate = null;
-        }
+    cancelTherapy(){
+        this.toggleFormST(false);
     }
-
-    getDateToDatePicker(subjectTherapy: SubjectTherapy): void {
-        if (subjectTherapy && subjectTherapy.startDate && !isNaN(new Date(subjectTherapy.startDate).getTime())) {
-            let date: string = new Date(subjectTherapy.startDate).toISOString().split('T')[0];
-            this.selectedStartDate = date;
+   
+    addTherapy(): Promise<void> {
+        if (!this.subjectTherapy) { 
+            console.log('nothing to create');
+            return; 
         }
-        if (subjectTherapy && subjectTherapy.endDate && !isNaN(new Date(subjectTherapy.endDate).getTime())) {
-            let date: string = new Date(subjectTherapy.endDate).toISOString().split('T')[0];
-            this.selectedEndDate = date;
+        if(this.preclinicalSubject.therapies === undefined){
+            this.preclinicalSubject.therapies = [];
         }
+        this.preclinicalSubject.therapies.push(this.subjectTherapy);
+        if (this.onEvent.observers.length > 0) {
+            this.onEvent.emit(this.subjectTherapy);
+        }
+        this.toggleForm = false;
+        this.subjectTherapy = new SubjectTherapy();
+    }
+    
+    updateTherapy(): void {
+        this.subjectTherapyService.updateSubjectTherapy(this.preclinicalSubject, this.subjectTherapy)
+            .then(st =>{
+                if (this.onEvent.observers.length > 0) {
+                    this.onEvent.emit(this.subjectTherapy);
+                }    
+            });
+        this.toggleForm = false;
+        this.subjectTherapy = new SubjectTherapy();
     }
 
 }

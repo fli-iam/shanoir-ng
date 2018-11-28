@@ -13,12 +13,6 @@ export class TherapyService  extends EntityService<Therapy>{
     API_URL = PreclinicalUtils.PRECLINICAL_API_THERAPIES_URL;
 
     getEntityInstance() { return new Therapy(); }
-    
-    getTherapies(): Promise<Therapy[]>{
-            return this.http.get<Therapy[]>(PreclinicalUtils.PRECLINICAL_API_THERAPIES_ALL_URL)
-                .map(entities => entities.map((entity) => this.toRealObject(entity)))
-                .toPromise();
-        }
-          
+     
     
 }

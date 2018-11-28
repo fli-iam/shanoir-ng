@@ -179,12 +179,60 @@
 					<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
 					<subject-tree [subject]="preclinicalSubject.subject" [studies]="studies"></subject-tree>
 			</fieldset>	
-			<!-- 
 			<div *ngIf="displayPathologyTherapy">
-				<subject-pathology-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" [mode]="mode" ></subject-pathology-list>
-				<subject-therapy-list *ngIf="mode" [preclinicalSubject]="preclinicalSubject" ></subject-therapy-list>
+				<fieldset>
+					<legend i18n="AniamlSubjectDetail|Pathologies label@@animalSubjectDetailPathologies">Pathologies</legend>
+				</fieldset>		
+				<div [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'edit'">
+							<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
+								<i class="fas fa-plus-square"></i>
+								new pathology
+							</button>
+						</ng-template>
+						<ng-template [ngSwitchCase]="'create'" *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()">
+							<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
+								<i class="fas fa-plus-square"></i>
+								new pathology
+							</button>
+						</ng-template>
+					</div>
+				<div>
+					<subject-pathology-form [preclinicalSubject]="preclinicalSubject"  [createSPMode]="createSPMode"
+								[toggleForm]="toggleFormSP" [subjectpathoSelected]="pathoSelected"  (onEvent)="refreshDisplayPathology($event)">
+					</subject-pathology-form>
+				</div>
+				<shanoir-table #subjectPathologiesTable
+    				[getPage]="getPagePathology.bind(this)" 
+    				[columnDefs]="columnDefsPathologies" >
+				</shanoir-table> 
+				<fieldset>
+					<legend i18n="AniamlSubjectDetail|Therapies label@@animalSubjectDetailTherapies">Therapies</legend>
+				</fieldset>
+				<div [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'edit'">
+							<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new therapy" (click)="goToAddTherapy()">
+								<i class="fas fa-plus-square"></i>
+								new therapy
+							</button>
+						</ng-template>
+						<ng-template [ngSwitchCase]="'create'" *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()">
+							<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new therapy" (click)="goToAddTherapy()">
+								<i class="fas fa-plus-square"></i>
+								new therapy
+							</button>
+						</ng-template>
+					</div>
+				<div>
+					<subject-therapy-form [preclinicalSubject]="preclinicalSubject"  [createSTMode]="createSTMode"
+								[toggleForm]="toggleFormST" [subTherapySelected]="therapySelected"  (onEvent)="refreshDisplayTherapy($event)">
+					</subject-therapy-form>
+				</div>
+				<shanoir-table #subjectTherapiesTable
+    				[getPage]="getPageTherapy.bind(this)" 
+    				[columnDefs]="columnDefsTherapies" >
+				</shanoir-table> 
 			</div>
-			-->
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
