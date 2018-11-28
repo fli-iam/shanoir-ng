@@ -12,7 +12,7 @@ import { Timepoint } from './timepoint.model';
 
 export class Study extends Entity {
     clinical: boolean;
-    compatible: boolean;
+    compatible: boolean = false;
     downloadableByDefault: boolean;
     endDate: Date;
     experimentalGroupsOfSubjects: IdNameObject[];
@@ -24,7 +24,7 @@ export class Study extends Entity {
     nbSujects: number;
     protocolFilePathList: string[];
     startDate: Date;
-    studyCenterList: StudyCenter[];
+    studyCenterList: StudyCenter[] = [];
     studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
     studyType: StudyType;
     subjectStudyList: SubjectStudy[] = [];

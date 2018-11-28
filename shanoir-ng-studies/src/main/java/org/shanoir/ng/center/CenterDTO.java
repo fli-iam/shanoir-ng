@@ -3,6 +3,7 @@ package org.shanoir.ng.center;
 import java.util.List;
 
 import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentDTO;
+import org.shanoir.ng.studycenter.StudyCenterDTO;
 
 /**
  * DTO for centers.
@@ -31,6 +32,8 @@ public class CenterDTO {
 	private String website;
 	
 	private Boolean compatible = false;
+	
+	private List<StudyCenterDTO> studyCenterList;
 
 	/**
 	 * Default constructor.
@@ -179,6 +182,14 @@ public class CenterDTO {
 
 	public void setCompatible(Boolean compatible) {
 		this.compatible = compatible;
+	}
+
+	public List<StudyCenterDTO> getStudyCenterList() {
+		return studyCenterList;
+	}
+
+	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+		this.studyCenterList = studyCenterList;
 	}
 
 }

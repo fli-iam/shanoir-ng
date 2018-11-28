@@ -1,6 +1,5 @@
-import { Role } from "../../roles/role.model";
-import { StudyUserType } from "./study-user-type.enum";
 import { User } from "../../users/shared/user.model";
+import { StudyUserType } from "./study-user-type.enum";
 
 export class StudyUser {
     studyId: number;

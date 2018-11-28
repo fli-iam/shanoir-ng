@@ -3,6 +3,7 @@ package org.shanoir.ng.acquisitionequipment;
 import java.util.List;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.shanoir.ng.center.CenterMapper;
 import org.shanoir.ng.manufacturermodel.ManufacturerModelMapper;
 
@@ -32,6 +33,7 @@ public interface AcquisitionEquipmentMapper {
 	 *            acquisition equipment to map.
 	 * @return acquisition equipment DTO.
 	 */
+	@Mapping(target = "compatible", ignore = true) 
 	AcquisitionEquipmentDTO acquisitionEquipmentToAcquisitionEquipmentDTO(AcquisitionEquipment acquisitionEquipment);
 
 }

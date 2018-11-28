@@ -3,16 +3,10 @@ package org.shanoir.ng.study;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
-import org.shanoir.ng.study.dto.SimpleStudyDTO;
 import org.shanoir.ng.studycenter.StudyCenter;
-import org.shanoir.ng.studycenter.StudyCenterDTO;
-import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.studyuser.StudyUserRepository;
@@ -39,9 +33,6 @@ public class StudyServiceImpl implements StudyService {
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
 	
-	@Autowired
-	private StudyCenterMapper studyCenterMapper;
-
 	@Autowired
 	private StudyCenterRepository studyCenterRepository;
 
@@ -115,43 +106,12 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public List<SimpleStudyDTO> findStudiesByUserAndEquipment(final Long userId, 
-			final EquipmentDicom equipment) throws ShanoirException {
+	public List<Study> findStudiesForImport(final Long userId) {
 		final List<Study> studies = findStudiesByUserIdAndStudyUserTypeLessThanEqual(userId, StudyUserType.SEE_DOWNLOAD_IMPORT.getId());
 		if (CollectionUtils.isEmpty(studies)) {
 			return new ArrayList<>();
 		}
-		
-		// Construction of SimpleStudyDTO List to send
-		final List<SimpleStudyDTO> simpleStudies = new ArrayList<>();
-		
-		for (final Study study : studies) {
-			// Id and name of study
-			final SimpleStudyDTO simpleStudy = new SimpleStudyDTO(study.getId(), study.getName());
-			
-			// centerDTO list for study
-			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
-				StudyCenterDTO studyCenterDTO = studyCenterMapper.studyCenterToStudyCenterDTO(studyCenter);
-				simpleStudy.getStudyCenterList().add(studyCenterDTO);
-				
-				// acquisition equipment for compatibility check
-				for (final AcquisitionEquipmentDTO acquisitionEquipment : studyCenterDTO.getCenter().getAcquisitionEquipments()) {
-					String serialNumber = acquisitionEquipment.getSerialNumber();
-					String manufacturerModel = acquisitionEquipment.getManufacturerModel().getName();
-					String manufacturer = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
-					if (StringUtils.equals(serialNumber, equipment.getDeviceSerialNumber())
-							&& StringUtils.equals(manufacturerModel, equipment.getManufacturerModelName())
-							&& StringUtils.equals(manufacturer, equipment.getManufacturer())) {
-						acquisitionEquipment.setCompatible(true);
-						studyCenterDTO.getCenter().setCompatible(true);
-						simpleStudy.setCompatible(true);
-						break;
-					}
-				}
-			}
-			simpleStudies.add(simpleStudy);
-		}
-		return simpleStudies;
+		return studies;
 	}
 	
 	@Override

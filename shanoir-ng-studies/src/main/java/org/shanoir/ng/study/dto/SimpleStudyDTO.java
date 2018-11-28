@@ -18,8 +18,6 @@ public class SimpleStudyDTO {
 	private String name;
 	
 	private List<StudyCenterDTO> studyCenterList;
-	
-	private Boolean compatible = false;
 
 	/**
 	 * Simple constructor.
@@ -69,14 +67,6 @@ public class SimpleStudyDTO {
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Boolean getCompatible() {
-		return compatible;
-	}
-
-	public void setCompatible(Boolean compatible) {
-		this.compatible = compatible;
 	}
 
 	/**

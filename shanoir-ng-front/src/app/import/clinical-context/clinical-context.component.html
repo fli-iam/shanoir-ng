@@ -20,16 +20,16 @@
         <li class="required">
             <label class="required-label">Select a center</label> 
             <span class="right-col">
-                <select [disabled]="!contextData.study.id || !centers" [(ngModel)]="contextData.studyCenter.center" (ngModelChange)="onSelectCenter($event)" [compareWith]="compareEntities"
-                        [class.compatible]="contextData.studyCenter.center?.compatible" [class.not-compatible]="!contextData.studyCenter.center?.compatible">
+                <select [disabled]="!contextData.study.id || !centers" [(ngModel)]="contextData.center" (ngModelChange)="onSelectCenter($event)" [compareWith]="compareEntities"
+                        [class.compatible]="contextData.center?.compatible" [class.not-compatible]="!contextData.center?.compatible">
                     <option *ngFor="let center of centers" [ngValue]="center"
                             [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">{{center?.name}}</option>
                 </select>
-                <button i18n="Import|CenterDetails label" [disabled]="!contextData.studyCenter.center" (click)="showCenterDetails()">details</button>
-                <button [disabled]="!contextData.studyCenter.center || contextData.studyCenter.center?.compatible" (click)="openCreateCenter()">add</button>
+                <button i18n="Import|CenterDetails label" [disabled]="!contextData.center.id" (click)="showCenterDetails()">details</button>
+                <button [disabled]="!contextData.center.id || contextData.center?.compatible" (click)="openCreateCenter()">add</button>
             </span>
         </li>
-        <li class="info" *ngIf="contextData.studyCenter.center && !contextData.studyCenter.center?.compatible">
+        <li class="info" *ngIf="contextData.center.id && !contextData.center?.compatible">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>This center may not be not compatible with the imported data !</strong>
             <br/>Your archive contains this data : <code>{{patient.studies[0].series[0].institution.institutionName}}, {{patient.studies[0].series[0].institution.institutionAddress}}.</code>
@@ -38,7 +38,7 @@
         <li class="required">
             <label class="required-label">Select an acquisition equipment</label> 
             <span class="right-col">
-                <select [disabled]="!contextData.studyCenter.center || !acquisitionEquipments" [(ngModel)]="contextData.acquisitionEquipment" (ngModelChange)="onSelectAcquisitonEquipment($event)" [compareWith]="compareEntities"
+                <select [disabled]="!contextData.center.id || !acquisitionEquipments" [(ngModel)]="contextData.acquisitionEquipment" (ngModelChange)="onSelectAcquisitonEquipment($event)" [compareWith]="compareEntities"
                         [class.compatible]="contextData.acquisitionEquipment?.compatible" [class.not-compatible]="!contextData.acquisitionEquipment?.compatible">
                     <option *ngFor="let acquisitionEquipment of acquisitionEquipments" [ngValue]="acquisitionEquipment" 
                             [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">{{acquisitionEquipment | acqEqptLabel}}</option>
@@ -56,7 +56,7 @@
                 {{patient.studies[0].series[0].equipment.manufacturerModelName}} - 
                 {{patient.studies[0].series[0].equipment.deviceSerialNumber}}
             </code>
-            <br/>If the acquisition equipment you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
+            <br/>If the acquisition equipment you need is not in the above list, you can create a new acquisition equipment from this data by clicking on the 'add' button.
         </li>
     </ol>
 

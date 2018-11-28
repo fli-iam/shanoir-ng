@@ -6,7 +6,6 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
-import org.shanoir.ng.study.dto.SimpleStudyDTO;
 
 /**
  * Study service.
@@ -91,17 +90,14 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	List<Study> findStudiesByUserIdAndStudyUserTypeLessThanEqual(final Long userId,final Integer studyUserTypeId);
 
 	/**
-	 * Find all studies with theirs study cards for a user.
+	 * Find all studies that the user is allowed to see and to import.
 	 * 
 	 * @param userId
 	 *            user id.
-	 * @param equipment
-	 *            equipment used during dicom import
-	 * @return a list of simple studies.
+	 * @return a list of studies.
 	 * @throws ShanoirException
 	 */
-	List<SimpleStudyDTO> findStudiesByUserAndEquipment(Long userId, EquipmentDicom equipment)
-			throws ShanoirException;
+	List<Study> findStudiesForImport(Long userId);
 	
 	/**
 	 * Check if an user is responsible of the study.

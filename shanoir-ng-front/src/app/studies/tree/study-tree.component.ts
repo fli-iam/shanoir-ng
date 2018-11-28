@@ -1,9 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
+import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
+import { CenterService } from '../../centers/shared/center.service';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
+import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserType } from '../shared/study-user-type.enum';
 import { Study } from '../shared/study.model';
 
@@ -26,8 +29,10 @@ export class StudyTreeComponent {
     private usersIconPath: string = ImagesUrlUtil.USERS_ICON_PATH;
     private xRay1IconPath: string = ImagesUrlUtil.X_RAY_1_ICON_PATH;
     private xRay2IconPath: string = ImagesUrlUtil.X_RAY_2_ICON_PATH;
+    private acquisitionEquipments: AcquisitionEquipment[] = [];
 
-    constructor(private examinationService: ExaminationService, private router: Router) {
+    constructor(private examinationService: ExaminationService, private router: Router,
+        private centerService: CenterService) {
     }
 
     getSubjectDetails(component: TreeNodeComponent) {
@@ -37,6 +42,19 @@ export class StudyTreeComponent {
             .then(examinations => {
                 if (examinations) {
                     subjectStudy.examinations = examinations;
+                    component.hasChildren = true;
+                }
+                component.open();
+            })
+    }
+
+    getAcqEptForCenter(component: TreeNodeComponent) {
+        component.dataLoading = true;
+        let studyCenter: StudyCenter = component.nodeParams;console.log(studyCenter.center.name)
+        this.centerService.get(studyCenter.center.id).then(
+            center =>  {
+                if (center) {
+                    this.acquisitionEquipments = center.acquisitionEquipments;
                     component.hasChildren = true;
                 }
                 component.open();
