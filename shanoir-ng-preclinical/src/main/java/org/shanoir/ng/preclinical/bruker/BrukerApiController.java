@@ -181,8 +181,11 @@ public class BrukerApiController implements BrukerApi {
 	private Path saveUploadedFileTmp(MultipartFile brukerFile, Path brukerDirPath) throws IOException {
 		// Path to file
 		Path pathToFile = Paths.get(brukerDirPath.toString() + FOLDER_SEP + brukerFile.getOriginalFilename());
-		byte[] bytes = brukerFile.getBytes();
-		return Files.write(pathToFile, bytes);
+		/*byte[] bytes = brukerFile.getBytes();
+		return Files.write(pathToFile, bytes);*/
+		File destFile = pathToFile.toFile();
+		brukerFile.transferTo(destFile);
+		return pathToFile;
 	}
 
 	/**
