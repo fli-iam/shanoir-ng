@@ -13,11 +13,15 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
 import org.shanoir.ng.importer.dcm2nii.NIfTIConverterService;
 import org.shanoir.ng.importer.dicom.DicomDirToJsonReaderService;
 import org.shanoir.ng.importer.dicom.DicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
+import org.shanoir.ng.importer.dicom.query.DicomQuery;
+import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
@@ -35,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +48,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.weasis.dicom.op.CFind;
+import org.weasis.dicom.param.DicomNode;
+import org.weasis.dicom.param.DicomParam;
+import org.weasis.dicom.param.DicomState;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,7 +92,7 @@ public class ImporterApiController implements ImporterApi {
 	
 	@Value("${ms.url.shanoir-ng-datasets}")
 	private String datasetsMsUrl;
-
+	
 	@Autowired
 	private DicomDirToJsonReaderService dicomDirToJsonReader;
 	
@@ -94,6 +101,9 @@ public class ImporterApiController implements ImporterApi {
 	
 	@Autowired
 	private DicomFileAnalyzerService dicomFileAnalyzer;
+	
+	@Autowired
+	private QueryPACSService queryPACSService;
 
 	@Autowired
 	private NIfTIConverterService niftiConverter;
@@ -274,7 +284,7 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setPatients(patientsDTO.getPatients());
 			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException e) {
-			LOG.error(e.getMessage());
+			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
 		}
@@ -296,11 +306,9 @@ public class ImporterApiController implements ImporterApi {
 	@Override
 	public ResponseEntity<Void> uploadDicomZipFileFromShup(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
 			throws RestServiceException, ShanoirException {
-		// TODO Auto-generated method stub
 		if (dicomZipFile == null)
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
-
 		try {
 			File tempFile = saveTempFile(dicomZipFile);
 
@@ -319,7 +327,6 @@ public class ImporterApiController implements ImporterApi {
 			}
 
 			ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
-
 			
 			File importJobFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + IMPORTJOB);
 			ImportJob importJob = null;
@@ -365,12 +372,25 @@ public class ImporterApiController implements ImporterApi {
 			LOG.error("Error on dataset microservice request", e);
 			throw new ShanoirException("Error while sending import job", ImportErrorModelCode.SC_MS_COMM_FAILURE);
 		} catch (ShanoirException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Authentication issue.", null));
 		}
-		
+	}
+
+	@Override
+	public ResponseEntity<ImportJob> queryPACS( @ApiParam(value = "DicomQuery", required = true) @Valid @RequestBody final DicomQuery dicomQuery)
+			throws RestServiceException {
+		ImportJob importJob;
+		try {
+			importJob = queryPACSService.queryPACS(dicomQuery);
+		} catch (ShanoirException e) {
+			LOG.error(e.getMessage(), e);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+							e.getMessage(), null));
+		}	
+		return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 	}
 
 }

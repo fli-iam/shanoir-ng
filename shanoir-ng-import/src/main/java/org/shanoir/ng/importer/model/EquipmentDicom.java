@@ -20,6 +20,12 @@ public class EquipmentDicom {
 	@JsonProperty("deviceSerialNumber")
 	private String deviceSerialNumber;
 
+	public EquipmentDicom(String manufacturer, String manufacturerModelName, String deviceSerialNumber) {
+		this.manufacturer = manufacturer;
+		this.manufacturerModelName = manufacturerModelName;
+		this.deviceSerialNumber = deviceSerialNumber;
+	}
+
 	public String getManufacturer() {
 		return manufacturer;
 	}

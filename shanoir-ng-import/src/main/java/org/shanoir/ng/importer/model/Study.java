@@ -5,13 +5,11 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 /**
  * @author atouboul
  *
  */
-
- public class Study {
+public class Study {
 
      @JsonProperty("studyInstanceUID")
      private String studyInstanceUID;
@@ -24,6 +22,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
      @JsonProperty("series")
      private List<Serie> series;
+
+	public Study(String studyInstanceUID, Date studyDate, String studyDescription) {
+		this.studyInstanceUID = studyInstanceUID;
+		this.studyDate = studyDate;
+		this.studyDescription = studyDescription;
+	}
 
 	public String getStudyInstanceUID() {
 		return studyInstanceUID;

@@ -33,7 +33,7 @@ public class Serie {
 	private Date seriesDate;
 
 	@JsonProperty("seriesNumber")
-	private Integer seriesNumber;
+	private String seriesNumber;
 
 	@JsonProperty("numberOfSeriesRelatedInstances")
 	private Integer numberOfSeriesRelatedInstances;
@@ -73,6 +73,15 @@ public class Serie {
 
 	@JsonProperty("datasets")
 	private List<Dataset> datasets;
+
+	public Serie(String seriesInstanceUID, String seriesDescription, Date seriesDate, String seriesNumber, String modality, String protocolName) {
+		this.seriesInstanceUID = seriesInstanceUID;
+		this.seriesDescription = seriesDescription;
+		this.seriesDate = seriesDate;
+		this.seriesNumber = seriesNumber;
+		this.modality = modality;
+		this.protocolName = protocolName;
+	}
 
 	public Boolean getSelected() {
 		return selected;
@@ -122,11 +131,11 @@ public class Serie {
 		this.seriesDate = seriesDate;
 	}
 
-	public Integer getSeriesNumber() {
+	public String getSeriesNumber() {
 		return seriesNumber;
 	}
 
-	public void setSeriesNumber(Integer seriesNumber) {
+	public void setSeriesNumber(String seriesNumber) {
 		this.seriesNumber = seriesNumber;
 	}
 

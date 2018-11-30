@@ -7,29 +7,47 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author atouboul
+ * @author mkain
  *
  */
-
 public class Patient {
 	
-     @JsonProperty("subject")
-     private Subject subject;
-     
-     @JsonProperty("patientID")
-     private String patientID;
+	private static final String NO_ID = "No ID";
 
-     @JsonProperty("patientName")
-     private String patientName;
+	@JsonProperty("patientID")
+	private String patientID;
 
-     @JsonProperty("patientBirthDate")
-     private Date patientBirthDate;
+	@JsonProperty("patientName")
+	private String patientName;
 
-     @JsonProperty("patientSex")
-     private String patientSex;
+	@JsonProperty("patientBirthName")
+	private String patientBirthName;
 
-     @JsonProperty("studies")
-     private List<Study> studies;
-     
+	@JsonProperty("patientBirthDate")
+	private Date patientBirthDate;
+
+	@JsonProperty("patientSex")
+	private String patientSex;
+
+	@JsonProperty("subject")
+	private Subject subject;
+
+	public Patient(String patientID, String patientName, String patientBirthName, Date patientBirthDate,
+			String patientSex) {
+		if (patientID == null || "".equals(patientID)) {
+			this.patientID = NO_ID;
+		} else {
+			this.patientID = patientID;			
+		}
+		this.patientName = patientName;
+		this.patientBirthName = patientBirthName;
+		this.patientBirthDate = patientBirthDate;
+		this.patientSex = patientSex;
+	}
+
+	@JsonProperty("studies")
+	private List<Study> studies;
+
 	public String getPatientID() {
 		return patientID;
 	}
@@ -46,6 +64,14 @@ public class Patient {
 		this.patientName = patientName;
 	}
 
+	public String getPatientBirthName() {
+		return patientBirthName;
+	}
+
+	public void setPatientBirthName(String patientBirthName) {
+		this.patientBirthName = patientBirthName;
+	}
+
 	public Date getPatientBirthDate() {
 		return patientBirthDate;
 	}
@@ -55,7 +81,7 @@ public class Patient {
 	}
 
 	public String getPatientSex() {
-		return patientSex;	
+		return patientSex;
 	}
 
 	public void setPatientSex(String patientSex) {
