@@ -9,27 +9,27 @@
         <li class="required">
             <label class="required-label">Select an existing research study</label> 
             <span class="right-col">
-                <select [(ngModel)]="contextData.study" (ngModelChange)="onSelectStudy($event)" [compareWith]="compareEntities"
-                        [class.compatible]="contextData.study?.compatible" [class.not-compatible]="!contextData.study?.compatible">
+                <select [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)" [compareWith]="compareEntities"
+                        [class.compatible]="study?.compatible" [class.not-compatible]="!study?.compatible">
                     <option *ngFor="let study of studies" [ngValue]="study"
                             [class.compatible]="study?.compatible" [class.not-compatible]="!study?.compatible">{{study?.name}}</option>
                 </select>
-                <button i18n="Import|StudyDetails label" [disabled]="!contextData.study.id" (click)="showStudyDetails()">details</button>
+                <button i18n="Import|StudyDetails label" [disabled]="!study" (click)="showStudyDetails()">details</button>
             </span>
         </li>
         <li class="required">
             <label class="required-label">Select a center</label> 
             <span class="right-col">
-                <select [disabled]="!contextData.study.id || !centers" [(ngModel)]="contextData.center" (ngModelChange)="onSelectCenter($event)" [compareWith]="compareEntities"
-                        [class.compatible]="contextData.center?.compatible" [class.not-compatible]="!contextData.center?.compatible">
+                <select [disabled]="!study || !centers" [(ngModel)]="center" (ngModelChange)="onSelectCenter($event)" [compareWith]="compareEntities"
+                        [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">
                     <option *ngFor="let center of centers" [ngValue]="center"
                             [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">{{center?.name}}</option>
                 </select>
-                <button i18n="Import|CenterDetails label" [disabled]="!contextData.center.id" (click)="showCenterDetails()">details</button>
-                <button [disabled]="!contextData.center.id || contextData.center?.compatible" (click)="openCreateCenter()">add</button>
+                <button i18n="Import|CenterDetails label" [disabled]="!center" (click)="showCenterDetails()">details</button>
+                <button [disabled]="!center || center?.compatible" (click)="openCreateCenter()">add</button>
             </span>
         </li>
-        <li class="info" *ngIf="contextData.center.id && !contextData.center?.compatible">
+        <li class="info" *ngIf="center && !center?.compatible">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>This center may not be not compatible with the imported data !</strong>
             <br/>Your archive contains this data : <code>{{patient.studies[0].series[0].institution.institutionName}}, {{patient.studies[0].series[0].institution.institutionAddress}}.</code>
@@ -38,16 +38,16 @@
         <li class="required">
             <label class="required-label">Select an acquisition equipment</label> 
             <span class="right-col">
-                <select [disabled]="!contextData.center.id || !acquisitionEquipments" [(ngModel)]="contextData.acquisitionEquipment" (ngModelChange)="onSelectAcquisitonEquipment($event)" [compareWith]="compareEntities"
-                        [class.compatible]="contextData.acquisitionEquipment?.compatible" [class.not-compatible]="!contextData.acquisitionEquipment?.compatible">
+                <select [disabled]="!center || !acquisitionEquipments" [(ngModel)]="acquisitionEquipment" (ngModelChange)="onSelectAcquisitonEquipment($event)" [compareWith]="compareEntities"
+                        [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">
                     <option *ngFor="let acquisitionEquipment of acquisitionEquipments" [ngValue]="acquisitionEquipment" 
                             [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">{{acquisitionEquipment | acqEqptLabel}}</option>
                 </select>
-                <button i18n="Import|AcquisitionEquipmentDetails label" [disabled]="!contextData.acquisitionEquipment.id" (click)="showAcquistionEquipmentDetails()">details</button>
-                <button [disabled]="!contextData.acquisitionEquipment.id || contextData.acquisitionEquipment?.compatible" (click)="openCreateAcqEqt()">add</button>
+                <button i18n="Import|AcquisitionEquipmentDetails label" [disabled]="!acquisitionEquipment" (click)="showAcquistionEquipmentDetails()">details</button>
+                <button [disabled]="!acquisitionEquipment || acquisitionEquipment?.compatible" (click)="openCreateAcqEqt()">add</button>
             </span>
         </li>
-        <li class="info" *ngIf="contextData.acquisitionEquipment.id && !contextData.acquisitionEquipment?.compatible">
+        <li class="info" *ngIf="acquisitionEquipment && !acquisitionEquipment?.compatible">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>The acquisition equipment may not be not compatible with the imported data !</strong>
             <br/>Your archive contains this data : 
@@ -68,14 +68,14 @@
         <li class="required">
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
-                <select [disabled]="!contextData.study.id || !contextData.acquisitionEquipment.id" [(ngModel)]="contextData.subject" (ngModelChange)="onSelectSubject($event)" [compareWith]="compareEntities">
+                <select [disabled]="!study || !acquisitionEquipment" [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)" [compareWith]="compareEntities">
                     <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
                 </select>
-                <button [disabled]="!contextData.subject.id" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
-                <button [disabled]="!contextData.study.id || !contextData.acquisitionEquipment.id" (click)="openCreateSubject()">add</button>
+                <button [disabled]="!subject" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
+                <button [disabled]="!study || !acquisitionEquipment" (click)="openCreateSubject()">add</button>
             </span>
         </li>
-        <li *ngIf="contextData.subject.id !== undefined">
+        <li *ngIf="subject !== null && subject !== undefined">
             <div>
                 <table>
                     <thead>
@@ -89,18 +89,18 @@
                     <tbody>
                         <tr>
                             <td class="label-col">
-                                {{contextData.subject.name}}
+                                {{subject.name}}
                             </td>
                             <td class="input-col">
-                                <input type="text" id="subjectStudyIdentifier" [(ngModel)]="contextData.subject.subjectStudy.subjectStudyIdentifier" 
+                                <input type="text" id="subjectStudyIdentifier" [(ngModel)]="subject.subjectStudy.subjectStudyIdentifier" 
                                     [ngModelOptions]="{standalone: true}"/>
                             </td>
                             <td class="chkbx-col">
-                                <input type="checkbox" [(ngModel)]="contextData.subject.subjectStudy.physicallyInvolved" 
+                                <input type="checkbox" [(ngModel)]="subject.subjectStudy.physicallyInvolved" 
                                     [ngModelOptions]="{standalone: true}"/>
                             </td>
                             <td class="dropdown-col">
-                                <select id="subjectType" [(ngModel)]="contextData.subject.subjectStudy.subjectType" 
+                                <select id="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" 
                                     [ngModelOptions]="{standalone: true}">
                                         <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
                                         <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
@@ -122,11 +122,11 @@
         <li class="required">
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select [disabled]="!contextData.study.id || !contextData.subject.id" [(ngModel)]="contextData.examination" (ngModelChange)="onSelectExam($event)" [compareWith]="compareEntities">
+                <select [disabled]="!study || !subject" [(ngModel)]="examination" (ngModelChange)="onSelectExam($event)" [compareWith]="compareEntities">
                     <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
                 </select>
-                <button [disabled]="!contextData.examination.id" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
-                <button [disabled]="!contextData.study.id || !contextData.subject.id" (click)="openCreateExam()">add</button>
+                <button [disabled]="!examination" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
+                <button [disabled]="!study || !subject" (click)="openCreateExam()">add</button>
             </span>
         </li>
     </ol>
@@ -136,7 +136,7 @@
         <li class="required">
             <label label class="required-label">Select a Nifti converter</label> 
             <span class="right-col">
-                <select [disabled]="!contextData.acquisitionEquipment.id" [(ngModel)]="contextData.niftiConverter" (ngModelChange)="onContextChange($event)" [compareWith]="compareEntities">
+                <select [disabled]="!examination" [(ngModel)]="niftiConverter" (ngModelChange)="onContextChange($event)" [compareWith]="compareEntities">
                     <option *ngFor="let niftiConverter of niftiConverters" [ngValue]="niftiConverter">{{niftiConverter?.name}}</option>
                 </select>
                 <!-- TODO when nifti converters page is done -->

@@ -8,21 +8,15 @@ import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject
 import { ImportJob, PatientDicom } from './dicom-data.model';
 
 export class ContextData {
-    public study: Study;
-    public center: Center;
-    public acquisitionEquipment: AcquisitionEquipment;
-    public subject: SubjectWithSubjectStudy;
-    public examination: SubjectExamination;
-    public niftiConverter: NiftiConverter;
-
-    constructor (contextdata: ContextData) {
-        this.study = contextdata ? contextdata.study : new Study();
-        this.center = contextdata ? contextdata.center: new Center();
-        this.acquisitionEquipment = contextdata ? contextdata.acquisitionEquipment: new AcquisitionEquipment();
-        this.niftiConverter = contextdata ? contextdata.niftiConverter: new NiftiConverter();
-        this.subject = contextdata ? contextdata.subject: new SubjectWithSubjectStudy();
-        this.examination = contextdata ? contextdata.examination: new SubjectExamination();
-    }
+    
+    constructor (
+        public study: Study,
+        public center: Center,
+        public acquisitionEquipment: AcquisitionEquipment,
+        public subject: SubjectWithSubjectStudy,
+        public examination: SubjectExamination,
+        public niftiConverter: NiftiConverter
+    ) {}
 }
 
 @Injectable()
