@@ -11,12 +11,12 @@ th { width: 100%; white-space: normal; }
 			.controls .awesome { vertical-align: middle; margin-right: 4px; }
 				.controls .awesome svg { vertical-align: -1; color: var(--color-c); }
 		.controls input,
-		.controls select { border: 1px solid var(--grey); border-radius: 2px;  height: 20px; vertical-align: middle; }
+		.controls select { height: 20px; vertical-align: middle; }
 		.controls input { padding: 0 5px; width: 150px; }
 		.controls select { width: 150px; margin-right: 5px; }
 		.controls .text-search,
 		.controls .options,
-		.select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 0; border-right: 1px solid var(--grey); }
+		.select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 0; }
 			.controls .options .max-results { width: 40px; text-align: right; }
 	.select-ctrl button { padding: 0 5px; }
 	.select-ctrl input[type="checkbox"] { margin: 0; width: 15px; }
@@ -41,7 +41,7 @@ tr { height: 20px; }
 td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
 	td + td { border-left: 1px solid var(--light-grey); }
 	td.bool { text-align: center; }
-	td.cell input:not([type='checkbox']), td.cell select { width: 100%; }
+	td.cell input:not([type='checkbox']), td.cell select { width: 100%; border: none; }
 	td.cell-date { text-align: right; }
 	td.cell-number { text-align: right; }
 	td.cell-nofield { text-align: center; }

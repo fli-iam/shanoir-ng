@@ -4,13 +4,14 @@ import { SelectBoxComponent } from './select.component';
 @Component({
     selector: 'select-option',
     template: `
-        <div (click)="select()" (mouseenter)="over()" [class.selected]="selected" [class.focus]="focus"><ng-content></ng-content></div>
+        <div (click)="select()" (mouseenter)="over()" [class.selected]="selected" [class.disabled]="disabled" [class.focus]="focus"><ng-content></ng-content></div>
     `,
     styles: [
         ':host() { height: 20px; display:block; border: none; white-space: nowrap; }',
         'div { padding: 0 5px; }',
         'div.focus { background-color: var(--grey); }',
-        'div.selected { background-color: var(--color-b-light); }'
+        'div.selected { background-color: var(--color-b-light); }',
+        'div.disabled { opacity: 0.5; }'
     ]
     
 })
@@ -18,6 +19,7 @@ import { SelectBoxComponent } from './select.component';
 export class SelectOptionComponent implements AfterViewInit {
     
     @Input() value: any;
+    @Input() disabled: any;
     public parent: SelectBoxComponent;
     public label: string;
     public selected: boolean = false;
@@ -33,11 +35,11 @@ export class SelectOptionComponent implements AfterViewInit {
     }
 
     private select() {
-        this.parent.onSelectedOptionChange(this);
+        if (!this.disabled) this.parent.onSelectedOptionChange(this);
     }
 
     private over() {
-        this.parent.onOptionOver(this);
+        if (!this.disabled) this.parent.onOptionOver(this);
     }
 
 }

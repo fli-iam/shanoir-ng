@@ -1,8 +1,9 @@
-:host() { display: inline-block; position: relative; vertical-align: middle; border: 1px solid var(--grey); border-radius: 2px; }
+:host() { display: inline-block; position: relative; vertical-align: middle; }
 .root.disabled:after { content: ""; display: block; position: absolute; top: 0; bottom: 0; left: 0; right: -6px; background-color: white; opacity: 0.7; }
 .frame { display: inline-flex; position: relative; overflow: hidden; height: 19px; width: 218px; }
-.label { display: inline-block; cursor: default; width: 100%; height: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 4px; }
+.label { display: inline-block; cursor: default; width: 100%; height: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .label.empty { font-style: italic; color: var(--greyer); }
+.label.placeholder { color: var(--greyer); }
 .commands { display: inline-flex; vertical-align: middle; }
     .commands > .button {
         display: list-item;
@@ -11,15 +12,15 @@
         margin: 0;
         background-color: transparent;
         border: none;
-        color: var(--very-dark-grey);
         height: 20px;
         min-width: 23px;
     }
         .button svg { margin: 4px 0; }
     .commands > .button.disabled { opacity: 0.7; }
-    .commands > .button:hover:not(.disabled) { background-color: var(--grey); cursor: pointer; }
-    .commands > .button:not(:first-child) { border-left: 1px solid var(--grey); }
-    .commands > .button:last-child { border-radius: 0 2px 2px 0; }
+    .commands > .button:hover:not(.disabled),
+    .commands > .button:focus:not(.disabled) { cursor: pointer; color: var(--color-a); outline: none; }
+    /* .commands > .button:not(:first-child) { border-left: 1px solid var(--grey); } */
+    /* .commands > .button:last-child { border-radius: 0 2px 2px 0; } */
         .open { border: none; cursor: default !important; }
         .open:hover { color: inherit !important; background-color: inherit !important; }
         

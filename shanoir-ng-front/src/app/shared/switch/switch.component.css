@@ -1,0 +1,62 @@
+:host() {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 19px;
+    border-radius: 2px;
+    border: none;
+    border-bottom: 1px solid var(--grey);
+}
+
+:host().on {}
+
+:host():focus {
+    outline: none;
+    border-bottom: 2px solid var(--color-a);
+}
+
+:host, .button, .on-back {
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.button {
+    position: relative;
+    display: inline-block;
+    width: 17px;
+    height: 17px;
+    border-radius: 2px;
+    border: 1px solid var(--grey);
+    z-index: 1;
+    background-color: var(--very-light-grey);
+}
+
+.button.on {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+}
+
+.on-back {
+    left: 0;
+    color: var(--color-c);
+}
+
+.off-back {
+    right: 0;
+    color: var(--greyer);
+}
+
+.on-back, .off-back {
+    width: 50%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    text-align: center;
+    display: list-item;
+}
+
+.on-back svg, .off-back svg {
+    vertical-align: -2;
+}

@@ -1,0 +1,30 @@
+:host() {
+    position: relative;
+    display: inline-block;
+    width: 17px;
+    height: 17px;
+    border-radius: 2px;
+    border: 1px solid var(--grey);
+}
+
+:host():focus {
+    outline: none;
+    border: 2px solid var(--color-a);
+    width: 15px;
+    height: 15px;
+}
+
+.button {
+    color: var(--color-c);
+    font-size: 15px;
+    text-align: center;
+    margin: 1px 0;
+}
+
+:host():focus .button {
+    margin: 0;
+}
+
+.button svg {
+    vertical-align: middle;
+}

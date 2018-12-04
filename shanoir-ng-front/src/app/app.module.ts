@@ -111,6 +111,8 @@ import { SelectOptionComponent } from './shared/select/select.option.component';
 import { FinishImportComponent } from './import/finish/finish.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
 import { ImportDataService } from './import/import.data-service';
+import { ToggleSwitchComponent } from './shared/switch/switch.component';
+import { CheckboxComponent } from './shared/checkbox/checkbox.component';
 
 
 @NgModule({
@@ -193,9 +195,11 @@ import { ImportDataService } from './import/import.data-service';
         ModalsComponent,
         BreadcrumbsComponent,
         SelectBoxComponent,
-        SelectOptionComponent
+        SelectOptionComponent,
         FinishImportComponent,
-        UploaderComponent
+        UploaderComponent,
+        ToggleSwitchComponent,
+        CheckboxComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -234,7 +238,7 @@ import { ImportDataService } from './import/import.data-service';
         },
         BreadcrumbsService,
         Router,
-        GlobalService
+        GlobalService,
         ImportDataService
     ],
     bootstrap: [AppComponent],

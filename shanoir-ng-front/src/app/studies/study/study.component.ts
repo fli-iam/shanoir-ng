@@ -166,6 +166,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     private onCenterAdd(): void {
+        if (!this.selectedCenter) return;
         let studyCenter: StudyCenter = new StudyCenter();
         studyCenter.center = new Center();
         studyCenter.center.id = this.selectedCenter.id;

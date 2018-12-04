@@ -1,8 +1,24 @@
-import { AfterContentInit, Component, ContentChildren, ElementRef, EventEmitter, forwardRef, Input, OnChanges, OnDestroy, Output, QueryList, SimpleChanges, AfterContentChecked } from '@angular/core';
+import {
+    AfterContentChecked,
+    Component,
+    ContentChildren,
+    ElementRef,
+    EventEmitter,
+    forwardRef,
+    HostBinding,
+    HostListener,
+    Input,
+    OnChanges,
+    OnDestroy,
+    Output,
+    QueryList,
+    SimpleChanges,
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { SelectOptionComponent } from './select.option.component';
+
 import { GlobalService } from '../services/global.service';
+import { SelectOptionComponent } from './select.option.component';
 
 @Component({
     selector: 'select-box',
@@ -26,9 +42,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private globalClickSubscription: Subscription;
     private way: 'up' | 'down' = 'down';
     private hideToComputeHeight: boolean = false;
-    private disabled: boolean = false;
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
+    @Input() disabled: boolean = false;
+    @Input() placeholder: string;
     
     @Input() viewDisabled: boolean;
     @Input() newDisabled: boolean;
@@ -162,6 +179,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if (this.globalClickSubscription) this.globalClickSubscription.unsubscribe();
     }
 
+    @HostListener('keydown', ['$event']) 
     private onKeyPress(event: any) {
         if ('ArrowDown' == event.key) {
             let focusIndex = this.getFocusIndex();
@@ -172,7 +190,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 if (!this.open) this.onSelectedOptionChange(this.options.toArray()[(focusIndex+1)]);
                 else this.scrollToFocusedOption();
             }
-            //event.detail.keyboardEvent.preventDefault();
+            event.preventDefault();
         } else if ('ArrowUp' == event.key) {
             let focusIndex = this.getFocusIndex();
             if (focusIndex >= 1) {
@@ -181,13 +199,17 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 if (!this.open) this.onSelectedOptionChange(this.options.toArray()[(focusIndex-1)]);
                 else this.scrollToFocusedOption();
             }
-            //event.detail.keyboardEvent.preventDefault();
-        } else if ('Enter' == event.key || 'Space' == event.key) {
-            let focusIndex = this.getFocusIndex();
-            if (focusIndex != -1) {
-                this.onSelectedOptionChange(this.options.toArray()[focusIndex]);
+            event.preventDefault();
+        } else if ('Enter' == event.key || ' ' == event.key) {
+            if (!this.open && !this.disabled) {
+                this.open = true;
+            } else {
+                let focusIndex = this.getFocusIndex();
+                if (focusIndex != -1) {
+                    this.onSelectedOptionChange(this.options.toArray()[focusIndex]);
+                }
             }
-            //event.detail.keyboardEvent.preventDefault();
+            event.preventDefault();
         }
             
     }
@@ -219,9 +241,16 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.onTouchedCallback = fn;
     }
 
-    setDisabledState(isDisabled: boolean): void {
-        this.disabled = isDisabled;
+    @HostListener('focusout', ['$event']) 
+    private onFocusOut() {
+        this.open = false; 
+        this.onTouchedCallback();
     }
+
+    @HostBinding('attr.tabindex')
+    private get tabindex(): number {
+        return this.disabled ? undefined : 0;
+    } 
 
     private clickView(): void {
         if(!this.viewDisabled && this.ngModel) this.onViewClick.emit();
@@ -231,7 +260,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if(!this.newDisabled) this.onNewClick.emit();
     }
 
-    private addView(): void {
+    private clickAdd(): void {
         if(!this.addDisabled) this.onAddClick.emit();
     }
 }

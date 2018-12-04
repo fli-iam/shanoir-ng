@@ -1,20 +1,23 @@
-import { Component, forwardRef } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors, NgControl } from '@angular/forms';
+import { AfterViewChecked, Component, ElementRef, forwardRef } from '@angular/core';
+import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl, ValidationErrors } from '@angular/forms';
 import { IMyOptions } from 'mydatepicker';
 
 @Component({
     selector: 'datepicker',
     template: `
-        <my-date-picker 
-            [options]="options" 
-            [ngModel]="convertedDate"
-            (ngModelChange)="onModelChange($event)"
-            (inputFieldChanged)="onInputFieldChanged($event)"
-            (inputFocusBlur)="onTouch()">
-        </my-date-picker>
+        <span>
+            <my-date-picker 
+                [options]="options" 
+                [ngModel]="convertedDate"
+                (ngModelChange)="onModelChange($event)"
+                (inputFieldChanged)="onInputFieldChanged($event)"
+                (inputFocusBlur)="onTouch()">
+            </my-date-picker>
+        </span>
     `,
     styles: [
-        ':host() { display: inline-block; height: 19px; }'
+        ':host() { display: inline-block; height: 19px; }',
+        ':host():has(input:focus) { border-bottom: 2px solid var(--color-a); }'
     ],
     providers: [
         {
@@ -24,7 +27,7 @@ import { IMyOptions } from 'mydatepicker';
         }]   
 })
 
-export class DatepickerComponent implements ControlValueAccessor {
+export class DatepickerComponent implements ControlValueAccessor, AfterViewChecked {
 
     private inputFieldContent: string;
     private lastInputFieldContent: string;
@@ -40,8 +43,12 @@ export class DatepickerComponent implements ControlValueAccessor {
         indicateInvalidDate: false
     };
 
-    constructor() {
+    constructor(private element: ElementRef) { }
 
+    ngAfterViewChecked() {
+        [].slice.call(this.element.nativeElement.getElementsByTagName('button')).forEach(elt => {
+            elt.setAttribute('tabindex', -1);
+        });
     }
 
     private onInputFieldChanged(event) {
