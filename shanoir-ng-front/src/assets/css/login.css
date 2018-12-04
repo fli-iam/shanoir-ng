@@ -10,6 +10,6 @@ body { background-color: var(--color-a); }
 		.login-main form a { text-decoration: none; color: var(--color-b-light); }
 	.login-main .header { padding: 20px 0; color: var(--color-b-light); } 
 	.login-main .footer { text-align: center; padding: 0; } 
-	.login-main .error { color: var(--color-error); } 
+	.login-main .error { color: orangered; } 
 
 .instructions { line-height: 1.3; color: var(--color-b-light); }
