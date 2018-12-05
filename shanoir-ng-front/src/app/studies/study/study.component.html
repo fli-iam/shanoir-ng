@@ -150,7 +150,7 @@
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigators</label>
 						<span class="right-col">
-							<select-box [ngModel]="selectedCenter" formControlName="studyCenterList" (ngModelChange)="onCenterChange($event)" placeholder="Select a center ...">
+							<select-box [ngModel]="selectedCenter" formControlName="studyCenterList" (change)="onCenterChange($event)" placeholder="Select a center ...">
 								<select-option *ngFor="let center of centers" [value]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</select-option>
 							</select-box>
 							<span *ngIf="enableAddIcon()" class="icon icon-clickable" (click)="onCenterAdd()"><i class="fas fa-plus"></i></span>
@@ -187,7 +187,7 @@
 					<li>
 						<label i18n="Study detail|List of users label@@studyDetailUsers">List of users</label>
 						<span class="right-col">
-							<select-box (ngModelChange)="onUserSelect($event)" placeholder="Add a user ...">
+							<select-box (change)="onUserSelect($event)" placeholder="Add a user ...">
 								<select-option *ngFor="let user of users" [value]="user" [disabled]="user?.selected">{{user.username}}</select-option>
 							</select-box>
 						</span>

@@ -69,7 +69,7 @@ export class ClinicalContextComponent {
             let examination = this.importDataService.contextBackup.examination;
             if (study) this.onSelectStudy(study);
             if (studycard) this.onSelectStudycard(studycard);
-            if (subject)this.onSelectSubject(subject);
+            if (subject) this.onSelectSubject(subject);
             if (examination) this.onSelectExamination(examination);
         }
     }
@@ -147,7 +147,6 @@ export class ClinicalContextComponent {
     }
 
     private onSelectSubject(subject: SubjectWithSubjectStudy): void {
-        console.log('on select subject 1')
         this.subject = subject;
         this.examinations = null;
         this.examination = null;
@@ -157,7 +156,6 @@ export class ClinicalContextComponent {
                 .then(examinations => this.examinations = examinations);
         }
         this.onContextChange();
-        console.log('on select subject 2')
     }
 
     private onSelectExamination(examination: SubjectExamination) {

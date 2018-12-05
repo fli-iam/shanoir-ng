@@ -10,7 +10,7 @@
         <li class="required">
             <label class="required-label">Select an existing research study</label> 
             <span class="right-col">
-                <select-box [ngModel]="study" (ngModelChange)="onSelectStudy($event)" (onViewClick)="showStudyDetails()" [viewDisabled]="study == null">
+                <select-box [ngModel]="study" (change)="onSelectStudy($event)" (onViewClick)="showStudyDetails()" [viewDisabled]="study == null">
                     <select-option *ngFor="let study of studies" [value]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study?.name}}</select-option>
                 </select-box>
             </span>
@@ -18,7 +18,7 @@
         <li class="required">
             <label class="required-label">Select an existing study card {{studycard?.id}}</label> 
             <span class="right-col">
-                <select-box [disabled]="!study" [ngModel]="studycard" (ngModelChange)="onSelectStudycard($event)">
+                <select-box [disabled]="!study" [ngModel]="studycard" (change)="onSelectStudycard($event)">
                     <select-option *ngFor="let studycard of studycards" [value]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</select-option>
                 </select-box>
             </span>
@@ -41,7 +41,7 @@
         <li class="required">
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
-                <select-box [disabled]="!study || !studycard" [ngModel]="subject" (ngModelChange)="onSelectSubject($event)" 
+                <select-box [disabled]="!study || !studycard" [ngModel]="subject" (change)="onSelectSubject($event)" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
                         (onNewClick)="openCreateSubject()" [newDisabled]="!study || !studycard">
                     <select-option *ngFor="let subject of subjects" [value]="subject">{{subject?.name}}</select-option>
@@ -95,7 +95,7 @@
         <li class="required">
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select-box [disabled]="!subject" [ngModel]="examination" (ngModelChange)="onSelectExamination($event)"
+                <select-box [disabled]="!subject" [ngModel]="examination" (change)="onSelectExamination($event)"
                         (onViewClick)="showExaminationDetails()" [viewDisabled]="!examination"
                         (onNewClick)="openCreateExam()" [newDisabled]="!subject">
                     <select-option *ngFor="let examination of examinations" [value]="examination">{{examination | subjectExaminationLabel}}</select-option>

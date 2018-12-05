@@ -163,7 +163,7 @@ form { color: var(--dark-grey); }
 .svg-inline--fa { vertical-align: baseline; }
 
 .loading { display: table-cell; width: 100vh; height: 100vh; vertical-align: middle; }
-.loading-msg { text-align: center; margin: 0; margin-bottom: 70px; }
+.loading-msg { text-align: center; margin: 0; margin-bottom: 150px; }
 .cat { text-align: center; width: 100%; }
     .cat img { display:inline-block; height: 100px; }
 

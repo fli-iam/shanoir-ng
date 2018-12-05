@@ -74,7 +74,7 @@
 										[newDisabled]="form.get('center').disabled"
 										formControlName="center" 
 										[ngModel]="coil.center"  
-										(ngModelChange)="updateManufList($event)">
+										(change)="updateManufList($event)">
 									<select-option *ngFor="let center of centers" [value]="center">{{center?.name}}</select-option>
 								</select-box>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Coil detail|Center required error@@coilDetailCenterRequiredError">Center is required!</label>

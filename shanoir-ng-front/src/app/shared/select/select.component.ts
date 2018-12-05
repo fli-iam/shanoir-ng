@@ -36,6 +36,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     
     @Input() ngModel: any = null;
     @Output() ngModelChange = new EventEmitter();
+    @Output() change = new EventEmitter();
     @ContentChildren(forwardRef(() => SelectOptionComponent)) private options: QueryList<SelectOptionComponent>;
     private selectedOption: SelectOptionComponent;
     private openState: boolean = false;
@@ -97,6 +98,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if (!this.optionsEqual(option, this.selectedOption)) {
             this.selectedOption = option;
             this.ngModelChange.emit(option.value);
+            this.change.emit(option.value);
         }
         this.open = false;
     }
