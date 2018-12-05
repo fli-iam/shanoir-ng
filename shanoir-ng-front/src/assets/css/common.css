@@ -58,24 +58,22 @@ input[type='date'] { width: 140px; }
 .hidden { display: none !important; }
 h2 + shanoir-table { margin-top: 20px; }
 
-textarea:focus, input:focus, select:focus, select-box:focus, datepicker:focus {
-  outline: none; border-bottom: 2px solid var(--color-a) !important; border-collapse: collapse !important;
+textarea, input, select, select-box, datepicker { 
+  border: none; border-bottom: 1px solid var(--grey); background-color: transparent; height: 22px; padding: 1px 0;
 }
+textarea:focus, input:focus, select:focus, select-box:focus, datepicker:focus {
+  outline: none; border-bottom: 2px inset var(--color-a) !important; padding-bottom: 0;
+}
+textarea.ng-invalid.ng-touched,
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+select-box.ng-invalid.ng-touched,
+datepicker.ng-invalid.ng-touched { border-bottom: 2px solid var(--color-error); color: var(--color-error); padding-bottom: 0; }
 
 form { color: var(--dark-grey); }
-  form input:not([type='file']),
-  form textarea,
-  form select,
-  form select-box,
-  form datepicker { border: none; border-bottom: 1px solid var(--grey); background-color: transparent; }
   form input[readonly],
   form textarea[readonly],
   form select[readonly] { background-color: var(--light-grey); cursor: default; color : transparent; text-shadow : 0 0 0 var(--greyer);}
-    form input.ng-invalid.ng-touched,
-    form textarea.ng-invalid.ng-touched,
-    form select.ng-invalid.ng-touched,
-    form select-box.ng-invalid.ng-touched,
-    form datepicker.ng-invalid.ng-touched { border-bottom: 2px solid var(--color-error); color: var(--color-error); }
   form input:not([type="checkbox"])::not([type="radio"]):not([type="file"]), form select { height: 20px; }
   form input[type='radio'] { vertical-align: -6; margin: 0 5px 0 0; }
   form input[type='radio'] + input[type='radio'] { margin-left: 20px; }
@@ -91,8 +89,6 @@ form { color: var(--dark-grey); }
   form li > label { display: inline-block; vertical-align: sub; width: 250px; }
   form fieldset ol { margin: 0; padding: 0; }
   form fieldset li { list-style: none; padding: 3px 0; margin: 0; min-height: 22px; }
-    form fieldset li input,
-    form fieldset li select,
     form fieldset li button { height: 22px; }
     form li.info { margin: 4px 0 13px; background-color: lightgoldenrodyellow; padding: 10px 15px; overflow: hidden; width: 473px; }
       form li.info .icon { margin-right: 6px; vertical-align: middle; color: var(--color-b); font-size: 16px; }
@@ -166,7 +162,8 @@ form { color: var(--dark-grey); }
 
 .svg-inline--fa { vertical-align: baseline; }
 
-.loading-msg { text-align: center; margin: 0; }
+.loading { display: table-cell; width: 100vh; height: 100vh; vertical-align: middle; }
+.loading-msg { text-align: center; margin: 0; margin-bottom: 70px; }
 .cat { text-align: center; width: 100%; }
     .cat img { display:inline-block; height: 100px; }
 

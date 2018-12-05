@@ -83,7 +83,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.selectedOption = null;
         if (this.ngModel && this.options) {
             this.options.forEach((option) => {
-                if(option.value == this.ngModel || (option.value.id && this.ngModel && option.value.id == this.ngModel.id)) {
+                if(this.valuesEqual(option.value, this.ngModel)) {
                     this.selectedOption = option;
                     option.selected = true;
                 } else {
@@ -94,9 +94,21 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     public onSelectedOptionChange(option: SelectOptionComponent) {
-        this.selectedOption = option;
-        this.ngModelChange.emit(option.value);
+        if (!this.optionsEqual(option, this.selectedOption)) {
+            this.selectedOption = option;
+            this.ngModelChange.emit(option.value);
+        }
         this.open = false;
+    }
+
+    private optionsEqual(option1: SelectOptionComponent, option2: SelectOptionComponent) {
+        return option1 == option2
+            || option1 && option2 && this.valuesEqual(option1.value, option2.value);
+    }
+
+    private valuesEqual(value1, value2) {
+        return value1 == value2 
+            || (value1 && value2 && value1.id == value2.id);
     }
     
     public onOptionOver(option: SelectOptionComponent) {

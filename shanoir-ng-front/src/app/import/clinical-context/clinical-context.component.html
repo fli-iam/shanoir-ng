@@ -10,20 +10,17 @@
         <li class="required">
             <label class="required-label">Select an existing research study</label> 
             <span class="right-col">
-                <select [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let study of studies" [ngValue]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study?.name}}</option>
-                </select>
-                <button i18n="Import|StudyDetails label" [disabled]="study == null" (click)="showStudyDetails()">details</button>
+                <select-box [ngModel]="study" (ngModelChange)="onSelectStudy($event)" (onViewClick)="showStudyDetails()" [viewDisabled]="study == null">
+                    <select-option *ngFor="let study of studies" [value]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study?.name}}</select-option>
+                </select-box>
             </span>
         </li>
         <li class="required">
-            <label class="required-label">Select an existing study card</label> 
+            <label class="required-label">Select an existing study card {{studycard?.id}}</label> 
             <span class="right-col">
-                <select [disabled]="!study" [(ngModel)]="studycard" (ngModelChange)="onSelectStudycard($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let studycard of studycards" [ngValue]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</option>
-                </select>
-                <!-- studycard not available for the moment -->
-                <button disabled (click)="showStudyCardDetails()">details</button>
+                <select-box [disabled]="!study" [ngModel]="studycard" (ngModelChange)="onSelectStudycard($event)">
+                    <select-option *ngFor="let studycard of studycards" [value]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</select-option>
+                </select-box>
             </span>
             <br/><span>
                 <label *ngIf="studycardMissingError==true" class="form-validation-alert" i18n="Import|StudycardMissingError label"><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Warning :</strong> no study card is defined for this research study. You cannot import data into this research study.</label>
@@ -44,11 +41,11 @@
         <li class="required">
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
-                <select [disabled]="!study || !studycard" [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
-                </select>
-                <button [disabled]="!subject" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
-                <button [disabled]="!study || !studycard" (click)="openCreateSubject()">add</button>
+                <select-box [disabled]="!study || !studycard" [ngModel]="subject" (ngModelChange)="onSelectSubject($event)" 
+                        (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
+                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !studycard">
+                    <select-option *ngFor="let subject of subjects" [value]="subject">{{subject?.name}}</select-option>
+                </select-box>
             </span>
         </li>
         <li *ngIf="subject != null">
@@ -98,11 +95,11 @@
         <li class="required">
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select [disabled]="!subject" [(ngModel)]="examination" (ngModelChange)="onSelectExamination($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
-                </select>
-                <button [disabled]="!examination" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
-                <button [disabled]="!subject" (click)="openCreateExam()">add</button>
+                <select-box [disabled]="!subject" [ngModel]="examination" (ngModelChange)="onSelectExamination($event)"
+                        (onViewClick)="showExaminationDetails()" [viewDisabled]="!examination"
+                        (onNewClick)="openCreateExam()" [newDisabled]="!subject">
+                    <select-option *ngFor="let examination of examinations" [value]="examination">{{examination | subjectExaminationLabel}}</select-option>
+                </select-box>
             </span>
         </li>
     </ol>

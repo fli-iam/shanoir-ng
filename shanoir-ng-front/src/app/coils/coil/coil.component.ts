@@ -90,6 +90,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     }
 
     private updateManufList(center: Center): void {
+        this.coil.center = center;
         this.coil.manufacturerModel = null;
         if (this.form) this.form.get('acquiEquipModel').markAsUntouched();
         this.manufModels = [];

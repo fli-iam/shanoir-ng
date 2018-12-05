@@ -1,5 +1,6 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { Entity } from 'src/app/shared/components/entity/entity.abstract';
 
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Examination } from '../../examinations/shared/examination.model';
@@ -15,8 +16,7 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { PatientDicom } from '../dicom-data.model';
-import { ImportDataService, ContextData } from '../import.data-service';
-import { Entity } from 'src/app/shared/components/entity/entity.abstract';
+import { ContextData, ImportDataService } from '../import.data-service';
 
 @Component({
     selector: 'clinical-context',
@@ -67,22 +67,10 @@ export class ClinicalContextComponent {
             let studycard = this.importDataService.contextBackup.studycard;
             let subject = this.importDataService.contextBackup.subject;
             let examination = this.importDataService.contextBackup.examination;
-            if (study) {
-                this.study = study;
-                this.onSelectStudy();
-            }
-            if (studycard) {
-                this.studycard = studycard;
-                this.onSelectStudycard();
-            }
-            if (subject) {
-                this.subject = subject;
-                this.onSelectSubject();
-            }
-            if (examination) {
-                this.examination = examination;
-                this.onSelectExamination();
-            }
+            if (study) this.onSelectStudy(study);
+            if (studycard) this.onSelectStudycard(studycard);
+            if (subject)this.onSelectSubject(subject);
+            if (examination) this.onSelectExamination(examination);
         }
     }
 
@@ -113,7 +101,8 @@ export class ClinicalContextComponent {
         }
     }
     
-    private onSelectStudy(): void {
+    private onSelectStudy(study): void {
+        this.study = study
         this.studycards = null;
         this.studycard = null;
         this.subjects = null;
@@ -141,7 +130,8 @@ export class ClinicalContextComponent {
         this.onContextChange();
     }
 
-    private onSelectStudycard(): void {
+    private onSelectStudycard(studyCard: StudyCard): void {
+        this.studycard = studyCard;
         if (this.studycard) {
             if (this.studycard.compatible) {
                 this.studycardNotCompatibleError = false;
@@ -156,7 +146,9 @@ export class ClinicalContextComponent {
         this.onContextChange();
     }
 
-    private onSelectSubject(): void {
+    private onSelectSubject(subject: SubjectWithSubjectStudy): void {
+        console.log('on select subject 1')
+        this.subject = subject;
         this.examinations = null;
         this.examination = null;
         if (this.subject) {
@@ -165,9 +157,11 @@ export class ClinicalContextComponent {
                 .then(examinations => this.examinations = examinations);
         }
         this.onContextChange();
+        console.log('on select subject 2')
     }
 
-    private onSelectExamination() {
+    private onSelectExamination(examination: SubjectExamination) {
+        this.examination = examination;
         this.onContextChange();
     }
 
