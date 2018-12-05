@@ -16,9 +16,9 @@ import io.swagger.annotations.ApiResponses;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-16T08:28:10.257Z")
 
-@Api(value = "login", description = "the login API")
-@RequestMapping("/login")
-public interface LoginApi {
+@Api(value = "last_login_date", description = "the last_login_date API")
+@RequestMapping("/last_login_date")
+public interface LastLoginDateApi {
 
 	@ApiOperation(value = "", notes = "Updates login date for an user", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "login date updated", response = Void.class),
@@ -27,8 +27,8 @@ public interface LoginApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<Void> login(
-			@ApiParam(value = "username of user for login date update", required = true) @RequestBody String username,
+	ResponseEntity<Void> lastLoginDate(
+			@ApiParam(value = "username of user for last login date update", required = true) @RequestBody String username,
 		    @Context HttpServletRequest httpRequest);
 
 }

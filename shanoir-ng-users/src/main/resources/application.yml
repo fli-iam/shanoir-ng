@@ -79,8 +79,6 @@ kc.admin.client:
   server.url: http://keycloak:8080/auth
   realm: master
   client.id: admin-cli
-  # used to verify, that the login date update comes really from Keycloak in the network:
-  host.name: keycloak
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-users.log
