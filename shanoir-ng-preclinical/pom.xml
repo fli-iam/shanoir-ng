@@ -22,7 +22,6 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<springfox-version>2.5.0</springfox-version>
-		<keycloak.version>3.1.0.Final</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
 		<spring.active.profile></spring.active.profile>
@@ -84,29 +83,7 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 
-		<!-- Keycloak -->
-		<!-- -->
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-tomcat8-adapter</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-spring-boot-adapter</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-spring-security-adapter</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-admin-client</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-
+		
 
 
 		<!-- Resteasy -->
