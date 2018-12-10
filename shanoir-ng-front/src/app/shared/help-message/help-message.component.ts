@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ImportDataService } from '../../import/import.data-service';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 
@@ -7,20 +7,28 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
     templateUrl: 'help-message.component.html',
     styleUrls: ['help-message.component.css']
 })
-export class HelpMessageComponent  {
+export class HelpMessageComponent implements OnInit {
 
-    private messages: any[];
+    @Input() help: "institution" | "equipment";
+    private message: any;
     private inImport: boolean;
     
-    constructor(private importDataService: ImportDataService, private breadcrumbsService: BreadcrumbsService) {
-        
-        if (importDataService.patients && importDataService.patients[0]
-                && importDataService.patients[0].studies && importDataService.patients[0].studies[0]
-                && importDataService.patients[0].studies[0].series && importDataService.patients[0].studies[0].series[0]) {
+    constructor(private importDataService: ImportDataService, private breadcrumbsService: BreadcrumbsService) {}
 
-            this.messages.push(importDataService.patients[0].studies[0].series[0].institution);
+    ngOnInit() {
+        if (this.importDataService.patients && this.importDataService.patients[0]
+            && this.importDataService.patients[0].studies && this.importDataService.patients[0].studies[0]
+            && this.importDataService.patients[0].studies[0].series && this.importDataService.patients[0].studies[0].series[0]) {
+            
+                if (this.help == 'institution' && this.importDataService.patients[0].studies[0].series[0].institution) {   
+                this.message = this.importDataService.patients[0].studies[0].series[0].institution.institutionName + ", " +
+                    this.importDataService.patients[0].studies[0].series[0].institution.institutionAddress;
+            } else if (this.help == 'equipment' && this.importDataService.patients[0].studies[0].series[0].equipment) {
+                this.message = this.importDataService.patients[0].studies[0].series[0].equipment.manufacturer + " - " +
+                    this.importDataService.patients[0].studies[0].series[0].equipment.manufacturerModelName + " - " + 
+                    this.importDataService.patients[0].studies[0].series[0].equipment.deviceSerialNumber;
+            }
         }
-
-        this.inImport = breadcrumbsService.isImporting();
+        this.inImport = this.breadcrumbsService.isImporting();
     }
 }

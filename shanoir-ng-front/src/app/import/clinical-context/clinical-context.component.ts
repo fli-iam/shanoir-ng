@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
@@ -12,7 +12,6 @@ import { NiftiConverterService } from '../../niftiConverters/nifti.converter.ser
 import { slideDown } from '../../shared/animations/animations';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
@@ -20,7 +19,7 @@ import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-catego
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { PatientDicom, EquipmentDicom } from '../dicom-data.model';
+import { EquipmentDicom, PatientDicom } from '../dicom-data.model';
 import { ContextData, ImportDataService } from '../import.data-service';
 
 @Component({
@@ -29,7 +28,7 @@ import { ContextData, ImportDataService } from '../import.data-service';
     styleUrls: ['clinical-context.component.css', '../import.step.css'],
     animations: [slideDown]
 })
-export class ClinicalContextComponent {
+export class ClinicalContextComponent{
     
     patient: PatientDicom;
     private studies: Study[] = [];
@@ -52,8 +51,7 @@ export class ClinicalContextComponent {
             private examinationService: ExaminationService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
-            private importDataService: ImportDataService,
-            private msgBoxService: MsgBoxService) {
+            private importDataService: ImportDataService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
             this.router.navigate(['imports'], {replaceUrl: true});
@@ -107,38 +105,45 @@ export class ClinicalContextComponent {
     private fetchStudies(): void {
         this.studyService
             .findStudiesForImport() 
-            .then(studies => {
-                /* For the moment, we import only zip files with the same equipment, 
-                   That's why the calculation is only based on the equipment of the first series of the first study
-                */
-                if (studies) this.calculateCompatibility(studies, this.patient.studies[0].series[0].equipment);
-                let hasOneCompatible: boolean = studies.filter(study => study.compatible).length == 1;
-                if (hasOneCompatible) {
-                    this.study = studies.filter(study => study.compatible)[0];
-                    this.onSelectStudy();
-                }
-                });
-            }
+            /* For the moment, we import only zip files with the same equipment, 
+                That's why the calculation is only based on the equipment of the first series of the first study
+            */
+            .then((studies) => {
+                if (studies) {
+                    this.calculateCompatibility(studies, this.patient.studies[0].series[0].equipment)
+                    .then(() => {
+                        this.studies.filter(study => console.log("for filtre: " + study));
+                        let hasOneCompatible: boolean = this.studies.filter(study => study.compatible).length == 1;
+                        if (hasOneCompatible) {
+                            this.study = this.studies.filter(study => study.compatible)[0];
+                            this.onSelectStudy();
+                        }
+                    })
+            }});
+    }
             
-            
-    private calculateCompatibility(studies: Study[], equipment: EquipmentDicom): void {
+    private async calculateCompatibility(studies, equipment: EquipmentDicom): Promise<void> {
+        let completeStudyPromises: Promise<void>[] = [];
         for (let study of studies) {
+            let completeCenterPromises: Promise<void>[] = [];
             for (let studyCenter of study.studyCenterList) {
-                this.centerService.get(studyCenter.center.id).then(
-                    center => {if (center) {
-                        for (let acqEpt of center.acquisitionEquipments) {
-                            if (acqEpt.serialNumber === this.patient.studies[0].series[0].equipment.deviceSerialNumber
-                                && acqEpt.manufacturerModel.name === this.patient.studies[0].series[0].equipment.manufacturerModelName
-                                && acqEpt.manufacturerModel.manufacturer.name === this.patient.studies[0].series[0].equipment.manufacturer) {
-                                    acqEpt.compatible = true;
-                                    center.compatible = true;
-                                    study.compatible = true;
-                            }
-                        } studyCenter.center = center;
-                    }
-                })
-            } this.studies.push(study);
+                completeCenterPromises.push(this.centerService.get(studyCenter.center.id).then((center) => {
+                    for (let acqEpt of center.acquisitionEquipments) {
+                        if (acqEpt.serialNumber === equipment.deviceSerialNumber
+                            && acqEpt.manufacturerModel.name === equipment.manufacturerModelName
+                            && acqEpt.manufacturerModel.manufacturer.name === equipment.manufacturer) {
+                                acqEpt.compatible = true;
+                                center.compatible = true;
+                                study.compatible = true;console.log(study.name + study.compatible)
+                        }
+                    } studyCenter.center = center;
+                }));
+            } 
+            completeStudyPromises.push(Promise.all(completeCenterPromises).then(() => {
+                this.studies.push(study);
+            }));
         }
+        return Promise.all(completeStudyPromises).then(() => {});
     }
 
     private onSelectStudy(): void {
@@ -242,10 +247,6 @@ export class ClinicalContextComponent {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledAcqEqt();
-            // this.msgBoxService.log('info', 
-            //     'Your archive contains this data: ' + this.patient.studies[0].series[0].equipment.manufacturer
-            //     + ' - ' + this.patient.studies[0].series[0].equipment.manufacturerModelName
-            //     + ' - ' + this.patient.studies[0].series[0].equipment.deviceSerialNumber, 100000);
             currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                 this.importDataService.contextBackup.acquisitionEquipment = (entity as AcquisitionEquipment);
             });

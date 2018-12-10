@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-
-import { EquipmentDicom } from '../../import/dicom-data.model';
+import { Observable } from 'rxjs/Observable';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
@@ -22,7 +21,6 @@ export class StudyService extends EntityService<Study> {
     
     findStudiesForImport(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_FOR_IMPORT_URL)
-            .map(entities => entities.map((entity) => Object.assign(new Study(), entity)))
             .toPromise();
     }
 
