@@ -10,7 +10,7 @@
                     <ol>
                         <li class="instructions">
                             ${msg("newPasswordInstruction")}
-                            <img src="${properties.assets!}/images/icons/information.16x16.png" title="${msg("passwordPolicyInstruction")}"/>
+                            <img src="${properties.assets!}/images/icons/information.png" title="${msg("passwordPolicyInstruction")}"/>
                         </li>
                         <li>
                             <input type="password" id="password-new" name="password-new" autofocus autocomplete="off" placeholder="${msg("password")}" />
