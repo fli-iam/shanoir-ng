@@ -34,9 +34,9 @@
 								</a>		
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="studyId" required formControlName="studyId" [(ngModel)]="examination.studyId">
-									<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
-								</select>
+								<select-box formControlName="studyId" [(ngModel)]="examination.studyId">
+									<select-option *ngFor="let study of studies" [value]="study.id">{{study.name}}</select-option>
+								</select-box>
 								<label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
 						</span>
@@ -63,9 +63,9 @@
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="centerId" required formControlName="centerId" [(ngModel)]="examination.centerId">
-									<option *ngFor="let center of centers" [ngValue]="center.id">{{center.name}}</option>
-								</select>
+								<select-box formControlName="centerId" [(ngModel)]="examination.centerId">
+									<select-option *ngFor="let center of centers" [value]="center.id">{{center.name}}</select-option>
+								</select-box>
 								<label *ngIf="hasError('centerId', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
 							</ng-template>
 						</span>

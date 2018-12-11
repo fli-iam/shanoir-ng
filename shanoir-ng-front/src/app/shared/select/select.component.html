@@ -1,6 +1,6 @@
 <div class="root" [class.disabled]="disabled">
     <span class="frame">
-        <span *ngIf="options.length > 0 && this.selectedOption" class="label" (click)="open = !disabled && !open">{{label}}</span>
+        <span [class.hidden]="!this.selectedOption" #label class="label" (click)="open = !disabled && !open"></span>
         <span *ngIf="options.length > 0 && !this.selectedOption" class="label placeholder" (click)="open = !disabled && !open">{{placeholder ? placeholder : 'Select an option...'}}</span>
         <span *ngIf="options.length == 0" class="label empty">Empty list</span>
         <span class="commands">

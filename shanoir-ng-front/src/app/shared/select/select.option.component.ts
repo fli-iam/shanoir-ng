@@ -1,10 +1,13 @@
-import { Component, Input, Host, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, ElementRef, Input } from '@angular/core';
+
 import { SelectBoxComponent } from './select.component';
 
 @Component({
     selector: 'select-option',
     template: `
-        <div (click)="select()" (mouseenter)="over()" [class.selected]="selected" [class.disabled]="disabled" [class.focus]="focus"><ng-content></ng-content></div>
+        <div (click)="select()" (mouseenter)="over()" [class.selected]="selected" [class.disabled]="disabled" [class.focus]="focus">
+            <ng-content></ng-content>
+        </div>
     `,
     styles: [
         ':host() { height: 20px; display:block; border: none; white-space: nowrap; }',
@@ -16,23 +19,17 @@ import { SelectBoxComponent } from './select.component';
     
 })
 
-export class SelectOptionComponent implements AfterViewInit {
+export class SelectOptionComponent {
     
     @Input() value: any;
     @Input() disabled: any;
     public parent: SelectBoxComponent;
-    public label: string;
     public selected: boolean = false;
     public focus: boolean = false;
 
-    constructor(public elt: ElementRef) { 
-       
-    }
-
-    ngAfterViewInit() {
-        let textNode = this.elt.nativeElement.childNodes[1].childNodes[0];
-        this.label = textNode.textContent;
-    }
+    constructor(public elt: ElementRef) { }
+    
+    //let textNode = this.elt.nativeElement.childNodes[1].childNodes[0];
 
     private select() {
         if (!this.disabled) this.parent.onSelectedOptionChange(this);

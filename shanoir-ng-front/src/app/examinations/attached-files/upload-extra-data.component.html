@@ -17,9 +17,9 @@
 					<li class="required">
 						    <label i18n="uploadExtraData|research study label@@uploadExtraDataResearchStudy" class="required-label">Select an existing research study 
 								</label>
-								<select id="studyId" required formControlName="studyId" [(ngModel)]="examinationStudyId">
-										<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
-									</select> 
+								<select-box formControlName="studyId" [(ngModel)]="examinationStudyId">
+									<select-option *ngFor="let study of studies" [value]="study.id">{{study.name}}</select-option>
+								</select-box> 
 					</li>
 					<li class="required">
 						    <label i18n="uploadExtraData|subject label@@uploadExtraDataSubject" class="required-label">Select a subject 

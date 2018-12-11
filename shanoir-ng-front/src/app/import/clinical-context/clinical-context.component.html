@@ -69,16 +69,14 @@
                                     [ngModelOptions]="{standalone: true}"/>
                             </td>
                             <td class="chkbx-col">
-                                <input type="checkbox" [(ngModel)]="subject.subjectStudy.physicallyInvolved" 
-                                    [ngModelOptions]="{standalone: true}"/>
+                                <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                             </td>
                             <td class="dropdown-col">
-                                <select id="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" 
-                                    [ngModelOptions]="{standalone: true}">
-                                        <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
-                                        <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
-                                        <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
-                                </select>
+                                <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
+                                    <select-option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</select-option>
+                                    <select-option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</select-option>
+                                    <select-option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</select-option>
+                                </select-box>
                             </td>
                         </tr>
                     </tbody>

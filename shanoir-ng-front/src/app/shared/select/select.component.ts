@@ -1,6 +1,7 @@
 import {
-    AfterContentChecked,
+    AfterContentInit,
     Component,
+    ComponentFactoryResolver,
     ContentChildren,
     ElementRef,
     EventEmitter,
@@ -12,7 +13,9 @@ import {
     OnDestroy,
     Output,
     QueryList,
+    Renderer2,
     SimpleChanges,
+    ViewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -32,12 +35,13 @@ import { SelectOptionComponent } from './select.option.component';
         }]   
 })
 
-export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnChanges, AfterContentChecked {
+export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnChanges, AfterContentInit {
     
     @Input() ngModel: any = null;
     @Output() ngModelChange = new EventEmitter();
     @Output() change = new EventEmitter();
     @ContentChildren(forwardRef(() => SelectOptionComponent)) private options: QueryList<SelectOptionComponent>;
+    @ViewChild('label', {read: ElementRef}) labelNode: ElementRef;
     private selectedOption: SelectOptionComponent;
     private openState: boolean = false;
     private globalClickSubscription: Subscription;
@@ -55,7 +59,11 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Output() onNewClick = new EventEmitter();
     @Output() onAddClick = new EventEmitter();
 
-    constructor(private element: ElementRef, private globalService: GlobalService) {}
+    constructor(
+            private element: ElementRef, 
+            private globalService: GlobalService,
+            private renderer: Renderer2,
+            private componentFactoryResolver: ComponentFactoryResolver) {}
 
     ngOnDestroy() {
         this.unsubscribeToGlobalClick();
@@ -68,7 +76,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
     }
 
-    ngAfterContentChecked() {
+    ngAfterContentInit() {
         this.options.forEach((option) => {
             option.parent = this;
         });
@@ -78,6 +86,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             });
         })
         this.updateSelectedOption();
+        this.updateLabel();
     }
 
     private updateSelectedOption() {
@@ -93,24 +102,40 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             });
         }
     }
-
+    
     public onSelectedOptionChange(option: SelectOptionComponent) {
         if (!this.optionsEqual(option, this.selectedOption)) {
             this.selectedOption = option;
             this.ngModelChange.emit(option.value);
             this.change.emit(option.value);
+            this.updateLabel();
         }
         this.open = false;
+    }
+    
+    private updateLabel() {
+        Array.from(this.labelNode.nativeElement.children).forEach(child => {
+            this.renderer.removeChild(this.labelNode.nativeElement, child);
+        });
+        if (this.selectedOption) {
+
+            let cloned = this.selectedOption.elt.nativeElement.cloneNode(true);
+            for (let focus of cloned.getElementsByClassName('focus')) {
+                focus.classList.remove('focus');
+            }
+            this.renderer.appendChild(this.labelNode.nativeElement, cloned);
+        }
     }
 
     private optionsEqual(option1: SelectOptionComponent, option2: SelectOptionComponent) {
         return option1 == option2
-            || option1 && option2 && this.valuesEqual(option1.value, option2.value);
+            || (option1 && option2 && this.valuesEqual(option1.value, option2.value));
     }
 
     private valuesEqual(value1, value2) {
-        return value1 == value2 
-            || (value1 && value2 && value1.id == value2.id);
+        return value1 == value2 || (
+            value1 && value2 && value1.id && value2.id && value1.id == value2.id
+        );
     }
     
     public onOptionOver(option: SelectOptionComponent) {
@@ -119,11 +144,6 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this.options.toArray()[focusIndex].focus = false;
         }
         option.focus = true;
-    }
-
-    private get label(): string {
-        if (!this.selectedOption) return null;
-        return this.selectedOption.label;
     }
 
     private set open(open: boolean) {
@@ -267,7 +287,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     } 
 
     private clickView(): void {
-        if(!this.viewDisabled && this.ngModel) this.onViewClick.emit();
+        if(!this.viewDisabled && this.ngModel) this.onViewClick.emit(this.ngModel);
     }
 
     private clickNew(): void {

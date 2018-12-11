@@ -73,7 +73,7 @@ datepicker.ng-invalid.ng-touched { border-bottom: 2px solid var(--color-error); 
 form { color: var(--dark-grey); }
   form input[readonly],
   form textarea[readonly],
-  form select[readonly] { background-color: var(--light-grey); cursor: default; color : transparent; text-shadow : 0 0 0 var(--greyer);}
+  form select[readonly] { cursor: default; border: none !important; }
   form input:not([type="checkbox"])::not([type="radio"]):not([type="file"]), form select { height: 20px; }
   form input[type='radio'] { vertical-align: -6; margin: 0 5px 0 0; }
   form input[type='radio'] + input[type='radio'] { margin-left: 20px; }
@@ -108,10 +108,10 @@ form { color: var(--dark-grey); }
     form .right-col button svg { margin-right: 3px; vertical-align: -1; color: var(--color-a); }
 
   /* Date picker style overriding */
-  form my-date-picker input.selection { height: 19px; font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; background-color: transparent !important; }
+  form my-date-picker input.selection { height: 19px; font-size: 12px !important; font-weight: normal !important; color: var(--greyer) !important; font-family: "Open Sans", Arial, sans-serif !important; background-color: transparent !important; border-radius: 0 !important; }
   form my-date-picker .selectiongroup { background-color: transparent !important; }
   form my-date-picker .selector { border: 1px solid var(--light-grey) !important; box-shadow: 0 0 var(--shadow-height) 0px gray !important; }
-  form my-date-picker input.selection { text-align: left !important; padding: 0 5px !important; }
+  form my-date-picker input.selection { text-align: left !important; padding: 0 !important; }
   form my-date-picker button.btnpicker,
   form my-date-picker button.btnclear { font-weight: normal !important; color: var(--greyer) !important; border: 0 !important; height: 10px; background-color: transparent !important; }
   /* form my-date-picker button.btnpicker:hover,
@@ -162,9 +162,10 @@ form { color: var(--dark-grey); }
 
 .svg-inline--fa { vertical-align: baseline; }
 
-.loading { display: table-cell; width: 100vh; height: 100vh; vertical-align: middle; }
-.loading-msg { text-align: center; margin: 0; margin-bottom: 150px; }
-.cat { text-align: center; width: 100%; }
+.loading { display: table; width: 100%; height: 100%;}
+.loading-middle { display: table-cell; width: 100%; height: 100%; vertical-align: middle; text-align: center; }
+.loading-msg { margin: 0; margin-bottom: 170px; }
+.cat { width: 100%; }
     .cat img { display:inline-block; height: 100px; }
 
 .mat-dialog-container { background: var(--color-overlay); position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 1000; box-shadow: none !important; }

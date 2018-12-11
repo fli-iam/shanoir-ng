@@ -1,9 +1,9 @@
 <span [ngSwitch]="mode">
     <ng-template [ngSwitchCase]="'view'">{{model}}</ng-template>
     <ng-template ngSwitchDefault>
-        <select [(ngModel)]="model" (change)="onChange()" [ngModelOptions]="{standalone: true}" [disabled]="disabled">
-            <option [value]="'RECONSTRUCTEDDATASET'">ReconstructedDataset</option>
-            <option [value]="'NONRECONSTRUCTEDDATASET'">NonReconstructedDataset</option>
-        </select>
+        <select-box [(ngModel)]="model" (change)="onChange()" [ngModelOptions]="{standalone: true}" [disabled]="disabled">
+            <select-option [value]="'RECONSTRUCTEDDATASET'">ReconstructedDataset</select-option>
+            <select-option [value]="'NONRECONSTRUCTEDDATASET'">NonReconstructedDataset</select-option>
+        </select-box>
     </ng-template>
 </span>

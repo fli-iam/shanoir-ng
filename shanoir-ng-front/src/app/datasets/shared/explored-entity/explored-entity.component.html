@@ -1,12 +1,12 @@
 <span [ngSwitch]="mode">
     <ng-template [ngSwitchCase]="'view'">{{model}}</ng-template>
     <ng-template ngSwitchDefault>
-        <select [(ngModel)]="model" (change)="onChange()" [ngModelOptions]="{standalone: true}" [disabled]="disabled">
-            <option [value]="'ANATOMICAL_DATASET'">Anatomical Dataset</option>
-            <option [value]="'FUNCTIONAL_DATASET'">Functional Dataset</option>
-            <option [value]="'HEMODYNAMIC_DATASET'">Hemodynamic Dataset</option>
-            <option [value]="'METABOLIC_DATASET'">Metabolic Dataset</option>
-            <option [value]="'CALIBRATION'">Calibration</option>
-        </select>
+        <select-box [(ngModel)]="model" (change)="onChange()" [ngModelOptions]="{standalone: true}" [disabled]="disabled">
+            <select-option [value]="'ANATOMICAL_DATASET'">Anatomical Dataset</select-option>
+            <select-option [value]="'FUNCTIONAL_DATASET'">Functional Dataset</select-option>
+            <select-option [value]="'HEMODYNAMIC_DATASET'">Hemodynamic Dataset</select-option>
+            <select-option [value]="'METABOLIC_DATASET'">Metabolic Dataset</select-option>
+            <select-option [value]="'CALIBRATION'">Calibration</select-option>
+        </select-box>
     </ng-template>
 </span>
