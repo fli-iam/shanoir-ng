@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
@@ -99,50 +99,40 @@ export class ClinicalContextComponent{
 
     setPatient(patient: PatientDicom) {
         this.patient = patient;
-        this.fetchStudies();
+        this.completeStudies(this.patient.studies[0].series[0].equipment)
+            /* For the moment, we import only zip files with the same equipment, 
+            That's why the calculation is only based on the equipment of the first series of the first study */
+            .then(() => {
+                let hasOneCompatible: boolean = this.studies.filter(study => study.compatible).length == 1;
+                if (hasOneCompatible) {
+                    this.study = this.studies.filter(study => study.compatible)[0];
+                    this.onSelectStudy();
+                }
+            })
     }
 
-    private fetchStudies(): void {
-        this.studyService
-            .findStudiesForImport() 
-            /* For the moment, we import only zip files with the same equipment, 
-                That's why the calculation is only based on the equipment of the first series of the first study
-            */
-            .then((studies) => {
-                if (studies) {
-                    this.calculateCompatibility(studies, this.patient.studies[0].series[0].equipment)
-                    .then(() => {
-                        this.studies.filter(study => console.log("for filtre: " + study));
-                        let hasOneCompatible: boolean = this.studies.filter(study => study.compatible).length == 1;
-                        if (hasOneCompatible) {
-                            this.study = this.studies.filter(study => study.compatible)[0];
-                            this.onSelectStudy();
-                        }
-                    })
-            }});
-    }
-            
-    private async calculateCompatibility(studies, equipment: EquipmentDicom): Promise<void> {
+    private async completeStudies(equipment: EquipmentDicom): Promise<void> {
         let completeStudyPromises: Promise<void>[] = [];
-        for (let study of studies) {
-            let completeCenterPromises: Promise<void>[] = [];
-            for (let studyCenter of study.studyCenterList) {
-                completeCenterPromises.push(this.centerService.get(studyCenter.center.id).then((center) => {
-                    for (let acqEpt of center.acquisitionEquipments) {
-                        if (acqEpt.serialNumber === equipment.deviceSerialNumber
-                            && acqEpt.manufacturerModel.name === equipment.manufacturerModelName
-                            && acqEpt.manufacturerModel.manufacturer.name === equipment.manufacturer) {
-                                acqEpt.compatible = true;
+        completeStudyPromises.push(Promise.all([this.studyService.findStudiesForImport(), this.centerService.getAll()])
+            .then(([allStudies, allCenters]) => {
+                for (let study of allStudies) {
+                    for (let studyCenter of study.studyCenterList) {
+                        let center = allCenters.find(center => center.id === studyCenter.center.id);
+                        if (center) {
+                            let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
+                                && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
+                                && acqEqt.manufacturerModel.manufacturer.name === equipment.manufacturer);
+                            for (let compatibleAcqEqt of compatibleAcqEqts) {
+                                compatibleAcqEqt.compatible = true;
                                 center.compatible = true;
-                                study.compatible = true;console.log(study.name + study.compatible)
+                                study.compatible = true;
+                            }
+                            studyCenter.center = center;
                         }
-                    } studyCenter.center = center;
-                }));
-            } 
-            completeStudyPromises.push(Promise.all(completeCenterPromises).then(() => {
-                this.studies.push(study);
+                    } 
+                    this.studies.push(study);
+                }
             }));
-        }
         return Promise.all(completeStudyPromises).then(() => {});
     }
 
