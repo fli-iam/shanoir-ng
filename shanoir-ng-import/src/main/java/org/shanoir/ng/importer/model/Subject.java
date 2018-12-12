@@ -4,16 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author atouboul
- *
+ * @author mkain
  */
-
 public class Subject {
 
-    @JsonProperty("id")
-    private long id;
+	@JsonProperty("id")
+	private long id;
 
-    @JsonProperty("name")
-    private String name;
+	@JsonProperty("name")
+	private String name;
 
 	public long getId() {
 		return id;

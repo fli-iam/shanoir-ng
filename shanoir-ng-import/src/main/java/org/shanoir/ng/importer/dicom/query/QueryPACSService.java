@@ -5,13 +5,16 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.dcm4che3.net.QueryOption;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
-import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
@@ -21,42 +24,54 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.weasis.dicom.op.CFind;
+import org.weasis.dicom.op.CMove;
 import org.weasis.dicom.param.AdvancedParams;
 import org.weasis.dicom.param.DicomNode;
 import org.weasis.dicom.param.DicomParam;
+import org.weasis.dicom.param.DicomProgress;
 import org.weasis.dicom.param.DicomState;
+import org.weasis.dicom.param.ProgressListener;
 
 @Service
 public class QueryPACSService {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(QueryPACSService.class);
 
-	@Value("${shanoir.import.pacs.aet.calling.name}")
+	@Value("${shanoir.import.pacs.query.aet.calling.name}")
 	private String callingName;
 
-	@Value("${shanoir.import.pacs.aet.calling.host}")
+	@Value("${shanoir.import.pacs.query.aet.calling.host}")
 	private String callingHost;
 	
-	@Value("${shanoir.import.pacs.aet.calling.port}")
+	@Value("${shanoir.import.pacs.query.aet.calling.port}")
 	private Integer callingPort;
 	
-	@Value("${shanoir.import.pacs.aet.called.name}")
+	@Value("${shanoir.import.pacs.query.aet.called.name}")
 	private String calledName;
 
-	@Value("${shanoir.import.pacs.aet.called.host}")
+	@Value("${shanoir.import.pacs.query.aet.called.host}")
 	private String calledHost;
 	
-	@Value("${shanoir.import.pacs.aet.called.port}")
+	@Value("${shanoir.import.pacs.query.aet.called.port}")
 	private Integer calledPort;
 	
-	public ImportJob queryPACS(DicomQuery dicomQuery) throws ShanoirImportException {
+	private DicomNode calling;
+	
+	private DicomNode called;
+	
+	@Value("${shanoir.import.pacs.store.aet.called.name}")
+	private String calledNameSCP;
+	
+	@PostConstruct
+	private void initDicomNodes() {
 		// Initialize connection configuration parameters here: to be used for all queries
-		DicomNode calling = new DicomNode(callingName);
-		DicomNode called = new DicomNode(calledName, calledHost, calledPort);
-		
+		this.calling = new DicomNode(callingName, callingHost, callingPort);
+		this.called = new DicomNode(calledName, calledHost, calledPort);
+	}
+	
+	public ImportJob queryCFIND(DicomQuery dicomQuery) throws ShanoirImportException {
 		ImportJob importJob = new ImportJob();
 		importJob.setFromPacs(true);
-
 		/**
 		 * In case of any patient specific search field is filled, work on patient level. Highest priority.
 		 */
@@ -82,6 +97,21 @@ public class QueryPACSService {
 		}
 		return importJob;
 	}
+	
+	public void queryCMOVE(Serie serie) {
+		DicomProgress progress = new DicomProgress();
+		progress.addProgressListener(new ProgressListener() {
+			@Override
+			public void handleProgression(DicomProgress progress) {
+				LOG.debug("Remaining operations:" + progress.getNumberOfRemainingSuboperations());
+			}
+		});
+		DicomParam[] params = { new DicomParam(Tag.QueryRetrieveLevel, "SERIES"),
+				new DicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID()) };
+		AdvancedParams options = new AdvancedParams();
+		options.getQueryOptions().add(QueryOption.RELATIONAL); // Required for QueryRetrieveLevel other than study
+		DicomState state = CMove.process(options, calling, called, calledNameSCP, progress, params);
+	}
 
 	/**
 	 * This method queries on patient root level.
@@ -99,7 +129,7 @@ public class QueryPACSService {
 		if (attributesPatients != null) {
 			List<Patient> patients = new ArrayList<Patient>();
 			for (int i = 0; i < attributesPatients.size(); i++) {
-				Patient patient = initPatient(attributesPatients.get(i));
+				Patient patient = new Patient(attributesPatients.get(i));
 				patients.add(patient);
 				queryStudies(calling, called, patient);
 			}
@@ -125,10 +155,10 @@ public class QueryPACSService {
 			List<Patient> patients = new ArrayList<Patient>();
 			for (int i = 0; i < attributesStudies.size(); i++) {
 				// handle patients
-				Patient patient = initPatient(attributesStudies.get(i));
+				Patient patient = new Patient(attributesStudies.get(i));
 				patient = addPatientIfNotExisting(patients, patient);
 				// handle studies
-				Study study = initStudy(attributesStudies.get(i));
+				Study study = new Study(attributesStudies.get(i));
 				patient.getStudies().add(study);
 				querySeries(calling, called, study);
 			}
@@ -182,7 +212,7 @@ public class QueryPACSService {
 		if (attributesStudies != null) {
 			List<Study> studies = new ArrayList<Study>();
 			for (int i = 0; i < attributesStudies.size(); i++) {
-				Study study = initStudy(attributesStudies.get(i));
+				Study study = new Study(attributesStudies.get(i));
 				studies.add(study);
 				querySeries(calling, called, study);
 			}
@@ -209,16 +239,48 @@ public class QueryPACSService {
 			new DicomParam(Tag.ManufacturerModelName),
 			new DicomParam(Tag.DeviceSerialNumber)	
 		};
-		List<Attributes> attributesSeries = queryCFIND(params, QueryRetrieveLevel.SERIES, calling, called);
-		if (attributesSeries != null) {
+		List<Attributes> attributes = queryCFIND(params, QueryRetrieveLevel.SERIES, calling, called);
+		if (attributes != null) {
 			List<Serie> series = new ArrayList<Serie>();
-			for (int i = 0; i < attributesSeries.size(); i++) {
-				Serie serie = initSerie(attributesSeries.get(i));
+			for (int i = 0; i < attributes.size(); i++) {
+				Serie serie = new Serie(attributes.get(i));
 				if (serie.getModality() != null && !"PR".equals(serie.getModality()) && !"SR".equals(serie.getModality())) {
-					series.add(serie);
+					queryInstances(calling, called, serie, study);
+					if (!serie.getInstances().isEmpty()) {
+						series.add(serie);						
+					} else {
+						LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: " + serie.getSeriesInstanceUID() + ").");
+					}
+				} else {
+					LOG.warn("Serie found with wrong modality (PR or SR) therefore ignored (SerieInstanceUID: " + serie.getSeriesInstanceUID() + ").");					
 				}
 			}
 			study.setSeries(series);
+		}
+	}
+	
+	/**
+	 * This method queries for instances/images, creates them and adds them to series.
+	 * 
+	 * @param calling
+	 * @param called
+	 * @param serie
+	 */
+	private void queryInstances(DicomNode calling, DicomNode called, Serie serie, Study study) {
+		DicomParam[] params = {
+			new DicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID()),
+			new DicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID()),
+			new DicomParam(Tag.SOPInstanceUID),
+			new DicomParam(Tag.InstanceNumber)	
+		};
+		List<Attributes> attributes = queryCFIND(params, QueryRetrieveLevel.IMAGE, calling, called);
+		if (attributes != null) {
+			List<Instance> instances = new ArrayList<Instance>();
+			for (int i = 0; i < attributes.size(); i++) {
+				Instance instance = new Instance(attributes.get(i));
+				instances.add(instance);
+			}
+			serie.setInstances(instances);
 		}
 	}
 	
@@ -238,6 +300,8 @@ public class QueryPACSService {
 			options.setInformationModel(InformationModel.StudyRoot);
 		} else if (level.equals(QueryRetrieveLevel.SERIES)) {
 			options.setInformationModel(InformationModel.StudyRoot);
+		} else if (level.equals(QueryRetrieveLevel.IMAGE)) {
+			options.setInformationModel(InformationModel.StudyRoot);
 		}
 		logQuery(params, options);
 		DicomState state = CFind.process(options, calling, called, 0, level, params);
@@ -254,55 +318,6 @@ public class QueryPACSService {
 		for (int i = 0; i < params.length; i++) {
 			LOG.info("Tag: " + params[i].getTagName() + ", Value: " + Arrays.toString(params[i].getValues())); 
 		}
-	}
-	
-	/**
-	 * Initialize patient from Attributes.
-	 * @param attributes
-	 * @return
-	 */
-	public Patient initPatient(final Attributes attributes) {
-		final Patient patient = new Patient(
-			attributes.getString(Tag.PatientID),
-			attributes.getString(Tag.PatientName),
-			attributes.getString(Tag.PatientBirthName),
-			attributes.getDate(Tag.PatientBirthDate),
-			attributes.getString(Tag.PatientSex));
-		return patient;
-	}
-	
-	/**
-	 * Initialize study from Attributes.
-	 * @param attributes
-	 * @return
-	 */
-	public Study initStudy(final Attributes attributes) {
-		final Study study = new Study(
-			attributes.getString(Tag.StudyInstanceUID),
-			attributes.getDate(Tag.StudyDate),
-			attributes.getString(Tag.StudyDescription));
-		return study;
-	}
-	
-	/**
-	 * Initialize serie from Attributes.
-	 * @param attributes
-	 * @return
-	 */
-	public Serie initSerie(final Attributes attributes) {
-		final Serie serie = new Serie(
-			attributes.getString(Tag.SeriesInstanceUID),
-			attributes.getString(Tag.SeriesDescription),
-			attributes.getDate(Tag.SeriesDate),
-			attributes.getString(Tag.SeriesNumber),
-			attributes.getString(Tag.Modality),
-			attributes.getString(Tag.ProtocolName));
-		final EquipmentDicom equipmentDicom = new EquipmentDicom(
-			attributes.getString(Tag.Manufacturer),
-			attributes.getString(Tag.ManufacturerModelName),
-			attributes.getString(Tag.DeviceSerialNumber));
-		serie.setEquipment(equipmentDicom);
-		return serie;
 	}
 
 }

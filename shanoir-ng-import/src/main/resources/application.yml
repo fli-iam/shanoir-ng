@@ -79,18 +79,24 @@ logging:
 # Shanoir configurations
 shanoir:
   import:
-    upload:
-      folder: /tmp
+    directory: /tmp
     # Import from PACS configuration
     pacs:
-      aet.calling:
-        name: SHANOIR
-        host: import
-        port: 44105
-      aet.called:
-        name: DCM4CHEE
-        host: dcm4chee-arc
-        port: 11112
+      query:
+        aet.calling:
+          name: SHANOIR-SCU
+          host: import
+          port: 11115
+        aet.called:
+          name: DCM4CHEE
+          host: dcm4chee-arc
+          port: 11112
+      store:
+        aet.called:
+          name: SHANOIR-SCP
+          host: import
+          port: 44105
+        folder: /tmp/shanoir-dcmrcv
     # In a dicom file. Format "tag==value;" If it is not needed to separate image files into separated folders for a dicom serie.
     series:
       # this long name has been kept, as Elise and Isabelle know it like this; to find it for further adaptions in later time

@@ -3,16 +3,18 @@ package org.shanoir.ng.importer.model;
 import java.util.Date;
 import java.util.List;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
+ * This class represents a patient based on Dicom as used in Shanoir.
+ * 
  * @author atouboul
  * @author mkain
- *
  */
 public class Patient {
-	
-	private static final String NO_ID = "No ID";
 
 	@JsonProperty("patientID")
 	private String patientID;
@@ -32,17 +34,15 @@ public class Patient {
 	@JsonProperty("subject")
 	private Subject subject;
 
-	public Patient(String patientID, String patientName, String patientBirthName, Date patientBirthDate,
-			String patientSex) {
-		if (patientID == null || "".equals(patientID)) {
-			this.patientID = NO_ID;
-		} else {
-			this.patientID = patientID;			
-		}
-		this.patientName = patientName;
-		this.patientBirthName = patientBirthName;
-		this.patientBirthDate = patientBirthDate;
-		this.patientSex = patientSex;
+	// Keep this empty constructor to avoid Jackson deserialization exceptions
+	public Patient() {}
+
+	public Patient(final Attributes attributes) {
+		this.patientID = attributes.getString(Tag.PatientID);
+		this.patientName = attributes.getString(Tag.PatientName);
+		this.patientBirthName = attributes.getString(Tag.PatientBirthName);
+		this.patientBirthDate = attributes.getDate(Tag.PatientBirthDate);
+		this.patientSex = attributes.getString(Tag.PatientSex);
 	}
 
 	@JsonProperty("studies")

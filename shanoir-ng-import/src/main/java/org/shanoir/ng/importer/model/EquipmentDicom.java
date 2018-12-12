@@ -3,6 +3,9 @@
  */
 package org.shanoir.ng.importer.model;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -19,6 +22,9 @@ public class EquipmentDicom {
 
 	@JsonProperty("deviceSerialNumber")
 	private String deviceSerialNumber;
+	
+	// Keep this empty constructor to avoid Jackson deserialization exceptions
+	public EquipmentDicom() {}
 
 	public EquipmentDicom(String manufacturer, String manufacturerModelName, String deviceSerialNumber) {
 		this.manufacturer = manufacturer;
@@ -48,6 +54,17 @@ public class EquipmentDicom {
 
 	public void setDeviceSerialNumber(String deviceSerialNumber) {
 		this.deviceSerialNumber = deviceSerialNumber;
+	}
+	
+	@JsonIgnore
+	public boolean isComplete() {
+		if (StringUtils.isNotEmpty(this.manufacturer)
+			&& StringUtils.isNotEmpty(this.manufacturerModelName)
+			&& StringUtils.isNotEmpty(this.deviceSerialNumber)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }
