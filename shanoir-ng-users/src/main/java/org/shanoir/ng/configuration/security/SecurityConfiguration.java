@@ -66,6 +66,7 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 				.disable()
 			.authorizeRequests()
 				.antMatchers("/accountrequest").permitAll()
+				.antMatchers("/last_login_date").permitAll()
 				.anyRequest().authenticated();
 	}
 
