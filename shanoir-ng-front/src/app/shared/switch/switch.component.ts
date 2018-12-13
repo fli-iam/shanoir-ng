@@ -18,10 +18,10 @@ export class ToggleSwitchComponent implements ControlValueAccessor {
     
     @Input() @HostBinding('class.on') ngModel: boolean = null;
     @Output() ngModelChange = new EventEmitter();
-    private state: boolean = false;
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     @Input() disabled: boolean = false;
+    @Input() reverse: boolean = false;
 
     constructor() {}
 

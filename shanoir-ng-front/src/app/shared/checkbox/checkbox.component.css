@@ -1,30 +1,34 @@
 :host() {
-    position: relative;
-    display: inline-block;
     width: 17px;
     height: 17px;
+    display: inline-block;
+    position: relative;
+}
+
+div {
     border-radius: 2px;
     border: 1px solid var(--grey);
+    color: var(--color-c);
+    height: calc(100% - 2px);
+    width: calc(100% - 2px);   
 }
 
 :host():focus {
     outline: none;
+}
+
+:host():focus div {
     border: 2px solid var(--color-a);
-    width: 15px;
-    height: 15px;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
 }
 
-.button {
-    color: var(--color-c);
-    font-size: 15px;
-    text-align: center;
-    margin: 1px 0;
+span {
+    position: absolute;
+    left: 50%;
 }
 
-:host():focus .button {
-    margin: 0;
-}
-
-.button svg {
-    vertical-align: middle;
+svg {
+    position: relative;
+    left: -50%;
 }

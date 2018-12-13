@@ -19,7 +19,6 @@ th { width: 100%; white-space: normal; }
 		.select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 0; }
 			.controls .options .max-results { width: 40px; text-align: right; }
 	.select-ctrl button { padding: 0 5px; }
-	.select-ctrl input[type="checkbox"] { margin: 0; width: 15px; }
 	th.sortable { cursor: pointer; position: relative; overflow: initial; }
 		th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
 	th.checkbox-col { width: 21px; }

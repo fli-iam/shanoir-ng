@@ -3,21 +3,27 @@
     display: inline-block;
     width: 40px;
     height: 19px;
-    border-radius: 2px;
-    border: none;
-    border-bottom: 1px solid var(--grey);
+    vertical-align: sub;
+    margin: 0 10px;
 }
-
-:host().on {}
 
 :host():focus {
     outline: none;
-    border-bottom: 2px solid var(--color-a);
 }
 
-:host, .button, .on-back {
-    -webkit-transition: .4s;
-    transition: .4s;
+
+.line {
+    border: 1px solid var(--grey);
+    border-radius: 5px;
+    display: block;
+    position: absolute;
+    left: 0; right: 0; top: 7px; bottom: 7px;
+    background-color: var(--light-grey);
+}
+
+:host, .button {
+    -webkit-transition: transform .4s;
+    transition: transform .4s ;
 }
 
 .button {
@@ -31,32 +37,14 @@
     background-color: var(--very-light-grey);
 }
 
+:host():focus .button {
+    border: 2px solid var(--color-a);
+    width: 15px;
+    height: 15px;
+}
+
 .button.on {
-    -webkit-transform: translateX(20px);
-    -ms-transform: translateX(20px);
-    transform: translateX(20px);
-}
-
-.on-back {
-    left: 0;
-    color: var(--color-c);
-}
-
-.off-back {
-    right: 0;
-    color: var(--greyer);
-}
-
-.on-back, .off-back {
-    width: 50%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    text-align: center;
-    display: list-item;
-}
-
-.on-back svg, .off-back svg {
-    vertical-align: -2;
+    -webkit-transform: translateX(21px);
+    -ms-transform: translateX(21px);
+    transform: translateX(21px);
 }

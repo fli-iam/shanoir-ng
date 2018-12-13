@@ -81,7 +81,7 @@
 
         <!-- editable boolean -->
         <span *ngIf="isFieldBoolean(col) && editMode && col.editable">
-            <input type="checkbox" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);" /> 
+            <checkbox [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);" ></checkbox> 
         </span>
 
         <!-- add a link -->
