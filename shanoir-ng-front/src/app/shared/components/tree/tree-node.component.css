@@ -4,6 +4,6 @@
 .node > span { display: inline-block; }
 .arrow { display: inline-block; margin-right: 6px; cursor: pointer; }
 .picto { height: 14px; vertical-align: sub; }
-input[type="checkbox"] { vertical-align: middle; }
+input[type="checkbox"] { vertical-align: middle; margin: 0 5px; }
 input[type="text"] { color: var(--very-dark-grey); }
 .clickable { cursor: pointer; }
