@@ -59,3 +59,4 @@ a.link { text-decoration: none; color: inherit; }
 	a.link svg:hover { color: var(--color-a); }
 
 .cell-button svg:hover { color: var(--color-a); }
+checkbox { height: 15px; width: 15px; }

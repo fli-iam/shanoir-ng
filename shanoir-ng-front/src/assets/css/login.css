@@ -1,4 +1,6 @@
-body { background-color: var(--color-a); display: table-cell; width: 100vh; height: 100vh; vertical-align: middle; }
+
+html { display: table;  width: 100%; height: 100%; }
+body { background-color: var(--color-a); display: table-cell; vertical-align: middle; }
 
 #kc-container { margin-bottom: 200px; }
 

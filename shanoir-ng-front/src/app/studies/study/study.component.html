@@ -138,12 +138,11 @@
 								<span *ngIf="!study.monoCenter">Multicenter</span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<span [class.disabled]="study.studyCenterList?.length > 1" class="mono">
-									<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="true" i18n="Study detail|Yes label@@noLabel"
-										[checked]="study.monoCenter" />Single center
+								<span [class.disabled]="study.studyCenterList?.length > 1" class="mono" i18n="Study detail|Yes label@@noLabel">
+										Single center
 								</span>
-								<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="false" i18n="Study detail|No label@@yesLabel"
-									[checked]="!study.monoCenter" />Multicenter
+								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" [class.disabled]="study.studyCenterList?.length > 1"></toggle-switch>
+								<span>Multicenter</span>
 							</ng-template>
 						</span>
 					</li>

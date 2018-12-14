@@ -9,22 +9,22 @@
 
 :host():focus {
     outline: none;
+}
+
+:host():focus::after {
+    content: "";
+    position: absolute;
+    top: -2px; right: -2px; bottom: -2px; left: -2px;
     border: 2px solid var(--color-a);
-    width: 15px;
-    height: 15px;
+    border-radius: 2px;
 }
 
 .button {
     color: var(--color-c);
-    font-size: 15px;
-    text-align: center;
-    margin: 1px 0;
-}
-
-:host():focus .button {
-    margin: 0;
 }
 
 .button svg {
-    vertical-align: middle;
+    height: 90%;
+    width: 100%;
+    margin-top: 5%;
 }
