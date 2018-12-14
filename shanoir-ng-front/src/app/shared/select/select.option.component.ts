@@ -28,8 +28,6 @@ export class SelectOptionComponent {
     public focus: boolean = false;
 
     constructor(public elt: ElementRef) { }
-    
-    //let textNode = this.elt.nativeElement.childNodes[1].childNodes[0];
 
     private select() {
         if (!this.disabled) this.parent.onSelectedOptionChange(this);

@@ -36,7 +36,7 @@
     background-color: var(--very-light-grey); 
     cursor: pointer;
     box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color);
-    padding: 0 5px;
+    padding: 0;
 }
 .list.down { top: 20px; }
 .list.up { bottom: 20px; } 

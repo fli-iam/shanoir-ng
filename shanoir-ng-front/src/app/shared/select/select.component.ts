@@ -118,11 +118,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this.renderer.removeChild(this.labelNode.nativeElement, child);
         });
         if (this.selectedOption) {
-
             let cloned = this.selectedOption.elt.nativeElement.cloneNode(true);
-            for (let focus of cloned.getElementsByClassName('focus')) {
-                focus.classList.remove('focus');
-            }
+            cloned.children[0].classList.remove('focus');
+            cloned.children[0].style.padding = '0';
             this.renderer.appendChild(this.labelNode.nativeElement, cloned);
         }
     }

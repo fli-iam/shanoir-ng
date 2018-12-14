@@ -20,19 +20,21 @@ export class ToggleSwitchComponent implements ControlValueAccessor {
     @Output() ngModelChange = new EventEmitter();
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
-    @Input() disabled: boolean = false;
+    @Input() @HostBinding('class.disabled') disabled: boolean = false;
     @Input() reverse: boolean = false;
 
     constructor() {}
 
     @HostListener('click', ['$event']) 
     private onClick() {
+        if (this.disabled) return; 
         this.ngModel = !this.ngModel;
         this.ngModelChange.emit(this.ngModel);
     }
 
     @HostListener('keydown', ['$event']) 
     private onKeyPress(event: any) {
+        if (this.disabled) return;
         if (' ' == event.key) {
             this.ngModel = !this.ngModel;
             this.ngModelChange.emit(this.ngModel);

@@ -1,16 +1,14 @@
 :host() {
+    position: relative;
+    display: inline-block;
     width: 17px;
     height: 17px;
-    display: inline-block;
-    position: relative;
-}
-
-div {
     border-radius: 2px;
     border: 1px solid var(--grey);
-    color: var(--color-c);
-    height: calc(100% - 2px);
-    width: calc(100% - 2px);   
+}
+
+:host().disabled {
+    opacity: 0.5;
 }
 
 :host():focus {
@@ -22,14 +20,14 @@ div {
     position: absolute;
     top: -2px; right: -2px; bottom: -2px; left: -2px;
     border: 2px solid var(--color-a);
-    border-radius: 2px;
+    border-radius: 3px;
 }
 
-.button {
+div {
     color: var(--color-c);
 }
 
-.button svg {
+div svg {
     height: 90%;
     width: 100%;
     margin-top: 5%;

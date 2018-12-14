@@ -138,10 +138,8 @@
 								<span *ngIf="!study.monoCenter">Multicenter</span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<span [class.disabled]="study.studyCenterList?.length > 1" class="mono" i18n="Study detail|Yes label@@noLabel">
-										Single center
-								</span>
-								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" [class.disabled]="study.studyCenterList?.length > 1"></toggle-switch>
+								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
+								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" [reverse]="true" [disabled]="study.studyCenterList?.length > 1"></toggle-switch>
 								<span>Multicenter</span>
 							</ng-template>
 						</span>
@@ -149,10 +147,9 @@
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigators</label>
 						<span class="right-col">
-							<select-box [ngModel]="selectedCenter" formControlName="studyCenterList" (change)="onCenterChange($event)" placeholder="Select a center ...">
+							<select-box [ngModel]="selectedCenter" formControlName="studyCenterList" (change)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()">
 								<select-option *ngFor="let center of centers" [value]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</select-option>
 							</select-box>
-							<span *ngIf="enableAddIcon()" class="icon icon-clickable" (click)="onCenterAdd()"><i class="fas fa-plus"></i></span>
 							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>

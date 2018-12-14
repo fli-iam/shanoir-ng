@@ -7,6 +7,10 @@
     margin: 0 10px;
 }
 
+:host().disabled {
+    opacity: 0.5;
+}
+
 :host():focus {
     outline: none;
 }
@@ -31,16 +35,18 @@
     display: inline-block;
     width: 17px;
     height: 17px;
-    border-radius: 2px;
+    border-radius: 50%;
     border: 1px solid var(--grey);
     z-index: 1;
     background-color: var(--very-light-grey);
 }
 
-:host():focus .button {
+:host():focus .button::after {
+    content: "";
+    position: absolute;
+    top: -2px; right: -2px; bottom: -2px; left: -2px;
     border: 2px solid var(--color-a);
-    width: 15px;
-    height: 15px;
+    border-radius: 50%;
 }
 
 .button.on {
