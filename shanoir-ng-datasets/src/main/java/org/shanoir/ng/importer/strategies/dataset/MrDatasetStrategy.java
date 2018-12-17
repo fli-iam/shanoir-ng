@@ -2,17 +2,14 @@ package org.shanoir.ng.importer.strategies.dataset;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.DatasetExpression;
 import org.shanoir.ng.dataset.DatasetMetadata;
 import org.shanoir.ng.dataset.DatasetModalityType;
 import org.shanoir.ng.dataset.ProcessedDatasetType;
 import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.datasetacquisition.DatasetAcquisitionMapper;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
@@ -21,11 +18,9 @@ import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
-import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionStrategy;
 import org.shanoir.ng.shared.model.EchoTimeMapper;
 import org.shanoir.ng.shared.model.FlipAngleMapper;
 import org.shanoir.ng.shared.model.InversionTimeMapper;
-import org.shanoir.ng.shared.model.RepetitionTime;
 import org.shanoir.ng.shared.model.RepetitionTimeMapper;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -222,31 +217,6 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		return mrDataset;
 	}
 
-
-//
-//
-//	/* ---- Fields set by the studyCard ---- */
-//	final IMetadataExtractor metadataExtractor = dicomImporter.getMetadataExtractor();
-//	HashMap<Integer, Object> tagMap;if(dicomFiles==null||dicomFiles.isEmpty())
-//	{
-//		tagMap = (HashMap<Integer, Object>) metadataExtractor.getValue(ShanoirConstants.DICOM_RETURNED_TYPES.STRING,
-//				mrDatasetAcquisition.getRank(), studyCard.getDicomTagArray());
-//	}else
-//	{
-//		tagMap = (HashMap<Integer, Object>) metadataExtractor.getValue(ShanoirConstants.DICOM_RETURNED_TYPES.STRING,
-//				studyCard.getDicomTagArray(), dicomFiles.get(0));
-//	}
-//
-//	setFieldsByStudyCard(mrDataset, studyCard, tagMap);
-//
-//}
-//
-
-//
-//	return null;
-//	}
-	
-	
 
 	/* (non-Javadoc)
 	 * @see org.shanoir.ng.dataset.modality.DatasetStrategy#computeDatasetName(java.lang.String, int)

@@ -19,26 +19,15 @@
         </node>
     </ng-template>
 </node>
-<node label="Principal investigators and Centers (takes place in and with)" [pictoUrl]="folderIconPath"
-    deploy="true">
-    <ng-template ngFor let-studycenter [ngForOf]="study.studyCenterList">
-        <node [label]="studycenter.center.name" [pictoUrl]="homeIconPath" [nodeParams]="studycenter.center.id" link="true"
-            (labelClick)="showCenterDetails($event)" deploy="true">
-            <ng-template ngFor let-acquisitionEquipment [ngForOf]="studycenter.center.acquisitionEquipments">
+<node label="Principal investigators and Centers (takes place in and with)" [pictoUrl]="folderIconPath" deploy="true">
+    <ng-template ngFor let-studyCenter [ngForOf]="study.studyCenterList">
+        <node [label]="studyCenter.center.name" [pictoUrl]="homeIconPath" [nodeParams]="studyCenter" [dataRequest]="true"
+            (openClick)="getAcqEptForCenter($event)" link="true" (labelClick)="showCenterDetails($event)">
+            <ng-template ngFor let-acquisitionEquipment [ngForOf]="acquisitionEquipments">
                 <node [label]="acquisitionEquipment | acqEqptLabel" [pictoUrl]="xRay1IconPath" [nodeParams]="acquisitionEquipment.id"
                     link="true" (labelClick)="showAcquisitionEquipmentDetails($event)">
-                    <ng-template ngFor let-studyCard [ngForOf]="acquisitionEquipment.studyCards">
-                        <node [label]="studyCard.name" [pictoUrl]="studyCardIconPath">
-                        </node>
-                    </ng-template>
                 </node>
             </ng-template>
-        </node>
-    </ng-template>
-</node>
-<node label="Study cards" [pictoUrl]="folderIconPath" deploy="true">
-    <ng-template ngFor let-studyCard [ngForOf]="study.studyCards">
-        <node [label]="studyCard.name" [pictoUrl]="studyCardIconPath">
         </node>
     </ng-template>
 </node>

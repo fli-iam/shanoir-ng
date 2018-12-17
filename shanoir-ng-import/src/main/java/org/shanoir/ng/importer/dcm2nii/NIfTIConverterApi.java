@@ -3,6 +3,8 @@
  */
 package org.shanoir.ng.importer.dcm2nii;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +20,8 @@ import io.swagger.annotations.ApiResponses;
  * @author yyao
  *
  */
-@Api(value = "nifticonverter", description = "the niftiConverter API")
-@RequestMapping("/niftiConverter")
+@Api(value = "niftiConverters", description = "the niftiConverters API")
+@RequestMapping("/niftiConverters")
 public interface NIfTIConverterApi {
 	@ApiOperation(value = "", notes = "If exists, returns the niftiConverter corresponding to the given id", response = NIfTIConverter.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found nifti converter", response = NIfTIConverter.class),
@@ -30,4 +32,13 @@ public interface NIfTIConverterApi {
 	@RequestMapping(value = "/{niftiConverterId}", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<NIfTIConverter> findNiftiConverterById(
 			@ApiParam(value = "id of the niftiConverter", required = true) @PathVariable("niftiConverterId") Long niftiConverterId);
+	
+	@ApiOperation(value = "", notes = "If exists, returns all the niftiConverters", response = NIfTIConverter.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found nifti converters", response = NIfTIConverter.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = NIfTIConverter.class),
+			@ApiResponse(code = 403, message = "forbidden", response = NIfTIConverter.class),
+			@ApiResponse(code = 404, message = "no nifti converter found", response = NIfTIConverter.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = NIfTIConverter.class) })
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<List<NIfTIConverter>> findNiftiConverters();
 }

@@ -1,8 +1,5 @@
 package org.shanoir.ng.importer;
 
-import java.util.ArrayList;
-
-import org.shanoir.ng.dataset.Dataset;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.Examination;
@@ -50,10 +47,6 @@ public class ImporterService {
 		
 	}
 	
-	public void applyStudyCard() {
-		// TODO Implement MrDatasetAcquisitionHome ->  processStudyCardChange(final string folderpath) method
-	}
-	
 	public void createAllDatasetAcquisition() {
 		Examination examination = null;
 		try {
@@ -66,10 +59,10 @@ public class ImporterService {
 			for (Patient patient : importJob.getPatients()) {
 				for (Study study : patient.getStudies()) {
 					for (Serie serie : study.getSeries() ) {
-//						if (serie.getSelected()) {
+						if (serie.getSelected()) {
 							createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
 							rank++;
-//						}
+						}
 					}
 				}
 			}
@@ -79,7 +72,7 @@ public class ImporterService {
 	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) {
 		if (serie.getModality() != null) {
 			// Added Temporary check on serie in order not to generate dataset acquisition for series without images.
-			if (serie.getSelected() && serie.getDatasets() != null && !serie.getDatasets().isEmpty()) {
+			if (serie.getDatasets() != null && !serie.getDatasets().isEmpty()) {
 				if (serie.getDatasets().get(0).getExpressionFormats() != null) {
 					if (serie.getDatasets().get(0).getExpressionFormats().size() > 0) {
 						datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());

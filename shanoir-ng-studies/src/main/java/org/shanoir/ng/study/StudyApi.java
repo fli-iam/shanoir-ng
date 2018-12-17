@@ -56,18 +56,15 @@ public interface StudyApi {
 	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<IdNameDTO>> findStudiesNames();
 
-	@ApiOperation(value = "", notes = "If exists, returns the studies with theirs study cards that the user is allowed to see", response = SimpleStudyDTO.class, tags = {})
+	@ApiOperation(value = "", notes = "If exists, returns the studies that the user is allowed to see and to import", response = SimpleStudyDTO.class, tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found studies with studycards", response = SimpleStudyDTO.class),
+			@ApiResponse(code = 200, message = "found studies by user and equipment", response = SimpleStudyDTO.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = SimpleStudyDTO.class),
 			@ApiResponse(code = 403, message = "forbidden", response = SimpleStudyDTO.class),
 			@ApiResponse(code = 404, message = "no study found", response = SimpleStudyDTO.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = SimpleStudyDTO.class) })
-	@RequestMapping(value = "/listwithcards", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<List<SimpleStudyDTO>> findStudiesWithStudyCardsByUserAndEquipment(
-			@ApiParam(value = "equipment", required = true) @RequestBody EquipmentDicom equipment, BindingResult result)
-			throws RestServiceException;
+	@RequestMapping(value = "/list_for_import", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<List<SimpleStudyDTO>> findStudiesForImport();
 
 	@ApiOperation(value = "", notes = "If exists, returns the study corresponding to the given id", response = Study.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found study", response = Study.class),

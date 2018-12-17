@@ -1,6 +1,5 @@
-import { Sex } from "../subjects/shared/subject.types";
-import { IdNameObject } from "../shared/models/id-name-object.model";
 import { Subject } from "../subjects/shared/subject.model";
+import { Sex } from "../subjects/shared/subject.types";
 
 export class ImportJob {
     fromDicomZip: boolean;
@@ -8,10 +7,9 @@ export class ImportJob {
     fromPacs: boolean;
     workFolder: string;
     patients: PatientDicom[];
-    frontExperimentalGroupOfSubjectId: number;
     examinationId: number;
     frontStudyId: number;
-    frontStudyCardId: number;
+    frontAcquisitionEquipmentId: number;
     frontConverterId: number;
 }
 
@@ -43,6 +41,7 @@ export class SerieDicom {
     numberOfSeriesRelatedInstances: number;
     sopClassUID: string;
     equipment: EquipmentDicom; 
+    institution: InstitutionDicom;
     isCompressed: boolean;
     isSpectroscopy: boolean;
     isEnhancedMR: boolean;
@@ -66,4 +65,9 @@ export class ImageDicom {
     acquisitionNumber: number;
     echoNumbers: number[];
     imageOrientationPatient: number[];
+}
+
+export class InstitutionDicom {
+    institutionName: string;
+    institutionAddress: string;
 }

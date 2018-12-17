@@ -3,10 +3,10 @@ package org.shanoir.ng.study;
 import java.util.List;
 
 import org.mapstruct.DecoratedWith;
-import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.shanoir.ng.study.dto.SimpleStudyDTO;
 import org.shanoir.ng.timepoint.TimepointMapper;
 
 /**
@@ -26,8 +26,7 @@ public interface StudyMapper {
 	 *            list of studies.
 	 * @return list of studies DTO.
 	 */
-	@IterableMapping(qualifiedByName = "studyToSimpleStudyDTO")
-	List<StudyDTO> studiesToStudyDTOs(List<Study> studies);
+	List<StudyDTO> studiesToStudyDTOs (List<Study> studies);
 
 	/**
 	 * Map a @Study to a @StudyDTO.
@@ -40,6 +39,11 @@ public interface StudyMapper {
 			@Mapping(target = "membersCategories", ignore = true), @Mapping(target = "nbExaminations", ignore = true),
 			@Mapping(target = "nbSujects", ignore = true), @Mapping(target = "studyCards", ignore = true),
 			@Mapping(target = "studyCenterList", ignore = true), @Mapping(target = "subjectStudyList", ignore = true) })
-	StudyDTO studyToStudyDTO(Study study);
+	StudyDTO studyToStudyDTO (Study study);
+	
+	@Mappings({ @Mapping(target = "studyCenterList", ignore = true) })
+	SimpleStudyDTO studyToSimpleStudyDTO (Study study);
+	
+	List<SimpleStudyDTO> studiesToSimpleStudyDTOs (List<Study> studies);
 
 }

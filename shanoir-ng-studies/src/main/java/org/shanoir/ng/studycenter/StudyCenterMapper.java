@@ -2,10 +2,10 @@ package org.shanoir.ng.studycenter;
 
 import java.util.List;
 
+import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import org.shanoir.ng.center.CenterMapper;
 
 /**
  * Mapper for link between a study and a center.
@@ -13,7 +13,8 @@ import org.shanoir.ng.center.CenterMapper;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { CenterMapper.class })
+@Mapper(componentModel = "spring")
+@DecoratedWith(StudyCenterDecorator.class)
 public interface StudyCenterMapper {
 
 	/**
@@ -32,7 +33,10 @@ public interface StudyCenterMapper {
 	 *            link between a study and a center.
 	 * @return DTO.
 	 */
-	@Mappings({ @Mapping(target = "studyId", source = "study.id") })
+	@Mappings({ @Mapping(target = "study.id", source = "study.id"),
+		@Mapping(target = "center.id", source = "center.id"),
+		@Mapping(target = "center.name", source = "center.name"),
+		@Mapping(target = "study.name", source = "study.name")})
 	StudyCenterDTO studyCenterToStudyCenterDTO(StudyCenter studyCenter);
 
 }
