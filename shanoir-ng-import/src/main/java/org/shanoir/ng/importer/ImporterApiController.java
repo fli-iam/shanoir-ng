@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,9 +52,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiParam;
 
 /**
- * This is the main component of the import of Shanoir-NG. The front-end in
- * Angular only communicates with this service. The import ms itself is calling
- * the ms datasets service.
+ * This is the main component of the import of Shanoir-NG.
+ * The front-end in Angular only communicates with this service.
+ * The import ms itself is calling the ms datasets service.
  * 
  * @author mkain
  *
@@ -66,7 +67,7 @@ public class ImporterApiController implements ImporterApi {
 	private static final String FILE_POINT = ".";
 
 	private static final String DICOMDIR = "DICOMDIR";
-
+	
 	private static final String IMPORTJOB = "importJob.json";
 
 	private static final String ZIP = ".zip";
@@ -81,13 +82,13 @@ public class ImporterApiController implements ImporterApi {
 
 	@Value("${shanoir.import.upload.folder}")
 	private String uploadFolder;
-
+	
 	@Value("${ms.url.shanoir-ng-datasets}")
 	private String datasetsMsUrl;
 
 	@Autowired
 	private DicomDirToJsonReaderService dicomDirToJsonReader;
-
+	
 	@Autowired
 	private ImportJobConstructorService importJobConstructorService;
 
@@ -99,11 +100,11 @@ public class ImporterApiController implements ImporterApi {
 
 	@Autowired
 	private RestTemplate restTemplate;
-
+	
 	/**
 	 * For the moment Spring is not used here to autowire, as we could keep the
-	 * anonymization project as simple as it is, without Spring annotations. Maybe
-	 * to change and think about deeper afterwards.
+	 * anonymization project as simple as it is, without Spring annotations.
+	 * Maybe to change and think about deeper afterwards.
 	 */
 	private AnonymizationServiceImpl anonymizer = new AnonymizationServiceImpl();
 
@@ -124,27 +125,25 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> startImportJob(
-			@ApiParam(value = "Importjob", required = true) @Valid @RequestBody final ImportJob importJob)
+	public ResponseEntity<Void> startImportJob( @ApiParam(value = "Importjob", required = true) @Valid @RequestBody final ImportJob importJob)
 			throws RestServiceException {
 		try {
 			LOG.info("start import job: " + importJob.toString());
-
+			
 			File workFolder = new File(importJob.getWorkFolder());
 			List<Patient> patients = importJob.getPatients();
 			for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = (Patient) patientsIt.next();
 				ArrayList<File> dicomFiles = getDicomFilesForPatient(patient, workFolder);
-				// anonymizer.anonymizeForShanoir(dicomFiles, "Neurinfo Profile",
-				// patient.getPatientName(), patient.getPatientID());
+				anonymizer.anonymizeForShanoir(dicomFiles, "Shanoir Profile", patient.getPatientName(), patient.getPatientID());
 				Long converterId = importJob.getFrontConverterId();
 				niftiConverter.prepareAndRunConversion(patient, workFolder, converterId);
 			}
-
+			
 			String importJobJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(importJob);
 			LOG.info(importJobJsonString);
-
+			
 			// HttpEntity represents the request
 			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
 
@@ -162,7 +161,7 @@ public class ImporterApiController implements ImporterApi {
 			} else {
 				throw new ShanoirException(ImportErrorModelCode.SC_MS_COMM_FAILURE);
 			}
-
+			
 			return new ResponseEntity<Void>(HttpStatus.OK);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
@@ -172,16 +171,14 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	/**
-	 * Using Java HashSet here to avoid duplicate files for anonymization. For
-	 * performance reasons already init with 2000 buckets, assuming, that we will
-	 * normally never have more than 2000 files to process. Maybe to be evaluated
-	 * later with more bigger imports.
-	 * 
+	 * Using Java HashSet here to avoid duplicate files for anonymization.
+	 * For performance reasons already init with 2000 buckets, assuming,
+	 * that we will normally never have more than 2000 files to process.
+	 * Maybe to be evaluated later with more bigger imports.
 	 * @param importJob
-	 * @throws FileNotFoundException
+	 * @throws FileNotFoundException 
 	 */
-	private ArrayList<File> getDicomFilesForPatient(final Patient patient, final File workFolder)
-			throws FileNotFoundException {
+	private ArrayList<File> getDicomFilesForPatient(final Patient patient, final File workFolder) throws FileNotFoundException {
 		Set<File> pathsSet = new HashSet<File>(2000);
 		List<Study> studies = patient.getStudies();
 		for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
@@ -194,7 +191,7 @@ public class ImporterApiController implements ImporterApi {
 					Image image = (Image) imagesIt.next();
 					String path = image.getPath();
 					File file = new File(workFolder.getAbsolutePath() + File.separator + path);
-					if (file.exists()) {
+					if(file.exists()) {
 						pathsSet.add(file);
 					} else {
 						throw new FileNotFoundException("File not found: " + path);
@@ -297,8 +294,7 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> uploadDicomZipFileFromShup(
-			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
+	public ResponseEntity<Void> uploadDicomZipFileFromShup(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
 			throws RestServiceException, ShanoirException {
 		// TODO Auto-generated method stub
 		if (dicomZipFile == null)
@@ -324,17 +320,18 @@ public class ImporterApiController implements ImporterApi {
 
 			ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
 
+			
 			File importJobFile = new File(unzipFolderFile.getAbsolutePath() + File.separator + IMPORTJOB);
 			ImportJob importJob = null;
 			if (importJobFile.exists()) {
 				ObjectMapper objectMapper = new ObjectMapper();
 				try {
 					importJob = objectMapper.readValue(importJobFile, ImportJob.class);
-					importJob = importJobConstructorService.reconstructImportJob(importJob, unzipFolderFile);
+					importJob = importJobConstructorService.reconstructImportJob(importJob,unzipFolderFile);
 					LOG.warn(objectMapper.writeValueAsString(importJob));
 				} catch (IOException ioe) {
-					LOG.error(ioe.getMessage(), ioe);
-					throw new RestServiceException(ioe, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					LOG.error(ioe.getMessage(),ioe);
+					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							"Error while mapping importJob.json file to object.", null));
 				}
 			}
@@ -347,17 +344,17 @@ public class ImporterApiController implements ImporterApi {
 				Long converterId = importJob.getFrontConverterId();
 				niftiConverter.prepareAndRunConversion(patient, workFolder, converterId);
 			}
-
+			
 			String importJobJsonString = dicomDirToJsonReader.getMapper().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(importJob);
 			LOG.info(importJobJsonString);
-
+			
 			// HttpEntity represents the request
 			final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
 
 			// Post to dataset MS to finish import
 			ResponseEntity<String> response = null;
-			response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody, String.class);
+				response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody, String.class);
 
 			return new ResponseEntity<Void>(HttpStatus.OK);
 		} catch (IOException e) {
@@ -392,7 +389,9 @@ public class ImporterApiController implements ImporterApi {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 						"DICOMDIR is missing in .zip file.", null));
 
-			String fileName = dicomZipFile.getName();
+			String fileName = dicomZipFile// anonymizer.anonymizeForShanoir(dicomFiles, "Neurinfo Profile",
+				// patient.getPatientName(), patient.getPatientID());
+				.getName();
 			int pos = fileName.lastIndexOf(FILE_POINT);
 			if (pos > 0) {
 				fileName = fileName.substring(0, pos);
