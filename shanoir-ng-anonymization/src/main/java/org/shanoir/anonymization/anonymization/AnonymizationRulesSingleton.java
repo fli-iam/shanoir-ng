@@ -56,18 +56,14 @@ public class AnonymizationRulesSingleton {
 				if (rowNumber == 0) {
 					Iterator<Cell> cellIterator = row.cellIterator();
 					while (cellIterator.hasNext() && (xtagColumn == null || profileColumn == null)) {
-
 						Cell cell = cellIterator.next();
-
 						if (cell.getStringCellValue().equals(xTagsColumn)) {
 							xtagColumn = cell.getColumnIndex();
 							LOG.debug("Tags column : " + xtagColumn);
-						} else if (cell.getStringCellValue().equals("Neurinfo Profile")) {
+						} else if (cell.getStringCellValue().equals("Shanoir Profile")) {
 							profileColumn = cell.getColumnIndex();
 						}
-
 					}
-
 				}
 				if (xtagColumn != null && profileColumn != null) {
 					Cell xtagCell = row.getCell(xtagColumn);
@@ -117,6 +113,5 @@ public class AnonymizationRulesSingleton {
 	public List<String> getTagsToKeep() {
 		return tagsToKeep;
 	}
-	
-	
+
 }

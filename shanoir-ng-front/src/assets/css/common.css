@@ -73,7 +73,7 @@ form { color: var(--dark-grey); }
   form textarea { resize: vertical; }
   form button { margin: 10px 0; }
   form input:not([type]), input[type='text'], input[type='password'], input[type='email'], textarea, select { width: 220px; }
-  form fieldset { border: 0; padding: 0; margin: 20px 15px; display: inline-flex; vertical-align: top; min-width: 504px; }
+  form fieldset { border: 0; padding: 0; margin: 20px 15px; display: inline-block; vertical-align: top; min-width: 504px; }
   form fieldset.line { border-top: 1px solid var(--grey); padding-top: 11px; }
     form fieldset fieldset legend { padding: 0 0 5px; font-weight: normal; }
     form fieldset fieldset label { display: block; width: auto; }

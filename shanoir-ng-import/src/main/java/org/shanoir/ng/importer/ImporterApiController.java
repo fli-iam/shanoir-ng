@@ -134,7 +134,7 @@ public class ImporterApiController implements ImporterApi {
 			for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = (Patient) patientsIt.next();
 				ArrayList<File> dicomFiles = getDicomFilesForPatient(patient, workFolder);
-//				anonymizer.anonymizeForShanoir(dicomFiles, "Neurinfo Profile", patient.getPatientName(), patient.getPatientID());
+				anonymizer.anonymizeForShanoir(dicomFiles, "Shanoir Profile", patient.getPatientName(), patient.getPatientID());
 				Long converterId = importJob.getFrontConverterId();
 				niftiConverter.prepareAndRunConversion(patient, workFolder, converterId);
 			}
