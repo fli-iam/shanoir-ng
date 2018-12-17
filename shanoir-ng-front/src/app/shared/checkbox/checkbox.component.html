@@ -1,3 +1,6 @@
-<div *ngIf="ngModel">
+<div *ngIf="ngModel && ngModel == true">
     <i class="fas fa-check"></i>
+</div>
+<div *ngIf="ngModel == 'indeterminate'">
+    <i class="fas fa-ellipsis-h"></i>
 </div>

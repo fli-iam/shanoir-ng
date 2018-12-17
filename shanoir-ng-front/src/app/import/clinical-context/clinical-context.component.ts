@@ -53,6 +53,7 @@ export class ClinicalContextComponent {
             private importDataService: ImportDataService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
+            console.log('importDataService.patients', importDataService.patients);
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }

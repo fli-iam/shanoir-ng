@@ -16,9 +16,9 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 
 export class CheckboxComponent implements ControlValueAccessor { 
     
-    @Input() @HostBinding('class.on') ngModel: boolean = null;
+    @Input() @HostBinding('class.on') ngModel: boolean | 'indeterminate' = null;
     @Output() ngModelChange = new EventEmitter();
-    private state: boolean = false;
+    @Output() onChange = new EventEmitter();
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     @Input() @Input() @HostBinding('class.disabled') disabled: boolean = false;
@@ -30,6 +30,7 @@ export class CheckboxComponent implements ControlValueAccessor {
         if (this.disabled) return;
         this.ngModel = !this.ngModel;
         this.ngModelChange.emit(this.ngModel);
+        this.onChange.emit(this.ngModel);
     }
 
     @HostListener('keydown', ['$event']) 
@@ -38,6 +39,7 @@ export class CheckboxComponent implements ControlValueAccessor {
         if (' ' == event.key) {
             this.ngModel = !this.ngModel;
             this.ngModelChange.emit(this.ngModel);
+            this.onChange.emit(this.ngModel);
             event.preventDefault();
         }
     }

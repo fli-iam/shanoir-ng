@@ -16,6 +16,8 @@
                     [editable]="true"
                     [nodeParams]="study"
                     (chkbxChange)="onPatientUpdate()"
+                    (labelClick)="showStudyDetails($event);"
+                    [class.selected]="detailedStudy == study"
                     tooltip="You can change the study description here. The value will then be overwritten in the dicom files."
                     pictoUrl="/assets/images/icons/medical/x-ray-2.png" 
                     hasBox="true"
@@ -34,9 +36,7 @@
                         </node>
                 </node>
         </node>
-    </div>
-
-    <div class="data-preview" *ngIf="detailedPatient">
+    </div><div class="data-preview" *ngIf="detailedPatient">
         <h3>Patient</h3>
         <table>
             <tr class="item">
@@ -58,6 +58,24 @@
         </table>
     </div>
 
+    <div class="data-preview" *ngIf="detailedStudy">
+        <h3>Study</h3>
+        <table>
+            <tr class="item">
+                <td class="label">Id</td>
+                <td class="value">{{detailedStudy?.studyInstanceUID}}</td>
+            </tr>
+            <tr class="item">
+                <td class="label">Date</td>
+                <td class="value">{{detailedStudy?.studyDate}}</td>
+            </tr>
+            <tr class="item">
+                <td class="label">Description</td>
+                <td class="value">{{detailedStudy?.studyDescription}}</td>
+            </tr>
+        </table>
+    </div>     
+
     <div class="data-preview" *ngIf="detailedSerie">
         <h3>Serie</h3>
         <table>
@@ -66,7 +84,7 @@
                 <td class="value">{{detailedSerie?.seriesInstanceUID}}</td>
             </tr>
             <tr class="item">
-                <td class="label">Protocol</td>
+                <td class="label">Protocol name</td>
                 <td class="value">{{detailedSerie?.protocolName}}</td>
             </tr>
             <tr class="item">
