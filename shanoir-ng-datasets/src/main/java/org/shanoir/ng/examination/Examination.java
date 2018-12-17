@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
@@ -108,7 +109,9 @@ public class Examination extends HalEntity {
 	private Integer weightUnitOfMeasure;
 
 	/** Flag to set the examination as pre-clinical */
-	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+	//@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+	@Column(nullable=false)
+	@ColumnDefault("false")
 	private boolean preclinical;
 
 	/**

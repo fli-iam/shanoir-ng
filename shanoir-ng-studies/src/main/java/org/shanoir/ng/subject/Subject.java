@@ -17,6 +17,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.SqlResultSetMapping;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.hateoas.HalEntity;
@@ -62,7 +63,9 @@ public class Subject extends HalEntity {
 	private Integer manualHemisphericDominance;
 
 	/** Flag to set the subject as pre-clinical subject */ 
-	@Column(nullable=false, columnDefinition="BOOLEAN DEFAULT false")
+	//@Column(nullable=false, columnDefinition="BOOLEAN DEFAULT false")
+	@Column(nullable=false)
+	@ColumnDefault("false")
 	private boolean preclinical;
 	
 	/**
