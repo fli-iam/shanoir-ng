@@ -41,6 +41,6 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
     }
 
     private instanceOfEntity(obj: any): boolean {
-        return obj.id && obj.create && obj.delete && obj.edit;
+        return obj.id && obj.create && obj.delete && obj.update;
     }
 }
