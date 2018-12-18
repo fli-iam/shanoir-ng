@@ -376,6 +376,14 @@ public class StudyServiceImpl implements StudyService {
 				// Add link study/user
 				studyUser.setStudyId(studyDb.getId());
 				studyDb.getStudyUserList().add(studyUser);
+			} else {
+				for (final StudyUser studyUserDb : studyUserDbList) {
+					if (studyUserDb.getId() == studyUser.getId()) {
+						studyUserDb.setReceiveAnonymizationReport(studyUserDb.isReceiveAnonymizationReport());
+						studyUserDb.setReceiveNewImportReport(studyUser.isReceiveNewImportReport());
+						studyUserDb.setStudyUserType(studyUser.getStudyUserType());
+					}
+				}
 			}
 		}
 		for (final StudyUser studyUserDb : studyUserDbList) {
