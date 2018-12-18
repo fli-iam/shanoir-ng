@@ -36,7 +36,7 @@ import { SelectOptionComponent } from './select.option.component';
 })
 
 export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnChanges, AfterContentInit {
-    
+
     @Input() ngModel: any = null;
     @Output() ngModelChange = new EventEmitter();
     @Output() change = new EventEmitter();
@@ -84,9 +84,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this.options.forEach((option) => {
                 option.parent = this;
             });
+            this.updateSelectedOption();
         })
         this.updateSelectedOption();
-        this.updateLabel();
     }
 
     private updateSelectedOption() {
@@ -101,6 +101,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 }
             });
         }
+        this.updateLabel();
     }
     
     public onSelectedOptionChange(option: SelectOptionComponent) {
@@ -262,7 +263,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     writeValue(obj: any): void {
         this.ngModel = obj;
-        this.updateSelectedOption();
+        this.onChangeCallback(this.ngModel);
     }
     
     registerOnChange(fn: any): void {

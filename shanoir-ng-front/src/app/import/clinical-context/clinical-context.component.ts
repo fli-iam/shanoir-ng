@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, HostListener, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Entity } from 'src/app/shared/components/entity/entity.abstract';
 
@@ -53,13 +53,11 @@ export class ClinicalContextComponent {
             private importDataService: ImportDataService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
-            console.log('importDataService.patients', importDataService.patients);
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
         breadcrumbsService.nameStep('3. Context');
-        this.setPatient(importDataService.patients[0]);
-        this.reloadSavedData();
+        this.setPatient(this.importDataService.patients[0]).then(() => this.reloadSavedData());
     }
 
     private reloadSavedData() {
@@ -75,13 +73,13 @@ export class ClinicalContextComponent {
         }
     }
 
-    setPatient(patient: PatientDicom) {
+    setPatient(patient: PatientDicom): Promise<void> {
         this.patient = patient;
-        this.fetchStudies();
+        return this.fetchStudies();
     }
 
-    private fetchStudies(): void {
-        this.studyService
+    private fetchStudies(): Promise<void> {
+        return this.studyService
             .findStudiesWithStudyCardsByUserAndEquipment(this.patient.studies[0].series[0].equipment)
             .then(studies => {
                 this.studies = studies;
@@ -273,5 +271,11 @@ export class ClinicalContextComponent {
 
     private compareEntities(e1: Entity, e2: Entity) : boolean {
         return e1 && e2 && e1.id === e2.id;
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == 'œ') {
+            console.log('study', this.study);
+        }
     }
 }

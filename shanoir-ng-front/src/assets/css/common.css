@@ -80,7 +80,8 @@ form { color: var(--dark-grey); }
   form textarea { resize: vertical; }
   form button { margin: 10px 0; }
   form input:not([type]), input[type='text'], input[type='password'], input[type='email'], textarea, select { width: 220px; }
-  form fieldset { border: 0; padding: 0; margin: 20px 15px; display: inline-block; vertical-align: top; min-width: 504px; }
+  form fieldset { border: 0; padding: 0; margin: 20px 0; display: inline-block; vertical-align: top; min-width: 504px; }
+  form fieldset ~ fieldset { margin-right: 20px; } 
   form fieldset.line { border-top: 1px solid var(--grey); padding-top: 11px; }
     form fieldset fieldset legend { padding: 0 0 5px; font-weight: normal; }
     form fieldset fieldset label { display: block; width: auto; }
@@ -93,7 +94,7 @@ form { color: var(--dark-grey); }
     form li.info { margin: 4px 0 13px; background-color: lightgoldenrodyellow; padding: 10px 15px; overflow: hidden; width: 473px; }
       form li.info .icon { margin-right: 6px; vertical-align: middle; color: var(--color-b); font-size: 16px; }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
-  form .header, form .footer { padding: 6px 15px; }
+  form .header, form .footer { }
   form .header { color: var(--color-b); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }
   form div.header { font-size: 16px; }
   form .required-label:after{ content:" *"; }

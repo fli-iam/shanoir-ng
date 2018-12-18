@@ -16,7 +16,7 @@
             </span>
         </li>
         <li class="required">
-            <label class="required-label">Select an existing study card {{studycard?.id}}</label> 
+            <label class="required-label">Select an existing study card</label> 
             <span class="right-col">
                 <select-box [disabled]="!study" [ngModel]="studycard" (change)="onSelectStudycard($event)">
                     <select-option *ngFor="let studycard of studycards" [value]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</select-option>
