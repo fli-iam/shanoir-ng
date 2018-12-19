@@ -30,9 +30,6 @@ import org.slf4j.LoggerFactory;
  */
 public class AnonymizationServiceImpl implements AnonymizationService {
 
-	/**
-	 * Logger
-	 */
 	private static final Logger LOG = LoggerFactory.getLogger(AnonymizationServiceImpl.class);
 
 	private static final String ANONYMIZATION_FILE_PATH = "anonymization.xlsx";

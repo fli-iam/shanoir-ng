@@ -57,13 +57,11 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 			ImportJob importJob) {
 		
 		DatasetsWrapper<MrDataset> datasetWrapper = new DatasetsWrapper<MrDataset>();
-
 		/**
 		 * retrieve number of dataset in current serie if Number of dataset > 1 then
 		 * each dataset will be named with an int at the end of the name. else the is
 		 * only one dataset => no need for extension.
 		 */
-
 		int datasetIndex;
 		if (serie.getDatasets().size() > 1) {
 			datasetIndex = 1;
@@ -95,9 +93,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 					}
 				}
 			}
-
 			datasetWrapper.getDatasets().add(mrDataset);
-
 			datasetIndex++;
 		}
 
@@ -112,14 +108,12 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 	public MrDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
 			ImportJob importJob) {
 		MrDataset mrDataset = new MrDataset();
-
 		mrDataset.setCreationDate(Utils.DateToLocalDate(serie.getSeriesDate()));
 		mrDataset.setDiffusionGradients(dataset.getDiffusionGradients());
 		final String serieDescription = serie.getSeriesDescription();
 
 		DatasetMetadata datasetMetadata = new DatasetMetadata();
 		mrDataset.setOriginMetadata(datasetMetadata);
-		
 		// set the series description as the dataset comment & name
 		if (serieDescription != null && !"".equals(serieDescription)) {
 			mrDataset.getOriginMetadata().setName(computeDatasetName(serieDescription, datasetIndex));
@@ -131,7 +125,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 
 		// Set the study and the subject
 		mrDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
-		mrDataset.setGroupOfSubjectsId(importJob.getPatients().get(0).getFrontExperimentalGroupOfSubjectId());
+//		mrDataset.setGroupOfSubjectsId(importJob.getPatients().get(0).getFrontExperimentalGroupOfSubjectId());
 		mrDataset.setStudyId(importJob.getFrontStudyId());
 
 		// Set the modality from dicom fields
@@ -149,7 +143,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		if (dataset.getEchoTimes() != null) {
 			List<EchoTime> listEchoTime = new ArrayList<EchoTime>(dataset.getEchoTimes());
 			mrDataset.getEchoTime().addAll(echoTimeMapper.EchoTimeDTOListToEchoTimeList(listEchoTime));
-			for ( org.shanoir.ng.shared.model.EchoTime et: mrDataset.getEchoTime()) {
+			for (org.shanoir.ng.shared.model.EchoTime et: mrDataset.getEchoTime()) {
 				et.setMrDataset(mrDataset);
 			}
 		}
@@ -188,7 +182,6 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
 			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
 			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);	
-			
 			if (datasetExpression.getFirstImageAcquisitionTime() != null) {
 				if (mrDataset.getFirstImageAcquisitionTime() == null) {
 					mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
@@ -198,7 +191,6 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 					}
 				}
 			}
-			
 			if (datasetExpression.getLastImageAcquisitionTime() != null) {
 				if (mrDataset.getLastImageAcquisitionTime() == null) {
 					mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
@@ -208,11 +200,8 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 					}
 				}
 			}
-			
 			datasetExpression.setDataset(mrDataset);
-			
 			mrDataset.getDatasetExpressions().add(datasetExpression);
-			
 		}
 		return mrDataset;
 	}

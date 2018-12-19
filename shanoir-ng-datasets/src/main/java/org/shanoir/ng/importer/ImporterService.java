@@ -44,7 +44,6 @@ public class ImporterService {
 	}
 	
 	public void buildDatasets() {
-		
 	}
 	
 	public void createAllDatasetAcquisition() {
@@ -52,14 +51,14 @@ public class ImporterService {
 		try {
 			examination = examinationService.findById(importJob.getExaminationId());
 		} catch (ShanoirException e) {
-			LOG.error("Unable to find Examination",e);
+			LOG.error("Unable to find Examination", e);
 		}
 		if (examination != null) {
 			int rank = 0;
 			for (Patient patient : importJob.getPatients()) {
 				for (Study study : patient.getStudies()) {
 					for (Serie serie : study.getSeries() ) {
-						if (serie.getSelected()) {
+						if (serie.getSelected() != null && serie.getSelected()) {
 							createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
 							rank++;
 						}
