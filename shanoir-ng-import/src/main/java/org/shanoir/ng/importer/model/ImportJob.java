@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author atouboul
- *
+ * @author mkain
  */
 public class ImportJob {
 

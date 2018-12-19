@@ -1,5 +1,6 @@
 package org.shanoir.ng.importer;
 
+import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -79,4 +80,16 @@ public interface ImporterApi {
         consumes = { "application/json" },
         method = RequestMethod.POST)
     ResponseEntity<Void> startImportJob(@ApiParam(value = "ImportJob", required=true) @RequestBody ImportJob importJob) throws RestServiceException;
+    
+    @ApiOperation(value = "ImportFromPACS: Query PACS", notes = "ImportFromPACS: Query PACS", response = Void.class, tags={ "ImportFromPACS: Query PACS", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "query the PACS started", response = Void.class),
+        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+    @RequestMapping(value = "/query_pacs/",
+        produces = { "application/json" }, 
+        consumes = { "application/json" },
+        method = RequestMethod.POST)
+    ResponseEntity<ImportJob> queryPACS(@ApiParam(value = "DicomQuery", required=true) @RequestBody DicomQuery dicomQuery) throws RestServiceException;
+
 }

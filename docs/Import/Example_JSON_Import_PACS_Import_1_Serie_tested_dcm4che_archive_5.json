@@ -1,0 +1,471 @@
+{
+    "fromDicomZip": false,
+    "fromShanoirUploader": false,
+    "fromPacs": true,
+    "workFolder": "",
+    "patients": [
+        {
+            "patientID": "jp160610b",
+            "patientName": "LEBA-12",
+            "patientBirthName": null,
+            "patientBirthDate": -31536000000,
+            "patientSex": "F",
+            "subject": {
+              "selected": false,
+              "subjectStudyList": [
+                {
+                  "id": 1,
+                  "subject": {
+                    "id": 1,
+                    "name": "subject1"
+                  },
+                  "study": {
+                    "id": 1,
+                    "name": "NATIVE Divers"
+                  },
+                  "subjectStudyIdentifier": "Subject 1 for study 1",
+                  "subjectType": "HEALTHY_VOLUNTEER",
+                  "physicallyInvolved": false,
+                  "examinationDTO": null
+                }
+              ],
+              "id": 1,
+              "name": "subject1",
+              "identifier": "sub1"
+            },
+            "studies": [
+                {
+                    "studyInstanceUID": "1.4.9.12.34.1.8527.0195473103800766125459023739526212827571",
+                    "studyDate": 1465516800000,
+                    "studyDescription": "HYDROPS-s2",
+                    "series": [
+                        {
+                            "selected": true,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0219681256560620948585942303330343638077",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "Reg - WIP DTI_6/6_APP SENSE",
+                            "sequenceName": null,
+                            "seriesDate": 1465516800000,
+                            "seriesNumber": "902",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0147480882638705109363904549036397404172",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        },
+                        {
+                            "selected": null,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0294461311763673244520600586044918322984",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "DTI_6/6_APP",
+                            "sequenceName": null,
+                            "seriesDate": null,
+                            "seriesNumber": "901",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0193846948720107998631723772867529351842",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        },
+                        {
+                            "selected": null,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0113476849480506733452964224972020239991",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "Reg - WIP DTI_5/6_APP SENSE",
+                            "sequenceName": null,
+                            "seriesDate": null,
+                            "seriesNumber": "802",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0251013259770199975747612109495647547040",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        },
+                        {
+                            "selected": null,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0257297449920841078059693495511921974264",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "DTI_5/6_APP",
+                            "sequenceName": null,
+                            "seriesDate": null,
+                            "seriesNumber": "801",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0061314306226027397621286695571122996525",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        },
+                        {
+                            "selected": null,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0004438182388110481946234898510593231486",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "Reg - WIP DTI_4/6_APP SENSE",
+                            "sequenceName": null,
+                            "seriesDate": null,
+                            "seriesNumber": "702",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0170608418689892020767876426152707952976",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        },
+                        {
+                            "selected": null,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0208688186576168107995517405266974858036",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "DTI_4/6_APP",
+                            "sequenceName": null,
+                            "seriesDate": null,
+                            "seriesNumber": "701",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0061303473910304592167906674872945236105",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        },
+                        {
+                            "selected": null,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0165275710312083844580485607554297849826",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "Reg - WIP DTI_3/6_APP SENSE",
+                            "sequenceName": null,
+                            "seriesDate": null,
+                            "seriesNumber": "602",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0170418069594306879074693907159506836184",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        },
+                        {
+                            "selected": null,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0148417799590779288501114818046652637552",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "DTI_3/6_APP",
+                            "sequenceName": null,
+                            "seriesDate": null,
+                            "seriesNumber": "601",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0240512700714781834783177879687832171165",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        },
+                        {
+                            "selected": null,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0158650500336650960739984670535343655176",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "DTI_2/6_APA",
+                            "sequenceName": null,
+                            "seriesDate": null,
+                            "seriesNumber": "501",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0019866803652539413735161014721026206634",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        },
+                        {
+                            "selected": null,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0251608693757279119267045241048992022949",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "DTI_1/6_APP",
+                            "sequenceName": null,
+                            "seriesDate": null,
+                            "seriesNumber": "401",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0006839450795827981006948239155961031258",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        },
+                        {
+                            "selected": null,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0315430894136711552782977581156641565815",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "T2 HR 3 MM",
+                            "sequenceName": null,
+                            "seriesDate": null,
+                            "seriesNumber": "301",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0021363216643075540682032022140591274520",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        },
+                        {
+                            "selected": null,
+                            "seriesInstanceUID": "1.4.9.12.34.1.8527.0078935975091722198525107325839234209072",
+                            "modality": "MR",
+                            "protocolName": null,
+                            "seriesDescription": "Survey T2",
+                            "sequenceName": null,
+                            "seriesDate": null,
+                            "seriesNumber": "101",
+                            "numberOfSeriesRelatedInstances": 0,
+                            "sopClassUID": null,
+                            "equipment": {
+                                "manufacturer": "Philips Medical Systems",
+                                "manufacturerModelName": "Achieva",
+                                "deviceSerialNumber": null
+                            },
+                            "isCompressed": null,
+                            "isSpectroscopy": null,
+                            "isEnhancedMR": null,
+                            "isMultiFrame": null,
+                            "multiFrameCount": null,
+                            "nonImages": null,
+                            "nonImagesNumber": null,
+                            "instances": [
+                                {
+                                    "sopInstanceUID": "1.4.9.12.34.1.8527.0297340171264364631095425493055543653731",
+                                    "instanceNumber": "1",
+                                    "referencedSOPClassUIDInFile": null,
+                                    "referencedFileID": null
+                                }
+                            ],
+                            "images": null,
+                            "imagesNumber": null,
+                            "datasets": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "examinationId": 1,
+    "frontStudyId": 1,
+    "frontStudyCardId": 1,
+    "frontConverterId": 1
+}

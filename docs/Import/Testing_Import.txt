@@ -1,0 +1,45 @@
+Testing of new import
+- with Keycloak enabled/embedded in docker-compose
+
+- dicom zip upload and import testing
+----  sampleArchiveHealthy1.zip
+-------- ExamCard appear empty in the tree, remove their series (fixed)
+-------- DicomEquipement is empty (fixed, now DicomEquipment is displayed)
+-------- But with only one serie: bug?, maybe selected == null? (fixed, yes, related, check added), still bug in ms datasets now, to test tomorrow (fixed in ms datasets)
+-------- Test single serie: T2 HR 3 MM , 1 image (MREnhanced)
+----------- Result: worked, as imported and visible in datasets, dicom download works, 1 big image; nii download and display in medInria works as well; preview works as well
+---- sample.zip
+-------- Tested with one serie and import works
+----------- Result: worked, as imported and visible in datasets, dicom download works, 96 images; nii download and display in medInria works as well; preview works as well
+---- sample1.zip
+-------- Big mistake patient name is in PACS!!!
+
+- query pacs and import testing
+---- PatientName: DIR OL, query running and working
+-------- Import, 1 serie selected: Reg - WIP DTI_6/6_APP SENSE
+----------- Bug import not done, see why?
+-------------- Error on dataset microservice request
+java.lang.NullPointerException: null
+    at org.shanoir.ng.utils.Utils.DateToLocalDate(Utils.java:53)
+    at org.shanoir.ng.importer.strategies.dataset.MrDatasetStrategy.generateSingleDataset(MrDatasetStrategy.java:121)
+"seriesDate": null in PACS server, because of anonymization, in anonymization.xlsx seriesDate is deleted from the dicom
+To continue testing seriesDate manually added: "seriesDate": 1465516800000, worked
+
+java.lang.NullPointerException: null
+    at org.shanoir.ng.importer.strategies.dataset.MrDatasetStrategy.generateSingleDataset(MrDatasetStrategy.java:138)
+    at org.shanoir.ng.importer.strategies.dataset.MrDatasetStrategy.generateDatasetsForSerie(MrDatasetStrategy.java:84)
+    at org.shanoir.ng.importer.strategies.datasetacquisition.MrDatasetAcquisitionStrategy.generateDatasetAcquisitionForSerie(MrDatasetAcquisitionStrategy.java:77)
+ExpGroupOfSubject commented in ms datasets
+
+java.lang.NullPointerException: null
+    at org.shanoir.ng.importer.strategies.dataset.MrDatasetStrategy.generateSingleDataset(MrDatasetStrategy.java:127)
+    at org.shanoir.ng.importer.strategies.dataset.MrDatasetStrategy.generateDatasetsForSerie(MrDatasetStrategy.java:77)
+Problem: the test json was not complete (subject infos missing), as after querying the pacs the json is completed by the import process frontend.
+A simulation .json has been constructed: Example_JSON_Import_PACS_Import_1_Serie_tested_dcm4che_archive_5.json, Import worked with this .json
+
+* Big mistake patient name is in PACS!!!, see GitHub Issue: #70
+    * sample1.zip used for testing
+    * tested with zip import
+    * Common name: subject2 used
+    * Not worked, still only 7 datasets: to check
+    * Successfully tested: fixed
