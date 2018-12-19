@@ -1,14 +1,10 @@
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.Dataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
@@ -18,10 +14,6 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.MrProtocolStrategy;
-import org.shanoir.ng.shared.model.EchoTime;
-import org.shanoir.ng.shared.model.FlipAngle;
-import org.shanoir.ng.shared.model.InversionTime;
-import org.shanoir.ng.shared.model.RepetitionTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +59,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		mrDatasetAcquisition.setRank(rank);
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));		
-		// TODO ATO : replace 1L with equipment contained in Study Card
-		mrDatasetAcquisition.setAcquisitionEquipmentId(1L);
+		mrDatasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
 		
 		MrProtocol mrProtocol = mrProtocolStrategy.generateMrProtocolForSerie(dicomAttributes, serie);
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);

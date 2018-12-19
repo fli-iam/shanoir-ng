@@ -44,14 +44,14 @@ public class StudyCenterMapperTest {
 				.studyCenterListToStudyCenterDTOList(Arrays.asList(createStudyCenter()));
 		Assert.assertNotNull(subjectStudyDTOs);
 		Assert.assertTrue(subjectStudyDTOs.size() == 1);
-		Assert.assertTrue(subjectStudyDTOs.get(0).getStudyId().equals(STUDY_ID));
+		Assert.assertTrue(subjectStudyDTOs.get(0).getId().equals(STUDY_ID));
 	}
 
 	@Test
 	public void studyCenterToStudyCenterDTOTest() {
 		final StudyCenterDTO subjectStudyDTO = studyCenterMapper.studyCenterToStudyCenterDTO(createStudyCenter());
 		Assert.assertNotNull(subjectStudyDTO);
-		Assert.assertTrue(subjectStudyDTO.getStudyId().equals(STUDY_ID));
+		Assert.assertTrue(subjectStudyDTO.getId().equals(STUDY_ID));
 	}
 
 	private StudyCenter createStudyCenter() {

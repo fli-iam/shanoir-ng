@@ -97,6 +97,14 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	/** Output files mapped by series UID. */
 	private HashMap<String, List<String>> outputFiles = new HashMap<String, List<String>>();
 	
+	public NIfTIConverter findById(Long id) {
+		return niftiConverterRepository.findOne(id);
+	}
+	
+	public List<NIfTIConverter> findAll() {
+		return niftiConverterRepository.findAll();
+	}
+	
 	public void createDatasetsAndRunConversion(Patient patient, File workFolder, Long converterId) throws ShanoirException {
 		File seriesFolderFile = new File(workFolder.getAbsolutePath() + File.separator + SERIES);
 		if(!seriesFolderFile.exists()) {
@@ -257,10 +265,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
         }
         LOG.debug("extractDiffusionGradients : End");
     }
-	
-	public NIfTIConverter findById(Long id) {
-		return niftiConverterRepository.findOne(id);
-	}
 	
 	/**
 	 * Execute the Nifti conversion

@@ -207,31 +207,6 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 	}
 
 
-//
-//
-//	/* ---- Fields set by the studyCard ---- */
-//	final IMetadataExtractor metadataExtractor = dicomImporter.getMetadataExtractor();
-//	HashMap<Integer, Object> tagMap;if(dicomFiles==null||dicomFiles.isEmpty())
-//	{
-//		tagMap = (HashMap<Integer, Object>) metadataExtractor.getValue(ShanoirConstants.DICOM_RETURNED_TYPES.STRING,
-//				mrDatasetAcquisition.getRank(), studyCard.getDicomTagArray());
-//	}else
-//	{
-//		tagMap = (HashMap<Integer, Object>) metadataExtractor.getValue(ShanoirConstants.DICOM_RETURNED_TYPES.STRING,
-//				studyCard.getDicomTagArray(), dicomFiles.get(0));
-//	}
-//
-//	setFieldsByStudyCard(mrDataset, studyCard, tagMap);
-//
-//}
-//
-
-//
-//	return null;
-//	}
-	
-	
-
 	/* (non-Javadoc)
 	 * @see org.shanoir.ng.dataset.modality.DatasetStrategy#computeDatasetName(java.lang.String, int)
 	 */

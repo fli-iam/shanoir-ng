@@ -12,9 +12,12 @@ RUN set -ex && \
 # Users microservice is build at first, so prepare self-signed certificate for all
 # other microservices and Nginx afterwards and put them into the share
 RUN apt-get update && apt-get install openssl
-COPY ssl.sh /etc/ssl/certs/java/ssl.sh
-RUN chmod 775 /etc/ssl/certs/java/ssl.sh
-RUN /etc/ssl/certs/java/ssl.sh
+RUN echo generating self-signed key and certificate
+RUN /usr/bin/openssl genrsa 2048 > /etc/ssl/certs/java/shanoir-ng-nginx.key
+RUN /usr/bin/openssl req -new -key /etc/ssl/certs/java/shanoir-ng-nginx.key -batch -subj "/CN=shanoir-ng-nginx" > /etc/ssl/certs/java/shanoir-ng-nginx.csr
+RUN /usr/bin/openssl x509 -req -days 730 -in /etc/ssl/certs/java/shanoir-ng-nginx.csr -signkey /etc/ssl/certs/java/shanoir-ng-nginx.key -out /etc/ssl/certs/java/shanoir-ng-nginx.crt
+RUN rm /etc/ssl/certs/java/shanoir-ng-nginx.csr
+
 # Import certificate into keystore for Java
 RUN keytool -importcert -file /etc/ssl/certs/java/shanoir-ng-nginx.crt -alias shanoir-ng-nginx -keystore /etc/ssl/certs/java/cacerts -storepass changeit -noprompt -trustcacerts
 

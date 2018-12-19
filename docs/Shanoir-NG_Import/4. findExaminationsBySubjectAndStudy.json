@@ -1,0 +1,19 @@
+[
+  {
+    "comment": "examination1",
+    "datasetAcquisitions": [
+      {
+        "id": 1,
+        "name": "MRDataset1 ()",
+        "datasets": [
+          {
+            "id": 1,
+            "name": "MRDataset1"
+          }
+        ]
+      }
+    ],
+    "examinationDate": "2018-11-07T00:00:00.000+0000",
+    "id": 1
+  }
+]

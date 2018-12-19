@@ -1,16 +1,11 @@
 import { Location } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { MsgBoxComponent } from '../../shared/msg-box/msg-box.component';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
-
 
 @Component({
     selector: 'upload-extra-data',
@@ -43,7 +38,6 @@ export class UploadExtraDataComponent implements OnInit {
         }
     }
 
-
     buildForm(): void {
         this.uploadExtraDataForm = this.fb.group({
             add: 'add',
@@ -63,7 +57,6 @@ export class UploadExtraDataComponent implements OnInit {
         });
       }
 
-
     formErrors = {
         'add': ''
     };
@@ -75,8 +68,6 @@ export class UploadExtraDataComponent implements OnInit {
             this.location.back();
         }
     }
-
-
 
     add(): void {
       
