@@ -6,12 +6,11 @@ const GUEST_ROLE_ID: number = 2;
 
 @Component({
     selector: 'accountRequest',
-    templateUrl: 'account-request.component.html',
-    styleUrls: ['account-request.component.css']
+    templateUrl: 'account-request.component.html'
 })
 
 export class AccountRequestComponent {
-    public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
+    public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
     public requestSent: boolean = false;
     public errorOnRequest: boolean = false;
 

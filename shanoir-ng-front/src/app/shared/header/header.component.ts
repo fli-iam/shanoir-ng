@@ -24,4 +24,8 @@ export class HeaderComponent {
         event.preventDefault();
         this.keycloakService.logout();
     }
+
+    isAuthenticated(): boolean {
+        return KeycloakService.auth.loggedIn;
+    }
 }
