@@ -313,5 +313,110 @@ public class ImporterApiController implements ImporterApi {
 		}
 		return false;
 	}
+	
+	
+	public ResponseEntity<ImportJob> importDicomZipFile(
+			@ApiParam(value = "file detail") @RequestBody String dicomZipFilename) throws RestServiceException {
+		if (dicomZipFilename == null)
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+
+		File tempFile = new File(dicomZipFilename);
+		return importDicomZipFile(tempFile);
+	}
+	
+	private ResponseEntity<ImportJob> importDicomZipFile(File dicomZipFile) throws RestServiceException {
+		if (!isZipFileFromFile(dicomZipFile))
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"Wrong content type of file upload, .zip required.", null));
+		try {
+			/**
+			 * 1. STEP: Handle file management. Always create a userId specific folder in
+			 * the import work folder (the root of everything): split imports to clearly
+			 * separate them into separate folders for each user
+			 */
+			final Long userId = KeycloakUtil.getTokenUserId();
+			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+			final File userImportDir = new File(userImportDirFilePath);
+			if (!userImportDir.exists()) {
+				userImportDir.mkdirs(); // create if not yet existing
+			}
+			File importJobDir = saveTempFileCreateFolderAndUnzipFromFile(userImportDir, dicomZipFile);
+
+			/**
+			 * 2. STEP: read DICOMDIR and create Shanoir model from it (== Dicom model):
+			 * Patient - Study - Serie - Instance
+			 */
+			List<Patient> patients = null;
+			File dicomDirFile = new File(importJobDir.getAbsolutePath() + File.separator + DICOMDIR);
+			if (dicomDirFile.exists()) {
+				patients = dicomDirToModel.readDicomDirToPatients(dicomDirFile);
+			}
+			/**
+			 * 3. STEP: split instances into non-images and images and get additional
+			 * meta-data from first dicom file of each serie, meta-data missing in dicomdir.
+			 */
+			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(),
+					false);
+
+			/**
+			 * 4. STEP: create ImportJob
+			 */
+			ImportJob importJob = new ImportJob();
+			importJob.setFromDicomZip(true);
+			// Work folder is always relative to general import directory and userId (not
+			// shown to outside world)
+			importJob.setWorkFolder(File.separator + importJobDir.getName());
+			importJob.setPatients(patients);
+			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
+		} catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+		} catch (ShanoirException e) {
+			LOG.error(e.getMessage(), e);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+		}
+	}
+	
+	private boolean isZipFileFromFile(File file) {
+		if (file != null && file.getName().endsWith(ZIP_FILE_SUFFIX)) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * This method stores an uploaded zip file in a temporary file, creates a new folder with the same
+	 * name and unzips the content into this folder, and gives back the folder with the content.
+	 * 
+	 * @param userImportDir
+	 * @param dicomZipFile
+	 * @return
+	 * @throws IOException
+	 * @throws RestServiceException
+	 */
+	private File saveTempFileCreateFolderAndUnzipFromFile(final File userImportDir, final File dicomZipFile) throws IOException, RestServiceException {
+		if (!ImportUtils.checkZipContainsFile(DICOMDIR, dicomZipFile))
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"DICOMDIR is missing in .zip file.", null));
+		String fileName = dicomZipFile.getName();
+		int pos = fileName.lastIndexOf(FILE_POINT);
+		if (pos > 0) {
+			fileName = fileName.substring(0, pos);
+		}
+		File unzipFolderFile = new File(dicomZipFile.getParentFile().getAbsolutePath() + File.separator + fileName);
+		if (!unzipFolderFile.exists()) {
+			unzipFolderFile.mkdirs();
+		} else {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"Error while unzipping file: folder already exists.", null));
+		}
+		ImportUtils.unzip(dicomZipFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
+		return unzipFolderFile;
+	}
+	
+	
 
 }
