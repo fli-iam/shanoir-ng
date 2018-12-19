@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiParam;
 public class NIfTIConverterApiController implements NIfTIConverterApi{
 	
 	@Autowired
-	private NIfTIConverterService niftiConverterService;
+	private DatasetsCreatorAndNIfTIConverterService niftiConverterService;
 	
 	@Override
 	public ResponseEntity<NIfTIConverter> findNiftiConverterById(

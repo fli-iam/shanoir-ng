@@ -1,8 +1,5 @@
 package org.shanoir.ng.importer;
 
-import java.util.ArrayList;
-
-import org.shanoir.ng.dataset.Dataset;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.Examination;
@@ -47,7 +44,6 @@ public class ImporterService {
 	}
 	
 	public void buildDatasets() {
-		
 	}
 	
 	public void applyStudyCard() {
@@ -59,17 +55,17 @@ public class ImporterService {
 		try {
 			examination = examinationService.findById(importJob.getExaminationId());
 		} catch (ShanoirException e) {
-			LOG.error("Unable to find Examination",e);
+			LOG.error("Unable to find Examination", e);
 		}
 		if (examination != null) {
 			int rank = 0;
 			for (Patient patient : importJob.getPatients()) {
 				for (Study study : patient.getStudies()) {
 					for (Serie serie : study.getSeries() ) {
-//						if (serie.getSelected()) {
+						if (serie.getSelected() != null && serie.getSelected()) {
 							createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
 							rank++;
-//						}
+						}
 					}
 				}
 			}

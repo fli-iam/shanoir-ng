@@ -12,7 +12,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -28,8 +27,8 @@ import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
-import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.DiffusionUtil;
 import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.ShanoirExec;
@@ -37,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /**
@@ -54,9 +52,9 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class NIfTIConverterService {
+public class DatasetsCreatorAndNIfTIConverterService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(NIfTIConverterService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetsCreatorAndNIfTIConverterService.class);
 
 	private static final String DOUBLE_EQUAL = "==";
 
@@ -99,28 +97,23 @@ public class NIfTIConverterService {
 	/** Output files mapped by series UID. */
 	private HashMap<String, List<String>> outputFiles = new HashMap<String, List<String>>();
 	
-	public void prepareAndRunConversion(Patient patient, File workFolder, Long converterId) throws RestServiceException {
+	public void createDatasetsAndRunConversion(Patient patient, File workFolder, Long converterId) throws ShanoirException {
 		File seriesFolderFile = new File(workFolder.getAbsolutePath() + File.separator + SERIES);
 		if(!seriesFolderFile.exists()) {
 			seriesFolderFile.mkdirs();
 		} else {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating series folder: folder already exists.", null));
+			throw new ShanoirException("Error while creating series folder: folder already exists.");
 		}
-
 		conversionLogs = "";
-		
-		Set<File> pathsSet = new HashSet<File>(2000);
 		List<Study> studies = patient.getStudies();
-		for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
+		for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 			Study study = (Study) studiesIt.next();
 			List<Serie> series = study.getSeries();
-			float seriesCounter = 0;
 			int numberOfSeries = series.size();
-			for (Iterator seriesIt = series.iterator(); seriesIt.hasNext();) {
+			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = (Serie) seriesIt.next();
-				if (serie.getSelected()) {
-					File serieIDFolderFile = createSerieIDFolder(workFolder, seriesFolderFile, serie);
+				if (serie.getSelected() != null && serie.getSelected()) {
+					File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
 					boolean serieIdentifiedForNotSeparating;
 					try {
 						serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, doNotSeparateDatasetsInSerie);
@@ -129,7 +122,6 @@ public class NIfTIConverterService {
 						serie.setDatasets(new ArrayList<Dataset>());
 						constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
 						constructNifti(serieIDFolderFile, serie, numberOfSeries, converterId);
-						++seriesCounter;
 					} catch (NoSuchFieldException | SecurityException e) {
 						LOG.error(e.getMessage());
 					}
@@ -569,8 +561,7 @@ public class NIfTIConverterService {
 				isConvertAs4D = checkSerieForPropertiesString(serie, convertAs4D);
 				isConvertWithClidcm = checkSerieForPropertiesString(serie, convertWithClidcm);
 			} catch (NoSuchFieldException | SecurityException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				LOG.error(e1.getMessage(), e1);
 			}
 			if (serie.getDatasets().size() > 1 ) {
 				// Need to construct nifti files for each dataset in current serie
@@ -637,7 +628,6 @@ public class NIfTIConverterService {
 	 * @param serieIdentifiedForNotSeparating
 	 */
 	private void constructDicom(final File serieIDFolderFile, final Serie serie, final boolean serieIdentifiedForNotSeparating) {
-		
 		if (!serieIdentifiedForNotSeparating) {
 			final HashMap<SerieToDatasetsSeparator, Dataset> datasetMap = new HashMap<SerieToDatasetsSeparator, Dataset>();
 			for (Image image : serie.getImages()) {
@@ -741,18 +731,20 @@ public class NIfTIConverterService {
 	}
 	
 	/**
+	 * This method creates a folder for each serie and moves into it the files,
+	 * coming either from the PACS or from the zip upload directory.
+	 * 
 	 * @param seriesFolderFile
 	 * @param serie
-	 * @throws RestServiceException
+	 * @throws ShanoirException
 	 */
-	private File createSerieIDFolder(File workFolder, File seriesFolderFile, Serie serie) throws RestServiceException {
+	private File createSerieIDFolderAndMoveFiles(File workFolder, File seriesFolderFile, Serie serie) throws ShanoirException {
 		String serieID = serie.getSeriesInstanceUID();
 		File serieIDFolderFile = new File(seriesFolderFile.getAbsolutePath() + File.separator + serieID);
 		if(!serieIDFolderFile.exists()) {
 			serieIDFolderFile.mkdirs();
 		} else {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating serie id folder: folder already exists.", null));
+			throw new ShanoirException("Error while creating serie id folder: folder already exists.");
 		}
 		List<Image> images = serie.getImages();
 		moveFiles(workFolder, serieIDFolderFile, images);
@@ -763,12 +755,13 @@ public class NIfTIConverterService {
 
 	/**
 	 * This method moves the files into serie specific folders.
+	 * 
 	 * @param serieIDFolder
 	 * @param images
 	 * @throws RestServiceException
 	 */
-	private void moveFiles(File workFolder, File serieIDFolder, List<Image> images) throws RestServiceException {
-		for (Iterator iterator = images.iterator(); iterator.hasNext();) {
+	private void moveFiles(File workFolder, File serieIDFolder, List<Image> images) throws ShanoirException {
+		for (Iterator<Image> iterator = images.iterator(); iterator.hasNext();) {
 			Image image = (Image) iterator.next();
 			// the path has been set in processDicomFile in DicomFileAnalyzer before
 			String filePath = image.getPath();
@@ -779,8 +772,7 @@ public class NIfTIConverterService {
 				LOG.debug("Moving file: " + oldFile.getAbsolutePath() + " to " + newFile.getAbsolutePath());
 				image.setPath(newFile.getAbsolutePath());
 			} else {
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating serie id folder: file to copy does not exist.", null));
+				throw new ShanoirException("Error while creating serie id folder: file to copy does not exist.");
 			}
 		}
 	}

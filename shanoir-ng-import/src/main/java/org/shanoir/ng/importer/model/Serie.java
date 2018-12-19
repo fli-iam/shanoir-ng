@@ -3,14 +3,19 @@ package org.shanoir.ng.importer.model;
 import java.util.Date;
 import java.util.List;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
+ * This class represents a serie based on Dicom as used in Shanoir.
+ * 
  * @author atouboul
- *
+ * @author mkain
  */
 public class Serie {
-	
+
 	@JsonProperty("selected")
 	private Boolean selected;
 
@@ -25,7 +30,7 @@ public class Serie {
 
 	@JsonProperty("seriesDescription")
 	private String seriesDescription;
-	
+
 	@JsonProperty("sequenceName")
 	private String sequenceName;
 
@@ -33,7 +38,7 @@ public class Serie {
 	private Date seriesDate;
 
 	@JsonProperty("seriesNumber")
-	private Integer seriesNumber;
+	private String seriesNumber;
 
 	@JsonProperty("numberOfSeriesRelatedInstances")
 	private Integer numberOfSeriesRelatedInstances;
@@ -49,7 +54,7 @@ public class Serie {
 
 	@JsonProperty("isSpectroscopy")
 	private Boolean isSpectroscopy;
-	
+
 	@JsonProperty("isEnhancedMR")
 	private Boolean isEnhancedMR;
 
@@ -65,6 +70,9 @@ public class Serie {
 	@JsonProperty("nonImagesNumber")
 	private Integer nonImagesNumber;
 
+	@JsonProperty("instances")
+	private List<Instance> instances;
+
 	@JsonProperty("images")
 	private List<Image> images;
 
@@ -73,6 +81,24 @@ public class Serie {
 
 	@JsonProperty("datasets")
 	private List<Dataset> datasets;
+
+	// Keep this empty constructor to avoid Jackson deserialization exceptions
+	public Serie() {}
+
+	public Serie(Attributes attributes) {
+		this.seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
+		this.seriesDescription = attributes.getString(Tag.SeriesDescription);
+		this.seriesDate = attributes.getDate(Tag.SeriesDate);
+		this.seriesNumber = attributes.getString(Tag.SeriesNumber);
+		this.numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
+		this.modality = attributes.getString(Tag.Modality);
+		this.protocolName = attributes.getString(Tag.ProtocolName);
+		final EquipmentDicom equipmentDicom = new EquipmentDicom(
+				attributes.getString(Tag.Manufacturer),
+				attributes.getString(Tag.ManufacturerModelName),
+				attributes.getString(Tag.DeviceSerialNumber));
+		setEquipment(equipmentDicom);
+	}
 
 	public Boolean getSelected() {
 		return selected;
@@ -122,11 +148,11 @@ public class Serie {
 		this.seriesDate = seriesDate;
 	}
 
-	public Integer getSeriesNumber() {
+	public String getSeriesNumber() {
 		return seriesNumber;
 	}
 
-	public void setSeriesNumber(Integer seriesNumber) {
+	public void setSeriesNumber(String seriesNumber) {
 		this.seriesNumber = seriesNumber;
 	}
 
@@ -202,6 +228,14 @@ public class Serie {
 		this.imagesNumber = imagesNumber;
 	}
 
+	public List<Instance> getInstances() {
+		return instances;
+	}
+
+	public void setInstances(List<Instance> instances) {
+		this.instances = instances;
+	}
+
 	public List<Dataset> getDatasets() {
 		return datasets;
 	}
@@ -225,7 +259,7 @@ public class Serie {
 	public void setIsSpectroscopy(Boolean isSpectroscopy) {
 		this.isSpectroscopy = isSpectroscopy;
 	}
-	
+
 	public Boolean getIsEnhancedMR() {
 		return isEnhancedMR;
 	}
@@ -241,5 +275,5 @@ public class Serie {
 	public void setSequenceName(String sequenceName) {
 		this.sequenceName = sequenceName;
 	}
-	
+
 }

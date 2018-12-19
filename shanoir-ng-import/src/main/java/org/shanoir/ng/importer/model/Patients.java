@@ -16,7 +16,5 @@ public class Patients {
 	public void setPatients(List<Patient> patients) {
 		this.patients = patients;
 	}
-    
-    
 	
 }
