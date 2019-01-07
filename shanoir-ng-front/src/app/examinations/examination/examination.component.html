@@ -18,7 +18,7 @@
 						<label i18n="Examination detail|Id label@@examinationDetailId" class="required-label">Id</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.id}}
+								{{examination?.id}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="id" [(ngModel)]="examination.id" readonly/>
@@ -30,12 +30,12 @@
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/study/details/', examination.study?.id]">
-									{{examination.studyName}}
+									{{examination.study?.name}}dsf
 								</a>		
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="study" required formControlName="study" [(ngModel)]="examination.study" (ngModelChange)="getSubjects($event)" [compareWith]="compareEntities">
-									<option *ngFor="let study of studies" [ngValue]="study">{{study.name}}</option>
+									<option *ngFor="let study of studies" [ngValue]="study">{{study?.name}}</option>
 								</select>
 								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
@@ -46,12 +46,12 @@
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/subject/details/', examination.subject?.id]">
-									{{examination.subject?.name}}
+									{{examination?.subject?.name}}
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="subject" required formControlName="subject" [(ngModel)]="examination.subject" [compareWith]="compareEntities">
-									<option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
+									<option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
 								</select>
 								<label *ngIf="hasError('subject', ['required'])" class="form-validation-alert" i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">Subject is required!</label>
 							</ng-template>
@@ -62,12 +62,12 @@
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/center/details/', examination.center?.id]">
-									{{examination.center.name}}
+									{{examination?.center?.name}}
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select id="center" required formControlName="center" [(ngModel)]="examination.center" [compareWith]="compareEntities">
-									<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
+									<option *ngFor="let center of centers" [ngValue]="center">{{center?.name}}</option>
 								</select>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
 							</ng-template>
@@ -77,7 +77,7 @@
 						<label i18n="Examination detail|Examination executive label@@examinationDetailExaminationExecutive">Examination executive</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.examinationExecutive?.name}}
+								{{examination?.examinationExecutive?.name}}
 							</ng-template>
 							<!--<ng-template ngSwitchDefault>
 								<select id="examinationExecutive" required formControlName="Examination executive" [(ngModel)]="examination.examinationExecutive">
@@ -90,7 +90,7 @@
 						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.examinationDate | date: 'dd/MM/yyyy'}}
+								{{examination?.examinationDate | date: 'dd/MM/yyyy'}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<datepicker [(ngModel)]="examination.examinationDate" formControlName="examinationDate" required></datepicker>
@@ -103,7 +103,7 @@
 						<label i18n="Examination detail|Comment label@@examinationDetailComment">Comment</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.comment}}
+								{{examination?.comment}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="comment" formControlName="comment" [(ngModel)]="examination.comment" />
@@ -114,7 +114,7 @@
 						<label i18n="Examination detail|Note label@@examinationDetailNote">Note</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.note}}
+								{{examination?.note}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="note" formControlName="note" [(ngModel)]="examination.note" />
@@ -125,7 +125,7 @@
 						<label i18n="Examination detail|Subject weight label@@examinationDetailSubjectWeight">Subject weight</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.subjectWeight}}
+								{{examination?.subjectWeight}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="subjectWeight" formControlName="subjectWeight" [(ngModel)]="examination.subjectWeight" />
