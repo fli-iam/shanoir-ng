@@ -90,9 +90,11 @@ form { color: var(--dark-grey); }
   form li > label { display: inline-block; vertical-align: sub; width: 250px; }
   form fieldset ol { margin: 0; padding: 0; }
   form fieldset li { list-style: none; padding: 3px 0; margin: 0; min-height: 22px; }
-    form fieldset li button { height: 22px; }
-    form li.info { margin: 4px 0 13px; background-color: lightgoldenrodyellow; padding: 10px 15px; overflow: hidden; width: 473px; }
-      form li.info .icon { margin-right: 6px; vertical-align: middle; color: var(--color-b); font-size: 16px; }
+    form fieldset li input,
+    form fieldset li select,
+    form fieldset li button { height: 21px; }
+    form li.info { margin: 4px 0 13px; background-color: var(--color-b-light); padding: 10px 15px; overflow: hidden; width: 473px; border-radius: 2px; }
+      form li.info svg { margin-right: 6px; vertical-align: -3; color: var(--color-b); font-size: 16px; }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header, form .footer { }
   form .header { color: var(--color-b); font-weight: bold; padding-top: 10px; padding-bottom: 10px; }

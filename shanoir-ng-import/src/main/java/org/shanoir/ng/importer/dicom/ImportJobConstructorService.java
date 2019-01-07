@@ -13,7 +13,6 @@ import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomInputStream;
-import org.dcm4che3.media.DicomDirReader;
 import org.shanoir.ng.importer.model.EchoTime;
 import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.Image;
@@ -26,11 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 
 @Service
 public class ImportJobConstructorService {
@@ -75,10 +69,10 @@ public class ImportJobConstructorService {
 						serie.setSeriesDescription(datasetAttributes.getString(Tag.SeriesDescription));
 						serie.setSeriesDate(datasetAttributes.getDate(Tag.StudyDate));
 						serie.setNumberOfSeriesRelatedInstances(datasetAttributes.getInt(Tag.NumberOfSeriesRelatedInstances,0));
-						EquipmentDicom equipment = new EquipmentDicom();
-						equipment.setDeviceSerialNumber(datasetAttributes.getString(Tag.DeviceSerialNumber));
-						equipment.setManufacturer(datasetAttributes.getString(Tag.Manufacturer));
-						equipment.setManufacturerModelName(datasetAttributes.getString(Tag.ManufacturerModelName));
+						EquipmentDicom equipment = new EquipmentDicom(
+							datasetAttributes.getString(Tag.Manufacturer),
+							datasetAttributes.getString(Tag.ManufacturerModelName),
+							datasetAttributes.getString(Tag.DeviceSerialNumber));
 						serie.setEquipment(equipment);
 						serie.setIsCompressed(checkSeriesIsCompressed(datasetAttributes));
 						if (UID.EnhancedMRImageStorage.equals(serie.getSopClassUID())) {
@@ -93,10 +87,8 @@ public class ImportJobConstructorService {
 							serie.setIsMultiFrame(false);
 							serie.setMultiFrameCount(0);
 						}
-						
 						firstImageOfSerie = false;
 					}
-
 
 					if (serie.getSopClassUID().startsWith("1.2.840.10008.5.1.4.1.1.66")) {
 						// ((ArrayNode) instances).remove(index);
@@ -109,17 +101,12 @@ public class ImportJobConstructorService {
 								|| checkSerieIsSpectroscopy(seriesDescription)) {
 							iterator.remove();
 							serie.getNonImages().add(image);
-							// ObjectNode nonImage = mapper.createObjectNode();
-							// nonImage.put("path", instanceFilePath.replace(unzipFolderFileAbsolutePath +
-							// "/", ""));
-							// nonImages.add(nonImage);
 							serie.setIsSpectroscopy(true);
 							LOG.warn("Attention: spectroscopy serie is included in this import!");
 							// images at the second
 						} else {
 							// do not change here: use absolute path all time and find other solution for
 							// image preview
-
 							addImageSeparateDatasetsInfo(image, datasetAttributes, serie.getSopClassUID());
 							serie.setIsSpectroscopy(false);
 						}
@@ -156,7 +143,6 @@ public class ImportJobConstructorService {
 	 * @param datasetAttributes
 	 */
 	private void addImageSeparateDatasetsInfo(Image image, Attributes datasetAttributes, String sopClassUID) {
-
 		Attributes attributes = null;
 		if (UID.EnhancedMRImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
@@ -204,7 +190,6 @@ public class ImportJobConstructorService {
 
 		if (image.getEchoTimes() == null) {
 			EchoTime echoTime = new EchoTime();
-			
 			Integer anEchoNumber = attributes.getInt(Tag.EchoNumbers, 0);
 			Double anEchoTime = attributes.getDouble(Tag.EchoTime, 0.0);
 			echoTime.setEchoNumber(anEchoNumber);
@@ -229,7 +214,6 @@ public class ImportJobConstructorService {
 			return false;
 		}
 	}
-
 	
 	/**
 	 * Get the frame count of the given dicom object.
@@ -250,4 +234,5 @@ public class ImportJobConstructorService {
 			return -1;
 		}
 	}
+
 }

@@ -8,7 +8,7 @@ import { ManufacturerModel } from './manufacturer-model.model';
 export class AcquisitionEquipmentPipe implements PipeTransform {
 
     transform(acqEqpt: AcquisitionEquipment) {
-        if (acqEqpt) {
+        if (acqEqpt && acqEqpt.manufacturerModel) {
             let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
             return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
                 + " (" + DatasetModalityType[manufModel.datasetModalityType] + ") " + acqEqpt.serialNumber + " - " + acqEqpt.center.name;

@@ -3,27 +3,39 @@ package org.shanoir.ng.importer.model;
 import java.util.Date;
 import java.util.List;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 /**
+ * This class represents a study based on Dicom as used in Shanoir.
+ * 
  * @author atouboul
- *
+ * @author mkain
  */
+public class Study {
 
- public class Study {
+	@JsonProperty("studyInstanceUID")
+	private String studyInstanceUID;
 
-     @JsonProperty("studyInstanceUID")
-     private String studyInstanceUID;
+	@JsonProperty("studyDate")
+	private Date studyDate;
 
-     @JsonProperty("studyDate")
-     private Date studyDate;
+	@JsonProperty("studyDescription")
+	private String studyDescription;
 
-     @JsonProperty("studyDescription")
-     private String studyDescription;
+	@JsonProperty("series")
+	private List<Serie> series;
 
-     @JsonProperty("series")
-     private List<Serie> series;
+	// Keep this empty constructor to avoid Jackson deserialization exceptions
+	public Study() {}
+
+	public Study(final Attributes attributes) {
+		this.studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
+		this.studyDate = attributes.getDate(Tag.StudyDate);
+		this.studyDescription = attributes.getString(Tag.StudyDescription);
+	}
 
 	public String getStudyInstanceUID() {
 		return studyInstanceUID;

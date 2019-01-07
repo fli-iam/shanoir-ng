@@ -3,6 +3,8 @@
  */
 package org.shanoir.ng.importer.dcm2nii;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +21,7 @@ import io.swagger.annotations.ApiParam;
 public class NIfTIConverterApiController implements NIfTIConverterApi{
 	
 	@Autowired
-	private NIfTIConverterService niftiConverterService;
+	private DatasetsCreatorAndNIfTIConverterService niftiConverterService;
 	
 	@Override
 	public ResponseEntity<NIfTIConverter> findNiftiConverterById(
@@ -31,4 +33,12 @@ public class NIfTIConverterApiController implements NIfTIConverterApi{
 		return new ResponseEntity<>(niftiConverter, HttpStatus.OK);
 	}
 
+	@Override
+	public ResponseEntity<List<NIfTIConverter>> findNiftiConverters() {
+		final List<NIfTIConverter> niftiConverters = niftiConverterService.findAll();
+		if (niftiConverters.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(niftiConverters, HttpStatus.OK);
+	}
 }

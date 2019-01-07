@@ -21,7 +21,7 @@
 								{{examination.id}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="id" formControlName="id" [(ngModel)]="examination.id" readonly/>
+								<input type="text" id="id" [(ngModel)]="examination.id" readonly/>
 							</ng-template>
 						</span>
 					</li>
@@ -29,19 +29,51 @@
 						<label i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/study/details/', examination.studyId]">
+								<a [routerLink]="['/study/details/', examination.study?.id]">
 									{{examination.studyName}}
 								</a>		
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="studyId" [(ngModel)]="examination.studyId">
-									<select-option *ngFor="let study of studies" [value]="study.id">{{study.name}}</select-option>
+								<select-box formControlName="study" [(ngModel)]="examination.study">
+									<select-option *ngFor="let study of studies" [value]="study">{{study.name}}</select-option>
 								</select-box>
-								<label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
+								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
 						</span>
 					</li>
-					 <li>
+					<li>
+						<label i18n="Examination detail|Subject label@@examinationDetailSubject" class="required-label">Subject</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								<a [routerLink]="['/subject/details/', examination.subject?.id]">
+									{{examination.subject?.name}}
+								</a>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select id="subject" required formControlName="subject" [(ngModel)]="examination.subject" [compareWith]="compareEntities">
+									<option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
+								</select>
+								<label *ngIf="hasError('subject', ['required'])" class="form-validation-alert" i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">Subject is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label i18n="Examination detail|Center label@@examinationDetailCenter" class="required-label">Center</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								<a [routerLink]="['/center/details/', examination.center?.id]">
+									{{examination.center.name}}
+								</a>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="center" [(ngModel)]="examination.center">
+									<select-option *ngFor="let center of centers" [value]="center">{{center.name}}</select-option>
+								</select-box>
+								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
+							</ng-template>
+						</span>
+					</li>
+					<li>
 						<label i18n="Examination detail|Examination executive label@@examinationDetailExaminationExecutive">Examination executive</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -52,35 +84,6 @@
 									<option *ngFor="let examinationExecutive of examinationExecutives" [ngValue]="subject">{{examinationExecutive.name}}</option>
 								</select>
 							</ng-template>-->
-						</span>
-					</li> 
-					<li>
-						<label i18n="Examination detail|Center label@@examinationDetailCenter" class="required-label">Center</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								<a [routerLink]="['/center/details/', examination.centerId]">
-									{{examination.centerName}}
-								</a>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="centerId" [(ngModel)]="examination.centerId">
-									<select-option *ngFor="let center of centers" [value]="center.id">{{center.name}}</select-option>
-								</select-box>
-								<label *ngIf="hasError('centerId', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{examination.subject?.name}}
-							</ng-template>
-						<!-- 	<ng-template ngSwitchDefault>
-								<select id="subject" required formControlName="Subject" [(ngModel)]="examination.subject">
-									<option *ngFor="let subject of subjects" [ngValue]="subject">{{subject.name}}</option>
-								</select>
-							</ng-template> -->
 						</span>
 					</li>
 					<li>
@@ -107,7 +110,7 @@
 							</ng-template>
 						</span>
 					</li>
-					<li>
+					<li *ngIf="!inImport" >
 						<label i18n="Examination detail|Note label@@examinationDetailNote">Note</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -118,7 +121,7 @@
 							</ng-template>
 						</span>
 					</li>
-					<li>
+					<li *ngIf="!inImport">
 						<label i18n="Examination detail|Subject weight label@@examinationDetailSubjectWeight">Subject weight</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -137,7 +140,7 @@
 
 						</span>
 					</li>
-					<li>
+					<li *ngIf="!inImport">
 						<label i18n="Examination detail|Assessments label@@examinationDetailAssessments">Assessments</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -152,8 +155,7 @@
 							</ng-template>
 						</span>
 					</li>
-
-					<li>
+					<li *ngIf="!inImport">
 						<label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">

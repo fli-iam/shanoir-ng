@@ -108,6 +108,14 @@ export class BreadcrumbsService {
         return this.previousStep.isWaitingFor(this.currentStep);
     }
 
+    public isImporting(): boolean {
+        for (let i=this.currentStepIndex; i>=0; i--) {
+            if (this.steps[i].importStart) return true;
+            else if (this.steps[i].milestone) return false;
+        }
+        return false;
+    }
+
 }
 
 export class Step {
@@ -150,6 +158,7 @@ export class Step {
     public milestone: boolean = false;
     public entity: Entity;
     public data: any = {};
+    public importStart: boolean = false;
 
     private onSave(): Subject<Entity> {
         this.subscribers++;

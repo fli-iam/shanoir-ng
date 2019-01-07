@@ -1,4 +1,3 @@
-
 <div class="header command-zone">3. Set the clinical context</div>
 <fieldset class="step">
 
@@ -10,26 +9,54 @@
         <li class="required">
             <label class="required-label">Select an existing research study</label> 
             <span class="right-col">
-                <select-box [ngModel]="study" (change)="onSelectStudy($event)" (onViewClick)="showStudyDetails()" [viewDisabled]="study == null">
-                    <select-option *ngFor="let study of studies" [value]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study?.name}}</select-option>
+                <select-box [ngModel]="study" (change)="onSelectStudy($event)" (onViewClick)="showStudyDetails()" [viewDisabled]="!study">
+                    <select-option *ngFor="let study of studies" [value]="study"
+                        [class.compatible]="study?.compatible" [class.not-compatible]="!study?.compatible">{{study?.name}}</select-option>
                 </select-box>
             </span>
         </li>
         <li class="required">
-            <label class="required-label">Select an existing study card</label> 
+            <label class="required-label">Select a center</label> 
             <span class="right-col">
-                <select-box [disabled]="!study" [ngModel]="studycard" (change)="onSelectStudycard($event)">
-                    <select-option *ngFor="let studycard of studycards" [value]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</select-option>
+                <select-box [disabled]="!study || !centers" [ngModel]="center" (change)="onSelectCenter($event)" 
+                        (onViewClick)="showCenterDetails()" [viewDisabled]="!center"
+                        (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters">
+                    <select-option *ngFor="let center of centers" [value]="center"
+                            [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">{{center?.name}}</select-option>
                 </select-box>
             </span>
-            <br/><span>
-                <label *ngIf="studycardMissingError==true" class="form-validation-alert" i18n="Import|StudycardMissingError label"><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Warning :</strong> no study card is defined for this research study. You cannot import data into this research study.</label>
-                <label *ngIf="studycardNotCompatibleError==true" class="form-validation-alert" i18n="Import|StudycardNotCompatibleError label"><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Warning :</strong> The Acquisition Equipment defined in the study card is not compatible with the data that you are importing.</label>
-            </span>
+        </li>
+        <li class="info" *ngIf="center && !center?.compatible">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>This center may not be not compatible with the imported data !</strong>
+            <br/>Your archive contains this data : 
+            <code>
+                {{patient?.studies[0]?.series[0]?.institution?.institutionName}} - 
+                {{patient?.studies[0]?.series[0]?.institution?.institutionAddress}}
+            </code>
+            <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
         </li>
         <li class="required">
-            <label>Nifti converter</label> 
-            <span class="right-col">{{niftiConverter?.name}}</span>
+            <label class="required-label">Select an acquisition equipment</label> 
+            <span class="right-col">
+                <select-box [disabled]="!center || !acquisitionEquipments" [ngModel]="acquisitionEquipment" (change)="onSelectAcquisitonEquipment($event)"
+                        (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
+                        (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments">
+                    <select-option *ngFor="let acquisitionEquipment of acquisitionEquipments" [value]="acquisitionEquipment" 
+                            [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">{{acquisitionEquipment | acqEqptLabel}}</select-option>
+                </select-box>
+            </span>
+        </li>
+        <li class="info" *ngIf="acquisitionEquipment && !acquisitionEquipment?.compatible">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>The acquisition equipment may not be not compatible with the imported data !</strong>
+            <br/>Your archive contains this data : 
+            <code>
+                {{patient?.studies[0]?.series[0]?.equipment?.manufacturer}} - 
+                {{patient?.studies[0]?.series[0]?.equipment?.manufacturerModelName}} - 
+                {{patient?.studies[0]?.series[0]?.equipment?.deviceSerialNumber}}
+            </code>
+            <br/>If the acquisition equipment you need is not in the above list, you can create a new acquisition equipment from this data by clicking on the 'add' button.
         </li>
     </ol>
 
@@ -41,14 +68,14 @@
         <li class="required">
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
-                <select-box [disabled]="!study || !studycard" [ngModel]="subject" (change)="onSelectSubject($event)" 
+                <select-box [disabled]="!study || !acquisitionEquipment" [ngModel]="subject" (change)="onSelectSubject($event)" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
-                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !studycard">
+                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment">
                     <select-option *ngFor="let subject of subjects" [value]="subject">{{subject?.name}}</select-option>
                 </select-box>
             </span>
         </li>
-        <li *ngIf="subject != null">
+        <li *ngIf="subject !== null && subject !== undefined">
             <div>
                 <table>
                     <thead>
@@ -93,10 +120,22 @@
         <li class="required">
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select-box [disabled]="!subject" [ngModel]="examination" (change)="onSelectExamination($event)"
+                <select-box [disabled]="!study || !subject" [ngModel]="examination" (change)="onSelectExamination($event)"
                         (onViewClick)="showExaminationDetails()" [viewDisabled]="!examination"
-                        (onNewClick)="openCreateExam()" [newDisabled]="!subject">
+                        (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject">
                     <select-option *ngFor="let examination of examinations" [value]="examination">{{examination | subjectExaminationLabel}}</select-option>
+                </select-box>  
+            </span>
+        </li>
+    </ol>
+
+    <ol>
+        <legend>Nifti Converter</legend>
+        <li class="required">
+            <label label class="required-label">Select a Nifti converter</label> 
+            <span class="right-col">
+                <select-box [disabled]="!examination" [ngModel]="niftiConverter" (change)="onSelectNifti($event)">
+                    <select-option *ngFor="let niftiConverter of niftiConverters" [value]="niftiConverter">{{niftiConverter?.name}}</select-option>
                 </select-box>
             </span>
         </li>

@@ -1,8 +1,12 @@
 package org.shanoir.ng.configuration;
 
+import java.util.concurrent.Executor;
+
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -12,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
  * @author mkain
  */
 @Configuration
+@EnableAsync
 public class ShanoirImportConfiguration {
 
 	@Bean
@@ -19,4 +24,15 @@ public class ShanoirImportConfiguration {
 		return builder.build();
 	}
 
+	@Bean(name = "asyncExecutor")
+    public Executor asyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(100);
+        executor.setMaxPoolSize(100);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("AsyncThread-");
+        executor.initialize();
+        return executor;
+    }
+	
 }

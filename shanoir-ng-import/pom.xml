@@ -20,7 +20,8 @@
 		<springfox-version>2.5.0</springfox-version>
 		<spring-active-profile></spring-active-profile>
 		<resteasy.version>3.1.0.Final</resteasy.version>
-		<dcm4che.version>5.10.6</dcm4che.version> 
+		<dcm4che.version>5.14.1</dcm4che.version>
+		<weasis.version>5.14.1</weasis.version>
 		<docker.image.name>shanoir-ng/template</docker.image.name>
 		<supervisor.file.name>ms.template.sv.dev.conf</supervisor.file.name>
 	</properties>
@@ -55,6 +56,13 @@
 			<artifactId>spring-boot-starter-amqp</artifactId>
 		</dependency>
 
+		<!-- DICOM Weasis Tools, based on dcm4che3 -->
+		<dependency>
+			<groupId>org.weasis</groupId>
+			<artifactId>weasis-dicom-tools</artifactId>
+			<version>${weasis.version}</version>
+		</dependency>
+		
 		<!-- DCM4CHE dependencies -->
 		<dependency>
 			<groupId>org.dcm4che</groupId>
@@ -88,7 +96,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
+		
 		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -179,6 +187,13 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>mvn-repo-master</id>
+			<url>https://raw.github.com/nroduit/mvn-repo/master/</url>
 		</repository>
 	</repositories>
 

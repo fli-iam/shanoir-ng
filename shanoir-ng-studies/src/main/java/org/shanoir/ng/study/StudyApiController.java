@@ -84,19 +84,17 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<SimpleStudyDTO>> findStudiesWithStudyCardsByUserAndEquipment(
-			@RequestBody final EquipmentDicom equipment, final BindingResult result) {
-		List<SimpleStudyDTO> studies;
+	public ResponseEntity<List<SimpleStudyDTO>> findStudiesForImport() {
+		List<Study> studies;
 		try {
-			studies = studyService.findStudiesWithStudyCardsByUserAndEquipment(KeycloakUtil.getTokenUserId(),
-					equipment);
+			studies = studyService.findStudiesForImport(KeycloakUtil.getTokenUserId());
 		} catch (ShanoirException e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(studies, HttpStatus.OK);
+		return new ResponseEntity<>(studyMapper.studiesToSimpleStudyDTOs(studies), HttpStatus.OK);
 	}
 
 	@Override
