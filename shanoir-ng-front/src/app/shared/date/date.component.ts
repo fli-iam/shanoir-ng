@@ -1,5 +1,5 @@
 import { AfterViewChecked, Component, ElementRef, forwardRef } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl, ValidationErrors } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
 import { IMyOptions } from 'mydatepicker';
 
 @Component({
@@ -34,7 +34,6 @@ export class DatepickerComponent implements ControlValueAccessor, AfterViewCheck
     private convertedDate: Object;
     private onTouch: () => void;
     private onChange: (value) => void;
-    private ngControl: NgControl;
 
     private options: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',

@@ -1,5 +1,6 @@
 :host() { display: inline-block; position: relative; vertical-align: middle; }
-.root.disabled:after { content: ""; display: block; position: absolute; top: 0; bottom: 0; left: 0; right: -6px; background-color: white; opacity: 0.7; }
+.root.disabled { opacity: 0.3; }
+.root.disabled:after { content: ""; display: block; position: absolute; top: 0; bottom: 0; left: 0; right: -6px; }
 .frame { display: inline-flex; position: relative; overflow: hidden; height: 19px; width: 218px; }
 .label { display: inline-block; cursor: default; width: 100%; height: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .label.empty { font-style: italic; color: var(--greyer); }
@@ -24,7 +25,7 @@
         .open { border: none; cursor: default !important; }
         .open:hover { color: inherit !important; background-color: inherit !important; }
         
-.list { 
+.list-frame { 
     position: absolute;
     z-index: 1000; 
     max-height: 320px;
@@ -38,6 +39,6 @@
     box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color);
     padding: 0;
 }
-.list.down { top: 20px; }
-.list.up { bottom: 20px; } 
+.list-frame.down { top: 20px; }
+.list-frame.up { bottom: 20px; } 
 .hidden-list { opacity: 0; }

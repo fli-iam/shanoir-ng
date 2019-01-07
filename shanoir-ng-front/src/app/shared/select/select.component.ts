@@ -53,8 +53,11 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() placeholder: string;
     
     @Input() viewDisabled: boolean;
+    @Input() viewHidden: boolean;
     @Input() newDisabled: boolean;
+    @Input() newHidden: boolean;
     @Input() addDisabled: boolean;
+    @Input() addHidden: boolean;
     @Output() onViewClick = new EventEmitter();
     @Output() onNewClick = new EventEmitter();
     @Output() onAddClick = new EventEmitter();
@@ -121,7 +124,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if (this.selectedOption) {
             let cloned = this.selectedOption.elt.nativeElement.cloneNode(true);
             cloned.children[0].classList.remove('focus');
+            cloned.children[0].classList.remove('selected');
             cloned.children[0].style.padding = '0';
+            cloned.children[0].style.overflow = 'hidden';
+            cloned.children[0].style.textOverflow = 'ellipsis';
             this.renderer.appendChild(this.labelNode.nativeElement, cloned);
         }
     }
