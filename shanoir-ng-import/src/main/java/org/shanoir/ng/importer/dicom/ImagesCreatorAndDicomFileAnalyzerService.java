@@ -347,6 +347,23 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	}
 
 	/**
+	 * Adds the equipment information.
+	 * 
+	 * @param serie
+	 * @param datasetAttributes
+	 */
+	private void addSeriesCenter(Serie serie, Attributes attributes) {
+		if (serie.getInstitution() == null) {
+			InstitutionDicom institution = new InstitutionDicom();
+			String institutionName = attributes.getString(Tag.InstitutionName);
+			String institutionAddress = attributes.getString(Tag.InstitutionAddress);
+			institution.setInstitutionName(institutionName);
+			institution.setInstitutionAddress(institutionAddress);
+			serie.setInstitution(institution);
+		}
+	}
+
+	/**
 	 * Normally we get the seriesDescription from the DicomDir, if not: null or
 	 * empty, get the seriesDescription from the .dcm file, if existing in .dcm file.
 	 * 
