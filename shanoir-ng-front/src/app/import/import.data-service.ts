@@ -1,17 +1,22 @@
 import { Injectable } from '@angular/core';
-import { ImportJob, PatientDicom } from './dicom-data.model';
-import { Study } from '../studies/shared/study.model';
-import { StudyCard } from '../study-cards/shared/study-card.model';
-import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject-study.model';
+import { AcquisitionEquipment } from '../acquisition-equipments/shared/acquisition-equipment.model';
+import { Center } from '../centers/shared/center.model';
 import { SubjectExamination } from '../examinations/shared/subject-examination.model';
+import { NiftiConverter } from '../niftiConverters/nifti.converter.model';
+import { Study } from '../studies/shared/study.model';
+import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject-study.model';
+import { ImportJob, PatientDicom } from './dicom-data.model';
 
 export class ContextData {
-    constructor(
+    
+    constructor (
         public study: Study,
-        public studycard: StudyCard,
+        public center: Center,
+        public acquisitionEquipment: AcquisitionEquipment,
         public subject: SubjectWithSubjectStudy,
-        public examination: SubjectExamination
-    ) {};
+        public examination: SubjectExamination,
+        public niftiConverter: NiftiConverter
+    ) {}
 }
 
 @Injectable()

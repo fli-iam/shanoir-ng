@@ -48,12 +48,12 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
             },
             {
                 headerName: "Research study", field: "studyName", type: "link", 
-                action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.studyId])
+                action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.study.id])
             },
             { headerName: "Examination executive", field: "" },
             {
                 headerName: "Center", field: "centerName", type: "link", 
-                action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.centerId])
+                action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.center.id])
             }
         ];
         return colDef;       

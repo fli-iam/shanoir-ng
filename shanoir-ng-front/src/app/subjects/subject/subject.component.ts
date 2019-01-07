@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
-
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date/date.component';
@@ -19,7 +18,7 @@ import { SubjectService } from '../shared/subject.service';
     animations: [slideDown, preventInitialChildAnimations]
 })
 
-export class SubjectComponent extends EntityComponent<Subject> {
+export class SubjectComponent extends EntityComponent<Subject> implements OnInit {
 
     private readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
@@ -38,6 +37,14 @@ export class SubjectComponent extends EntityComponent<Subject> {
 
     public get subject(): Subject { return this.entity; }
     public set subject(subject: Subject) { this.entity = subject; }
+
+    ngOnInit() {
+        super.ngOnInit();
+        if (this.mode == 'create') {
+            this.firstName = this.breadcrumbsService.currentStep.data.firstName;
+            this.lastName = this.breadcrumbsService.currentStep.data.lastName;
+        }
+    }
 
     initView(): Promise<void> {
         return this.subjectService.get(this.id).then(subject => { this.subject = subject; });
@@ -134,22 +141,6 @@ export class SubjectComponent extends EntityComponent<Subject> {
         let hex = "";
         hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
-    }
-
-    /**
-     * Try to compute patient first name and last name from dicom tags. 
-     * eg. TOM^HANKS -> return TOM as first name and HANKS as last name
-     */
-    private computeNameFromDicomTag (patientName: string): void {
-        if (patientName) {
-            let names: string[] = patientName.split("\\^");
-            if (names !== null && names.length == 2) {
-                this.firstName = names[1];
-                this.lastName = names[2];
-            } else {
-                this.firstName = this.lastName = patientName;
-            }
-        }
     }
 
     private humanSelected(): boolean {

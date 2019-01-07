@@ -108,9 +108,4 @@ public class SubjectStudyDTO {
 	public void setExaminationDTO(List<ExaminationDTO> examinationDTO) {
 		this.examinationDTO = examinationDTO;
 	}
-
-
-	
-	
-
 }

@@ -21,7 +21,6 @@
 		<module>../shanoir-ng-users</module>
 		<module>../shanoir-ng-anonymization</module>
 		<module>../shanoir-ng-studies</module>
-		<module>../shanoir-ng-studycards</module>
 		<module>../shanoir-ng-datasets</module>
 		<module>../shanoir-ng-import</module>
 		<module>../shanoir-ng-preclinical</module>

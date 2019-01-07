@@ -3,8 +3,10 @@ package org.shanoir.ng.center;
 import java.util.List;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentMapper;
 import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.studycenter.StudyCenterMapper;
 
 /**
  * Mapper for centers.
@@ -12,7 +14,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = AcquisitionEquipmentMapper.class)
+@Mapper(componentModel = "spring", uses = { AcquisitionEquipmentMapper.class, StudyCenterMapper.class })
 public interface CenterMapper {
 
 	/**
@@ -31,6 +33,7 @@ public interface CenterMapper {
 	 *            center to map.
 	 * @return center DTO.
 	 */
+	@Mapping(target = "compatible", ignore = true) 
 	CenterDTO centerToCenterDTO(Center center);
 
 	/**

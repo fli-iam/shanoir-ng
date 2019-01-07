@@ -38,7 +38,7 @@ into the folder /docker-compose to be used from there by docker-compose
 * If you are on your **developer/local machine**:
     * Configure your local **/etc/hosts** (for windows, C:/Windows/System32/drivers/etc/hosts) and add:
 	* 127.0.0.1       shanoir-ng-nginx
-    * For windows 7, increase your RAM and set the port redirection for the virtual box.
+    * For windows 7, increase your RAM and set the port redirection (8080 and 443) for the virtual box.
 * If you are on a **dedicated server** (e.g. shanoir-ng.irisa.fr):
     * By default Shanoir-NG is installed with the host shanoir-ng-nginx and the scheme http (dev setup)
     * If you are on a dedicated server (e.g. shanoir-ng.irisa.fr) you will have to do manual adaptions

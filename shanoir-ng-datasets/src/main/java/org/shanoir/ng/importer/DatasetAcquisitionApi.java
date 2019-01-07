@@ -31,7 +31,6 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(code = 403, message = "forbidden", response = Void.class),
         @ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-
     @RequestMapping(value = "/datasetacquisition",
         produces = { "application/json" },
         consumes = { "application/json" },

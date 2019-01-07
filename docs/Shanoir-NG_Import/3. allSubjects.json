@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "name": "subject1",
+    "identifier": "sub1",
+    "subjectStudy": {
+      "id": 1,
+      "subject": {
+        "id": 1,
+        "name": "subject1"
+      },
+      "study": {
+        "id": 1,
+        "name": "NATIVE Divers"
+      },
+      "subjectStudyIdentifier": "Subject 1 for study 1",
+      "subjectType": "HEALTHY_VOLUNTEER",
+      "physicallyInvolved": false,
+      "examinationDTO": null
+    }
+  },
+  {
+    "id": 2,
+    "name": "subject2",
+    "identifier": "sub2",
+    "subjectStudy": {
+      "id": 2,
+      "subject": {
+        "id": 2,
+        "name": "subject2"
+      },
+      "study": {
+        "id": 1,
+        "name": "NATIVE Divers"
+      },
+      "subjectStudyIdentifier": "Subject 2 for study 1",
+      "subjectType": "PATIENT",
+      "physicallyInvolved": false,
+      "examinationDTO": null
+    }
+  }
+]

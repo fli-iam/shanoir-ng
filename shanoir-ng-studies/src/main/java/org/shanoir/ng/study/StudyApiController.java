@@ -54,7 +54,7 @@ public class StudyApiController implements StudyApi {
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
-
+	
 	@Override
 	public ResponseEntity<List<StudyDTO>> findStudies() {
 		List<Study> studies;
@@ -76,17 +76,7 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<List<IdNameDTO>> findStudiesNames() {
-		List<IdNameDTO> studies;
-		try {
-			if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-				// Return all studies if user has role "admin"
-				studies = studyService.findIdsAndNames();
-			} else {
-				studies = studyService.findIdsAndNamesByUserId(KeycloakUtil.getTokenUserId());
-			}
-		} catch (ShanoirException e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+		final List<IdNameDTO> studies = studyService.findIdsAndNames();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -94,19 +84,17 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<SimpleStudyDTO>> findStudiesWithStudyCardsByUserAndEquipment(
-			@RequestBody final EquipmentDicom equipment, final BindingResult result) {
-		List<SimpleStudyDTO> studies;
+	public ResponseEntity<List<SimpleStudyDTO>> findStudiesForImport() {
+		List<Study> studies;
 		try {
-			studies = studyService.findStudiesWithStudyCardsByUserAndEquipment(KeycloakUtil.getTokenUserId(),
-					equipment);
+			studies = studyService.findStudiesForImport(KeycloakUtil.getTokenUserId());
 		} catch (ShanoirException e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(studies, HttpStatus.OK);
+		return new ResponseEntity<>(studyMapper.studiesToSimpleStudyDTOs(studies), HttpStatus.OK);
 	}
 
 	@Override
@@ -163,7 +151,7 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
 			final BindingResult result) throws RestServiceException {
-
+		
 		try {
 			if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 				// Check if user can update study, if he is not admin
@@ -174,7 +162,7 @@ public class StudyApiController implements StudyApi {
 		} catch (ShanoirException e) {
 			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
+		
 		study.setId(studyId);
 
 		// A basic study can only update certain fields, check that

@@ -29,7 +29,6 @@ export class ImagesUrlUtil {
     public static SHANOIR_WHITE_SMALL_LOGO_PATH = 'assets/images/logo.shanoir.white.small.png';
     public static SHARE_ICON_PATH = 'assets/images/icons/share.png';
     public static STETHOSCOPE_ICON_PATH = 'assets/images/icons/medical/stethoscope.png';
-    public static STUDY_CARD_ICON_PATH = 'assets/images/icons/study-card.png';
     public static UNCHECK_ALL_ICON_PATH = 'assets/images/icons/uncheck-all.png';
     public static USER_5_ICON_PATH = 'assets/images/icons/user-5.png';
     public static USER_ICON_PATH = 'assets/images/icons/user.png';

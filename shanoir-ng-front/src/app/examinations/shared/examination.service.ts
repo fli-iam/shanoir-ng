@@ -1,12 +1,11 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { Examination } from './examination.model';
 import { SubjectExamination } from './subject-examination.model';
-import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+
 
 @Injectable()
 export class ExaminationService extends EntityService<Examination> {

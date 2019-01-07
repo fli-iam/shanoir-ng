@@ -3,7 +3,7 @@ package org.shanoir.ng.study.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.studycenter.StudyCenterDTO;
 
 /**
  * Simple DTO for studies.
@@ -16,12 +16,8 @@ public class SimpleStudyDTO {
 	private Long id;
 
 	private String name;
-
-	private List<SimpleStudyCardDTO> studyCards;
 	
-	private List<IdNameDTO> centers;
-	
-	private Boolean compatible;
+	private List<StudyCenterDTO> studyCenterList;
 
 	/**
 	 * Simple constructor.
@@ -40,8 +36,7 @@ public class SimpleStudyDTO {
 	public SimpleStudyDTO(final Long id, final String name) {
 		this.id = id;
 		this.name = name;
-		this.centers = new ArrayList<>();
-		this.studyCards = new ArrayList<>();
+		this.setStudyCenterList(new ArrayList<>());
 	}
 
 	/**
@@ -75,34 +70,17 @@ public class SimpleStudyDTO {
 	}
 
 	/**
-	 * @return the studyCards
+	 * @return the studyCenterList
 	 */
-	public List<SimpleStudyCardDTO> getStudyCards() {
-		return studyCards;
+	public List<StudyCenterDTO> getStudyCenterList() {
+		return studyCenterList;
 	}
 
 	/**
-	 * @param studyCards
-	 *            the studyCards to set
+	 * @param studyCenterList the studyCenterList to set
 	 */
-	public void setStudyCards(List<SimpleStudyCardDTO> studyCards) {
-		this.studyCards = studyCards;
-	}
-
-	public List<IdNameDTO> getCenters() {
-		return centers;
-	}
-
-	public void setCenters(List<IdNameDTO> centers) {
-		this.centers = centers;
-	}
-
-	public Boolean getCompatible() {
-		return compatible;
-	}
-
-	public void setCompatible(Boolean compatible) {
-		this.compatible = compatible;
+	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+		this.studyCenterList = studyCenterList;
 	}
 
 }

@@ -21,7 +21,7 @@
                 <menu-item label="Anesthetics" link="preclinical-anesthetic" [icon]="ImagesUrlUtil.SLEEP_ICON_PATH"></menu-item>   
             </dropdown-menu>
 
-            <dropdown-menu label="Import data">
+            <dropdown-menu label="Import data" *ngIf="!isUserGuest()">
                 <menu-item label="From DICOM CD/DVD" i18n-label="Import data menu|From DICOM CD/DVD@@navbarFromDICOMCDDVD" link="imports" [icon]="ImagesUrlUtil.COMPACT_DISC_ICON_PATH"></menu-item>
                 <menu-item label="From BRUKER" i18n-label="Import data menu|From BRUKER@@navbarFromBRUKER" link="importsBruker" [icon]="ImagesUrlUtil.BRUKER_ICON_PATH"></menu-item>
                 <menu-item label="From Neurinfo PACS" i18n-label="Import data menu|From Neurinfo PACS@@navbarFromNeurinfoPACS" link="" [icon]="ImagesUrlUtil.NEURINFO_ICON_PATH"></menu-item>

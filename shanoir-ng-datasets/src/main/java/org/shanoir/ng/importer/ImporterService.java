@@ -46,10 +46,6 @@ public class ImporterService {
 	public void buildDatasets() {
 	}
 	
-	public void applyStudyCard() {
-		// TODO Implement MrDatasetAcquisitionHome ->  processStudyCardChange(final string folderpath) method
-	}
-	
 	public void createAllDatasetAcquisition() {
 		Examination examination = null;
 		try {
@@ -75,7 +71,7 @@ public class ImporterService {
 	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) {
 		if (serie.getModality() != null) {
 			// Added Temporary check on serie in order not to generate dataset acquisition for series without images.
-			if (serie.getSelected() && serie.getDatasets() != null && !serie.getDatasets().isEmpty()) {
+			if (serie.getDatasets() != null && !serie.getDatasets().isEmpty()) {
 				if (serie.getDatasets().get(0).getExpressionFormats() != null) {
 					if (serie.getDatasets().get(0).getExpressionFormats().size() > 0) {
 						datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());

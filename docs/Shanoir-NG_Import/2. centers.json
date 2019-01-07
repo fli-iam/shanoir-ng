@@ -1,0 +1,8180 @@
+[
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "id": 1,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/3"
+            }
+          },
+          "id": 3,
+          "name": "Verio",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "40296",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "id": 2,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "17072",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "id": 11,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/5"
+            }
+          },
+          "id": 5,
+          "name": "Sonata",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "23257",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "id": 40,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/16"
+            }
+          },
+          "id": 16,
+          "name": "Ingenia",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "71051",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "id": 42,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/16"
+            }
+          },
+          "id": 16,
+          "name": "Ingenia",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "71050",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "id": 64,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "41575",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "id": 94,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "00000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "id": 95,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/29"
+            }
+          },
+          "id": 29,
+          "name": " LIGHTSPEED VCT64",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0000",
+        "compatible": false
+      }
+    ],
+    "city": "Rennes",
+    "country": "France",
+    "id": 1,
+    "name": "CHU Rennes",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 1,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 1,
+          "name": "NATIVE Divers"
+        }
+      },
+      {
+        "id": 2,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 2,
+          "name": "USPIO-6"
+        }
+      },
+      {
+        "id": 6,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 3,
+          "name": "Phantom Qualite"
+        }
+      },
+      {
+        "id": 7,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 4,
+          "name": "AtlasDIR@Neurinfo"
+        }
+      },
+      {
+        "id": 8,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 5,
+          "name": "DIR@Epilepsie"
+        }
+      },
+      {
+        "id": 10,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 7,
+          "name": "Moelle"
+        }
+      },
+      {
+        "id": 12,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 9,
+          "name": "3D T1 "
+        }
+      },
+      {
+        "id": 13,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 10,
+          "name": "CIS DIR"
+        }
+      },
+      {
+        "id": 14,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 11,
+          "name": "Transfert"
+        }
+      },
+      {
+        "id": 15,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 12,
+          "name": "IRMf "
+        }
+      },
+      {
+        "id": 16,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 13,
+          "name": "isaSegTum"
+        }
+      },
+      {
+        "id": 17,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 14,
+          "name": "asl_SEP"
+        }
+      },
+      {
+        "id": 18,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 15,
+          "name": "asl_CTL"
+        }
+      },
+      {
+        "id": 21,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 17,
+          "name": "DIFF_ISCHEMIE"
+        }
+      },
+      {
+        "id": 22,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 18,
+          "name": "USPIO-6 ASL"
+        }
+      },
+      {
+        "id": 23,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 19,
+          "name": "transIRMf"
+        }
+      },
+      {
+        "id": 24,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 20,
+          "name": "AngioIRM_NATIVE_QISS"
+        }
+      },
+      {
+        "id": 25,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 21,
+          "name": "FIM"
+        }
+      },
+      {
+        "id": 26,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 22,
+          "name": "DEPRESIST"
+        }
+      },
+      {
+        "id": 27,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 23,
+          "name": "FIM ft"
+        }
+      },
+      {
+        "id": 28,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 24,
+          "name": "Jonin"
+        }
+      },
+      {
+        "id": 29,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 25,
+          "name": "DEEP"
+        }
+      },
+      {
+        "id": 30,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 26,
+          "name": "ASL IP"
+        }
+      },
+      {
+        "id": 31,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 27,
+          "name": "ASLf mt"
+        }
+      },
+      {
+        "id": 32,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 28,
+          "name": "asl_tum"
+        }
+      },
+      {
+        "id": 33,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 29,
+          "name": "asl_vasc"
+        }
+      },
+      {
+        "id": 34,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 30,
+          "name": "PNGI"
+        }
+      },
+      {
+        "id": 35,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 31,
+          "name": "DIR EP CLIN"
+        }
+      },
+      {
+        "id": 36,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 18,
+          "name": "USPIO-6 ASL"
+        }
+      },
+      {
+        "id": 37,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 32,
+          "name": "ASL SENSE 2"
+        }
+      },
+      {
+        "id": 39,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 33,
+          "name": "OFSEP_Test_Lyon"
+        }
+      },
+      {
+        "id": 46,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 34,
+          "name": "iQALY-SEP"
+        }
+      },
+      {
+        "id": 48,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 34,
+          "name": "iQALY-SEP"
+        }
+      },
+      {
+        "id": 50,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 36,
+          "name": "PerfT1"
+        }
+      },
+      {
+        "id": 51,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 37,
+          "name": "ASL DEM"
+        }
+      },
+      {
+        "id": 52,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 38,
+          "name": "Dysphasie"
+        }
+      },
+      {
+        "id": 53,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 39,
+          "name": "NCE MRA"
+        }
+      },
+      {
+        "id": 54,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 40,
+          "name": "VPIPRO"
+        }
+      },
+      {
+        "id": 55,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 41,
+          "name": "MTX_sep"
+        }
+      },
+      {
+        "id": 56,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 42,
+          "name": "SURFER"
+        }
+      },
+      {
+        "id": 57,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 43,
+          "name": "AINSI"
+        }
+      },
+      {
+        "id": 59,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 44,
+          "name": "1RO100"
+        }
+      },
+      {
+        "id": 68,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 47,
+          "name": "HYP_T2"
+        }
+      },
+      {
+        "id": 69,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 48,
+          "name": "DEPAPATHIE"
+        }
+      },
+      {
+        "id": 72,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 49,
+          "name": "AfaCorVis3D"
+        }
+      },
+      {
+        "id": 73,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 50,
+          "name": "DIVASL"
+        }
+      },
+      {
+        "id": 74,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 51,
+          "name": "IQALY-SEP+"
+        }
+      },
+      {
+        "id": 75,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 18,
+          "name": "USPIO-6 ASL"
+        }
+      },
+      {
+        "id": 76,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 51,
+          "name": "IQALY-SEP+"
+        }
+      },
+      {
+        "id": 77,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 51,
+          "name": "IQALY-SEP+"
+        }
+      },
+      {
+        "id": 78,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 51,
+          "name": "IQALY-SEP+"
+        }
+      },
+      {
+        "id": 79,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 52,
+          "name": "MIDI"
+        }
+      },
+      {
+        "id": 80,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 51,
+          "name": "IQALY-SEP+"
+        }
+      },
+      {
+        "id": 81,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 51,
+          "name": "IQALY-SEP+"
+        }
+      },
+      {
+        "id": 82,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 53,
+          "name": "Emodes_Pilote"
+        }
+      },
+      {
+        "id": 83,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 54,
+          "name": "ATLDIF"
+        }
+      },
+      {
+        "id": 84,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 53,
+          "name": "Emodes_Pilote"
+        }
+      },
+      {
+        "id": 85,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 6,
+          "name": "Emodes"
+        }
+      },
+      {
+        "id": 86,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 55,
+          "name": "AVCPOSTIM"
+        }
+      },
+      {
+        "id": 87,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 56,
+          "name": "EMOCAR"
+        }
+      },
+      {
+        "id": 88,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 55,
+          "name": "AVCPOSTIM"
+        }
+      },
+      {
+        "id": 89,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 57,
+          "name": "MALTA"
+        }
+      },
+      {
+        "id": 92,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 58,
+          "name": "NCE MRA PHANTOM"
+        }
+      },
+      {
+        "id": 98,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 59,
+          "name": "USPIO-6 C"
+        }
+      },
+      {
+        "id": 104,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 60,
+          "name": "OFSEP_Pilot_Marseille"
+        }
+      },
+      {
+        "id": 105,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 61,
+          "name": "HEPAT_M"
+        }
+      },
+      {
+        "id": 107,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 63,
+          "name": "GRECCAR 4"
+        }
+      },
+      {
+        "id": 108,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 64,
+          "name": "OFSEP_Pilot_Rennes"
+        }
+      },
+      {
+        "id": 111,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 66,
+          "name": "TMS Depression"
+        }
+      },
+      {
+        "id": 115,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 69,
+          "name": "EPI-DISTO"
+        }
+      },
+      {
+        "id": 116,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 70,
+          "name": "SSS-DIMO"
+        }
+      },
+      {
+        "id": 117,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 71,
+          "name": "Methodo ASL"
+        }
+      },
+      {
+        "id": 118,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 72,
+          "name": "OFSEP_Rennes"
+        }
+      },
+      {
+        "id": 120,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 74,
+          "name": "HORAW"
+        }
+      },
+      {
+        "id": 126,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 76,
+          "name": "PSY MORPHO ASL"
+        }
+      },
+      {
+        "id": 127,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 77,
+          "name": "MS-REPAIR"
+        }
+      },
+      {
+        "id": 134,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 80,
+          "name": "AVCPOSTIM MORPHO"
+        }
+      },
+      {
+        "id": 135,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 81,
+          "name": "CAPP-CATI"
+        }
+      },
+      {
+        "id": 136,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 82,
+          "name": "MS-SPI"
+        }
+      },
+      {
+        "id": 143,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 83,
+          "name": "DEEP GREEN"
+        }
+      },
+      {
+        "id": 144,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 84,
+          "name": "*TEST"
+        }
+      },
+      {
+        "id": 145,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 85,
+          "name": "*Volontaires Sains"
+        }
+      },
+      {
+        "id": 146,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 86,
+          "name": "EMISEP_Pilote"
+        }
+      },
+      {
+        "id": 152,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 87,
+          "name": "LONGIDEP"
+        }
+      },
+      {
+        "id": 153,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 88,
+          "name": "MP2Relaxo"
+        }
+      },
+      {
+        "id": 154,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 89,
+          "name": "PERINE_Pilote"
+        }
+      },
+      {
+        "id": 155,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 90,
+          "name": "VEP"
+        }
+      },
+      {
+        "id": 156,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 91,
+          "name": "OptimMS"
+        }
+      },
+      {
+        "id": 166,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 93,
+          "name": "ASL_Pilote"
+        }
+      },
+      {
+        "id": 167,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 94,
+          "name": "EMISEP"
+        }
+      },
+      {
+        "id": 182,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 96,
+          "name": "ASL_Pilote_CATI"
+        }
+      },
+      {
+        "id": 184,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 97,
+          "name": "HEMISFER_Pilote"
+        }
+      },
+      {
+        "id": 193,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 101,
+          "name": "PERINE"
+        }
+      },
+      {
+        "id": 194,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 102,
+          "name": "LUNG"
+        }
+      },
+      {
+        "id": 195,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 103,
+          "name": "T1Mapping_Repro"
+        }
+      },
+      {
+        "id": 200,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 106,
+          "name": "RICART"
+        }
+      },
+      {
+        "id": 201,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 107,
+          "name": "HEMO MAV"
+        }
+      },
+      {
+        "id": 202,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 108,
+          "name": "Tracto-SCP-Pilote"
+        }
+      },
+      {
+        "id": 203,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 109,
+          "name": "Tracto-SCP"
+        }
+      },
+      {
+        "id": 204,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 98,
+          "name": "HEMOCOEUR"
+        }
+      },
+      {
+        "id": 210,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      },
+      {
+        "id": 218,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 110,
+          "name": "ReproRelaxo"
+        }
+      },
+      {
+        "id": 219,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 111,
+          "name": "CineRT"
+        }
+      },
+      {
+        "id": 220,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 112,
+          "name": "BrainGraphs"
+        }
+      },
+      {
+        "id": 221,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 113,
+          "name": "EPMR-MA Pilote OSS"
+        }
+      },
+      {
+        "id": 225,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 114,
+          "name": "HED-O-SHIFT Pilote OSS"
+        }
+      },
+      {
+        "id": 226,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 115,
+          "name": "EPMR-MA"
+        }
+      },
+      {
+        "id": 227,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 116,
+          "name": "HED-O-SHIFT"
+        }
+      },
+      {
+        "id": 228,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 117,
+          "name": "CineIRM"
+        }
+      },
+      {
+        "id": 229,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 118,
+          "name": "COGNISEP Pilote OSS"
+        }
+      },
+      {
+        "id": 230,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 119,
+          "name": "PEPS EC"
+        }
+      },
+      {
+        "id": 238,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 120,
+          "name": "ASL DISTO"
+        }
+      },
+      {
+        "id": 240,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 121,
+          "name": "ASL_pedia"
+        }
+      },
+      {
+        "id": 243,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 122,
+          "name": "DAbdo3D"
+        }
+      },
+      {
+        "id": 257,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      },
+      {
+        "id": 266,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 125,
+          "name": "ADERASL"
+        }
+      },
+      {
+        "id": 269,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 127,
+          "name": "Test_DerivedStudy"
+        }
+      },
+      {
+        "id": 270,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 128,
+          "name": "QUANT_MRI"
+        }
+      },
+      {
+        "id": 279,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 129,
+          "name": "MB-Diffusion"
+        }
+      },
+      {
+        "id": 282,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 130,
+          "name": "COGNISEP Patients"
+        }
+      },
+      {
+        "id": 284,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 131,
+          "name": "UTE4EEG"
+        }
+      },
+      {
+        "id": 285,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 132,
+          "name": "FastMicroDiff"
+        }
+      },
+      {
+        "id": 286,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 133,
+          "name": "CaractRF"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "id": 3,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "17131",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "id": 124,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "46055",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "id": 166,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/44"
+            }
+          },
+          "id": 44,
+          "name": "Artis Q",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "0",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "id": 167,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/48"
+            }
+          },
+          "id": 48,
+          "name": "Revolution",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0001",
+        "compatible": false
+      }
+    ],
+    "city": "Reims",
+    "country": "France",
+    "id": 2,
+    "name": "CHU Reims",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 3,
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "study": {
+          "id": 2,
+          "name": "USPIO-6"
+        }
+      },
+      {
+        "id": 41,
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "study": {
+          "id": 34,
+          "name": "iQALY-SEP"
+        }
+      },
+      {
+        "id": 99,
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "study": {
+          "id": 59,
+          "name": "USPIO-6 C"
+        }
+      },
+      {
+        "id": 112,
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "study": {
+          "id": 67,
+          "name": "OFSEP_Pilot_Reims"
+        }
+      },
+      {
+        "id": 129,
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "study": {
+          "id": 77,
+          "name": "MS-REPAIR"
+        }
+      },
+      {
+        "id": 137,
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "study": {
+          "id": 82,
+          "name": "MS-SPI"
+        }
+      },
+      {
+        "id": 149,
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "study": {
+          "id": 86,
+          "name": "EMISEP_Pilote"
+        }
+      },
+      {
+        "id": 176,
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "study": {
+          "id": 94,
+          "name": "EMISEP"
+        }
+      },
+      {
+        "id": 283,
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 3,
+          "name": "LPS - CENIR"
+        },
+        "id": 35,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/3"
+            }
+          },
+          "id": 3,
+          "name": "Verio",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "40527",
+        "compatible": false
+      }
+    ],
+    "city": "Paris",
+    "country": "France",
+    "id": 3,
+    "name": "LPS - CENIR",
+    "phoneNumber": "0157274007",
+    "postalCode": "75013",
+    "street": "Bâtiment ICM \t(niv -1) ,  47 Bd de l'Hôpital",
+    "website": "www.cenir.org",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 4,
+        "center": {
+          "id": 3,
+          "name": "LPS - CENIR"
+        },
+        "study": {
+          "id": 2,
+          "name": "USPIO-6"
+        }
+      },
+      {
+        "id": 101,
+        "center": {
+          "id": 3,
+          "name": "LPS - CENIR"
+        },
+        "study": {
+          "id": 59,
+          "name": "USPIO-6 C"
+        }
+      },
+      {
+        "id": 141,
+        "center": {
+          "id": 3,
+          "name": "LPS - CENIR"
+        },
+        "study": {
+          "id": 82,
+          "name": "MS-SPI"
+        }
+      },
+      {
+        "id": 151,
+        "center": {
+          "id": 3,
+          "name": "LPS - CENIR"
+        },
+        "study": {
+          "id": 86,
+          "name": "EMISEP_Pilote"
+        }
+      },
+      {
+        "id": 177,
+        "center": {
+          "id": 3,
+          "name": "LPS - CENIR"
+        },
+        "study": {
+          "id": 94,
+          "name": "EMISEP"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 4,
+          "name": "CHU Marseille"
+        },
+        "id": 4,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/3"
+            }
+          },
+          "id": 3,
+          "name": "Verio",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "40146",
+        "compatible": false
+      }
+    ],
+    "city": "Marseille",
+    "country": "France",
+    "id": 4,
+    "name": "CHU Marseille",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 5,
+        "center": {
+          "id": 4,
+          "name": "CHU Marseille"
+        },
+        "study": {
+          "id": 2,
+          "name": "USPIO-6"
+        }
+      },
+      {
+        "id": 100,
+        "center": {
+          "id": 4,
+          "name": "CHU Marseille"
+        },
+        "study": {
+          "id": 59,
+          "name": "USPIO-6 C"
+        }
+      },
+      {
+        "id": 103,
+        "center": {
+          "id": 4,
+          "name": "CHU Marseille"
+        },
+        "study": {
+          "id": 60,
+          "name": "OFSEP_Pilot_Marseille"
+        }
+      },
+      {
+        "id": 128,
+        "center": {
+          "id": 4,
+          "name": "CHU Marseille"
+        },
+        "study": {
+          "id": 77,
+          "name": "MS-REPAIR"
+        }
+      },
+      {
+        "id": 138,
+        "center": {
+          "id": 4,
+          "name": "CHU Marseille"
+        },
+        "study": {
+          "id": 82,
+          "name": "MS-SPI"
+        }
+      },
+      {
+        "id": 148,
+        "center": {
+          "id": 4,
+          "name": "CHU Marseille"
+        },
+        "study": {
+          "id": 86,
+          "name": "EMISEP_Pilote"
+        }
+      },
+      {
+        "id": 171,
+        "center": {
+          "id": 4,
+          "name": "CHU Marseille"
+        },
+        "study": {
+          "id": 94,
+          "name": "EMISEP"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 5,
+          "name": "HCL - NeuroCardio"
+        },
+        "id": 6,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "17569",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 5,
+          "name": "HCL - NeuroCardio"
+        },
+        "id": 14,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "41196",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 5,
+          "name": "HCL - NeuroCardio"
+        },
+        "id": 15,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/7"
+            }
+          },
+          "id": 7,
+          "name": "Avanto",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "25299",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 5,
+          "name": "HCL - NeuroCardio"
+        },
+        "id": 20,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/13"
+            }
+          },
+          "id": 13,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "08867",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 5,
+          "name": "HCL - NeuroCardio"
+        },
+        "id": 21,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/12"
+            }
+          },
+          "id": 12,
+          "name": "Intera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "08867",
+        "compatible": false
+      }
+    ],
+    "city": "Lyon",
+    "country": "France",
+    "id": 5,
+    "name": "HCL - NeuroCardio",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 90,
+        "center": {
+          "id": 5,
+          "name": "HCL - NeuroCardio"
+        },
+        "study": {
+          "id": 33,
+          "name": "OFSEP_Test_Lyon"
+        }
+      },
+      {
+        "id": 132,
+        "center": {
+          "id": 5,
+          "name": "HCL - NeuroCardio"
+        },
+        "study": {
+          "id": 78,
+          "name": "OFSEP_Pilot_Hopital-Neuro"
+        }
+      },
+      {
+        "id": 157,
+        "center": {
+          "id": 5,
+          "name": "HCL - NeuroCardio"
+        },
+        "study": {
+          "id": 92,
+          "name": "MoNICa"
+        }
+      },
+      {
+        "id": 248,
+        "center": {
+          "id": 5,
+          "name": "HCL - NeuroCardio"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 7,
+          "name": "Hôpitaux Universitaires de Strasbourg"
+        },
+        "id": 7,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/4"
+            }
+          },
+          "id": 4,
+          "name": "Signa HDxt",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000H4858977",
+        "compatible": false
+      }
+    ],
+    "city": "Strasbourg",
+    "country": "France",
+    "id": 7,
+    "name": "Hôpitaux Universitaires de Strasbourg",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 42,
+        "center": {
+          "id": 7,
+          "name": "Hôpitaux Universitaires de Strasbourg"
+        },
+        "study": {
+          "id": 34,
+          "name": "iQALY-SEP"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      
+    ],
+    "city": "Saint Brieuc",
+    "country": "France",
+    "id": 8,
+    "name": "Centre Hospitalier Yves Le Foll",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 9,
+          "name": "CHU Nîmes"
+        },
+        "id": 10,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/4"
+            }
+          },
+          "id": 4,
+          "name": "Signa HDxt",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000A4194823",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 9,
+          "name": "CHU Nîmes"
+        },
+        "id": 51,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/24"
+            }
+          },
+          "id": 24,
+          "name": "Ingenia",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "41235",
+        "compatible": false
+      }
+    ],
+    "city": "Nîmes",
+    "country": "France",
+    "id": 9,
+    "name": "CHU Nîmes",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 40,
+        "center": {
+          "id": 9,
+          "name": "CHU Nîmes"
+        },
+        "study": {
+          "id": 34,
+          "name": "iQALY-SEP"
+        }
+      },
+      {
+        "id": 208,
+        "center": {
+          "id": 9,
+          "name": "CHU Nîmes"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "id": 24,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "731041",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "id": 43,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "45600",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "id": 136,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "24027",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "id": 137,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "00000141",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "id": 138,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/38"
+            }
+          },
+          "id": 38,
+          "name": "LightSpeed Optima CT660 ",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00010",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "id": 142,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/51"
+            }
+          },
+          "id": 51,
+          "name": "Achieva-dStream",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "34111",
+        "compatible": false
+      }
+    ],
+    "city": "Toulouse",
+    "country": "France",
+    "id": 10,
+    "name": "CHU Toulouse",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 43,
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "study": {
+          "id": 34,
+          "name": "iQALY-SEP"
+        }
+      },
+      {
+        "id": 97,
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "study": {
+          "id": 46,
+          "name": "Synesthesia"
+        }
+      },
+      {
+        "id": 102,
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "study": {
+          "id": 59,
+          "name": "USPIO-6 C"
+        }
+      },
+      {
+        "id": 139,
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "study": {
+          "id": 82,
+          "name": "MS-SPI"
+        }
+      },
+      {
+        "id": 150,
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "study": {
+          "id": 86,
+          "name": "EMISEP_Pilote"
+        }
+      },
+      {
+        "id": 175,
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "study": {
+          "id": 94,
+          "name": "EMISEP"
+        }
+      },
+      {
+        "id": 196,
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "study": {
+          "id": 104,
+          "name": "Sprite"
+        }
+      },
+      {
+        "id": 249,
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      },
+      {
+        "id": 273,
+        "center": {
+          "id": 10,
+          "name": "CHU Toulouse"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 11,
+          "name": "CHU Nantes"
+        },
+        "id": 9,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/5"
+            }
+          },
+          "id": 5,
+          "name": "Sonata",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "21221",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 11,
+          "name": "CHU Nantes"
+        },
+        "id": 66,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "41987",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 11,
+          "name": "CHU Nantes"
+        },
+        "id": 68,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/24"
+            }
+          },
+          "id": 24,
+          "name": "Ingenia",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "64665787",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 11,
+          "name": "CHU Nantes"
+        },
+        "id": 69,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/54"
+            }
+          },
+          "id": 54,
+          "name": "Ingenia",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "71266",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 11,
+          "name": "CHU Nantes"
+        },
+        "id": 72,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/25"
+            }
+          },
+          "id": 25,
+          "name": "DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 11,
+          "name": "CHU Nantes"
+        },
+        "id": 73,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/56"
+            }
+          },
+          "id": 56,
+          "name": "Optima CT660",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "* ",
+        "compatible": false
+      }
+    ],
+    "city": "Nantes",
+    "country": "France",
+    "id": 11,
+    "name": "CHU Nantes",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 44,
+        "center": {
+          "id": 11,
+          "name": "CHU Nantes"
+        },
+        "study": {
+          "id": 34,
+          "name": "iQALY-SEP"
+        }
+      },
+      {
+        "id": 250,
+        "center": {
+          "id": 11,
+          "name": "CHU Nantes"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 12,
+          "name": "CHU Brabois"
+        },
+        "id": 44,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/4"
+            }
+          },
+          "id": 4,
+          "name": "Signa HDxt",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000I4192908",
+        "compatible": false
+      }
+    ],
+    "city": "Nancy",
+    "country": "France",
+    "id": 12,
+    "name": "CHU Brabois",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 45,
+        "center": {
+          "id": 12,
+          "name": "CHU Brabois"
+        },
+        "study": {
+          "id": 34,
+          "name": "iQALY-SEP"
+        }
+      },
+      {
+        "id": 147,
+        "center": {
+          "id": 12,
+          "name": "CHU Brabois"
+        },
+        "study": {
+          "id": 86,
+          "name": "EMISEP_Pilote"
+        }
+      },
+      {
+        "id": 168,
+        "center": {
+          "id": 12,
+          "name": "CHU Brabois"
+        },
+        "study": {
+          "id": 94,
+          "name": "EMISEP"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      
+    ],
+    "city": "Fort-de-France",
+    "country": "France",
+    "id": 13,
+    "name": "CHU de Fort-de-France",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 47,
+        "center": {
+          "id": 13,
+          "name": "CHU de Fort-de-France"
+        },
+        "study": {
+          "id": 34,
+          "name": "iQALY-SEP"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "id": 8,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "38235",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "id": 29,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "21024",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "id": 31,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "38014",
+        "compatible": false
+      }
+    ],
+    "city": "Grenoble",
+    "country": "France",
+    "id": 14,
+    "name": "CHU Michallon",
+    "phoneNumber": "",
+    "postalCode": "38700",
+    "street": "Site Santé",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 58,
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "study": {
+          "id": 43,
+          "name": "AINSI"
+        }
+      },
+      {
+        "id": 65,
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "study": {
+          "id": 46,
+          "name": "Synesthesia"
+        }
+      },
+      {
+        "id": 66,
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "study": {
+          "id": 45,
+          "name": "CoCoA"
+        }
+      },
+      {
+        "id": 67,
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "study": {
+          "id": 35,
+          "name": "AINSI-GIN"
+        }
+      },
+      {
+        "id": 119,
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "study": {
+          "id": 73,
+          "name": "OFSEP_Grenoble"
+        }
+      },
+      {
+        "id": 183,
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "study": {
+          "id": 96,
+          "name": "ASL_Pilote_CATI"
+        }
+      },
+      {
+        "id": 189,
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "study": {
+          "id": 99,
+          "name": "F-Tract"
+        }
+      },
+      {
+        "id": 192,
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      },
+      {
+        "id": 198,
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "study": {
+          "id": 105,
+          "name": "AGIR-PARK"
+        }
+      },
+      {
+        "id": 244,
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "study": {
+          "id": 123,
+          "name": "RESSTORE"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 15,
+          "name": "GIN"
+        },
+        "id": 13,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "38058",
+        "compatible": false
+      }
+    ],
+    "city": "Grenoble",
+    "country": "France",
+    "id": 15,
+    "name": "GIN",
+    "phoneNumber": "",
+    "postalCode": "38706",
+    "street": "",
+    "website": "http://neurosciences.ujf-grenoble.fr/main-home-1-sub-home-0-lang-en.html",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 60,
+        "center": {
+          "id": 15,
+          "name": "GIN"
+        },
+        "study": {
+          "id": 45,
+          "name": "CoCoA"
+        }
+      },
+      {
+        "id": 61,
+        "center": {
+          "id": 15,
+          "name": "GIN"
+        },
+        "study": {
+          "id": 46,
+          "name": "Synesthesia"
+        }
+      },
+      {
+        "id": 188,
+        "center": {
+          "id": 15,
+          "name": "GIN"
+        },
+        "study": {
+          "id": 99,
+          "name": "F-Tract"
+        }
+      },
+      {
+        "id": 245,
+        "center": {
+          "id": 15,
+          "name": "GIN"
+        },
+        "study": {
+          "id": 123,
+          "name": "RESSTORE"
+        }
+      },
+      {
+        "id": 288,
+        "center": {
+          "id": 15,
+          "name": "GIN"
+        },
+        "study": {
+          "id": 134,
+          "name": "Sharing_SynesthesiaData"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 16,
+          "name": "CHU Brest"
+        },
+        "id": 125,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "38214",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 16,
+          "name": "CHU Brest"
+        },
+        "id": 126,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/44"
+            }
+          },
+          "id": 44,
+          "name": "Artis Q",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "010000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 16,
+          "name": "CHU Brest"
+        },
+        "id": 127,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/42"
+            }
+          },
+          "id": 42,
+          "name": "somatom",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "02000",
+        "compatible": false
+      }
+    ],
+    "city": "Brest",
+    "country": "France",
+    "id": 16,
+    "name": "CHU Brest",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 267,
+        "center": {
+          "id": 16,
+          "name": "CHU Brest"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      
+    ],
+    "city": "Rennes",
+    "country": "France",
+    "id": 17,
+    "name": "CHGR",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      
+    ],
+    "city": "Lyon",
+    "country": "France",
+    "id": 18,
+    "name": "HCL - NeuroCardio to delete",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 91,
+        "center": {
+          "id": 18,
+          "name": "HCL - NeuroCardio to delete"
+        },
+        "study": {
+          "id": 33,
+          "name": "OFSEP_Test_Lyon"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 19,
+          "name": "HCL - Hopital Edouard Herriot"
+        },
+        "id": 22,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/8"
+            }
+          },
+          "id": 8,
+          "name": "DISCOVERY MR750",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000B4498422",
+        "compatible": false
+      }
+    ],
+    "city": "Lyon",
+    "country": "France",
+    "id": 19,
+    "name": "HCL - Hopital Edouard Herriot",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 93,
+        "center": {
+          "id": 19,
+          "name": "HCL - Hopital Edouard Herriot"
+        },
+        "study": {
+          "id": 33,
+          "name": "OFSEP_Test_Lyon"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 20,
+          "name": "HCL - CHLS RMN"
+        },
+        "id": 17,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "08259",
+        "compatible": false
+      }
+    ],
+    "city": "Lyon",
+    "country": "France",
+    "id": 20,
+    "name": "HCL - CHLS RMN",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 94,
+        "center": {
+          "id": 20,
+          "name": "HCL - CHLS RMN"
+        },
+        "study": {
+          "id": 33,
+          "name": "OFSEP_Test_Lyon"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      
+    ],
+    "city": "Lyon",
+    "country": "France",
+    "id": 21,
+    "name": "HCL - NeuroCardio HFME",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 95,
+        "center": {
+          "id": 21,
+          "name": "HCL - NeuroCardio HFME"
+        },
+        "study": {
+          "id": 33,
+          "name": "OFSEP_Test_Lyon"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 22,
+          "name": "HCL - GIE Lyon Nord"
+        },
+        "id": 23,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/2"
+            }
+          },
+          "id": 2,
+          "name": "Symphony",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "23145",
+        "compatible": false
+      }
+    ],
+    "city": "Lyon",
+    "country": "France",
+    "id": 22,
+    "name": "HCL - GIE Lyon Nord",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 96,
+        "center": {
+          "id": 22,
+          "name": "HCL - GIE Lyon Nord"
+        },
+        "study": {
+          "id": 33,
+          "name": "OFSEP_Test_Lyon"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 23,
+          "name": "INSERM_825"
+        },
+        "id": 25,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "34111",
+        "compatible": false
+      }
+    ],
+    "city": "Toulouse",
+    "country": "France",
+    "id": 23,
+    "name": "INSERM_825",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 106,
+        "center": {
+          "id": 23,
+          "name": "INSERM_825"
+        },
+        "study": {
+          "id": 62,
+          "name": "OFSEP_Pilot_U825"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 24,
+          "name": "UCL"
+        },
+        "id": 26,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "17035",
+        "compatible": false
+      }
+    ],
+    "city": "Bruxelles",
+    "country": "Belgique",
+    "id": 24,
+    "name": "UCL",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 109,
+        "center": {
+          "id": 24,
+          "name": "UCL"
+        },
+        "study": {
+          "id": 64,
+          "name": "OFSEP_Pilot_Rennes"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 25,
+          "name": "CH Bretagne Atlantique Vannes"
+        },
+        "id": 27,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "41335",
+        "compatible": false
+      }
+    ],
+    "city": "Vannes",
+    "country": "France",
+    "id": 25,
+    "name": "CH Bretagne Atlantique Vannes",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 110,
+        "center": {
+          "id": 25,
+          "name": "CH Bretagne Atlantique Vannes"
+        },
+        "study": {
+          "id": 65,
+          "name": "OFSEP_Pilot_Vannes"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 27,
+          "name": "ICM"
+        },
+        "id": 28,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/14"
+            }
+          },
+          "id": 14,
+          "name": "TrioTim",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "35181",
+        "compatible": false
+      }
+    ],
+    "city": "Paris",
+    "country": "France",
+    "id": 27,
+    "name": "ICM",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 114,
+        "center": {
+          "id": 27,
+          "name": "ICM"
+        },
+        "study": {
+          "id": 68,
+          "name": "OFSEP_Pilot_Paris"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "id": 32,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/13"
+            }
+          },
+          "id": 13,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "22070",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "id": 34,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/17"
+            }
+          },
+          "id": 17,
+          "name": "DISCOVERY MR750w",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000M4166994",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "id": 147,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/17"
+            }
+          },
+          "id": 17,
+          "name": "DISCOVERY MR750w",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "M4166994",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "id": 148,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/30"
+            }
+          },
+          "id": 30,
+          "name": "IGS INNOVA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "01000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "id": 149,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "011110",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "id": 150,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/49"
+            }
+          },
+          "id": 49,
+          "name": "Optima 540",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "id": 168,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/58"
+            }
+          },
+          "id": 58,
+          "name": "Integris V",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "000010",
+        "compatible": false
+      }
+    ],
+    "city": "Bordeaux",
+    "country": "France",
+    "id": 28,
+    "name": "CHU Bordeaux",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 133,
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "study": {
+          "id": 79,
+          "name": "OFSEP_Pilot_Bordeaux"
+        }
+      },
+      {
+        "id": 164,
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "study": {
+          "id": 86,
+          "name": "EMISEP_Pilote"
+        }
+      },
+      {
+        "id": 174,
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "study": {
+          "id": 94,
+          "name": "EMISEP"
+        }
+      },
+      {
+        "id": 207,
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      },
+      {
+        "id": 268,
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "study": {
+          "id": 126,
+          "name": "test"
+        }
+      },
+      {
+        "id": 275,
+        "center": {
+          "id": 28,
+          "name": "CHU Bordeaux"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 29,
+          "name": "HCL - CHLS"
+        },
+        "id": 33,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/16"
+            }
+          },
+          "id": 16,
+          "name": "Ingenia",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "42025",
+        "compatible": false
+      }
+    ],
+    "city": "Lyon",
+    "country": "France",
+    "id": 29,
+    "name": "HCL - CHLS",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 121,
+        "center": {
+          "id": 29,
+          "name": "HCL - CHLS"
+        },
+        "study": {
+          "id": 75,
+          "name": "OFSEP_Pilot_CHLS"
+        }
+      },
+      {
+        "id": 163,
+        "center": {
+          "id": 29,
+          "name": "HCL - CHLS"
+        },
+        "study": {
+          "id": 86,
+          "name": "EMISEP_Pilote"
+        }
+      },
+      {
+        "id": 172,
+        "center": {
+          "id": 29,
+          "name": "HCL - CHLS"
+        },
+        "study": {
+          "id": 94,
+          "name": "EMISEP"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 30,
+          "name": "CHRU Clermont-Ferrand Gabriel Montpied"
+        },
+        "id": 37,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/8"
+            }
+          },
+          "id": 8,
+          "name": "DISCOVERY MR750",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000M4171551",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 30,
+          "name": "CHRU Clermont-Ferrand Gabriel Montpied"
+        },
+        "id": 65,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "42445",
+        "compatible": false
+      }
+    ],
+    "city": "Clermont-Ferrand",
+    "country": "France",
+    "id": 30,
+    "name": "CHRU Clermont-Ferrand Gabriel Montpied",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 140,
+        "center": {
+          "id": 30,
+          "name": "CHRU Clermont-Ferrand Gabriel Montpied"
+        },
+        "study": {
+          "id": 82,
+          "name": "MS-SPI"
+        }
+      },
+      {
+        "id": 161,
+        "center": {
+          "id": 30,
+          "name": "CHRU Clermont-Ferrand Gabriel Montpied"
+        },
+        "study": {
+          "id": 86,
+          "name": "EMISEP_Pilote"
+        }
+      },
+      {
+        "id": 170,
+        "center": {
+          "id": 30,
+          "name": "CHRU Clermont-Ferrand Gabriel Montpied"
+        },
+        "study": {
+          "id": 94,
+          "name": "EMISEP"
+        }
+      },
+      {
+        "id": 246,
+        "center": {
+          "id": 30,
+          "name": "CHRU Clermont-Ferrand Gabriel Montpied"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 31,
+          "name": "CHRU Montpellier Gui de Chauliac"
+        },
+        "id": 36,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "45212",
+        "compatible": false
+      }
+    ],
+    "city": "Montpellier",
+    "country": "France",
+    "id": 31,
+    "name": "CHRU Montpellier Gui de Chauliac",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 142,
+        "center": {
+          "id": 31,
+          "name": "CHRU Montpellier Gui de Chauliac"
+        },
+        "study": {
+          "id": 34,
+          "name": "iQALY-SEP"
+        }
+      },
+      {
+        "id": 160,
+        "center": {
+          "id": 31,
+          "name": "CHRU Montpellier Gui de Chauliac"
+        },
+        "study": {
+          "id": 86,
+          "name": "EMISEP_Pilote"
+        }
+      },
+      {
+        "id": 169,
+        "center": {
+          "id": 31,
+          "name": "CHRU Montpellier Gui de Chauliac"
+        },
+        "study": {
+          "id": 94,
+          "name": "EMISEP"
+        }
+      },
+      {
+        "id": 222,
+        "center": {
+          "id": 31,
+          "name": "CHRU Montpellier Gui de Chauliac"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 33,
+          "name": "IRM des sources"
+        },
+        "id": 38,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/13"
+            }
+          },
+          "id": 13,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "21692",
+        "compatible": false
+      }
+    ],
+    "city": "Lyon",
+    "country": "France",
+    "id": 33,
+    "name": "IRM des sources",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 158,
+        "center": {
+          "id": 33,
+          "name": "IRM des sources"
+        },
+        "study": {
+          "id": 92,
+          "name": "MoNICa"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 35,
+          "name": "IPB Strasbourg"
+        },
+        "id": 39,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/3"
+            }
+          },
+          "id": 3,
+          "name": "Verio",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "40480",
+        "compatible": false
+      }
+    ],
+    "city": "Strasbourg",
+    "country": "France",
+    "id": 35,
+    "name": "IPB Strasbourg",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 165,
+        "center": {
+          "id": 35,
+          "name": "IPB Strasbourg"
+        },
+        "study": {
+          "id": 86,
+          "name": "EMISEP_Pilote"
+        }
+      },
+      {
+        "id": 173,
+        "center": {
+          "id": 35,
+          "name": "IPB Strasbourg"
+        },
+        "study": {
+          "id": 94,
+          "name": "EMISEP"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 36,
+          "name": "Hôpital de la Timone - Marseille"
+        },
+        "id": 56,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "45293",
+        "compatible": false
+      }
+    ],
+    "city": "Marseille",
+    "country": "France",
+    "id": 36,
+    "name": "Hôpital de la Timone - Marseille",
+    "phoneNumber": "",
+    "postalCode": "13005",
+    "street": "264 rue St Pierre",
+    "website": "http://fr.ap-hm.fr/nos-hopitaux/hopital-de-la-timone",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 205,
+        "center": {
+          "id": 36,
+          "name": "Hôpital de la Timone - Marseille"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 37,
+          "name": "HCL - Hôpital Pierre Wertheimer"
+        },
+        "id": 46,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "60173981",
+        "compatible": false
+      }
+    ],
+    "city": "Lyon",
+    "country": "France",
+    "id": 37,
+    "name": "HCL - Hôpital Pierre Wertheimer",
+    "phoneNumber": "",
+    "postalCode": "69677",
+    "street": "59 bvd Pinel",
+    "website": "http://www.chu-lyon.fr/web/Hopital_Pierre-w_2346.html",
+    "compatible": false,
+    "studyCenterList": [
+      
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 38,
+          "name": "CHU - Charles-Nicolle- Rouen"
+        },
+        "id": 57,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/7"
+            }
+          },
+          "id": 7,
+          "name": "Avanto",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "27865",
+        "compatible": false
+      }
+    ],
+    "city": "Rouen",
+    "country": "France",
+    "id": 38,
+    "name": "CHU - Charles-Nicolle- Rouen",
+    "phoneNumber": "",
+    "postalCode": "76031",
+    "street": "1 rue de Germont",
+    "website": "http://www3.chu-rouen.fr/internet/connaitreCHU/reperes/soins/charles_nicolle/",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 232,
+        "center": {
+          "id": 38,
+          "name": "CHU - Charles-Nicolle- Rouen"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 39,
+          "name": "CHU - Dijon"
+        },
+        "id": 60,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "41087",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 39,
+          "name": "CHU - Dijon"
+        },
+        "id": 155,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "145036",
+        "compatible": false
+      }
+    ],
+    "city": "Dijon",
+    "country": "France",
+    "id": 39,
+    "name": "CHU - Dijon",
+    "phoneNumber": "",
+    "postalCode": "21079",
+    "street": "14 rue Gaffarel",
+    "website": "http://www.chu-dijon.fr/",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 212,
+        "center": {
+          "id": 39,
+          "name": "CHU - Dijon"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      },
+      {
+        "id": 277,
+        "center": {
+          "id": 39,
+          "name": "CHU - Dijon"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 40,
+          "name": "CHU - Hôpital Central - Nancy"
+        },
+        "id": 58,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/22"
+            }
+          },
+          "id": 22,
+          "name": "SIGNA HDX",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0000000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 40,
+          "name": "CHU - Hôpital Central - Nancy"
+        },
+        "id": 116,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/22"
+            }
+          },
+          "id": 22,
+          "name": "SIGNA HDX",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000N4192928",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 40,
+          "name": "CHU - Hôpital Central - Nancy"
+        },
+        "id": 117,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/8"
+            }
+          },
+          "id": 8,
+          "name": "DISCOVERY MR750",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000N4192951",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 40,
+          "name": "CHU - Hôpital Central - Nancy"
+        },
+        "id": 118,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/30"
+            }
+          },
+          "id": 30,
+          "name": "IGS INNOVA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 40,
+          "name": "CHU - Hôpital Central - Nancy"
+        },
+        "id": 119,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/43"
+            }
+          },
+          "id": 43,
+          "name": "BUTTERFLY",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 40,
+          "name": "CHU - Hôpital Central - Nancy"
+        },
+        "id": 120,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/29"
+            }
+          },
+          "id": 29,
+          "name": " LIGHTSPEED VCT64",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "000000",
+        "compatible": false
+      }
+    ],
+    "city": "Nancy",
+    "country": "France",
+    "id": 40,
+    "name": "CHU - Hôpital Central - Nancy",
+    "phoneNumber": "",
+    "postalCode": "54035",
+    "street": "29 avenue du Maréchal de Lattre de Tassigny",
+    "website": "http://www.chu-nancy.fr/",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 213,
+        "center": {
+          "id": 40,
+          "name": "CHU - Hôpital Central - Nancy"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      },
+      {
+        "id": 264,
+        "center": {
+          "id": 40,
+          "name": "CHU - Hôpital Central - Nancy"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 41,
+          "name": "CHRU - Lille"
+        },
+        "id": 49,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/23"
+            }
+          },
+          "id": 23,
+          "name": "Optima MR 450w",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000T4185506",
+        "compatible": false
+      }
+    ],
+    "city": "Lille",
+    "country": "France",
+    "id": 41,
+    "name": "CHRU - Lille",
+    "phoneNumber": "",
+    "postalCode": "59037",
+    "street": "2 avenue Oscar Lambret",
+    "website": "http://www.chru-lille.fr/",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 214,
+        "center": {
+          "id": 41,
+          "name": "CHRU - Lille"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 43,
+          "name": "Hôpital Beaujon -Paris"
+        },
+        "id": 52,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/16"
+            }
+          },
+          "id": 16,
+          "name": "Ingenia",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "42265",
+        "compatible": false
+      }
+    ],
+    "city": "Clichy",
+    "country": "France",
+    "id": 43,
+    "name": "Hôpital Beaujon -Paris",
+    "phoneNumber": "",
+    "postalCode": "92110",
+    "street": "100 boulevard du général Leclerc",
+    "website": "http://www.aphp.fr/hopital/beaujon/",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 216,
+        "center": {
+          "id": 43,
+          "name": "Hôpital Beaujon -Paris"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 44,
+          "name": "Hôpital Bicêtre - Paris"
+        },
+        "id": 67,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "17465",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 44,
+          "name": "Hôpital Bicêtre - Paris"
+        },
+        "id": 114,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "0101",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 44,
+          "name": "Hôpital Bicêtre - Paris"
+        },
+        "id": 115,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/42"
+            }
+          },
+          "id": 42,
+          "name": "somatom",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "0102",
+        "compatible": false
+      }
+    ],
+    "city": "Le Kremlin Bicetre",
+    "country": "France",
+    "id": 44,
+    "name": "Hôpital Bicêtre - Paris",
+    "phoneNumber": "",
+    "postalCode": "94275",
+    "street": "78 rue du général Leclerc",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 217,
+        "center": {
+          "id": 44,
+          "name": "Hôpital Bicêtre - Paris"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      },
+      {
+        "id": 263,
+        "center": {
+          "id": 44,
+          "name": "Hôpital Bicêtre - Paris"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 45,
+          "name": "Hopital d'Instruction des Armées Sainte Anne"
+        },
+        "id": 53,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/4"
+            }
+          },
+          "id": 4,
+          "name": "Signa HDxt",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000M4475661",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 45,
+          "name": "Hopital d'Instruction des Armées Sainte Anne"
+        },
+        "id": 128,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "46219",
+        "compatible": false
+      }
+    ],
+    "city": "Toulon",
+    "country": "France",
+    "id": 45,
+    "name": "Hopital d'Instruction des Armées Sainte Anne",
+    "phoneNumber": "0483162014",
+    "postalCode": "83800",
+    "street": "2 bvd Sainte Anne",
+    "website": "http://www.sainteanne.org/",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 223,
+        "center": {
+          "id": 45,
+          "name": "Hopital d'Instruction des Armées Sainte Anne"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 46,
+          "name": "CHU St-Etienne"
+        },
+        "id": 54,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "41433",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 46,
+          "name": "CHU St-Etienne"
+        },
+        "id": 107,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/39"
+            }
+          },
+          "id": 39,
+          "name": "Prisma",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "66062",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 46,
+          "name": "CHU St-Etienne"
+        },
+        "id": 108,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/31"
+            }
+          },
+          "id": 31,
+          "name": "Artis Zee Pure-DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "000001",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 46,
+          "name": "CHU St-Etienne"
+        },
+        "id": 109,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/40"
+            }
+          },
+          "id": 40,
+          "name": "Definition As64",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "0",
+        "compatible": false
+      }
+    ],
+    "city": "St Priest en Jarez - St Etienne",
+    "country": "France",
+    "id": 46,
+    "name": "CHU St-Etienne",
+    "phoneNumber": "0477829226",
+    "postalCode": "42277",
+    "street": "Hôpital Nord- avenue albert raimond",
+    "website": "http://www.chu-st-etienne.fr/",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 224,
+        "center": {
+          "id": 46,
+          "name": "CHU St-Etienne"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      },
+      {
+        "id": 261,
+        "center": {
+          "id": 46,
+          "name": "CHU St-Etienne"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 47,
+          "name": "CH Annecy Genevois"
+        },
+        "id": 55,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "42259",
+        "compatible": false
+      }
+    ],
+    "city": "Metz - Tessy",
+    "country": "France",
+    "id": 47,
+    "name": "CH Annecy Genevois",
+    "phoneNumber": "",
+    "postalCode": "74374",
+    "street": "1avenue de l'hôpital",
+    "website": "http://www.ch-annecygenevois.fr/fr",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 231,
+        "center": {
+          "id": 47,
+          "name": "CH Annecy Genevois"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 48,
+          "name": "Hopital Nord - Marseille"
+        },
+        "id": 59,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "45986",
+        "compatible": false
+      }
+    ],
+    "city": "Marseille",
+    "country": "France",
+    "id": 48,
+    "name": "Hopital Nord - Marseille",
+    "phoneNumber": "0491380000",
+    "postalCode": "13915",
+    "street": "Chemin des Bourrely",
+    "website": "http://fr.ap-hm.fr/nos-hopitaux/hopital-nord",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 233,
+        "center": {
+          "id": 48,
+          "name": "Hopital Nord - Marseille"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 49,
+          "name": "Hopital Pitié Salpétrière"
+        },
+        "id": 61,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/4"
+            }
+          },
+          "id": 4,
+          "name": "Signa HDxt",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000M40345186",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 49,
+          "name": "Hopital Pitié Salpétrière"
+        },
+        "id": 143,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/23"
+            }
+          },
+          "id": 23,
+          "name": "Optima MR 450w",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "M40345203",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 49,
+          "name": "Hopital Pitié Salpétrière"
+        },
+        "id": 144,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "M40345186",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 49,
+          "name": "Hopital Pitié Salpétrière"
+        },
+        "id": 145,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/44"
+            }
+          },
+          "id": 44,
+          "name": "Artis Q",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 49,
+          "name": "Hopital Pitié Salpétrière"
+        },
+        "id": 146,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/37"
+            }
+          },
+          "id": 37,
+          "name": "Discovery",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "",
+        "compatible": false
+      }
+    ],
+    "city": "Paris",
+    "country": "France",
+    "id": 49,
+    "name": "Hopital Pitié Salpétrière",
+    "phoneNumber": "0157274007",
+    "postalCode": "75013",
+    "street": "47-83 bd de l’hôpital",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 236,
+        "center": {
+          "id": 49,
+          "name": "Hopital Pitié Salpétrière"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      },
+      {
+        "id": 274,
+        "center": {
+          "id": 49,
+          "name": "Hopital Pitié Salpétrière"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 50,
+          "name": "CHU St Roch - Nice"
+        },
+        "id": 62,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/23"
+            }
+          },
+          "id": 23,
+          "name": "Optima MR 450w",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "HM1069",
+        "compatible": false
+      }
+    ],
+    "city": "Nice",
+    "country": "France",
+    "id": 50,
+    "name": "CHU St Roch - Nice",
+    "phoneNumber": "",
+    "postalCode": "06006",
+    "street": "5 rue Pierre Devoluy",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 237,
+        "center": {
+          "id": 50,
+          "name": "CHU St Roch - Nice"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 51,
+          "name": "CHU Poitiers"
+        },
+        "id": 63,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/3"
+            }
+          },
+          "id": 3,
+          "name": "Verio",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "40724",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 51,
+          "name": "CHU Poitiers"
+        },
+        "id": 129,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/35"
+            }
+          },
+          "id": 35,
+          "name": "MR450W W GEM XP",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000A4197627",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 51,
+          "name": "CHU Poitiers"
+        },
+        "id": 130,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/45"
+            }
+          },
+          "id": 45,
+          "name": "AXIOM ARTIS DBA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "000001",
+        "compatible": false
+      }
+    ],
+    "city": "Poitiers",
+    "country": "France",
+    "id": 51,
+    "name": "CHU Poitiers",
+    "phoneNumber": "",
+    "postalCode": "86000",
+    "street": "rue de la miletrie",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 239,
+        "center": {
+          "id": 51,
+          "name": "CHU Poitiers"
+        },
+        "study": {
+          "id": 100,
+          "name": "OxyTC"
+        }
+      },
+      {
+        "id": 271,
+        "center": {
+          "id": 51,
+          "name": "CHU Poitiers"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 52,
+          "name": "Hôpital Saint-Anne"
+        },
+        "id": 70,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/8"
+            }
+          },
+          "id": 8,
+          "name": "DISCOVERY MR750",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 52,
+          "name": "Hôpital Saint-Anne"
+        },
+        "id": 75,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/29"
+            }
+          },
+          "id": 29,
+          "name": " LIGHTSPEED VCT64",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 52,
+          "name": "Hôpital Saint-Anne"
+        },
+        "id": 76,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/30"
+            }
+          },
+          "id": 30,
+          "name": "IGS INNOVA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 52,
+          "name": "Hôpital Saint-Anne"
+        },
+        "id": 77,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/22"
+            }
+          },
+          "id": 22,
+          "name": "SIGNA HDX",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "",
+        "compatible": false
+      }
+    ],
+    "city": "Paris",
+    "country": "France",
+    "id": 52,
+    "name": "Hôpital Saint-Anne",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 251,
+        "center": {
+          "id": 52,
+          "name": "Hôpital Saint-Anne"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 53,
+          "name": "CHU Limoges"
+        },
+        "id": 78,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/31"
+            }
+          },
+          "id": 31,
+          "name": "Artis Zee Pure-DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 53,
+          "name": "CHU Limoges"
+        },
+        "id": 79,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 53,
+          "name": "CHU Limoges"
+        },
+        "id": 80,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "42021",
+        "compatible": false
+      }
+    ],
+    "city": "Limoges",
+    "country": "",
+    "id": 53,
+    "name": "CHU Limoges",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 252,
+        "center": {
+          "id": 53,
+          "name": "CHU Limoges"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 54,
+          "name": "CHU Angers"
+        },
+        "id": 81,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "45553",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 54,
+          "name": "CHU Angers"
+        },
+        "id": 82,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/33"
+            }
+          },
+          "id": 33,
+          "name": "Brillance190p",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 54,
+          "name": "CHU Angers"
+        },
+        "id": 83,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "XXXX",
+        "compatible": false
+      }
+    ],
+    "city": "Angers",
+    "country": "",
+    "id": 54,
+    "name": "CHU Angers",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 253,
+        "center": {
+          "id": 54,
+          "name": "CHU Angers"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 55,
+          "name": "CHU Sud Reunion"
+        },
+        "id": 84,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "45095",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 55,
+          "name": "CHU Sud Reunion"
+        },
+        "id": 85,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "42102",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 55,
+          "name": "CHU Sud Reunion"
+        },
+        "id": 86,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "0000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 55,
+          "name": "CHU Sud Reunion"
+        },
+        "id": 87,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/34"
+            }
+          },
+          "id": 34,
+          "name": "Brightspeed 16",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "",
+        "compatible": false
+      }
+    ],
+    "city": "SAINT-PIERRE",
+    "country": "France",
+    "id": 55,
+    "name": "CHU Sud Reunion",
+    "phoneNumber": "0262359000",
+    "postalCode": "97448",
+    "street": "Avenue du Président Mitterrand",
+    "website": "http://www.chu-reunion.fr",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 254,
+        "center": {
+          "id": 55,
+          "name": "CHU Sud Reunion"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 56,
+          "name": "Hôpital Clairval"
+        },
+        "id": 88,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/35"
+            }
+          },
+          "id": 35,
+          "name": "MR450W W GEM XP",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "HM0439",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 56,
+          "name": "Hôpital Clairval"
+        },
+        "id": 89,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/31"
+            }
+          },
+          "id": 31,
+          "name": "Artis Zee Pure-DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "00000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 56,
+          "name": "Hôpital Clairval"
+        },
+        "id": 90,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/36"
+            }
+          },
+          "id": 36,
+          "name": "TDM",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0000",
+        "compatible": false
+      }
+    ],
+    "city": "Marseille",
+    "country": "",
+    "id": 56,
+    "name": "Hôpital Clairval",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 255,
+        "center": {
+          "id": 56,
+          "name": "Hôpital Clairval"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 57,
+          "name": "CHU Amiens"
+        },
+        "id": 91,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/35"
+            }
+          },
+          "id": 35,
+          "name": "MR450W W GEM XP",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000S4160096",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 57,
+          "name": "CHU Amiens"
+        },
+        "id": 92,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/31"
+            }
+          },
+          "id": 31,
+          "name": "Artis Zee Pure-DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "0000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 57,
+          "name": "CHU Amiens"
+        },
+        "id": 93,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/37"
+            }
+          },
+          "id": 37,
+          "name": "Discovery",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0000",
+        "compatible": false
+      }
+    ],
+    "city": "Amiens",
+    "country": "",
+    "id": 57,
+    "name": "CHU Amiens",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 256,
+        "center": {
+          "id": 57,
+          "name": "CHU Amiens"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 58,
+          "name": "CHU Rouen"
+        },
+        "id": 96,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/17"
+            }
+          },
+          "id": 17,
+          "name": "DISCOVERY MR750w",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00000000 C4200438",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 58,
+          "name": "CHU Rouen"
+        },
+        "id": 97,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "000000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 58,
+          "name": "CHU Rouen"
+        },
+        "id": 98,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/37"
+            }
+          },
+          "id": 37,
+          "name": "Discovery",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0000000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 58,
+          "name": "CHU Rouen"
+        },
+        "id": 99,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/38"
+            }
+          },
+          "id": 38,
+          "name": "LightSpeed Optima CT660 ",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 58,
+          "name": "CHU Rouen"
+        },
+        "id": 135,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/7"
+            }
+          },
+          "id": 7,
+          "name": "Avanto",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "0001010",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 58,
+          "name": "CHU Rouen"
+        },
+        "id": 140,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/57"
+            }
+          },
+          "id": 57,
+          "name": "Revolution EVO",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "000001",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 58,
+          "name": "CHU Rouen"
+        },
+        "id": 141,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/49"
+            }
+          },
+          "id": 49,
+          "name": "Optima 540",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0001",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 58,
+          "name": "CHU Rouen"
+        },
+        "id": 164,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/29"
+            }
+          },
+          "id": 29,
+          "name": " LIGHTSPEED VCT64",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "011",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 58,
+          "name": "CHU Rouen"
+        },
+        "id": 165,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/48"
+            }
+          },
+          "id": 48,
+          "name": "Revolution",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00123",
+        "compatible": false
+      }
+    ],
+    "city": "Rouen",
+    "country": "",
+    "id": 58,
+    "name": "CHU Rouen",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 258,
+        "center": {
+          "id": 58,
+          "name": "CHU Rouen"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 59,
+          "name": "CHU Clermont Ferrand"
+        },
+        "id": 100,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "42446",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 59,
+          "name": "CHU Clermont Ferrand"
+        },
+        "id": 101,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/17"
+            }
+          },
+          "id": 17,
+          "name": "DISCOVERY MR750w",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 59,
+          "name": "CHU Clermont Ferrand"
+        },
+        "id": 102,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "0000000",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 59,
+          "name": "CHU Clermont Ferrand"
+        },
+        "id": 103,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/37"
+            }
+          },
+          "id": 37,
+          "name": "Discovery",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "00",
+        "compatible": false
+      }
+    ],
+    "city": "",
+    "country": "",
+    "id": 59,
+    "name": "CHU Clermont Ferrand",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 259,
+        "center": {
+          "id": 59,
+          "name": "CHU Clermont Ferrand"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 60,
+          "name": "Fondation Ophtalmologique de Rothschild"
+        },
+        "id": 104,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/16"
+            }
+          },
+          "id": 16,
+          "name": "Ingenia",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "42015",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 60,
+          "name": "Fondation Ophtalmologique de Rothschild"
+        },
+        "id": 105,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "0000001",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 60,
+          "name": "Fondation Ophtalmologique de Rothschild"
+        },
+        "id": 106,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/37"
+            }
+          },
+          "id": 37,
+          "name": "Discovery",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "01",
+        "compatible": false
+      }
+    ],
+    "city": "",
+    "country": "",
+    "id": 60,
+    "name": "Fondation Ophtalmologique de Rothschild",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 260,
+        "center": {
+          "id": 60,
+          "name": "Fondation Ophtalmologique de Rothschild"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 61,
+          "name": "CHU Montpellier"
+        },
+        "id": 110,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "0110",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 61,
+          "name": "CHU Montpellier"
+        },
+        "id": 111,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/38"
+            }
+          },
+          "id": 38,
+          "name": "LightSpeed Optima CT660 ",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0101",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 61,
+          "name": "CHU Montpellier"
+        },
+        "id": 112,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "45212B",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 61,
+          "name": "CHU Montpellier"
+        },
+        "id": 113,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/41"
+            }
+          },
+          "id": 41,
+          "name": "SKYRA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "42613",
+        "compatible": false
+      }
+    ],
+    "city": "Montpellier",
+    "country": "",
+    "id": 61,
+    "name": "CHU Montpellier",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 262,
+        "center": {
+          "id": 61,
+          "name": "CHU Montpellier"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 62,
+          "name": "CHRU Besançon"
+        },
+        "id": 121,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/19"
+            }
+          },
+          "id": 19,
+          "name": "Skyra",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "46098",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 62,
+          "name": "CHRU Besançon"
+        },
+        "id": 122,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/42"
+            }
+          },
+          "id": 42,
+          "name": "somatom",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "0101",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 62,
+          "name": "CHRU Besançon"
+        },
+        "id": 123,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/25"
+            }
+          },
+          "id": 25,
+          "name": "DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "0101",
+        "compatible": false
+      }
+    ],
+    "city": "",
+    "country": "",
+    "id": 62,
+    "name": "CHRU Besançon",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 265,
+        "center": {
+          "id": 62,
+          "name": "CHRU Besançon"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 63,
+          "name": "CHD de Vendée"
+        },
+        "id": 131,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/52"
+            }
+          },
+          "id": 52,
+          "name": "SIGNA HDe",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "14183042",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 63,
+          "name": "CHD de Vendée"
+        },
+        "id": 132,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "00000010",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 63,
+          "name": "CHD de Vendée"
+        },
+        "id": 133,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/33"
+            }
+          },
+          "id": 33,
+          "name": "Brillance190p",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "0101",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 63,
+          "name": "CHD de Vendée"
+        },
+        "id": 134,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/47"
+            }
+          },
+          "id": 47,
+          "name": "Brillance 40",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "01",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 63,
+          "name": "CHD de Vendée"
+        },
+        "id": 169,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/6"
+            }
+          },
+          "id": 6,
+          "name": "Aera",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "141228",
+        "compatible": false
+      }
+    ],
+    "city": "",
+    "country": "",
+    "id": 63,
+    "name": "CHD de Vendée",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 272,
+        "center": {
+          "id": 63,
+          "name": "CHD de Vendée"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 64,
+          "name": "CHU Grenoble"
+        },
+        "id": 151,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/13"
+            }
+          },
+          "id": 13,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "21024",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 64,
+          "name": "CHU Grenoble"
+        },
+        "id": 152,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "00003",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 64,
+          "name": "CHU Grenoble"
+        },
+        "id": 153,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/48"
+            }
+          },
+          "id": 48,
+          "name": "Revolution",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0000002",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 64,
+          "name": "CHU Grenoble"
+        },
+        "id": 154,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/1"
+            }
+          },
+          "id": 1,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "038014",
+        "compatible": false
+      }
+    ],
+    "city": "Grenoble",
+    "country": "",
+    "id": 64,
+    "name": "CHU Grenoble",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 276,
+        "center": {
+          "id": 64,
+          "name": "CHU Grenoble"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 65,
+          "name": "CHRU de Tours"
+        },
+        "id": 156,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/3"
+            }
+          },
+          "id": 3,
+          "name": "Verio",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 3.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/3"
+              }
+            },
+            "id": 3,
+            "name": "SIEMENS"
+          }
+        },
+        "serialNumber": "MR 40679",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 65,
+          "name": "CHRU de Tours"
+        },
+        "id": 157,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/22"
+            }
+          },
+          "id": 22,
+          "name": "SIGNA HDX",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "E4212413",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 65,
+          "name": "CHRU de Tours"
+        },
+        "id": 158,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/37"
+            }
+          },
+          "id": 37,
+          "name": "Discovery",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "000110",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 65,
+          "name": "CHRU de Tours"
+        },
+        "id": 159,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/27"
+            }
+          },
+          "id": 27,
+          "name": "DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/1"
+              }
+            },
+            "id": 1,
+            "name": "GE MEDICAL SYSTEMS"
+          }
+        },
+        "serialNumber": "0002",
+        "compatible": false
+      }
+    ],
+    "city": "",
+    "country": "",
+    "id": 65,
+    "name": "CHRU de Tours",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 278,
+        "center": {
+          "id": 65,
+          "name": "CHRU de Tours"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      {
+        "center": {
+          "id": 66,
+          "name": "Hôpitaux Civils de Colmar"
+        },
+        "id": 160,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/13"
+            }
+          },
+          "id": 13,
+          "name": "Achieva",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/2"
+              }
+            },
+            "id": 2,
+            "name": "Philips Medical Systems"
+          }
+        },
+        "serialNumber": "48013640",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 66,
+          "name": "Hôpitaux Civils de Colmar"
+        },
+        "id": 161,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/24"
+            }
+          },
+          "id": 24,
+          "name": "Ingenia",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 1.5,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "58555281",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 66,
+          "name": "Hôpitaux Civils de Colmar"
+        },
+        "id": 162,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/32"
+            }
+          },
+          "id": 32,
+          "name": "ALLURA DSA",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "000002",
+        "compatible": false
+      },
+      {
+        "center": {
+          "id": 66,
+          "name": "Hôpitaux Civils de Colmar"
+        },
+        "id": 163,
+        "manufacturerModel": {
+          "_links": {
+            "self": {
+              "href": "http://localhost:9900/manufacturermodel/46"
+            }
+          },
+          "id": 46,
+          "name": "Ingenuity CT 128",
+          "datasetModalityType": "MR_DATASET",
+          "magneticField": 0.0,
+          "manufacturer": {
+            "_links": {
+              "self": {
+                "href": "http://localhost:9900/manufacturer/5"
+              }
+            },
+            "id": 5,
+            "name": "Philips Healthcare"
+          }
+        },
+        "serialNumber": "01000",
+        "compatible": false
+      }
+    ],
+    "city": "",
+    "country": "Colmar",
+    "id": 66,
+    "name": "Hôpitaux Civils de Colmar",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 280,
+        "center": {
+          "id": 66,
+          "name": "Hôpitaux Civils de Colmar"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      
+    ],
+    "city": "Colmar",
+    "country": "",
+    "id": 67,
+    "name": "CH Colmar",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 281,
+        "center": {
+          "id": 67,
+          "name": "CH Colmar"
+        },
+        "study": {
+          "id": 124,
+          "name": "ICAN"
+        }
+      }
+    ]
+  },
+  {
+    "acquisitionEquipments": [
+      
+    ],
+    "city": "Lyon",
+    "country": "",
+    "id": 68,
+    "name": "CREATIS",
+    "phoneNumber": "",
+    "postalCode": "",
+    "street": "",
+    "website": "",
+    "compatible": false,
+    "studyCenterList": [
+      {
+        "id": 287,
+        "center": {
+          "id": 68,
+          "name": "CREATIS"
+        },
+        "study": {
+          "id": 133,
+          "name": "CaractRF"
+        }
+      }
+    ]
+  }
+]

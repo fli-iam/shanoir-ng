@@ -150,11 +150,6 @@ export class StudyComponent extends EntityComponent<Study> {
     }
     
     /** Center section management  **/
-
-    private get disableMono(): boolean {
-        return this.study.studyCenterList && this.study.studyCenterList.length > 1;
-    }
-
     private onMonoMultiChange() {
         if (this.study.monoCenter && this.study.studyCenterList.length == 1) {
             this.selectedCenter = this.centers.find(center => center.id == this.study.studyCenterList[0].center.id);

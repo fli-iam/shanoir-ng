@@ -19,7 +19,7 @@ export const BACKEND_API_CENTER_NAMES_URL: string = BACKEND_API_CENTER_URL + '/n
 
 // Studies http api
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';
-export const BACKEND_API_STUDY_WITH_CARDS_BY_USER_EQUIPMENT_URL: string = BACKEND_API_STUDY_URL + '/listwithcards';
+export const BACKEND_API_STUDY_FOR_IMPORT_URL: string = BACKEND_API_STUDY_URL + '/list_for_import';
 export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '/names';
 
 // Subjects http api
@@ -61,6 +61,8 @@ export const BACKEND_API_IMPORT_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + 
 export const BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/start_import_job/';
 export const BACKEND_API_IMAGE_VIEWER_URL: string = BACKEND_API_IMPORT_MS_URL + '/viewer/ImageViewerServlet';
 
+// Nifti Converter http api
+export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL + '/niftiConverters';
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;

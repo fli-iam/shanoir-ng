@@ -8,8 +8,9 @@ import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +93,9 @@ public class CenterServiceImpl implements CenterService {
 	public Center save(final Center center) throws ShanoirStudiesException {
 		Center savedCenter = null;
 		try {
+			for (final StudyCenter studyCenter: center.getStudyCenterList()) {
+				studyCenter.setCenter(center);
+			}
 			savedCenter = centerRepository.save(center);
 		} catch (DataIntegrityViolationException dive) {
 			LOG.error("Error while creating center", dive);
