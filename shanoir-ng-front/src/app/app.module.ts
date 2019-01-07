@@ -1,4 +1,3 @@
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
@@ -188,7 +187,6 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         ExaminationComponent,
         ExaminationPipe,
         ExaminationTreeComponent,
-        NewExamComponent,
         NewInstrumentComponent,
         UploadExtraDataComponent,
         ExtensionRequestComponent,
