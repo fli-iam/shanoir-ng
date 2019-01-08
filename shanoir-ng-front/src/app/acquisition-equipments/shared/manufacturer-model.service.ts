@@ -12,6 +12,14 @@ export class ManufacturerModelService extends EntityService<ManufacturerModel> {
 
     getEntityInstance() { return new ManufacturerModel(); }
 
+    getAll(): Promise<ManufacturerModel[]> {
+        return super.getAll().then((list: ManufacturerModel[]) => {
+            return list.sort((a: ManufacturerModel, b: ManufacturerModel) => {
+                return a.name.trim().localeCompare(b.name.trim());
+            });
+        });
+    }
+
     getManufacturerModelsNames(): Promise<IdNameObject[]> {
         return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_MANUF_MODEL_NAMES_URL)
             .toPromise();
