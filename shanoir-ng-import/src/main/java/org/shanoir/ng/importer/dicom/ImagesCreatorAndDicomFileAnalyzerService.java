@@ -328,23 +328,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber));
 		}
 	}
-	
-	/**
-	 * Adds the equipment information.
-	 * 
-	 * @param serie
-	 * @param datasetAttributes
-	 */
-	private void addSeriesCenter(Serie serie, Attributes attributes) {
-		if (serie.getInstitution() == null) {
-			InstitutionDicom institution = new InstitutionDicom();
-			String institutionName = attributes.getString(Tag.InstitutionName);
-			String institutionAddress = attributes.getString(Tag.InstitutionAddress);
-			institution.setInstitutionName(institutionName);
-			institution.setInstitutionAddress(institutionAddress);
-			serie.setInstitution(institution);
-		}
-	}
 
 	/**
 	 * Adds the equipment information.
