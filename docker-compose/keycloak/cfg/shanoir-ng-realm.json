@@ -5,10 +5,10 @@
   "resetPasswordAllowed" : true,
   "passwordPolicy" : "hashIterations and length and specialChars and digits and upperCase and lowerCase",
   "smtpServer" : {
-    "host" : "SMTP_HOST",
-    "from" : "SHANOIR_ADMIN_EMAIL",
-    "fromDisplayName" : "SHANOIR_ADMIN_NAME",
-    "port" : "SMTP_PORT"
+    "host" : "mail.host=smtp.inria.fr",
+    "from" : "do-not-reply@inria.fr",
+    "fromDisplayName" : "Shanoir",
+    "port" : "25"
   },
 
   "roles": {
