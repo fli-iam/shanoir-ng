@@ -10,9 +10,7 @@
             <span *ngIf="onAddClick.observers.length > 0 && !addwHidden" (click)="clickAdd()" [class.disabled]="addDisabled" class="button"><i class="fas fa-plus"></i></span>
         </span>
     </span>
-    <div class="list">
-        <div *ngIf="open" [class.hidden-list]="hideToComputeHeight" class="list-frame" [class.down]="way=='down'" [class.up]="way=='up'">
-            <ng-content></ng-content>
-        </div>
+    <div *ngIf="open" [class.hidden-list]="hideToComputeHeight" class="list" [class.down]="way=='down'" [class.up]="way=='up'">
+        <ng-content></ng-content>
     </div>
 </div>

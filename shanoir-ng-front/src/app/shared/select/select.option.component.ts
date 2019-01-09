@@ -10,7 +10,7 @@ import { SelectBoxComponent } from './select.component';
         </div>
     `,
     styles: [
-        ':host() { height: 20px; display:block; border: none; white-space: nowrap; }',
+        ':host() { height: 20px; display:block; border: none; white-space: nowrap; color: var(--dark-grey); }',
         'div { padding: 0 5px; }',
         'div.focus { background-color: var(--grey); }',
         'div.selected { background-color: var(--color-b-light); }',

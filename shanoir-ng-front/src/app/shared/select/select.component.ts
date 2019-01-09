@@ -49,6 +49,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private hideToComputeHeight: boolean = false;
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
+    private lastSearchTime: number = 0;
+    private currentSearch: string;
     @Input() disabled: boolean = false;
     @Input() placeholder: string;
     
@@ -174,23 +176,26 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if (!this.selectedOption) return;
         setTimeout(() => {
             let top: number = this.selectedOption.elt.nativeElement.offsetTop;
-            this.element.nativeElement.querySelector('.list').scrollTop = top;
+            let listElt = this.element.nativeElement.querySelector('.list');
+            if (listElt) listElt.scrollTop = top;
         });  
     }
 
     private scrollToFocusedOption() {
         let focusIndex = this.getFocusIndex();
         if (focusIndex == -1) return;
-        let focusesOption = this.options.toArray()[focusIndex];
+        let focusedOption = this.options.toArray()[focusIndex];
         setTimeout(() => {
-            let top: number = focusesOption.elt.nativeElement.offsetTop;
-            let height: number = focusesOption.elt.nativeElement.offsetHeight;
-            let frameTop: number = this.element.nativeElement.querySelector('.list').scrollTop;
-            let frameHeight: number = this.element.nativeElement.querySelector('.list').offsetHeight;
+            let listElt = this.element.nativeElement.querySelector('.list');
+            if (!listElt) return;
+            let top: number = focusedOption.elt.nativeElement.offsetTop;
+            let height: number = focusedOption.elt.nativeElement.offsetHeight;
+            let frameTop: number = listElt.scrollTop;
+            let frameHeight: number = listElt.offsetHeight;
             if (top < frameTop) {
-                this.element.nativeElement.querySelector('.list').scrollTop = top;
+                listElt.scrollTop = top;
             } else if (top > frameTop + frameHeight - height) {
-                this.element.nativeElement.querySelector('.list').scrollTop = frameTop + height ;
+                listElt.scrollTop = top - frameHeight + height;
             }
         });  
     }
@@ -199,7 +204,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.hideToComputeHeight = true;
         this.way = 'down'
         setTimeout(() => {
-            let bottom = this.element.nativeElement.querySelector('.list').getBoundingClientRect().bottom;
+            let listElt = this.element.nativeElement.querySelector('.list');
+            if (!listElt) return;
+            let bottom = listElt.getBoundingClientRect().bottom;
             let docHeight: number = document.body.clientHeight;
             if (bottom > docHeight) this.way = 'up';
             this.hideToComputeHeight = false;
@@ -249,6 +256,32 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 }
             }
             event.preventDefault();
+        } else if (event.keyCode >= 65 && event.keyCode <= 90) {
+            let key = event.key.toLowerCase();
+            let now = new Date().getTime();
+            if ((now - this.lastSearchTime) > 1000 || key == this.currentSearch ) {
+                this.currentSearch = '';
+            } 
+            this.lastSearchTime = now;
+            this.currentSearch += key;
+            let focusIndex = this.getFocusIndex();
+            let currentText = this.options.toArray()[focusIndex].elt.nativeElement.textContent.trim().toLowerCase();
+            let serachIn;
+            if (focusIndex >= 0 && currentText.startsWith(this.currentSearch)) {
+                serachIn = this.options.toArray().slice(focusIndex + 1);
+            } else {
+                serachIn = this.options.toArray();
+            }
+            for (let option of serachIn) {
+                let text: string = option.elt.nativeElement.textContent.trim().toLowerCase();
+                if (text.startsWith(this.currentSearch)) {
+                    if (focusIndex >= 0) this.options.toArray()[focusIndex].focus = false;
+                    option.focus = true;
+                    if (!this.open) this.onSelectedOptionChange(this.options.toArray()[this.getFocusIndex()]);
+                    else this.scrollToFocusedOption();
+                    return;
+                }
+            }
         }
             
     }

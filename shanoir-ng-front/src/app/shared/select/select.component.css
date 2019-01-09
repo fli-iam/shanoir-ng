@@ -25,7 +25,7 @@
         .open { border: none; cursor: default !important; }
         .open:hover { color: inherit !important; background-color: inherit !important; }
         
-.list-frame { 
+.list { 
     position: absolute;
     z-index: 1000; 
     max-height: 320px;
@@ -39,6 +39,6 @@
     box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color);
     padding: 0;
 }
-.list-frame.down { top: 20px; }
-.list-frame.up { bottom: 20px; } 
+.list.down { top: 20px; }
+.list.up { bottom: 20px; } 
 .hidden-list { opacity: 0; }
