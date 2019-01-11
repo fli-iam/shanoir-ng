@@ -65,7 +65,7 @@ services:
       - kc.admin.client.password
       - front.server.url
       - front.server.address
-      - mail.host
+      - spring.mail.host
       - administrator.email
       - spring.jpa.hibernate.ddl-auto
       - spring.datasource.initialize
@@ -241,6 +241,7 @@ services:
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
+      - "/home/julien/projects/shanoir-ng/shanoir-ng-front/mnt-dist:/etc/nginx/html/"
     networks:
       - shanoir_ng_network    
     ports:
