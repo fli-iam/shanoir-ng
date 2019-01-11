@@ -65,7 +65,7 @@ services:
       - kc.admin.client.password
       - front.server.url
       - front.server.address
-      - mail.host
+      - spring.mail.host
       - administrator.email
       - spring.jpa.hibernate.ddl-auto
       - spring.datasource.initialize
