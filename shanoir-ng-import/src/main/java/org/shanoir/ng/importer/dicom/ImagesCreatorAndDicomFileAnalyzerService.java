@@ -19,6 +19,7 @@ import org.shanoir.ng.importer.model.EchoTime;
 import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.Instance;
+import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
@@ -235,6 +236,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			checkSerieData(serie, attributes);
 			checkIsMultiFrame(serie, attributes);
 			addSeriesEquipment(serie, attributes);
+			addSeriesCenter(serie, attributes);
 		} catch (IOException e) {
 			LOG.error("Error during DICOM file process", e);
 		} finally {
@@ -324,6 +326,23 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
 			String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
 			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber));
+		}
+	}
+
+	/**
+	 * Adds the equipment information.
+	 * 
+	 * @param serie
+	 * @param datasetAttributes
+	 */
+	private void addSeriesCenter(Serie serie, Attributes attributes) {
+		if (serie.getInstitution() == null) {
+			InstitutionDicom institution = new InstitutionDicom();
+			String institutionName = attributes.getString(Tag.InstitutionName);
+			String institutionAddress = attributes.getString(Tag.InstitutionAddress);
+			institution.setInstitutionName(institutionName);
+			institution.setInstitutionAddress(institutionAddress);
+			serie.setInstitution(institution);
 		}
 	}
 
