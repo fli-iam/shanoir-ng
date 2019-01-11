@@ -89,8 +89,8 @@ export class BrukerFinishImportComponent {
             importJob.fromDicomZip = true;
             importJob.examinationId = this.context.examination.id;
             importJob.frontStudyId = this.context.study.id;
-            importJob.frontStudyCardId = this.context.studycard.id;
-            importJob.frontConverterId = this.context.studycard.niftiConverter.id;
+            importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;
+            importJob.frontConverterId = this.context.niftiConverter.id;
             return this.importService.startImportJob(importJob);
         }
     }

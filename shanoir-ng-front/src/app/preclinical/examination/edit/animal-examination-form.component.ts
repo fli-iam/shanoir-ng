@@ -23,6 +23,9 @@ import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { ActivatedRoute } from '@angular/router';
+import { DatepickerComponent } from '../../../shared/date/date.component';
+import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
+import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -49,8 +52,9 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     examinationExtradatas: ExtraData[] = [];
     centers: IdNameObject[] = [];
     studies: IdNameObject[] = [];
-    subjects: Subject[] = [];
+    private subjects: SubjectWithSubjectStudy[];
     animalSubjectId: number;
+    private inImport: boolean; 
     
     constructor(
         private route: ActivatedRoute,
@@ -60,10 +64,12 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         private contrastAgentsService: ContrastAgentService,
         private animalSubjectService: AnimalSubjectService, 
         private centerService: CenterService,
-        private studyService: StudyService) 
+        private studyService: StudyService, 
+        protected breadcrumbsService: BreadcrumbsService) 
     {
 
         super(route, 'preclinical-examination');
+        this.inImport = breadcrumbsService.isImporting();
         this.manageSaveEntity();
     }
     
@@ -71,14 +77,13 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     set examination(examination: Examination) { this.entity = examination; }
 
     initView(): Promise<void> {
-        this.getSubjects();
         return this.animalExaminationService.get(this.id).then(examination => {
             this.examination = examination; 
-            this.updateSubject();
+            this.updateExam();
             //this.loadExaminationAnesthetic();
-            if(this.examination && this.examination.subjectId ){
+            if(this.examination && this.examination.subject && this.examination.subject.id ){
                 this.animalSubjectService
-        			.findAnimalSubjectBySubjectId(this.examination.subjectId)
+        			.findAnimalSubjectBySubjectId(this.examination.subject.id)
         			.then(animalSubject => this.animalSubjectId = animalSubject.id)
                     .catch((error) => {});
                 
@@ -90,14 +95,13 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     initEdit(): Promise<void> {
         this.getCenters();
         this.getStudies();
-        this.getSubjects();
         return this.animalExaminationService.get(this.id).then(examination => {
             this.examination = examination;
-            this.updateSubject();
+            this.updateExam();
             //this.loadExaminationAnesthetic(this.id);
-            if(this.examination && this.examination.subjectId ){
+            if(this.examination && this.examination.subject && this.examination.subject.id){
                 this.animalSubjectService
-        			.findAnimalSubjectBySubjectId(this.examination.subjectId)
+        			.findAnimalSubjectBySubjectId(this.examination.subject.id)
         			.then(animalSubject => this.animalSubjectId = animalSubject.id)
                     .catch((error) => {});
                 
@@ -111,18 +115,15 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.examination.preclinical = true;
         this.getCenters();
         this.getStudies();
-        this.getSubjects();
         return Promise.resolve();
     }
 
     buildForm(): FormGroup {
         return this.formBuilder.group({
-            'id': [this.examination.id],
-            'studyId': [this.examination.studyId, Validators.required],
-            // 'Examination executive': [this.examination.examinationExecutive],
-            'centerId': [this.examination.centerId, Validators.required],
-            'subject': [this.examination.subjectId, Validators.required],
-            'examinationDate': [this.examination.examinationDate, Validators.required],
+            'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
+            'subject': [{value: this.examination.subject, disabled: this.inImport}],
+            'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
+            'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight]
@@ -133,6 +134,22 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     private attachNewFiles() {
+    }
+
+    private updateExam(): void{
+        this.examination.study = new IdNameObject(this.examination.studyId, this.examination.studyName);
+        this.examination.center = new IdNameObject(this.examination.centerId, this.examination.centerName);
+        this.examination.subjectStudy = new SubjectWithSubjectStudy();
+        if (this.examination.subject){
+            this.examination.subjectStudy.id = this.examination.subject.id;
+            this.examination.subjectStudy.name = this.examination.subject.name;
+        }
+    }
+
+    private updateExamForSave(): void{
+        this.examination.centerId = this.examination.center.id;
+        this.examination.studyId = this.examination.study.id;
+        this.examination.subjectId = this.examination.subject.id;
     }
     
     private getCenters(): void {
@@ -154,40 +171,13 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
     
     
-    
-    getSubjects(): void{
-    	this.subjects = [];
-    	this.animalSubjectService.getPreclinicalSubjects(true)
-    		.then(subjects => {
-    			this.subjects = subjects;
-    		})
-    		.catch((error) => {
-                // TODO: display error
-                console.log("error getting subjects list!");
-            });
+    private getSubjects(): void {
+        if (!this.examination.study) return;
+        this.studyService
+            .findSubjectsByStudyId(this.examination.study.id)
+            .then(subjects => this.subjects = subjects);
     }
 
-
-	
-    
-    getSubjectById(id: number): Subject{
-    	if (this.subjects){
-    		for (let s of this.subjects) {
-    			if (s.id === id){
-    				return s;
-    			}
-    		}
-    	}
-    	return null;
-    }
-    
-    updateSubject(){
-    	if (this.examination && this.examination.subject){
-    		this.examination.subjectId = this.examination.subject.id;
-    		this.examination.subjectName = this.examination.subject.name;
-    	}
-    }
-    
 
     manageSaveEntity(): void {
         this.subscribtions.push(
@@ -202,7 +192,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
 
     protected save(): Promise<void> {
-        //this.updateSubject();
+        this.updateExamForSave();
         return super.save();
     }
 

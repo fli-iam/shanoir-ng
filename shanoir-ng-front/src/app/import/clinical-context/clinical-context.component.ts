@@ -314,7 +314,7 @@ export class ClinicalContextComponent{
         let newExam = new Examination();
         newExam.study = new IdNameObject(this.study.id, this.study.name);
         newExam.center = new IdNameObject(this.center.id, this.center.name);
-        newExam.subject = this.subject;
+        newExam.subjectStudy = this.subject;
         newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
         newExam.comment = this.patient.studies[0].studyDescription;
         return newExam;

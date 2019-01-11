@@ -8,9 +8,15 @@ export class Examination extends Entity {
     id: number;
     examinationDate: Date;
     examinationExecutive: IdNameObject;
-    subject: SubjectWithSubjectStudy;
+    subjectStudy: SubjectWithSubjectStudy;
+    subject: IdNameObject;
+    subjectId: number;
     study: IdNameObject;
+    studyId: number;
+    studyName: string;
     center: IdNameObject;
+    centerId: number;
+    centerName: string;
     comment: string;
     note: string;
     subjectWeight: number;

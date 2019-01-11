@@ -78,7 +78,8 @@ public class SubjectApiController implements SubjectApi {
 		final List<Subject> subjects = subjectService.findBy("preclinical", preclinical);
 
 		if (subjects.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			LOG.info("subjects are empty !! ");
+			//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}

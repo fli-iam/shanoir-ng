@@ -1,11 +1,9 @@
-import { Component,ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { PatientDicom } from "../../../import/dicom-data.model";
-import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { EquipmentDicom, PatientDicom } from '../../../import/dicom-data.model';
 import { Study } from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
-import { StudyCard } from '../../../study-cards/shared/study-card.model';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
@@ -20,6 +18,13 @@ import { ImportDataService, ContextData } from '../../../import/import.data-serv
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { Entity } from '../../../shared/components/entity/entity.abstract';
 import { PreclinicalSubject } from '../../animalSubject/shared/preclinicalSubject.model';
+import { Center } from '../../../centers/shared/center.model';
+import { CenterService } from '../../../centers/shared/center.service';
+import { AcquisitionEquipment } from '../../../acquisition-equipments/shared/acquisition-equipment.model';
+import { NiftiConverter } from '../../../niftiConverters/nifti.converter.model';
+import { NiftiConverterService } from '../../../niftiConverters/nifti.converter.service';
+import { StudyCenter } from '../../../studies/shared/study-center.model';
+import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
 
 @Component({
     selector: 'animal-clinical-context',
@@ -29,29 +34,26 @@ import { PreclinicalSubject } from '../../animalSubject/shared/preclinicalSubjec
 })
 export class AnimalClinicalContextComponent  {
     
-     patient: PatientDicom;
-    //@Output() contextChange = new EventEmitter<ContextData>();
-    
-    @ViewChild('subjectCreationModal') subjectCreationModal: ModalComponent;
-    @ViewChild('examCreationModal') examCreationModal: ModalComponent;
-
-    private studycardMissingError: Boolean;
-    private studycardNotCompatibleError: Boolean;
-
-    private studies: Study[];
+    patient: PatientDicom;
+    private studies: Study[] = [];
+    private centers: Center[] = [];
+    private acquisitionEquipments: AcquisitionEquipment[] = [];
+    private subjects: SubjectWithSubjectStudy[] = [];
+    private examinations: SubjectExamination[] = [];
+    private niftiConverters: NiftiConverter[] = [];
     private study: Study;
-    private studycards: StudyCard[];
-    private studycard: StudyCard;
-    private subjects: SubjectWithSubjectStudy[]; 
+    private center: Center;
+    private acquisitionEquipment: AcquisitionEquipment;
     private subject: SubjectWithSubjectStudy;
-    private examinations: SubjectExamination[];
     private examination: SubjectExamination;
-    public niftiConverter: IdNameObject;
+    private niftiConverter: NiftiConverter;
     private animalSubject: AnimalSubject = new AnimalSubject();
     
     
     constructor(
             private studyService: StudyService,
+            private centerService: CenterService,
+            private niftiConverterService: NiftiConverterService,
             private animalSubjectService: AnimalSubjectService,
             private examinationService: ExaminationService,
             private router: Router,
@@ -70,16 +72,22 @@ export class AnimalClinicalContextComponent  {
 	private reloadSavedData() {
         if (this.importDataService.contextBackup) {
             let study = this.importDataService.contextBackup.study;
-            let studycard = this.importDataService.contextBackup.studycard;
+            let center = this.importDataService.contextBackup.center;
+            let acquisitionEquipment = this.importDataService.contextBackup.acquisitionEquipment;
             let subject = this.importDataService.contextBackup.subject;
             let examination = this.importDataService.contextBackup.examination;
+            let niftiConverter = this.importDataService.contextBackup.niftiConverter;
             if (study) {
                 this.study = study;
                 this.onSelectStudy();
             }
-            if (studycard) {
-                this.studycard = studycard;
-                this.onSelectStudycard();
+            if (center) {
+                this.center = center;
+                this.onSelectCenter();
+            }
+            if (acquisitionEquipment) {
+                this.acquisitionEquipment = acquisitionEquipment;
+                this.onSelectAcquisitonEquipment();
             }
             if (subject) {
                 this.subject = subject;
@@ -87,74 +95,90 @@ export class AnimalClinicalContextComponent  {
             }
             if (examination) {
                 this.examination = examination;
-                this.onSelectExamination();
+                this.onSelectExam();
+            }
+            if (niftiConverter) {
+                this.niftiConverter = niftiConverter;
+                this.onContextChange();
             }
         }
     }
+    
 
     setPatient(patient: PatientDicom) {
         this.patient = patient;
-        this.fetchStudies();
-    }
-    
-    private fetchStudies(): void {
-        this.studyService
-            .findStudiesWithStudyCardsByUserAndEquipment(this.patient.studies[0].series[0].equipment)
-            .then(studies => {
-                this.studies = studies;
-                this.prepareStudyStudycard(studies);
-            });
+        this.completeStudies(this.patient.studies[0].series[0].equipment)
+            /* For the moment, we import only zip files with the same equipment, 
+            That's why the calculation is only based on the equipment of the first series of the first study */
+            .then(() => {
+                let hasOneCompatible: boolean = this.studies.filter(study => study.compatible).length == 1;
+                if (hasOneCompatible) {
+                    this.study = this.studies.filter(study => study.compatible)[0];
+                    this.onSelectStudy();
+                }
+            })
     }
 
-    private prepareStudyStudycard(studies: Study[]): void {
-        let compatibleStudies: Study[] = [];
-        for (let study of studies) {
-            if (study.compatible) {
-                compatibleStudies.push(study);
-            }
-        }
-        if (compatibleStudies.length == 1) {
-            this.study = compatibleStudies[0];
-            this.studycards = this.study.studyCards;
-        }
+    private async completeStudies(equipment: EquipmentDicom): Promise<void> {
+        let completeStudyPromises: Promise<void>[] = [];
+        completeStudyPromises.push(Promise.all([this.studyService.findStudiesForImport(), this.centerService.getAll()])
+            .then(([allStudies, allCenters]) => {
+                for (let study of allStudies) {
+                    for (let studyCenter of study.studyCenterList) {
+                        let center = allCenters.find(center => center.id === studyCenter.center.id);
+                        if (center) {
+                            let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
+                                && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
+                                && acqEqt.manufacturerModel.manufacturer.name === equipment.manufacturer);
+                            for (let compatibleAcqEqt of compatibleAcqEqts) {
+                                compatibleAcqEqt.compatible = true;
+                                center.compatible = true;
+                                study.compatible = true;
+                            }
+                            studyCenter.center = center;
+                        }
+                    } 
+                    this.studies.push(study);
+                }
+            }));
+        return Promise.all(completeStudyPromises).then(() => {});
     }
     
+
     private onSelectStudy(): void {
-        this.studycards = null;
-        this.studycard = null;
-        this.subjects = null;
-        this.subject = null;
-        this.examinations = null;
-        this.examination = null;
-        if (this.study) {
-            if (this.study.studyCards.length == 0) {
-                this.studycardMissingError = true;
-            } else {
-                this.studycardMissingError = false;
-                let compatibleStudycards: StudyCard[] = [];
-                for (let studycard of this.study.studyCards) {
-                    if (studycard.compatible) {
-                        compatibleStudycards.push(studycard);
-                    }
-                }
-                if (compatibleStudycards.length == 1) {
-                    // autoselect studycard
-                    this.studycard = compatibleStudycards[0];
-                } 
-                this.studycards = this.study.studyCards;
+        this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
+        this.center = this.acquisitionEquipment = this.subject = this.examination = null;
+        if (this.study.id && this.study.studyCenterList) {
+            let hasOneCompatible: boolean = this.study.studyCenterList.filter(studyCenter => studyCenter.center.compatible).length == 1;
+            if (hasOneCompatible) {
+                this.center = this.study.studyCenterList.filter(studyCenter => studyCenter.center.compatible)[0].center;
+                this.onSelectCenter();
+            }
+            for (let studyCenter of this.study.studyCenterList) {
+                this.centers.push(studyCenter.center);
             }
         }
         this.onContextChange();
     }
 
-    private onSelectStudycard(): void {
-        if (this.studycard) {
-            if (this.studycard.compatible) {
-                this.studycardNotCompatibleError = false;
-            } else {
-                this.studycardNotCompatibleError = true;
+    private onSelectCenter(): void {
+        this.acquisitionEquipments = this.subjects = this.examinations = [];
+        this.acquisitionEquipment = this.subject = this.examination = null;
+        if (this.center && this.center.acquisitionEquipments) {
+            let hasOneCompatible: boolean = this.center.acquisitionEquipments.filter(acqEqt => acqEqt.compatible).length == 1;
+            if (hasOneCompatible) {
+                this.acquisitionEquipment = this.center.acquisitionEquipments.filter(acqEqt => acqEqt.compatible)[0];
+                this.onSelectAcquisitonEquipment();
             }
-            this.niftiConverter = this.studycard.niftiConverter;
+            this.acquisitionEquipments = this.center.acquisitionEquipments;
+        }
+        this.onContextChange();
+    }
+
+    private onSelectAcquisitonEquipment(): void {
+        this.subjects = this.examinations = [];
+        this.subject = this.examination = null;
+        if (this.acquisitionEquipment) {
             this.studyService
                 .findSubjectsByStudyId(this.study.id)
                 .then(subjects => this.subjects = subjects);
@@ -163,10 +187,10 @@ export class AnimalClinicalContextComponent  {
     }
 
     private onSelectSubject(): void {
-        this.examinations = null;
+        this.examinations = [];
         this.examination = null;
         if (this.subject) {
-        	this.animalSubjectService
+            this.animalSubjectService
         		.findAnimalSubjectBySubjectId(this.subject.id)
         		.then(animalSubject => this.animalSubject = animalSubject)
         		.catch((error) => {});
@@ -177,10 +201,14 @@ export class AnimalClinicalContextComponent  {
         this.onContextChange();
     }
     
-
-    private onSelectExamination() {
+    private onSelectExam(): void {
+        this.niftiConverters = [];
+        if (this.examination) {
+            this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
+        }
         this.onContextChange();
     }
+
 
     private onContextChange() {
         this.importDataService.contextBackup = this.getContext();
@@ -190,15 +218,59 @@ export class AnimalClinicalContextComponent  {
     }
     
     private getContext(): ContextData {
-        return new ContextData(this.study, this.studycard, this.subject, this.examination);
+        return new ContextData(this.study, this.center, this.acquisitionEquipment,
+            this.subject, this.examination, this.niftiConverter);
     }
 
+    private openCreateCenter = () => {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/center/create']).then(success => {
+            this.breadcrumbsService.currentStep.entity = this.getPrefilledCenter();
+            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                this.importDataService.contextBackup.center = this.updateStudyCenter(entity as Center);
+            });
+        });
+    }
+
+    private getPrefilledCenter(): Center {
+        let studyCenter = new StudyCenter();
+        studyCenter.study = this.study;
+        let newCenter = new Center();
+        newCenter.studyCenterList = [studyCenter];
+        return newCenter;
+    }
+
+    private updateStudyCenter(center: Center): Center {
+        if (!center) return;
+        let studyCenter: StudyCenter = center.studyCenterList[0];
+        this.study.studyCenterList.push(studyCenter);
+        return center;
+    }
+
+    private openCreateAcqEqt() {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/acquisition-equipment/create']).then(success => {
+            this.breadcrumbsService.currentStep.entity = this.getPrefilledAcqEqt();
+            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                this.importDataService.contextBackup.acquisitionEquipment = (entity as AcquisitionEquipment);
+            });
+        });
+    }
+
+    private getPrefilledAcqEqt(): AcquisitionEquipment {
+        let acqEpt = new AcquisitionEquipment();
+        acqEpt.center = this.center;
+        acqEpt.serialNumber = this.patient.studies[0].series[0].equipment.deviceSerialNumber;
+        return acqEpt;
+    }
 
     private openCreateSubject = () => {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
+        let importStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/preclinical-subject/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+            this.breadcrumbsService.currentStep.data.firstName = this.computeNameFromDicomTag(this.patient.patientName)[1];
+            this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
+            importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                 this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy((entity as PreclinicalSubject).subject);
             });
         });
@@ -211,6 +283,7 @@ export class AnimalClinicalContextComponent  {
         let newPreclinicalSubject = new PreclinicalSubject();
         let newSubject = new Subject();
         let newAnimalSubject = new AnimalSubject();
+        newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
         newSubject.birthDate = this.patient.patientBirthDate;
         newSubject.name = this.patient.patientName;
         if (this.patient.patientSex){
@@ -220,6 +293,22 @@ export class AnimalClinicalContextComponent  {
         newPreclinicalSubject.subject = newSubject;
         newPreclinicalSubject.animalSubject = newAnimalSubject;
         return newPreclinicalSubject;
+    }
+
+    /**
+     * Try to compute patient first name and last name from dicom tags. 
+     * eg. TOM^HANKS -> return TOM as first name and HANKS as last name
+     */
+    private computeNameFromDicomTag (patientName: string): string[] {
+        let names: string[] = [];
+        if (patientName) {
+            names = patientName.split("\\^");
+            if (names === null || names.length !== 2) {
+                names.push(patientName);
+                names.push(patientName);
+            }
+        }
+        return names;
     }
     
     private subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
@@ -242,17 +331,20 @@ export class AnimalClinicalContextComponent  {
         });
     }
 
+
     private getPrefilledExam(): Examination {
         let newExam = new Examination();
         newExam.preclinical = true;
         newExam.hasStudyCenterData = true;
+        newExam.study = new IdNameObject(this.study.id, this.study.name);
         newExam.studyId = this.study.id;
         newExam.studyName = this.study.name;
-        newExam.centerId = this.studycard.center.id;
-        newExam.centerName = this.studycard.center.name;
+        newExam.center = new IdNameObject(this.center.id, this.center.name);
+        newExam.subjectStudy = this.subject;
         newExam.subjectId = this.subject.id;
-        newExam.subjectName = this.subject.name;
-        newExam.subject = new IdNameObject(this.subject.id,this.subject.name, true );
+        newExam.subject = new Subject();
+        newExam.subject.id = this.subject.id;
+        newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
         newExam.comment = this.patient.studies[0].studyDescription;
         return newExam;
@@ -272,33 +364,37 @@ export class AnimalClinicalContextComponent  {
         window.open('study/details/' + this.study.id, '_blank');
     }
 
+    private showCenterDetails() {
+        window.open('center/details/' + this.center.id, '_blank');
+    }
+
+    private showAcquistionEquipmentDetails() {
+        window.open('acquisition-equipment/details/' + this.acquisitionEquipment.id, '_blank');
+    }
+
     private showSubjectDetails() {
-    	if (this.animalSubject.id){
+        if (this.animalSubject.id){
         	window.open('preclinical-subject/details/' + this.animalSubject.id , '_blank');
         }else{
             window.open('subject/details/' + this.subject.id, '_blank');
         }
     }
 
-    private showStudyCardDetails() {
-        window.open('studycard/details/' + this.studycard.id, '_blank');
-    }
-
     private showExaminationDetails() {
         window.open('preclinical-examination/details/' + this.examination.id , '_blank');
     }
-
-    
 
 
     get valid(): boolean {
         let context = this.getContext();
         return (
             context.study != undefined && context.study != null
-            && context.studycard != undefined && context.studycard != null
+            && context.center != undefined && context.center != null
+            && context.acquisitionEquipment != undefined && context.acquisitionEquipment != null
             && context.subject != undefined && context.subject != null
             && context.examination != undefined && context.examination != null
-        );
+            && context.niftiConverter != undefined && context.niftiConverter != null
+            );
     }
 
     private next() {

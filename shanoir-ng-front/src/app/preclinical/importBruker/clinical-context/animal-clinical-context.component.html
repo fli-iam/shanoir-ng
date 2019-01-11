@@ -1,4 +1,3 @@
-
 <div class="header command-zone">3. Set the clinical context</div>
 <fieldset class="step">
 
@@ -8,33 +7,59 @@
             <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
         </legend>
         <li class="required">
-            <label class="required-label">Select an existing research study</label> 
-            <span class="right-col">
-                <select [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let study of studies" [ngValue]="study" [ngStyle]="{'color':study.compatible == true ? 'green' : 'red' }">{{study?.name}}</option>
-                </select>
-                <button i18n="Import|StudyDetails label" [disabled]="study == null" (click)="showStudyDetails()">details</button>
-            </span>
-        </li>
-        <li class="required">
-            <label class="required-label">Select an existing study card</label> 
-            <span class="right-col">
-                <select [disabled]="!study" [(ngModel)]="studycard" (ngModelChange)="onSelectStudycard($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let studycard of studycards" [ngValue]="studycard" [ngStyle]="{'color':studycard.compatible == true ? 'green' : 'red' }">{{studycard?.name}}</option>
-                </select>
-                <!-- studycard not available for the moment -->
-                <button disabled (click)="showStudyCardDetails()">details</button>
-            </span>
-            <br/><span>
-                <label *ngIf="studycardMissingError==true" class="form-validation-alert" i18n="Import|StudycardMissingError label"><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Warning :</strong> no study card is defined for this research study. You cannot import data into this research study.</label>
-                <label *ngIf="studycardNotCompatibleError==true" class="form-validation-alert" i18n="Import|StudycardNotCompatibleError label"><strong class="warning"><i class="fas fa-exclamation-triangle"></i> Warning :</strong> The Acquisition Equipment defined in the study card is not compatible with the data that you are importing.</label>
-            </span>
-        </li>
-        <li class="required">
-            <label>Nifti converter</label> 
-            <span class="right-col">{{niftiConverter?.name}}</span>
-        </li>
-    </ol>
+                <label class="required-label">Select an existing research study</label> 
+                <span class="right-col">
+                    <select [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)" [compareWith]="compareEntities"
+                            [class.compatible]="study?.compatible" [class.not-compatible]="!study?.compatible">
+                        <option *ngFor="let study of studies" [ngValue]="study"
+                                [class.compatible]="study?.compatible" [class.not-compatible]="!study?.compatible">{{study?.name}}</option>
+                    </select>
+                    <button i18n="Import|StudyDetails label" [disabled]="!study" (click)="showStudyDetails()">details</button>
+                </span>
+            </li>
+            <li class="required">
+                <label class="required-label">Select a center</label> 
+                <span class="right-col">
+                    <select [disabled]="!study || !centers" [(ngModel)]="center" (ngModelChange)="onSelectCenter($event)" [compareWith]="compareEntities"
+                            [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">
+                        <option *ngFor="let center of centers" [ngValue]="center"
+                                [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">{{center?.name}}</option>
+                    </select>
+                    <button i18n="Import|CenterDetails label" [disabled]="!center" (click)="showCenterDetails()">details</button>
+                    <button [disabled]="!center || center?.compatible" (click)="openCreateCenter()">add</button>
+                </span>
+            </li>
+            <li class="info" *ngIf="center && !center?.compatible">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>This center may not be not compatible with the imported data !</strong>
+                <br/>Your archive contains this data : <code>{{patient.studies[0].series[0].institution?.institutionName}}, {{patient.studies[0].series[0].institution?.institutionAddress}}.</code>
+                <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
+            </li>
+            <li class="required">
+                <label class="required-label">Select an acquisition equipment</label> 
+                <span class="right-col">
+                    <select [disabled]="!center || !acquisitionEquipments" [(ngModel)]="acquisitionEquipment" (ngModelChange)="onSelectAcquisitonEquipment($event)" [compareWith]="compareEntities"
+                            [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">
+                        <option *ngFor="let acquisitionEquipment of acquisitionEquipments" [ngValue]="acquisitionEquipment" 
+                                [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">{{acquisitionEquipment | acqEqptLabel}}</option>
+                    </select>
+                    <button i18n="Import|AcquisitionEquipmentDetails label" [disabled]="!acquisitionEquipment" (click)="showAcquistionEquipmentDetails()">details</button>
+                    <button [disabled]="!acquisitionEquipment || acquisitionEquipment?.compatible" (click)="openCreateAcqEqt()">add</button>
+                </span>
+            </li>
+            <li class="info" *ngIf="acquisitionEquipment && !acquisitionEquipment?.compatible">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>The acquisition equipment may not be not compatible with the imported data !</strong>
+                <br/>Your archive contains this data : 
+                <code>
+                    {{patient.studies[0].series[0].equipment.manufacturer}} - 
+                    {{patient.studies[0].series[0].equipment.manufacturerModelName}} - 
+                    {{patient.studies[0].series[0].equipment.deviceSerialNumber}}
+                </code>
+                <br/>If the acquisition equipment you need is not in the above list, you can create a new acquisition equipment from this data by clicking on the 'add' button.
+            </li>
+        </ol>
+    
 
     <ol>
         <legend>
@@ -44,14 +69,15 @@
         <li class="required">
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
-                <select [disabled]="!study || !studycard" [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)" [compareWith]="compareEntities">
+                <select [disabled]="!study || !acquisitionEquipment" [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)" [compareWith]="compareEntities">
                     <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
                 </select>
                 <button [disabled]="!subject" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
-                <button [disabled]="!study || !studycard" (click)="openCreateSubject()">add</button>
+                <button [disabled]="!study || !acquisitionEquipment" (click)="openCreateSubject()">add</button>
             </span>
         </li>
-        <li *ngIf="subject != null">
+
+        <li *ngIf="subject !== null && subject !== undefined">
             <div>
                 <table>
                     <thead>
@@ -89,11 +115,24 @@
         <li class="required">
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select [disabled]="!subject" [(ngModel)]="examination" (ngModelChange)="onSelectExamination($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
+                <select [disabled]="!study || !subject" [(ngModel)]="examination" (ngModelChange)="onSelectExam($event)" [compareWith]="compareEntities">
+                     <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
                 </select>
                 <button [disabled]="!examination" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
-                <button [disabled]="!subject" (click)="openCreateExam()">add</button>
+                <button [disabled]="!study || !subject" (click)="openCreateExam()">add</button>
+            </span>
+        </li>
+    </ol>
+    <ol>
+        <legend>Nifti Converter</legend>
+        <li class="required">
+            <label label class="required-label">Select a Nifti converter</label> 
+            <span class="right-col">
+                <select [disabled]="!examination" [(ngModel)]="niftiConverter" (ngModelChange)="onContextChange($event)" [compareWith]="compareEntities">
+                    <option *ngFor="let niftiConverter of niftiConverters" [ngValue]="niftiConverter">{{niftiConverter?.name}}</option>
+                </select>
+                <!-- TODO when nifti converters page is done -->
+                <button i18n="Import|NiftiConverterDetails label" [disabled]="true">details</button>
             </span>
         </li>
     </ol>
