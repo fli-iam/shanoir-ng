@@ -241,7 +241,6 @@ services:
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
-      - "/home/julien/projects/shanoir-ng/shanoir-ng-front/mnt-dist:/etc/nginx/html/"
     networks:
       - shanoir_ng_network    
     ports:
