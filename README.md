@@ -19,8 +19,7 @@ The installation of Shanoir-NG is based on two components:
 * BUILD (COMPILE): with Maven 3
 * DEPLOY: with docker-compose, version 3
 
-## --------------- BUILD (COMPILE) ---------------
-
+## BUILD (COMPILE)
 * Install Maven 3 on your machine/on the server
 * Get access to the GitHub repository and clone the shanoir-ng repository
 * Execute the Maven build on the parent project with the following commands:
@@ -30,8 +29,7 @@ The installation of Shanoir-NG is based on two components:
 * The build creates all .jar and .js executable files and copies them
 into the folder /docker-compose to be used from there by docker-compose
 
-## --------------- DEPLOY ------------------------
-
+## DEPLOY
 * Install docker and docker-compose:
     * https://docs.docker.com/install/
     * https://docs.docker.com/compose/install/
@@ -63,7 +61,11 @@ and will not be found if you run docker-compose elsewhere; results in errors aft
 
 * Access to shanoir-ng: https://shanoir-ng-nginx
 
-If you want to login, please go to Keycloak:
+If you want to login, please configure a user in Keycloak :
+
+## CONFIGURE
+
+### Configure a user in Keycloak
 
 * Access to Keycloak admin interface: http://localhost:8080/auth/admin/
 
@@ -79,7 +81,28 @@ database in Keycloak in production, please set the flag **syncAllUsersToKeycloak
 in the file **/docker-compose/keycloak/variables.env** and in the file **/docker-compose/users/Dockerfile**
 adapt as well the credentials.
 
-* Access to the backup PACS dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/
+### Configure a mail server
 
-* This installation uses Docker named volumes, find more here to handle your local data:
+Users and admin may receive mails from Shanoir when they request an account or when they have forgotten their password. To make those functions work, there are two places where you need to set your mail server config.
+
+#### In keycloak
+
+In keycloak, with Shanoir-ng realm selected, go to "Realm Settings", then tab "Email" and simply set your config.
+
+#### In .env
+
+Edit the .env file at the root of the Shanoir source directory. At the line 
+```
+spring.mail.host=SMTP_HOST
+```
+simply replace SMTP_HOST by your mail server url.
+**Attention:** After that you will have to restart the application (docker-compose down && docker-compose up --build) 
+
+### PACS dcm4chee
+
+Access to the backup PACS dcm4chee 5 arc-light: http://localhost:8081/dcm4chee-arc/ui2/
+
+### Local data
+
+This installation uses Docker named volumes, find more here to handle your local data:
 https://docs.docker.com/storage/volumes/
