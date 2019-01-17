@@ -15,13 +15,14 @@ import java.util.Date;
  */
 public class DateTimeUtils {
 	
-	
 	public static LocalDate dateToLocalDate(Date date) {
-		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		if (date == null) return null;
+		else return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 	}
 	
 	public static LocalDateTime dateToLocalDateTime(Date date) {
-		return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+		if (date == null) return null;
+		else return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
 	}
 	
 	public static LocalDate pacsStringToLocalDate(String yyyyMMdd) {
