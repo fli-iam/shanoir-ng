@@ -113,8 +113,8 @@ public interface ExaminationApi {
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	ResponseEntity<Examination> saveNewExamination(
-			@ApiParam(value = "examination to create", required = true) @Valid @RequestBody Examination examination,
+	ResponseEntity<ExaminationDTO> saveNewExamination(
+			@ApiParam(value = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examination,
 			final BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates an examination", response = Void.class, tags = {})
@@ -128,7 +128,7 @@ public interface ExaminationApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> updateExamination(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@ApiParam(value = "examination to update", required = true) @Valid @RequestBody Examination examination,
+			@ApiParam(value = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
 			final BindingResult result) throws RestServiceException;
 
 }

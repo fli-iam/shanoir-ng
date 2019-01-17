@@ -2,8 +2,9 @@ package org.shanoir.ng.examination;
 
 
 
-import java.util.Date;
+import java.time.LocalDate;
 
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 
 /**
@@ -22,7 +23,8 @@ public class ExaminationDTO {
 
 	private String comment;
 
-	private Date examinationDate;
+	@LocalDateAnnotations
+	private LocalDate examinationDate;
 
 	private String note;
 
@@ -94,21 +96,6 @@ public class ExaminationDTO {
 	 */
 	public void setComment(String comment) {
 		this.comment = comment;
-	}
-
-	/**
-	 * @return the examinationDate
-	 */
-	public Date getExaminationDate() {
-		return examinationDate;
-	}
-
-	/**
-	 * @param examinationDate
-	 *            the examinationDate to set
-	 */
-	public void setExaminationDate(Date examinationDate) {
-		this.examinationDate = examinationDate;
 	}
 
 	/**
@@ -186,6 +173,14 @@ public class ExaminationDTO {
 		this.subjectWeight = subjectWeight;
 	}
 	
+	public LocalDate getExaminationDate() {
+		return examinationDate;
+	}
+
+	public void setExaminationDate(LocalDate examinationDate) {
+		this.examinationDate = examinationDate;
+	}
+
 	public boolean isPreclinical() {
 		return preclinical;
 	}

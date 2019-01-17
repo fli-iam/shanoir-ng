@@ -1,7 +1,7 @@
 package org.shanoir.ng.dataset.modality;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 import org.shanoir.ng.dataset.Dataset;
 import org.shanoir.ng.shared.model.DiffusionGradient;
@@ -16,7 +17,6 @@ import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.FlipAngle;
 import org.shanoir.ng.shared.model.InversionTime;
 import org.shanoir.ng.shared.model.RepetitionTime;
-import javax.persistence.Transient;
 
 /**
  * MR dataset.
@@ -65,11 +65,11 @@ public class MrDataset extends Dataset {
 	
 	/** Store temporarily the first image acquisition time until all images are processed*/
 	@Transient
-	private  Date firstImageAcquisitionTime;
+	private LocalDateTime  firstImageAcquisitionTime;
 
 	/** Store temporarily the last image acquisition time until all images are processed */
 	@Transient	
-	private Date lastImageAcquisitionTime;
+	private LocalDateTime lastImageAcquisitionTime;
 	
 	/**
 	 * @return the diffusionGradients
@@ -214,19 +214,19 @@ public class MrDataset extends Dataset {
 		this.updatedMrMetadata = updatedMrMetadata;
 	}
 
-	public Date getFirstImageAcquisitionTime() {
+	public LocalDateTime getFirstImageAcquisitionTime() {
 		return firstImageAcquisitionTime;
 	}
 
-	public void setFirstImageAcquisitionTime(Date firstImageAcquisitionTime) {
+	public void setFirstImageAcquisitionTime(LocalDateTime firstImageAcquisitionTime) {
 		this.firstImageAcquisitionTime = firstImageAcquisitionTime;
 	}
 
-	public Date getLastImageAcquisitionTime() {
+	public LocalDateTime getLastImageAcquisitionTime() {
 		return lastImageAcquisitionTime;
 	}
 
-	public void setLastImageAcquisitionTime(Date lastImageAcquisitionTime) {
+	public void setLastImageAcquisitionTime(LocalDateTime lastImageAcquisitionTime) {
 		this.lastImageAcquisitionTime = lastImageAcquisitionTime;
 	}
 	

@@ -1,10 +1,12 @@
 package org.shanoir.ng.importer.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -35,7 +37,8 @@ public class Serie {
 	private String sequenceName;
 
 	@JsonProperty("seriesDate")
-	private Date seriesDate;
+	@LocalDateAnnotations
+	private LocalDate seriesDate;
 
 	@JsonProperty("seriesNumber")
 	private String seriesNumber;
@@ -91,7 +94,7 @@ public class Serie {
 	public Serie(Attributes attributes) {
 		this.seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
 		this.seriesDescription = attributes.getString(Tag.SeriesDescription);
-		this.seriesDate = attributes.getDate(Tag.SeriesDate);
+		this.seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
 		this.seriesNumber = attributes.getString(Tag.SeriesNumber);
 		this.numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
 		this.modality = attributes.getString(Tag.Modality);
@@ -143,11 +146,11 @@ public class Serie {
 		this.seriesDescription = seriesDescription;
 	}
 
-	public Date getSeriesDate() {
+	public LocalDate getSeriesDate() {
 		return seriesDate;
 	}
 
-	public void setSeriesDate(Date seriesDate) {
+	public void setSeriesDate(LocalDate seriesDate) {
 		this.seriesDate = seriesDate;
 	}
 
