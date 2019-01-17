@@ -21,7 +21,6 @@ export abstract class Entity {
     protected getIgnoreList() { return ['service']; }
 
     private replacer = (key, value) => {
-        if (this[key] instanceof Date) {console.log(this[key])}
         if (this.getIgnoreList().indexOf(key) > -1) return undefined;
         else if (this[key] instanceof Date) return this.datePattern(this[key]);
         else return value;
