@@ -29,7 +29,7 @@ public interface AccountRequestApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<Void> saveNewAccountRequest(
+	ResponseEntity<User> saveNewAccountRequest(
 			@ApiParam(value = "user to create from account request", required = true) @RequestBody User user,
 			BindingResult result) throws RestServiceException;
 
