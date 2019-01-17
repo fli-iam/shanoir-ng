@@ -125,8 +125,8 @@ export class UserComponent implements OnInit {
         this.userService.requestAccount(this.user)
             .subscribe((res) => {
                 this.getOut(res);
-            }, (err: String) => {
-                if (err.indexOf("email should be unique") != -1) {
+            }, (reason: any) => {
+                if ( reason && reason.error.code == 422) {
                     this.isEmailUnique = false;
                 } else {
                     this.getOut();
