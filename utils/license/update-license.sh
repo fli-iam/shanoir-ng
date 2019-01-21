@@ -5,7 +5,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 LGREEN='\033[0;92m'
 YELLOW='\033[0;33m'
-count=0
+newCount=0
 
 if [ "$1" ]; then 
     dir=$1; 
@@ -30,29 +30,49 @@ build_commented_header () {
         echo "$3" >> var/commented_tmp
         echo "$3" >> var/previous_commented_tmp 
     fi
+    echo -e "" >> var/commented_tmp
+    echo -e "" >> var/previous_commented_tmp 
 }
 
 add_header_to () {
     headerNbLines=($(wc -l < var/commented_tmp))
     previousHeaderNbLines=($(wc -l < var/previous_commented_tmp))
+    imHead=$(< var/commented_tmp)
+    imPrevHead=$(< var/previous_commented_tmp)
     for arg in "$@"; do
         echo -n "searching for $arg ..."
-        files=$(find $dir -name "$arg" -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/target/*")
+        files=$(find $dir -name "$arg" \
+            -not -path "*/node_modules/*" \
+            -not -path "*/dist/*" \
+            -not -path "*/target/*" \ 
+            -not -path "*/bin/*" \
+            -not -path "*/webapp/*" \ 
+            -not -path "*/mnt-dist/*" \
+            -not -path "*/.mvn/*" \
+            -not -path "*/src/assets/*")
         echo ' [DONE]'
-        for i in $files; do
-            if head $i -n $headerNbLines | cmp -s ./var/commented_tmp - ; then
-                echo -e "${YELLOW}$i ... [ALREADY UP-TO-DATE]${NC}"  
-            elif head $i -n $previousHeaderNbLines | cmp -s ./var/previous_commented_tmp - ; then
-                echo -ne "${GREEN}$i ...\n"
-                cp var/previous_commented_tmp $i.new && tail -n +$(($previousHeaderNbLines+1)) $i >> $i.new && mv $i.new $i
-                echo -e " [LICENSE UPDATED]${NC}"  
-            elif grep -q Copyright $i; then
-                echo -e "${RED}$i ... [UNKNOWN LICENSE]${NC}"  
+        for file in $files; do
+            imFile=$(< $file)
+            echo -ne "$file ..."
+            if [[ ${imFile} = *${imHead}* ]]; then 
+                echo -e "${YELLOW} [ALREADY UP-TO-DATE]${NC}"
+            elif [[ ${imFile} = *${imPrevHead}* ]]; then 
+                echo -e "${GREEN} [TODO : UPDATE LICENSE]${NC}"
+            elif grep -q Copyright $file; then
+                echo -e "${RED}$file ... [UNKNOWN LICENSE]${NC}"  
             else
-                echo -ne "${LGREEN}$i ..."
-                cat var/commented_tmp $i > $i.new && mv $i.new $i
-                echo -e " [SHANOIR LICENSE ADDED]${NC}"
-                count=$(($count+1))
+                xmlLine="$(grep -ni "<?xml" "$file" | cut -d : -f 1)"
+                if [ "${file##*.}" = "xml" ] && [ ! -z $xmlLine ] && [ $xmlLine -gt "0" ]; then
+                    tail -n +$xmlLine $file | head -n 1 >> $file.new \
+                    && echo "" >> $file.new \
+                    && cat var/commented_tmp >> $file.new \
+                    && tail -n +$(($xmlLine+1)) $file >> $file.new \
+                    && mv $file.new $file
+                else
+                    cat var/commented_tmp $file > $file.new && mv $file.new $file
+                fi
+                echo -e "${LGREEN} [SHANOIR LICENSE ADDED]${NC}"
+                newCount=$(($newCount+1))
             fi
         done
     done
@@ -60,18 +80,18 @@ add_header_to () {
 
 
 build_commented_header " * " "/**" " */"
-add_header_to "*.java" "*.ts"
+add_header_to "*.java" "*.ts" "*.js"
 
 build_commented_header "# "
-add_header_to "*.yml" "*.properties"
+add_header_to "*.yml" "*.yaml" "*.properties" "Dockerfile"
 
 build_commented_header "-- "
 add_header_to "*.sql"
 
 build_commented_header "" "<!--" "-->"
-add_header_to "*.html"
+add_header_to "*.html" "*.xml"
 
-echo -e "\n$count license headers added"
+echo -e "\n$newCount license headers added"
 rm -f var/commented_tmp
 rm -f var/previous_commented_tmp
 cp -f ./license-header ./var/previous-license-header
