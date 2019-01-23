@@ -1,15 +1,15 @@
 package org.shanoir.ng.accountrequest;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.error.UsersFieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.UsersErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
+import org.shanoir.ng.shared.exception.UsersErrorModelCode;
 import org.shanoir.ng.user.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +51,7 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 		user.setRole(null);
 		user.setExpirationDate(null);
 		// Set creation date on creation.
-		user.setCreationDate(new Date());
+		user.setCreationDate(LocalDate.now());
 
 		/* Save user in db. */
 		try {
