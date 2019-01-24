@@ -62,8 +62,6 @@ export class UserComponent implements OnInit {
             this.user = new User();
         } else {
             this.userService.get(this.id).then((user: User) => {
-                console.log(user instanceof User, new User() instanceof User, Object.assign(new User(), user) instanceof User); 
-                
                 user.role = this.getRoleById(user.role.id);
                 this.user = user;
                 if (user.extensionRequestDemand) {
