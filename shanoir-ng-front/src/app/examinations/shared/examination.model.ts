@@ -13,10 +13,8 @@ export class Examination extends Entity {
     subjectId: number;
     study: IdNameObject;
     studyId: number;
-    studyName: string;
     center: IdNameObject;
     centerId: number;
-    centerName: string;
     comment: string;
     note: string;
     subjectWeight: number;

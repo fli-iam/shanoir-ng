@@ -137,8 +137,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     private updateExam(): void{
-        this.examination.study = new IdNameObject(this.examination.studyId, this.examination.studyName);
-        this.examination.center = new IdNameObject(this.examination.centerId, this.examination.centerName);
         this.examination.subjectStudy = new SubjectWithSubjectStudy();
         if (this.examination.subject){
             this.examination.subjectStudy.id = this.examination.subject.id;

@@ -20,13 +20,13 @@
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 							<a [routerLink]="['/study/details/', examination.study?.id]">
-								{{examination.studyName}}
+								{{examination.study?.name}}
 							</a>		
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<div [ngSwitch]="examination.hasStudyCenterData">
 								<ng-template [ngSwitchCase]="true">
-									{{examination.studyName}}
+									{{examination.study?.name}}
 								</ng-template>
 								<ng-template [ngSwitchCase]="false">
 									<select id="study" required formControlName="study" [(ngModel)]="examination.study" (ngModelChange)="getSubjects($event)" [compareWith]="compareEntities">

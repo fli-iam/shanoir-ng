@@ -337,11 +337,8 @@ export class AnimalClinicalContextComponent  {
         newExam.preclinical = true;
         newExam.hasStudyCenterData = true;
         newExam.study = new IdNameObject(this.study.id, this.study.name);
-        newExam.studyId = this.study.id;
-        newExam.studyName = this.study.name;
         newExam.center = new IdNameObject(this.center.id, this.center.name);
         newExam.subjectStudy = this.subject;
-        newExam.subjectId = this.subject.id;
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
@@ -358,6 +355,11 @@ export class AnimalClinicalContextComponent  {
         subjectExam.examinationDate = examination.examinationDate;
         subjectExam.comment = examination.comment;
         return subjectExam;
+    }
+
+    
+    private get hasCompatibleEquipments(): boolean {
+        return this.acquisitionEquipments.find(ae => ae.compatible) != undefined;
     }
 
     private showStudyDetails() {

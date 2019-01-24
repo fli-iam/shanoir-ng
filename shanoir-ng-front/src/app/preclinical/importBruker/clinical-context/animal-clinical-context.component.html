@@ -44,8 +44,8 @@
                                 [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">{{acquisitionEquipment | acqEqptLabel}}</option>
                     </select>
                     <button i18n="Import|AcquisitionEquipmentDetails label" [disabled]="!acquisitionEquipment" (click)="showAcquistionEquipmentDetails()">details</button>
-                    <button [disabled]="!acquisitionEquipment || acquisitionEquipment?.compatible" (click)="openCreateAcqEqt()">add</button>
-                </span>
+                    <button [disabled]="acquisitionEquipment?.compatible || hasCompatibleEquipments || !center" (click)="openCreateAcqEqt()">add</button>
+            </span>
             </li>
             <li class="info" *ngIf="acquisitionEquipment && !acquisitionEquipment?.compatible">
                 <i class="fas fa-exclamation-triangle"></i>
