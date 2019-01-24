@@ -143,7 +143,7 @@ export class UserComponent implements OnInit {
     }
 
     submit(): void {
-        this.user = this.userForm.value;
+        // this.user = this.userForm.value;
         this.user.accountRequestInfo = this.accountRequestInfo;
     }
 
