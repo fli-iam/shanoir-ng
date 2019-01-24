@@ -61,7 +61,7 @@ export class UserComponent implements OnInit {
         if (this.mode == 'create') {
             this.user = new User();
         } else {
-            this.userService.getUser(this.id).then((user: User) => {
+            this.userService.get(this.id).then((user: User) => {
                 console.log(user instanceof User, new User() instanceof User, Object.assign(new User(), user) instanceof User); 
                 
                 user.role = this.getRoleById(user.role.id);
@@ -74,12 +74,8 @@ export class UserComponent implements OnInit {
         }
     }
 
-    getOut(user: User = null): void {
-        if (this.closing.observers.length > 0) {
-            this.closing.emit(user);
-        } else {
-            this.location.back();
-        }
+    getOut(): void {
+        this.location.back();
     }
 
     cancelAccountRequest(): void {
@@ -89,7 +85,7 @@ export class UserComponent implements OnInit {
     accept(): void {
         this.submit();
         this.userService.confirmAccountRequest(this.id, this.user)
-            .subscribe((user) => {
+            .then((user) => {
                 this.getOut();
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
@@ -113,8 +109,8 @@ export class UserComponent implements OnInit {
     create(): void {
         this.submit();
         this.userService.create(this.user)
-            .subscribe((user) => {
-                this.getOut(user);
+            .then((user) => {
+                this.getOut();
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
@@ -125,8 +121,8 @@ export class UserComponent implements OnInit {
     accountRequest(): void {
         this.submit();
         this.userService.requestAccount(this.user)
-            .subscribe((res) => {
-                this.getOut(res);
+            .then((res) => {
+                this.getOut();
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
@@ -139,8 +135,8 @@ export class UserComponent implements OnInit {
     update(): void {
         this.submit();
         this.userService.update(this.id, this.user)
-            .subscribe((user) => {
-                this.getOut(user);
+            .then((user) => {
+                this.getOut();
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
