@@ -76,18 +76,29 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<List<IdNameDTO>> findStudiesNames() {
-		final List<IdNameDTO> studies = studyService.findIdsAndNames();
-		if (studies.isEmpty()) {
+		List<IdNameDTO> studiesNames;
+		try {
+			if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+				// Return all studies if user has role "admin"
+				studiesNames = studyService.findIdsAndNames();
+			} else {
+				List<Study> studies = studyService.findStudiesByUserIdAndStudyUserType(KeycloakUtil.getTokenUserId());
+				studiesNames = studyMapper.studiesToIdNameDTOs(studies);
+			}
+		} catch (ShanoirException e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		if (studiesNames.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(studies, HttpStatus.OK);
+		return new ResponseEntity<>(studiesNames, HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<List<SimpleStudyDTO>> findStudiesForImport() {
 		List<Study> studies;
 		try {
-			studies = studyService.findStudiesForImport(KeycloakUtil.getTokenUserId());
+			studies = studyService.findStudiesByUserIdAndStudyUserType(KeycloakUtil.getTokenUserId());
 		} catch (ShanoirException e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
