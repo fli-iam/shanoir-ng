@@ -67,7 +67,10 @@ public interface ExaminationMapper {
 	 *
 	 * @return examination.
 	 */
-	@Mapping(source="subject.id", target = "subjectId")
+	@Mappings({ @Mapping(source="subject.id", target = "subjectId"), 
+		@Mapping(source="center.id", target = "centerId"), 
+		@Mapping(source="study.id", target = "studyId")
+	})
 	Examination examinationDTOToExamination(ExaminationDTO examinationDTO);
 	
 	/**

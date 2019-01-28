@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
