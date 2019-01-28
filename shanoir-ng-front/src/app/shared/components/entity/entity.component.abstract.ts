@@ -143,6 +143,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                         let fieldControl: AbstractControl = this.form.get(managedField);
                         if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
                         fieldControl.updateValueAndValidity({emitEvent : false});
+                        if (!fieldControl.valid) fieldControl.markAsTouched();
                     }
                     this.footerState.valid = this.form.status == 'VALID';
                 } else throw reason;
@@ -160,7 +161,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         return (control: AbstractControl): ValidationErrors | null => {
             if (this.saveError && this.saveError.hasFieldError(errorFieldName ? errorFieldName : controlFieldName, constraintName, control.value)
                     //&& this.form.get(controlFieldName).pristine
-            ) {       
+            ) {
                 let ret = {};
                 ret[constraintName] = true;
                 return ret;
