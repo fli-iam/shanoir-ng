@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { DatepickerComponent } from '../../shared/date/date.component';
+import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';

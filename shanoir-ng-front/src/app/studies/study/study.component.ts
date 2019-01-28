@@ -9,7 +9,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { DatepickerComponent } from '../../shared/date/date.component';
+import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';

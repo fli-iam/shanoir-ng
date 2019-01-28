@@ -76,7 +76,7 @@ import { TooltipComponent } from './shared/components/tooltip/tooltip.component'
 import { TreeNodeComponent } from './shared/components/tree/tree-node.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
 import { ConsoleComponent } from './shared/console/console.line.component';
-import { DatepickerComponent } from './shared/date/date.component';
+import { DatepickerComponent } from './shared/date-picker/date-picker.component';
 import { HeaderComponent } from './shared/header/header.component';
 import { HelpMessageComponent } from './shared/help-message/help-message.component';
 import { KeycloakHttpInterceptor } from "./shared/keycloak/keycloak.http.interceptor";

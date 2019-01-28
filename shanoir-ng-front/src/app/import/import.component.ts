@@ -16,8 +16,7 @@ export class ImportComponent implements OnInit {
             route.url.subscribe(() => {this.importMode = this.route.snapshot.firstChild.data[0].importMode;})
         }
         
-        ngOnInit() {
-            this.breadcrumbsService.currentStep.importStart = true;  
+    ngOnInit() {
+        this.breadcrumbsService.currentStep.importStart = true;  
     }
-
 }

@@ -1,12 +1,7 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
-import { DicomArchiveService } from '../shared/dicom-archive.service';
-import { ImportJob } from '../shared/dicom-data.model';
-import { ImportDataService } from '../shared/import.data-service';
-import { ImportService } from '../shared/import.service';
+
 
 @Component({
     selector: 'query-pacs',
@@ -15,15 +10,26 @@ import { ImportService } from '../shared/import.service';
     animations: [slideDown]
 })
 export class QueryPacsComponent {
+
+    private patientName: string;
+    private patientID: string;
+    private patientBirthDate: Date;
+    private studyDescription: string;
+    private studyDate: Date;
+    private isStudyDateValid: boolean = true;
+
     constructor(
-        private importService: ImportService, 
-        private dicomArchiveService: DicomArchiveService,
-        private router: Router,
-        private breadcrumbsService: BreadcrumbsService,
-        private importDataService: ImportDataService) {
-    
-    breadcrumbsService.nameStep('1. Query');
-    breadcrumbsService.markMilestone();
-}
+        private breadcrumbsService: BreadcrumbsService) {
+            breadcrumbsService.nameStep('1. Query');
+            breadcrumbsService.markMilestone();
+    }
+
+    getValid(): boolean {
+        return ((this.patientName != undefined && this.patientName != null)
+            || (this.patientID != undefined && this.patientID != null)
+            || (this.patientBirthDate != undefined && this.patientBirthDate != null)
+            || (this.studyDescription != undefined && this.studyDescription != null)
+            || (this.studyDate != undefined && this.studyDate != null && this.isStudyDateValid))
+    }
 
 }
