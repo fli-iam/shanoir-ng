@@ -29,6 +29,7 @@ import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.compone
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { FinishImportComponent } from './import/finish/finish.component';
+import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 
 let appRoutes: Routes = [
     {
@@ -48,13 +49,13 @@ let appRoutes: Routes = [
         path: 'imports',
         component: ImportComponent,
         children: [
-            {
-                path: '',
-                pathMatch: 'full',
-                redirectTo: 'upload'
+            {   path: 'upload',
+                component: DicomUploadComponent,
+                data: [{importMode: 'dicom'}]
             }, {
-                path: 'upload',
-                component: DicomUploadComponent
+                path: 'pacs',
+                component: QueryPacsComponent,
+                data: [{importMode: 'pacs'}]
             }, {
                 path: 'series',
                 component: SelectSeriesComponent

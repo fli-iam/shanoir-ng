@@ -47,12 +47,13 @@ import { SubjectExaminationPipe } from './examinations/shared/subject-examinatio
 import { ExaminationTreeComponent } from './examinations/tree/examination-tree.component';
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
-import { DicomArchiveService } from './import/dicom-archive.service';
+import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
+import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ImportComponent } from './import/import.component';
-import { ImportDataService } from './import/import.data-service';
-import { ImportService } from './import/import.service';
+import { ImportDataService } from './import/shared/import.data-service';
+import { ImportService } from './import/shared/import.service';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { NiftiConverterService } from './niftiConverters/nifti.converter.service';
 import { RoleService } from './roles/role.service';
@@ -177,6 +178,7 @@ import { ServiceLocator } from './utils/locator.service';
         ProcessedDatasetTypeComponent,
         SelectSeriesComponent,
         DicomUploadComponent,
+        QueryPacsComponent,
         ClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,

@@ -6,14 +6,14 @@ import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
-import { ImportJob, PatientDicom } from '../dicom-data.model';
-import { ImportService } from '../import.service';
-import { ImportDataService, ContextData } from '../import.data-service';
+import { ImportJob, PatientDicom } from '../shared/dicom-data.model';
+import { ImportService } from '../shared/import.service';
+import { ImportDataService, ContextData } from '../shared/import.data-service';
 
 @Component({
     selector: 'finish-import',
     templateUrl: 'finish.component.html',
-    styleUrls: ['finish.component.css', '../import.step.css']
+    styleUrls: ['finish.component.css', '../shared/import.step.css']
 })
 export class FinishImportComponent {
 

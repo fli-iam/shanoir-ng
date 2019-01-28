@@ -4,14 +4,14 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../breadcrumbs/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
-import { PatientDicom, SerieDicom } from '../dicom-data.model';
-import { ImportDataService } from '../import.data-service';
-import { ImportService } from '../import.service';
+import { PatientDicom, SerieDicom } from '../shared/dicom-data.model';
+import { ImportDataService } from '../shared/import.data-service';
+import { ImportService } from '../shared/import.service';
 
 @Component({
     selector: 'select-series',
     templateUrl: 'select-series.component.html',
-    styleUrls: ['select-series.component.css', '../import.step.css'],
+    styleUrls: ['select-series.component.css', '../shared/import.step.css'],
     animations: [slideDown]
 })
 export class SelectSeriesComponent {

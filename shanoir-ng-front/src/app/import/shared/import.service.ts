@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
-import * as AppUtils from '../utils/app.utils';
+import * as AppUtils from '../../utils/app.utils';
 import { ImportJob } from './dicom-data.model';
 
 

@@ -19,13 +19,13 @@ import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-catego
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { EquipmentDicom, PatientDicom } from '../dicom-data.model';
-import { ContextData, ImportDataService } from '../import.data-service';
+import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
+import { ContextData, ImportDataService } from '../shared/import.data-service';
 
 @Component({
     selector: 'clinical-context',
     templateUrl: 'clinical-context.component.html',
-    styleUrls: ['clinical-context.component.css', '../import.step.css'],
+    styleUrls: ['clinical-context.component.css', '../shared/import.step.css'],
     animations: [slideDown]
 })
 export class ClinicalContextComponent{

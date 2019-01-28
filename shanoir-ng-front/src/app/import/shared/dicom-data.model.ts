@@ -1,5 +1,5 @@
-import { Subject } from "../subjects/shared/subject.model";
-import { Sex } from "../subjects/shared/subject.types";
+import { Subject } from "../../subjects/shared/subject.model";
+import { Sex } from "../../subjects/shared/subject.types";
 
 export class ImportJob {
     fromDicomZip: boolean;

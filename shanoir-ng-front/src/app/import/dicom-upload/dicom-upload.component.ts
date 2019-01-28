@@ -1,20 +1,18 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
-import { DicomArchiveService } from '../dicom-archive.service';
-import { ImportJob } from '../dicom-data.model';
-import { ImportDataService } from '../import.data-service';
-import { ImportService } from '../import.service';
-
+import { DicomArchiveService } from '../shared/dicom-archive.service';
+import { ImportJob } from '../shared/dicom-data.model';
+import { ImportDataService } from '../shared/import.data-service';
+import { ImportService } from '../shared/import.service';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
 @Component({
     selector: 'dicom-upload',
     templateUrl: 'dicom-upload.component.html',
-    styleUrls: ['dicom-upload.component.css', '../import.step.css'],
+    styleUrls: ['dicom-upload.component.css', '../shared/import.step.css'],
     animations: [slideDown]
 })
 export class DicomUploadComponent {
