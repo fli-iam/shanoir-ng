@@ -90,7 +90,6 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 
 			if (names != null) {
 				if (names.getStudy() != null) {
-					
 					examinationDTO.setStudy(new IdNameDTO(studyIds.getStudyId(), names.getStudy().getName()));
 				}
 

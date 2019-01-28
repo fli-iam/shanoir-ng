@@ -15,13 +15,12 @@ import javax.persistence.PostLoad;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
-import org.shanoir.ng.shared.jackson.LocalDateDeserializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Examination.
@@ -55,7 +54,7 @@ public class Examination extends HalEntity {
 
 	/** Examination date. */
 	@NotNull
-	@JsonDeserialize(using = LocalDateDeserializer.class)
+	@LocalDateAnnotations
 	private LocalDate examinationDate;
 
 	/**

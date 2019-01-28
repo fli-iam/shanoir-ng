@@ -1,6 +1,6 @@
 package org.shanoir.ng.user;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -150,7 +150,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		// Guarantees it is a creation, not an update
 		user.setId(null);
 		// Set creation date on creation.
-		user.setCreationDate(new Date());
+		user.setCreationDate(LocalDate.now());
 
 		/* Save user in db. */
 		try {

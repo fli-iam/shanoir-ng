@@ -32,7 +32,7 @@ export class ExtensionRequestComponent implements OnInit {
     }
 
      getUser(): void {
-        this.userService.getUser(KeycloakService.auth.userId)
+        this.userService.get(KeycloakService.auth.userId)
         .then((user: User) => {
             this.extensionRequestInfo.extensionDate = new Date();
             if (user.expirationDate) {

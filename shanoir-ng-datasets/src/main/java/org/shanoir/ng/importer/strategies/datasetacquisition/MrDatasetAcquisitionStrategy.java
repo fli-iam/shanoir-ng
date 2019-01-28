@@ -1,6 +1,7 @@
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -75,7 +76,8 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		if(mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
 			Double totalAcquisitionTime = null;
 			if (datasetsWrapper.getFirstImageAcquisitionTime() != null && datasetsWrapper.getLastImageAcquisitionTime() != null) {
-				totalAcquisitionTime = new Double(datasetsWrapper.getLastImageAcquisitionTime().getTime() - datasetsWrapper.getFirstImageAcquisitionTime().getTime());
+				Duration duration = Duration.between(datasetsWrapper.getLastImageAcquisitionTime(), datasetsWrapper.getFirstImageAcquisitionTime());
+				totalAcquisitionTime = new Double(duration.toMillis());
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(totalAcquisitionTime);
 			} else {
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);

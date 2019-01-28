@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -94,7 +96,7 @@ public class UserRepositoryTest {
 	@Test
 	public void findByExpirationDateLessThanAndFirstExpirationNotificationSentFalseTest() throws Exception {
 		// 15/06/2017
-		final Date date = new Date(1497484800000L);
+		final LocalDate date = Instant.ofEpochMilli(1497484800000L).atZone(ZoneId.systemDefault()).toLocalDate();
 		List<User> usersDb = repository.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(date);
 		assertThat(usersDb.size()).isEqualTo(1);
 		assertThat(usersDb.get(0).getId()).isEqualTo(5L);
@@ -103,7 +105,7 @@ public class UserRepositoryTest {
 	@Test
 	public void findByExpirationDateLessThanAndSecondExpirationNotificationSentFalseTest() throws Exception {
 		// 01/01/2017
-		final Date date = new Date(1483228800000L);
+		final LocalDate date = Instant.ofEpochMilli(1483228800000L).atZone(ZoneId.systemDefault()).toLocalDate();
 		List<User> usersDb = repository.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(date);
 		assertThat(usersDb.size()).isEqualTo(1);
 		assertThat(usersDb.get(0).getId()).isEqualTo(4L);

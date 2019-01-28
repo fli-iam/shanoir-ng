@@ -1,4 +1,4 @@
-package org.shanoir.ng.shared.jackson;
+package org.shanoir.ng.shared.dateTime;
 
 import java.io.IOException;
 import java.time.Instant;

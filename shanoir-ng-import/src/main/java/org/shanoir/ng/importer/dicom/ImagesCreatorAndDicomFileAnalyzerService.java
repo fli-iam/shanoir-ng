@@ -23,6 +23,7 @@ import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -376,7 +377,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			serie.setIsSpectroscopy(false);
 		}
 		if (serie.getSeriesDate() == null) {
-			serie.setSeriesDate(attributes.getDate(Tag.SeriesDate));
+			serie.setSeriesDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate)));
 		}
 		if (serie.getIsCompressed() == null) {
 			String transferSyntaxUID = attributes.getString(Tag.TransferSyntaxUID);
@@ -402,7 +403,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void checkPatientData(Patient patient, Attributes attributes) {
 		if (patient.getPatientBirthDate() == null) {
 			// has not been found in dicomdir, so we get it from .dcm file:
-			patient.setPatientBirthDate(attributes.getDate(Tag.PatientBirthDate));
+			patient.setPatientBirthDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate)));
 		}
 		if (StringUtils.isEmpty(patient.getPatientSex())) {
 			// has not been found in dicomdir, so we get it from .dcm file:
