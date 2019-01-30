@@ -41,15 +41,7 @@ add_header_to () {
     imPrevHead=$(< var/previous_commented_tmp)
     for arg in "$@"; do
         echo -n "searching for $arg ..."
-        files=$(find $dir -name "$arg" \
-            -not -path "*/node_modules/*" \
-            -not -path "*/dist/*" \
-            -not -path "*/target/*" \ 
-            -not -path "*/bin/*" \
-            -not -path "*/webapp/*" \ 
-            -not -path "*/mnt-dist/*" \
-            -not -path "*/.mvn/*" \
-            -not -path "*/src/assets/*")
+        files=$(find $dir -name "$arg" -not -path "*/node_modules/*" -not -path "*/dist/*" -not -path "*/target/*" -not -path "*/bin/*" -not -path "*/webapp/*" -not -path "*/mnt-dist/*" -not -path "*/.mvn/*" -not -path "*/src/assets/*")
         echo ' [DONE]'
         for file in $files; do
             imFile=$(< $file)
