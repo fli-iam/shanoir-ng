@@ -11,7 +11,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.studyuser.StudyUser;
-import org.shanoir.ng.studyuser.StudyUserType;
+import org.shanoir.ng.studyuser.StudyUserRight;
 import org.shanoir.ng.subjectstudy.SubjectStudyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -100,7 +100,7 @@ public abstract class StudyDecorator implements StudyMapper {
 
 	private void prepareMembersCategories(final Study study, final StudyDTO studyDTO) {
 		// Sort members by category (studyUserType)
-		final Map<StudyUserType, List<IdNameDTO>> membersMap = new HashMap<>();
+		final Map<StudyUserRight, List<IdNameDTO>> membersMap = new HashMap<>();
 		for (StudyUser studyUser : study.getStudyUserList()) {
 			final IdNameDTO member = new IdNameDTO(studyUser.getUserId(), studyUser.getUserName());
 			if (membersMap.containsKey(studyUser.getStudyUserType())) {
@@ -113,7 +113,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		}
 		// Transform map into list
 		studyDTO.setMembersCategories(new ArrayList<>());
-		for (StudyUserType type : membersMap.keySet()) {
+		for (StudyUserRight type : membersMap.keySet()) {
 			studyDTO.getMembersCategories().add(new MembersCategoryDTO(type, membersMap.get(type)));
 		}
 		// Sort categories by importance

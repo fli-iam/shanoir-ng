@@ -101,15 +101,15 @@ public class StudyUser extends AbstractGenericItem{
 	/**
 	 * @return the studyUserType
 	 */
-	public StudyUserType getStudyUserType() {
-		return StudyUserType.getType(studyUserType);
+	public StudyUserRight getStudyUserType() {
+		return StudyUserRight.getType(studyUserType);
 	}
 
 	/**
 	 * @param studyUserType
 	 *            the studyUserType to set
 	 */
-	public void setStudyUserType(StudyUserType studyUserType) {
+	public void setStudyUserType(StudyUserRight studyUserType) {
 		if (studyUserType != null) {
 			this.studyUserType = studyUserType.getId();
 		}

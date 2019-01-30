@@ -12,7 +12,7 @@ import org.shanoir.ng.manufacturermodel.ManufacturerModel;
 import org.shanoir.ng.shared.common.CommonIdsDTO;
 import org.shanoir.ng.study.Study;
 import org.shanoir.ng.studyuser.StudyUser;
-import org.shanoir.ng.studyuser.StudyUserType;
+import org.shanoir.ng.studyuser.StudyUserRight;
 import org.shanoir.ng.subject.Subject;
 
 /**
@@ -150,7 +150,7 @@ public final class ModelsUtil {
 	public static StudyUser createStudyUser() {
 		final StudyUser studyUser = new StudyUser();
 		studyUser.setStudyId(STUDY_ID);
-		studyUser.setStudyUserType(StudyUserType.RESPONSIBLE);
+		studyUser.setStudyUserType(StudyUserRight.RESPONSIBLE);
 		studyUser.setUserId(USER_ID);
 		return studyUser;
 	}

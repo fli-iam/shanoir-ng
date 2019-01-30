@@ -11,7 +11,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.AccessDeniedException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.SecurityContextTestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ public class StudyApiControllerTest {
 	private StudyService studyServiceMock;
 
 	@Before
-	public void setup() throws ShanoirStudiesException {
+	public void setup() throws AccessDeniedException, EntityNotFoundException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		given(studyMapperMock.studiesToStudyDTOs(Mockito.anyListOf(Study.class)))
@@ -65,7 +66,7 @@ public class StudyApiControllerTest {
 
 		doNothing().when(studyServiceMock).deleteById(1L);
 		given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
-		given(studyServiceMock.findById(1L, 1L)).willReturn(new Study());
+		given(studyServiceMock.findById(1L)).willReturn(new Study());
 		given(studyServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
 		given(studyServiceMock.save(Mockito.mock(Study.class))).willReturn(new Study());
 	}

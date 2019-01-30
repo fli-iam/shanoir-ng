@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import org.shanoir.ng.center.Center;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyuser.StudyUser;
-import org.shanoir.ng.studyuser.StudyUserType;
+import org.shanoir.ng.studyuser.StudyUserRight;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,7 +167,7 @@ public class StudyApiControllerTestIT extends KeycloakControllerTestIT {
 	private StudyUser createStudyUser() {
 		final StudyUser studyUser = new StudyUser();
 		studyUser.setStudyId(1L);
-		studyUser.setStudyUserType(StudyUserType.RESPONSIBLE);
+		studyUser.setStudyUserType(StudyUserRight.CAN_ADMINISTRATE);
 		studyUser.setUserId(1L);
 		return studyUser;
 	}

@@ -7,6 +7,7 @@ import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.exception.TokenNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -28,11 +29,11 @@ public final class KeycloakUtil {
 	 * @return user roles.
 	 * @throws ShanoirStudiesException
 	 */
-	public static Set<String> getTokenRoles() throws ShanoirException {
+	public static Set<String> getTokenRoles() {
 		final KeycloakSecurityContext context = getKeycloakSecurityContext();
 		final AccessToken accessToken = context.getToken();
 		if (accessToken == null) {
-			throw new ShanoirException("Token not found");
+			throw new TokenNotFoundException("Access token not found");
 		}
 		return accessToken.getRealmAccess().getRoles();
 	}
@@ -43,11 +44,11 @@ public final class KeycloakUtil {
 	 * @return user id.
 	 * @throws ShanoirStudiesException
 	 */
-	public static Long getTokenUserId() throws ShanoirException {
+	public static Long getTokenUserId() {
 		final KeycloakSecurityContext context = getKeycloakSecurityContext();
 		final AccessToken accessToken = context.getToken();
 		if (accessToken == null) {
-			throw new ShanoirException("Token not found");
+			throw new TokenNotFoundException("Access token not found");
 		}
 		final Map<String, Object> otherClaims = accessToken.getOtherClaims();
 		if (otherClaims.containsKey(USER_ID_TOKEN_ATT)) {
@@ -77,9 +78,9 @@ public final class KeycloakUtil {
 	 * @throws ShanoirStudiesException
 	 */
 	@SuppressWarnings("rawtypes")
-	private static KeycloakSecurityContext getKeycloakSecurityContext() throws ShanoirException {
+	private static KeycloakSecurityContext getKeycloakSecurityContext() throws SecurityException {
 		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
-			throw new ShanoirException("Anonymous user");
+			throw new SecurityException("Anonymous user");
 		}
 		final KeycloakPrincipal principal = (KeycloakPrincipal) SecurityContextHolder.getContext().getAuthentication()
 				.getPrincipal();

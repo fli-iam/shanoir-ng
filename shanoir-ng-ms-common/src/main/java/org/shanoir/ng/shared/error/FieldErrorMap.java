@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.shanoir.ng.shared.exception.AccessDeniedException;
+import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
+import org.shanoir.ng.shared.validation.UniqueCheckableService;
+import org.shanoir.ng.shared.validation.UniqueValidator;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
@@ -13,7 +18,7 @@ import org.springframework.validation.ObjectError;
  * @author msimon
  *
  */
-public class FieldErrorMap extends HashMap<String, List<FieldError>> {
+public class FieldErrorMap<T extends AbstractGenericItem> extends HashMap<String, List<FieldError>> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,12 +29,6 @@ public class FieldErrorMap extends HashMap<String, List<FieldError>> {
 		super();
 	}
 
-	/**
-	 * Constructor
-	 */
-	public FieldErrorMap(FieldErrorMap... maps) {
-		this.merge(maps);
-	}
 
 	/**
 	 * Constructor
@@ -56,16 +55,36 @@ public class FieldErrorMap extends HashMap<String, List<FieldError>> {
 	 *
 	 * @param maps
 	 */
-	public void merge(FieldErrorMap... maps) {
-		for (FieldErrorMap map : maps) {
-			for (String fieldName : map.keySet()) {
-				List<FieldError> error = map.get(fieldName);
-				if (!this.containsKey(fieldName)) {
-					this.put(fieldName, error);
-				} else {
-					this.get(fieldName).addAll(error);
-				}
+	public FieldErrorMap<T> merge(FieldErrorMap<T> map) {
+		for (String fieldName : map.keySet()) {
+			List<FieldError> error = map.get(fieldName);
+			if (!this.containsKey(fieldName)) {
+				this.put(fieldName, error);
+			} else {
+				this.get(fieldName).addAll(error);
 			}
 		}
+		return this;
 	}
+
+	public FieldErrorMap<T> checkFieldAccess(T entity) {
+		FieldErrorMap<T> newErrors = new EditableOnlyByValidator<T>().validate(entity);
+		return this.merge(newErrors);
+	}
+	
+	public FieldErrorMap<T> checkFieldAccess(T entity, UniqueCheckableService<T> service) throws AccessDeniedException {
+		T dbEntity = service.findById(entity.getId());
+		FieldErrorMap<T> newErrors = new EditableOnlyByValidator<T>().validate(entity, dbEntity);
+		return this.merge(newErrors);
+	}
+
+	public FieldErrorMap<T> checkBindingContraints(BindingResult result) {
+		return this.merge(new FieldErrorMap<T>(result));
+	}
+
+	public FieldErrorMap<T> checkUniqueConstraints(T entity, UniqueCheckableService<T> service) {
+		final UniqueValidator<T> uniqueValidator = new UniqueValidator<T>(service);
+		return this.merge(uniqueValidator.validate(entity));
+	}
+
 }

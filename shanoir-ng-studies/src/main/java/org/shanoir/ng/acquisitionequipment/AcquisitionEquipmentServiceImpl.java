@@ -3,6 +3,7 @@ package org.shanoir.ng.acquisitionequipment;
 import java.util.List;
 
 import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.utils.Utils;
@@ -38,12 +39,9 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	private RabbitTemplate rabbitTemplate;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirStudiesException {
+	public void deleteById(final Long id) throws EntityNotFoundException {
 		final AcquisitionEquipment equipment = acquisitionEquipmentRepository.findOne(id);
-		if (equipment == null) {
-			LOG.error("Acquisition equipment with id " + id + " not found");
-			throw new ShanoirStudiesException(StudiesErrorModelCode.ACQ_EQPT_NOT_FOUND);
-		}
+		if (equipment == null) throw new EntityNotFoundException(AcquisitionEquipment.class, id);
 		acquisitionEquipmentRepository.delete(id);
 		deleteEquipmentOnShanoirOld(id);
 	}

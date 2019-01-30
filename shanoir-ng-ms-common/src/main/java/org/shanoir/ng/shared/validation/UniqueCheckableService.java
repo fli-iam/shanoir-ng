@@ -2,6 +2,7 @@ package org.shanoir.ng.shared.validation;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
@@ -23,5 +24,14 @@ public interface UniqueCheckableService<T extends AbstractGenericItem> {
 	 * @return list of items.
 	 */
 	List<T> findBy(String fieldName, Object value);
+	
+	/**
+	 * Find entity by its id. Check if current user can see study.
+	 *
+	 * @param id id
+	 * @return an entity or null.
+	 * @throws AccessDeniedException 
+	 */
+	T findById(Long id) throws AccessDeniedException;
 
 }

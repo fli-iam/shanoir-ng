@@ -62,13 +62,13 @@ public class UniqueValidator <T extends AbstractGenericItem> {
 						// If found entities and it is not the same current entity
 						if (!foundedList.isEmpty() && !(foundedList.size() == 1 && foundedList.get(0).getId().equals(entity.getId()))) {
 							List<FieldError> errors = new ArrayList<FieldError>();
-							errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", value));
+							errors.add(new FieldError("unique", "The given value is already taken for this field, choose another value", value));
 							errorMap.put(field.getName(), errors);
 						}
 					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 						LOG.error("Error while checking @Unique custom annotation", e);
 					} catch (NoSuchMethodException e) {
-						LOG.error("Error while checking @EditableOnlyBy custom annotation, you must implement a method named "
+						LOG.error("Error while checking @Unique custom annotation, you must implement a method named "
 								+ getterName + "() for accessing " + entity.getClass().getName() + "." + field.getName());
 					}
 				}

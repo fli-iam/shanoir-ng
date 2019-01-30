@@ -3,113 +3,63 @@ package org.shanoir.ng.study;
 import java.util.List;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.AccessDeniedException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 /**
  * Study service.
- * 
- * @author msimon
  *
  */
+@Service
 public interface StudyService extends UniqueCheckableService<Study> {
 
-	/**
-	 * Check if an user can update a study.
-	 * 
-	 * @param studyId
-	 *            study id.
-	 * @param userId
-	 *            user id.
-	 * @return true or false.
-	 */
-	boolean canUserUpdateStudy(Long studyId, Long userId);
 
 	/**
 	 * Delete a study. Do check before if current user can delete study!
 	 *
 	 * @param id
 	 *            study id.
+	 * @throws EntityNotFoundException 
+	 * @throws AccessDeniedException 
 	 */
-	void deleteById(Long id);
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and hasPermission(#id, 'Study', 'CAN_ADMINISTRATE')")
+	void deleteById(Long id) throws EntityNotFoundException, AccessDeniedException;
 
-	/**
-	 * Get all the studies
-	 * 
-	 * @return a list of studies
-	 */
-	List<Study> findAll();
-
-	/**
-	 * Find study by its id.
-	 *
-	 * @param id
-	 *            study id.
-	 * @return a study or null.
-	 */
-	Study findById(Long id);
 
 	/**
 	 * Find study by its id. Check if current user can see study.
 	 *
 	 * @param id
 	 *            study id.
-	 * @param userId
-	 *            user id.
 	 * @return a study or null.
-	 * @throws ShanoirStudiesException
+	 * @throws AccessDeniedException 
 	 */
-	Study findById(Long id, Long userId) throws ShanoirStudiesException;
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
+	@PostAuthorize("hasPermission(returnObject, 'CAN_SEE_ALL')")
+	Study findById(Long id); 
 
+
+	/**
+	 * Get all the studies
+	 * 
+	 * @return a list of studies
+	 */
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
+	List<Study> findAll();
+	
+	
 	/**
 	 * Find id and name for all studies.
 	 * 
 	 * @return list of studies.
 	 */
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	List<IdNameDTO> findIdsAndNames();
 
-	/**
-	 * Find all studies for a user.
-	 * 
-	 * @param userId
-	 *            user id.
-	 * @return a list of studies.
-	 */
-	List<Study> findStudiesByUserId(Long userId);
-
-	/**
-	 * Find all studies for a user with permission level (studyUserType) lower than or equal to specified value.
-	 * 
-	 * @param userId
-	 *            user id.
-	 * @param studyUserTypeId
-	 *            studyUserType id.
-	 * @return a list of studies.
-	 */
-	List<Study> findStudiesByUserIdAndStudyUserTypeLessThanEqual(final Long userId,final Integer studyUserTypeId);
-
-	/**
-	 * Find all studies that the user is allowed to see and to import.
-	 * 
-	 * @param userId
-	 *            user id.
-	 * @return a list of studies.
-	 * @throws ShanoirException
-	 */
-	List<Study> findStudiesForImport(Long userId);
-	
-	/**
-	 * Check if an user is responsible of the study.
-	 * 
-	 * @param studyId
-	 *            study id.
-	 * @param userId
-	 *            user id.
-	 * @return true if user is responsible
-	 * @throws ShanoirStudiesException
-	 */
-	boolean isUserResponsible(Long studyId, Long userId) throws ShanoirStudiesException;
 
 	/**
 	 * add new study
@@ -118,24 +68,20 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @return created Study
 	 * @throws ShanoirStudiesException
 	 */
-	Study save(Study study) throws ShanoirStudiesException;
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and hasPermission(#id, 'Study', 'CAN_ADMINISTRATE')")
+	Study save(Study study);
 
+	
 	/**
 	 * Update a study
 	 * 
 	 * @param study
 	 * @return updated study
 	 * @throws ShanoirStudiesException
+	 * @throws EntityNotFoundException 
+	 * @throws AccessDeniedException 
 	 */
-	Study update(Study study) throws ShanoirStudiesException;
-
-	/**
-	 * Update a Study from the old Shanoir
-	 *
-	 * @param Study
-	 *            Study.
-	 * @throws ShanoirStudiesException
-	 */
-	void updateFromShanoirOld(Study study) throws ShanoirStudiesException;
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and hasPermission(#id, 'Study', 'CAN_ADMINISTRATE')")
+	Study update(Study study) throws EntityNotFoundException, AccessDeniedException;
 
 }

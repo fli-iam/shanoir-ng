@@ -2,6 +2,7 @@ package org.shanoir.ng.acquisitionequipment;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 
@@ -20,7 +21,7 @@ public interface AcquisitionEquipmentService extends UniqueCheckableService<Acqu
 	 *            acquisition equipment id.
 	 * @throws ShanoirStudiesException
 	 */
-	void deleteById(Long id) throws ShanoirStudiesException;
+	void deleteById(Long id) throws EntityNotFoundException;
 
 	/**
 	 * Get all the acquisition equipments.

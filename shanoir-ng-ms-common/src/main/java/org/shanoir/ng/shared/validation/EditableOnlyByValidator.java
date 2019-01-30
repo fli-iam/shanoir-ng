@@ -10,6 +10,7 @@ import java.util.List;
 import org.keycloak.KeycloakPrincipal;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ import org.springframework.util.StringUtils;
  *
  * @param <T>
  */
-public class EditableOnlyByValidator<T> {
+public class EditableOnlyByValidator<T extends AbstractGenericItem> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(EditableOnlyByValidator.class);
 
@@ -36,9 +37,9 @@ public class EditableOnlyByValidator<T> {
 	 * @param user
 	 * @return the forgotten fields names
 	 */
-	public FieldErrorMap validate(final T originalEntity, final T editedEntity) {
+	public FieldErrorMap<T> validate(final T originalEntity, final T editedEntity) {
 		final Collection<String> connectedUserRoles = getConnectedUserRoles();
-		final FieldErrorMap errorMap = new FieldErrorMap();
+		final FieldErrorMap<T> errorMap = new FieldErrorMap<T>();
 		try {
 			for (final Field field : originalEntity.getClass().getDeclaredFields()) {
 				if (field.isAnnotationPresent(EditableOnlyBy.class)) {
@@ -78,9 +79,9 @@ public class EditableOnlyByValidator<T> {
 	 * @param user
 	 * @return the forgotten fields names
 	 */
-	public FieldErrorMap validate(final T editedEntity) {
+	public FieldErrorMap<T> validate(final T editedEntity) {
 		final Collection<String> connectedUserRoles = getConnectedUserRoles();
-		final FieldErrorMap errorMap = new FieldErrorMap();
+		final FieldErrorMap<T> errorMap = new FieldErrorMap<T>();
 		try {
 			for (final Field field : editedEntity.getClass().getDeclaredFields()) {
 				if (field.isAnnotationPresent(EditableOnlyBy.class)) {

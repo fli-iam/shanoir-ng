@@ -91,8 +91,7 @@ public class EditableOnlyByValidator<T> {
 						final Object givenValue = editedGetter.invoke(editedEntity);
 						if (givenValue != null && !haveOneRoleInCommon(annotation.roles(), connectedUserRoles)) {
 							final List<FieldError> errors = new ArrayList<FieldError>();
-							errors.add(new FieldError("unauthorized", "You do not have the right to edit this field",
-									givenValue));
+							errors.add(new FieldError("unauthorized", "You do not have the right to edit this field", givenValue));
 							errorMap.put(field.getName(), errors);
 						}
 					} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {

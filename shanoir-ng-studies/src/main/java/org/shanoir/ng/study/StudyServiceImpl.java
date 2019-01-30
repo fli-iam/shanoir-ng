@@ -4,20 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
-import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
+import org.shanoir.ng.shared.exception.AccessDeniedException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.studyuser.StudyUserRepository;
-import org.shanoir.ng.studyuser.StudyUserType;
+import org.shanoir.ng.studyuser.StudyUserRight;
 import org.shanoir.ng.subjectstudy.SubjectStudy;
 import org.shanoir.ng.subjectstudy.SubjectStudyRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Implementation of study service.
@@ -25,13 +22,8 @@ import org.springframework.util.CollectionUtils;
  * @author msimon
  *
  */
-@Service
 public class StudyServiceImpl implements StudyService {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
 	
 	@Autowired
 	private StudyCenterRepository studyCenterRepository;
@@ -45,27 +37,12 @@ public class StudyServiceImpl implements StudyService {
 	@Autowired
 	private StudyRepository studyRepository;
 
-	@Override
-	public boolean canUserUpdateStudy(final Long studyId, final Long userId) {
-		final Study study = studyRepository.findOne(studyId);
-		for (final StudyUser studyUser : study.getStudyUserList()) {
-			if (userId.equals(studyUser.getUserId()) && (StudyUserType.RESPONSIBLE.equals(studyUser.getStudyUserType())
-					|| StudyUserType.SEE_DOWNLOAD_IMPORT_MODIFY.equals(studyUser.getStudyUserType()))) {
-				return true;
-			}
-		}
-		LOG.warn("User with id " + userId + " can't update study with id " + studyId);
-		return false;
-	}
 
 	@Override
-	public void deleteById(final Long id) {
-		studyRepository.delete(id);
-	}
-
-	@Override
-	public List<Study> findAll() {
-		return studyRepository.findAll();
+	public void deleteById(final Long id) throws EntityNotFoundException, AccessDeniedException {
+		final Study study = studyRepository.findOne(id);
+		if (study == null) throw new EntityNotFoundException(Study.class, id);
+		studyRepository.delete(id);			
 	}
 
 	@Override
@@ -74,79 +51,35 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public Study findById(Long id) {
+	public Study findById(final Long id) {
 		return studyRepository.findOne(id);
 	}
 
 	@Override
-	public Study findById(final Long id, final Long userId) throws ShanoirStudiesException {
-		final Study study = studyRepository.findOne(id);
-		for (final StudyUser studyUser : study.getStudyUserList()) {
-			if (userId.equals(studyUser.getUserId())
-					&& !StudyUserType.NOT_SEE_DOWNLOAD.equals(studyUser.getStudyUserType())) {
-				return studyRepository.findOne(id);
+	public Study save(final Study study) {
+		if (study.getStudyCenterList() != null) {
+			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
+				studyCenter.setStudy(study);			} 
+			
+		}
+		if (study.getSubjectStudyList() != null) {
+			for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+				subjectStudy.setStudy(study);
 			}
 		}
-		LOG.error("User with id " + userId + " can't see study with id " + id);
-		throw new ShanoirStudiesException(StudiesErrorModelCode.NO_RIGHT_FOR_ACTION);
-	}
-
-	@Override
-	public List<IdNameDTO> findIdsAndNames() {
-		return studyRepository.findIdsAndNames();
-	}
-
-	@Override
-	public List<Study> findStudiesByUserId(final Long userId) {
-		return studyRepository.findByStudyUserList_UserIdOrderByNameAsc(userId);
-	}
-	
-	public List<Study> findStudiesByUserIdAndStudyUserTypeLessThanEqual(final Long userId,final Integer studyUserTypeId) {
-		return studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserTypeLessThanEqualOrderByNameAsc(userId,studyUserTypeId);		
-	}
-
-	@Override
-	public List<Study> findStudiesForImport(final Long userId) {
-		final List<Study> studies = findStudiesByUserIdAndStudyUserTypeLessThanEqual(userId, StudyUserType.SEE_DOWNLOAD_IMPORT.getId());
-		if (CollectionUtils.isEmpty(studies)) {
-			return new ArrayList<>();
-		}
-		return studies;
-	}
-	
-	@Override
-	public boolean isUserResponsible(final Long studyId, final Long userId) throws ShanoirStudiesException {
-		final Study study = studyRepository.findOne(studyId);
-		if (study == null) {
-			LOG.error("Study with id " + studyId + " not found");
-			throw new ShanoirStudiesException(StudiesErrorModelCode.STUDY_NOT_FOUND);
-		}
-		for (final StudyUser studyUser : study.getStudyUserList()) {
-			if (userId.equals(studyUser.getUserId())
-					&& StudyUserType.RESPONSIBLE.equals(studyUser.getStudyUserType())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public Study save(final Study study) throws ShanoirStudiesException {
-		for (final StudyCenter studyCenter : study.getStudyCenterList()) {
-			studyCenter.setStudy(study);
-		} 
-		for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-			subjectStudy.setStudy(study);
-		}
-		for (final StudyUser studyUser: study.getStudyUserList()) {
-			studyUser.setStudyId(study.getId());
+		if (study.getStudyUserList() != null) {
+			for (final StudyUser studyUser: study.getStudyUserList()) {
+				studyUser.setStudyId(study.getId());
+			}			
 		}
 		return studyRepository.save(study);
 	}
 
 	@Override
-	public Study update(final Study study) throws ShanoirStudiesException {
+	public Study update(final Study study) throws EntityNotFoundException, AccessDeniedException {
 		final Study studyDb = studyRepository.findOne(study.getId());
+		if (studyDb == null) throw new EntityNotFoundException(Study.class, study.getId());
+		
 		studyDb.setClinical(study.isClinical());
 		studyDb.setDownloadableByDefault(study.isDownloadableByDefault());
 		studyDb.setEndDate(study.getEndDate());
@@ -181,13 +114,17 @@ public class StudyServiceImpl implements StudyService {
 		}
 		
 		// Copy list of database links subject/study
-		final List<SubjectStudy> subjectStudyDbList = new ArrayList<>(studyDb.getSubjectStudyList());
-		for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-			if (subjectStudy.getId() == null) {
-				// Add link subject/study
-				subjectStudy.setStudy(studyDb);
-				studyDb.getSubjectStudyList().add(subjectStudy);
-			}
+		final List<SubjectStudy> subjectStudyDbList = studyDb.getSubjectStudyList() != null 
+				? new ArrayList<>(studyDb.getSubjectStudyList())
+				: new ArrayList<>();
+		if (study.getSubjectStudyList() != null) {
+			for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+				if (subjectStudy.getId() == null) {
+					// Add link subject/study
+					subjectStudy.setStudy(studyDb);
+					studyDb.getSubjectStudyList().add(subjectStudy);
+				}
+			}			
 		}
 		for (final SubjectStudy subjectStudyDb : subjectStudyDbList) {
 			boolean keepSubjectStudy = false;
@@ -205,21 +142,25 @@ public class StudyServiceImpl implements StudyService {
 		}
 		
 		// Copy list of database links study/user
-		final List<StudyUser> studyUserDbList = new ArrayList<>(studyDb.getStudyUserList());
-		for (final StudyUser studyUser : study.getStudyUserList()) {
-			if (studyUser.getId() == null) {
-				// Add link study/user
-				studyUser.setStudyId(studyDb.getId());
-				studyDb.getStudyUserList().add(studyUser);
-			} else {
-				for (final StudyUser studyUserDb : studyUserDbList) {
-					if (studyUserDb.getId() == studyUser.getId()) {
-						studyUserDb.setReceiveAnonymizationReport(studyUserDb.isReceiveAnonymizationReport());
-						studyUserDb.setReceiveNewImportReport(studyUser.isReceiveNewImportReport());
-						studyUserDb.setStudyUserType(studyUser.getStudyUserType());
+		final List<StudyUser> studyUserDbList = studyDb.getStudyUserList() != null 
+				? new ArrayList<>(studyDb.getStudyUserList())
+				: new ArrayList<>();
+		if (study.getStudyUserList() != null) {
+			for (final StudyUser studyUser : study.getStudyUserList()) {
+				if (studyUser.getId() == null) {
+					// Add link study/user
+					studyUser.setStudyId(studyDb.getId());
+					studyDb.getStudyUserList().add(studyUser);
+				} else {
+					for (final StudyUser studyUserDb : studyUserDbList) {
+						if (studyUserDb.getId() == studyUser.getId()) {
+							studyUserDb.setReceiveAnonymizationReport(studyUserDb.isReceiveAnonymizationReport());
+							studyUserDb.setReceiveNewImportReport(studyUser.isReceiveNewImportReport());
+							studyUserDb.setStudyUserType(studyUser.getStudyUserType());
+						}
 					}
 				}
-			}
+			}			
 		}
 		for (final StudyUser studyUserDb : studyUserDbList) {
 			boolean keepStudyUser = false;
@@ -242,33 +183,23 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void updateFromShanoirOld(final Study study) throws ShanoirStudiesException {
-		if (study.getId() == null) {
-			LOG.info("Insert new Study with name " + study.getName() + " from shanoir-old");
-			try {
-				studyRepository.save(study);
-			} catch (Exception e) {
-				LOG.error("Error while creating study from Shanoir Old", e);
-				throw new ShanoirStudiesException("Error while creating study from Shanoir Old");
-			}
+	public List<Study> findAll() {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return studyRepository.findAll();
 		} else {
-			final Study studyDb = studyRepository.findOne(study.getId());
-			if (studyDb != null) {
-				try {
-					LOG.info("Update existing Study with name " + study.getName() + " (id: " + study.getId()
-							+ ") from shanoir-old");
-					studyRepository.save(study);
-				} catch (Exception e) {
-					LOG.error("Error while updating study from Shanoir Old", e);
-					throw new ShanoirStudiesException("Error while updating study from Shanoir Old");
-				}
-			} else {
-				LOG.warn("Import new study with name " + study.getName() + "  (id: " + study.getId()
-						+ ") from shanoir-old");
-				studyRepository.save(study);
-			}
+			return studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserTypeEqualOrderByNameAsc
+					(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
 		}
+	}
 
+	@Override
+	public List<IdNameDTO> findIdsAndNames() {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return studyRepository.findIdsAndNames();
+		} else {
+			return studyRepository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserTypeEqualOrderByNameAsc
+					(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
+		}
 	}
 
 }

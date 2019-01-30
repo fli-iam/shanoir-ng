@@ -42,8 +42,8 @@ public class UniqueValidator <T extends AbstractGenericItem> {
 	 * @param entity
 	 * @return
 	 */
-	public FieldErrorMap validate(T entity) {
-		FieldErrorMap errorMap = new FieldErrorMap();
+	public FieldErrorMap<T> validate(T entity) {
+		FieldErrorMap<T> errorMap = new FieldErrorMap<T>();
 		try {
 			for (Field field : entity.getClass().getDeclaredFields()) {
 				// check @unique
