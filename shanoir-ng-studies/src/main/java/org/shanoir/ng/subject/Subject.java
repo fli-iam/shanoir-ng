@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.subject;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -32,6 +32,7 @@ import javax.persistence.PostLoad;
 import javax.persistence.SqlResultSetMapping;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
@@ -52,7 +53,8 @@ public class Subject extends HalEntity {
 
 	private static final long serialVersionUID = 6844259659282875507L;
 
-	private Date birthDate;
+	@LocalDateAnnotations
+	private LocalDate birthDate;
 
 	@Unique
 	private String name;
@@ -103,11 +105,11 @@ public class Subject extends HalEntity {
 		return super.getId();
 	}
 
-	public Date getBirthDate() {
+	public LocalDate getBirthDate() {
 		return birthDate;
 	}
 
-	public void setBirthDate(Date birthDate) {
+	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
 	}
 

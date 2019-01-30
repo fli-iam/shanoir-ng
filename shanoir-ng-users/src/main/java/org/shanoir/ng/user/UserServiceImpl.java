@@ -14,13 +14,12 @@
 
 package org.shanoir.ng.user;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.joda.time.DateTime;
 import org.keycloak.KeycloakPrincipal;
 import org.shanoir.ng.accountrequest.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
@@ -193,14 +192,14 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public List<User> getUsersToReceiveFirstExpirationNotification() {
-		final DateTime expirationDateTime = new DateTime().withMillisOfDay(0).plusMonths(1);
-		return userRepository.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(expirationDateTime.toDate());
+		final LocalDate expirationDate = LocalDate.now().plusMonths(1);
+		return userRepository.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(expirationDate);
 	}
 
 	@Override
 	public List<User> getUsersToReceiveSecondExpirationNotification() {
-		final DateTime expirationDateTime = new DateTime().withMillisOfDay(0).plusWeeks(1);
-		return userRepository.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(expirationDateTime.toDate());
+		final LocalDate expirationDate = LocalDate.now().plusWeeks(1);
+		return userRepository.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(expirationDate);
 	}
 
 	@Override
@@ -233,7 +232,7 @@ public class UserServiceImpl implements UserService {
 				// Set role 'guest'
 				user.setRole(roleRepository.findByName("ROLE_GUEST")
 						.orElseThrow(() -> new ShanoirUsersException("Error while getting role 'ROLE_GUEST'")));
-				user.setExpirationDate(new DateTime().plusYears(1).toDate());
+				user.setExpirationDate(LocalDate.now().plusYears(1));
 			}
 			savedUser = userRepository.save(user);
 			if (user.getAccountRequestInfo() != null) {
@@ -291,7 +290,7 @@ public class UserServiceImpl implements UserService {
 	public void updateLastLogin(final String username) throws ShanoirUsersException {
 		final User user = userRepository.findByUsername(username)
 				.orElseThrow(() -> new ShanoirUsersException("User with username " + username + " not found"));
-		user.setLastLogin(new Date());
+		user.setLastLogin(LocalDate.now());
 		try {
 			userRepository.save(user);
 		} catch (Exception e) {

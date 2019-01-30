@@ -14,13 +14,9 @@
 
 package org.shanoir.ng.dataset;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -28,16 +24,12 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.processing.DatasetProcessingType;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
-import org.shanoir.ng.shared.model.EchoTime;
-import org.shanoir.ng.shared.model.FlipAngle;
-import org.shanoir.ng.shared.model.InversionTime;
-import org.shanoir.ng.shared.model.RepetitionTime;
-import javax.persistence.Transient;
 
 /**
  * Dataset expression.
@@ -58,7 +50,7 @@ public class DatasetExpression extends AbstractGenericItem {
 	private List<DatasetExpression> comingFromDatasetExpressions;
 
 	/** Creation date of the dataset expression. */
-	private LocalDate creationDate;
+	private LocalDateTime creationDate;
 
 	/** Expressed dataset. */
 	@ManyToOne
@@ -96,11 +88,11 @@ public class DatasetExpression extends AbstractGenericItem {
  
 	/** Store temporarily the first image acquisition time until all images are processed*/
 	@Transient
-	private  Date firstImageAcquisitionTime;
+	private  LocalDateTime firstImageAcquisitionTime;
 
 	/** Store temporarily the last image acquisition time until all images are processed */
 	@Transient	
-	private Date lastImageAcquisitionTime;
+	private LocalDateTime lastImageAcquisitionTime;
 	
 //	@Transient 
 //	private Map<Integer,EchoTime> echoTimes;
@@ -145,7 +137,7 @@ public class DatasetExpression extends AbstractGenericItem {
 	/**
 	 * @return the creationDate
 	 */
-	public LocalDate getExpressionCreationDate() {
+	public LocalDateTime getExpressionCreationDate() {
 		return creationDate;
 	}
 
@@ -153,7 +145,7 @@ public class DatasetExpression extends AbstractGenericItem {
 	 * @param creationDate
 	 *            the creationDate to set
 	 */
-	public void setCreationDate(LocalDate creationDate) {
+	public void setCreationDate(LocalDateTime creationDate) {
 		this.creationDate = creationDate;
 	}
 
@@ -319,19 +311,19 @@ public class DatasetExpression extends AbstractGenericItem {
 	}
 
 
-	public Date getFirstImageAcquisitionTime() {
+	public LocalDateTime getFirstImageAcquisitionTime() {
 		return firstImageAcquisitionTime;
 	}
 
-	public void setFirstImageAcquisitionTime(Date firstImageAcquisitionTime) {
+	public void setFirstImageAcquisitionTime(LocalDateTime firstImageAcquisitionTime) {
 		this.firstImageAcquisitionTime = firstImageAcquisitionTime;
 	}
 
-	public Date getLastImageAcquisitionTime() {
+	public LocalDateTime getLastImageAcquisitionTime() {
 		return lastImageAcquisitionTime;
 	}
 
-	public void setLastImageAcquisitionTime(Date lastImageAcquisitionTime) {
+	public void setLastImageAcquisitionTime(LocalDateTime lastImageAcquisitionTime) {
 		this.lastImageAcquisitionTime = lastImageAcquisitionTime;
 	}
 

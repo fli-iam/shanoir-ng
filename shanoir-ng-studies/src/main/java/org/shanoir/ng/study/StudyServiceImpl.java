@@ -109,7 +109,7 @@ public class StudyServiceImpl implements StudyService {
 	public List<IdNameDTO> findIdsAndNames() {
 		return studyRepository.findIdsAndNames();
 	}
-
+	
 	@Override
 	public List<Study> findStudiesByUserId(final Long userId) {
 		return studyRepository.findByStudyUserList_UserIdOrderByNameAsc(userId);
@@ -120,7 +120,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public List<Study> findStudiesForImport(final Long userId) {
+	public List<Study> findStudiesByUserIdAndStudyUserType(final Long userId) {
 		final List<Study> studies = findStudiesByUserIdAndStudyUserTypeLessThanEqual(userId, StudyUserType.SEE_DOWNLOAD_IMPORT.getId());
 		if (CollectionUtils.isEmpty(studies)) {
 			return new ArrayList<>();

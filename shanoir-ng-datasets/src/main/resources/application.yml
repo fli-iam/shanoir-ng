@@ -82,10 +82,11 @@ ms.url:
 datasets-data: /var/datasets-data
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-dataset.log
+  file: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log
   level:
-    org.springframework.web: ERROR
+    org.springframework.web: DEBUG
     org.hibernate: ERROR
+    org.springframework.amqp: OFF
         
   
 ### ============================================================= ###

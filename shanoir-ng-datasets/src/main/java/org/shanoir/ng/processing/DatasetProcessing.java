@@ -16,7 +16,6 @@ package org.shanoir.ng.processing;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -27,6 +26,7 @@ import javax.validation.constraints.NotNull;
 
 import org.joda.time.LocalDate;
 import org.shanoir.ng.dataset.Dataset;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
@@ -63,6 +63,7 @@ public class DatasetProcessing extends AbstractGenericItem {
 	private List<Dataset> outputDatasets;
 
 	/** Date of the dataset processing. */
+	@LocalDateAnnotations
 	private LocalDate processingDate;
 
 	/** The study for which this dataset is a result. */

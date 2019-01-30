@@ -60,7 +60,7 @@ public class SwaggerDocumentationConfig {
 		return new Docket(DocumentationType.SWAGGER_2).select()
 				.apis(RequestHandlerSelectors.basePackage("org.shanoir.ng.study.controller.rest")).build()
 				.directModelSubstitute(org.joda.time.LocalDate.class, java.sql.Date.class)
-				.directModelSubstitute(org.joda.time.DateTime.class, java.util.Date.class)
+				.directModelSubstitute(org.joda.time.DateTime.class, java.time.LocalDate.class)
 				.apiInfo(apiInfo())
 				.useDefaultResponseMessages(false)
 				.globalOperationParameters(parameters);

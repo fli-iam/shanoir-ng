@@ -14,9 +14,11 @@
 
 package org.shanoir.ng.importer.dto;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 /**
  * This class wraps logic, like firstImage- and lastImageAcquisitionTime,
@@ -30,9 +32,11 @@ public class DatasetsWrapper<T> {
 	
 	private List<T> datasets;
 
-	private Date firstImageAcquisitionTime;
+	@LocalDateAnnotations
+	private LocalDateTime firstImageAcquisitionTime;
 	
-	private Date lastImageAcquisitionTime;
+	@LocalDateAnnotations
+	private LocalDateTime lastImageAcquisitionTime;
 	
 	public List<T> getDatasets() {
 		if (datasets == null) {
@@ -45,19 +49,19 @@ public class DatasetsWrapper<T> {
 		this.datasets = datasetList;
 	}
 	
-	public Date getFirstImageAcquisitionTime() {
+	public LocalDateTime getFirstImageAcquisitionTime() {
 		return firstImageAcquisitionTime;
 	}
 	
-	public void setFirstImageAcquisitionTime(Date firstImageAcquisitionTime) {
+	public void setFirstImageAcquisitionTime(LocalDateTime firstImageAcquisitionTime) {
 		this.firstImageAcquisitionTime = firstImageAcquisitionTime;
 	}
 	
-	public Date getLastImageAcquisitionTime() {
+	public LocalDateTime getLastImageAcquisitionTime() {
 		return lastImageAcquisitionTime;
 	}
 	
-	public void setLastImageAcquisitionTime(Date lastImageAcquisitionTime) {
+	public void setLastImageAcquisitionTime(LocalDateTime lastImageAcquisitionTime) {
 		this.lastImageAcquisitionTime = lastImageAcquisitionTime;
 	}
 

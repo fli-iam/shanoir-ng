@@ -30,13 +30,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -52,8 +45,14 @@ import org.shanoir.ng.dataset.modality.StatisticalDataset;
 import org.shanoir.ng.dataset.modality.TemplateDataset;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.processing.DatasetProcessing;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 /**
  * Dataset.
@@ -86,8 +85,7 @@ public abstract class Dataset extends AbstractGenericItem {
 	private static final long serialVersionUID = -6712556010816448026L;
 
 	/** Creation date of the dataset. */
-	//@JsonDeserialize(using = LocalDateDeserializer.class)
-	@JsonSerialize(using = LocalDateSerializer.class)
+	@LocalDateAnnotations
 	private LocalDate creationDate;
 
 	/** Dataset Acquisition. */

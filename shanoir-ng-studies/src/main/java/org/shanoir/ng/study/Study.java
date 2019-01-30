@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.study;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -35,6 +35,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
@@ -89,7 +90,8 @@ public class Study extends HalEntity {
 	private boolean downloadableByDefault;
 
 	/** End date. */
-	private Date endDate;
+	@LocalDateAnnotations
+	private LocalDate endDate;
 
 	/** List of the examinations related to this study. */
 	@ElementCollection
@@ -119,7 +121,8 @@ public class Study extends HalEntity {
 	private List<String> protocolFilePaths;
 
 	/** Start date. */
-	private Date startDate;
+	@LocalDateAnnotations
+	private LocalDate startDate;
 
 	/** Dataset list. */
 //	@OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
@@ -211,7 +214,7 @@ public class Study extends HalEntity {
 	/**
 	 * @return the endDate
 	 */
-	public Date getEndDate() {
+	public LocalDate getEndDate() {
 		return endDate;
 	}
 
@@ -219,7 +222,7 @@ public class Study extends HalEntity {
 	 * @param endDate
 	 *            the endDate to set
 	 */
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
 
@@ -301,7 +304,7 @@ public class Study extends HalEntity {
 	/**
 	 * @return the startDate
 	 */
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
 
@@ -309,7 +312,7 @@ public class Study extends HalEntity {
 	 * @param startDate
 	 *            the startDate to set
 	 */
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
 

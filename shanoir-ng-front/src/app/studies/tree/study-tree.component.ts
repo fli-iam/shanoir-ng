@@ -64,7 +64,7 @@ export class StudyTreeComponent {
 
     getAcqEptForCenter(component: TreeNodeComponent) {
         component.dataLoading = true;
-        let studyCenter: StudyCenter = component.nodeParams;console.log(studyCenter.center.name)
+        let studyCenter: StudyCenter = component.nodeParams;
         this.centerService.get(studyCenter.center.id).then(
             center =>  {
                 if (center) {

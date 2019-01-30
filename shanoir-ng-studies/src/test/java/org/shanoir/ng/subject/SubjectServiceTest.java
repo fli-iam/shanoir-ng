@@ -18,9 +18,10 @@ import static org.mockito.BDDMockito.given;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.Assert;
@@ -136,7 +137,7 @@ public class SubjectServiceTest {
 		final Subject subject = new Subject();
 		//subject.setName("Toto");
 		//subject.setId(1L);
-		subject.setBirthDate(new Date(1392122691000L));
+		subject.setBirthDate(Instant.ofEpochMilli(1392122691000L).atZone(ZoneId.systemDefault()).toLocalDate());
 		subject.setIdentifier("Titi");
 
 		subject.setImagedObjectCategory(ImagedObjectCategory.PHANTOM);

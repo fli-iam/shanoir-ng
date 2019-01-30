@@ -16,13 +16,12 @@ package org.shanoir.ng.user;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.role.Role;
 import org.shanoir.ng.shared.dto.IdListDTO;
-import org.shanoir.ng.user.User;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,7 +181,7 @@ public class UserApiControllerTestIT extends KeycloakControllerTestIT {
 	 */
 	private ExtensionRequestInfo createExtensionRequestInfo() {
 		final ExtensionRequestInfo requestInfo = new ExtensionRequestInfo();
-		requestInfo.setExtensionDate(new Date());
+		requestInfo.setExtensionDate(LocalDate.now());
 		requestInfo.setExtensionMotivation("motivation");
 		return requestInfo;
 	}

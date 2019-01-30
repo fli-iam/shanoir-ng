@@ -35,8 +35,6 @@ import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 
-declare type Mode = 'create' | 'edit' | 'view';
-
 @Component({
     selector: 'study-detail',
     templateUrl: 'study.component.html',
@@ -86,7 +84,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
         Promise.all([
             studyPromise,
-            this.userService.getUsers().then(users => this.users = users)
+            this.userService.getAll().then(users => this.users = users)
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
         });
@@ -111,7 +109,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
         });
 
-        this.userService.getUsers().then(users => this.users = users);
+        this.userService.getAll().then(users => this.users = users);
         return Promise.resolve();
     }
 

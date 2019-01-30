@@ -25,7 +25,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.shanoir.ng.datasetacquisition.mr.AcquisitionContrast;

@@ -24,10 +24,6 @@ import javax.persistence.OneToOne;
 
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.shanoir.ng.shared.model.DiffusionGradient;
-import org.shanoir.ng.shared.model.EchoTime;
-import org.shanoir.ng.shared.model.FlipAngle;
-import org.shanoir.ng.shared.model.InversionTime;
-import org.shanoir.ng.shared.model.RepetitionTime;
 
 /**
  * MR protocol.

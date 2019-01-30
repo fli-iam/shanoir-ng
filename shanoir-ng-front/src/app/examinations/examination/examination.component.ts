@@ -26,8 +26,6 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 
-
-
 @Component({
     selector: 'examination',
     templateUrl: 'examination.component.html',

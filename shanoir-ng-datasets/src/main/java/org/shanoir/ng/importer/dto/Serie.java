@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.importer.dto;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
+
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -41,7 +43,8 @@ public class Serie {
 	private String seriesDescription = null;
 
 	@JsonProperty("seriesDate")
-	private Date seriesDate = null;
+	@LocalDateAnnotations
+	private LocalDate seriesDate = null;
 
 	@JsonProperty("seriesNumber")
 	private Integer seriesNumber = null;
@@ -125,11 +128,11 @@ public class Serie {
 		this.seriesDescription = seriesDescription;
 	}
 
-	public Date getSeriesDate() {
+	public LocalDate getSeriesDate() {
 		return seriesDate;
 	}
 
-	public void setSeriesDate(Date seriesDate) {
+	public void setSeriesDate(LocalDate seriesDate) {
 		this.seriesDate = seriesDate;
 	}
 

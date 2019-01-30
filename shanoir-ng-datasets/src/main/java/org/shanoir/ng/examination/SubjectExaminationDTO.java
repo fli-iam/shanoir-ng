@@ -14,10 +14,11 @@
 
 package org.shanoir.ng.examination;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.ExaminationDatasetAcquisitionDTO;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 /**
  * Simple examination DTO with information for subject.
@@ -31,7 +32,8 @@ public class SubjectExaminationDTO {
 
 	private List<ExaminationDatasetAcquisitionDTO> datasetAcquisitions;
 
-	private Date examinationDate;
+	@LocalDateAnnotations
+	private LocalDate examinationDate;
 
 	private Long id;
 
@@ -68,7 +70,7 @@ public class SubjectExaminationDTO {
 	/**
 	 * @return the examinationDate
 	 */
-	public Date getExaminationDate() {
+	public LocalDate getExaminationDate() {
 		return examinationDate;
 	}
 
@@ -76,7 +78,7 @@ public class SubjectExaminationDTO {
 	 * @param examinationDate
 	 *            the examinationDate to set
 	 */
-	public void setExaminationDate(Date examinationDate) {
+	public void setExaminationDate(LocalDate examinationDate) {
 		this.examinationDate = examinationDate;
 	}
 

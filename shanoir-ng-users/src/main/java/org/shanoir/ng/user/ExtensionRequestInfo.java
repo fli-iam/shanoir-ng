@@ -15,10 +15,12 @@
 package org.shanoir.ng.user;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
+
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 /**
  * Extension request info.
@@ -35,7 +37,8 @@ public class ExtensionRequestInfo implements Serializable {
 	private static final long serialVersionUID = -6296721709358679698L;
 
 	@NotNull
-	private Date extensionDate;
+	@LocalDateAnnotations
+	private LocalDate extensionDate;
 
 	@NotNull
 	private String extensionMotivation;
@@ -43,7 +46,7 @@ public class ExtensionRequestInfo implements Serializable {
 	/**
 	 * @return the extensionDate
 	 */
-	public Date getExtensionDate() {
+	public LocalDate getExtensionDate() {
 		return extensionDate;
 	}
 
@@ -51,7 +54,7 @@ public class ExtensionRequestInfo implements Serializable {
 	 * @param extensionDate
 	 *            the extensionDate to set
 	 */
-	public void setExtensionDate(Date extensionDate) {
+	public void setExtensionDate(LocalDate extensionDate) {
 		this.extensionDate = extensionDate;
 	}
 

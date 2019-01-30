@@ -67,7 +67,7 @@ export class DatepickerComponent implements ControlValueAccessor {
         setTimeout(() => {
             if (this.inputFieldContent == this.lastInputFieldContent) return;
             if (event && event.epoc) {
-                this.onChange(event.epoc * 1000);
+                this.onChange(new Date(event.epoc * 1000));
             } else if (this.inputFieldContent) {
                 this.onChange('invalid');
             } else {
@@ -99,5 +99,4 @@ export class DatepickerComponent implements ControlValueAccessor {
         }
         return null;
     }
-
 }

@@ -58,7 +58,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">{{acquisitionEquipment | acqEqptLabel}}</option>
                 </select>
                 <button i18n="Import|AcquisitionEquipmentDetails label" [disabled]="!acquisitionEquipment" (click)="showAcquistionEquipmentDetails()">details</button>
-                <button [disabled]="!acquisitionEquipment || acquisitionEquipment?.compatible" (click)="openCreateAcqEqt()">add</button>
+                <button [disabled]="acquisitionEquipment?.compatible || hasCompatibleEquipments || !center" (click)="openCreateAcqEqt()">add</button>
             </span>
         </li>
         <li class="info" *ngIf="acquisitionEquipment && !acquisitionEquipment?.compatible">

@@ -16,32 +16,19 @@ package org.shanoir.ng.importer.strategies.datasetexpression;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDateTime;
 
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.DatasetExpression;
 import org.shanoir.ng.dataset.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.processing.DatasetProcessingType;
-import org.shanoir.ng.shared.model.EchoTime;
-import org.shanoir.ng.shared.model.FlipAngle;
-import org.shanoir.ng.shared.model.InversionTime;
-import org.shanoir.ng.shared.model.RepetitionTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -57,7 +44,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 			ExpressionFormat expressionFormat) {
 		
 		DatasetExpression niftiDatasetExpression = new DatasetExpression();
-		niftiDatasetExpression.setCreationDate(LocalDate.now());
+		niftiDatasetExpression.setCreationDate(LocalDateTime.now());
 		niftiDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		niftiDatasetExpression.setDatasetProcessingType(DatasetProcessingType.FORMAT_CONVERSION);
 		

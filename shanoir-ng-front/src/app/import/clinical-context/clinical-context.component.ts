@@ -344,6 +344,10 @@ export class ClinicalContextComponent{
         return subjectExam;
     }
 
+    private get hasCompatibleEquipments(): boolean {
+        return this.acquisitionEquipments.find(ae => ae.compatible) != undefined;
+    }
+
     private showStudyDetails() {
         window.open('study/details/' + this.study.id, '_blank');
     }

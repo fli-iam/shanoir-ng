@@ -20,6 +20,7 @@ import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
 import org.shanoir.ng.timepoint.TimepointMapper;
 
@@ -59,5 +60,9 @@ public interface StudyMapper {
 	SimpleStudyDTO studyToSimpleStudyDTO (Study study);
 	
 	List<SimpleStudyDTO> studiesToSimpleStudyDTOs (List<Study> studies);
+	
+	IdNameDTO studyToIdNameDTO (Study study);
+	
+	List<IdNameDTO> studiesToIdNameDTOs (List<Study> studies);
 
 }

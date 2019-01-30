@@ -14,14 +14,9 @@
 
 package org.shanoir.ng.subject.dto;
 
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
 
-import org.shanoir.ng.subject.HemisphericDominance;
-import org.shanoir.ng.subject.ImagedObjectCategory;
 import org.shanoir.ng.subject.PseudonymusHashValues;
-import org.shanoir.ng.subject.Sex;
-import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
 
 public class SubjectFromShupDTO {
 
@@ -31,7 +26,7 @@ public class SubjectFromShupDTO {
     
     private String identifier;
 
-    private Date birthDate;
+    private LocalDate birthDate;
 
     private Integer languageHemisphericDominance;
 
@@ -79,11 +74,11 @@ public class SubjectFromShupDTO {
 		this.identifier = identifier;
 	}
 
-	public Date getBirthDate() {
+	public LocalDate getBirthDate() {
 		return birthDate;
 	}
 
-	public void setBirthDate(Date birthDate) {
+	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
 	}
 

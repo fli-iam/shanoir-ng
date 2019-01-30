@@ -16,6 +16,8 @@ package org.shanoir.ng.subjectstudy;
 
 import java.time.LocalDate;
 
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+
 
 public class ExaminationDTO {
 	
@@ -27,6 +29,7 @@ public class ExaminationDTO {
 
 	private String comment;
 
+	@LocalDateAnnotations
 	private LocalDate examinationDate;
 
 	private String note;

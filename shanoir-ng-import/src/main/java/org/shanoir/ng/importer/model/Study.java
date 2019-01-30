@@ -14,11 +14,13 @@
 
 package org.shanoir.ng.importer.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -34,7 +36,8 @@ public class Study {
 	private String studyInstanceUID;
 
 	@JsonProperty("studyDate")
-	private Date studyDate;
+	@LocalDateAnnotations
+	private LocalDate studyDate;
 
 	@JsonProperty("studyDescription")
 	private String studyDescription;
@@ -47,7 +50,7 @@ public class Study {
 
 	public Study(final Attributes attributes) {
 		this.studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
-		this.studyDate = attributes.getDate(Tag.StudyDate);
+		this.studyDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.StudyDate));
 		this.studyDescription = attributes.getString(Tag.StudyDescription);
 	}
 
@@ -59,11 +62,11 @@ public class Study {
 		this.studyInstanceUID = studyInstanceUID;
 	}
 
-	public Date getStudyDate() {
+	public LocalDate getStudyDate() {
 		return studyDate;
 	}
 
-	public void setStudyDate(Date studyDate) {
+	public void setStudyDate(LocalDate studyDate) {
 		this.studyDate = studyDate;
 	}
 

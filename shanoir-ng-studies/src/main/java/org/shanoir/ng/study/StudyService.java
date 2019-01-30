@@ -111,7 +111,7 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @return a list of studies.
 	 * @throws ShanoirException
 	 */
-	List<Study> findStudiesForImport(Long userId);
+	List<Study> findStudiesByUserIdAndStudyUserType(Long userId);
 	
 	/**
 	 * Check if an user is responsible of the study.
@@ -151,5 +151,4 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @throws ShanoirStudiesException
 	 */
 	void updateFromShanoirOld(Study study) throws ShanoirStudiesException;
-
 }

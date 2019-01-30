@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.utils;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.shanoir.ng.role.Role;
 import org.shanoir.ng.user.User;
@@ -96,9 +96,9 @@ public final class ModelsUtil {
 	 */
 	public static User createUser(final Role role) {
 		final User user = new User();
-		user.setCreationDate(new Date());
+		user.setCreationDate(LocalDate.now());
 		user.setEmail(USER_EMAIL);
-		user.setExpirationDate(new Date());
+		user.setExpirationDate(LocalDate.now());
 		user.setFirstName(USER_FIRSTNAME);
 		user.setLastName(USER_LASTNAME);
 		user.setRole(role);

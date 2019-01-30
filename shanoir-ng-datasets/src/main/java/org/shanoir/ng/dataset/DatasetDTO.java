@@ -16,6 +16,8 @@ package org.shanoir.ng.dataset;
 
 import java.time.LocalDate;
 
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+
 
 /**
  * DTO for dataset.
@@ -25,6 +27,7 @@ import java.time.LocalDate;
  */
 public class DatasetDTO {
 
+	@LocalDateAnnotations
 	private LocalDate creationDate;
 
 	private Long groupOfSubjectsId;

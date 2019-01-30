@@ -54,6 +54,14 @@ export abstract class EntityService<T extends Entity> {
     }
 
     private toRealObject(entity: T) {
-        return Object.assign(this.getEntityInstance(entity), entity);
+        let trueObject = Object.assign(this.getEntityInstance(entity), entity);
+        Object.keys(entity).forEach(key => {
+            let value = entity[key];
+            // For Date Object, put the json object to a real Date object
+            if (String(key).indexOf("Date") > -1 && value) {
+                trueObject[key] = new Date(value);
+            } 
+        });
+        return trueObject;
     }
 }
