@@ -1,27 +1,36 @@
-# About Shanoir-NG (next generation)
+# Shanoir NG - Import, manage and share neuroimaging data
 
-GitHub is dedicated to developers, if you search more information from an user's
-point of view please see http://shanoir.org.
+Shanoir NG (Next Generation) is a software that helps neuroimaging analysis researchers, radiologists, and MRI operators to organize and share neuroimaging datasets. 
 
-Shanoir-NG is based on a microservice architecture, that heavily uses Docker.
-Each Docker container integrates one microservice, mostly based on Spring Boot.
-Each microservice exposes a REST interface on using Swagger 2, as definition format.
-The front-end/web interface is implemented on using "Angular 2" (now 5) technology.
-Nginx and Keycloak (on using OpenID-Connect) are used to glue everything together.
-Internally dcm4che3 is used to handle all DICOM concerns and dcm4chee 5 arc-light as backup PACS.
-Furthermore dcm2niix is used for the DICOM to NIfTI conversion and Papaya Viewer for DICOM/NIfTI web view.
+_Here we need to present the main functionnalities of Shanoir (import formats, data model, security and roles, ...)_
 
-Many thanks to all these giants: on their shoulders we are standing to develop Shanoir-NG!!!
+Shanoir NG is a complete technological remake of the first version of the Shanoir application, maintaining the key concepts of Shanoir, enhancing the functionalities and the user interface and providing a great flexibility for further improvements.
 
-# Installation of Shanoir-NG
+Shanoir NG is copyrighted by [Inria](https://www.inria.fr/) and is now open source under the GNU General Public License v3.0. See the LICENCE file at the root of this project. If you want to contribute, please see the following page : [Contribution Workflow](https://github.com/fli-iam/shanoir-ng/wiki/Contribution-Workflow).
 
-The installation of Shanoir-NG is based on two components:
+GitHub is a tool for developers if you are seeking information at a user level view please visit http://shanoir.org.
+
+# About Shanoir NG's architecture
+
+* Shanoir-NG is based on a microservice architecture, that heavily uses Docker.
+* Each Docker container integrates one microservice, mostly based on Spring Boot.
+* Each microservice exposes a REST interface on using Swagger 2, as definition format.
+* The front-end/web interface is implemented on using "Angular 2" (now 5) technology.
+* Nginx and Keycloak (on using OpenID-Connect) are used to glue everything together.
+* Internally dcm4che3 is used to handle all DICOM concerns and dcm4chee 5 arc-light as backup PACS.
+* Furthermore dcm2niix is used for the DICOM to NIfTI conversion and Papaya Viewer for DICOM/NIfTI web view.
+
+Many thanks to all these giants, on their shoulders we are standing to develop Shanoir-NG !
+
+# Installation of Shanoir NG
+
+The installation of Shanoir NG has two steps :
 * BUILD (COMPILE): with Maven 3
 * DEPLOY: with docker-compose, version 3
 
 ## BUILD (COMPILE)
 * Install Maven 3 on your machine/on the server
-* Get access to the GitHub repository and clone the shanoir-ng repository
+* Download or git clone the shanoir-ng code. The `master` branch should be the most stable while `develop` will contain the newests functionalities if you are interested in testing thoses.
 * Execute the Maven build on the parent project with the following commands:
     * cd shanoir-ng-parent/
     * **mvn install -DskipTests**
@@ -41,11 +50,11 @@ into the folder /docker-compose to be used from there by docker-compose
     * By default Shanoir-NG is installed with the host shanoir-ng-nginx and the scheme http (dev setup)
     * If you are on a dedicated server (e.g. shanoir-ng.irisa.fr) you will have to do manual adaptions
       (we tried to automate as much as possible in a given time and there is still a way to go, but here we are currently):
-	* 1) Keycloak: Open **/docker-compose/keycloak/cfg/shanoir-ng-realm.json** and change **redirectUris** and **webOrigins**
-	* 2) Spring Boot: Open **/.env** and change the host and scheme of all three properties in the file
-	* 3) Docker Compose: Open **/docker-compose.yml** and change the **container_name** of Nginx to e.g. shanoir-ng.irisa.fr
+	1. Keycloak: Open **/docker-compose/keycloak/cfg/shanoir-ng-realm.json** and change **redirectUris** and **webOrigins**
+	2. Spring Boot: Open **/.env** and change the host and scheme of all three properties in the file
+	3. Docker Compose: Open **/docker-compose.yml** and change the **container_name** of Nginx to e.g. shanoir-ng.irisa.fr
 	This is necessary, that e.g. ms users and the Keycloak CLI client can access to Keycloak (resolve the host name)
-	* 4) Angular: Open **/shanoir-ng-front/config/webpack.config.js** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST**
+	4. Angular: Open **/shanoir-ng-front/config/webpack.config.js** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST**
 	
     * **Attention:** you will have to re-compile your code after these changes with Maven!!!
 
