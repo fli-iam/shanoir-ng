@@ -48,12 +48,10 @@ into the folder /docker-compose to be used from there by docker-compose
     * For windows 7, increase your RAM and set the port redirection (8080 and 443) for the virtual box.
 * If you are on a **dedicated server** (e.g. shanoir-ng.irisa.fr):
     * By default Shanoir-NG is installed with the host shanoir-ng-nginx and the scheme http (dev setup)
-    * If you are on a dedicated server (e.g. shanoir-ng.irisa.fr) you will have to do manual adaptions
-      (we tried to automate as much as possible in a given time and there is still a way to go, but here we are currently):
-	1. Keycloak: Open **/docker-compose/keycloak/cfg/shanoir-ng-realm.json** and change **redirectUris** and **webOrigins**
+    * If you are on a dedicated server (e.g. shanoir-ng.irisa.fr) you will have to do manual adaptions (we tried to automate as much as possible in a given time and there is still a way to go, but here we are currently):
+        1. Keycloak: Open **/docker-compose/keycloak/cfg/shanoir-ng-realm.json** and change **redirectUris** and **webOrigins**
 	2. Spring Boot: Open **/.env** and change the host and scheme of all three properties in the file
-	3. Docker Compose: Open **/docker-compose.yml** and change the **container_name** of Nginx to e.g. shanoir-ng.irisa.fr
-	This is necessary, that e.g. ms users and the Keycloak CLI client can access to Keycloak (resolve the host name)
+	3. Docker Compose: Open **/docker-compose.yml** and change the **container_name** of Nginx to e.g. shanoir-ng.irisa.fr. This is necessary, that e.g. ms users and the Keycloak CLI client can access to Keycloak (resolve the host name)
 	4. Angular: Open **/shanoir-ng-front/config/webpack.config.js** and change **SHANOIR_NG_URL_SCHEME** and **SHANOIR_NG_URL_HOST**
 	
     * **Attention:** you will have to re-compile your code after these changes with Maven!!!
