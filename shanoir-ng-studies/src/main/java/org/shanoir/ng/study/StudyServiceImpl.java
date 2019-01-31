@@ -60,7 +60,7 @@ public class StudyServiceImpl implements StudyService {
 		if (study.getStudyCenterList() != null) {
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
 				studyCenter.setStudy(study);			} 
-			
+
 		}
 		if (study.getSubjectStudyList() != null) {
 			for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {

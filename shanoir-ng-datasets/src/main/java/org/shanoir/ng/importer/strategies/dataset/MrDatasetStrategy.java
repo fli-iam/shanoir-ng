@@ -22,7 +22,6 @@ import org.shanoir.ng.shared.model.EchoTimeMapper;
 import org.shanoir.ng.shared.model.FlipAngleMapper;
 import org.shanoir.ng.shared.model.InversionTimeMapper;
 import org.shanoir.ng.shared.model.RepetitionTimeMapper;
-import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +78,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 				if (datasetWrapper.getFirstImageAcquisitionTime() == null) {
 					datasetWrapper.setFirstImageAcquisitionTime(mrDataset.getFirstImageAcquisitionTime());
 				} else {
-					if (datasetWrapper.getFirstImageAcquisitionTime().after(mrDataset.getFirstImageAcquisitionTime())) {
+					if (datasetWrapper.getFirstImageAcquisitionTime().isAfter(mrDataset.getFirstImageAcquisitionTime())) {
 						datasetWrapper.setFirstImageAcquisitionTime(mrDataset.getFirstImageAcquisitionTime());
 					}
 				}
@@ -88,7 +87,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 				if (datasetWrapper.getLastImageAcquisitionTime() == null) {
 					datasetWrapper.setLastImageAcquisitionTime(mrDataset.getLastImageAcquisitionTime());
 				} else {
-					if (datasetWrapper.getLastImageAcquisitionTime().after(mrDataset.getLastImageAcquisitionTime())) {
+					if (datasetWrapper.getLastImageAcquisitionTime().isAfter(mrDataset.getLastImageAcquisitionTime())) {
 						datasetWrapper.setLastImageAcquisitionTime(mrDataset.getLastImageAcquisitionTime());
 					}
 				}
@@ -108,7 +107,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 	public MrDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
 			ImportJob importJob) {
 		MrDataset mrDataset = new MrDataset();
-		mrDataset.setCreationDate(Utils.DateToLocalDate(serie.getSeriesDate()));
+		mrDataset.setCreationDate(serie.getSeriesDate());
 		mrDataset.setDiffusionGradients(dataset.getDiffusionGradients());
 		final String serieDescription = serie.getSeriesDescription();
 
@@ -186,7 +185,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 				if (mrDataset.getFirstImageAcquisitionTime() == null) {
 					mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
 				} else {
-					if (mrDataset.getFirstImageAcquisitionTime().after(datasetExpression.getFirstImageAcquisitionTime())) {
+					if (mrDataset.getFirstImageAcquisitionTime().isAfter(datasetExpression.getFirstImageAcquisitionTime())) {
 						mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
 					}
 				}
@@ -195,7 +194,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 				if (mrDataset.getLastImageAcquisitionTime() == null) {
 					mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
 				} else {
-					if (mrDataset.getLastImageAcquisitionTime().after(datasetExpression.getLastImageAcquisitionTime())) {
+					if (mrDataset.getLastImageAcquisitionTime().isAfter(datasetExpression.getLastImageAcquisitionTime())) {
 						mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
 					}
 				}

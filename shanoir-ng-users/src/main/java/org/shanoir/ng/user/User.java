@@ -1,8 +1,8 @@
 package org.shanoir.ng.user;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.accountrequest.AccountRequestInfo;
 import org.shanoir.ng.role.Role;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.EditableOnlyBy;
@@ -48,7 +49,8 @@ public class User extends HalEntity implements UserDetails {
 
 	private boolean canAccessToDicomAssociation;
 
-	private Date creationDate;
+	@LocalDateAnnotations
+	private LocalDate creationDate;
 
 	@NotBlank
 	@Column(unique = true)
@@ -56,7 +58,8 @@ public class User extends HalEntity implements UserDetails {
 	private String email;
 	
 	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
-	private Date expirationDate;
+	@LocalDateAnnotations
+	private LocalDate expirationDate;
 
 	@Embedded
 	private ExtensionRequestInfo extensionRequestInfo;
@@ -70,7 +73,8 @@ public class User extends HalEntity implements UserDetails {
 
 	private String keycloakId;
 
-	private Date lastLogin;
+	@LocalDateAnnotations
+	private LocalDate lastLogin;
 
 	@NotNull
 	private String lastName;
@@ -145,7 +149,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the creationDate
 	 */
-	public Date getCreationDate() {
+	public LocalDate getCreationDate() {
 		return creationDate;
 	}
 
@@ -153,7 +157,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param creationDate
 	 *            the creationDate to set
 	 */
-	public void setCreationDate(final Date creationDate) {
+	public void setCreationDate(final LocalDate creationDate) {
 		this.creationDate = creationDate;
 	}
 
@@ -175,7 +179,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the expirationDate
 	 */
-	public Date getExpirationDate() {
+	public LocalDate getExpirationDate() {
 		return expirationDate;
 	}
 
@@ -183,7 +187,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param expirationDate
 	 *            the expirationDate to set
 	 */
-	public void setExpirationDate(final Date expirationDate) {
+	public void setExpirationDate(final LocalDate expirationDate) {
 		this.expirationDate = expirationDate;
 	}
 
@@ -265,7 +269,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the lastLogin
 	 */
-	public Date getLastLogin() {
+	public LocalDate getLastLogin() {
 		return lastLogin;
 	}
 
@@ -273,7 +277,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param lastLogin
 	 *            the lastLogin to set
 	 */
-	public void setLastLogin(final Date lastLogin) {
+	public void setLastLogin(final LocalDate lastLogin) {
 		this.lastLogin = lastLogin;
 	}
 
@@ -385,7 +389,7 @@ public class User extends HalEntity implements UserDetails {
 	@Override
 	@JsonIgnore
 	public boolean isEnabled() {
-		return expirationDate == null || expirationDate.after(new Date());
+		return expirationDate == null || expirationDate.isAfter(LocalDate.now());
 	}
 
 }

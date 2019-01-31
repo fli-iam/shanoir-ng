@@ -7,7 +7,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisitionMapper;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
 
@@ -50,8 +49,6 @@ public interface ExaminationMapper {
 	 */
 	List<SubjectExaminationDTO> examinationsToSubjectExaminationDTOs(List<Examination> examinations);
 
-	@Mappings({ @Mapping(target = "centerName", ignore = true), @Mapping(target = "studyName", ignore = true),
-			@Mapping(target = "subject", ignore = true),@Mapping(source="subjectId", target = "subject.id") })
 	/**
 	 * Map a @Examination to a @ExaminationDTO.
 	 * 
@@ -59,6 +56,8 @@ public interface ExaminationMapper {
 	 *            examination to map.
 	 * @return examination DTO.
 	 */
+	@Mappings({ @Mapping(target = "center", ignore = true), @Mapping(target = "study", ignore = true),
+		@Mapping(target = "subject", ignore = true)})
 	ExaminationDTO examinationToExaminationDTO(Examination examination);
 
 	/**
@@ -68,7 +67,10 @@ public interface ExaminationMapper {
 	 *
 	 * @return examination.
 	 */
-	@Mapping(source="subject.id", target = "subjectId")
+	@Mappings({ @Mapping(source="subject.id", target = "subjectId"), 
+		@Mapping(source="center.id", target = "centerId"), 
+		@Mapping(source="study.id", target = "studyId")
+	})
 	Examination examinationDTOToExamination(ExaminationDTO examinationDTO);
 	
 	/**

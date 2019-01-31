@@ -14,7 +14,7 @@
 			</span>
 
 			<common-dataset-details [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></common-dataset-details>
-			<mr-dataset-details *ngIf="dataset.type == 'Mr' && mod=='view'" [mode]="mode" [dataset]="dataset"></mr-dataset-details>
+			<mr-dataset-details *ngIf="dataset.type == 'Mr' && mode=='view'" [mode]="mode" [dataset]="dataset"></mr-dataset-details>
 			<!-- TODO : other types -->
 
 			<fieldset *ngIf="mode=='view'">

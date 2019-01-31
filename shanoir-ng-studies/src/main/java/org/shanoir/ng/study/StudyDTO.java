@@ -1,8 +1,9 @@
 package org.shanoir.ng.study;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.studyuser.StudyUser;
@@ -21,7 +22,8 @@ public class StudyDTO {
 
 	private boolean downloadableByDefault;
 
-	private Date endDate;
+	@LocalDateAnnotations
+	private LocalDate endDate;
 
 	private List<IdNameDTO> experimentalGroupsOfSubjects;
 
@@ -39,7 +41,8 @@ public class StudyDTO {
 
 	private List<String> protocolFilePaths;
 
-	private Date startDate;
+	@LocalDateAnnotations
+	private LocalDate startDate;
 
 	private List<IdNameDTO> studyCards;
 
@@ -98,7 +101,7 @@ public class StudyDTO {
 	/**
 	 * @return the endDate
 	 */
-	public Date getEndDate() {
+	public LocalDate getEndDate() {
 		return endDate;
 	}
 
@@ -106,7 +109,7 @@ public class StudyDTO {
 	 * @param endDate
 	 *            the endDate to set
 	 */
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
 
@@ -233,7 +236,7 @@ public class StudyDTO {
 	/**
 	 * @return the startDate
 	 */
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
 
@@ -241,7 +244,7 @@ public class StudyDTO {
 	 * @param startDate
 	 *            the startDate to set
 	 */
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
 

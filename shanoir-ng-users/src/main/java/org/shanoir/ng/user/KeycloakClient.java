@@ -153,7 +153,7 @@ public class KeycloakClient {
 		final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
 		attributes.put("userId", Arrays.asList(user.getId().toString()));
 		if (user.getExpirationDate() != null) {
-			attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate().getTime()));
+			attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
 		}
 
 		final UserRepresentation userRepresentation = new UserRepresentation();

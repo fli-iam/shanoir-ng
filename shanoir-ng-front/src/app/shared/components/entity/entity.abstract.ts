@@ -22,11 +22,20 @@ export abstract class Entity {
 
     private replacer = (key, value) => {
         if (this.getIgnoreList().indexOf(key) > -1) return undefined;
+        else if (this[key] instanceof Date) return this.datePattern(this[key]);
         else return value;
     }
 
     public stringify() {
         return JSON.stringify(this, this.replacer);
+    }
+
+    private datePattern(date: Date): string {
+         return date.getFullYear()
+         + '-' 
+         + ('0' + (date.getMonth() + 1)).slice(-2)
+         + '-' 
+         + ('0' + date.getDate()).slice(-2);
     }
 }
 

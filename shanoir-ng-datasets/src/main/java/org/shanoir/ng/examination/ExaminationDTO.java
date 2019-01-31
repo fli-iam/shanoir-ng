@@ -2,8 +2,9 @@ package org.shanoir.ng.examination;
 
 
 
-import java.util.Date;
+import java.time.LocalDate;
 
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 
 /**
@@ -16,19 +17,16 @@ public class ExaminationDTO {
 
 	private Long id;
 
-	private Long centerId;
-
-	private String centerName;
+	private IdNameDTO center;
 
 	private String comment;
 
-	private Date examinationDate;
+	@LocalDateAnnotations
+	private LocalDate examinationDate;
 
 	private String note;
 
-	private Long studyId;
-
-	private String studyName;
+	private IdNameDTO study;
 
 	private IdNameDTO subject;
 
@@ -52,36 +50,6 @@ public class ExaminationDTO {
 	}
 
 	/**
-	 * @return the centerId
-	 */
-	public Long getCenterId() {
-		return centerId;
-	}
-
-	/**
-	 * @param centerId
-	 *            the centerId to set
-	 */
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
-
-	/**
-	 * @return the centerName
-	 */
-	public String getCenterName() {
-		return centerName;
-	}
-
-	/**
-	 * @param centerName
-	 *            the centerName to set
-	 */
-	public void setCenterName(String centerName) {
-		this.centerName = centerName;
-	}
-
-	/**
 	 * @return the comment
 	 */
 	public String getComment() {
@@ -99,7 +67,7 @@ public class ExaminationDTO {
 	/**
 	 * @return the examinationDate
 	 */
-	public Date getExaminationDate() {
+	public LocalDate getExaminationDate() {
 		return examinationDate;
 	}
 
@@ -107,7 +75,7 @@ public class ExaminationDTO {
 	 * @param examinationDate
 	 *            the examinationDate to set
 	 */
-	public void setExaminationDate(Date examinationDate) {
+	public void setExaminationDate(LocalDate examinationDate) {
 		this.examinationDate = examinationDate;
 	}
 
@@ -126,34 +94,20 @@ public class ExaminationDTO {
 		this.note = note;
 	}
 
-	/**
-	 * @return the studyId
-	 */
-	public Long getStudyId() {
-		return studyId;
+	public IdNameDTO getCenter() {
+		return center;
 	}
 
-	/**
-	 * @param studyId
-	 *            the studyId to set
-	 */
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
+	public void setCenter(IdNameDTO center) {
+		this.center = center;
 	}
 
-	/**
-	 * @return the studyName
-	 */
-	public String getStudyName() {
-		return studyName;
+	public IdNameDTO getStudy() {
+		return study;
 	}
 
-	/**
-	 * @param studyName
-	 *            the studyName to set
-	 */
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
+	public void setStudy(IdNameDTO study) {
+		this.study = study;
 	}
 
 	/**

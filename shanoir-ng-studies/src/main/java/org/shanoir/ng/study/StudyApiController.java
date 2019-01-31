@@ -61,7 +61,6 @@ public class StudyApiController implements StudyApi {
 		return new ResponseEntity<>(studies, HttpStatus.OK);
 	}
 
-	@Override
 	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId) {
 		Study study; 
 		try {

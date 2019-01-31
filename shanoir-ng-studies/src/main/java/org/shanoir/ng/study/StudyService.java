@@ -50,7 +50,7 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 */
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	List<Study> findAll();
-	
+
 	
 	/**
 	 * Find id and name for all studies.

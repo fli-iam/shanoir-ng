@@ -1,6 +1,6 @@
 package org.shanoir.ng.user;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,7 +43,7 @@ public interface UserRepository extends CrudRepository<User, Long>, ItemReposito
 	 *            expiration date to check.
 	 * @return list of users.
 	 */
-	List<User> findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Date expirationDate);
+	List<User> findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(LocalDate expirationDate);
 
 	/**
 	 * Find users who have account that will soon expire and have not received
@@ -53,7 +53,7 @@ public interface UserRepository extends CrudRepository<User, Long>, ItemReposito
 	 *            expiration date to check.
 	 * @return list of users.
 	 */
-	List<User> findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Date expirationDate);
+	List<User> findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(LocalDate expirationDate);
 
 	/**
 	 * Find users by their id.
