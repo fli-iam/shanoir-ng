@@ -61,7 +61,7 @@ export class DicomUploadComponent {
         this.importService.uploadFile(formData)
             .then((patientDicomList: ImportJob) => {
                 this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
-                this.importDataService.archiveUploaded = patientDicomList;
+                this.importDataService.patientList = patientDicomList;
                 this.setArchiveStatus('uploaded');
             }).catch(error => {
                 this.setArchiveStatus('error');

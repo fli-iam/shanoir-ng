@@ -71,3 +71,11 @@ export class InstitutionDicom {
     institutionName: string;
     institutionAddress: string;
 }
+
+export class DicomQuery {
+    patientName: string = "";
+    patientID: string = "";
+    patientBirthDate: string = "";
+    studyDescription: string = "";
+    studyDate: string = "";
+}

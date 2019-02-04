@@ -7,36 +7,36 @@
         <li>
             <label>Patient Name</label> 
             <span class="right-col">
-                <input type="text" id="patientName" [(ngModel)]="patientName" />
+                <input type="text" id="patientName" [(ngModel)]="dicomQuery.patientName" />
             </span>
             <tool-tip>Enter the exact value, case sensitive. Ex: TITI^TOTO won't match titi'toto</tool-tip>
         </li>
         <li>
             <label>Patient ID</label> 
             <span class="right-col">
-                <input type="text" id="patientID" [(ngModel)]="patientID" />
+                <input type="text" id="patientID" [(ngModel)]="dicomQuery.patientID" />
             </span>
         </li>
         <li>
             <label>Patient Birth Date</label> 
             <span class="right-col">
-                <datepicker [(ngModel)]="patientBirthDate"></datepicker>
+                <datepicker [(ngModel)]="dicomQuery.patientBirthDate"></datepicker>
             </span>
         </li>
         <li>
             <label>Dicom Study Description</label> 
             <span class="right-col">
-                <input type="text" id="studyDescription" [(ngModel)]="studyDescription" />
+                <input type="text" id="studyDescription" [(ngModel)]="dicomQuery.studyDescription" />
             </span>
             <tool-tip>The wildcard character is allowed. For instance, you can enter STUDY* to find STUDY^NEURO</tool-tip>
         </li>
         <li>
             <label>Study Date</label> 
             <span class="right-col">
-                <datepicker [(ngModel)]="studyDate"></datepicker>
+                <datepicker [(ngModel)]="dicomQuery.studyDate"></datepicker>
                 <label *ngIf="isStudyDateValid==false" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
             </span>
         </li>
     </ol>
 </fieldset>
-<button class="next" [disabled]="!valid" (click)="query_pacs()">Query</button>
+<button class="next" [disabled]="!valid" (click)="queryPACS()">Query</button>

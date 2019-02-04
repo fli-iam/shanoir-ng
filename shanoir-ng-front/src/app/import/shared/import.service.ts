@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
 import * as AppUtils from '../../utils/app.utils';
-import { ImportJob } from './dicom-data.model';
+import { ImportJob, DicomQuery } from './dicom-data.model';
 
 
 @Injectable()
@@ -33,5 +33,10 @@ export class ImportService {
         return this.http.get(url,
             { observe: 'response', responseType: 'arraybuffer' }
             ).map(response => response.body).toPromise();
+    }
+
+    queryPACS(dicomQuery: DicomQuery): Promise<ImportJob> {
+        return this.http.post<ImportJob>(AppUtils.BACKEND_API_QUERY_PACS, dicomQuery)
+            .toPromise();
     }
 }  

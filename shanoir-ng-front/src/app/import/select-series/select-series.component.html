@@ -28,7 +28,7 @@
                             [(ngModel)]="serie.selected"  
                             [nodeParams]="serie"
                             (chkbxChange)="onPatientUpdate()"
-                            (labelClick)="showSerieDetails($event); initPapaya(serie);"
+                            (labelClick)="showSerieDetails($event, serie)"
                             [class.selected]="detailedSerie == serie"
                             [ngModelOptions]="{standalone: true}">
                         </node>
@@ -94,7 +94,9 @@
                 <td class="value">{{detailedSerie?.nonImagesNumber}}</td>
             </tr>
         </table>
-        <papaya [params]="papayaParams"></papaya>
+        <div [hidden]="!papayaParams">
+            <papaya [params]="papayaParams"></papaya>
+        </div>
     </div>     
 </fieldset>
 <button class="next" [disabled]="!valid" (click)="next()">Next</button>

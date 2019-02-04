@@ -23,14 +23,14 @@ export class ContextData {
 export class ImportDataService {
 
     private _inMemoryExtracted: any;      // 1. upload
-    private _archiveUploaded: ImportJob;  // 1. upload
+    private _patientList: ImportJob;   // 1. upload or pacs
     private _patients: PatientDicom[];    // 2. series
     private _contextData: ContextData;    // 3. context
     public contextBackup: ContextData;
 
     public reset() {
         this._inMemoryExtracted = undefined;
-        this._archiveUploaded = undefined;
+        this._patientList = undefined;
         this._patients = undefined;
         this._contextData = undefined;
         this.contextBackup = undefined;
@@ -45,12 +45,12 @@ export class ImportDataService {
         this.patients = undefined;
     }
 
-    public get archiveUploaded(): ImportJob {
-        return this._archiveUploaded;
+    public get patientList(): ImportJob {
+        return this._patientList;
     }
 
-    public set archiveUploaded(job: ImportJob) {
-        this._archiveUploaded = job;
+    public set patientList(job: ImportJob) {
+        this._patientList = job;
         this.patients = undefined;
     }
 

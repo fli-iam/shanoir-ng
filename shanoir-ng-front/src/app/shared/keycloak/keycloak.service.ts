@@ -71,4 +71,10 @@ export class KeycloakService {
         return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_GUEST");
     }
 
+    canUserImportFromPACS(): boolean {
+        // console.log(KeycloakService.auth.authz)
+        return true;
+        // return KeycloakService.auth.authz && KeycloakService.auth.authz.user.canAccessToDicomAssociation;
+    }
+
 }

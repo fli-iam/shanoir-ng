@@ -32,7 +32,7 @@ export class FinishImportComponent {
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
             
-        if (!this.importDataService.archiveUploaded || !this.importDataService.inMemoryExtracted
+        if (!this.importDataService.patientList || !this.importDataService.inMemoryExtracted
                 || !importDataService.patients || !importDataService.patients[0]
                 || !importDataService.contextData) {
             this.router.navigate(['imports'], {replaceUrl: true});
@@ -40,7 +40,7 @@ export class FinishImportComponent {
         }
         
         breadcrumbsService.nameStep('4. Finish');
-        this.importJob = this.importDataService.archiveUploaded;
+        this.importJob = this.importDataService.patientList;
         this.selectedPatients = this.importDataService.patients;
         this.context = this.importDataService.contextData;
     }

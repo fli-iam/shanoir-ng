@@ -51,11 +51,11 @@ let appRoutes: Routes = [
         children: [
             {   path: 'upload',
                 component: DicomUploadComponent,
-                data: [{importMode: 'dicom'}]
+                data: {importMode: 'DICOM'}
             }, {
                 path: 'pacs',
                 component: QueryPacsComponent,
-                data: [{importMode: 'pacs'}]
+                data: {importMode: 'PACS'}
             }, {
                 path: 'series',
                 component: SelectSeriesComponent
