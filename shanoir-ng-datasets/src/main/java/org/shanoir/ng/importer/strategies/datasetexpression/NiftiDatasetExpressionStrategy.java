@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.shanoir.ng.dataset.DatasetExpression;
 import org.shanoir.ng.dataset.DatasetExpressionFormat;
@@ -33,7 +34,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 			ExpressionFormat expressionFormat) {
 
 		DatasetExpression niftiDatasetExpression = new DatasetExpression();
-		niftiDatasetExpression.setCreationDate(LocalDate.now());
+		niftiDatasetExpression.setCreationDate(LocalDateTime.now());
 		niftiDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		niftiDatasetExpression.setDatasetProcessingType(DatasetProcessingType.FORMAT_CONVERSION);
 

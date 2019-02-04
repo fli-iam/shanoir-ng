@@ -20,6 +20,7 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +68,7 @@ public class ImportJobConstructorService {
 							serie.setProtocolName(protocolNameDicomFile);
 						}
 						serie.setSeriesDescription(datasetAttributes.getString(Tag.SeriesDescription));
-						serie.setSeriesDate(datasetAttributes.getDate(Tag.StudyDate));
+						serie.setSeriesDate(DateTimeUtils.dateToLocalDate(datasetAttributes.getDate(Tag.StudyDate)));
 						serie.setNumberOfSeriesRelatedInstances(datasetAttributes.getInt(Tag.NumberOfSeriesRelatedInstances,0));
 						EquipmentDicom equipment = new EquipmentDicom(
 							datasetAttributes.getString(Tag.Manufacturer),

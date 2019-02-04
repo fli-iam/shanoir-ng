@@ -1,8 +1,9 @@
 package  org.shanoir.ng.subject.dto;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.subject.HemisphericDominance;
 import org.shanoir.ng.subject.ImagedObjectCategory;
 import org.shanoir.ng.subject.Sex;
@@ -17,7 +18,8 @@ public class SubjectDTO {
     
     private String identifier;
 
-    private Date birthDate;
+    @LocalDateAnnotations
+    private LocalDate birthDate;
 
     private HemisphericDominance languageHemisphericDominance;
 
@@ -76,14 +78,14 @@ public class SubjectDTO {
 	/**
 	 * @return the birthDate
 	 */
-	public Date getBirthDate() {
+	public LocalDate getBirthDate() {
 		return birthDate;
 	}
 
 	/**
 	 * @param birthDate the birthDate to set
 	 */
-	public void setBirthDate(Date birthDate) {
+	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
 	}
 
