@@ -141,6 +141,15 @@ public class StudyServiceImpl implements StudyService {
 		for (final StudyUser studyUser: study.getStudyUserList()) {
 			studyUser.setStudyId(study.getId());
 		}
+		final List<StudyUser> studyUserList = new ArrayList<>(study.getStudyUserList());
+		Study studyDb =  studyRepository.save(study);
+		// Issue 109: add new study id to the studyUser list and save it
+		for (final StudyUser studyUser : studyUserList) {
+			// Add link study/user
+			studyUser.setStudyId(studyDb.getId());
+			studyDb.getStudyUserList().add(studyUser);
+		}
+		
 		return studyRepository.save(study);
 	}
 
