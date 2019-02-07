@@ -14,12 +14,14 @@ export class ImportService {
             .toPromise();
     }
 
-    startImportJob(importJob: ImportJob): Promise<Object> {
-        return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
-            .toPromise()
-            .catch((error) => {
-                return Promise.reject(error.message || error);
-            });
+    async startImportJob(importJob: ImportJob): Promise<Object> {
+        try {
+            return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
+                .toPromise();
+        }
+        catch (error) {
+            return Promise.reject(error.message || error);
+        }
     }
 
     /**

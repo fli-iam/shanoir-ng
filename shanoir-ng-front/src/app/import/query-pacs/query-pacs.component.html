@@ -1,42 +1,51 @@
-<div class="header command-zone">1. Query Neurinfo PACS</div>
-<fieldset class="step">
-    <ol>
-        <legend>
-            Please fill <strong class="warning">at least one </strong>of the five fields below to query the PACS.
-        </legend>
-        <li>
-            <label>Patient Name</label> 
-            <span class="right-col">
-                <input type="text" id="patientName" [(ngModel)]="dicomQuery.patientName" />
-            </span>
-            <tool-tip>Enter the exact value, case sensitive. Ex: TITI^TOTO won't match titi'toto</tool-tip>
-        </li>
-        <li>
-            <label>Patient ID</label> 
-            <span class="right-col">
-                <input type="text" id="patientID" [(ngModel)]="dicomQuery.patientID" />
-            </span>
-        </li>
-        <li>
-            <label>Patient Birth Date</label> 
-            <span class="right-col">
-                <datepicker [(ngModel)]="dicomQuery.patientBirthDate"></datepicker>
-            </span>
-        </li>
-        <li>
-            <label>Dicom Study Description</label> 
-            <span class="right-col">
-                <input type="text" id="studyDescription" [(ngModel)]="dicomQuery.studyDescription" />
-            </span>
-            <tool-tip>The wildcard character is allowed. For instance, you can enter STUDY* to find STUDY^NEURO</tool-tip>
-        </li>
-        <li>
-            <label>Study Date</label> 
-            <span class="right-col">
-                <datepicker [(ngModel)]="dicomQuery.studyDate"></datepicker>
-                <label *ngIf="isStudyDateValid==false" class="form-validation-alert">Date should be valid! Date format: dd/mm/yyyy</label>
-            </span>
-        </li>
-    </ol>
-</fieldset>
-<button class="next" [disabled]="!valid" (click)="queryPACS()">Query</button>
+
+<form [formGroup]="form" novalidate>
+    <div class="header command-zone">1. Query Neurinfo PACS</div>
+    <fieldset class="step">
+        <ol>
+            <legend>
+                Please fill <strong class="warning">at least one </strong>of the five fields below to query the PACS.
+            </legend>
+            <li>
+                <label>Patient Name</label> 
+                <span class="right-col">
+                    <input type="text" id="patientName" formControlName="patientName" maxlength="64" [(ngModel)]="dicomQuery.patientName" />
+                    <label *ngIf="hasError('patientName', ['maxlength'])" [@slideDown]="hasError('patientName', ['maxlength'])" class="form-validation-alert">Length must not exceed 64!</label>
+                </span>
+                <tool-tip>Enter the exact value, case sensitive. Ex: TITI^TOTO won't match titi'toto</tool-tip>
+            </li>
+            <li>
+                <label>Patient ID</label> 
+                <span class="right-col">
+                    <input type="text" id="patientID" formControlName="patientID" maxlength="64" [(ngModel)]="dicomQuery.patientID" />
+                    <label *ngIf="hasError('patientID', ['maxlength'])" [@slideDown]="hasError('patientID', ['maxlength'])" class="form-validation-alert">Length must not exceed 64!</label>
+                </span>
+            </li>
+            <li>
+                <label>Patient Birth Date</label> 
+                <span class="right-col">
+                    <input type="text" id="patientBirthDate" placeholder="yyyyMMdd" [(ngModel)]="dicomQuery.patientBirthDate" formControlName="patientBirthDate" />
+                    <label *ngIf="hasError('patientBirthDate', ['pattern'])" class="form-validation-alert">Date format required by the PACS: yyyyMMdd</label>
+                </span>
+                <tool-tip>Date format required by the PACS: yyyyMMdd</tool-tip>
+            </li>
+            <li>
+                <label>Study Description</label> 
+                <span class="right-col">
+                    <input type="text" id="studyDescription" formControlName="studyDescription" maxlength="64" [(ngModel)]="dicomQuery.studyDescription" />
+                    <label *ngIf="hasError('studyDescription', ['maxlength'])" [@slideDown]="hasError('studyDescription', 'maxlength')" class="form-validation-alert">Length must not exceed 64!</label>
+                </span>
+                <tool-tip>The wildcard character is allowed. For instance, you can enter STUDY* to find STUDY^NEURO</tool-tip>
+            </li>
+            <li>
+                <label>Study Date</label> 
+                <span class="right-col">
+                    <input type="text" id="studyDate" placeholder="yyyyMMdd" [(ngModel)]="dicomQuery.studyDate" formControlName="studyDate" />
+                    <label *ngIf="hasError('studyDate', ['pattern'])" class="form-validation-alert">ate format required by the PACS: yyyyMMdd</label>
+                </span>
+                <tool-tip>Date format required by the PACS: yyyyMMdd</tool-tip>
+            </li>
+        </ol>
+    </fieldset>
+    <button class="next" [disabled]="!form.valid" (click)="queryPACS()">Query</button>
+</form>
