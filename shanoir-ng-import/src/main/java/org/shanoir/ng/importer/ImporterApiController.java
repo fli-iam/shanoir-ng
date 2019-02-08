@@ -65,7 +65,7 @@ public class ImporterApiController implements ImporterApi {
 	private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
 	private static final String ZIP_FILE_SUFFIX = ".zip";
-
+	
 	@Value("${shanoir.import.directory}")
 	private String importDir;
 	
