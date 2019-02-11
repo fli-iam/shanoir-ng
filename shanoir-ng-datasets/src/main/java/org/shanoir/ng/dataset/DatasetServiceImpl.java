@@ -1,5 +1,6 @@
 package org.shanoir.ng.dataset;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.dataset.modality.CtDataset;
@@ -8,15 +9,24 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetRepository;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.modality.PetDatasetRepository;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.service.MicroserviceRequestsService;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Dataset service implementation.
@@ -43,6 +53,13 @@ public class DatasetServiceImpl implements DatasetService<Dataset> {
 
 	@Autowired
 	private PetDatasetRepository petDatasetRepository;
+	
+	@Autowired
+	private RestTemplate restTemplate;
+	
+	@Autowired
+	private MicroserviceRequestsService microservicesRequestsService;
+	
 
 	@Override
 	public void deleteById(final Long id) throws ShanoirDatasetsException {
@@ -164,8 +181,47 @@ public class DatasetServiceImpl implements DatasetService<Dataset> {
 
 	@Override
 	public Page<Dataset> findPage(final Pageable pageable) throws ShanoirException {
-		Page<Dataset> page = datasetRepository.findAll(pageable);
+		Page<Dataset> page = datasetRepository.findByStudyIdIn(getStudiesForUser(),pageable);
 		return page;
 	}
+	
+	private List<Long> getStudiesForUser() {
+		HttpEntity<Object> entity = null;
+		try {
+			entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
+		} catch (ShanoirException e) {
+			LOG.error("Error on keycloak request - " + e.getMessage());
+		}
+
+		// Request to study MS to get list of studies reachable by connected
+		// user
+		ResponseEntity<IdNameDTO[]> response = null;
+		try {
+			response = restTemplate.exchange(
+					microservicesRequestsService.getStudiesMsUrl() + MicroserviceRequestsService.STUDY, HttpMethod.GET,
+					entity, IdNameDTO[].class);
+		} catch (RestClientException e) {
+			LOG.error("Error on study microservice request - " + e.getMessage());
+		}
+
+		final List<Long> studyIds = new ArrayList<>();
+		if (response != null) {
+			IdNameDTO[] studies = null;
+			if (HttpStatus.OK.equals(response.getStatusCode())
+					|| HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+				studies = response.getBody();
+			} else {
+				LOG.error("Error on study microservice response - status code: " + response.getStatusCode());
+			}
+
+			if (studies != null) {
+				for (IdNameDTO idNameDTO : studies) {
+					studyIds.add(idNameDTO.getId());
+				}
+			}
+		}
+		return studyIds;
+	}
+
 
 }

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 public interface DatasetRepository extends DatasetBaseRepository<Dataset> {
 
 	Page<Dataset> findAll(Pageable pageable);
+	Page<Dataset> findByStudyIdIn(List<Long> studyIds, Pageable pageable);
 	List<Dataset> findAll();
 
 }

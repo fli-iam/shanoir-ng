@@ -162,9 +162,9 @@ public class DatasetApiController implements DatasetApi {
 	public ResponseEntity<Page<DatasetDTO>> findDatasets(final Pageable pageable) throws RestServiceException {
 		try {
 			Page<Dataset> datasets = datasetService.findPage(pageable);	
-			if (datasets.getContent().isEmpty()) {
+			/*if (datasets.getContent().isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			}
+			}*/
 			return new ResponseEntity<Page<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(
