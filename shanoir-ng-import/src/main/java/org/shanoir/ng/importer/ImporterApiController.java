@@ -236,7 +236,10 @@ public class ImporterApiController implements ImporterApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							e.getMessage(), null));
-		}	
+		}
+		if (importJob.getPatients() == null || importJob.getPatients().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
 		return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 	}
 

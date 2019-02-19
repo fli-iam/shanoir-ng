@@ -37,7 +37,6 @@ export class KeycloakService {
         KeycloakService.auth.authz.logout();
     }
     
-
     getToken(): Promise<string> {
         if (!this.gettingToken) {
             this.gettingToken = true;
@@ -72,7 +71,7 @@ export class KeycloakService {
     }
 
     canUserImportFromPACS(): boolean {
-        // console.log(KeycloakService.auth.authz)
+        // console.log(KeycloakService.auth.authz.canImportFromPACS);
         return true;
         // return KeycloakService.auth.authz && KeycloakService.auth.authz.user.canAccessToDicomAssociation;
     }

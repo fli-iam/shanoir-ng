@@ -55,8 +55,8 @@ public class QueryPACSService {
 	@Value("${shanoir.import.pacs.query.aet.called.port}")
 	private Integer calledPort;
 	
-	@Value("${shanoir.import.pacs.query.maxiPatients}")
-	private Integer maxiPatientsFromPACS;
+	@Value("${shanoir.import.pacs.query.maxPatients}")
+	private Integer maxPatientsFromPACS;
 	
 	private DicomNode calling;
 	
@@ -135,8 +135,8 @@ public class QueryPACSService {
 		if (attributesPatients != null) {
 			// Limit the max number of patients returned 
 			int patientsNbre = attributesPatients.size();
-			if (maxiPatientsFromPACS < attributesPatients.size()) {
-				patientsNbre = maxiPatientsFromPACS;
+			if (maxPatientsFromPACS < attributesPatients.size()) {
+				patientsNbre = maxPatientsFromPACS;
 			}
 			List<Patient> patients = new ArrayList<Patient>();
 			for (int i = 0; i < patientsNbre; i++) {
@@ -174,8 +174,8 @@ public class QueryPACSService {
 				querySeries(calling, called, study);
 			}
 			// Limit the max number of patients returned 
-			if (maxiPatientsFromPACS < patients.size()) {
-				patients = patients.subList(0, maxiPatientsFromPACS);
+			if (maxPatientsFromPACS < patients.size()) {
+				patients = patients.subList(0, maxPatientsFromPACS);
 			}
 			importJob.setPatients(patients);
 		}

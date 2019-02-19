@@ -32,7 +32,7 @@
         <li class="info" *ngIf="center && !center?.compatible">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>This center may not be not compatible with the imported data !</strong>
-            <br/>Your archive contains this data : <code>{{patient.studies[0].series[0].institution.institutionName}}, {{patient.studies[0].series[0].institution.institutionAddress}}.</code>
+            <br/>Your archive contains this data : <code>{{patient.studies[0].series[0]?.institution?.institutionName}}, {{patient.studies[0].series[0]?.institution?.institutionAddress}}.</code>
             <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
         </li>
         <li class="required">

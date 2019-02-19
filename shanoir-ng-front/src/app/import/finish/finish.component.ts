@@ -23,6 +23,7 @@ export class FinishImportComponent {
     private importing: boolean = false;
     private step: Step;
     private readonly ImagesUrlUtil = ImagesUrlUtil;
+    private importMode: "DICOM" | "PACS";
 
     constructor(
             private importService: ImportService,
@@ -32,15 +33,23 @@ export class FinishImportComponent {
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
             
-        if (!this.importDataService.patientList || !this.importDataService.inMemoryExtracted
-                || !importDataService.patients || !importDataService.patients[0]
-                || !importDataService.contextData) {
+        if (!this.importDataService.patientList || !importDataService.patients 
+            || !importDataService.patients[0] || !importDataService.contextData) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
         
-        breadcrumbsService.nameStep('4. Finish');
         this.importJob = this.importDataService.patientList;
+        if (this.importJob.fromDicomZip) {
+            this.importMode = "DICOM";
+            if (!this.importDataService.inMemoryExtracted) {
+                this.router.navigate(['imports'], {replaceUrl: true});
+                return;
+            }
+        } else if (this.importJob.fromPacs) {
+            this.importMode = "PACS";
+        }
+        breadcrumbsService.nameStep('4. Finish');
         this.selectedPatients = this.importDataService.patients;
         this.context = this.importDataService.contextData;
     }
@@ -57,13 +66,16 @@ export class FinishImportComponent {
                 let that = this;
                 this.importing = true;
                 this.importData()
-                    .then(() => {
+                    .then((importJob: ImportJob) => {
                         this.importDataService.reset();
                         this.importing = false;
                         setTimeout(function () {
                             that.msgService.log('info', 'The data has been successfully imported')
                         }, 0);
-                        this.router.navigate(['/dataset/list']);
+                        // go back to the first step of import
+                        if (this.importMode == 'PACS') this.router.navigate(['/imports/pacs']);
+                        else if (this.importMode == 'DICOM') this.router.navigate(['/imports/upload']);
+                        else this.router.navigate(['/home']);
                     }).catch(error => {
                         this.importing = false;
                         throw error;
@@ -73,7 +85,7 @@ export class FinishImportComponent {
             });
     }
 
-    private importData (): Promise<any> {
+    private importData(): Promise<any> {
         if (true) {
             let importJob = new ImportJob();
             importJob.patients = new Array<PatientDicom>();
@@ -85,7 +97,8 @@ export class FinishImportComponent {
                     this.context.subject.subjectStudy);
             importJob.patients.push(this.patient);
             importJob.workFolder = this.importJob.workFolder;
-            importJob.fromDicomZip = true;
+            if (this.importMode == 'DICOM') importJob.fromDicomZip = true;
+            else if (this.importMode == 'PACS') importJob.fromPacs = true;
             importJob.examinationId = this.context.examination.id;
             importJob.frontStudyId = this.context.study.id;
             importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;

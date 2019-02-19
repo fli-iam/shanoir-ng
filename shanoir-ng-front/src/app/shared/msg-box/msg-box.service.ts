@@ -1,5 +1,4 @@
-import { Injectable, ApplicationRef, Injector } from '@angular/core';
-import { Subject } from 'rxjs';
+import { ApplicationRef, Injectable, Injector } from '@angular/core';
 
 type msgType = 'error' | 'warn' | 'info';
 class Message { constructor(public type: msgType, public txt: string, public duration: number) {} }

@@ -9,16 +9,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class ImportComponent implements OnInit {
 
-    public importMode: "DICOM" | "PACS";
+    private importMode: "DICOM" | "PACS";
+    private title: string = '';
 
     constructor(private breadcrumbsService: BreadcrumbsService,
         private route: ActivatedRoute, private router: Router) {
             route.url.subscribe(() => {
-                if (this.route.snapshot.firstChild) {
-                    this.importMode = this.route.snapshot.firstChild.data['importMode'];
-                } else {
-                    this.router.navigate(['home'], {replaceUrl: true});
-                    return;
+                if (this.route.snapshot.firstChild && this.route.snapshot.firstChild.data['importMode']) {
+                    this.title = 'from ' + this.route.snapshot.firstChild.data['importMode'];
                 }
         })
     }
