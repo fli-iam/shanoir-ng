@@ -13,9 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.role.Role;
-import org.shanoir.ng.role.RoleRepository;
-import org.shanoir.ng.role.RoleServiceImpl;
+import org.shanoir.ng.role.model.Role;
+import org.shanoir.ng.role.repository.RoleRepository;
+import org.shanoir.ng.role.service.RoleServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 
 /**
@@ -35,7 +35,7 @@ public class RoleServiceTest {
 
 	@Before
 	public void setup() {
-		given(roleRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createGuestRole()));
+		given(roleRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUserRole()));
 	}
 
     @Test

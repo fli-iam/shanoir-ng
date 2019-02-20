@@ -5,14 +5,13 @@ package org.shanoir.ng.configuration.security;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
-import org.shanoir.ng.role.Role;
-import org.shanoir.ng.role.RoleService;
-import org.shanoir.ng.user.UserContext;
+import org.shanoir.ng.role.model.Role;
+import org.shanoir.ng.role.service.RoleService;
+import org.shanoir.ng.user.model.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.GrantedAuthority;
@@ -55,10 +54,8 @@ public class UserDetailsArgumentResolver implements HandlerMethodArgumentResolve
 		final List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 		if (token.getRealmAccess().getRoles() != null) {
 			for (String roleStr : token.getRealmAccess().getRoles()) {
-				Optional<Role> role = roleService.findByName(roleStr);
-				if (role.isPresent()) {
-					authorities.add(role.get());
-				}
+				Role role = roleService.findByName(roleStr);
+				authorities.add(role);
 			}
 		}
 		userContext.setAuthorities(authorities);

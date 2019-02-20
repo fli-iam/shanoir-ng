@@ -2,11 +2,13 @@ package org.shanoir.ng.accountrequest;
 
 import static org.junit.Assert.assertEquals;
 
+import java.security.GeneralSecurityException;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.accountrequest.AccountRequestInfo;
-import org.shanoir.ng.user.User;
+import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
+import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,7 @@ public class AccountRequestApiControllerTestIT extends KeycloakControllerTestIT 
 
 	@Test
 	@Ignore
-	public void saveNewUser() {
+	public void saveNewUser() throws GeneralSecurityException {
 		final User user = ModelsUtil.createUser(null);
 		user.setEmail("test@te.st");
 		user.setUsername("test");

@@ -1,18 +1,17 @@
 package org.shanoir.ng.email;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
-import org.shanoir.ng.user.User;
-import org.shanoir.ng.user.UserRepository;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
@@ -49,8 +48,7 @@ public class EmailServiceImpl implements EmailService {
 	@Value("${front.server.address}")
 	private String shanoirServerAddress;
 
-	private static final DateFormat SHORT_DATE_FORMAT_EN = DateFormat.getDateInstance(DateFormat.SHORT,
-			new Locale("EN", "en"));
+	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d yyyy");
 
 	@Override
 	public void notifyAccountWillExpire(User user) {
@@ -63,15 +61,12 @@ public class EmailServiceImpl implements EmailService {
 			variables.put("firstname", user.getFirstName());
 			variables.put("lastname", user.getLastName());
 			variables.put("serverAddress", shanoirServerAddress);
-			variables.put("expirationDate", SHORT_DATE_FORMAT_EN.format(user.getExpirationDate()));
+			variables.put("expirationDate", formatter.format(user.getExpirationDate()));
 			final String content = build("notifyAccountWillExpire", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
+
 	}
 
 	@Override
@@ -90,11 +85,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyAdminAccountRequest", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
 	}
 
 	@Override
@@ -136,11 +127,8 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyNewUser", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
+
 	}
 
 	@Override
@@ -157,11 +145,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyUserResetPassword", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
 	}
 
 	private String build(final String templateFile, final Map<String, Object> variables) {
@@ -188,11 +172,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyAdminAccountRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
 	}
 
 	private void notifyAdminAccountRequestDenied(final User user) {
@@ -209,11 +189,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyAdminAccountRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
 	}
 
 	private void notifyAdminExtensionRequestAccepted(final User user) {
@@ -230,11 +206,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyAdminExtensionRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
 	}
 
 	private void notifyAdminExtensionRequestDenied(final User user) {
@@ -251,11 +223,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyAdminExtensionRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
 	}
 
 	private void notifyUserAccountRequestAccepted(final User user) {
@@ -271,11 +239,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyUserAccountRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
 	}
 
 	private void notifyUserAccountRequestDenied(final User user) {
@@ -292,11 +256,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyUserAccountRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
 	}
 
 	private void notifyUserExtensionRequestAccepted(final User user) {
@@ -309,15 +269,11 @@ public class EmailServiceImpl implements EmailService {
 			variables.put("firstname", user.getFirstName());
 			variables.put("lastname", user.getLastName());
 			variables.put("serverAddress", shanoirServerAddress);
-			variables.put("expirationDate", SHORT_DATE_FORMAT_EN.format(user.getExpirationDate()));
+			variables.put("expirationDate", formatter.format(user.getExpirationDate()));
 			final String content = build("notifyUserExtensionRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
 	}
 
 	private void notifyUserExtensionRequestDenied(final User user) {
@@ -330,15 +286,11 @@ public class EmailServiceImpl implements EmailService {
 			variables.put("firstname", user.getFirstName());
 			variables.put("lastname", user.getLastName());
 			variables.put("serverAddress", shanoirServerAddress);
-			variables.put("expirationDate", SHORT_DATE_FORMAT_EN.format(user.getExpirationDate()));
+			variables.put("expirationDate", formatter.format(user.getExpirationDate()));
 			final String content = build("notifyUserExtensionRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};
-		try {
-			mailSender.send(messagePreparator);
-		} catch (MailException e) {
-			LOG.error("Error while sending email to new user " + user.getEmail(), e);
-		}
+		mailSender.send(messagePreparator);
 	}
 
 }

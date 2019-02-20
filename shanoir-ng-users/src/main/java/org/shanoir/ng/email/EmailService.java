@@ -1,6 +1,6 @@
 package org.shanoir.ng.email;
 
-import org.shanoir.ng.user.User;
+import org.shanoir.ng.user.model.User;
 
 /**
  * Email service.

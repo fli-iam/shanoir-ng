@@ -3,7 +3,7 @@ package org.shanoir.ng.shared.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.shanoir.ng.user.User;
+import org.shanoir.ng.user.model.User;
 
 /**
  * Validate if motivation exists with extension request.

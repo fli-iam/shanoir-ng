@@ -7,11 +7,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.accountrequest.AccountRequestApiController;
-import org.shanoir.ng.accountrequest.AccountRequestInfo;
-import org.shanoir.ng.shared.exception.ShanoirUsersException;
-import org.shanoir.ng.user.User;
-import org.shanoir.ng.user.UserService;
+import org.shanoir.ng.accountrequest.controller.AccountRequestApiController;
+import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
+import org.shanoir.ng.shared.exception.PasswordPolicyException;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,9 +22,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for user controller.
@@ -38,8 +36,6 @@ public class AccountRequestApiControllerTest {
 
 	private static final String REQUEST_PATH = "/accountrequest";
 
-	private Gson gson;
-
 	@Autowired
 	private MockMvc mvc;
 
@@ -47,9 +43,7 @@ public class AccountRequestApiControllerTest {
 	private UserService userServiceMock;
 
 	@Before
-	public void setup() throws ShanoirUsersException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
+	public void setup() throws PasswordPolicyException {
 		given(userServiceMock.save(Mockito.mock(User.class))).willReturn(new User());
 	}
 
@@ -68,7 +62,7 @@ public class AccountRequestApiControllerTest {
 		user.setAccountRequestInfo(info);
 
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(user)))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
 				.andExpect(status().isNoContent());
 	}
 

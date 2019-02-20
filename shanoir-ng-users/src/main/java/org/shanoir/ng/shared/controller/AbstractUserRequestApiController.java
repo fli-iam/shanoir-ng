@@ -1,11 +1,8 @@
 package org.shanoir.ng.shared.controller;
 
 import org.apache.commons.lang3.StringUtils;
-import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
-import org.shanoir.ng.shared.validation.UniqueValidator;
-import org.shanoir.ng.user.User;
-import org.shanoir.ng.user.UserService;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -59,43 +56,6 @@ public abstract class AbstractUserRequestApiController {
 		}
 
 		user.setUsername(username);
-	}
-
-	/*
-	 * Get access rights errors
-	 *
-	 * @param user
-	 * 
-	 * @return an error map
-	 */
-	protected FieldErrorMap getUpdateRightsErrors(final User user) {
-		final User previousStateUser = userService.findById(user.getId());
-		final FieldErrorMap accessErrors = new EditableOnlyByValidator<User>().validate(previousStateUser, user);
-		return accessErrors;
-	}
-
-	/*
-	 * Get access rights errors
-	 *
-	 * @param user
-	 * 
-	 * @return an error map
-	 */
-	protected FieldErrorMap getCreationRightsErrors(final User user) {
-		return new EditableOnlyByValidator<User>().validate(user);
-	}
-
-	/*
-	 * Get unique constraint errors
-	 *
-	 * @param user
-	 * 
-	 * @return an error map
-	 */
-	protected FieldErrorMap getUniqueConstraintErrors(final User user) {
-		final UniqueValidator<User> uniqueValidator = new UniqueValidator<User>(userService);
-		final FieldErrorMap uniqueErrors = uniqueValidator.validate(user);
-		return uniqueErrors;
 	}
 
 }

@@ -32,6 +32,6 @@ public interface UniqueCheckableService<T extends AbstractGenericItem> {
 	 * @return an entity or null.
 	 * @throws AccessDeniedException 
 	 */
-	T findById(Long id) throws AccessDeniedException;
+	T findById(Long id); 
 
 }

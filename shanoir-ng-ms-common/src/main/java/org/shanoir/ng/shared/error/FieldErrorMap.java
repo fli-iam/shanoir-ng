@@ -72,7 +72,7 @@ public class FieldErrorMap<T extends AbstractGenericItem> extends HashMap<String
 		return this.merge(newErrors);
 	}
 	
-	public FieldErrorMap<T> checkFieldAccess(T entity, UniqueCheckableService<T> service) throws AccessDeniedException {
+	public FieldErrorMap<T> checkFieldAccess(T entity, UniqueCheckableService<T> service) {
 		T dbEntity = service.findById(entity.getId());
 		FieldErrorMap<T> newErrors = new EditableOnlyByValidator<T>().validate(entity, dbEntity);
 		return this.merge(newErrors);

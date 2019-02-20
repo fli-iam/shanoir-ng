@@ -1,0 +1,191 @@
+package org.shanoir.ng.user;
+
+import static org.mockito.BDDMockito.given;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Optional;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
+import org.shanoir.ng.email.EmailService;
+import org.shanoir.ng.role.repository.RoleRepository;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.user.model.ExtensionRequestInfo;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.repository.UserRepository;
+import org.shanoir.ng.user.service.UserService;
+import org.shanoir.ng.user.utils.KeycloakClient;
+import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.test.context.junit4.SpringRunner;
+
+/**
+ * User detail service test.
+ * 
+ * @author msimon
+ * 
+ */
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class UserServiceSecurityTest {
+
+	private static final long USER_ID = 1L;
+	private static final long LOGGED_USER_ID = 2L;
+	private static final String LOGGED_USER_USERNAME = "logged";
+	private static final String UPDATED_USER_FIRSTNAME = "test";
+	private static final String USER_USERNAME = "name";
+	private static final String USER_EMAIL = "test@shanoir.fr";
+
+	@MockBean
+	private AccountRequestInfoRepository accountRequestInfoRepository;
+
+	@MockBean
+	private EmailService emailService;
+
+	@MockBean
+	private KeycloakClient keycloakClient;
+
+	@MockBean
+	private RabbitTemplate rabbitTemplate;
+
+	@MockBean
+	private RoleRepository roleRepository;
+
+	@MockBean
+	private UserRepository userRepository;
+	
+	@MockBean
+    private ApplicationEventPublisher publisher;
+
+	@Autowired
+	private UserService userService;
+	
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+	
+	private User mockUser;
+	private User mockMe;
+
+	@Before
+	public void setup() {
+		mockUser = ModelsUtil.createUser(USER_ID);
+		mockMe = ModelsUtil.createAdmin(LOGGED_USER_ID);
+		
+		given(userRepository.findOne(USER_ID)).willReturn(mockUser);
+		given(userRepository.findOne(LOGGED_USER_ID)).willReturn(mockMe);
+		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
+		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
+		given(userRepository.findByIdIn(Mockito.anyListOf(Long.class)))
+				.willReturn(Arrays.asList(createUser()));
+		given(userRepository
+				.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(LocalDate.class)))
+						.willReturn(Arrays.asList(ModelsUtil.createUser()));
+		given(userRepository
+				.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Mockito.any(LocalDate.class)))
+						.willReturn(Arrays.asList(ModelsUtil.createUser()));
+		given(userRepository.findByEmail(USER_EMAIL)).willReturn(Optional.of(ModelsUtil.createUser()));
+		given(userRepository.save(Mockito.any(User.class))).willReturn(ModelsUtil.createUser());
+		given(roleRepository.findByName(Mockito.anyString())).willReturn(ModelsUtil.createUserRole());
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
+	public void testAsUser() throws ShanoirException {
+
+		assertAccessDenied(userService::confirmAccountRequest, mockUser);
+		assertAccessDenied(userService::deleteById, USER_ID);
+		assertAccessDenied(userService::denyAccountRequest, USER_ID);
+		assertAccessDenied(userService::findAll);
+		assertAccessDenied(userService::findByEmail, USER_EMAIL);
+		assertAccessDenied(userService::findById, USER_ID);
+		assertAccessAuthorized(userService::findById, LOGGED_USER_ID);
+		assertAccessDenied(userService::findByUsername, USER_USERNAME);
+		assertAccessAuthorized(userService::findByUsername, LOGGED_USER_USERNAME);
+		assertAccessDenied(userService::getUsersToReceiveFirstExpirationNotification);
+		assertAccessDenied(userService::getUsersToReceiveSecondExpirationNotification);
+		assertAccessAuthorized(userService::requestExtension, USER_ID, new ExtensionRequestInfo());
+		assertAccessAuthorized(userService::save, mockUser);
+		assertAccessAuthorized(userService::findByIds, Arrays.asList(USER_ID));
+		assertAccessDenied(userService::update, mockUser);
+		assertAccessAuthorized(userService::update, mockMe);
+		assertAccessDenied(userService::updateExpirationNotification, mockUser, true);
+		assertAccessAuthorized(userService::updateLastLogin, USER_USERNAME);
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
+	public void testAsExpert() throws ShanoirException {
+
+		assertAccessDenied(userService::confirmAccountRequest, mockUser);
+		assertAccessDenied(userService::deleteById, USER_ID);
+		assertAccessDenied(userService::denyAccountRequest, USER_ID);
+		assertAccessDenied(userService::findAll);
+		assertAccessDenied(userService::findByEmail, USER_EMAIL);
+		assertAccessDenied(userService::findById, USER_ID);
+		assertAccessAuthorized(userService::findById, LOGGED_USER_ID);
+		assertAccessDenied(userService::findByUsername, USER_USERNAME);
+		assertAccessAuthorized(userService::findByUsername, LOGGED_USER_USERNAME);
+		assertAccessDenied(userService::getUsersToReceiveFirstExpirationNotification);
+		assertAccessDenied(userService::getUsersToReceiveSecondExpirationNotification);
+		assertAccessAuthorized(userService::requestExtension, USER_ID, new ExtensionRequestInfo());
+		assertAccessAuthorized(userService::save, mockUser);
+		assertAccessAuthorized(userService::findByIds, Arrays.asList(USER_ID));
+		assertAccessDenied(userService::update, mockUser);
+		assertAccessAuthorized(userService::update, mockMe);
+		assertAccessDenied(userService::updateExpirationNotification, mockUser, true);
+		assertAccessAuthorized(userService::updateLastLogin, USER_USERNAME);
+	}
+	
+	@Test
+	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+	public void testAsAdmin() throws ShanoirException {
+
+		mockUser.setAccountRequestDemand(true);
+		assertAccessAuthorized(userService::confirmAccountRequest, mockUser);
+		mockUser.setAccountRequestDemand(false);
+		assertAccessAuthorized(userService::deleteById, USER_ID);
+		mockUser.setAccountRequestDemand(true);
+		assertAccessAuthorized(userService::denyAccountRequest, USER_ID);
+		mockUser.setAccountRequestDemand(false);
+		assertAccessAuthorized(userService::findAll);
+		assertAccessAuthorized(userService::findByEmail, USER_EMAIL);
+		assertAccessAuthorized(userService::findById, USER_ID);
+		assertAccessAuthorized(userService::findById, LOGGED_USER_ID);
+		assertAccessAuthorized(userService::findByUsername, USER_USERNAME);
+		assertAccessAuthorized(userService::findByUsername, LOGGED_USER_USERNAME);
+		assertAccessAuthorized(userService::getUsersToReceiveFirstExpirationNotification);
+		assertAccessAuthorized(userService::getUsersToReceiveSecondExpirationNotification);
+		assertAccessAuthorized(userService::requestExtension, USER_ID, new ExtensionRequestInfo());
+		assertAccessAuthorized(userService::save, mockUser);
+		assertAccessAuthorized(userService::findByIds, Arrays.asList(USER_ID));
+		assertAccessAuthorized(userService::update, mockUser);
+		assertAccessAuthorized(userService::update, mockMe);
+		assertAccessAuthorized(userService::updateExpirationNotification, mockUser, true);
+		assertAccessAuthorized(userService::updateLastLogin, USER_USERNAME);
+	}
+
+	private User createUser() {
+		final User user = new User();
+		user.setId(USER_ID);
+		user.setFirstName(UPDATED_USER_FIRSTNAME);
+		user.setUsername(USER_USERNAME);
+		return user;
+	}
+
+}
