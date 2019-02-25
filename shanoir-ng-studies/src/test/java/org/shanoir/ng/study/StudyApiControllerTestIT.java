@@ -9,6 +9,8 @@ import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.center.Center;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.studyuser.StudyUserRight;

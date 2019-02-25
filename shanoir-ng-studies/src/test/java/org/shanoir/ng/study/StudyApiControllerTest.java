@@ -13,8 +13,13 @@ import org.mockito.Mockito;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.study.controler.StudyApiController;
+import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.mapper.StudyMapper;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.shanoir.ng.utils.SecurityContextTestUtil;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -89,7 +94,7 @@ public class StudyApiControllerTest {
 
 	@Test
 	public void findStudiesTest() throws Exception {
-		SecurityContextTestUtil.initAuthenticationContext();
+		SecurityContextUtil.initAuthenticationContext();
 
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());

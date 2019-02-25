@@ -1,4 +1,4 @@
-package org.shanoir.ng.study;
+package org.shanoir.ng.study.dto;
 
 import java.util.List;
 

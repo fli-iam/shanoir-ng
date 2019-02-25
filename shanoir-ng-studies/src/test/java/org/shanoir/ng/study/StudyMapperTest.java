@@ -7,8 +7,11 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.mapper.StudyMapper;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.timepoint.TimepointMapper;
-import org.shanoir.ng.utils.SecurityContextTestUtil;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -46,7 +49,7 @@ public class StudyMapperTest {
 
 	@Test
 	public void studyToStudyDTOTest() {
-		SecurityContextTestUtil.initAuthenticationContext();
+		SecurityContextUtil.initAuthenticationContext();
 
 		final StudyDTO studyDTO = studyMapper.studyToStudyDTO(createStudy());
 		Assert.assertNotNull(studyDTO);

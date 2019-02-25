@@ -14,8 +14,7 @@ import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ForbiddenException;
-import org.shanoir.ng.shared.exception.PasswordPolicyException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.user.controller.UserApiController;
 import org.shanoir.ng.user.model.User;
@@ -53,7 +52,7 @@ public class UserApiControllerTest {
 	private UserService userServiceMock;
 
 	@Before
-	public void setup() throws EntityNotFoundException, AccountNotOnDemandException, PasswordPolicyException, ForbiddenException  {
+	public void setup() throws EntityNotFoundException, AccountNotOnDemandException, SecurityException  {
 		User mockUser = ModelsUtil.createUser(1L);
 		given(userServiceMock.confirmAccountRequest(mockUser)).willReturn(mockUser);
 		doNothing().when(userServiceMock).deleteById(1L);
@@ -61,7 +60,7 @@ public class UserApiControllerTest {
 		given(userServiceMock.findAll()).willReturn(Arrays.asList(mockUser));
 		given(userServiceMock.findById(1L)).willReturn(mockUser);
 		given(userServiceMock.findByIds(Arrays.asList(1L))).willReturn(Arrays.asList(new IdNameDTO()));
-		given(userServiceMock.save(Mockito.mock(User.class))).willReturn(new User());
+		given(userServiceMock.create(Mockito.mock(User.class))).willReturn(new User());
 	}
 
 	@Test

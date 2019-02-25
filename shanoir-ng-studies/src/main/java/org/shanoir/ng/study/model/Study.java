@@ -1,4 +1,4 @@
-package org.shanoir.ng.study;
+package org.shanoir.ng.study.model;
 
 import java.time.LocalDate;
 import java.util.List;

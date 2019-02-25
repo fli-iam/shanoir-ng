@@ -1,4 +1,4 @@
-package org.shanoir.ng.study;
+package org.shanoir.ng.study.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.List;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.studyuser.StudyUser;

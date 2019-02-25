@@ -1,14 +1,18 @@
-package org.shanoir.ng.study;
+package org.shanoir.ng.study.dto.mapper;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjectsMapper;
 import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.study.dto.MembersCategoryDTO;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
+import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.studyuser.StudyUserRight;
@@ -119,4 +123,14 @@ public abstract class StudyDecorator implements StudyMapper {
 		// Sort categories by importance
 		Collections.sort(studyDTO.getMembersCategories(), new MembersCategoryComparator());
 	}
+	
+	private class MembersCategoryComparator implements Comparator<MembersCategoryDTO> {
+		
+		@Override
+		public int compare(MembersCategoryDTO category1, MembersCategoryDTO category2) {
+			return (category1.getStudyUserType().getId() > category2.getStudyUserType().getId()) ? 1 : -1;
+		}
+		
+	}
 }
+

@@ -1,4 +1,4 @@
-package org.shanoir.ng.study;
+package org.shanoir.ng.study.dto.mapper;
 
 import java.util.List;
 
@@ -8,6 +8,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
+import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.timepoint.TimepointMapper;
 
 /**

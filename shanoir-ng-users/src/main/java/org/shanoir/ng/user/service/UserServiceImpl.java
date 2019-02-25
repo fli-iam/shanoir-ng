@@ -12,8 +12,8 @@ import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ForbiddenException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void deleteById(final Long id) throws EntityNotFoundException, ForbiddenException {
+	public void deleteById(final Long id) throws EntityNotFoundException {
 		final User user = userRepository.findOne(id);
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, id);
@@ -175,29 +175,41 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User save(final User user) throws PasswordPolicyException {
-		// Password generation
+	public User create(final User user) throws PasswordPolicyException, SecurityException {
+		/* Password generation */
 		final String newPassword = PasswordUtils.generatePassword();
 		if (!PasswordUtils.checkPasswordPolicy(newPassword)) throw new PasswordPolicyException();
-		User savedUser = null; 
+		
+		User savedUser = userRepository.save(user);
+		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
+		if (keycloakUserId == null) {
+			throw new SecurityException("Could not register the new user into Keycloak.");
+		}
+		savedUser.setKeycloakId(keycloakUserId); // Save keycloak id
+		userRepository.save(savedUser);
+		emailService.notifyNewUser(savedUser, newPassword); // Send email to user
+		return savedUser;
+	}
+	
+	@Override
+	public User createAccountRequest(final User user) throws PasswordPolicyException, SecurityException {
+		/* Password generation */
+		final String newPassword = PasswordUtils.generatePassword();
+		if (!PasswordUtils.checkPasswordPolicy(newPassword)) throw new PasswordPolicyException();		
 
-		if (user.getAccountRequestInfo() != null) {
-			accountRequestInfoRepository.save(user.getAccountRequestInfo()); // Save account request info
-			/* Security ! */
-			user.setAccountRequestDemand(true);
-			user.setRole(roleRepository.findByName("ROLE_USER")); // Set role 'USER'
-			user.setExpirationDate(LocalDate.now().plusYears(1));
-		}
-		savedUser = userRepository.save(user);
-		if (user.getAccountRequestInfo() != null) {
-			emailService.notifyAdminAccountRequest(savedUser); // Send email to administrators
-		}
+		user.setRole(roleRepository.findByName("ROLE_USER")); // Set role 'USER'
+		user.setExpirationDate(LocalDate.now().plusYears(1));
+
+		accountRequestInfoRepository.save(user.getAccountRequestInfo()); // Save account request info
+		User savedUser = userRepository.save(user);
+		emailService.notifyAdminAccountRequest(savedUser); // Send email to administrators
 
 		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
-		if (keycloakUserId != null) {
-			savedUser.setKeycloakId(keycloakUserId); // Save keycloak id
-			userRepository.save(savedUser);
+		if (keycloakUserId == null) {
+			throw new SecurityException("Could not register the new user into Keycloak.");
 		}
+		savedUser.setKeycloakId(keycloakUserId); // Save keycloak id
+		userRepository.save(savedUser);
 		emailService.notifyNewUser(savedUser, newPassword); // Send email to user
 		return savedUser;
 	}

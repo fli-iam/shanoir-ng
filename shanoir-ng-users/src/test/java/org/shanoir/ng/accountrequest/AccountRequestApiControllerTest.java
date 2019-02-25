@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.accountrequest.controller.AccountRequestApiController;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
-import org.shanoir.ng.shared.exception.PasswordPolicyException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.service.UserService;
@@ -43,8 +43,8 @@ public class AccountRequestApiControllerTest {
 	private UserService userServiceMock;
 
 	@Before
-	public void setup() throws PasswordPolicyException {
-		given(userServiceMock.save(Mockito.mock(User.class))).willReturn(new User());
+	public void setup() throws SecurityException {
+		given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
 	}
 
 	@Test

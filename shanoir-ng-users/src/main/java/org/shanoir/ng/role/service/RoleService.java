@@ -21,9 +21,8 @@ public interface RoleService {
 	/**
 	 * Find role by its name.
 	 *
-	 * @param name
-	 *            name.
-	 * @return a role or null/
+	 * @param name name.
+	 * @return a role or null
 	 */
 	Role findByName(String name);
 

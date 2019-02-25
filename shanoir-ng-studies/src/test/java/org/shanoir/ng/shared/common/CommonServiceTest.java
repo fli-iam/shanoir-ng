@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.center.CenterRepository;
-import org.shanoir.ng.study.StudyRepository;
+import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

@@ -1,4 +1,4 @@
-package org.shanoir.ng.study;
+package org.shanoir.ng.study.controler;
 
 import java.util.List;
 
@@ -9,6 +9,10 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.mapper.StudyMapper;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.service.StudyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,13 +65,9 @@ public class StudyApiController implements StudyApi {
 		return new ResponseEntity<>(studies, HttpStatus.OK);
 	}
 
+	@Override
 	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId) {
-		Study study; 
-		try {
-			study = studyService.findById(studyId);			
-		} catch (AccessDeniedException e) {
-			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-		}
+		Study study = studyService.findById(studyId);			
 		if (study == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		else return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
 	}

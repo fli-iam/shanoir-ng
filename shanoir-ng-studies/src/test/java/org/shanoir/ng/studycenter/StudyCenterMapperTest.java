@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentMapper;
 import org.shanoir.ng.center.CenterMapper;
-import org.shanoir.ng.study.Study;
+import org.shanoir.ng.study.model.Study;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;

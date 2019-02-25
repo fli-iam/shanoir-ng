@@ -17,11 +17,10 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.ForbiddenException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,8 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 public class UserApiController extends AbstractUserRequestApiController implements UserApi {
-
-	private static final Logger LOG = LoggerFactory.getLogger(UserApiController.class);
 	
 	@Override
 	public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
@@ -137,18 +134,19 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
 		}	
 		
-		user.setId(null); // Guarantees it is a creation, not an update
 		user.setCreationDate(LocalDate.now()); // Set creation date on creation, which is now
 
 		/* Save user in db. */
-		User createdUser;
 		try {
-			createdUser = getUserService().save(user);
+			User createdUser = getUserService().create(user);
+			return new ResponseEntity<>(createdUser, HttpStatus.OK);
 		} catch (PasswordPolicyException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while generating the new password"));
+		} catch (SecurityException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in Keycloak"));
 		}
-		return new ResponseEntity<>(createdUser, HttpStatus.OK);
 
 	}
 

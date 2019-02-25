@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
-import org.shanoir.ng.study.Study;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.Subject;
 import org.shanoir.ng.subject.SubjectType;
 

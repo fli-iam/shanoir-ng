@@ -8,7 +8,7 @@ import javax.persistence.ManyToOne;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.center.Center;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
-import org.shanoir.ng.study.Study;
+import org.shanoir.ng.study.model.Study;
 
 /**
  * Link between studies and centers.

@@ -9,6 +9,8 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.repository.StudyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

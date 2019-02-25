@@ -1,10 +1,12 @@
-package org.shanoir.ng.study;
+package org.shanoir.ng.study.dto;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.study.model.StudyStatus;
+import org.shanoir.ng.study.model.StudyType;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.subjectstudy.SubjectStudyDTO;

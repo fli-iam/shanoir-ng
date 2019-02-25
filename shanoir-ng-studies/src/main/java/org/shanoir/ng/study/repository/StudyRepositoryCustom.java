@@ -1,9 +1,10 @@
-package org.shanoir.ng.study;
+package org.shanoir.ng.study.repository;
 
 import java.util.List;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.model.ItemRepositoryCustom;
+import org.shanoir.ng.study.model.Study;
 
 /**
  * Custom repository for studies.

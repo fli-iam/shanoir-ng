@@ -2,9 +2,8 @@ package org.shanoir.ng.study.security;
 
 import java.io.Serializable;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.study.Study;
-import org.shanoir.ng.study.StudyRepository;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.studyuser.StudyUserRight;
 import org.shanoir.ng.utils.KeycloakUtil;

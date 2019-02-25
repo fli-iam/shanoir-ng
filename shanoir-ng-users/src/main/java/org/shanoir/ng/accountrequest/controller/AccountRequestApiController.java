@@ -9,6 +9,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,18 +40,18 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
 		}
 
-		/* Security */
-		user.setId(null); // Guarantees it is a creation, not an update
-		user.setRole(null);
 		user.setExpirationDate(null);
 		user.setCreationDate(LocalDate.now()); // Set creation date on creation.
 
 		/* Save user in db. */
 		try {
-			getUserService().save(user);
+			getUserService().createAccountRequest(user);
 		} catch (PasswordPolicyException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while generating the new password"));
+		} catch (SecurityException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in Keycloak"));
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}

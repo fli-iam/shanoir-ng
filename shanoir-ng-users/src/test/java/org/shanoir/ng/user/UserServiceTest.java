@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +21,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ForbiddenException;
-import org.shanoir.ng.shared.exception.PasswordPolicyException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
 import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
@@ -28,7 +29,7 @@ import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.utils.KeycloakClient;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.shanoir.ng.utils.tests.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,6 +37,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -93,6 +95,7 @@ public class UserServiceTest {
 						.willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository.save(Mockito.any(User.class))).willReturn(ModelsUtil.createUser());
 		given(roleRepository.findByName(Mockito.anyString())).willReturn(ModelsUtil.createUserRole());
+		given(keycloakClient.createUserWithPassword(Mockito.any(User.class), Mockito.anyString())).willReturn(RandomStringUtils.randomAlphanumeric(10));
 	}
 
 	@Test
@@ -248,15 +251,17 @@ public class UserServiceTest {
 
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void saveTest() throws PasswordPolicyException  {
-		userService.save(createUser());
-
-		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+	public void saveTest() throws SecurityException  {
+		User newUser = createUser();
+		newUser.setId(null);
+		userService.create(newUser);
+		Mockito.verify(userRepository, Mockito.times(2)).save(Mockito.any(User.class));
 		Mockito.verify(accountRequestInfoRepository, Mockito.times(0)).save(Mockito.any(AccountRequestInfo.class));
 	}
 
 	@Test
-	public void saveWithAccountRequestTest() throws PasswordPolicyException {
+	@WithAnonymousUser
+	public void saveWithAccountRequestTest() throws SecurityException {
 		final User user = createUser();
 		final AccountRequestInfo accountRequestInfo = new AccountRequestInfo();
 		accountRequestInfo.setContact("contact");
@@ -267,10 +272,12 @@ public class UserServiceTest {
 		accountRequestInfo.setWork("work");
 		user.setAccountRequestDemand(true);
 		user.setAccountRequestInfo(accountRequestInfo);
-		userService.save(user);
+		user.setId(null);
+		user.setRole(null);
+		userService.createAccountRequest(user);
 
 		Mockito.verify(accountRequestInfoRepository, Mockito.times(1)).save(accountRequestInfo);
-		Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+		Mockito.verify(userRepository, Mockito.times(2)).save(Mockito.any(User.class));
 	}
 
 	@Test

@@ -2,7 +2,7 @@ package org.shanoir.ng.subjectstudy;
 
 import java.util.List;
 
-import org.shanoir.ng.study.Study;
+import org.shanoir.ng.study.model.Study;
 import org.springframework.data.repository.CrudRepository;
 
 /**

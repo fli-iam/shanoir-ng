@@ -10,7 +10,7 @@ import org.shanoir.ng.manufacturermodel.DatasetModalityType;
 import org.shanoir.ng.manufacturermodel.Manufacturer;
 import org.shanoir.ng.manufacturermodel.ManufacturerModel;
 import org.shanoir.ng.shared.common.CommonIdsDTO;
-import org.shanoir.ng.study.Study;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studyuser.StudyUser;
 import org.shanoir.ng.studyuser.StudyUserRight;
 import org.shanoir.ng.subject.Subject;

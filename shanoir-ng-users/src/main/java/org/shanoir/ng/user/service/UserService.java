@@ -6,9 +6,8 @@ import java.util.Optional;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ForbiddenException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
-import org.shanoir.ng.shared.exception.ShanoirUsersException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
@@ -21,20 +20,17 @@ import org.springframework.stereotype.Service;
  * @author msimon
  * @author jlouis
  * @author mkain
- *
  */
 @Service
 public interface UserService extends UniqueCheckableService<User> {
 
 	/**
-	 * Confirms an account request and updates user.
+	 * Confirm an account request and updates user.
 	 * 
-	 * @param userId
-	 *            user id.
-	 * @param user
-	 *            updated user.
-	 * @return updated user.
-	 * @throws ShanoirUsersException
+	 * @param user the user to update.
+	 * @return the updated user.
+	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
+	 * @throws AccountNotOnDemandException if this account is not currently on demand.
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
 	User confirmAccountRequest(User user) throws EntityNotFoundException, AccountNotOnDemandException;
@@ -42,20 +38,18 @@ public interface UserService extends UniqueCheckableService<User> {
 	/**
 	 * Delete a user
 	 * 
-	 * @param id
-	 * @throws ForbiddenException 
-	 * @throws EntityNotFoundException
+	 * @param id the user id.
+	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
 	 */
 	@PreAuthorize("hasRole('ADMIN') and !@isMeSecurityService.isMe(#id)")
-	void deleteById(Long id) throws EntityNotFoundException, ForbiddenException;
+	void deleteById(Long id) throws EntityNotFoundException;
 
 	/**
-	 * Denies an account request.
+	 * Deny an account request.
 	 * 
-	 * @param userId
-	 *            user id.
-	 * @throws AccountNotOnDemandException 
-	 * @throws ShanoirUsersException
+	 * @param userId the user id.
+	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
+	 * @throws AccountNotOnDemandException if this account is not currently on demand.
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
 	void denyAccountRequest(Long userId) throws EntityNotFoundException, AccountNotOnDemandException;
@@ -71,9 +65,8 @@ public interface UserService extends UniqueCheckableService<User> {
 	/**
 	 * Find user by its email.
 	 *
-	 * @param email
-	 *            email.
-	 * @return a user or null.
+	 * @param email email.
+	 * @return optionally a user.
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
 	Optional<User> findByEmail(String email);
@@ -81,8 +74,7 @@ public interface UserService extends UniqueCheckableService<User> {
 	/**
 	 * Find user by its id.
 	 *
-	 * @param id
-	 *            user id.
+	 * @param id the user id.
 	 * @return a user or null.
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#id))")
@@ -91,27 +83,24 @@ public interface UserService extends UniqueCheckableService<User> {
 	/**
 	 * Find user by its username.
 	 *
-	 * @param username
-	 *            user name.
+	 * @param username the username.
 	 * @return a user or null.
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#username))")
 	Optional<User> findByUsername(String username);
 
 	/**
-	 * Find users who have account that will soon expire and have not received
-	 * first notification.
+	 * Find users that will soon expire and have not yet received the first notification.
 	 * 
-	 * @return list of users.
+	 * @return a list of users.
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
 	List<User> getUsersToReceiveFirstExpirationNotification();
 
 	/**
-	 * Find users who have account that will soon expire and have not received
-	 * second notification.
+	 * Find users that will soon expire and have not yet received the second notification.
 	 * 
-	 * @return list of users.
+	 * @return a list of users.
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
 	List<User> getUsersToReceiveSecondExpirationNotification();
@@ -119,30 +108,40 @@ public interface UserService extends UniqueCheckableService<User> {
 	/**
 	 * Request a date extension for an user.
 	 * 
-	 * @param userId
-	 *            user id.
-	 * @param requestInfo
-	 *            request info.
-	 * @throws ShanoirUsersException
+	 * @param userId the user id.
+	 * @param requestInfo the request info.
+	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
 	 */
 	void requestExtension(Long userId, ExtensionRequestInfo requestInfo) throws EntityNotFoundException;
 
 	/**
 	 * Save a new user.
 	 *
-	 * @param user
-	 *            user to create.
-	 * @return created user.
-	 * @throws PasswordPolicyException 
-	 * @throws ShanoirUsersException
+	 * @param user the user to create.
+	 * @return the created user with its fresh id.
+	 * @throws PasswordPolicyException if the given password doesn't meet the security requirements.
+	 * @throws SecurityException if the new user could not be register into Keycloak. 
+	 * In this case the user is not saved in the database either.
 	 */
-	User save(User user) throws PasswordPolicyException;
+	@PreAuthorize("hasRole('ADMIN') and #user.getId() == null")
+	User create(User user) throws PasswordPolicyException, SecurityException;
+	
+	/**
+	 * Create a new account request.
+	 *
+	 * @param user the user to create.
+	 * @return the created user with its fresh id.
+	 * @throws PasswordPolicyException if the given password doesn't meet the security requirements.
+	 * @throws SecurityException if the new user could not be register into Keycloak. 
+	 * In this case the user is not saved in the database either.
+	 */
+	@PreAuthorize("#user.getId() == null && #user.getRole() == null && #user.isAccountRequestDemand()")
+	User createAccountRequest(User user) throws PasswordPolicyException, SecurityException;
 
 	/**
 	 * Search users by their id.
 	 * 
-	 * @param userIds
-	 *            list of user ids.
+	 * @param userIds as list of user ids.
 	 * @return list of users with id and username.
 	 */
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
@@ -151,10 +150,9 @@ public interface UserService extends UniqueCheckableService<User> {
 	/**
 	 * Update a user.
 	 *
-	 * @param user
-	 *            user to update.
+	 * @param user the user to update.
 	 * @return updated user.
-	 * @throws ShanoirUsersException
+	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#user))")
 	User update(User user) throws EntityNotFoundException;
@@ -162,10 +160,8 @@ public interface UserService extends UniqueCheckableService<User> {
 	/**
 	 * Update expiration notification for an user.
 	 * 
-	 * @param user
-	 *            user to update.
-	 * @param firstNotification
-	 *            is it first notification?
+	 * @param user the user to update.
+	 * @param firstNotification is it first notification?
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
 	void updateExpirationNotification(User user, boolean firstNotification);
@@ -173,9 +169,8 @@ public interface UserService extends UniqueCheckableService<User> {
 	/**
 	 * Update last login date.
 	 * 
-	 * @param username
-	 *            username.
-	 * @throws EntityNotFoundException 
+	 * @param username username.
+	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
 	 */
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	void updateLastLogin(String username) throws EntityNotFoundException;
