@@ -113,7 +113,26 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyNewUser(final User user, final String password) {
+	public void notifyCreateUser(final User user, final String password) {
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(user.getEmail());
+			messageHelper.setSubject("Shanoir Account Creation");
+			final Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("firstname", user.getFirstName());
+			variables.put("lastname", user.getLastName());
+			variables.put("password", password);
+			variables.put("username", user.getUsername());
+			final String content = build("notifyCreateUser", variables);
+			messageHelper.setText(content, true);
+		};
+		mailSender.send(messagePreparator);
+
+	}
+
+	@Override
+	public void notifyCreateAccountRequest(final User user, final String password) {
 		MimeMessagePreparator messagePreparator = mimeMessage -> {
 			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom(administratorEmail);
