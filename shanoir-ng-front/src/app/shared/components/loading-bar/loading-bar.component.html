@@ -1,1 +1,3 @@
-<span class="inner" [style.width]="progress*200">&nbsp;</span><span class="text">{{getProgressText()}}</span>
+<div (resized)="onResized($event)">
+    <span class="inner" [class.done]="progress >= 1" [style.width]="progress*width"><div class="left-text" [style.margin-right]="progress*(width/2)-(width/2)">{{getProgressText()}}</div></span><span class="text">{{getProgressText()}}</span>
+</div>

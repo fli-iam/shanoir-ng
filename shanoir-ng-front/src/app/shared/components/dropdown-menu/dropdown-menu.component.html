@@ -6,7 +6,9 @@
         *ngIf="hasChildren && mode == 'top'"
         class="label"
         (click)="toggle($event)"
-        >{{label}}
+        >
+        <i *ngIf="awesome" class="{{awesome}}"></i>
+        {{label}}
         <span class="menu-arrow">&#x25BE;</span>
     </span> 
     <span
@@ -22,9 +24,7 @@
         class="plus"
         (click)="toggle($event)"
         ><ng-template [ngIf]="!opened">+</ng-template><ng-template [ngIf]="opened">&#10549;</ng-template></span>
-
-    <!-- ul #contentWrapper class="sub-content" [class.hidden]="!opened" [@slideDown]="opened" -->
-    <ul #contentWrapper class="sub-content" *ngIf="opened" [@slideDown]="opened" [hidden]="!init">
+    <ul #contentWrapper class="sub-content" *ngIf="opened" [@menuSlideDown]="opened" [hidden]="!init">
         <div class="sub-sub-content"><ng-content></ng-content></div>
     </ul>
 </li>

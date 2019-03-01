@@ -105,6 +105,9 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
+import { NotificationsComponent } from './shared/notifications/notifications.component';
+import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
+import { TaskService } from './async-tasks/task.service';
 
 @NgModule({
     imports: [
@@ -186,7 +189,9 @@ import { ServiceLocator } from './utils/locator.service';
         BreadcrumbsComponent,
         FinishImportComponent,
         UploaderComponent,
-        HelpMessageComponent
+        HelpMessageComponent,
+        NotificationsComponent,
+        AsyncTasksComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -226,7 +231,8 @@ import { ServiceLocator } from './utils/locator.service';
         BreadcrumbsService,
         Router,
         ImportDataService,
-        NiftiConverterService
+        NiftiConverterService,
+        TaskService
     ],
     bootstrap: [AppComponent],
 })

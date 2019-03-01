@@ -29,6 +29,7 @@ import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.compone
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { FinishImportComponent } from './import/finish/finish.component';
+import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 
 let appRoutes: Routes = [
     {
@@ -70,6 +71,9 @@ let appRoutes: Routes = [
         path: 'new-instrument',
         component: NewInstrumentComponent,
         canActivate: [AuthNotGuestGuard]
+    }, {
+        path: 'task',
+        component: AsyncTasksComponent
     }
 ];
 

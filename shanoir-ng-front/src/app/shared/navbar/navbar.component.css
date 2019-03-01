@@ -2,7 +2,7 @@
 /* Navbar component */
 /********************/
 :host { overflow: hidden; }
-.navbar-component { box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color); margin-bottom: 25px; z-index: 100; position: relative; } 
+.navbar-component { box-shadow: 0 0 var(--shadow-height) 0 var(--shadow-color); margin-bottom: 25px; z-index: 100; position: relative; background-color: var(--light-grey); } 
 .shadow-fix { display: inline-block; position: static; }
 
 dropdown-menu + dropdown-menu { margin-left: -4px; padding: 0;  border: 0; }
@@ -11,3 +11,5 @@ dropdown-menu + dropdown-menu { margin-left: -4px; padding: 0;  border: 0; }
 
 .horizontal-bar { background-color: var(--light-grey); list-style-type: none; }
     .horizontal-bar hr { bottom: 5px; height: 10px; margin: 0 5px !important; position: relative; }
+
+.notifications { position: absolute; right: 0; top: 0; bottom: 0; height: 100%; }

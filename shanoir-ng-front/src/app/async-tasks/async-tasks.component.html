@@ -1,0 +1,9 @@
+<h2 class="header command-zone">My tasks</h2>
+
+<shanoir-table #table
+	[getPage]="getPage.bind(this)" 
+	[columnDefs]="columnDefs" 
+	[customActionDefs]="customActionDefs" 
+	(rowClick)="onRowClick($event)"
+	[browserSearch]="false">
+</shanoir-table>

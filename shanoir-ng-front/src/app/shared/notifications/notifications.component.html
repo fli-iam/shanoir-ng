@@ -1,0 +1,31 @@
+
+<span (click)="toggle()">
+    <span class="notif">
+        <i class="fas fa-hourglass-half"></i>
+        <span class="number" [class.highlight]="newProcess">{{nbProcess}}</span>
+    </span>
+    <span class="notif">
+        <i class="fas fa-flag-checkered"></i>
+        <span class="number" [class.highlight]="newDones">{{nbDone}}</span>
+    </span>
+</span>
+
+<div *ngIf="isOpen" [@menuSlideDown]="isOpen" class="dropdown">
+    
+    <div class="subtitle"><i class="fas fa-hourglass-half"></i> {{nbProcess}} works in progress</div>
+    <ul>
+        <li>Import datasets <progress-bar progress="0.5"></progress-bar></li>
+        <li>Import datasets <progress-bar progress="0.75" ></progress-bar></li>
+        <li>Build study export - NATIVE<progress-bar progress="0.05"></progress-bar></li>
+    </ul>
+    <li class="horizontal-bar"><hr/></li>
+    <div class="subtitle"><i class="fas fa-flag-checkered"></i>{{nbDone}} works done</div>
+    <ul>
+        <li>Import datasets</li>
+        <li>Import datasets</li>
+    </ul>
+    <!-- <li class="horizontal-bar"><hr/></li>
+    <ul>
+        <menu-item label="Manage my tasks" i18n-label="Administration menu|Manage tasks@@navbarManageTasks" link="tasks" [icon]="ImagesUrlUtil.NOTEPAD_ICON_PATH"></menu-item>
+    </ul> -->
+</div>
