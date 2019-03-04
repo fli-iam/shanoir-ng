@@ -1,4 +1,5 @@
-import { Component,  Input, ViewChild } from '@angular/core';
+import { Component,  Input, ViewChild, OnChanges } from '@angular/core';
+import { DoCheck, KeyValueDiffers, KeyValueDiffer } from '@angular/core';
 import { FormGroup,  Validators, FormControl } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 
@@ -80,15 +81,20 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     therapiesToDelete: SubjectTherapy[] = [];
     therapiesToCreate: SubjectTherapy[] = [];
 
+    differ: KeyValueDiffer<string, any>;
+
 
     constructor(private route: ActivatedRoute,
             private animalSubjectService: AnimalSubjectService,
             private studyService: StudyService, 
             private referenceService: ReferenceService,
             private subjectPathologyService: SubjectPathologyService,
-            private subjectTherapyService: SubjectTherapyService,) {
+            private subjectTherapyService: SubjectTherapyService,
+            private differs: KeyValueDiffers) {
 
         super(route, 'preclinical-subject');
+        this.differ = this.differs.find({}).create();
+
     }
 
     public get preclinicalSubject(): PreclinicalSubject { return this.entity; }
@@ -189,21 +195,23 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     initCreate(): Promise<void> {
-        this.createColumnDefsPathologies();
-        this.subjectPathologiesPromise = Promise.resolve().then(() => {
-            this.browserPagingPathology = new BrowserPaging([], this.columnDefsPathologies);
+        return new  Promise<void>(resolve => {
+            this.createColumnDefsPathologies();
+            this.subjectPathologiesPromise = Promise.resolve().then(() => {
+                this.browserPagingPathology = new BrowserPaging([], this.columnDefsPathologies);
+            });
+            this.createColumnDefsTherapies();
+            this.subjectTherapiesPromise = Promise.resolve().then(() => {
+                this.browserPagingTherapy = new BrowserPaging([], this.columnDefsTherapies);
+            });
+            this.loadData();
+            this.preclinicalSubject = new PreclinicalSubject();
+            this.preclinicalSubject.subject = new Subject();
+            this.preclinicalSubject.animalSubject = new AnimalSubject();
+            this.preclinicalSubject.subject.preclinical = true;
+            this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
+            resolve();
         });
-        this.createColumnDefsTherapies();
-        this.subjectTherapiesPromise = Promise.resolve().then(() => {
-            this.browserPagingTherapy = new BrowserPaging([], this.columnDefsTherapies);
-        });
-        this.loadData();
-        this.preclinicalSubject = new PreclinicalSubject();
-        this.preclinicalSubject.subject = new Subject();
-        this.preclinicalSubject.animalSubject = new AnimalSubject();
-        this.preclinicalSubject.subject.preclinical = true;
-        this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
-        return Promise.resolve();
     }
 
     loadData() {
@@ -218,6 +226,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         this.studyService.getStudiesNames()
             .then(studies => {
                 this.studies = studies;
+                this.updateStudiesList();
             })
             .catch((error) => {
                 // TODO: display error
@@ -709,6 +718,32 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         this.browserPagingTherapy.setItems(this.preclinicalSubject.therapies);
         this.tableTherapy.refresh();
     }
+
+    ngDoCheck() {
+        const change = this.differ.diff(this);
+        if (change) {
+          change.forEachChangedItem(item => {
+            if(item.key=="entity"){
+                this.updateStudiesList();
+            }
+          });
+        }
+    }
+
+    updateStudiesList(){
+        if (this.preclinicalSubject && this.preclinicalSubject.subject && this.preclinicalSubject.subject.subjectStudyList && this.preclinicalSubject.subject.subjectStudyList.length > 0){
+            for(let st of this.preclinicalSubject.subject.subjectStudyList){
+                if (this.studies && this.studies.length > 0){
+                    for (let s of this.studies){
+                        if (s.id ==st.study.id){
+                            s.selected = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
 
 }
