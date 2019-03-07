@@ -48,12 +48,4 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 		return em.createNativeQuery("SELECT id, name FROM study", "studyNameResult").getResultList();
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<IdNameDTO> findIdsAndNamesByUserId(Long userId) {
-		return em.createNativeQuery(
-				"SELECT s.id, s.name FROM study s, study_user su WHERE s.id=su.study_id AND su.user_id= :userId",
-				"studyNameResult").setParameter("userId", userId).getResultList();
-	}
-
 }

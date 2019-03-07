@@ -15,7 +15,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="content-component detail" [@preventInitialChildAnimations]>
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
-			<span class="right-col" [ngSwitch]="mode">
+			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone"i18n="View subject|Title@@subjectDetailViewTitle">Details on subject</h2>
 				</ng-template>

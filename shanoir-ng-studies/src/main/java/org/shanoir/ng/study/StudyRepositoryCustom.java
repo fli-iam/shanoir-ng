@@ -34,12 +34,4 @@ public interface StudyRepositoryCustom extends ItemRepositoryCustom<Study> {
 	 */
 	List<IdNameDTO> findIdsAndNames();
 
-	/**
-	 * Get list of study name and id for a given user
-	 * 
-	 * @param userId
-	 * @return
-	 */
-	public List<IdNameDTO> findIdsAndNamesByUserId(Long userId);
-
 }

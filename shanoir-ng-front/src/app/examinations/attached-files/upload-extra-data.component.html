@@ -17,14 +17,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<div class="layout">
 			<fieldset>
 				<ol>
-					<li>
-						<p i18n="uploadExtraData| Explication label@@uploadExtraDataExplication" class="required-label">You can attach extra data to existing examinations. To do this, you can upload as many files as you wish of any type, and select in the next step the examination to which they are associated.</p> 
-					</li>
                     <li class="required">
-						<input type="file"
-								id="file"
-								name="file"
-								(change)="handleFileInput($event.target.files)" >
+                        <label i18n="uploadExtraData| Explication label@@uploadExtraDataExplication" class="required-label">You can attach extra data to existing examinations. To do this, you can upload as many files as you wish of any type, and select in the next step the examination to which they are associated. 
+							</label> 
+							<div class="form-group">
+									<label for="file">Choose File</label>
+									<input type="file"
+										   id="file"
+										   name="file"
+										   (change)="handleFileInput($event.target.files)" >
+							</div>
 					</li>
 					<li class="required">
 						    <label i18n="uploadExtraData|research study label@@uploadExtraDataResearchStudy" class="required-label">Select an existing research study 
