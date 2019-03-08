@@ -24,9 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class ImportJob {
 
-    @JsonProperty("subjects")
-    private List<Subject> subjects;
-
     @JsonProperty("fromDicomZip")
     private boolean fromDicomZip;
 
@@ -48,14 +45,6 @@ public class ImportJob {
     @JsonProperty("frontAcquisitionEquipmentId")
     private Long frontAcquisitionEquipmentId;
     
-	public List<Subject> getSubjects() {
-		return subjects;
-	}
-
-	public void setSubjects(List<Subject> subjects) {
-		this.subjects = subjects;
-	}
-
 	public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}

@@ -18,6 +18,7 @@ import { BrowserPaginEntityListComponent } from '../../shared/components/entity/
 import { TableComponent } from '../../shared/components/table/table.component';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
+import { DatasetService } from '../../datasets/shared/dataset.service';
 
 @Component({
     selector: 'subject-list',
@@ -29,7 +30,7 @@ export class SubjectListComponent extends BrowserPaginEntityListComponent<Subjec
     
     @ViewChild('table') table: TableComponent;
 
-    constructor(private subjectService: SubjectService) {       
+    constructor(private subjectService: SubjectService, private datasetService: DatasetService) {       
         super('subject');
     }
 
@@ -57,11 +58,21 @@ export class SubjectListComponent extends BrowserPaginEntityListComponent<Subjec
             { headerName: "Manual HD", field: "manualHemisphericDominance"},
             { headerName: "Language HD", field: "languageHemisphericDominance"},
             { headerName: "Imaged object category", field: "imagedObjectCategory"},
-            { headerName: "Personal Comments", field: ""}
+            { headerName: "Personal Comments", field: ""},
+            { headerName: "BIDS", width: "63px", type: "button", awesome: "fa-download", action: item => this.exportBIDS(item) }
         ];
     }
 
     getCustomActionsDefs(): any[] {
         return [];
+    }
+
+    private exportBIDS(subject: Subject) {
+        let studyName: string;
+        if (subject.subjectStudyList[0]) {
+            // TODO: for export BIDS of one subject, the name of his first study is used for the moment..
+            studyName = subject.subjectStudyList[0].study.name;
+        }
+        this.datasetService.exportBIDSBySubjectId(subject.id, subject.name, studyName);
     }
 }

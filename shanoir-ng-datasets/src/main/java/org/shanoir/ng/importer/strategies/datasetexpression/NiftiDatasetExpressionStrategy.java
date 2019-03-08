@@ -63,7 +63,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 
 				String originalNiftiName  = datasetFile.getPath().substring(datasetFile.getPath().lastIndexOf('/') + 1);
 
-				String storagePath = niftiStorageDir+"/"+importJob.getPatients().get(0).getPatientID()+"/"+importJob.getExaminationId()+"/MR/";
+				String storagePath = niftiStorageDir + "/" + importJob.getPatients().get(0).getSubject().getName() + "/" + importJob.getExaminationId() + "/MR/";
 				File outDir = new File(storagePath);
 				outDir.mkdirs();
 				
@@ -79,7 +79,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 
 				DatasetFile niftiDatasetFile = new DatasetFile();
 				niftiDatasetFile.setPacs(false);
-				niftiDatasetFile.setPath(NiftiFinalLocation.toUri().toString().replaceAll(" ", "%20"));
+				niftiDatasetFile.setPath(NiftiFinalLocation.toUri().toString());
 				niftiDatasetExpression.getDatasetFiles().add(niftiDatasetFile);
 				niftiDatasetFile.setDatasetExpression(niftiDatasetExpression);
 

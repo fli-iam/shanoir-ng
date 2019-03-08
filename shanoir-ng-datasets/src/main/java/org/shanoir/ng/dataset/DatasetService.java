@@ -65,7 +65,6 @@ public interface DatasetService<T extends Dataset> {
 	 * @throws ShanoirException
 	 */
 	T update(T dataset) throws ShanoirException;
-
 	/**
 	 * Update a dataset from the old Shanoir
 	 * 

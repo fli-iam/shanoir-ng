@@ -31,6 +31,10 @@ public class MrDatasetDTO extends DatasetDTO {
     private List<InversionTime> inversionTime;
     
     private List<RepetitionTime> repetitionTime;
+    
+	private MrDatasetMetadata originMrMetadata;
+    
+	private MrDatasetMetadata updatedMrMetadata;
 
 
     public List<EchoTime> getEchoTime() {
@@ -64,4 +68,20 @@ public class MrDatasetDTO extends DatasetDTO {
     public void setRepetitionTime(List<RepetitionTime> repetitionTime) {
         this.repetitionTime = repetitionTime;
     }
+
+	public MrDatasetMetadata getOriginMrMetadata() {
+		return originMrMetadata;
+	}
+
+	public void setOriginMrMetadata(MrDatasetMetadata originMrMetadata) {
+		this.originMrMetadata = originMrMetadata;
+	}
+
+	public MrDatasetMetadata getUpdatedMrMetadata() {
+		return updatedMrMetadata;
+	}
+
+	public void setUpdatedMrMetadata(MrDatasetMetadata updatedMrMetadata) {
+		this.updatedMrMetadata = updatedMrMetadata;
+	}
 }

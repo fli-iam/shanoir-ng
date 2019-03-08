@@ -36,6 +36,8 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.examination.Examination;
+import org.shanoir.ng.examination.ExaminationService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.DatasetsErrorModelCode;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -59,6 +61,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.swagger.annotations.ApiParam;
 
 @Controller
@@ -80,6 +84,9 @@ public class DatasetApiController implements DatasetApi {
 	
 	@Autowired
 	private DatasetService<Dataset> datasetService;
+	
+	@Autowired 
+	private ExaminationService examinationService;
 
     private final HttpServletRequest request;
     
@@ -291,23 +298,117 @@ public class DatasetApiController implements DatasetApi {
 	
 	private void zip(String sourceDirPath, String zipFilePath) throws IOException {
 		Path p = Paths.get(zipFilePath);
-		try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
+		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
 			Path pp = Paths.get(sourceDirPath);
 			Files.walk(pp)
 				.filter(path -> !Files.isDirectory(path))
 				.forEach(path -> {
 					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
 					try {
-						zs.putNextEntry(zipEntry);
-						Files.copy(path, zs);
-						zs.closeEntry();
+						zos.putNextEntry(zipEntry);
+						Files.copy(path, zos);
+						zos.closeEntry();
 					} catch (IOException e) {
 						LOG.error(e.getMessage(), e);
 					}
 				});
-            	zs.finish();
-            zs.close();
+            	zos.finish();
+            zos.close();
 		}
+	}
+	
+	@Override
+	public ResponseEntity<ByteArrayResource> exportBIDSBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
+			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") String studyName)
+			throws RestServiceException, MalformedURLException, IOException {
+		final List<Examination> examinationList = examinationService.findBySubjectId(subjectId);
+		if (examinationList.isEmpty()) { 
+			throw new RestServiceException(
+				new ErrorModel(HttpStatus.NOT_FOUND.value(), "No Examination found of subject Id.", null)); 
+		} else {
+			// 1. Create folder
+			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+			long n = RANDOM.nextLong();
+			if (n == Long.MIN_VALUE) {
+				n = 0; // corner case
+			} else {
+				n = Math.abs(n);
+			}
+			String tmpFilePath = tmpDir + File.separator + Long.toString(n);
+			File workFolder = new File(tmpFilePath + DOWNLOAD);
+			workFolder.mkdirs();
+			File zipFile = new File(tmpFilePath + ZIP);
+			zipFile.createNewFile();
+			
+			// 2. Create sub folder and dataset_description.json
+			final String subLabel = "sub-" + subjectName;
+			File subFolder = new File(workFolder.getAbsolutePath() + File.separator + subLabel);
+			subFolder.mkdirs();
+			
+			DatasetDescription datasetDesciption = new DatasetDescription();
+			datasetDesciption.setName(studyName);
+			ObjectMapper objectMapper = new ObjectMapper();
+			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + "dataset_description.json"), datasetDesciption);
+			
+			// TODO 3. Create [ses-<label>/] folder if multi exams 
+			/*if (examinationList.size() > 1) {
+				for (Examination examination: examinationList) {
+					String sesLabel = examination.getId().toString();
+					final List<DatasetAcquisition> datasetAcquisitionList = examination.getDatasetAcquisitions();
+					for (DatasetAcquisition datasetAcquisition : datasetAcquisitionList) {
+						// TODO 5. multi dataset acquisiton: add [_acq-<label>]
+						String acqLabel = datasetAcquisition.getId().toString();
+						final List<Dataset> datasetList = datasetAcquisition.getDatasets();
+						for (Dataset dataset: datasetList) {
+							// TODO 6. multi datasets: add [_run-<index>]
+							
+							// TODO 7. multi MrDatasetNature: add _<modality_label>
+						}
+					}
+				}
+			}*/
+			
+			// 4. Create anat folder
+			// TODO Create anat, func, dwi, fmap folder according to MrDatasetNature
+			final String anatLabel = "anat";		
+			File anatFolder = new File(subFolder.getAbsolutePath() + File.separator + anatLabel);
+			anatFolder.mkdirs();
+			
+			// 8. Get nii and json of dataset
+			/* For the demo: one exam, one acq, one dataset, one modality which is T1 */
+			final Dataset dataset = examinationList.get(0).getDatasetAcquisitions().get(0).getDatasets().get(0);
+			if (dataset == null) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.NOT_FOUND.value(), "No Dataset found for subject Id.", null));
+			}
+			try {
+				List<URL> pathURLs = new ArrayList<URL>();
+				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+				copyNiftiFilesForURLs(pathURLs, anatFolder);
+			} catch (IOException e) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
+			}
+			
+			// 9. Create zip file
+			zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+
+			// Try to determine file's content type
+			String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
+
+			byte[] data = Files.readAllBytes(zipFile.toPath());
+			ByteArrayResource resource = new ByteArrayResource(data);
+
+			return ResponseEntity.ok()
+				// Content-Disposition
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + zipFile.getName())
+				// Content-Type
+				.contentType(MediaType.parseMediaType(contentType)) //
+				// Content-Length
+				.contentLength(data.length) //
+				.body(resource);
+		}		
 	}
     
 }

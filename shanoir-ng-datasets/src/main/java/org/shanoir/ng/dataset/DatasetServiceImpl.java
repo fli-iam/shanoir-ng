@@ -168,6 +168,10 @@ public class DatasetServiceImpl implements DatasetService<Dataset> {
 		datasetDb.setStudyId(dataset.getStudyId());
 		datasetDb.setSubjectId(dataset.getSubjectId());
 		datasetDb.setUpdatedMetadata(dataset.getUpdatedMetadata());
+		if (dataset instanceof MrDataset) {
+			MrDataset mrDataset = (MrDataset) dataset;
+			((MrDataset) datasetDb).setUpdatedMrMetadata(mrDataset.getUpdatedMrMetadata());
+		}
 		return datasetDb;
 	}
 

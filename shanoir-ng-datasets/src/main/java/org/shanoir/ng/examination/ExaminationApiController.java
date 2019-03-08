@@ -198,7 +198,6 @@ public class ExaminationApiController implements ExaminationApi {
 				HttpStatus.OK);
 	}
 
-
 	@Override
 	public ResponseEntity<Long> saveNewExaminationFromShup(@ApiParam(value = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException {
