@@ -1,0 +1,6 @@
+button { margin-right: 10px; }
+    button svg { vertical-align: 0; }
+.filename { color: var(--color-c); font-weight: bold; vertical-align: -8; font-size: 34px; }
+    .filename svg { margin-right: 10px; vertical-align: -2; }
+.loader { vertical-align: middle; height: 12px; }
+.error { color: var(--color-error); }

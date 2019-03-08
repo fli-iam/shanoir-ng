@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <legend>
     {{legend}}
     <tool-tip>You can choose one or more {{legend | lowercase}} from the list</tool-tip>
@@ -6,13 +20,17 @@
     <li>
         <label>List of the {{legend | lowercase}} available</label>
         <span class="right-col">
-            <select id="title" (ngModelChange)="onObjectSelect($event)" [ngModel]="selectedStudy" [ngModelOptions]="{standalone: true}">
-                <option disabled>Please select...</option>
-                <option *ngFor="let object of list" [ngValue]="object" [disabled]="object?.selected">{{object.name}}</option>
+            <select id="title" [(ngModel)]="selected" [ngModelOptions]="{standalone: true}">
+                <option disabled [ngValue]="undefined">Please select...</option>
+                <option *ngFor="let object of selectableList" [ngValue]="object" [disabled]="object?.selected">{{object.name}}</option>
             </select>
+            <button (click)="onAdd()" [disabled]="!selected">
+                <i class="fas fa-plus-square"></i>
+                Add
+            </button>
         </span>
     </li>
-    <li *ngIf="subjectStudyList != null && subjectStudyList.length != 0">
+    <li *ngIf="model && model.length > 0">
         <table>
             <thead>
                 <tr>
@@ -24,20 +42,10 @@
                 </tr>
             </thead>  
             <tbody>
-                <tr *ngFor="let subjectStudy of subjectStudyList; let i = index">
+                <tr *ngFor="let subjectStudy of model; let i = index">
                     <td class="label-col">
-                        <div *ngFor="let object of list">
-                            <div *ngIf="mode == 'study'; else subject_mode">
-                                <span *ngIf="object.id == subjectStudy.study.id">
-                                    {{object.name}}
-                                </span>
-                            </div>
-                            <ng-template #subject_mode>
-                                <span *ngIf="object.id == subjectStudy.subject.id">
-                                    {{object.name}}
-                                </span>
-                            </ng-template>
-                        </div>
+                        <span *ngIf="compMode == 'study'">{{subjectStudy.subject.name}}</span>
+                        <span *ngIf="compMode == 'subject'">{{subjectStudy.study.name}}</span>
                     </td>
                     <td class="input-col">
                         <input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>

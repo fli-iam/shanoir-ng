@@ -1,50 +1,27 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
 
-import { Manufacturer } from './manufacturer.model';
+import { Injectable } from '@angular/core';
+
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
+import { Manufacturer } from './manufacturer.model';
 
 @Injectable()
-export class ManufacturerService {
-    constructor(private http: HttpClient) { }
+export class ManufacturerService extends EntityService<Manufacturer> {
+    
+    API_URL = AppUtils.BACKEND_API_MANUF_URL;
 
-    getManufacturers(): Promise<Manufacturer[]> {
-        return this.http.get<Manufacturer[]>(AppUtils.BACKEND_API_MANUF_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting manufs', error);
-                return Promise.reject(error.message || error);
-            });
-    }
-
-    delete(id: number): Promise<void> {
-        return this.http.delete<void>(AppUtils.BACKEND_API_MANUF_URL + '/' + id)
-            .toPromise()
-            .catch((error) => {
-                console.error('Error delete manuf', error);
-                return Promise.reject(error.message || error);
-            });
-    }
-
-    getManufacturer(id: number): Promise<Manufacturer> {
-        return this.http.get<Manufacturer>(AppUtils.BACKEND_API_MANUF_URL + '/' + id)
-            .toPromise()
-            .then(res => res)
-            .catch((error) => {
-                console.error('Error while getting manuf', error);
-                return Promise.reject(error.message || error);
-            });
-    }
-
-    create(manuf: Manufacturer): Observable<Manufacturer> {
-        return this.http.post<Manufacturer>(AppUtils.BACKEND_API_MANUF_URL, JSON.stringify(manuf))
-            .map(response => response);
-    }
-
-    update(id: number, manuf: Manufacturer): Observable<Manufacturer> {
-        return this.http.put<Manufacturer>(AppUtils.BACKEND_API_MANUF_URL + '/' + id, JSON.stringify(manuf))
-            .map(response => response);
-    }
+    getEntityInstance() { return new Manufacturer(); }
 }

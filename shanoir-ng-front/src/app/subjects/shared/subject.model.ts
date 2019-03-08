@@ -1,12 +1,29 @@
-import { Examination } from "../../examinations/shared/examination.model";
-import { SubjectStudy } from "./subject-study.model";
-import { ImagedObjectCategory } from "./imaged-object-category.enum";
-import { Sex } from "./subject.types";
-import { IdNameObject } from "../../shared/models/id-name-object.model";
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
 
-export class Subject {
-    examinations: Examination[];
+import { Examination } from '../../examinations/shared/examination.model';
+import { Entity } from '../../shared/components/entity/entity.abstract';
+import { ServiceLocator } from '../../utils/locator.service';
+import { ImagedObjectCategory } from './imaged-object-category.enum';
+import { SubjectStudy } from './subject-study.model';
+import { SubjectService } from './subject.service';
+import { Sex } from './subject.types';
+
+export class Subject extends Entity {
+
     id: number;
+    examinations: Examination[];
     name: string;
     identifier: string;
     birthDate: Date;
@@ -17,13 +34,6 @@ export class Subject {
     selected: boolean = false;
     subjectStudyList: SubjectStudy[] = [];
 
-    constructor(subject?: IdNameObject) {
-        if (subject) {
-            this.id = subject.id;
-            this.name = subject.name;
-        }
-    }
-
     public static makeSubject(id: number, name: string, identifier: string, subjectStudy: SubjectStudy): Subject {
         let subject = new Subject();
         subject.id = id;
@@ -32,4 +42,6 @@ export class Subject {
         subject.subjectStudyList = [subjectStudy];
         return subject;
     }
+
+    service = ServiceLocator.injector.get(SubjectService);
 }

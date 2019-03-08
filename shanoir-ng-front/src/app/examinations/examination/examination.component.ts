@@ -1,19 +1,30 @@
-import { Location } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { IMyDate, IMyDateModel, IMyInputFieldChanged, IMyOptions } from 'mydatepicker';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
 
+import { Component, ViewChild } from '@angular/core';
+import { FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
-import { FooterState } from '../../shared/components/form-footer/footer-state.model';
+import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { DatepickerComponent } from '../../shared/date/date.component';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { StudyService } from '../../studies/shared/study.service';
+import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-
 
 @Component({
     selector: 'examination',
@@ -21,63 +32,65 @@ import { ExaminationService } from '../shared/examination.service';
     styleUrls: ['examination.component.css'],
 })
 
-export class ExaminationComponent implements OnInit {
+export class ExaminationComponent extends EntityComponent<Examination> {
 
     @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
-    public examinationForm: FormGroup
-    private _examination: Examination;
-    private id: number;
-    public mode: "view" | "edit" | "create";
-    private isNameUnique: Boolean = true;
     private centers: IdNameObject[];
     public studies: IdNameObject[];
-    private subjects: IdNameObject[];
+    private subjects: SubjectWithSubjectStudy[];
     private examinationExecutives: Object[];
-    private addIconPath: string = ImagesUrlUtil.ADD_ICON_PATH;
-    isDateValid: boolean = true;
-    selectedDateNormal: IMyDate;
-    private footerState: FooterState;
+    private inImport: boolean; 
 
-    constructor(private route: ActivatedRoute, private router: Router,
-            private examinationService: ExaminationService, private fb: FormBuilder,
+    constructor(
+            private route: ActivatedRoute,
+            private examinationService: ExaminationService,
             private centerService: CenterService,
-            private studyService: StudyService,
-            private location: Location, private keycloakService: KeycloakService) {
+            private studyService: StudyService, 
+            protected breadcrumbsService: BreadcrumbsService) {
 
-        this.mode = this.route.snapshot.data['mode'];
-        this.id = +this.route.snapshot.params['id'];
+        super(route, 'examination');
+        this.inImport = breadcrumbsService.isImporting();
     }
 
-    ngOnInit(): void {
+    set examination(examination: Examination) { this.entity = examination; }
+    get examination(): Examination { return this.entity; }
+
+    initView(): Promise<void> {
+        return this.examinationService.get(this.id).then((examination: Examination) => {
+            this.examination = examination
+        });
+    }
+
+    initEdit(): Promise<void> {
         this.getCenters();
         this.getStudies();
-        this.fetchExamination();
-        this.footerState = new FooterState(this.mode, this.keycloakService.isUserAdminOrExpert());
+        return this.examinationService.get(this.id).then((examination: Examination) => {
+            this.examination = examination
+        });
     }
 
-    set examination(examination: Examination) {
-        this._examination = examination;
-        this.buildForm();
+    initCreate(): Promise<void> {
+        this.getCenters();
+        this.getStudies();
+        this.examination = new Examination();
+        return Promise.resolve();
     }
 
-    get examination(): Examination {
-        return this._examination;
+    buildForm(): FormGroup {
+        return this.formBuilder.group({
+            'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
+            'subject': [{value: this.examination.subject, disabled: this.inImport}],
+            'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
+            // 'Examination executive': [this.examination.examinationExecutive],
+            'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
+            'comment': [this.examination.comment],
+            'note': [this.examination.note],
+            'subjectWeight': [this.examination.subjectWeight]
+        });
     }
 
-    fetchExamination(): void {
-        if (this.mode == 'create') {
-            this.examination = new Examination();
-        } else {
-            this.examinationService.getExamination(this.id)
-            .then((examination: Examination) => {
-                this.examination = examination;
-                this.getDateToDatePicker(this.examination);
-            });
-        }
-    }
-
-    getCenters(): void {
+    private getCenters(): void {
         this.centerService
             .getCentersNamesForExamination()
             .then(centers => {
@@ -85,7 +98,7 @@ export class ExaminationComponent implements OnInit {
             });
     }
 
-    getStudies(): void {
+    private getStudies(): void {
         this.studyService
             .getStudiesNames()
             .then(studies => {
@@ -93,130 +106,17 @@ export class ExaminationComponent implements OnInit {
             });
     }
 
-    buildForm(): void {
-        this.examinationForm = this.fb.group({
-            'id': [this.examination.id],
-            'studyId': [this.examination.studyId, Validators.required],
-            // 'Examination executive': [this.examination.examinationExecutive],
-            'centerId': [this.examination.centerId, Validators.required],
-            // 'Subject': [this.examination.subject],
-            'examinationDate': [this.examination.examinationDate],
-            'comment': [this.examination.comment],
-            'note': [this.examination.note],
-            'subjectWeight': [this.examination.subjectWeight]
-        });
-        this.examinationForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
-        this.onValueChanged(); // (re)set validation messages now
-        this.examinationForm.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID');
+    private getSubjects(): void {
+        if (!this.examination.study) return;
+        this.studyService
+            .findSubjectsByStudyId(this.examination.study.id)
+            .then(subjects => this.subjects = subjects);
     }
 
-    onValueChanged(data?: any) {
-        if (!this.examinationForm) { return; }
-        const form = this.examinationForm;
-        for (const field in this.formErrors) {
-            // clear previous error message (if any)
-            this.formErrors[field] = '';
-            const control = form.get(field);
-            if (control && control.dirty && !control.valid) {
-                for (const key in control.errors) {
-                    this.formErrors[field] += key;
-                }
-            }
-        }
+    private instAssessment() {
     }
 
-    onInputFieldChanged(event: IMyInputFieldChanged) {
-        if (event.value !== '') {
-            if (!event.valid) {
-                this.isDateValid = false;
-            } else {
-                this.isDateValid = true;
-            }
-        } else {
-            this.isDateValid = true;
-            setTimeout(():void => this.selectedDateNormal = null);
-        }
-    }
-
-    private myDatePickerOptions: IMyOptions = {
-        dateFormat: 'dd/mm/yyyy',
-        height: '20px',
-        width: '160px'
-    };
-
-    onDateChanged(event: IMyDateModel) {
-        if (event.formatted !== '') {
-            this.selectedDateNormal = event.date;
-        }
-    }
-
-    setDateFromDatePicker(): void {
-        if (this.selectedDateNormal) {
-            this.examination.examinationDate = new Date(this.selectedDateNormal.year, this.selectedDateNormal.month - 1,
-                this.selectedDateNormal.day);
-        } else {
-            this.examination.examinationDate = null;
-        }
-    }
-
-    getDateToDatePicker(examination: Examination): void {
-        if (examination && examination.examinationDate && !isNaN(new Date(examination.examinationDate).getTime())) {
-            let expirationDate: Date = new Date(examination.examinationDate);
-            this.selectedDateNormal = {
-                year: expirationDate.getFullYear(), month: expirationDate.getMonth() + 1,
-                day: expirationDate.getDate()
-            };;
-        }
-    }
-
-    formErrors = {
-        'centerId': '',
-        'studyId': ''
-    };
-
-    back(): void {
-        this.location.back();
-    }
-
-    edit(): void {
-        this.router.navigate(['/examination/edit/'+this.examination.id]);
-    }
-
-    submit(): void {
-        this.examination = this.examinationForm.value;
-        this.setDateFromDatePicker();        
-    }
-
-    create(): void {
-        this.submit();
-        this.examinationService.create(this.examination)
-            .subscribe((examination) => {
-                this.back();
-            }, (err: String) => {
-
-            });
-    }
-
-    update(): void {
-        this.submit();
-        this.examinationService.update(this.id, this.examination)
-            .subscribe((examination) => {
-                this.back();
-            }, (err: String) => {
-               /* if (err.indexOf("name should be unique") != -1) {
-                    this.isNameUnique = false;
-                }*/
-            });
-    }
-
-
-    closePopin(instAssessmentId?: number) {
-        this.instAssessmentModal.hide();
-    }
-
-    closeAttachedFilePopin(id?: number) {
-        this.attachNewFilesModal.hide();
+    private attachNewFiles() {
     }
 
 }

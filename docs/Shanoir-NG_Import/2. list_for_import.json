@@ -1,0 +1,86 @@
+[
+  {
+    "id": 35,
+    "name": "AINSI-GIN",
+    "studyCenterList": [
+      {
+        "id": 67,
+        "center": {
+          "id": 14,
+          "name": "CHU Michallon"
+        },
+        "study": {
+          "id": 35,
+          "name": "AINSI-GIN"
+        }
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "name": "NATIVE Divers",
+    "studyCenterList": [
+      {
+        "id": 1,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 1,
+          "name": "NATIVE Divers"
+        }
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "USPIO-6",
+    "studyCenterList": [
+      {
+        "id": 2,
+        "center": {
+          "id": 1,
+          "name": "CHU Rennes"
+        },
+        "study": {
+          "id": 2,
+          "name": "USPIO-6"
+        }
+      },
+      {
+        "id": 3,
+        "center": {
+          "id": 2,
+          "name": "CHU Reims"
+        },
+        "study": {
+          "id": 2,
+          "name": "USPIO-6"
+        }
+      },
+      {
+        "id": 4,
+        "center": {
+          "id": 3,
+          "name": "LPS - CENIR"
+        },
+        "study": {
+          "id": 2,
+          "name": "USPIO-6"
+        }
+      },
+      {
+        "id": 5,
+        "center": {
+          "id": 4,
+          "name": "CHU Marseille"
+        },
+        "study": {
+          "id": 2,
+          "name": "USPIO-6"
+        }
+      }
+    ]
+  }
+]

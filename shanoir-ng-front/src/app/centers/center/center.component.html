@@ -1,114 +1,134 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="content-component detail">
-	<form *ngIf="centerForm" [formGroup]="centerForm" class="max-content" novalidate>
-		<div class="layout" [ngClass]="{'left': mode=='view'}">
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone"i18n="View center|Title@@centerDetailViewTitle">Details on center</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone"i18n="Edit center|Title@@centerDetailEditTitle">Edit center</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone"i18n="Create center|Title@@centerDetailCreateTitle">Create center</h2>
-				</ng-template>
-			</span>
-			<fieldset>
-				<ol>
-					<li>
-						<label i18n="Center detail|Name label@@centerDetailName" class="required-label">Name</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{center.name}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="center.name" (change)="resetNameErrorMsg()" />
-								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="Edit center|Name required error@@centerDetailNameRequiredError">Name is required!</label>
-								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="Edit center|Name length error@@centerDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="Edit center|Name unique error@@centerDetailNameUniqueError">Name should be unique!</label>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Center detail|Street label@@centerDetailStreet">Street</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{center.street}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="street" formControlName="street" [(ngModel)]="center.street" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Center detail|Post code label@@centerDetailPostCode">Post code</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{center.postalCode}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="postalCode" formControlName="postalCode" [(ngModel)]="center.postalCode" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Center detail|Town label@@centerDetailTown">Town</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{center.city}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="city" formControlName="city" [(ngModel)]="center.city" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Center detail|Country label@@centerDetailCountry">Country</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{center.country}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="country" formControlName="country" [(ngModel)]="center.country" />
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Center detail|Phone label@@centerDetailPhone">Phone number</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{center.phoneNumber}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="phoneNumber" formControlName="phoneNumber" [(ngModel)]="center.phoneNumber" (change)="resetPhoneNumberErrorMsg()" />
-								<label *ngIf="phoneNumberPatternError" class="form-validation-alert" i18n="Edit center|PhoneNumberPatternError label">Invalid phone number!</label>
-							</ng-template>
-						</span>
-					</li>
-					<li>
-						<label i18n="Center detail|Website label@@centerDetailWebsite">Website</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{center.website}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="website" formControlName="website" [(ngModel)]="center.website" />
-							</ng-template>
-						</span>
-					</li>
-				</ol>
-			</fieldset>
-			<form-footer
-				[state]="footerState"
-				(update)="update()"
-				(create)="create()"
-				(edit)="edit()"
-				(back)="back()"
-			></form-footer>
-		</div>
-		<div class="layout right" *ngIf="mode=='view'">
-			<div *ngIf="center.acquisitionEquipments?.length > 0">
-				<list title="Acquisition Equipments List" [tab_open]='true' [list]='center.acquisitionEquipments'></list>
-			</div>
-		</div>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+		<span [ngSwitch]="mode">
+			<ng-template [ngSwitchCase]="'view'">
+				<h2 class="header command-zone"i18n="View center|Title@@centerDetailViewTitle">Details on center</h2>
+			</ng-template>
+			<ng-template [ngSwitchCase]="'edit'">
+				<h2 class="header command-zone"i18n="Edit center|Title@@centerDetailEditTitle">Edit center</h2>
+			</ng-template>
+			<ng-template [ngSwitchCase]="'create'">
+				<h2 class="header command-zone"i18n="Create center|Title@@centerDetailCreateTitle">Create center</h2>
+			</ng-template>
+		</span>
+		<help-message [help]="'institution'"></help-message>
+		<fieldset>
+			<ol>
+				<li>
+					<label i18n="Center detail|Name label@@centerDetailName" class="required-label">Name</label>
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{center.name}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="center.name" (change)="isNameUniqueError=false" />
+							<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit center|Name required error@@centerDetailNameRequiredError">Name is required!</label>
+							<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit center|Name length error@@centerDetailNameLengthError">Name length must be between 2 and 200!</label>
+							<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Edit center|Name unique error@@centerDetailNameUniqueError">Name should be unique!</label>
+						</ng-template>
+					</span>
+				</li>
+				<li>
+					<label i18n="Center detail|Street label@@centerDetailStreet">Street</label>
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{center.street}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<input type="text" id="street" formControlName="street" [(ngModel)]="center.street" />
+						</ng-template>
+					</span>
+				</li>
+				<li>
+					<label i18n="Center detail|Post code label@@centerDetailPostCode">Post code</label>
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{center.postalCode}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<input type="text" id="postalCode" formControlName="postalCode" [(ngModel)]="center.postalCode" />
+						</ng-template>
+					</span>
+				</li>
+				<li>
+					<label i18n="Center detail|Town label@@centerDetailTown">Town</label>
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{center.city}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<input type="text" id="city" formControlName="city" [(ngModel)]="center.city" />
+						</ng-template>
+					</span>
+				</li>
+				<li>
+					<label i18n="Center detail|Country label@@centerDetailCountry">Country</label>
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{center.country}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<input type="text" id="country" formControlName="country" [(ngModel)]="center.country" />
+						</ng-template>
+					</span>
+				</li>
+				<li>
+					<label i18n="Center detail|Phone label@@centerDetailPhone">Phone number</label>
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{center.phoneNumber}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<input type="text" id="phoneNumber" formControlName="phoneNumber" [(ngModel)]="center.phoneNumber" (change)="phoneNumberPatternError=false" />
+							<label *ngIf="phoneNumberPatternError" class="form-validation-alert" i18n="Edit center|PhoneNumberPatternError label">Invalid phone number!</label>
+						</ng-template>
+					</span>
+				</li>
+				<li>
+					<label i18n="Center detail|Website label@@centerDetailWebsite">Website</label>
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{center.website}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<input type="text" id="website" formControlName="website" [(ngModel)]="center.website" />
+						</ng-template>
+					</span>
+				</li>
+			</ol>
+		</fieldset>
+		<fieldset *ngIf="mode=='view' && center.acquisitionEquipments?.length > 0" class="list">
+			<legend (click)="openAcqEq = !openAcqEq">
+				<span *ngIf="openAcqEq"><i class="fas fa-chevron-up"></i></span>
+				<span *ngIf="!openAcqEq"><i class="fas fa-chevron-down"></i></span>
+				Acquisition Equipments
+			</legend>
+			<ul *ngIf="openAcqEq">
+				<li *ngFor="let o of center.acquisitionEquipments">
+					{{o | acqEqptLabel}}
+					<span class="link" (click)="goToAcquisitionEquipment(o)"><i class="fas fa-external-link-alt"></i></span>
+				</li>
+			</ul>
+		</fieldset>
+		<form-footer
+			[state]="footerState"
+			(save)="save()"
+			(edit)="goToEdit()"
+			(back)="goBack()"
+		></form-footer>
 	</form>
 </div>

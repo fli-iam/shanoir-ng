@@ -1,11 +1,27 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -94,7 +110,7 @@ public class UserRepositoryTest {
 	@Test
 	public void findByExpirationDateLessThanAndFirstExpirationNotificationSentFalseTest() throws Exception {
 		// 15/06/2017
-		final Date date = new Date(1497484800000L);
+		final LocalDate date = Instant.ofEpochMilli(1497484800000L).atZone(ZoneId.systemDefault()).toLocalDate();
 		List<User> usersDb = repository.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(date);
 		assertThat(usersDb.size()).isEqualTo(1);
 		assertThat(usersDb.get(0).getId()).isEqualTo(5L);
@@ -103,7 +119,7 @@ public class UserRepositoryTest {
 	@Test
 	public void findByExpirationDateLessThanAndSecondExpirationNotificationSentFalseTest() throws Exception {
 		// 01/01/2017
-		final Date date = new Date(1483228800000L);
+		final LocalDate date = Instant.ofEpochMilli(1483228800000L).atZone(ZoneId.systemDefault()).toLocalDate();
 		List<User> usersDb = repository.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(date);
 		assertThat(usersDb.size()).isEqualTo(1);
 		assertThat(usersDb.get(0).getId()).isEqualTo(4L);

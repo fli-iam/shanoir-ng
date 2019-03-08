@@ -1,50 +1,28 @@
-import { Injectable } from '@angular/core';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { Injectable } from '@angular/core';
 
 import * as AppUtils from '../../utils/app.utils';
 import { Coil } from './coil.model';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 
 @Injectable()
-export class CoilService {
-    constructor(private http: HttpClient) { }
+export class CoilService extends EntityService<Coil> {
 
-    getCoils(): Promise<Coil[]> {
-        return this.http.get<Coil[]>(AppUtils.BACKEND_API_COIL_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting coils', error);
-                return Promise.reject(error.message || error);
-            });
-    }
+    API_URL = AppUtils.BACKEND_API_COIL_URL;
 
-    delete(id: number): Promise<void> {
-        return this.http.delete<void>(AppUtils.BACKEND_API_COIL_URL + '/' + id)
-            .toPromise()
-            .catch((error) => {
-                console.error('Error delete coil', error);
-                return Promise.reject(error.message || error);
-            });
-    }
-
-    getCoil(id: number): Promise<Coil> {
-        return this.http.get<Coil>(AppUtils.BACKEND_API_COIL_URL + '/' + id)
-            .toPromise()
-            .then(res => res)
-            .catch((error) => {
-                console.error('Error while getting coil', error);
-                return Promise.reject(error.message || error);
-            });
-    }
-
-    create(coil: Coil): Observable<Coil> {
-        return this.http.post<Coil>(AppUtils.BACKEND_API_COIL_URL, JSON.stringify(coil))
-            .map(response => response);
-    }
-
-    update(id: number, coil: Coil): Observable<Coil> {
-        return this.http.put<Coil>(AppUtils.BACKEND_API_COIL_URL + '/' + id, JSON.stringify(coil))
-            .map(response => response);
-    }
+    getEntityInstance() { return new Coil(); }
 }

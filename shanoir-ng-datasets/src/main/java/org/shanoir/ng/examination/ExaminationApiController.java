@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.examination;
 
 import java.util.List;
@@ -102,13 +116,13 @@ public class ExaminationApiController implements ExaminationApi {
 	}
 
 	@Override
-	public ResponseEntity<Examination> saveNewExamination(
-			@ApiParam(value = "the examination to create", required = true) @RequestBody @Valid final Examination examination,
+	public ResponseEntity<ExaminationDTO> saveNewExamination(
+			@ApiParam(value = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examination,
 			final BindingResult result) throws RestServiceException {
 
 		/* Validation */
 		// A basic examination can only update certain fields, check that
-		final FieldErrorMap accessErrors = this.getCreationRightsErrors(examination);
+		final FieldErrorMap accessErrors = this.getCreationRightsErrors(examinationMapper.examinationDTOToExamination(examination));
 		// Check hibernate validation
 		final FieldErrorMap hibernateErrors = new FieldErrorMap(result);
 		/* Merge errors. */
@@ -124,7 +138,7 @@ public class ExaminationApiController implements ExaminationApi {
 		/* Save examination in db. */
 		try {
 			final Examination createdExamination = examinationService.save(examination);
-			return new ResponseEntity<Examination>(createdExamination, HttpStatus.OK);
+			return new ResponseEntity<ExaminationDTO>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 		} catch (ShanoirDatasetsException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -134,7 +148,7 @@ public class ExaminationApiController implements ExaminationApi {
 	@Override
 	public ResponseEntity<Void> updateExamination(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
-			@ApiParam(value = "the examination to update", required = true) @RequestBody @Valid final Examination examination,
+			@ApiParam(value = "the examination to update", required = true) @RequestBody @Valid final ExaminationDTO examination,
 			final BindingResult result) throws RestServiceException {
 
 		examination.setId(examinationId);
@@ -153,7 +167,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 		/* Update examination in db. */
 		try {
-			examinationService.update(examination);
+			examinationService.update(examinationMapper.examinationDTOToExamination(examination));
 		} catch (ShanoirDatasetsException e) {
 			LOG.error("Error while trying to update examination " + examinationId + " : ", e);
 			throw new RestServiceException(

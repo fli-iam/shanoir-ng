@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.configuration.amqp;
 
 import org.shanoir.ng.messaging.InterMicroservicesCommunicator;
@@ -13,6 +27,8 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class RabbitMQConfiguration {
+	
+	private static final String MS_USERS_TO_MS_STUDIES_USER_DELETE = "ms_users_to_ms_studies_user_delete";
 
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	private static final String CENTER_QUEUE_NAME_OUT = "center_queue_from_ng";
@@ -40,6 +56,11 @@ public class RabbitMQConfiguration {
 		return new InterMicroservicesCommunicator();
 	}
 
+    @Bean
+    public static Queue getMSUsersToMSStudiesUserDelete() {
+            return new Queue(MS_USERS_TO_MS_STUDIES_USER_DELETE, true);
+    }
+	
 	@Bean
 	public static Queue acqEqptQueueOut() {
 		return new Queue(ACQ_EQPT_QUEUE_NAME_OUT, true);

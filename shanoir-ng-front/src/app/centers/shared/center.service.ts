@@ -1,71 +1,38 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
 
-import { Center } from './center.model';
-import * as AppUtils from '../../utils/app.utils';
+import { Injectable } from '@angular/core';
+
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
+import * as AppUtils from '../../utils/app.utils';
+import { Center } from './center.model';
 
 @Injectable()
-export class CenterService {
-    constructor(private http: HttpClient) { }
+export class CenterService extends EntityService<Center> {
 
-    getCenters(): Promise<Center[]> {
-        return this.http.get<Center[]>(AppUtils.BACKEND_API_CENTER_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting centers', error);
-                return Promise.reject(error.message || error);
-            });
-    }
+    API_URL = AppUtils.BACKEND_API_CENTER_URL;
 
-    getCentersNames(): Promise<Center[]> {
-        return this.http.get<Center[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting centers', error);
-                return Promise.reject(error.message || error);
-            });
+    getEntityInstance() { return new Center(); }
+
+    getCentersNames(): Promise<IdNameObject[]> {
+        return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
+            .toPromise();
     }
 
     getCentersNamesForExamination(): Promise<IdNameObject[]> {
         return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting centers', error);
-                return Promise.reject(error.message || error);
-            });
-    }
-
-    delete(id: number): Promise<void> {
-        return this.http.delete<void>(AppUtils.BACKEND_API_CENTER_URL + '/' + id)
-            .toPromise()
-            .catch((error) => {
-                console.error('Error delete center', error);
-                return Promise.reject(error);
-            });
-    }
-
-    getCenter(id: number): Promise<Center> {
-        return this.http.get<Center>(AppUtils.BACKEND_API_CENTER_URL + '/' + id)
-            .toPromise()
-            .then(res => res)
-            .catch((error) => {
-                console.error('Error while getting center', error);
-                return Promise.reject(error.message || error);
-            });
-    }
-
-    create(center: Center): Observable<Center> {
-        return this.http.post<Center>(AppUtils.BACKEND_API_CENTER_URL, JSON.stringify(center))
-            .map(res => res);
-    }
-
-    update(id: number, center: Center): Observable<Center> {
-        return this.http.put<Center>(AppUtils.BACKEND_API_CENTER_URL + '/' + id, JSON.stringify(center))
-            .map(response => response);
+            .toPromise();
     }
 }

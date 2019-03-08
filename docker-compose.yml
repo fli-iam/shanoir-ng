@@ -1,3 +1,15 @@
+# Shanoir NG - Import, manage and share neuroimaging data
+# Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+# Contact us on https://project.inria.fr/shanoir/
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
 version: '3'
 services:
   #
@@ -5,11 +17,9 @@ services:
   #
   keycloak-database:
     container_name: keycloak-database
-    image: mysql/mysql-server:5.7
+    build: ./docker-compose/keycloak-database
     environment:
       - MYSQL_DATABASE=keycloak
-      - MYSQL_USER=keycloak
-      - MYSQL_PASSWORD=password
     volumes:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
@@ -44,6 +54,8 @@ services:
   database:
     container_name: database
     build: ./docker-compose/database
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
     volumes:
       - "database-data:/var/lib/mysql"
     ports:
@@ -56,8 +68,22 @@ services:
   users:
     container_name: users
     build: ./docker-compose/users
+    environment:
+      - keycloak.auth-server-url
+      - kc.admin.client.server.url
+      - kc.admin.client.realm
+      - kc.admin.client.client.id
+      - kc.admin.client.username
+      - kc.admin.client.password
+      - front.server.url
+      - front.server.address
+      - spring.mail.host
+      - administrator.email
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java
     networks:
       - shanoir_ng_network
     ports:
@@ -73,8 +99,15 @@ services:
   studies:
     container_name: studies
     build: ./docker-compose/studies
+    environment:
+      - keycloak.auth-server-url
+      - front.server.url
+      - front.server.address
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java:ro
     networks:
       - shanoir_ng_network
     ports:
@@ -84,14 +117,22 @@ services:
       - "keycloak"
       - "database"
       - "rabbitmq"
+      - "users"
   #
   # Import microservice
   #
   import:
     container_name: import
     build: ./docker-compose/import
+    environment:
+      - keycloak.auth-server-url
+      - front.server.url
+      - front.server.address
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java:ro
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
@@ -102,14 +143,22 @@ services:
       - "keycloak"
       - "database"
       - "rabbitmq"
+      - "users"
   #
   # Datasets microservice
   #
   datasets:
     container_name: datasets
     build: ./docker-compose/datasets
+    environment:
+      - keycloak.auth-server-url
+      - front.server.url
+      - front.server.address
+      - spring.jpa.hibernate.ddl-auto
+      - spring.datasource.initialize
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java:ro
       - "tmp:/tmp"
       - "datasets-data:/var/datasets-data"
     networks:
@@ -121,6 +170,7 @@ services:
       - "keycloak"
       - "database"
       - "rabbitmq"
+      - "users"
   #
   # Solr microservice for Shanoir-NG search
   #
@@ -202,10 +252,11 @@ services:
     build: ./docker-compose/nginx
     volumes:
       - "logs:/var/log/nginx"
+      - certificate-share-data:/opt/ssl:ro
     networks:
-      - shanoir_ng_network
+      - shanoir_ng_network    
     ports:
-     - "80:80"
+     - "443:443"
     depends_on:
       - "keycloak"
       - "users"
@@ -226,6 +277,7 @@ volumes:
   dcm4chee-arc-wildfly-data:
   dcm4chee-arc-storage-data:
   solr-data:
+  certificate-share-data:
   tmp:
   logs:
 

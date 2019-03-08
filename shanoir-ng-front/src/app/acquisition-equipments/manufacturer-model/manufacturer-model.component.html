@@ -1,5 +1,19 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="content-component">
-    <form *ngIf="manufModelForm" [formGroup]="manufModelForm" class="max-content" novalidate>
+    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'"> 
@@ -12,36 +26,27 @@
 					<h2 class="header command-zone"i18n="Create manufModel|Title@@manufModelDetailCreateTitle">Create manufacturer model</h2>
 				</ng-template>
 			</span>
+			<help-message [help]="'equipment'"></help-message>
 			<fieldset>
 				<ol>
                     <li class="required">
-                        <label i18n="ManufModel detail|Modality type label@@manufModelDetailModalityType" class="required-label">Modality type</label> 
-                        <span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'"> 
-								{{datasetModalityTypeEnumValue}}
-							</ng-template>
-							<ng-template ngSwitchDefault> 
-								<select id="datasetModalityType" required formControlName="datasetModalityType" [(ngModel)]="manufModel.datasetModalityType" (change)="onSelect($event.target.value)">
-									<option *ngFor="let datasetModalityType of datasetModalityTypes" [value]="datasetModalityType.key">{{datasetModalityType.value}}</option>
-								</select>
-								<label *ngIf="formErrors.datasetModalityType.includes('required')" class="form-validation-alert" i18n="ManufModel detail|Modality required error@@manufModelDetailModalityRequiredError">Modality type is required!</label>
-							</ng-template>
-						</span>
+						<label i18n="ManufModel detail|Modality type label@@manufModelDetailModalityType" class="required-label">Modality type</label> 
+						<select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="manufModel.datasetModalityType" formControlName="datasetModalityType"></select-dataset-type>
                     </li>
 					<li class="required">
 						<label i18n="ManufModel detail|Manufacturer label@@manufModelDetailManuf" class="required-label">Manufacturer</label> 
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
-								<a [routerLink]="['/manufacturer']" [queryParams]="{mode: 'view', id: manufModel?.manufacturer?.id}">
+								<a [routerLink]="['/manufacturer/details/', manufModel?.manufacturer?.id]">
 									{{manufModel.manufacturer?.name}}
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select id="name" required formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer">
+								<select id="name" required formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer" [compareWith]="compareEntities">
 									<option *ngFor="let manufacturer of manufs" [ngValue]="manufacturer">{{manufacturer.name}}</option>
 								</select>
-								<button i18n="ManufModel detail|Create manuf label@@manufModelDetailCreateManuf" (click)="manufModal.show()">
-									<img [src]="addIconPath"/>
+								<button i18n="ManufModel detail|Create manuf label@@manufModelDetailCreateManuf" (click)="openNewManuf()">
+									<i class="fas fa-plus-square"></i>
 									new manufacturer
 								</button>
 							</ng-template>
@@ -54,10 +59,10 @@
 								{{manufModel.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<input type="text" id="name" formControlName="name" [(ngModel)]="manufModel.name"/>
-								<label *ngIf="formErrors.name.includes('required')" class="form-validation-alert" i18n="ManufModel detail|Name required error@@manufModelDetailNameRequiredError">Name is required!</label>
-								<label *ngIf="formErrors.name.includes('length')" class="form-validation-alert" i18n="ManufModel detail|Name length error@@manufModelDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="isNameUnique==false" class="form-validation-alert" i18n="ManufModel detail|Name unique error@@manufModelDetailNameUniqueError">Name should be unique!</label>
+								<input type="text" id="name" formControlName="name" [(ngModel)]="manufModel.name" (change)="isNameUniqueError=false"/>
+								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="ManufModel detail|Name required error@@manufModelDetailNameRequiredError">Name is required!</label>
+								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="ManufModel detail|Name length error@@manufModelDetailNameLengthError">Name length must be between 2 and 200!</label>
+								<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="ManufModel detail|Name unique error@@manufModelDetailNameUniqueError">Name should be unique!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -69,9 +74,9 @@
 							</ng-template>
 							<ng-template ngSwitchDefault> 
 								<input type="text" pattern="[0-9]+([.][0-9]+)?" id="magneticField" formControlName="magneticField" [(ngModel)]="manufModel.magneticField"/>
-                            	T
-								<label *ngIf="formErrors.magneticField.includes('required')" class="form-validation-alert" i18n="ManufModel detail|Magnetic field required error@@manufModelDetailMagneticFieldRequiredError">Magnetic field is required!</label>
-								<label *ngIf="formErrors.magneticField.includes('pattern')" class="form-validation-alert" i18n="ManufModel detail|Magnetic field pattern error@@manufModelDetailMagneticFieldPatternError">Magnetic field should be a number!</label>
+                            	Teslas
+								<label *ngIf="hasError('magneticField', ['required'])" class="form-validation-alert" i18n="ManufModel detail|Magnetic field required error@@manufModelDetailMagneticFieldRequiredError">Magnetic field is required!</label>
+								<label *ngIf="hasError('magneticField', ['pattern'])" class="form-validation-alert" i18n="ManufModel detail|Magnetic field pattern error@@manufModelDetailMagneticFieldPatternError">Magnetic field should be a number!</label>
 							</ng-template>
 						</span>
 					</li>
@@ -79,17 +84,10 @@
 			</fieldset>
 			<form-footer
 				[state]="footerState"
-				(update)="update()"
-				(create)="create()"
-				(edit)="edit()"
-				(back)="back()"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(back)="goBack()"
 			></form-footer>
         </div>
     </form>
 </div>
-
-<app-modal modalDialogId="manufModal" #manufModal>
-    <div class="app-modal-body">
-      <manufacturer-detail [mode]="'create'" (closing)="closePopin($event)"></manufacturer-detail>
-    </div>
-</app-modal>

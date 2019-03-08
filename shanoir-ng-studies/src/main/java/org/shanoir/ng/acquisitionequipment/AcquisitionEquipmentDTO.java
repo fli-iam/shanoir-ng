@@ -1,7 +1,18 @@
-package org.shanoir.ng.acquisitionequipment;
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
 
-import java.util.ArrayList;
-import java.util.List;
+package org.shanoir.ng.acquisitionequipment;
 
 import org.shanoir.ng.manufacturermodel.ManufacturerModel;
 import org.shanoir.ng.shared.dto.IdNameDTO;
@@ -21,15 +32,8 @@ public class AcquisitionEquipmentDTO {
 	private ManufacturerModel manufacturerModel;
 
 	private String serialNumber;
-
-	private List<IdNameDTO> studyCards;
-
-	/**
-	 * Default constructor.
-	 */
-	public AcquisitionEquipmentDTO() {
-		studyCards = new ArrayList<>();
-	}
+	
+	private Boolean compatible = false;
 
 	/**
 	 * @return the center
@@ -91,18 +95,12 @@ public class AcquisitionEquipmentDTO {
 		this.serialNumber = serialNumber;
 	}
 
-	/**
-	 * @return the studyCards
-	 */
-	public List<IdNameDTO> getStudyCards() {
-		return studyCards;
+	public Boolean getCompatible() {
+		return compatible;
 	}
 
-	/**
-	 * @param studyCards the studyCards to set
-	 */
-	public void setStudyCards(List<IdNameDTO> studyCards) {
-		this.studyCards = studyCards;
+	public void setCompatible(Boolean compatible) {
+		this.compatible = compatible;
 	}
 
 }

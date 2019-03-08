@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.center;
 
 import java.util.ArrayList;
@@ -8,8 +22,9 @@ import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.StudiesErrorModelCode;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +107,9 @@ public class CenterServiceImpl implements CenterService {
 	public Center save(final Center center) throws ShanoirStudiesException {
 		Center savedCenter = null;
 		try {
+			for (final StudyCenter studyCenter: center.getStudyCenterList()) {
+				studyCenter.setCenter(center);
+			}
 			savedCenter = centerRepository.save(center);
 		} catch (DataIntegrityViolationException dive) {
 			LOG.error("Error while creating center", dive);

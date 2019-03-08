@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <!-- Control bar -->
 <caption class="controls">
     <span *ngIf="selectionAllowed" class="select-ctrl">
@@ -87,16 +101,12 @@
         <!-- add a link -->
         <a class="link"
             *ngIf="col.type == 'link'"
-            [routerLink]="col.clickAction.target" 
-            [queryParams]="col.clickAction.getParams? col.clickAction.getParams(item) : null" 
-            ><i class="fas fa-external-link-alt"></i></a>
+            (click)="col.action(item)">
+            <i class="fas fa-external-link-alt"></i>
+        </a>
         
         <!-- display a button -->
         <span class="button" *ngIf="col.type == 'button'">
-            <a *ngIf="col.target" [routerLink]="col.target" [queryParams]="col.getParams ? col.getParams(item) : null" routerLinkActive="active">
-                <img *ngIf="col.img" src="{{col.img}}" />
-                <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
-            </a>
             <span *ngIf="col.action" (click)="col.action(item)">
                 <img *ngIf="col.img" src="{{col.img}}" />
                 <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>

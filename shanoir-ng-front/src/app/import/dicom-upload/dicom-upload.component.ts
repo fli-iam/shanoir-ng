@@ -1,10 +1,26 @@
-import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { ImportJob } from '../dicom-data.model';
-import { ImportService } from '../import.service';
-import { DicomArchiveService } from '../dicom-archive.service';
-import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { AbstractImportStepComponent } from '../import-step.abstract';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+
+import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
+import { DicomArchiveService } from '../dicom-archive.service';
+import { ImportJob } from '../dicom-data.model';
+import { ImportDataService } from '../import.data-service';
+import { ImportService } from '../import.service';
 
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
@@ -15,20 +31,23 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     styleUrls: ['dicom-upload.component.css', '../import.step.css'],
     animations: [slideDown]
 })
-export class DicomUploadComponent extends AbstractImportStepComponent {
-
-    @Output() inMemoryExtracted = new EventEmitter<any>();
-    @Output() archiveUploaded = new EventEmitter<ImportJob>();
+export class DicomUploadComponent {
     
     private archiveStatus: Status = 'none';
     private extensionError: boolean;
     private dicomDirMissingError: boolean;
     private modality: string;
-    private readonly ImagesUrlUtil = ImagesUrlUtil;
 
 
-    constructor(private importService: ImportService, private dicomArchiveService: DicomArchiveService) {
-        super();
+    constructor(
+            private importService: ImportService, 
+            private dicomArchiveService: DicomArchiveService,
+            private router: Router,
+            private breadcrumbsService: BreadcrumbsService,
+            private importDataService: ImportDataService) {
+        
+        breadcrumbsService.nameStep('1. Upload');
+        breadcrumbsService.markMilestone();
     }
     
     private uploadArchive(fileEvent: any): void {
@@ -40,10 +59,10 @@ export class DicomUploadComponent extends AbstractImportStepComponent {
     private loadInMemory(fileEvent: any) {
     	this.dicomArchiveService.clearFileInMemory();
     	this.dicomArchiveService.importFromZip((fileEvent.target).files[0])
-            .subscribe(response => {
+            .subscribe(_ => {
                 this.dicomArchiveService.extractFileDirectoryStructure()
                 .subscribe(response => {
-                    this.inMemoryExtracted.emit(response);
+                    this.importDataService.inMemoryExtracted = response;
                 });
             });
     }
@@ -56,23 +75,28 @@ export class DicomUploadComponent extends AbstractImportStepComponent {
         let formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         this.importService.uploadFile(formData)
-            .subscribe((patientDicomList: ImportJob) => {
+            .then((patientDicomList: ImportJob) => {
                 this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
-                this.archiveUploaded.emit(patientDicomList);
+                this.importDataService.archiveUploaded = patientDicomList;
                 this.setArchiveStatus('uploaded');
-            }, (err: String) => {
+            }).catch(error => {
                 this.setArchiveStatus('error');
-                this.dicomDirMissingError = err.indexOf("DICOMDIR is missing") != -1
+                if (error && error.error && error.error.message) 
+                    this.dicomDirMissingError = error.error.message.indexOf("DICOMDIR is missing") != -1
             });
     }
 
     private setArchiveStatus(status: Status) {
         this.archiveStatus = status;
-        this.updateValidity();
+        //this.updateValidity();
     }
 
-    getValidity(): boolean {
+    get valid(): boolean {
         return this.archiveStatus == 'uploaded';
+    }
+
+    private next() {
+        this.router.navigate(['imports/series']);
     }
 
 }

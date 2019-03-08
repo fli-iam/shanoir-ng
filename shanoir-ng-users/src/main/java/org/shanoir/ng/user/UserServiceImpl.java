@@ -1,12 +1,25 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.user;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.joda.time.DateTime;
 import org.keycloak.KeycloakPrincipal;
 import org.shanoir.ng.accountrequest.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
@@ -179,14 +192,14 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public List<User> getUsersToReceiveFirstExpirationNotification() {
-		final DateTime expirationDateTime = new DateTime().withMillisOfDay(0).plusMonths(1);
-		return userRepository.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(expirationDateTime.toDate());
+		final LocalDate expirationDate = LocalDate.now().plusMonths(1);
+		return userRepository.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(expirationDate);
 	}
 
 	@Override
 	public List<User> getUsersToReceiveSecondExpirationNotification() {
-		final DateTime expirationDateTime = new DateTime().withMillisOfDay(0).plusWeeks(1);
-		return userRepository.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(expirationDateTime.toDate());
+		final LocalDate expirationDate = LocalDate.now().plusWeeks(1);
+		return userRepository.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(expirationDate);
 	}
 
 	@Override
@@ -219,7 +232,7 @@ public class UserServiceImpl implements UserService {
 				// Set role 'guest'
 				user.setRole(roleRepository.findByName("ROLE_GUEST")
 						.orElseThrow(() -> new ShanoirUsersException("Error while getting role 'ROLE_GUEST'")));
-				user.setExpirationDate(new DateTime().plusYears(1).toDate());
+				user.setExpirationDate(LocalDate.now().plusYears(1));
 			}
 			savedUser = userRepository.save(user);
 			if (user.getAccountRequestInfo() != null) {
@@ -277,7 +290,7 @@ public class UserServiceImpl implements UserService {
 	public void updateLastLogin(final String username) throws ShanoirUsersException {
 		final User user = userRepository.findByUsername(username)
 				.orElseThrow(() -> new ShanoirUsersException("User with username " + username + " not found"));
-		user.setLastLogin(new Date());
+		user.setLastLogin(LocalDate.now());
 		try {
 			userRepository.save(user);
 		} catch (Exception e) {

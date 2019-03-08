@@ -1,4 +1,18 @@
-<fieldset ngModelGroup="common">
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<fieldset *ngIf="parentFormGroup" [formGroup]="parentFormGroup">
 	<ol>
 		<li>
 			<label i18n="Dataset detail|Dataset id@@datasetId">Id</label>
@@ -16,7 +30,7 @@
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{getSubjectName(dataset.subjectId)}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<select required [(ngModel)]="dataset.subjectId" [ngModelOptions]="{standalone: true}" >
+					<select [(ngModel)]="dataset.subjectId" formControlName="subject" >
 						<option *ngFor="let subject of subjects" [value]="subject.id">{{subject.name}}</option>
 					</select>
 				</ng-template>
@@ -27,7 +41,7 @@
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{getStudyName(dataset.studyId)}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<select required [(ngModel)]="dataset.studyId" [ngModelOptions]="{standalone: true}" >
+					<select [(ngModel)]="dataset.studyId" formControlName="study">
 						<option *ngFor="let study of studies" [value]="study.id">{{study.name}}</option>
 					</select>
 				</ng-template>
@@ -38,7 +52,7 @@
 			<span [ngSwitch]="mode" class="right-col">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.creationDate | date: 'dd/MM/yyyy'}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<datepicker [(ngModel)]="dataset.creationDate" validDate name="dataset.creationDate"></datepicker>
+					<datepicker [(ngModel)]="dataset.creationDate" formControlName="creationDate"></datepicker>
 				</ng-template>
 			</span>
 		</li>

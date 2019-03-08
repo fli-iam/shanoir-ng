@@ -1,8 +1,21 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.processing;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -13,6 +26,7 @@ import javax.validation.constraints.NotNull;
 
 import org.joda.time.LocalDate;
 import org.shanoir.ng.dataset.Dataset;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
@@ -49,6 +63,7 @@ public class DatasetProcessing extends AbstractGenericItem {
 	private List<Dataset> outputDatasets;
 
 	/** Date of the dataset processing. */
+	@LocalDateAnnotations
 	private LocalDate processingDate;
 
 	/** The study for which this dataset is a result. */

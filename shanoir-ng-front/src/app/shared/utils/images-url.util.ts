@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 export class ImagesUrlUtil {
     public static ADD_ICON_PATH = 'assets/images/icons/add.png';
     public static ADD_DISABLED_ICON_PATH = 'assets/images/icons/add_disabled.png';
@@ -29,7 +43,6 @@ export class ImagesUrlUtil {
     public static SHANOIR_WHITE_SMALL_LOGO_PATH = 'assets/images/logo.shanoir.white.small.png';
     public static SHARE_ICON_PATH = 'assets/images/icons/share.png';
     public static STETHOSCOPE_ICON_PATH = 'assets/images/icons/medical/stethoscope.png';
-    public static STUDY_CARD_ICON_PATH = 'assets/images/icons/study-card.png';
     public static UNCHECK_ALL_ICON_PATH = 'assets/images/icons/uncheck-all.png';
     public static USER_5_ICON_PATH = 'assets/images/icons/user-5.png';
     public static USER_ICON_PATH = 'assets/images/icons/user.png';

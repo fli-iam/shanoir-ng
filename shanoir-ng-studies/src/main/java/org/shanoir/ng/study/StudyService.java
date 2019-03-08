@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.study;
 
 import java.util.List;
@@ -6,7 +20,6 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.shared.validation.UniqueCheckableService;
-import org.shanoir.ng.study.dto.SimpleStudyDTO;
 
 /**
  * Study service.
@@ -80,7 +93,7 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	List<Study> findStudiesByUserId(Long userId);
 
 	/**
-	 * Find all studies for a user with permission level (studyUserType) lower than specified value.
+	 * Find all studies for a user with permission level (studyUserType) lower than or equal to specified value.
 	 * 
 	 * @param userId
 	 *            user id.
@@ -88,20 +101,17 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 *            studyUserType id.
 	 * @return a list of studies.
 	 */
-	List<Study> findStudiesByUserIdAndStudyUserTypeLessThan(final Long userId,final Integer studyUserTypeId);
+	List<Study> findStudiesByUserIdAndStudyUserTypeLessThanEqual(final Long userId,final Integer studyUserTypeId);
 
 	/**
-	 * Find all studies with theirs study cards for a user.
+	 * Find all studies that the user is allowed to see and to import.
 	 * 
 	 * @param userId
 	 *            user id.
-	 * @param equipment
-	 *            equipment used during dicom import
-	 * @return a list of simple studies.
+	 * @return a list of studies.
 	 * @throws ShanoirException
 	 */
-	List<SimpleStudyDTO> findStudiesWithStudyCardsByUserAndEquipment(Long userId, EquipmentDicom equipment)
-			throws ShanoirException;
+	List<Study> findStudiesByUserIdAndStudyUserType(Long userId);
 	
 	/**
 	 * Check if an user is responsible of the study.
@@ -141,5 +151,4 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	 * @throws ShanoirStudiesException
 	 */
 	void updateFromShanoirOld(Study study) throws ShanoirStudiesException;
-
 }

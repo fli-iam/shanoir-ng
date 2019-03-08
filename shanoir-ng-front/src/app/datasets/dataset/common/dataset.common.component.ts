@@ -1,31 +1,59 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { Dataset } from '../../shared/dataset.model';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+
+import { Mode } from '../../../shared/components/entity/entity.component.abstract';
+import { Study } from '../../../studies/shared/study.model';
+import { StudyService } from '../../../studies/shared/study.service';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
-import { StudyService } from '../../../studies/shared/study.service';
-import { Study } from '../../../studies/shared/study.model';
-import { NgForm, ControlContainer } from '@angular/forms';
+import { Dataset } from '../../shared/dataset.model';
+import { DatepickerComponent } from '../../../shared/date/date.component';
 
 
 @Component({
     selector: 'common-dataset-details',
-    templateUrl: 'dataset.common.component.html',
-    viewProviders: [ { provide: ControlContainer, useExisting: NgForm } ]
+    templateUrl: 'dataset.common.component.html'
 })
 
 export class CommonDatasetComponent implements OnChanges {
 
-    @Input() private mode: 'create' | 'edit' | 'view';
+    @Input() private mode: Mode;
     @Input() private dataset: Dataset;
+    @Input() private parentFormGroup: FormGroup;
     private subjects: Subject[] = [];
     private studies: Study[] = [];
     
 
     constructor(
             private studyService: StudyService,
-            private subjectService: SubjectService) {}
+            private subjectService: SubjectService,
+            private formBuilder: FormBuilder) {}
+
+    completeForm() {
+        this.parentFormGroup.addControl('subject', new FormControl(this.dataset.subjectId, [Validators.required]));
+        this.parentFormGroup.addControl('study', new FormControl(this.dataset.studyId, [Validators.required]));
+        this.parentFormGroup.addControl('creationDate', new FormControl(this.dataset.creationDate, [DatepickerComponent.validator]));
+        
+    }
 
     ngOnChanges(changes: SimpleChanges) {
+        if (changes['parentFormGroup']) {
+            this.completeForm();
+        }
         if (changes['mode']) {
             if (this.mode != 'view')  {
                 this.fetchAllSubjects();
@@ -48,26 +76,26 @@ export class CommonDatasetComponent implements OnChanges {
 
     private fetchOneSubject() {
         if (!this.dataset.subjectId) return;
-        this.subjectService.getSubject(this.dataset.subjectId).then(subject => {
+        this.subjectService.get(this.dataset.subjectId).then(subject => {
             this.subjects = [subject];
         });
     }
 
     private fetchOneStudy() {
         if (!this.dataset.studyId) return;
-        this.studyService.getStudy(this.dataset.studyId).then(study => {
+        this.studyService.get(this.dataset.studyId).then(study => {
             this.studies = [study];
         });
     }
 
     private fetchAllSubjects() {
-        this.subjectService.getSubjects().then(subjects => {
+        this.subjectService.getAll().then(subjects => {
             this.subjects = subjects;
         });
     }
 
     private fetchAllStudies() {
-        this.studyService.getStudies().then(studies => {
+        this.studyService.getAll().then(studies => {
             this.studies = studies;
         });
     }

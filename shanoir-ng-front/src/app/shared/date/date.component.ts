@@ -1,7 +1,20 @@
-import { Component, Input, Output, EventEmitter, forwardRef, OnChanges, SimpleChanges } from '@angular/core';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+import { Component, forwardRef } from '@angular/core';
+import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors, NgControl } from '@angular/forms';
 import { IMyOptions } from 'mydatepicker';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { pad } from '../../utils/app.utils';
 
 @Component({
     selector: 'datepicker',
@@ -9,11 +22,14 @@ import { pad } from '../../utils/app.utils';
         <my-date-picker 
             [options]="options" 
             [ngModel]="convertedDate"
-            (dateChanged)="onDateChange($event)"
-            (ngModelChange)="onModelChange($event)">
+            (ngModelChange)="onModelChange($event)"
+            (inputFieldChanged)="onInputFieldChanged($event)"
+            (inputFocusBlur)="onTouch()">
         </my-date-picker>
     `,
-    styles: ['my-date-picker { }'],
+    styles: [
+        ':host() { display: inline-block; height: 19px; }'
+    ],
     providers: [
         {
           provide: NG_VALUE_ACCESSOR,
@@ -22,59 +38,65 @@ import { pad } from '../../utils/app.utils';
         }]   
 })
 
-export class DatepickerComponent implements ControlValueAccessor, OnChanges {
-    
-    @Input() ngModel: Date | 'invalid' = null;
-    @Output() ngModelChange = new EventEmitter<Date | 'invalid'>();
+export class DatepickerComponent implements ControlValueAccessor {
+
+    private inputFieldContent: string;
+    private lastInputFieldContent: string;
     private convertedDate: Object;
-    private emptySemaphore: boolean = false;
+    private onTouch: () => void;
+    private onChange: (value) => void;
+    private ngControl: NgControl;
 
     private options: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
         height: '21px',
-        width: '160px'
+        width: '160px',
+        indicateInvalidDate: false
     };
 
     constructor() {
 
     }
 
-    onDateChange(event) {
-        if (event && event.jsdate) {
-            const chosenDate: Date = new Date([event.date.year, pad(event.date.month, 2), pad(event.date.day, 2)].join('-') + 'T00:00:00Z');
-            this.ngModelChange.emit(chosenDate);
-        } else {
-            this.emptySemaphore = true;
-            this.ngModelChange.emit(null);
-        }
+    private onInputFieldChanged(event) {
+        this.lastInputFieldContent = this.inputFieldContent;
+        this.inputFieldContent = event.value;
     }
 
     onModelChange(event) {
-        if (this.emptySemaphore) {
-            this.emptySemaphore = false;
-        } else if (!event) {
-            this.ngModelChange.emit('invalid');
-        }
-    }
-
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes['ngModel'] && this.ngModel != 'invalid') {
-            if (this.ngModel) {
-                this.convertedDate = {jsdate: new Date(this.ngModel)};
+        setTimeout(() => {
+            if (this.inputFieldContent == this.lastInputFieldContent) return;
+            if (event && event.epoc) {
+                this.onChange(new Date(event.epoc * 1000));
+            } else if (this.inputFieldContent) {
+                this.onChange('invalid');
             } else {
-                this.convertedDate = null;
+                this.onChange(null);
             }
-        }
+            this.onTouch();
+        })
     }
 
-    writeValue(obj: any): void {
+    writeValue(value: any): void {
+        if (value) {
+            this.convertedDate = {jsdate: new Date(value)};
+        } else {
+            this.convertedDate = null; 
+        }
     }
     
-    registerOnChange(fn: any): void {
+    registerOnChange(fn: (_: any) => void): void {
+        this.onChange = fn;
     }
 
     registerOnTouched(fn: any): void {
+        this.onTouch = fn;
     }
     
-
+    public static validator = (control: AbstractControl): ValidationErrors | null => {
+        if (control.value == 'invalid') {
+            return { format: true}
+        }
+        return null;
+    }
 }

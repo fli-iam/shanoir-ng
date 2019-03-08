@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.anonymization.anonymization;
 
 import java.io.IOException;
@@ -56,18 +70,14 @@ public class AnonymizationRulesSingleton {
 				if (rowNumber == 0) {
 					Iterator<Cell> cellIterator = row.cellIterator();
 					while (cellIterator.hasNext() && (xtagColumn == null || profileColumn == null)) {
-
 						Cell cell = cellIterator.next();
-
 						if (cell.getStringCellValue().equals(xTagsColumn)) {
 							xtagColumn = cell.getColumnIndex();
 							LOG.debug("Tags column : " + xtagColumn);
-						} else if (cell.getStringCellValue().equals("Neurinfo Profile")) {
+						} else if (cell.getStringCellValue().equals("Shanoir Profile")) {
 							profileColumn = cell.getColumnIndex();
 						}
-
 					}
-
 				}
 				if (xtagColumn != null && profileColumn != null) {
 					Cell xtagCell = row.getCell(xtagColumn);
@@ -117,6 +127,5 @@ public class AnonymizationRulesSingleton {
 	public List<String> getTagsToKeep() {
 		return tagsToKeep;
 	}
-	
-	
+
 }

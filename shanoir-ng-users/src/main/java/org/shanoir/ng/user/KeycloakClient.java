@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.user;
 
 import java.util.ArrayList;
@@ -33,23 +47,23 @@ public class KeycloakClient {
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(KeycloakClient.class);
 
+	@Value("${kc.admin.client.server.url}")
+	private String kcAdminClientServerUrl;
+
+	@Value("${kc.admin.client.realm}")
+	private String kcAdminClientRealm;
+
+	@Value("${kc.admin.client.client.id}")
+	private String kcAdminClientClientId;
+
+	@Value("${kc.admin.client.username}")
+	private String kcAdminClientUsername;
+
+	@Value("${kc.admin.client.password}")
+	private String kcAdminClientPassword;
+	
 	@Value("${keycloak.realm}")
 	private String keycloakRealm;
-
-	@Value("${kc.requests.admin.login}")
-	private String keycloakRequestsAdminLogin;
-
-	@Value("${kc.requests.admin.password}")
-	private String keycloakRequestsAdminPassword;
-
-	@Value("${keycloak.auth-server-url}")
-	private String keycloakRequestsAuthServerUrl;
-
-	@Value("${kc.requests.client.id}")
-	private String keycloakRequestsClientId;
-
-	@Value("${kc.requests.realm}")
-	private String keycloakRequestsRealm;
 
 	private Keycloak keycloak;
 
@@ -58,8 +72,8 @@ public class KeycloakClient {
 
 	protected Keycloak getKeycloak() {
 		if (keycloak == null) {
-			keycloak = Keycloak.getInstance(keycloakRequestsAuthServerUrl, keycloakRequestsRealm,
-					keycloakRequestsAdminLogin, keycloakRequestsAdminPassword, keycloakRequestsClientId);
+			keycloak = Keycloak.getInstance(kcAdminClientServerUrl, kcAdminClientRealm,
+					kcAdminClientUsername, kcAdminClientPassword, kcAdminClientClientId);
 		}
 		return keycloak;
 	}
@@ -153,7 +167,7 @@ public class KeycloakClient {
 		final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
 		attributes.put("userId", Arrays.asList(user.getId().toString()));
 		if (user.getExpirationDate() != null) {
-			attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate().getTime()));
+			attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
 		}
 
 		final UserRepresentation userRepresentation = new UserRepresentation();

@@ -1,6 +1,19 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { Location } from '@angular/common';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 
 import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
@@ -23,7 +36,7 @@ export class ExtensionRequestComponent implements OnInit {
     userId: number;
     selectedDateNormal: string = '';
 
-    constructor(private router: Router, private location: Location, private route: ActivatedRoute,
+    constructor(private router: Router, private route: ActivatedRoute,
         private userService: UserService, private fb: FormBuilder) {
     }
 
@@ -33,17 +46,14 @@ export class ExtensionRequestComponent implements OnInit {
     }
 
      getUser(): void {
-        this.route.queryParams
-            .switchMap((queryParams: Params) => {
-                return this.userService.getUser(KeycloakService.auth.userId);
-            })
-            .subscribe((user: User) => {
-                this.extensionRequestInfo.extensionDate = new Date();
-                if (user.expirationDate) {
-                    this.extensionRequestInfo.extensionDate = new Date(user.expirationDate);
-                }
-                this.getDateToDatePicker(this.extensionRequestInfo);
-            });
+        this.userService.get(KeycloakService.auth.userId)
+        .then((user: User) => {
+            this.extensionRequestInfo.extensionDate = new Date();
+            if (user.expirationDate) {
+                this.extensionRequestInfo.extensionDate = new Date(user.expirationDate);
+            }
+            this.getDateToDatePicker(this.extensionRequestInfo);
+        });
     }
 
     extensionRequest(): void {
@@ -51,8 +61,6 @@ export class ExtensionRequestComponent implements OnInit {
         this.userService.requestExtension(this.extensionRequestInfo)
             .then(() => {
                 this.router.navigate(['/home']);
-            }, (err: String) => {
-                console.log(err);
             });
     }
 

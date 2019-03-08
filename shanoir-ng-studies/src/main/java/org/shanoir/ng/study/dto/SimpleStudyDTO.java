@@ -1,9 +1,23 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.study.dto;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.studycenter.StudyCenterDTO;
 
 /**
  * Simple DTO for studies.
@@ -16,12 +30,8 @@ public class SimpleStudyDTO {
 	private Long id;
 
 	private String name;
-
-	private List<SimpleStudyCardDTO> studyCards;
 	
-	private List<IdNameDTO> centers;
-	
-	private Boolean compatible;
+	private List<StudyCenterDTO> studyCenterList;
 
 	/**
 	 * Simple constructor.
@@ -40,8 +50,7 @@ public class SimpleStudyDTO {
 	public SimpleStudyDTO(final Long id, final String name) {
 		this.id = id;
 		this.name = name;
-		this.centers = new ArrayList<>();
-		this.studyCards = new ArrayList<>();
+		this.setStudyCenterList(new ArrayList<>());
 	}
 
 	/**
@@ -75,34 +84,17 @@ public class SimpleStudyDTO {
 	}
 
 	/**
-	 * @return the studyCards
+	 * @return the studyCenterList
 	 */
-	public List<SimpleStudyCardDTO> getStudyCards() {
-		return studyCards;
+	public List<StudyCenterDTO> getStudyCenterList() {
+		return studyCenterList;
 	}
 
 	/**
-	 * @param studyCards
-	 *            the studyCards to set
+	 * @param studyCenterList the studyCenterList to set
 	 */
-	public void setStudyCards(List<SimpleStudyCardDTO> studyCards) {
-		this.studyCards = studyCards;
-	}
-
-	public List<IdNameDTO> getCenters() {
-		return centers;
-	}
-
-	public void setCenters(List<IdNameDTO> centers) {
-		this.centers = centers;
-	}
-
-	public Boolean getCompatible() {
-		return compatible;
-	}
-
-	public void setCompatible(Boolean compatible) {
-		this.compatible = compatible;
+	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+		this.studyCenterList = studyCenterList;
 	}
 
 }

@@ -1,9 +1,23 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.user;
 
 import static org.mockito.BDDMockito.given;
 
+import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,10 +35,6 @@ import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.role.RoleRepository;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
-import org.shanoir.ng.user.User;
-import org.shanoir.ng.user.UserContext;
-import org.shanoir.ng.user.UserRepository;
-import org.shanoir.ng.user.UserServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -72,10 +82,10 @@ public class UserServiceTest {
 				.willReturn(Arrays.asList(createUser()));
 		given(userRepository.findOne(USER_ID)).willReturn(ModelsUtil.createUser());
 		given(userRepository
-				.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(Date.class)))
+				.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(LocalDate.class)))
 						.willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository
-				.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Mockito.any(Date.class)))
+				.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Mockito.any(LocalDate.class)))
 						.willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository.save(Mockito.any(User.class))).willReturn(ModelsUtil.createUser());
 		given(roleRepository.findByName(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createGuestRole()));
@@ -206,7 +216,7 @@ public class UserServiceTest {
 		Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(users.get(0).getFirstName()));
 
 		Mockito.verify(userRepository, Mockito.times(1))
-				.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(Date.class));
+				.findByExpirationDateLessThanAndFirstExpirationNotificationSentFalse(Mockito.any(LocalDate.class));
 	}
 
 	@Test
@@ -217,13 +227,13 @@ public class UserServiceTest {
 		Assert.assertTrue(ModelsUtil.USER_FIRSTNAME.equals(users.get(0).getFirstName()));
 
 		Mockito.verify(userRepository, Mockito.times(1))
-				.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Mockito.any(Date.class));
+				.findByExpirationDateLessThanAndSecondExpirationNotificationSentFalse(Mockito.any(LocalDate.class));
 	}
 
 	@Test
 	public void requestExtensionTest() throws ShanoirUsersException {
 		ExtensionRequestInfo requestInfo = new ExtensionRequestInfo();
-		requestInfo.setExtensionDate(new Date());
+		requestInfo.setExtensionDate(LocalDate.now());
 		requestInfo.setExtensionMotivation("motivation");
 		userService.requestExtension(USER_ID, requestInfo);
 

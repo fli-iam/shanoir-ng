@@ -1,11 +1,20 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.utils;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.shanoir.ng.shared.model.AbstractGenericItem;
@@ -47,20 +56,5 @@ public class Utils {
 		return o1.equals(o2) || o2.equals(o1);
 		// o1.equals(o2) is not equivalent to o2.equals(o1) ! For instance with
 		// java.sql.Timestamp and java.util.Date
-	}
-	
-	public static LocalDate DateToLocalDate(Date date)  {
-		return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalDate();
-	}
-	
-	public static LocalDate StringToLocalDate(String yyyyMMdd) {
-		if (yyyyMMdd != null && !yyyyMMdd.isEmpty()) {
-			final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
-			LocalDate localDate = LocalDate.parse(yyyyMMdd, dtf);
-			return localDate;
-		} else {
-			return null;
-		}
-	
 	}
 }

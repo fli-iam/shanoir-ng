@@ -1,9 +1,23 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <node label="Subjects" [pictoUrl]="folderIconPath" deploy="true">
     <ng-template ngFor let-subject [ngForOf]="study.subjectStudyList">
         <node [label]="subject | subjectStudyLabel" [pictoUrl]="userIconPath" [nodeParams]="subject" [dataRequest]="true"
             (openClick)="getSubjectDetails($event)" link="true" (labelClick)="showSubjectDetails($event)">
             <ng-template ngFor let-examination [ngForOf]="subject.examinations">
-                <node [label]="examination | subjectExaminationLabel" [pictoUrl]="listIconPath" link="true" (labelClick)="showExaminationDetails($event)">
+                <node [label]="examination | subjectExaminationLabel" [pictoUrl]="listIconPath" link="true" (labelClick)="showExaminationDetails(examination?.id)">
                     <node *ngFor="let acquisition of examination.datasetAcquisitions" [label]="acquisition.name" [pictoUrl]="xRay2IconPath">
                         <node *ngFor="let dataset of acquisition.datasets" [label]="dataset.name" [pictoUrl]="usersIconPathbrainIconPath" link="true" (labelClick)="showDatasetDetails(dataset.id)">
                         </node>
@@ -19,36 +33,21 @@
         </node>
     </ng-template>
 </node>
-<node label="Principal investigators and Centers (takes place in and with)" [pictoUrl]="folderIconPath"
-    deploy="true">
-    <ng-template ngFor let-studycenter [ngForOf]="study.studyCenterList">
-        <node [label]="studycenter.center.name" [pictoUrl]="homeIconPath" [nodeParams]="studycenter.center.id" link="true"
-            (labelClick)="showCenterDetails($event)" deploy="true">
-            <ng-template ngFor let-acquisitionEquipment [ngForOf]="studycenter.center.acquisitionEquipments">
+<node label="Principal investigators and Centers (takes place in and with)" [pictoUrl]="folderIconPath" deploy="true">
+    <ng-template ngFor let-studyCenter [ngForOf]="study.studyCenterList">
+        <node [label]="studyCenter.center.name" [pictoUrl]="homeIconPath" [nodeParams]="studyCenter" [dataRequest]="true"
+            (openClick)="getAcqEptForCenter($event)" link="true" (labelClick)="showCenterDetails($event)">
+            <ng-template ngFor let-acquisitionEquipment [ngForOf]="acquisitionEquipments">
                 <node [label]="acquisitionEquipment | acqEqptLabel" [pictoUrl]="xRay1IconPath" [nodeParams]="acquisitionEquipment.id"
                     link="true" (labelClick)="showAcquisitionEquipmentDetails($event)">
-                    <ng-template ngFor let-studyCard [ngForOf]="acquisitionEquipment.studyCards">
-                        <node [label]="studyCard.name" [pictoUrl]="studyCardIconPath">
-                        </node>
-                    </ng-template>
                 </node>
             </ng-template>
-        </node>
-    </ng-template>
-</node>
-<node label="Study cards" [pictoUrl]="folderIconPath" deploy="true">
-    <ng-template ngFor let-studyCard [ngForOf]="study.studyCards">
-        <node [label]="studyCard.name" [pictoUrl]="studyCardIconPath">
         </node>
     </ng-template>
 </node>
 <node label="Members" [pictoUrl]="folderIconPath" deploy="true">
-    <ng-template ngFor let-membersCategory [ngForOf]="study.membersCategories">
-        <node [label]="membersCategory.studyUserType.label" [pictoUrl]="folderIconPath" deploy="true">
-            <ng-template ngFor let-member [ngForOf]="membersCategory.members">
-                <node [label]="member.name" [pictoUrl]="userIconPath" [nodeParams]="member.id" link="true" (labelClick)="showMemberDetails($event)">
-                </node>
-            </ng-template>
+    <node *ngFor="let membersCategory of study.membersCategories" [label]="getStudyUserTypeLabel(membersCategory.studyUserType)" [pictoUrl]="folderIconPath" deploy="true">
+        <node *ngFor="let member of membersCategory.members" [label]="member.name" [pictoUrl]="userIconPath" [nodeParams]="member.id" link="true" (labelClick)="showMemberDetails($event)">
         </node>
-    </ng-template>
+    </node>
 </node>

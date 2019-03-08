@@ -1,91 +1,50 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
 
-import { Subject } from './subject.model';
-import * as AppUtils from '../../utils/app.utils';
+import { Injectable } from '@angular/core';
+
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { SubjectStudy } from "./subject-study.model";
+import * as AppUtils from '../../utils/app.utils';
+import { SubjectStudy } from './subject-study.model';
+import { Subject } from './subject.model';
 
 @Injectable()
-export class SubjectService {
-    constructor(private http: HttpClient) { }
+export class SubjectService extends EntityService<Subject> {
 
-    getSubjects(): Promise<Subject[]> {
-        return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting subjects', error);
-                return Promise.reject(error.message || error);
-            });
-    }
+    API_URL = AppUtils.BACKEND_API_SUBJECT_URL;
+
+    getEntityInstance() { return new Subject(); }
 
     getSubjectsNames(): Promise<IdNameObject[]> {
         return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_SUBJECT_NAMES_URL)
-        .toPromise()
-        .then(response => response)
-        .catch((error) => {
-            console.error('Error while getting subjects names', error);
-            return Promise.reject(error.message || error);
-        });
+        .toPromise();
     }
 
     getCentersNames(): Promise<Subject[]> {
         return this.http.get<Subject[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting centers', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     getCentersNamesForExamination(): Promise<IdNameObject[]> {
         return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise()
-            .then(response => response)
-            .catch((error) => {
-                console.error('Error while getting centers', error);
-                return Promise.reject(error.message || error);
-            });
-    }
-
-    delete(id: number): Promise<void> {
-        return this.http.delete<void>(AppUtils.BACKEND_API_CENTER_URL + '/' + id)
-            .toPromise()
-            .catch((error) => {
-                console.error('Error delete center', error);
-                return Promise.reject(error);
-            });
-    }
-
-    getSubject(id: number): Promise<Subject> {
-        return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id)
-            .toPromise()
-            .catch((error) => {
-                console.error('Error while getting subject', error);
-                return Promise.reject(error.message || error);
-            });
+            .toPromise();
     }
 
     findSubjectByIdentifier(identifier: string): Promise<Subject> {
         return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
-            .toPromise()
-            .catch((error)=> {
-                console.error('Error while finding subject by identifier', error);
-                return Promise.reject(error.message || error);
-        });
-    }
-
-    create(subject: Subject): Promise<Subject> {
-        return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, JSON.stringify(subject))
             .toPromise();
-    }
-
-    update(id: number, subject: Subject): Observable<Subject> {
-        return this.http.put<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id, JSON.stringify(subject))
-            .map(response => response);
     }
 
     updateSubjectStudyValues(subjectStudy: SubjectStudy): Promise<SubjectStudy> {

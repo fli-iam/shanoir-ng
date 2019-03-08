@@ -1,70 +1,98 @@
-import { Component, Input, Output, EventEmitter, OnInit, SimpleChanges, OnChanges } from '@angular/core';
-import { IdNameObject } from '../../models/id-name-object.model';
-import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+import { Component, forwardRef, Input } from '@angular/core';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
+
 import { Study } from '../../../studies/shared/study.model';
+import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
+import { AbstractInput } from '../../form/input.abstract';
 
 @Component({
   selector: 'subject-study-list',
   templateUrl: 'subject-study-list.component.html',
   styleUrls: ['subject-study-list.component.css'],
+  providers: [
+    { 
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => SubjectStudyListComponent),
+      multi: true
+    }
+]
 })
 
-export class SubjectStudyListComponent implements OnInit, OnChanges{
-    @Input() mode: "study" | "subject";
-    @Input() list: any[];
-    @Input() subjectStudyList : SubjectStudy[] = [];
-    @Output() subjectStudyListChange = new EventEmitter<SubjectStudy[]>();
+export class SubjectStudyListComponent extends AbstractInput {
     
-    private legend: "Studies" | "Subjects";
-    private columnName: "Common Name" | "Study Name";
+    @Input() subject: Subject;
+    @Input() study: Study;
+    @Input() selectableList: Subject[] | Study[];
+    private selected: any;
 
-    private onChangeSubjectStudyList() {
-        this.subjectStudyListChange.emit(this.subjectStudyList);
+    private get legend(): string {
+        return this.compMode == 'study' ? 'Subjects' : 'Studies';
     }
 
-    ngOnInit () {
-        this.legend = this.mode == 'study' ? 'Studies' : 'Subjects';
-        this.columnName = this.mode == 'study' ? 'Study Name' : 'Common Name';
-    }
-    
-    ngOnChanges(changes: SimpleChanges) {
-        if ((changes['subjectStudyList'] || changes['list'])) {
-            if (this.list && this.subjectStudyList)
-                for (let subjectStudy of this.subjectStudyList) {
-                    for (let object of this.list) {
-                        if ((this.mode == "subject" && subjectStudy.subject.id == object.id)
-                            || (this.mode == "study" && subjectStudy.study.id == object.id)) {object.selected = true;}
-                    }
+    writeValue(obj: any): void {
+        super.writeValue(obj);
+        if (this.model && this.selectableList) {
+            if (this.compMode == 'study') {
+                for (let item of this.selectableList) {
+                    item.selected = this.model.find(subStu => subStu.subject.id == item.id) 
                 }
+            } else if (this.compMode == 'subject') {
+                for (let item of this.selectableList) {
+                    item.selected = this.model.find(subStu => subStu.study.id == item.id) 
+                }
+            }
         }
     }
 
-    onObjectSelect(object: IdNameObject) {
-        object.selected = true;
+    private get compMode(): 'subject' | 'study' { 
+        if (this.subject && this.study) throw Error('You cannot set both subject and study');
+        if (this.subject) return 'subject';
+        if (this.study) return 'study';
+        throw Error('You have to set either subject or study');
+        
+    }
+
+    onAdd() {
+        if (!this.selected) return;
+        this.selected.selected = true;
         let newSubjectStudy: SubjectStudy = new SubjectStudy();
         newSubjectStudy.physicallyInvolved = false;
-        if (this.mode == "study") {
-            newSubjectStudy.study = new Study(object);
-        } else if (this.mode == "subject") {
-            newSubjectStudy.subject = new Subject(object);
+        if (this.compMode == "study") {
+            let studyCopy: Study = new Study();
+            studyCopy.id = this.study.id;
+            newSubjectStudy.study = studyCopy;
+            newSubjectStudy.subject = this.selected;
         }
-        this.subjectStudyList.push(newSubjectStudy);
-        this.onChangeSubjectStudyList();
+        else if (this.compMode == "subject") {
+            let subjectCopy: Subject = new Subject();
+            subjectCopy.id = this.subject.id;
+            newSubjectStudy.subject = subjectCopy;
+            newSubjectStudy.study = this.selected;
+        }
+        this.selected = undefined;
+        this.model.push(newSubjectStudy);
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
-        for (let object of this.list) {
-            if (this.mode == "study") {
-                if (subjectStudy.study.id == object.id) object.selected = false;
-            } else if (this.mode == "subject") {
-                if (subjectStudy.subject.id == object.id) object.selected = false;
-            }
+        const index: number = this.model.indexOf(subjectStudy);
+        if (index > -1) {
+            this.model[index].selected = false;
+            this.model.splice(index, 1);
         }
-        const index: number = this.subjectStudyList.indexOf(subjectStudy);
-        if (index !== -1) {
-            this.subjectStudyList.splice(index, 1);
-        }
-        this.onChangeSubjectStudyList();
     }
 }

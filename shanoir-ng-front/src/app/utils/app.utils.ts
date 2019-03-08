@@ -1,6 +1,21 @@
-import { Pageable } from '../shared/components/table/pageable.model';
-import { HttpResponse } from '@angular/common/http';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Pipe, PipeTransform } from '@angular/core';
+
+import { MrDataset } from '../datasets/dataset/mr/dataset.mr.model';
+import { Dataset } from '../datasets/shared/dataset.model';
 
 // Users http api
 const BACKEND_API_USERS_MS_URL: string = process.env.BACKEND_API_USERS_MS_URL;
@@ -18,7 +33,7 @@ export const BACKEND_API_CENTER_NAMES_URL: string = BACKEND_API_CENTER_URL + '/n
 
 // Studies http api
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';
-export const BACKEND_API_STUDY_WITH_CARDS_BY_USER_EQUIPMENT_URL: string = BACKEND_API_STUDY_URL + '/listwithcards';
+export const BACKEND_API_STUDY_FOR_IMPORT_URL: string = BACKEND_API_STUDY_URL + '/list_for_import';
 export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '/names';
 
 // Subjects http api
@@ -57,6 +72,8 @@ export const BACKEND_API_UPLOAD_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + 
 export const BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/start_import_job/';
 export const BACKEND_API_IMAGE_VIEWER_URL: string = BACKEND_API_IMPORT_MS_URL + '/viewer/ImageViewerServlet';
 
+// Nifti Converter http api
+export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL + '/niftiConverters';
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
@@ -121,4 +138,24 @@ export function allOfEnum<T>(enumClass): Array<T> {
         list.push(enumClass[key]);
     }
     return list;
+}
+
+export function capitalizeFirstLetter(str: string) {
+    if (!str) return;
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function capitalsAndUnderscoresToDisplayable(str: string) {
+    if (!str) return;
+    return capitalizeFirstLetter(str.replace('_', ' ').toLowerCase());
+}
+
+export function getEntityInstance(entity: Dataset) { 
+    if (entity.type == 'Mr') return new MrDataset();
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // TODO : Implement others !!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    else return new MrDataset(); // fixes errors with our test dataset (which have no real types)
+    // TODO : Throw en exception
 }

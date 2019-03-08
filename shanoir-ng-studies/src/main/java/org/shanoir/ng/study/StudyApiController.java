@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.study;
 
 import java.util.List;
@@ -76,27 +90,36 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<List<IdNameDTO>> findStudiesNames() {
-		final List<IdNameDTO> studies = studyService.findIdsAndNames();
-		if (studies.isEmpty()) {
+		List<IdNameDTO> studiesNames;
+		try {
+			if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+				// Return all studies if user has role "admin"
+				studiesNames = studyService.findIdsAndNames();
+			} else {
+				List<Study> studies = studyService.findStudiesByUserIdAndStudyUserType(KeycloakUtil.getTokenUserId());
+				studiesNames = studyMapper.studiesToIdNameDTOs(studies);
+			}
+		} catch (ShanoirException e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		if (studiesNames.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(studies, HttpStatus.OK);
+		return new ResponseEntity<>(studiesNames, HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<List<SimpleStudyDTO>> findStudiesWithStudyCardsByUserAndEquipment(
-			@RequestBody final EquipmentDicom equipment, final BindingResult result) {
-		List<SimpleStudyDTO> studies;
+	public ResponseEntity<List<SimpleStudyDTO>> findStudiesForImport() {
+		List<Study> studies;
 		try {
-			studies = studyService.findStudiesWithStudyCardsByUserAndEquipment(KeycloakUtil.getTokenUserId(),
-					equipment);
+			studies = studyService.findStudiesByUserIdAndStudyUserType(KeycloakUtil.getTokenUserId());
 		} catch (ShanoirException e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(studies, HttpStatus.OK);
+		return new ResponseEntity<>(studyMapper.studiesToSimpleStudyDTOs(studies), HttpStatus.OK);
 	}
 
 	@Override
