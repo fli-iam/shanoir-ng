@@ -73,7 +73,13 @@ public class DatasetApiController implements DatasetApi {
 	private static final String DOWNLOAD = ".download";
 
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
-
+	
+	private static final String SUB_PREFIX = "sub-";
+	
+	private static final String DATASET_DESCRIPTION_FILE = "dataset_description.json";
+	
+	private static final String README_FILE = "README";
+	
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
 
 	@Autowired
@@ -341,39 +347,30 @@ public class DatasetApiController implements DatasetApi {
 			File zipFile = new File(tmpFilePath + ZIP);
 			zipFile.createNewFile();
 			
-			// 2. Create sub folder and dataset_description.json
-			final String subLabel = "sub-" + subjectName;
-			File subFolder = new File(workFolder.getAbsolutePath() + File.separator + subLabel);
-			subFolder.mkdirs();
-			
+			// 2. Create dataset_description.json and README
 			DatasetDescription datasetDesciption = new DatasetDescription();
 			datasetDesciption.setName(studyName);
 			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + "dataset_description.json"), datasetDesciption);
+			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDesciption);
+			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + README_FILE), studyName);
 			
-			// TODO 3. Create [ses-<label>/] folder if multi exams 
+			// TODO BIDS: 3. Create [ses-<label>/] folder if multi exams 
 			/*if (examinationList.size() > 1) {
 				for (Examination examination: examinationList) {
 					String sesLabel = examination.getId().toString();
 					final List<DatasetAcquisition> datasetAcquisitionList = examination.getDatasetAcquisitions();
 					for (DatasetAcquisition datasetAcquisition : datasetAcquisitionList) {
-						// TODO 5. multi dataset acquisiton: add [_acq-<label>]
+						// TODO BIDS: 5. multi dataset acquisiton: add [_acq-<label>]
 						String acqLabel = datasetAcquisition.getId().toString();
 						final List<Dataset> datasetList = datasetAcquisition.getDatasets();
 						for (Dataset dataset: datasetList) {
-							// TODO 6. multi datasets: add [_run-<index>]
+							// TODO BIDS: 6. multi datasets: add [_run-<index>]
 							
-							// TODO 7. multi MrDatasetNature: add _<modality_label>
+							// TODO BIDS: 7. multi MrDatasetNature: add _<modality_label>
 						}
 					}
 				}
 			}*/
-			
-			// 4. Create anat folder
-			// TODO Create anat, func, dwi, fmap folder according to MrDatasetNature
-			final String anatLabel = "anat";		
-			File anatFolder = new File(subFolder.getAbsolutePath() + File.separator + anatLabel);
-			anatFolder.mkdirs();
 			
 			// 8. Get nii and json of dataset
 			/* For the demo: one exam, one acq, one dataset, one modality which is T1 */
@@ -385,7 +382,7 @@ public class DatasetApiController implements DatasetApi {
 			try {
 				List<URL> pathURLs = new ArrayList<URL>();
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-				copyNiftiFilesForURLs(pathURLs, anatFolder);
+				copyNiftiFilesForURLs(pathURLs, workFolder);
 			} catch (IOException e) {
 				throw new RestServiceException(
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));

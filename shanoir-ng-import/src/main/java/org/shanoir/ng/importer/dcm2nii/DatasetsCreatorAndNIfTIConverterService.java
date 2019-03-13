@@ -527,15 +527,14 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 * @return List of nifti files
 	 */
 	
-	private List<File> niftiFileSorting(List<File> existingFiles,File directory,File serieIDFolderFile) {
+	private List<File> niftiFileSorting(List<File> existingFiles, File directory, File serieIDFolderFile) {
 		// If one of the output files is a prop file, there has been an error
 		List<File> niftiFileResult = null;
 		if (outputFiles.get(serieIDFolderFile.getName()) != null) {
 			List<File> niiFiles = diff(existingFiles, directory.getPath());
 			niftiFileResult = niiFiles;
 			if (!containsPropFile(niiFiles)) {
-				for (File niiFile : niiFiles) 
-				{
+				for (File niiFile : niiFiles) {
 					outputFiles.get(serieIDFolderFile.getName()).add(niiFile.getAbsolutePath());
 					LOG.info("Path niiFile : " + niiFile.getAbsolutePath());
 				}
@@ -595,8 +594,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 						} catch (NoSuchFieldException | SecurityException e) {
 							LOG.error(e.getMessage());
 						}
-						List<File> niftiGeneratedFiles = niftiFileSorting(existingFiles,directory,serieIDFolderFile);
-						constructNiftiExpressionAndDatasetFiles(converter,dataset,serie,niftiGeneratedFiles);
+						List<File> niftiGeneratedFiles = niftiFileSorting(existingFiles, directory, serieIDFolderFile);
+						constructNiftiExpressionAndDatasetFiles(converter, dataset, serie, niftiGeneratedFiles);
 						++index;
 						
 					}
@@ -613,8 +612,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					} catch (NoSuchFieldException | SecurityException e) {
 						LOG.error(e.getMessage());
 					}
-					List<File> niftiGeneratedFiles = niftiFileSorting(existingFiles,serieIDFolderFile,serieIDFolderFile);
-					constructNiftiExpressionAndDatasetFiles(converter,dataset,serie,niftiGeneratedFiles);
+					List<File> niftiGeneratedFiles = niftiFileSorting(existingFiles, serieIDFolderFile, serieIDFolderFile);
+					constructNiftiExpressionAndDatasetFiles(converter, dataset, serie, niftiGeneratedFiles);
 				}
 			}
 		}
@@ -628,12 +627,12 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 * @param serie
 	 * @param niftiGeneratedFiles
 	 */
-	private void constructNiftiExpressionAndDatasetFiles(NIfTIConverter converter, Dataset dataset, Serie serie,List<File> niftiGeneratedFiles) {
+	private void constructNiftiExpressionAndDatasetFiles(NIfTIConverter converter, Dataset dataset, Serie serie, List<File> niftiGeneratedFiles) {
 		// Build dataset Expresion and datasetFiles
 		ExpressionFormat expressionFormat = generateNiftiDatasetExpression(dataset,serie);
 		expressionFormat.setNiftiConverter(converter);
 		dataset.getExpressionFormats().add(expressionFormat);
-		generateNiftiDatasetFiles(expressionFormat,dataset,niftiGeneratedFiles);
+		generateNiftiDatasetFiles(expressionFormat, dataset, niftiGeneratedFiles);
 	}
 	
 	
