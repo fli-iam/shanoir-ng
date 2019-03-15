@@ -295,7 +295,6 @@ services:
     build: ./docker-compose/nginx
     volumes:
       - "logs:/var/log/nginx"
-      - "/home/mbodin/Shanoir/shanoir-ng/shanoir-ng-front/mnt-dist:/etc/nginx/html" 
       - certificate-share-data:/opt/ssl:ro
     networks:
       - shanoir_ng_network    
