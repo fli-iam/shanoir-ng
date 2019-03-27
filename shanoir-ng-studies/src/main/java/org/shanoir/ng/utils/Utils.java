@@ -28,7 +28,12 @@ public class Utils {
         }
         return list;
     }
-
+    
+    public static <T> List<T> copyList(List<T> list) {
+    	List<T> copy = new ArrayList<T>();
+    	for (T item : list) copy.add(item);
+    	return copy;
+    }
 
     public static boolean equalsIgnoreNull(Object o1, Object o2) {
         if (o1 == null) return o2 == null;

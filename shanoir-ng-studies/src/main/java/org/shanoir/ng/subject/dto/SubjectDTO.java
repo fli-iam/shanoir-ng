@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.subject.HemisphericDominance;
-import org.shanoir.ng.subject.ImagedObjectCategory;
-import org.shanoir.ng.subject.Sex;
-import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
+import org.shanoir.ng.subject.model.HemisphericDominance;
+import org.shanoir.ng.subject.model.ImagedObjectCategory;
+import org.shanoir.ng.subject.model.Sex;
+import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 
 
 public class SubjectDTO {

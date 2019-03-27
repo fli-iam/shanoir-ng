@@ -49,8 +49,6 @@ public class StudyMapperTest {
 
 	@Test
 	public void studyToStudyDTOTest() {
-		SecurityContextUtil.initAuthenticationContext();
-
 		final StudyDTO studyDTO = studyMapper.studyToStudyDTO(createStudy());
 		Assert.assertNotNull(studyDTO);
 		Assert.assertTrue(studyDTO.getId().equals(STUDY_ID));

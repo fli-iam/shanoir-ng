@@ -3,20 +3,21 @@ package org.shanoir.ng.study.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.model.security.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studycenter.StudyCenterRepository;
-import org.shanoir.ng.studyuser.StudyUser;
-import org.shanoir.ng.studyuser.StudyUserRepository;
-import org.shanoir.ng.studyuser.StudyUserRight;
-import org.shanoir.ng.subjectstudy.SubjectStudy;
-import org.shanoir.ng.subjectstudy.SubjectStudyRepository;
+import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Implementation of study service.
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author msimon
  *
  */
+@Component
 public class StudyServiceImpl implements StudyService {
 
 	
@@ -41,7 +43,7 @@ public class StudyServiceImpl implements StudyService {
 
 
 	@Override
-	public void deleteById(final Long id) throws EntityNotFoundException, AccessDeniedException {
+	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findOne(id);
 		if (study == null) throw new EntityNotFoundException(Study.class, id);
 		studyRepository.delete(id);			
@@ -49,7 +51,8 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public List<Study> findBy(final String fieldName, final Object value) {
-		return studyRepository.findBy(fieldName, value);
+		// Create a brand new ArrayList to prevent a bug with @PostFilter
+		return Utils.copyList(studyRepository.findBy(fieldName, value));
 	}
 
 	@Override
@@ -58,7 +61,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public Study save(final Study study) {
+	public Study create(final Study study) {
 		if (study.getStudyCenterList() != null) {
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
 				studyCenter.setStudy(study);			} 
@@ -158,7 +161,7 @@ public class StudyServiceImpl implements StudyService {
 						if (studyUserDb.getId() == studyUser.getId()) {
 							studyUserDb.setReceiveAnonymizationReport(studyUserDb.isReceiveAnonymizationReport());
 							studyUserDb.setReceiveNewImportReport(studyUser.isReceiveNewImportReport());
-							studyUserDb.setStudyUserType(studyUser.getStudyUserType());
+							studyUserDb.setStudyUserRight(studyUser.getStudyUserRight());
 						}
 					}
 				}
@@ -186,22 +189,12 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public List<Study> findAll() {
+		// Utils.copyList is used to prevent a bug with @PostFilter
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return studyRepository.findAll();
+			return Utils.copyList(studyRepository.findAll());
 		} else {
-			return studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserTypeEqualOrderByNameAsc
-					(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
+			return Utils.copyList(studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc
+					(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId()));
 		}
 	}
-
-	@Override
-	public List<IdNameDTO> findIdsAndNames() {
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return studyRepository.findIdsAndNames();
-		} else {
-			return studyRepository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserTypeEqualOrderByNameAsc
-					(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-		}
-	}
-
 }

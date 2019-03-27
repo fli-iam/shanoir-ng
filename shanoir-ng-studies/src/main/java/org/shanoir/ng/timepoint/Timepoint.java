@@ -7,7 +7,7 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 
 /**
@@ -18,7 +18,7 @@ import org.shanoir.ng.study.model.Study;
  */
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-public class Timepoint extends AbstractGenericItem {
+public class Timepoint extends AbstractEntity {
 
 	/**
 	 * UID

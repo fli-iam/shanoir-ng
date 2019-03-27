@@ -1,5 +1,6 @@
 package org.shanoir.ng.study.controler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
@@ -13,8 +14,6 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.service.StudyService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 public class StudyApiController implements StudyApi {
-
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
 
 	@Autowired
 	private StudyService studyService;
@@ -45,9 +39,6 @@ public class StudyApiController implements StudyApi {
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-		} catch (AccessDeniedException e) {
-			LOG.warn(e.getMessage());
-			return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
 		}
 	}
 	
@@ -60,9 +51,11 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<List<IdNameDTO>> findStudiesNames() {
-		final List<IdNameDTO> studies = studyService.findIdsAndNames();
+		List<IdNameDTO> studiesDTO = new ArrayList<>();
+		final List<Study> studies = studyService.findAll();
 		if (studies.isEmpty()) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		return new ResponseEntity<>(studies, HttpStatus.OK);
+		for (Study study : studies) studiesDTO.add(studyMapper.studyToIdNameDTO(study));
+		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
 
 	@Override
@@ -76,7 +69,7 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<StudyDTO> saveNewStudy(@RequestBody final Study study, final BindingResult result)
 			throws RestServiceException {
 
-		final FieldErrorMap<Study> errors = new FieldErrorMap<Study>()
+		final FieldErrorMap errors = new FieldErrorMap()
 				.checkFieldAccess(study)
 				.checkBindingContraints(result)
 				.checkUniqueConstraints(study, studyService);
@@ -85,8 +78,7 @@ public class StudyApiController implements StudyApi {
 			throw new RestServiceException(error);
 		}
 
-		study.setId(null); // Guarantees it is a creation, not an update
-		final Study createdStudy = studyService.save(study);
+		final Study createdStudy = studyService.create(study);
 		return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
 	}
 
@@ -94,9 +86,8 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
 			final BindingResult result) throws RestServiceException {
 
-		study.setId(studyId);
 		try {
-			final FieldErrorMap<Study> errors = new FieldErrorMap<Study>()
+			final FieldErrorMap errors = new FieldErrorMap()
 					.checkFieldAccess(study, studyService) 
 					.checkBindingContraints(result)
 					.checkUniqueConstraints(study, studyService);

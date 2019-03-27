@@ -26,6 +26,7 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	 */
 	List<Study> findByStudyUserList_UserIdOrderByNameAsc(Long userId);
 	
+	
 	/**
 	 * Get studies linked to an user.
 	 * 
@@ -33,16 +34,16 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	 *            user id.
 	 * @return list of studies.
 	 */
-	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserTypeEqualOrderByNameAsc(Long userId, Integer studyUserTypeId);
+	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(Long userId, Integer studyUseRightId);
 	
 	
 	/**
 	 * Find id and name for all studies in which user has a defined role
 	 * 
 	 * @param userId
-	 * @param studyUserTypeId
+	 * @param studyUserRightId
 	 * @return
 	 */
-	List<IdNameDTO> findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserTypeEqualOrderByNameAsc(Long userId, Integer studyUserTypeId);
+	List<IdNameDTO> findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(Long userId, Integer studyUserRightId);
 
 }

@@ -133,7 +133,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<User> findBy(final String fieldName, final Object value) {
-		return userRepository.findBy(fieldName, value);
+		return userRepository.findBy(fieldName, value, User.class);
 	}
 
 	@Override
@@ -187,7 +187,7 @@ public class UserServiceImpl implements UserService {
 		}
 		savedUser.setKeycloakId(keycloakUserId); // Save keycloak id
 		userRepository.save(savedUser);
-		emailService.notifyNewUser(savedUser, newPassword); // Send email to user
+		emailService.notifyCreateUser(savedUser, newPassword); // Send email to user
 		return savedUser;
 	}
 	
@@ -210,7 +210,7 @@ public class UserServiceImpl implements UserService {
 		}
 		savedUser.setKeycloakId(keycloakUserId); // Save keycloak id
 		userRepository.save(savedUser);
-		emailService.notifyNewUser(savedUser, newPassword); // Send email to user
+		emailService.notifyCreateAccountRequest(savedUser, newPassword); // Send email to user
 		return savedUser;
 	}
 

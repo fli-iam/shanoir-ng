@@ -69,7 +69,7 @@ public class UserRepositoryTest {
 	
 	@Test
 	public void findByTest() throws Exception {
-		List<User> usersDb = repository.findBy("email", USER_TEST_1_EMAIL);
+		List<User> usersDb = repository.findBy("email", USER_TEST_1_EMAIL, User.class);
 		assertNotNull(usersDb);
 		assertThat(usersDb.size()).isEqualTo(1);
 		assertThat(usersDb.get(0).getUsername()).isEqualTo(USER_TEST_1_USERNAME);
@@ -126,5 +126,4 @@ public class UserRepositoryTest {
 		assertTrue(userDb.isPresent());
 		assertThat(userDb.get().getId()).isEqualTo(USER_TEST_1_ID);
 	}
-	
 }

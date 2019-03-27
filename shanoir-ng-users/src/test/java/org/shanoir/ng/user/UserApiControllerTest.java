@@ -4,12 +4,14 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
@@ -68,7 +70,7 @@ public class UserApiControllerTest {
 	public void confirmAccountRequestTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID + "/confirmaccountrequest")
 				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-				.content(JacksonUtils.serialize(ModelsUtil.createUser()))).andExpect(status().isNoContent());
+				.content(JacksonUtils.serialize(ModelsUtil.createUser(1L)))).andExpect(status().isNoContent());
 	}
 
 	@Test
@@ -117,8 +119,30 @@ public class UserApiControllerTest {
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void updateUserTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser())))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser(1L))))
 				.andExpect(status().isNoContent());
+	}
+	
+	@Test
+	@WithMockUser(authorities = { "ROLE_USER" })
+	public void fieldAccessTest() throws Exception {
+		User user = ModelsUtil.createUser(1L);
+		Role adminRole = ModelsUtil.createAdminRole();
+		Role expertRole = ModelsUtil.createExpertRole();
+		if (user.getRole().getId().equals(adminRole.getId())) {
+			user.setRole(expertRole);
+		} else {
+			user.setRole(adminRole);
+		}
+		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+				.andExpect(status().isUnprocessableEntity());
+		
+		user = ModelsUtil.createUser(1L);
+		user.setExpirationDate(LocalDate.now().plusYears(100));
+		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+				.andExpect(status().isUnprocessableEntity());
 	}
 
 }

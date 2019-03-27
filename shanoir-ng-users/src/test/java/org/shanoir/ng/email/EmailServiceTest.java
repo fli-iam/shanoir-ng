@@ -87,7 +87,7 @@ public class EmailServiceTest {
 
 	@Test
 	public void notifyNewUserTest() throws Exception {
-		emailService.notifyNewUser(ModelsUtil.createUser(), "password");
+		emailService.notifyCreateUser(ModelsUtil.createUser(), "password");
 		assertReceivedMessageContains("Shanoir Account Creation", "Your account has been created");
 	}
 

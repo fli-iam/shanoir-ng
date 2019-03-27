@@ -2,8 +2,8 @@ package org.shanoir.ng.shared.validation;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
  * Service for unicity validator.
@@ -12,7 +12,7 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  *
  * @param <T>
  */
-public interface UniqueCheckableService<T extends AbstractGenericItem> {
+public interface UniqueCheckableService<T extends AbstractEntity> {
 
 	/**
 	 * Find an item by a value of a field.

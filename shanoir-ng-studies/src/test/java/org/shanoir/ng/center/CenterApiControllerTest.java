@@ -10,8 +10,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.center.controler.CenterApiController;
+import org.shanoir.ng.center.dto.CenterDTO;
+import org.shanoir.ng.center.dto.mapper.CenterMapper;
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -53,7 +58,7 @@ public class CenterApiControllerTest {
 	private CenterService centerServiceMock;
 
 	@Before
-	public void setup() throws ShanoirStudiesException {
+	public void setup() throws EntityNotFoundException  {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		given(centerMapperMock.centersToCenterDTOs(Mockito.anyListOf(Center.class)))
@@ -64,7 +69,7 @@ public class CenterApiControllerTest {
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(new Center()));
 		given(centerServiceMock.findById(1L)).willReturn(new Center());
 		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
-		given(centerServiceMock.save(Mockito.mock(Center.class))).willReturn(new Center());
+		given(centerServiceMock.create(Mockito.mock(Center.class))).willReturn(new Center());
 	}
 
 	@Test
@@ -103,8 +108,10 @@ public class CenterApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void updateCenterTest() throws Exception {
+		Center existingCenter = ModelsUtil.createCenter();
+		existingCenter.setId(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createCenter())))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(existingCenter)))
 				.andExpect(status().isNoContent());
 	}
 

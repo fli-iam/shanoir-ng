@@ -35,19 +35,17 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
 			@RequestBody final User user, final BindingResult result) throws RestServiceException {
 		
-		user.setId(userId); // IMPORTANT : this avoid any confusion that could lead to a security breach
-		
-		// Validation
-		final FieldErrorMap<User> errors = new FieldErrorMap<User>()
-				.checkFieldAccess(user, getUserService()) 
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(user, getUserService());
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}
-		
 		try {
+			// Validation
+			final FieldErrorMap errors = new FieldErrorMap()
+					.checkFieldAccess(user, getUserService()) 
+					.checkBindingContraints(result)
+					.checkUniqueConstraints(user, getUserService());
+			if (!errors.isEmpty()) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+			}
+
 			getUserService().confirmAccountRequest(user);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
@@ -125,7 +123,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		}
 		
 		/* Validation. */
-		final FieldErrorMap<User> errors = new UsersFieldErrorMap()
+		final FieldErrorMap errors = new UsersFieldErrorMap()
 				.checkBindingIgnoreBlankUsername(result)
 				.checkFieldAccess(user)
 				.checkUniqueConstraints(user, getUserService());
@@ -162,21 +160,19 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	@Override
 	public ResponseEntity<Void> updateUser(@PathVariable("userId") final Long userId,
 			@RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {
-		
-		user.setId(userId); // IMPORTANT : avoid any confusion that could lead to security breach
 
-		/* Validation. */
-		final FieldErrorMap<User> errors = new FieldErrorMap<User>()
-				.checkFieldAccess(user, getUserService())
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(user, getUserService());
-		if (!errors.isEmpty()) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-			throw new RestServiceException(error);
-		}
-		
-		/* Update user in db. */
 		try {
+			/* Validation. */
+			final FieldErrorMap errors = new FieldErrorMap()
+					.checkFieldAccess(user, getUserService())
+					.checkBindingContraints(result)
+					.checkUniqueConstraints(user, getUserService());
+			if (!errors.isEmpty()) {
+				ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+				throw new RestServiceException(error);
+			}
+			
+			/* Update user in db. */
 			getUserService().update(user);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 

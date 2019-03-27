@@ -36,7 +36,7 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{userId}/confirmaccountrequest", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') and @controlerSecurityService.idMatches(#userId, #user)")
 	ResponseEntity<Void> confirmAccountRequest(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
 			@ApiParam(value = "user to update", required = true) @RequestBody User user, BindingResult result)
@@ -128,7 +128,7 @@ public interface UserApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{userId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#userId))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#userId)) and @controlerSecurityService.idMatches(#userId, #user)")
 	ResponseEntity<Void> updateUser(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
 			@ApiParam(value = "user to update", required = true) @RequestBody User user, BindingResult result)

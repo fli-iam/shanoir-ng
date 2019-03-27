@@ -72,8 +72,7 @@ public class StudyApiControllerTest {
 		doNothing().when(studyServiceMock).deleteById(1L);
 		given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
 		given(studyServiceMock.findById(1L)).willReturn(new Study());
-		given(studyServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
-		given(studyServiceMock.save(Mockito.mock(Study.class))).willReturn(new Study());
+		given(studyServiceMock.create(Mockito.mock(Study.class))).willReturn(new Study());
 	}
 
 	// TODO: manage keycloak token
@@ -85,7 +84,7 @@ public class StudyApiControllerTest {
 	}
 
 	// TODO: manage keycloak token
-	// @Test
+	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void deleteStudyTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
@@ -93,8 +92,8 @@ public class StudyApiControllerTest {
 	}
 
 	@Test
+	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void findStudiesTest() throws Exception {
-		SecurityContextUtil.initAuthenticationContext();
 
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());

@@ -6,7 +6,6 @@ import java.util.Set;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.TokenNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -63,7 +62,7 @@ public final class KeycloakUtil {
 	 * @return HTTP headers.
 	 * @throws ShanoirStudiesException
 	 */
-	public static HttpHeaders getKeycloakHeader() throws ShanoirException {
+	public static HttpHeaders getKeycloakHeader() {
 		final KeycloakSecurityContext context = getKeycloakSecurityContext();
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);

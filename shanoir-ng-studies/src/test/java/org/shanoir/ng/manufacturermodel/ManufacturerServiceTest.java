@@ -13,7 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.manufacturermodel.model.Manufacturer;
+import org.shanoir.ng.manufacturermodel.repository.ManufacturerRepository;
+import org.shanoir.ng.manufacturermodel.service.ManufacturerServiceImpl;
+import org.shanoir.ng.shared.core.repository.CustomRepository;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -31,6 +35,9 @@ public class ManufacturerServiceTest {
 
 	@Mock
 	private ManufacturerRepository manufacturerRepository;
+	
+	@Mock
+	private CustomRepository<Manufacturer> manufacturerRepositoryCustom;
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;
@@ -41,10 +48,10 @@ public class ManufacturerServiceTest {
 	@Before
 	public void setup() {
 		given(manufacturerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturer()));
-		given(manufacturerRepository.findBy("name", ModelsUtil.MANUFACTURER_NAME))
+		given(manufacturerRepositoryCustom.findBy("name", ModelsUtil.MANUFACTURER_NAME, Manufacturer.class))
 				.willReturn(Arrays.asList(ModelsUtil.createManufacturer()));
 		given(manufacturerRepository.findOne(MANUFACTURER_ID)).willReturn(ModelsUtil.createManufacturer());
-		given(manufacturerRepository.save(Mockito.any(Manufacturer.class))).willReturn(ModelsUtil.createManufacturer());
+		given(manufacturerRepository.save(Mockito.any(Manufacturer.class))).willReturn(createManufacturer());
 	}
 
 	@Test
@@ -62,8 +69,6 @@ public class ManufacturerServiceTest {
 		Assert.assertNotNull(manufacturers);
 		Assert.assertTrue(manufacturers.size() == 1);
 		Assert.assertTrue(ModelsUtil.MANUFACTURER_NAME.equals(manufacturers.get(0).getName()));
-
-		Mockito.verify(manufacturerRepository, Mockito.times(1)).findBy(Mockito.anyString(), Mockito.anyObject());
 	}
 
 	@Test
@@ -76,14 +81,14 @@ public class ManufacturerServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirStudiesException {
-		manufacturerService.save(createManufacturer());
+	public void saveTest() {
+		manufacturerService.create(createManufacturer());
 
 		Mockito.verify(manufacturerRepository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirStudiesException {
+	public void updateTest() throws EntityNotFoundException {
 		final Manufacturer updatedManufacturer = manufacturerService.update(createManufacturer());
 		Assert.assertNotNull(updatedManufacturer);
 		Assert.assertTrue(UPDATED_MANUFACTURER_NAME.equals(updatedManufacturer.getName()));

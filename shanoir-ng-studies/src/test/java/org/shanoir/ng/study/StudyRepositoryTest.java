@@ -4,13 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -48,7 +52,13 @@ public class StudyRepositoryTest {
 	public void create() {
 		final Study study = new Study();
 		study.setName("StudyTest");
-		study.setId(4L);
+		StudyCenter studyCenter = new StudyCenter();
+		studyCenter.setStudy(study);
+		studyCenter.setCenter(new Center());
+		List<StudyCenter> studyCenters = new ArrayList<StudyCenter>();
+		studyCenters.add(studyCenter);
+		study.setStudyCenterList(studyCenters);
+		study.setStudyStatus(StudyStatus.IN_PROGRESS);
 		final Study newStudy = studyRepository.save(study);
 		assertEquals("StudyTest", newStudy.getName());
 	}

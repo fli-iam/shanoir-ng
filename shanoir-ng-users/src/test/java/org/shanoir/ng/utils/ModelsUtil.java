@@ -143,7 +143,7 @@ public final class ModelsUtil {
 		final User user = new User();
 		user.setCreationDate(LocalDate.now());
 		user.setEmail(USER_EMAIL);
-		user.setExpirationDate(LocalDate.now());
+		user.setExpirationDate(LocalDate.now().plusYears(1));
 		user.setFirstName(USER_FIRSTNAME);
 		user.setLastName(USER_LASTNAME);
 		user.setRole(role);

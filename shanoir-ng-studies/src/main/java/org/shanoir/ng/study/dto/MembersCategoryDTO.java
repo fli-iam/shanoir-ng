@@ -3,7 +3,7 @@ package org.shanoir.ng.study.dto;
 import java.util.List;
 
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.studyuser.StudyUserRight;
+import org.shanoir.ng.study.model.security.StudyUserRight;
 
 /**
  * DTO of list of members by right type.
@@ -15,7 +15,7 @@ public class MembersCategoryDTO {
 
 	private List<IdNameDTO> members;
 
-	private StudyUserRight studyUserType;
+	private StudyUserRight studyUserRight;
 
 	/**
 	 * Default constructor.
@@ -26,13 +26,13 @@ public class MembersCategoryDTO {
 	/**
 	 * Constructor with category and members.
 	 * 
-	 * @param studyUserType
+	 * @param studyUserRight
 	 *            category.
 	 * @param members
 	 *            members.
 	 */
-	public MembersCategoryDTO(final StudyUserRight studyUserType, final List<IdNameDTO> members) {
-		this.studyUserType = studyUserType;
+	public MembersCategoryDTO(final StudyUserRight studyUserRight, final List<IdNameDTO> members) {
+		this.studyUserRight = studyUserRight;
 		this.members = members;
 	}
 
@@ -52,18 +52,18 @@ public class MembersCategoryDTO {
 	}
 
 	/**
-	 * @return the studyUserType
+	 * @return the studyUserRight
 	 */
-	public StudyUserRight getStudyUserType() {
-		return studyUserType;
+	public StudyUserRight getStudyUserRight() {
+		return studyUserRight;
 	}
 
 	/**
-	 * @param studyUserType
-	 *            the studyUserType to set
+	 * @param studyUserRight
+	 *            the studyUserRight to set
 	 */
-	public void setStudyUserType(StudyUserRight studyUserType) {
-		this.studyUserType = studyUserType;
+	public void setStudyUserRight(StudyUserRight studyUserRight) {
+		this.studyUserRight = studyUserRight;
 	}
 
 }

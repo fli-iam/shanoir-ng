@@ -10,7 +10,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.coil.controler.CoilApiController;
+import org.shanoir.ng.coil.dto.CoilDTO;
+import org.shanoir.ng.coil.dto.mapper.CoilMapper;
+import org.shanoir.ng.coil.model.Coil;
+import org.shanoir.ng.coil.service.CoilService;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -51,7 +56,7 @@ public class CoilApiControllerTest {
 	private CoilService coilServiceMock;
 
 	@Before
-	public void setup() throws ShanoirStudiesException {
+	public void setup() throws EntityNotFoundException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		given(coilMapperMock.coilsToCoilDTOs(Mockito.anyListOf(Coil.class)))
@@ -61,7 +66,7 @@ public class CoilApiControllerTest {
 		doNothing().when(coilServiceMock).deleteById(1L);
 		given(coilServiceMock.findAll()).willReturn(Arrays.asList(new Coil()));
 		given(coilServiceMock.findById(1L)).willReturn(new Coil());
-		given(coilServiceMock.save(Mockito.mock(Coil.class))).willReturn(new Coil());
+		given(coilServiceMock.create(Mockito.mock(Coil.class))).willReturn(new Coil());
 	}
 
 	@Test
@@ -94,8 +99,10 @@ public class CoilApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void updateCoilTest() throws Exception {
+		Coil coil = ModelsUtil.createCoil();
+		coil.setId(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createCoil())))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(coil)))
 				.andExpect(status().isNoContent());
 	}
 

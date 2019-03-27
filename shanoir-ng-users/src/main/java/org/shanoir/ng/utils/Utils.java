@@ -3,7 +3,7 @@ package org.shanoir.ng.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * Utility class
@@ -42,8 +42,8 @@ public final class Utils {
 			return o2 == null;
 		if (o2 == null)
 			return o1 == null;
-		if (o1 instanceof AbstractGenericItem && o2 instanceof AbstractGenericItem) {
-			return ((AbstractGenericItem) o1).getId().equals(((AbstractGenericItem) o2).getId());
+		if (o1 instanceof AbstractEntity && o2 instanceof AbstractEntity) {
+			return ((AbstractEntity) o1).getId().equals(((AbstractEntity) o2).getId());
 		}
 		// o1.equals(o2) is not equivalent to o2.equals(o1) ! For instance with
 		// java.sql.Timestamp and java.util.Date

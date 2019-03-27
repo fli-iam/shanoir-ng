@@ -1,0 +1,97 @@
+package org.shanoir.ng.manufacturermodel.controler;
+
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.shanoir.ng.manufacturermodel.model.Manufacturer;
+import org.shanoir.ng.manufacturermodel.service.ManufacturerService;
+import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+
+@Controller
+public class ManufacturerApiController implements ManufacturerApi {
+
+	@Autowired
+	private ManufacturerService manufacturerService;
+
+	@Override
+	public ResponseEntity<Manufacturer> findManufacturerById(@PathVariable("manufacturerId") final Long manufacturerId) {
+		final Manufacturer manufacturer = manufacturerService.findById(manufacturerId);
+		if (manufacturer == null) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(manufacturer, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<Manufacturer>> findManufacturers() {
+		final List<Manufacturer> manufacturers = manufacturerService.findAll();
+		if (manufacturers.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(manufacturers, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Manufacturer> saveNewManufacturer(@RequestBody final Manufacturer manufacturer,
+			final BindingResult result) throws RestServiceException {
+		
+		/* Validation */
+		final FieldErrorMap errors = new FieldErrorMap()
+				.checkFieldAccess(manufacturer) 
+				.checkBindingContraints(result)
+				.checkUniqueConstraints(manufacturer, manufacturerService);
+		if (!errors.isEmpty()) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+		}
+
+		return new ResponseEntity<>(manufacturerService.create(manufacturer), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Void> updateManufacturer(@PathVariable("manufacturerId") final Long manufacturerId,
+			@RequestBody @Valid final Manufacturer manufacturer, final BindingResult result) throws RestServiceException {
+		
+		try {
+			/* Validation */
+			final FieldErrorMap errors = new FieldErrorMap()
+					.checkFieldAccess(manufacturer, manufacturerService) 
+					.checkBindingContraints(result)
+					.checkUniqueConstraints(manufacturer, manufacturerService);
+			if (!errors.isEmpty()) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+			}
+			
+			/* Update user in db. */
+			manufacturerService.update(manufacturer);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			
+		} catch (EntityNotFoundException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+
+	@Override
+	public ResponseEntity<Void> deleteManufacturer(Long manufacturerId) throws RestServiceException {
+		try {
+			manufacturerService.deleteById(manufacturerId);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			
+		} catch (EntityNotFoundException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+	}
+}

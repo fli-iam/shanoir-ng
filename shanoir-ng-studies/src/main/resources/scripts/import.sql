@@ -467,7 +467,7 @@ VALUES
 	(4, 3);
 
 INSERT INTO study_user
-	(id, study_id, user_id, user_name, receive_anonymization_report, receive_new_import_report, study_user_type)
+	(id, study_id, user_id, user_name, receive_anonymization_report, receive_new_import_report, study_user_right)
 VALUES (1, 1, 3, 'yyao', 1, 1, 1);
 
 INSERT INTO pseudonymus_hash_values

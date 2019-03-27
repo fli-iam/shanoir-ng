@@ -4,7 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 
 import org.hibernate.validator.constraints.NotBlank;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Role
  */
 @Entity
-public class Role extends AbstractGenericItem implements GrantedAuthority {
+public class Role extends AbstractEntity implements GrantedAuthority {
 
 	/**
 	 * UID

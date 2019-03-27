@@ -2,14 +2,14 @@ package org.shanoir.ng.center;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -63,17 +63,17 @@ public class CenterRepositoryTest {
 	
 	@Test
 	public void findByTest() throws Exception {
-		List<Center> centersDb = repository.findBy("name", CENTER_TEST_1_NAME);
-		assertNotNull(centersDb);
+		List<Center> centersDb = repository.findBy("name", CENTER_TEST_1_NAME, Center.class);
+		assertNotNull(centersDb); 
 		assertThat(centersDb.size()).isEqualTo(1);
 		assertThat(centersDb.get(0).getId()).isEqualTo(CENTER_TEST_1_ID);
 	}
 	
 	@Test
 	public void findByNameTest() throws Exception {
-		Optional<Center> centerDb = repository.findByName(CENTER_TEST_1_NAME);
-		assertTrue(centerDb.isPresent());
-		assertThat(centerDb.get().getId()).isEqualTo(CENTER_TEST_1_ID);
+		Center centerDb = repository.findByName(CENTER_TEST_1_NAME);
+		assertNotNull(centerDb);
+		assertThat(centerDb.getId()).isEqualTo(CENTER_TEST_1_ID);
 	}
 	
 	@Test

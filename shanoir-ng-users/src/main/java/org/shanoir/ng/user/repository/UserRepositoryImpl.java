@@ -1,11 +1,10 @@
 package org.shanoir.ng.user.repository;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.shanoir.ng.shared.model.ItemRepositoryCustom;
+import org.shanoir.ng.shared.core.repository.CustomRepository;
+import org.shanoir.ng.shared.core.repository.CustomRepositoryImpl;
 import org.shanoir.ng.user.model.User;
 import org.springframework.stereotype.Repository;
 
@@ -16,17 +15,9 @@ import org.springframework.stereotype.Repository;
  *
  */
 @Repository
-public class UserRepositoryImpl implements ItemRepositoryCustom<User> {
+public class UserRepositoryImpl extends CustomRepositoryImpl<User> implements CustomRepository<User> {
 
 	@PersistenceContext
 	private EntityManager em;
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<User> findBy(String fieldName, Object value) {
-		final StringBuilder sqlQuery = new StringBuilder();
-		sqlQuery.append("SELECT u FROM User u WHERE u.").append(fieldName).append(" LIKE :value");
-		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
-	}
-
+	
 }

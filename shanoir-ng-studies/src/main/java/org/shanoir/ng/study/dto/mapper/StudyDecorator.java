@@ -13,10 +13,10 @@ import org.shanoir.ng.study.dto.MembersCategoryDTO;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.model.security.StudyUserRight;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
-import org.shanoir.ng.studyuser.StudyUser;
-import org.shanoir.ng.studyuser.StudyUserRight;
-import org.shanoir.ng.subjectstudy.SubjectStudyMapper;
+import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -103,16 +103,16 @@ public abstract class StudyDecorator implements StudyMapper {
 	}
 
 	private void prepareMembersCategories(final Study study, final StudyDTO studyDTO) {
-		// Sort members by category (studyUserType)
+		// Sort members by right
 		final Map<StudyUserRight, List<IdNameDTO>> membersMap = new HashMap<>();
 		for (StudyUser studyUser : study.getStudyUserList()) {
 			final IdNameDTO member = new IdNameDTO(studyUser.getUserId(), studyUser.getUserName());
-			if (membersMap.containsKey(studyUser.getStudyUserType())) {
-				membersMap.get(studyUser.getStudyUserType()).add(member);
+			if (membersMap.containsKey(studyUser.getStudyUserRight())) {
+				membersMap.get(studyUser.getStudyUserRight()).add(member);
 			} else {
 				final List<IdNameDTO> studyUsers = new ArrayList<>();
 				studyUsers.add(member);
-				membersMap.put(studyUser.getStudyUserType(), studyUsers);
+				membersMap.put(studyUser.getStudyUserRight(), studyUsers);
 			}
 		}
 		// Transform map into list
@@ -128,7 +128,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		
 		@Override
 		public int compare(MembersCategoryDTO category1, MembersCategoryDTO category2) {
-			return (category1.getStudyUserType().getId() > category2.getStudyUserType().getId()) ? 1 : -1;
+			return (category1.getStudyUserRight().getId() > category2.getStudyUserRight().getId()) ? 1 : -1;
 		}
 		
 	}

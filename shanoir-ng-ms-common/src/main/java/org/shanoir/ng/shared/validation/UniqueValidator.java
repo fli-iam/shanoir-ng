@@ -6,9 +6,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -20,7 +20,7 @@ import org.springframework.util.StringUtils;
  *
  * @param <T>
  */
-public class UniqueValidator <T extends AbstractGenericItem> {
+public class UniqueValidator <T extends AbstractEntity> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(UniqueValidator.class);
 
@@ -42,8 +42,8 @@ public class UniqueValidator <T extends AbstractGenericItem> {
 	 * @param entity
 	 * @return
 	 */
-	public FieldErrorMap<T> validate(T entity) {
-		FieldErrorMap<T> errorMap = new FieldErrorMap<T>();
+	public FieldErrorMap validate(T entity) {
+		FieldErrorMap errorMap = new FieldErrorMap();
 		try {
 			for (Field field : entity.getClass().getDeclaredFields()) {
 				// check @unique

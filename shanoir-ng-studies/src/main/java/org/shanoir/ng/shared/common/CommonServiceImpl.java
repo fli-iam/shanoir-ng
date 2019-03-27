@@ -1,12 +1,12 @@
 package org.shanoir.ng.shared.common;
 
-import org.shanoir.ng.center.Center;
-import org.shanoir.ng.center.CenterRepository;
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
-import org.shanoir.ng.subject.Subject;
-import org.shanoir.ng.subject.SubjectRepository;
+import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

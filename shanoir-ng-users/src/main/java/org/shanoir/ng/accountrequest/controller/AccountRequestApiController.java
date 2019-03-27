@@ -32,7 +32,7 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 			generateUsername(user);
 		}
 		
-		final FieldErrorMap<User> errors = new UsersFieldErrorMap()
+		final FieldErrorMap errors = new UsersFieldErrorMap()
 				.checkBindingContraints(result)
 				.checkUniqueConstraints(user, getUserService());
 		if (!errors.isEmpty()) {

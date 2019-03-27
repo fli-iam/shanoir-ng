@@ -15,7 +15,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
-import org.shanoir.ng.subject.SubjectGroupOfSubjects;
+import org.shanoir.ng.subject.model.SubjectGroupOfSubjects;
 
 /**
  * Group of subjects.

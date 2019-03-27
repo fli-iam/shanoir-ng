@@ -3,12 +3,11 @@ package org.shanoir.ng.shared.error;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
-public class UsersFieldErrorMap extends FieldErrorMap<User> {
+public class UsersFieldErrorMap extends FieldErrorMap {
 
 	private static final long serialVersionUID = -3176001477448120848L;
 

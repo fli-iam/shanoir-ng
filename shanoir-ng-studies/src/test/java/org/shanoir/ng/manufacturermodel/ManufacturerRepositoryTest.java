@@ -1,13 +1,13 @@
 package org.shanoir.ng.manufacturermodel;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.manufacturermodel.model.Manufacturer;
+import org.shanoir.ng.manufacturermodel.repository.ManufacturerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -56,14 +56,6 @@ public class ManufacturerRepositoryTest {
 			nbManufacturers++;
 		}
 		assertThat(nbManufacturers).isEqualTo(3);
-	}
-	
-	@Test
-	public void findByTest() throws Exception {
-		List<Manufacturer> manufacturersDb = repository.findBy("name", MANUFACTURER_TEST_1_NAME);
-		assertNotNull(manufacturersDb);
-		assertThat(manufacturersDb.size()).isEqualTo(1);
-		assertThat(manufacturersDb.get(0).getId()).isEqualTo(MANUFACTURER_TEST_1_ID);
 	}
 	
 	@Test

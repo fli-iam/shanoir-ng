@@ -1,6 +1,6 @@
 package org.shanoir.ng.shared.exception;
 
-import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * SecurityException exception.
@@ -16,11 +16,11 @@ public class EntityNotFoundException extends ShanoirException {
 		super(message);
 	}
 	
-	public EntityNotFoundException(Class<? extends AbstractGenericItem> clazz, Long id) {
+	public EntityNotFoundException(Class<? extends AbstractEntity> clazz, Long id) {
 		super(getMessage(clazz, id));
 	}
 	
-	private static String getMessage(Class<? extends AbstractGenericItem> clazz, Long id) {
+	private static String getMessage(Class<? extends AbstractEntity> clazz, Long id) {
 		return "Cannot find " 
 				+ clazz.getSimpleName()
 				+ " with id "

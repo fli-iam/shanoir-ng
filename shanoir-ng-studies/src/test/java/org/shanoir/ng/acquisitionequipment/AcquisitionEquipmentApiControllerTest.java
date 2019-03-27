@@ -10,7 +10,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.acquisitionequipment.controler.AcquisitionEquipmentApiController;
+import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
+import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -51,7 +56,7 @@ public class AcquisitionEquipmentApiControllerTest {
 	private AcquisitionEquipmentService acquisitionEquipmentServiceMock;
 
 	@Before
-	public void setup() throws ShanoirStudiesException {
+	public void setup() throws EntityNotFoundException  {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		given(acquisitionEquipmentMapperMock
@@ -64,7 +69,7 @@ public class AcquisitionEquipmentApiControllerTest {
 		doNothing().when(acquisitionEquipmentServiceMock).deleteById(1L);
 		given(acquisitionEquipmentServiceMock.findAll()).willReturn(Arrays.asList(new AcquisitionEquipment()));
 		given(acquisitionEquipmentServiceMock.findById(1L)).willReturn(new AcquisitionEquipment());
-		given(acquisitionEquipmentServiceMock.save(Mockito.mock(AcquisitionEquipment.class)))
+		given(acquisitionEquipmentServiceMock.create(Mockito.mock(AcquisitionEquipment.class)))
 				.willReturn(new AcquisitionEquipment());
 	}
 

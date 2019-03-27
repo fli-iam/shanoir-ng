@@ -25,11 +25,10 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
-import org.shanoir.ng.shared.validation.EditableOnlyBy;
+import org.shanoir.ng.shared.security.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycenter.StudyCenter;
-import org.shanoir.ng.studyuser.StudyUser;
-import org.shanoir.ng.subjectstudy.SubjectStudy;
+import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.timepoint.Timepoint;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;

@@ -1,6 +1,6 @@
 package org.shanoir.ng.shared.exception;
 
-import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.utils.KeycloakUtil;
 
 /**
@@ -16,15 +16,15 @@ public class AccessDeniedException extends SecurityException {
 		super(message);
 	}
 	
-	public AccessDeniedException(Class<? extends AbstractGenericItem> clazz, Long id) {
+	public AccessDeniedException(Class<? extends AbstractEntity> clazz, Long id) {
 		super(getMessage(clazz, id));
 	}
 	
-	public AccessDeniedException(AbstractGenericItem entity) {
+	public AccessDeniedException(AbstractEntity entity) {
 		this(AccessDeniedException.getMessage(entity.getClass(), entity.getId()));
 	}
 	
-	private static String getMessage(Class<? extends AbstractGenericItem> clazz, Long id) {
+	private static String getMessage(Class<? extends AbstractEntity> clazz, Long id) {
 		return "Current user " 
 				+ KeycloakUtil.getTokenUserId()
 				+ " cannot access to " 

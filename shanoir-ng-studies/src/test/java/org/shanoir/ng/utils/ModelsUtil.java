@@ -2,18 +2,18 @@ package org.shanoir.ng.utils;
 
 import java.util.ArrayList;
 
-import org.shanoir.ng.acquisitionequipment.AcquisitionEquipment;
-import org.shanoir.ng.center.Center;
-import org.shanoir.ng.coil.Coil;
-import org.shanoir.ng.coil.CoilType;
-import org.shanoir.ng.manufacturermodel.DatasetModalityType;
-import org.shanoir.ng.manufacturermodel.Manufacturer;
-import org.shanoir.ng.manufacturermodel.ManufacturerModel;
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.coil.model.Coil;
+import org.shanoir.ng.coil.model.CoilType;
+import org.shanoir.ng.manufacturermodel.model.DatasetModalityType;
+import org.shanoir.ng.manufacturermodel.model.Manufacturer;
+import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.common.CommonIdsDTO;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.studyuser.StudyUser;
-import org.shanoir.ng.studyuser.StudyUserRight;
-import org.shanoir.ng.subject.Subject;
+import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.model.security.StudyUserRight;
+import org.shanoir.ng.subject.model.Subject;
 
 /**
  * Utility class for test. Generates models.
@@ -150,7 +150,7 @@ public final class ModelsUtil {
 	public static StudyUser createStudyUser() {
 		final StudyUser studyUser = new StudyUser();
 		studyUser.setStudyId(STUDY_ID);
-		studyUser.setStudyUserType(StudyUserRight.RESPONSIBLE);
+		studyUser.setStudyUserRight(StudyUserRight.CAN_ADMINISTRATE);
 		studyUser.setUserId(USER_ID);
 		return studyUser;
 	}
