@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 
@@ -69,22 +68,23 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 		
 		if (expressionFormat != null & expressionFormat.getType().equals("nii")) {
 
+			final String subLabel = SUB_PREFIX + importJob.getPatients().get(0).getSubject().getName();
+			// TODO BIDS: Remove ses level if only one examination, add ses level if new examination imported for the same subject
+			final String sesLabel = SES_PREFIX + importJob.getExaminationId();
+			// TODO BIDS: Get data type (anat, func, dwi, fmap, meg and beh) from MrDatasetNature and/or ExploredEntity
+			final String dataTypeLabel = ANAT + "/";
+			
+			final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + dataTypeLabel + File.separator);
+			outDir.mkdirs();
+			
 			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
-
-				String originalNiftiName = datasetFile.getPath().substring(datasetFile.getPath().lastIndexOf('/') + 1);
 				
-				final String subLabel = SUB_PREFIX + importJob.getPatients().get(0).getSubject().getName();
-				// TODO BIDS: Remove ses level if only one examination, add ses level if new examination imported for the same subject
-				final String sesLabel = SES_PREFIX + importJob.getExaminationId();
-				// TODO BIDS: Get data type (anat, func, dwi, fmap, meg and beh) from MrDatasetNature and/or ExploredEntity
-				final String dataTypeLabel = ANAT;
-				
-				File outDir = new File (niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + dataTypeLabel + File.separator);
-				outDir.mkdirs();
-				
+				File srcFile = new File(datasetFile.getPath().replace("file:" , ""));
+				String originalNiftiName = srcFile.getAbsolutePath().substring(datasetFile.getPath().lastIndexOf('/') + 1);
+				File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
 				Path niftiFinalLocation = null;
 				try {
-					niftiFinalLocation = Files.copy(Paths.get(datasetFile.getPath().replace("file:","")), Paths.get(outDir + originalNiftiName), StandardCopyOption.REPLACE_EXISTING);
+					niftiFinalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
 					LOG.error("IOException generating nifti Dataset Expression", e);
 				}

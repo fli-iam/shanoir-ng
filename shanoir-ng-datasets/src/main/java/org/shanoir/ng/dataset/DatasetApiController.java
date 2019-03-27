@@ -34,6 +34,7 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
+import org.shanoir.ng.dataset.modality.MrDatasetNature;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.Examination;
@@ -48,6 +49,7 @@ import org.shanoir.ng.shared.validation.EditableOnlyByValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,6 +58,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -74,13 +77,20 @@ public class DatasetApiController implements DatasetApi {
 
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 	
+	private static final String T1w = "T1w";
+	
 	private static final String SUB_PREFIX = "sub-";
+	
+	private static final String SES_PREFIX = "ses-";
 	
 	private static final String DATASET_DESCRIPTION_FILE = "dataset_description.json";
 	
 	private static final String README_FILE = "README";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
+	
+	@Value("${datasets-data}")
+	private String niftiStorageDir;
 
 	@Autowired
 	private DatasetMapper datasetMapper;
@@ -372,20 +382,33 @@ public class DatasetApiController implements DatasetApi {
 				}
 			}*/
 			
-			// 8. Get nii and json of dataset
+			// 8. Get modality label, nii and json of dataset
 			/* For the demo: one exam, one acq, one dataset, one modality which is T1 */
 			final Dataset dataset = examinationList.get(0).getDatasetAcquisitions().get(0).getDatasets().get(0);
 			if (dataset == null) {
 				throw new RestServiceException(
 						new ErrorModel(HttpStatus.NOT_FOUND.value(), "No Dataset found for subject Id.", null));
 			}
+			
+			// Get modality label
+			String modalityLabel = null;
+			if (((MrDataset) dataset).getUpdatedMrMetadata().getMrDatasetNature().equals(MrDatasetNature.T1_WEIGHTED_MR_DATASET)
+					|| ((MrDataset) dataset).getUpdatedMrMetadata().getMrDatasetNature().equals(MrDatasetNature.T1_WEIGHTED_DCE_MR_DATASET)) {
+				modalityLabel = T1w;
+			} 
+			if (StringUtils.isEmpty(modalityLabel)) {
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.NOT_FOUND.value(), "No MrDatasetNature, so could not define modality label and export BIDS!", null));
+			}
+			
+			// Get nii and json files
 			try {
 				List<URL> pathURLs = new ArrayList<URL>();
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-				copyNiftiFilesForURLs(pathURLs, workFolder);
+				copyFilesForBIDSExport(pathURLs, workFolder, subjectName, examinationList.get(0).getId().toString(), modalityLabel);
 			} catch (IOException e) {
 				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error exporting nifti files for subject in BIDS.", null));
 			}
 			
 			// 9. Create zip file
@@ -408,4 +431,25 @@ public class DatasetApiController implements DatasetApi {
 		}		
 	}
     
+	/**
+	 * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
+	 * @param urls
+	 * @param workFolder
+	 * @throws IOException
+	 * @throws MessagingException
+	 */
+	public void copyFilesForBIDSExport(final List<URL> urls, final File workFolder, final String subjectName, 
+			final String sesId, final String modalityLabel) throws IOException {
+		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
+			URL url =  (URL) iterator.next();
+			File srcFile = new File(url.getPath());
+			String destFilePath = srcFile.getPath().substring(niftiStorageDir.length() + 1, srcFile.getPath().lastIndexOf('/'));
+			File destFolder = new File(workFolder.getAbsolutePath() + File.separator + destFilePath);
+			destFolder.mkdirs();
+			String extensionType = srcFile.getPath().substring(srcFile.getPath().lastIndexOf(".") + 1);
+			String destFileNameBIDS = SUB_PREFIX + subjectName + "_" + SES_PREFIX + sesId + "_" + modalityLabel + "." + extensionType;
+			File destFile = new File(destFolder.getAbsolutePath() + File.separator + destFileNameBIDS);
+			Files.copy(srcFile.toPath(), destFile.toPath());
+		}
+	}
 }
