@@ -19,7 +19,7 @@ import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-catego
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
+import { EquipmentDicom, PatientDicom, ImportJob } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 
 @Component({
@@ -43,6 +43,7 @@ export class ClinicalContextComponent{
     private subject: SubjectWithSubjectStudy;
     private examination: SubjectExamination;
     private niftiConverter: NiftiConverter;
+    private importMode: "DICOM" | "PACS";
     
     constructor(
             private studyService: StudyService,
@@ -58,6 +59,12 @@ export class ClinicalContextComponent{
             return;
         }
         breadcrumbsService.nameStep('3. Context');
+
+        if (this.importDataService.patientList.fromDicomZip) {
+            this.importMode = 'DICOM';
+        } else if (this.importDataService.patientList.fromPacs) {
+            this.importMode = 'PACS';
+        }
         this.setPatient(importDataService.patients[0]);
         this.reloadSavedData();
     }
@@ -99,7 +106,7 @@ export class ClinicalContextComponent{
 
     setPatient(patient: PatientDicom) {
         this.patient = patient;
-        this.completeStudies(this.patient.studies[0].series[0].equipment)
+        this.completeStudiesAndCompatibilities(this.patient.studies[0].series[0].equipment)
             /* For the moment, we import only zip files with the same equipment, 
             That's why the calculation is only based on the equipment of the first series of the first study */
             .then(() => {
@@ -111,7 +118,7 @@ export class ClinicalContextComponent{
             })
     }
 
-    private async completeStudies(equipment: EquipmentDicom): Promise<void> {
+    private async completeStudiesAndCompatibilities(equipment: EquipmentDicom): Promise<void> {
         let completeStudyPromises: Promise<void>[] = [];
         completeStudyPromises.push(Promise.all([this.studyService.findStudiesForImport(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
@@ -119,11 +126,18 @@ export class ClinicalContextComponent{
                     for (let studyCenter of study.studyCenterList) {
                         let center = allCenters.find(center => center.id === studyCenter.center.id);
                         if (center) {
-                            let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
-                                && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
-                                && acqEqt.manufacturerModel.manufacturer.name === equipment.manufacturer);
-                            for (let compatibleAcqEqt of compatibleAcqEqts) {
-                                compatibleAcqEqt.compatible = true;
+                            if (this.importMode == 'DICOM') {
+                                /* calculate compatibilites only if import from dicom zip */
+                                let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
+                                    && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
+                                    && acqEqt.manufacturerModel.manufacturer.name === equipment.manufacturer);
+                                for (let compatibleAcqEqt of compatibleAcqEqts) {
+                                    compatibleAcqEqt.compatible = true;
+                                    center.compatible = true;
+                                    study.compatible = true;
+                                }
+                            } else if (this.importMode == 'PACS') {
+                                center.acquisitionEquipments.forEach(acqEqt => acqEqt.compatible = true);
                                 center.compatible = true;
                                 study.compatible = true;
                             }

@@ -37,14 +37,12 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         super(route, 'acquisition-equipment');
     }
 
-    initView(): Promise<void> {
-        return this.acqEquipService.get(this.id).then(ae => {
-            this.acqEquip = ae;
-            this.updateAcquEq();
-        });
+    async initView(): Promise<void> {
+        this.acqEquip = await this.acqEquipService.get(this.id);
+        this.updateAcquEq();
     }
 
-    initEdit(): Promise<void> {
+    async initEdit(): Promise<void> {
         this.getManufModels();
         return Promise.all([
             this.centerService.getCentersNames(),
