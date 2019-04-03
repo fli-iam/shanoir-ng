@@ -16,7 +16,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerRepository;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerServiceImpl;
-import org.shanoir.ng.shared.core.repository.CustomRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -35,9 +34,6 @@ public class ManufacturerServiceTest {
 
 	@Mock
 	private ManufacturerRepository manufacturerRepository;
-	
-	@Mock
-	private CustomRepository<Manufacturer> manufacturerRepositoryCustom;
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;
@@ -48,8 +44,6 @@ public class ManufacturerServiceTest {
 	@Before
 	public void setup() {
 		given(manufacturerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturer()));
-		given(manufacturerRepositoryCustom.findBy("name", ModelsUtil.MANUFACTURER_NAME, Manufacturer.class))
-				.willReturn(Arrays.asList(ModelsUtil.createManufacturer()));
 		given(manufacturerRepository.findOne(MANUFACTURER_ID)).willReturn(ModelsUtil.createManufacturer());
 		given(manufacturerRepository.save(Mockito.any(Manufacturer.class))).willReturn(createManufacturer());
 	}
@@ -61,14 +55,6 @@ public class ManufacturerServiceTest {
 		Assert.assertTrue(manufacturers.size() == 1);
 
 		Mockito.verify(manufacturerRepository, Mockito.times(1)).findAll();
-	}
-
-	@Test
-	public void findByTest() {
-		final List<Manufacturer> manufacturers = manufacturerService.findBy("name", ModelsUtil.MANUFACTURER_NAME);
-		Assert.assertNotNull(manufacturers);
-		Assert.assertTrue(manufacturers.size() == 1);
-		Assert.assertTrue(ModelsUtil.MANUFACTURER_NAME.equals(manufacturers.get(0).getName()));
 	}
 
 	@Test

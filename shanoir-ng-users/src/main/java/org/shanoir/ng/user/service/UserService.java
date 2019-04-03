@@ -8,7 +8,6 @@ import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +21,7 @@ import org.springframework.stereotype.Service;
  * @author mkain
  */
 @Service
-public interface UserService extends UniqueCheckableService<User> {
+public interface UserService {
 
 	/**
 	 * Confirm an account request and updates user.
@@ -70,15 +69,6 @@ public interface UserService extends UniqueCheckableService<User> {
 	 */
 	@PreAuthorize("hasRole('ADMIN')")
 	Optional<User> findByEmail(String email);
-
-	/**
-	 * Find user by its id.
-	 *
-	 * @param id the user id.
-	 * @return a user or null.
-	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#id))")
-	User findById(Long id);
 
 	/**
 	 * Find user by its username.
@@ -174,5 +164,14 @@ public interface UserService extends UniqueCheckableService<User> {
 	 */
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	void updateLastLogin(String username) throws EntityNotFoundException;
+
+	/**
+	 * Find a user by it's id
+	 * 
+	 * @param id the id
+	 * @return the user
+	 */
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#id))")
+	User findById(Long id);
 
 }

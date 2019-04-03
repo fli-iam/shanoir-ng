@@ -8,11 +8,8 @@ import javax.validation.Valid;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.dto.IdListDTO;
 import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.error.UsersFieldErrorMap;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.ForbiddenException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
@@ -36,15 +33,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			@RequestBody final User user, final BindingResult result) throws RestServiceException {
 		
 		try {
-			// Validation
-			final FieldErrorMap errors = new FieldErrorMap()
-					.checkFieldAccess(user, getUserService()) 
-					.checkBindingContraints(result)
-					.checkUniqueConstraints(user, getUserService());
-			if (!errors.isEmpty()) {
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-			}
+			validate(user, result);
 
 			getUserService().confirmAccountRequest(user);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -122,16 +111,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			generateUsername(user);
 		}
 		
-		/* Validation. */
-		final FieldErrorMap errors = new UsersFieldErrorMap()
-				.checkBindingIgnoreBlankUsername(result)
-				.checkFieldAccess(user)
-				.checkUniqueConstraints(user, getUserService());
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}	
-		
+		validateIgnoreBlankUsername(user, result);
 		user.setCreationDate(LocalDate.now()); // Set creation date on creation, which is now
 
 		/* Save user in db. */
@@ -162,15 +142,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			@RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {
 
 		try {
-			/* Validation. */
-			final FieldErrorMap errors = new FieldErrorMap()
-					.checkFieldAccess(user, getUserService())
-					.checkBindingContraints(result)
-					.checkUniqueConstraints(user, getUserService());
-			if (!errors.isEmpty()) {
-				ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-				throw new RestServiceException(error);
-			}
+			validate(user, result);
 			
 			/* Update user in db. */
 			getUserService().update(user);

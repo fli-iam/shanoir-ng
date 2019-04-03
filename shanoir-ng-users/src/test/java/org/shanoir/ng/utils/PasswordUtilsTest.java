@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirUsersException;
 
 /**
  * @author msimon

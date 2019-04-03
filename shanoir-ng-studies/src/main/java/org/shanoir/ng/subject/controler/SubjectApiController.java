@@ -18,6 +18,7 @@ import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.dto.mapper.SubjectMappingUtilsService;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
+import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,9 @@ public class SubjectApiController implements SubjectApi {
 
 	@Autowired
 	private SubjectService subjectService;
+	
+	@Autowired
+	private SubjectUniqueConstraintManager uniqueConstraintManager;
 	
 	@Override
 	public ResponseEntity<Void> deleteSubject(
@@ -90,14 +94,7 @@ public class SubjectApiController implements SubjectApi {
 			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException {
 		
-		final FieldErrorMap errors = new FieldErrorMap()
-				.checkFieldAccess(subject) 
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(subject, subjectService);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}
+		validate(subject, result);
 
 		final Subject createdSubject = subjectService.create(subject);
 		return new ResponseEntity<SubjectDTO>(subjectMapper.subjectToSubjectDTO(createdSubject), HttpStatus.OK);
@@ -111,15 +108,7 @@ public class SubjectApiController implements SubjectApi {
 		Long studyCardId = subjectStudyCardIdDTO.getStudyCardId();
 		Subject subject = subjectStudyCardIdDTO.getSubject();
 		
-		final FieldErrorMap errors = new FieldErrorMap()
-				.checkFieldAccess(subject) 
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(subject, subjectService);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}
-		
+		validate(subject, result);
 		
 		String commonName;
 		try {
@@ -144,16 +133,8 @@ public class SubjectApiController implements SubjectApi {
 			@ApiParam(value = "subject to update", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException {
 
+		validate(subject, result);
 		try {
-			final FieldErrorMap errors = new FieldErrorMap()
-					.checkFieldAccess(subject, subjectService) 
-					.checkBindingContraints(result)
-					.checkUniqueConstraints(subject, subjectService);
-			if (!errors.isEmpty()) {
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-			}
-			
 			subjectService.update(subject);
 			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 			
@@ -228,4 +209,13 @@ public class SubjectApiController implements SubjectApi {
 	}
 	
 	
+	private void validate(Subject subject, BindingResult result) throws RestServiceException {
+		final FieldErrorMap errors = new FieldErrorMap()
+				.add(new FieldErrorMap(result))
+				.add(uniqueConstraintManager.validate(subject));
+		if (!errors.isEmpty()) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+			throw new RestServiceException(error);
+		} 
+	}
 }

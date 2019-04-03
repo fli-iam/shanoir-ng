@@ -14,8 +14,11 @@ import org.shanoir.ng.center.controler.CenterApiController;
 import org.shanoir.ng.center.dto.CenterDTO;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.security.CenterFieldEditionSecurityManager;
 import org.shanoir.ng.center.service.CenterService;
+import org.shanoir.ng.center.service.CenterUniqueConstraintManager;
 import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +59,12 @@ public class CenterApiControllerTest {
 
 	@MockBean
 	private CenterService centerServiceMock;
+	
+	@MockBean
+	private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
+	
+	@MockBean
+	private CenterUniqueConstraintManager uniqueConstraintManager;
 
 	@Before
 	public void setup() throws EntityNotFoundException  {
@@ -70,6 +79,8 @@ public class CenterApiControllerTest {
 		given(centerServiceMock.findById(1L)).willReturn(new Center());
 		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
 		given(centerServiceMock.create(Mockito.mock(Center.class))).willReturn(new Center());
+		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
+		given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

@@ -13,7 +13,9 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
 import org.shanoir.ng.study.service.StudyService;
+import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,12 @@ public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private StudyMapper studyMapper;
+	
+	@Autowired
+	private StudyFieldEditionSecurityManager fieldEditionSecurityManager;
+	
+	@Autowired
+	private StudyUniqueConstraintManager uniqueConstraintManager;
 
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
@@ -69,14 +77,7 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<StudyDTO> saveNewStudy(@RequestBody final Study study, final BindingResult result)
 			throws RestServiceException {
 
-		final FieldErrorMap errors = new FieldErrorMap()
-				.checkFieldAccess(study)
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(study, studyService);
-		if (!errors.isEmpty()) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-			throw new RestServiceException(error);
-		}
+		validate(study, result);
 
 		final Study createdStudy = studyService.create(study);
 		return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
@@ -86,16 +87,9 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
 			final BindingResult result) throws RestServiceException {
 
+		validate(study, result);
+		
 		try {
-			final FieldErrorMap errors = new FieldErrorMap()
-					.checkFieldAccess(study, studyService) 
-					.checkBindingContraints(result)
-					.checkUniqueConstraints(study, studyService);
-			if (!errors.isEmpty()) {
-				ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-				throw new RestServiceException(error);
-			} 
-
 			studyService.update(study);
 		} catch (AccessDeniedException e) {
 			return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
@@ -103,6 +97,18 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+	
+	
+	private void validate(Study study, BindingResult result) throws RestServiceException {
+		final FieldErrorMap errors = new FieldErrorMap()
+				.add(fieldEditionSecurityManager.validate(study))
+				.add(new FieldErrorMap(result))
+				.add(uniqueConstraintManager.validate(study));
+		if (!errors.isEmpty()) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+			throw new RestServiceException(error);
+		} 
 	}
 	
 }

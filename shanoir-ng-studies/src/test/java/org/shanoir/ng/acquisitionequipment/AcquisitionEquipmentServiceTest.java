@@ -19,7 +19,6 @@ import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentServiceIm
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.data.repository.CrudRepository;
 
 /**
  * Acquisition equipment service test.

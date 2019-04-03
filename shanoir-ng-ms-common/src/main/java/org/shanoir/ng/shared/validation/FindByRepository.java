@@ -1,4 +1,4 @@
-package org.shanoir.ng.shared.core.repository;
+package org.shanoir.ng.shared.validation;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
  * @author msimon
  *
  */
-public interface CustomRepository<T extends AbstractEntity> {
+public interface FindByRepository<T extends AbstractEntity> {
 
 	/**
 	 * Find entities by field value.

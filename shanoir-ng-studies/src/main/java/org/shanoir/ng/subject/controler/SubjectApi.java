@@ -12,7 +12,6 @@ import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,7 +36,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{subjectId}", produces = { "application/json" }, method = RequestMethod.DELETE)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @StudySecurityService.hasRightOnSubject(#subjectId, 'CAN_ADMINISTRATE')")
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#subjectId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
@@ -49,7 +48,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasRole('ADMIN') or @StudySecurityService.hasRightOnSubject(filterObject.getId(), 'CAN_VIEW')")
+	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SubjectDTO>> findSubjects();
 	
 	@ApiOperation(value = "", notes = "Returns id and name for all the subjects", response = IdNameDTO.class, responseContainer = "List", tags = {})
@@ -61,7 +60,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasRole('ADMIN') or @StudySecurityService.hasRightOnSubject(filterObject.getId(), 'CAN_VIEW')")
+	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectIdNamesDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<IdNameDTO>> findSubjectsNames();	
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given id", response = Subject.class, tags = {})
@@ -72,7 +71,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@RequestMapping(value = "/{subjectId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("@StudySecurityService.hasRightOnTrustedSubject(returnObject.getBody(), 'CAN_VIEW')")
+	@PostAuthorize("@studySecurityService.hasRightOnSubjectForOneStudy(returnObject.getBody().getId(), 'CAN_SEE_ALL')")
 	ResponseEntity<SubjectDTO> findSubjectById(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
@@ -84,7 +83,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @StudySecurityService.checkRightOnSubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
 	ResponseEntity<SubjectDTO> saveNewSubject(
 			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException;
@@ -97,7 +96,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@RequestMapping(value = "/OFSEP/", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @StudySecurityService.checkRightOnSubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subjectStudyCardIdDTO.getSubject().getSubjectStudyList(), 'CAN_IMPORT'))")
 	ResponseEntity<Subject> saveNewOFSEPSubject(
 			@ApiParam(value = "subject to create and the id of the study card", required = true) @RequestBody SubjectStudyCardIdDTO subjectStudyCardIdDTO,
 			final BindingResult result) throws RestServiceException;
@@ -111,7 +110,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@RequestMapping(value = "/OFSEP/SHUP", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @StudySecurityService.checkRightOnSubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and #subjectFromShupDTO.getStudyId() != null and @studySecurityService.hasRightOnStudy(#subjectFromShupDTO.getStudyId(), 'CAN_IMPORT'))")
 	ResponseEntity<Long> saveNewOFSEPSubjectFromShup(
 			@ApiParam(value = "subject to create and the id of the study card", required = true) @RequestBody SubjectFromShupDTO subjectFromShupDTO,
 			final BindingResult result) throws RestServiceException;
@@ -153,7 +152,7 @@ public interface SubjectApi {
 	@RequestMapping(value = "/{studyId}/allSubjects", produces = {
 			"application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasRole('ADMIN') or @StudySecurityService.hasRightOnSubject(filterObject.getId(), 'CAN_VIEW')")
+	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSimpleSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
@@ -166,7 +165,7 @@ public interface SubjectApi {
 	@RequestMapping(value = "/findByIdentifier/{subjectIdentifier}", produces = {
 			"application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("@StudySecurityService.hasRightOnTrustedSubject(returnObject.getBody(), 'CAN_VIEW')")
+	@PostAuthorize("@studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<SubjectDTO> findSubjectByIdentifier(
 			@ApiParam(value = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier);
 

@@ -1,8 +1,8 @@
 package org.shanoir.ng.subject;
 
 import static org.mockito.BDDMockito.given;
-import static org.shanoir.ng.utils.tests.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.tests.assertion.AssertUtils.assertAccessDenied;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.shanoir.ng.utils.tests.usermock.WithMockKeycloakUser;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -70,7 +70,6 @@ public class SubjectServiceSecurityTest {
 	public void testAsAnonymous() throws ShanoirException {
 		assertAccessDenied(service::findAll);
 		assertAccessDenied(service::findAllSubjectsOfStudy, 1L);
-		assertAccessDenied(service::findBy, "id", ENTITY_ID);
 		
 		assertAccessDenied(service::findByData, "data");
 		assertAccessDenied(service::findById, ENTITY_ID);
@@ -137,7 +136,6 @@ public class SubjectServiceSecurityTest {
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::findAllSubjectsOfStudy, 1L);
 		assertAccessAuthorized(service::findByData, "data");
-		assertAccessAuthorized(service::findBy, "id", ENTITY_ID);
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findByIdentifier, "identifier");
 		assertAccessAuthorized(service::findByIdWithSubjecStudies, ENTITY_ID);
@@ -221,7 +219,6 @@ public class SubjectServiceSecurityTest {
 		newSubjectMock = buildSubjectMock(null);
 		addStudyToMock(newSubjectMock, 11L);
 		addStudyToMock(newSubjectMock, 12L);
-		System.out.println("0. " + newSubjectMock.getSubjectStudyList());
 		assertAccessDenied(service::create, newSubjectMock);
 		
 		// Create subject linked to a study where I can import

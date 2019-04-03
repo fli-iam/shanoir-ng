@@ -68,16 +68,7 @@ public class CoilApiController implements CoilApi {
 			final BindingResult result) throws RestServiceException {
 		
 		/* Validation */
-		final FieldErrorMap errors = new FieldErrorMap()
-				.checkFieldAccess(coil) 
-				.checkBindingContraints(result);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}
-		
-		// Guarantees it is a creation, not an update
-		coil.setId(null);
+		validate(result);
 
 		/* Save coil in db. */
 		final Coil createdCoil = coilService.create(coil);
@@ -89,21 +80,22 @@ public class CoilApiController implements CoilApi {
 			@ApiParam(value = "coil to update", required = true) @Valid @RequestBody Coil coil,
 			final BindingResult result) throws RestServiceException {
 
+		validate(result);
 		try {
-			/* Validation */
-			final FieldErrorMap errors = new FieldErrorMap()
-					.checkFieldAccess(coil, coilService)
-					.checkBindingContraints(result);
-			if (!errors.isEmpty()) {
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-			}
-
 			coilService.update(coil);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
+	}
+	
+	
+	private void validate(BindingResult result) throws RestServiceException {
+		final FieldErrorMap errors = new FieldErrorMap(result);
+		if (!errors.isEmpty()) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+			throw new RestServiceException(error);
+		} 
 	}
 }

@@ -62,14 +62,6 @@ public class CenterRepositoryTest {
 	}
 	
 	@Test
-	public void findByTest() throws Exception {
-		List<Center> centersDb = repository.findBy("name", CENTER_TEST_1_NAME, Center.class);
-		assertNotNull(centersDb); 
-		assertThat(centersDb.size()).isEqualTo(1);
-		assertThat(centersDb.get(0).getId()).isEqualTo(CENTER_TEST_1_ID);
-	}
-	
-	@Test
 	public void findByNameTest() throws Exception {
 		Center centerDb = repository.findByName(CENTER_TEST_1_NAME);
 		assertNotNull(centerDb);

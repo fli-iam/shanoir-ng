@@ -50,12 +50,6 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public List<Study> findBy(final String fieldName, final Object value) {
-		// Create a brand new ArrayList to prevent a bug with @PostFilter
-		return Utils.copyList(studyRepository.findBy(fieldName, value));
-	}
-
-	@Override
 	public Study findById(final Long id) {
 		return studyRepository.findOne(id);
 	}

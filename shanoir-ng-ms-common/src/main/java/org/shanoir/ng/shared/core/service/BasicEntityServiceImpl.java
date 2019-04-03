@@ -3,11 +3,9 @@ package org.shanoir.ng.shared.core.service;
 import java.util.List;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.shanoir.ng.shared.core.repository.CustomRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -20,11 +18,7 @@ public abstract class BasicEntityServiceImpl<T extends AbstractEntity> implement
 
 	@Autowired
 	private CrudRepository<T, Long> repository;
-	
-	@Autowired
-	@Qualifier("CustomRepositoryImpl")
-	private CustomRepository<T> customRepository;
-	
+		
 	
 	/*
 	 * Update an entity with the values of another.
@@ -35,11 +29,6 @@ public abstract class BasicEntityServiceImpl<T extends AbstractEntity> implement
 	 */
 	protected abstract T updateValues(final T from, final T to);
 
-	@Override
-	public List<T> findBy(String fieldName, Object value, @SuppressWarnings("rawtypes") Class clazz) {
-		return customRepository.findBy(fieldName, value, clazz);
-	}
-	
 	@Override
 	public T findById(final Long id) {
 		return repository.findOne(id);

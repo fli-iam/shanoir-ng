@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerService;
+import org.shanoir.ng.manufacturermodel.service.ManufacturerUniqueConstraintManager;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -24,6 +25,9 @@ public class ManufacturerApiController implements ManufacturerApi {
 
 	@Autowired
 	private ManufacturerService manufacturerService;
+	
+	@Autowired
+	private ManufacturerUniqueConstraintManager uniqueConstraintManager;
 
 	@Override
 	public ResponseEntity<Manufacturer> findManufacturerById(@PathVariable("manufacturerId") final Long manufacturerId) {
@@ -47,16 +51,7 @@ public class ManufacturerApiController implements ManufacturerApi {
 	public ResponseEntity<Manufacturer> saveNewManufacturer(@RequestBody final Manufacturer manufacturer,
 			final BindingResult result) throws RestServiceException {
 		
-		/* Validation */
-		final FieldErrorMap errors = new FieldErrorMap()
-				.checkFieldAccess(manufacturer) 
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(manufacturer, manufacturerService);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}
-
+		validate(manufacturer, result);
 		return new ResponseEntity<>(manufacturerService.create(manufacturer), HttpStatus.OK);
 	}
 
@@ -64,17 +59,8 @@ public class ManufacturerApiController implements ManufacturerApi {
 	public ResponseEntity<Void> updateManufacturer(@PathVariable("manufacturerId") final Long manufacturerId,
 			@RequestBody @Valid final Manufacturer manufacturer, final BindingResult result) throws RestServiceException {
 		
-		try {
-			/* Validation */
-			final FieldErrorMap errors = new FieldErrorMap()
-					.checkFieldAccess(manufacturer, manufacturerService) 
-					.checkBindingContraints(result)
-					.checkUniqueConstraints(manufacturer, manufacturerService);
-			if (!errors.isEmpty()) {
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-			}
-			
+		validate(manufacturer, result);
+		try {			
 			/* Update user in db. */
 			manufacturerService.update(manufacturer);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -94,4 +80,16 @@ public class ManufacturerApiController implements ManufacturerApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
+	
+	
+	private void validate(Manufacturer manufacturer, BindingResult result) throws RestServiceException {
+		final FieldErrorMap errors = new FieldErrorMap()
+				.add(new FieldErrorMap(result))
+				.add(uniqueConstraintManager.validate(manufacturer));
+		if (!errors.isEmpty()) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+			throw new RestServiceException(error);
+		} 
+	}
+	
 }

@@ -1,7 +1,7 @@
 package org.shanoir.ng.manufacturermodel;
 
-import static org.shanoir.ng.utils.tests.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.tests.assertion.AssertUtils.assertAccessDenied;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.shanoir.ng.utils.tests.usermock.WithMockKeycloakUser;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -50,7 +50,6 @@ public class ManufacturerSecurityTest {
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
-		assertAccessDenied(service::findBy, "id", ENTITY_ID);
 		assertAccessDenied(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findAll);
 		assertAccessDenied(service::create, mockNew);
@@ -61,7 +60,6 @@ public class ManufacturerSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testAsUser() throws ShanoirException {
-		assertAccessAuthorized(service::findBy, "id", ENTITY_ID);
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
 		assertAccessDenied(service::create, mockNew);
@@ -72,7 +70,6 @@ public class ManufacturerSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsExpert() throws ShanoirException {
-		assertAccessAuthorized(service::findBy, "id", ENTITY_ID);
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::create, mockNew);
@@ -84,7 +81,6 @@ public class ManufacturerSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
-		assertAccessAuthorized(service::findBy, "id", ENTITY_ID);
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::create, mockNew);

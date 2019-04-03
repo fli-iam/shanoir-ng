@@ -69,13 +69,7 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 			throws RestServiceException {
 		
 		/* Validation */
-		final FieldErrorMap errors = new FieldErrorMap()
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(manufacturerModel, manufacturerModelService);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}
+		validate(result);
 
 		/* Save center in db. */
 		return new ResponseEntity<ManufacturerModel>(manufacturerModelService.create(manufacturerModel), HttpStatus.OK);
@@ -89,13 +83,7 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 		manufacturerModel.setId(manufacturerModelId);
 
 		/* Validation */
-		final FieldErrorMap errors = new FieldErrorMap()
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(manufacturerModel, manufacturerModelService);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}
+		validate(result);
 
 		/* Update user in db. */
 		try {
@@ -105,6 +93,15 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
+	}
+	
+	
+	private void validate(BindingResult result) throws RestServiceException {
+		final FieldErrorMap errors = new FieldErrorMap(result);
+		if (!errors.isEmpty()) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+			throw new RestServiceException(error);
+		} 
 	}
 
 }

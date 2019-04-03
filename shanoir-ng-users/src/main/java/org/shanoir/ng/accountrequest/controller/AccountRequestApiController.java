@@ -3,9 +3,6 @@ package org.shanoir.ng.accountrequest.controller;
 import java.time.LocalDate;
 
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
-import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.error.UsersFieldErrorMap;
-import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -21,7 +18,7 @@ import io.swagger.annotations.ApiParam;
 
 @Controller
 public class AccountRequestApiController extends AbstractUserRequestApiController implements AccountRequestApi {
-
+	
 	@Override
 	public ResponseEntity<Void> saveNewAccountRequest(
 			@ApiParam(value = "user to create from account request", required = true) @RequestBody final User user,
@@ -31,15 +28,9 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 		if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {
 			generateUsername(user);
 		}
-		
-		final FieldErrorMap errors = new UsersFieldErrorMap()
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(user, getUserService());
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}
 
+		validate(user, result);
+		
 		user.setExpirationDate(null);
 		user.setCreationDate(LocalDate.now()); // Set creation date on creation.
 
@@ -55,5 +46,6 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
+	 
 
 }

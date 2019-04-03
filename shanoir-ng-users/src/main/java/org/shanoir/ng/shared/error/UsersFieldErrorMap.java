@@ -16,11 +16,11 @@ public class UsersFieldErrorMap extends FieldErrorMap {
 
 	
 	public UsersFieldErrorMap checkBindingIgnoreBlankUsername(BindingResult result) {
-		return this.merge(UsersFieldErrorMap.fieldErrorMapIgnoreUsernameBlank(result));
+		return this.add(UsersFieldErrorMap.fieldErrorMapIgnoreUsernameBlank(result));
 	}
 	
 	public UsersFieldErrorMap checkBindingIgnoreBlankUsernameAndRole(BindingResult result) {
-		return this.merge(UsersFieldErrorMap.fieldErrorMapIgnoreUsernameAndRoleBlank(result));
+		return this.add(UsersFieldErrorMap.fieldErrorMapIgnoreUsernameAndRoleBlank(result));
 	}
 	
 	public UsersFieldErrorMap checkPasswordPolicy(String password) {
@@ -32,8 +32,8 @@ public class UsersFieldErrorMap extends FieldErrorMap {
 		return this;
 	}
 	
-	public UsersFieldErrorMap merge(UsersFieldErrorMap map) {
-		return (UsersFieldErrorMap) super.merge(map);
+	public UsersFieldErrorMap add(UsersFieldErrorMap map) {
+		return (UsersFieldErrorMap) super.add(map);
 	}
 
 	/**

@@ -132,11 +132,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<User> findBy(final String fieldName, final Object value) {
-		return userRepository.findBy(fieldName, value, User.class);
-	}
-
-	@Override
 	public Optional<User> findByEmail(final String email) {
 		return userRepository.findByEmail(email);
 	}

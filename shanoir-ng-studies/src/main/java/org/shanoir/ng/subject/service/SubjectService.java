@@ -3,7 +3,6 @@ package org.shanoir.ng.subject.service;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -16,13 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  * @author msimon
  *
  */
-public interface SubjectService extends UniqueCheckableService<Subject> {
-
-	@Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("@studySecurityService.hasRightOnTrustedSubject(returnObject, 'CAN_SEE_ALL')")
-	List<Subject> findBy(String fieldName, Object value);
-	
+public interface SubjectService {
 	
 	/**
 	 * Get all the subjects.
@@ -30,7 +23,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @return a list of subjects.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubject(filterObject, 'CAN_SEE_ALL')")
+	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Subject> findAll();
 
 	
@@ -41,7 +34,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @return list of subjects
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnSubject(filterObject.getId(), 'CAN_SEE_ALL')")
+	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId);
 	
 	/**
@@ -51,7 +44,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @return a subject.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("@studySecurityService.hasRightOnTrustedSubject(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("@studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
 	Subject findByData(String data);
 
 	/**
@@ -61,7 +54,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @return a template or null.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("@studySecurityService.hasRightOnTrustedSubject(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("@studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
 	Subject findById(Long id);
 
 	/**
@@ -71,7 +64,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @return the subject or null
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("@studySecurityService.hasRightOnTrustedSubject(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("@studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
 	Subject findByIdentifier(String indentifier);
 	
 	/**
@@ -81,7 +74,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @return a subject or null
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("@studySecurityService.hasRightOnTrustedSubject(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("@studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
 	Subject findByIdWithSubjecStudies(Long subjectStudyId);
 
 	/**
@@ -90,7 +83,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @return a subject or null
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("@studySecurityService.hasRightOnTrustedSubject(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("@studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
 	Subject findSubjectFromCenterCode(String centerCode);
 	
 	
@@ -100,7 +93,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @param subject subject to create.
 	 * @return created subject.
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnSubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
 	Subject create(Subject subject);
 	
 	
@@ -121,7 +114,7 @@ public interface SubjectService extends UniqueCheckableService<Subject> {
 	 * @param id subject id.
 	 * @throws EntityNotFoundException
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnSubject(#id, 'CAN_ADMINISTRATE')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id) throws EntityNotFoundException;
 
 

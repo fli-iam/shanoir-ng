@@ -1,6 +1,5 @@
 package org.shanoir.ng.coil.service;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.coil.model.Coil;
@@ -34,10 +33,4 @@ public class CoilServiceImpl extends BasicEntityServiceImpl<Coil> implements Coi
 	public Optional<Coil> findByName(String name) {
 		return coilRepository.findByName(name);
 	}
-
-	@Override
-	public List<Coil> findBy(String fieldName, Object value) {
-		return this.findBy(fieldName, value, Coil.class);
-	}
-
 }

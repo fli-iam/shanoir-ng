@@ -6,7 +6,6 @@ import org.mapstruct.Mapper;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.coil.dto.CoilDTO;
 import org.shanoir.ng.coil.model.Coil;
-import org.shanoir.ng.manufacturermodel.dto.mapper.ManufacturerModelMapper;
 
 /**
  * Mapper for coils.

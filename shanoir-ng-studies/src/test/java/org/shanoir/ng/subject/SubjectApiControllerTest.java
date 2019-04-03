@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.service.StudyService;
@@ -19,6 +20,7 @@ import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.dto.mapper.SubjectMappingUtilsService;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
+import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -63,6 +65,9 @@ public class SubjectApiControllerTest {
 
 	@MockBean
 	private SubjectMapper subjectMapperMock;
+	
+	@MockBean
+	private SubjectUniqueConstraintManager uniqueConstraintManager;
 
 	@Before
 	public void setup() throws EntityNotFoundException {
@@ -75,6 +80,7 @@ public class SubjectApiControllerTest {
 		given(subjectServiceMock.findAll()).willReturn(Arrays.asList(new Subject()));
 		given(subjectServiceMock.findById(1L)).willReturn(new Subject());
 		given(subjectServiceMock.create(Mockito.mock(Subject.class))).willReturn(new Subject());
+		given(uniqueConstraintManager.validate(Mockito.any(Subject.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

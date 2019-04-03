@@ -1,4 +1,4 @@
-package org.shanoir.ng.shared.core.repository;
+package org.shanoir.ng.shared.validation;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component("CustomRepositoryImpl")
-public class CustomRepositoryImpl<T extends AbstractEntity> implements CustomRepository<T> {
+public class FindByRepositoryImpl<T extends AbstractEntity> implements FindByRepository<T> {
 
 	@PersistenceContext
 	private EntityManager em;

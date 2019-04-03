@@ -10,16 +10,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.study.controler.StudyApiController;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
 import org.shanoir.ng.study.service.StudyService;
+import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.shanoir.ng.utils.SecurityContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -60,6 +61,12 @@ public class StudyApiControllerTest {
 
 	@MockBean
 	private StudyService studyServiceMock;
+	
+	@MockBean
+	private StudyFieldEditionSecurityManager fieldEditionSecurityManager;
+	
+	@MockBean
+	private StudyUniqueConstraintManager uniqueConstraintManager;
 
 	@Before
 	public void setup() throws AccessDeniedException, EntityNotFoundException {
@@ -73,6 +80,8 @@ public class StudyApiControllerTest {
 		given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
 		given(studyServiceMock.findById(1L)).willReturn(new Study());
 		given(studyServiceMock.create(Mockito.mock(Study.class))).willReturn(new Study());
+		given(fieldEditionSecurityManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
+		given(uniqueConstraintManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
 	}
 
 	// TODO: manage keycloak token

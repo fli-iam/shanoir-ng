@@ -33,11 +33,6 @@ public class ManufacturerModelServiceImpl extends BasicEntityServiceImpl<Manufac
 	}
 
 	@Override
-	public List<ManufacturerModel> findBy(String fieldName, Object value) {
-		return this.findBy(fieldName, value, ManufacturerModel.class);
-	}
-
-	@Override
 	protected ManufacturerModel updateValues(ManufacturerModel from, ManufacturerModel to) {
 		to.setDatasetModalityType(from.getDatasetModalityType());
 		to.setMagneticField(from.getMagneticField());

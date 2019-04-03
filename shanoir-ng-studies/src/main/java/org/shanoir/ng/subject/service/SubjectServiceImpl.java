@@ -8,13 +8,10 @@ import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subject.repository.SubjectRepositoryImpl;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,11 +23,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SubjectServiceImpl implements SubjectService {
-
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
 	@Autowired
 	private SubjectRepository subjectRepository;
@@ -52,12 +44,8 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public List<Subject> findAll() {
-		return Utils.toList(subjectRepository.findAll());
-	}
-
-	@Override
-	public List<Subject> findBy(final String fieldName, final Object value) {
-		return subjectRepository.findBy(fieldName, value);
+		// copyList is to prevent a bug with @postFilter
+		return Utils.copyList(Utils.toList(subjectRepository.findAll()));
 	}
 
 	@Override
@@ -165,7 +153,7 @@ public class SubjectServiceImpl implements SubjectService {
 					simpleSubjectDTOList.add(simpleSubjectDTO);
 				}
 			}
-		} 
+		}
 		return simpleSubjectDTOList;
 	}
 	

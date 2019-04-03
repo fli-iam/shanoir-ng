@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.utils.tests.assertion;
+package org.shanoir.ng.utils.assertion;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.security.access.AccessDeniedException;

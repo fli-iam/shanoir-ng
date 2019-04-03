@@ -12,12 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.utils.tests.assertion;
+package org.shanoir.ng.utils.assertion;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.security.access.AccessDeniedException;
 
 @FunctionalInterface
-public interface AccessCheckedFunction3Arg<T, U, V> {
-	void apply(T t, U u, V v) throws AccessDeniedException, ShanoirException;
+public interface AccessCheckedFunction2Arg<T, U> {
+	void apply(T t, U u) throws AccessDeniedException, ShanoirException;
 }

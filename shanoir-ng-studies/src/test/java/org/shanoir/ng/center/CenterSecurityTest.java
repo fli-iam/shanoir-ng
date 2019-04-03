@@ -1,8 +1,8 @@
 package org.shanoir.ng.center;
 
 import static org.mockito.BDDMockito.given;
-import static org.shanoir.ng.utils.tests.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.tests.assertion.AssertUtils.assertAccessDenied;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.shanoir.ng.utils.tests.usermock.WithMockKeycloakUser;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -63,7 +63,6 @@ public class CenterSecurityTest {
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
-		assertAccessDenied(service::findBy, "id", ENTITY_ID);
 		assertAccessDenied(service::findByName, "name");
 		assertAccessDenied(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findAll);
@@ -77,7 +76,6 @@ public class CenterSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testAsUser() throws ShanoirException {
-		assertAccessAuthorized(service::findBy, "id", ENTITY_ID);
 		assertAccessAuthorized(service::findByName, "name");
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
@@ -91,7 +89,6 @@ public class CenterSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsExpert() throws ShanoirException {
-		assertAccessAuthorized(service::findBy, "id", ENTITY_ID);
 		assertAccessAuthorized(service::findByName, "name");
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
@@ -106,7 +103,6 @@ public class CenterSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
-		assertAccessAuthorized(service::findBy, "id", ENTITY_ID);
 		assertAccessAuthorized(service::findByName, "name");
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);

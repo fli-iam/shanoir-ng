@@ -1,8 +1,5 @@
 package org.shanoir.ng.subject.repository;
 
-import java.util.Optional;
-
-import org.shanoir.ng.shared.core.repository.CustomRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

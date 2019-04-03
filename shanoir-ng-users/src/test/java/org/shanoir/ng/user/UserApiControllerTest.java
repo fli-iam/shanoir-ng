@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Before;
@@ -18,14 +19,18 @@ import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
+import org.shanoir.ng.shared.validation.FindByRepository;
 import org.shanoir.ng.user.controller.UserApiController;
 import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
 import org.shanoir.ng.user.service.UserService;
+import org.shanoir.ng.user.service.UserUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -39,7 +44,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = UserApiController.class)
+@WebMvcTest(controllers = {UserApiController.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class})
 @AutoConfigureMockMvc(secure = false)
 public class UserApiControllerTest {
 
@@ -52,6 +57,12 @@ public class UserApiControllerTest {
 
 	@MockBean
 	private UserService userServiceMock;
+	
+	@MockBean
+	private FindByRepository<User> findByRepositoryMock;
+	
+	@MockBean
+	private CrudRepository<User, Long> repoForFieldAccess;
 
 	@Before
 	public void setup() throws EntityNotFoundException, AccountNotOnDemandException, SecurityException  {
@@ -63,6 +74,8 @@ public class UserApiControllerTest {
 		given(userServiceMock.findById(1L)).willReturn(mockUser);
 		given(userServiceMock.findByIds(Arrays.asList(1L))).willReturn(Arrays.asList(new IdNameDTO()));
 		given(userServiceMock.create(Mockito.mock(User.class))).willReturn(new User());
+		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(Arrays.asList(mockUser));
+		given(repoForFieldAccess.findOne(1L)).willReturn(mockUser);
 	}
 
 	@Test
@@ -101,6 +114,7 @@ public class UserApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void saveNewUserTest() throws Exception {
+		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(new ArrayList<User>());
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser())))
 				.andExpect(status().isOk());
@@ -133,7 +147,7 @@ public class UserApiControllerTest {
 			user.setRole(expertRole);
 		} else {
 			user.setRole(adminRole);
-		}
+		}	
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
 				.andExpect(status().isUnprocessableEntity());

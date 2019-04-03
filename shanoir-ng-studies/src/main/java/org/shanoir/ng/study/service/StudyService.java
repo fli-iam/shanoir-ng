@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.shanoir.ng.study.model.Study;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public interface StudyService extends UniqueCheckableService<Study> {
+public interface StudyService {
 
 	/**
 	 * Delete a study. Do check before if current user can delete study!
@@ -40,11 +39,6 @@ public interface StudyService extends UniqueCheckableService<Study> {
 	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL')")
 	Study findById(Long id); 
 
-	
-	@Override
-	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-	@PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
-	List<Study> findBy(String fieldName, Object value);
 
 	/**
 	 * Get all the studies

@@ -7,7 +7,9 @@ import javax.validation.Valid;
 import org.shanoir.ng.center.dto.CenterDTO;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.security.CenterFieldEditionSecurityManager;
 import org.shanoir.ng.center.service.CenterService;
+import org.shanoir.ng.center.service.CenterUniqueConstraintManager;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -33,6 +35,12 @@ public class CenterApiController implements CenterApi {
 
 	@Autowired
 	private CenterService centerService;
+
+	@Autowired
+	private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
+	
+	@Autowired
+	private CenterUniqueConstraintManager uniqueConstraintManager;
 
 	@Override
 	public ResponseEntity<Void> deleteCenter(
@@ -85,15 +93,7 @@ public class CenterApiController implements CenterApi {
 			@ApiParam(value = "the center to create", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
 
-		/* Validation */
-		final FieldErrorMap errors = new FieldErrorMap()
-				.checkFieldAccess(center) 
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(center, centerService);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}
+		validate(center, result);
 
 		/* Save center in db. */
 		final Center createdCenter = centerService.create(center);
@@ -106,16 +106,9 @@ public class CenterApiController implements CenterApi {
 			@ApiParam(value = "the center to update", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
 
-		try {
-			/* Validation */
-			final FieldErrorMap errors = new FieldErrorMap()
-					.checkFieldAccess(center, centerService) 
-					.checkBindingContraints(result)
-					.checkUniqueConstraints(center, centerService);
-			if (!errors.isEmpty()) {
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-			}
+		validate(center, result);
+
+		try {	
 			/* Update center in db. */
 			centerService.update(center);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -123,5 +116,17 @@ public class CenterApiController implements CenterApi {
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
+	}
+	
+	
+	private void validate(Center center, BindingResult result) throws RestServiceException {
+		final FieldErrorMap errors = new FieldErrorMap()
+				.add(fieldEditionSecurityManager.validate(center))
+				.add(new FieldErrorMap(result))
+				.add(uniqueConstraintManager.validate(center));
+		if (!errors.isEmpty()) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+			throw new RestServiceException(error);
+		} 
 	}
 }

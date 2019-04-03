@@ -61,16 +61,9 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	public ResponseEntity<AcquisitionEquipmentDTO> saveNewAcquisitionEquipment(
 			@ApiParam(value = "acquisition equipment to create", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException {
-		
-		/* Validation. */
-		final FieldErrorMap errors = new FieldErrorMap()
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(acquisitionEquipment, acquisitionEquipmentService);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}	
 
+		validate(acquisitionEquipment, result);
+		
 		/* Save acquisition equipment in db. */
 		return new ResponseEntity<>(acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(
 				acquisitionEquipmentService.create(acquisitionEquipment)), HttpStatus.OK);
@@ -81,14 +74,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			@ApiParam(value = "acquisition equipment to update", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException {
 
-		/* Validation. */
-		final FieldErrorMap errors = new FieldErrorMap()
-				.checkBindingContraints(result)
-				.checkUniqueConstraints(acquisitionEquipment, acquisitionEquipmentService);
-		if (!errors.isEmpty()) {
-			throw new RestServiceException(
-				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
-		}	
+		validate(acquisitionEquipment, result);
 
 		/* Update user in db. */
 		try {
@@ -97,5 +83,13 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
+	}
+	
+	private void validate(AcquisitionEquipment acquisitionEquipment, BindingResult result) throws RestServiceException {
+		final FieldErrorMap errors = new FieldErrorMap(result);
+		if (!errors.isEmpty()) {
+			throw new RestServiceException(
+				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+		}	
 	}
 }

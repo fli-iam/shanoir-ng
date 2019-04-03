@@ -9,10 +9,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.accountrequest.controller.AccountRequestApiController;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
 import org.shanoir.ng.user.service.UserService;
+import org.shanoir.ng.user.service.UserUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -41,10 +44,18 @@ public class AccountRequestApiControllerTest {
 
 	@MockBean
 	private UserService userServiceMock;
+	
+	@MockBean
+	private UserFieldEditionSecurityManager fieldEditionSecurityManager;
+	
+	@MockBean
+	private UserUniqueConstraintManager uniqueConstraintManager;
 
 	@Before
 	public void setup() throws SecurityException {
 		given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
+		given(fieldEditionSecurityManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());
+		given(uniqueConstraintManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

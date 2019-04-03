@@ -1,10 +1,8 @@
 package org.shanoir.ng.coil.dto;
 
 import org.shanoir.ng.center.dto.CenterDTO;
-import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.coil.model.CoilType;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 
 /**
  * DTO for coil.

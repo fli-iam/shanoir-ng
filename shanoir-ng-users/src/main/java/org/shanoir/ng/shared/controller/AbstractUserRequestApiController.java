@@ -1,9 +1,18 @@
 package org.shanoir.ng.shared.controller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.error.UsersFieldErrorMap;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
 import org.shanoir.ng.user.service.UserService;
+import org.shanoir.ng.user.service.UserUniqueConstraintManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
 
 /**
  * Abstract class for users request API controllers.
@@ -15,6 +24,12 @@ public abstract class AbstractUserRequestApiController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private UserFieldEditionSecurityManager fieldEditionSecurityManager;
+	
+	@Autowired
+	private UserUniqueConstraintManager uniqueConstraintManager;
 
 	/**
 	 * @return the userService
@@ -56,6 +71,28 @@ public abstract class AbstractUserRequestApiController {
 		}
 
 		user.setUsername(username);
+	}
+	
+	protected void validate(User user, BindingResult result) throws RestServiceException {
+		final FieldErrorMap errors = new FieldErrorMap()
+				.add(fieldEditionSecurityManager.validate(user))
+				.add(new FieldErrorMap(result))
+				.add(uniqueConstraintManager.validate(user));
+		if (!errors.isEmpty()) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+			throw new RestServiceException(error);
+		} 
+	}
+	
+	protected void validateIgnoreBlankUsername(User user, BindingResult result) throws RestServiceException {
+		final FieldErrorMap errors = new UsersFieldErrorMap()
+				.checkBindingIgnoreBlankUsername(result)
+				.add(fieldEditionSecurityManager.validate(user))
+				.add(uniqueConstraintManager.validate(user));
+		if (!errors.isEmpty()) {
+			throw new RestServiceException(
+				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
+		}	
 	}
 
 }

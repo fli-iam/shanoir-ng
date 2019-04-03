@@ -69,10 +69,4 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	public Center findByName(String name) {
 		return centerRepository.findByName(name);
 	}
-
-	@Override
-	public List<Center> findBy(String fieldName, Object value) {
-		return this.findBy(fieldName, value, Center.class);
-	}
-
 }

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.validation.UniqueCheckableService;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -14,28 +13,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
  *
  * @param <T>
  */
-public interface BasicEntityService<T extends AbstractEntity> extends UniqueCheckableService<T> {
+public interface BasicEntityService<T extends AbstractEntity> {
 
-	/**
-	 * Find an item by a value of a field.
-	 * 
-	 * @param fieldName searched field name.
-	 * @param value value to search.
-	 * @return list of items.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<T> findBy(String fieldName, Object value, @SuppressWarnings("rawtypes") Class clazz);
-	
-	/**
-	 * Find an item by a value of a field.
-	 * 
-	 * @param fieldName searched field name.
-	 * @param value value to search.
-	 * @return list of items.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<T> findBy(String fieldName, Object value);
-	
 	/**
 	 * Find entity by its id. 
 	 *

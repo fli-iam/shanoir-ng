@@ -12,6 +12,8 @@ import org.mockito.Mockito;
 import org.shanoir.ng.manufacturermodel.controler.ManufacturerApiController;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerService;
+import org.shanoir.ng.manufacturermodel.service.ManufacturerUniqueConstraintManager;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -47,6 +49,9 @@ public class ManufacturerApiControllerTest {
 
 	@MockBean
 	private ManufacturerService manufacturerServiceMock;
+	
+	@MockBean
+	private ManufacturerUniqueConstraintManager uniqueConstraintManager;
 
 	@Before
 	public void setup() {
@@ -55,6 +60,7 @@ public class ManufacturerApiControllerTest {
 		given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(new Manufacturer()));
 		given(manufacturerServiceMock.findById(1L)).willReturn(new Manufacturer());
 		given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(new Manufacturer());
+		given(uniqueConstraintManager.validate(Mockito.any(Manufacturer.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test

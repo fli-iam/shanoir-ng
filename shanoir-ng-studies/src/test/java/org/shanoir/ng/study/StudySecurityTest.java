@@ -2,8 +2,8 @@ package org.shanoir.ng.study;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
-import static org.shanoir.ng.utils.tests.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.tests.assertion.AssertUtils.assertAccessDenied;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +12,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -20,7 +19,7 @@ import org.shanoir.ng.study.model.security.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.shanoir.ng.utils.tests.usermock.WithMockKeycloakUser;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -64,7 +63,6 @@ public class StudySecurityTest {
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
-		assertAccessDenied(service::findBy, "id", ENTITY_ID);
 		assertAccessDenied(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findAll);
 		assertAccessDenied(service::create, mockNew);
@@ -96,24 +94,6 @@ public class StudySecurityTest {
 	
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
-	public void testFindByAsUserThatCanSee() throws ShanoirException {
-		assertAccessAuthorized(service::findBy, "id", ENTITY_ID);
-		
-		given(repository.findBy(Mockito.any(String.class), Mockito.any(Object.class))).willReturn(Arrays.asList(new Study[] 
-				{ buildStudyMock(1L), buildStudyMock(2L) } ));
-		assertEquals(0, service.findBy("any", "any").size());
-		
-		given(repository.findBy(Mockito.any(String.class), Mockito.any(Object.class))).willReturn(Arrays.asList(new Study[] 
-				{ buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT), buildStudyMock(2L) } ));
-		assertEquals(0, service.findBy("any", "any").size());
-		
-		given(repository.findBy(Mockito.any(String.class), Mockito.any(Object.class))).willReturn(Arrays.asList(new Study[] 
-				{ buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT) } ));
-		assertEquals(1, service.findBy("any", "any").size());
-	}
-	
-	@Test
-	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testFindAllAsUserThatCanSee() throws ShanoirException {
 		assertAccessAuthorized(service::findAll);
 		
@@ -130,7 +110,6 @@ public class StudySecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsExpert() throws ShanoirException {
 		
-		assertAccessAuthorized(service::findBy, "id", ENTITY_ID);
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::create, mockNew);
@@ -155,7 +134,6 @@ public class StudySecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
-		assertAccessAuthorized(service::findBy, "id", ENTITY_ID);
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::create, mockNew);
