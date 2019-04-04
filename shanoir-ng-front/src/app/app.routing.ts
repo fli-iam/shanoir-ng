@@ -8,12 +8,20 @@ import { CenterListComponent } from './centers/center-list/center-list.component
 import { CenterComponent } from './centers/center/center.component';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
+import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
+import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 import { HomeComponent } from './home/home.component';
+import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
+import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
+import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
+import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
 import { AuthNotGuestGuard } from './shared/roles/auth-not-guest-guard';
 import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyComponent } from './studies/study/study.component';
@@ -23,13 +31,6 @@ import { AccountRequestComponent } from './users/account-request/account-request
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
-import { DatasetComponent } from './datasets/dataset/dataset.component';
-import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
-import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
-import { SelectSeriesComponent } from './import/select-series/select-series.component';
-import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
-import { FinishImportComponent } from './import/finish/finish.component';
-import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 
 let appRoutes: Routes = [
     {
@@ -55,7 +56,8 @@ let appRoutes: Routes = [
             }, {
                 path: 'pacs',
                 component: QueryPacsComponent,
-                data: {importMode: 'PACS'}
+                data: {importMode: 'PACS'},
+                canActivate: [CanImportFromPACSGuard]
             }, {
                 path: 'series',
                 component: SelectSeriesComponent

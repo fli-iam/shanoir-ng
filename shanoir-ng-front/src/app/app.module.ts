@@ -86,6 +86,7 @@ import { MsgBoxService } from './shared/msg-box/msg-box.service';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { AuthNotGuestGuard } from './shared/roles/auth-not-guest-guard';
+import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
 import { HandleErrorService } from './shared/utils/handle-error.service';
 import { StudyService } from './studies/shared/study.service';
 import { StudyListComponent } from './studies/study-list/study-list.component';
@@ -199,6 +200,7 @@ import { ServiceLocator } from './utils/locator.service';
         AcquisitionEquipmentService,
         AuthAdminGuard,
         AuthNotGuestGuard,
+        CanImportFromPACSGuard,
         CenterService,
         ConfirmDialogService,
         ExaminationService,

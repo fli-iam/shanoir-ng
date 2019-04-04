@@ -71,9 +71,7 @@ export class KeycloakService {
     }
 
     canUserImportFromPACS(): boolean {
-        // console.log(KeycloakService.auth.authz.canImportFromPACS);
-        return true;
-        // return KeycloakService.auth.authz && KeycloakService.auth.authz.user.canAccessToDicomAssociation;
+        return KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed.canImportFromPACS;
     }
 
 }
