@@ -37,6 +37,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			@ApiParam(value = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) {
 		importerService.setImportJob(importJob);
 		importerService.createAllDatasetAcquisition();
+		importerService.cleanTempFiles(importJob.getWorkFolder());
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 

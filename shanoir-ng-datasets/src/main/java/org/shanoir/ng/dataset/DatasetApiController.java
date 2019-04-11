@@ -305,7 +305,7 @@ public class DatasetApiController implements DatasetApi {
 				List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
 				for (Iterator itFiles = datasetFiles.iterator(); itFiles.hasNext();) {
 					DatasetFile datasetFile = (DatasetFile) itFiles.next();
-					URL url = new URL(datasetFile.getPath());
+					URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
 					pathURLs.add(url);
 				}
 			}

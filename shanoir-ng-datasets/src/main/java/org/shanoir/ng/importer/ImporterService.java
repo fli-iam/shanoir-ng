@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.importer;
 
+import java.io.File;
+
 import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.Examination;
@@ -23,6 +25,7 @@ import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +102,22 @@ public class ImporterService {
 					}
 				}
 			}
+		}
+	}
+	
+	public void cleanTempFiles(String workFolder) {
+		
+		if (workFolder != null) {
+			final boolean success = Utils.deleteFolder((new File(workFolder)));
+			if (!success) {
+				if (new File(workFolder).exists()) {
+					LOG.error("cleanTempFiles: " + workFolder + " could not be deleted" );
+				} else {
+					LOG.error("cleanTempFiles: " + workFolder + " does not exist" );
+				}
+			}
+		} else {
+			LOG.error("cleanTempFiles: workFolder is null");
 		}
 	}
 

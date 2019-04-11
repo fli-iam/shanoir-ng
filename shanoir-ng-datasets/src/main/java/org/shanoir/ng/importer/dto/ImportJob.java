@@ -45,6 +45,9 @@ public class ImportJob {
     @JsonProperty("frontAcquisitionEquipmentId")
     private Long frontAcquisitionEquipmentId;
     
+	@JsonProperty("workFolder")
+	private String workFolder;
+    
 	public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}
@@ -99,5 +102,13 @@ public class ImportJob {
 
 	public void setFrontAcquisitionEquipmentId(Long frontAcquisitionEquipmentId) {
 		this.frontAcquisitionEquipmentId = frontAcquisitionEquipmentId;
+	}
+
+	public String getWorkFolder() {
+		return workFolder;
+	}
+
+	public void setWorkFolder(String workFolder) {
+		this.workFolder = workFolder;
 	}
 }
