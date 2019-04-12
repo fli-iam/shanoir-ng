@@ -8,6 +8,7 @@ import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 /**
  * Decorator for dataset acquisitions mapper.
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
+@Component
 public abstract class MrDatasetDecorator implements MrDatasetMapper {
 
 	@Autowired

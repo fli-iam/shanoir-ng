@@ -6,9 +6,9 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import org.shanoir.ng.dataset.DatasetExpression;
 import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 @Entity
-public class EchoTime extends AbstractGenericItem {
+public class EchoTime extends AbstractEntity {
 
 	/**
 	 * UID

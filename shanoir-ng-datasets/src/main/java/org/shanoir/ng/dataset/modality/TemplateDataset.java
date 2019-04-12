@@ -2,7 +2,7 @@ package org.shanoir.ng.dataset.modality;
 
 import javax.persistence.Entity;
 
-import org.shanoir.ng.dataset.Dataset;
+import org.shanoir.ng.dataset.model.Dataset;
 
 /**
  * Template dataset.

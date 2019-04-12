@@ -6,6 +6,10 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.examination.dto.ExaminationDTO;
+import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
+import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,7 +55,7 @@ public class ExaminationMapperTest {
 
 	@Test
 	public void examinationToExaminationDTOTest() {
-		SecurityContextUtil.initAuthenticationContext();
+		SecurityContextUtil.initAuthenticationContext("ROEL_ADMIN");
 
 		final ExaminationDTO examinationDTO = examinationMapper.examinationToExaminationDTO(createExamination());
 		Assert.assertNotNull(examinationDTO);

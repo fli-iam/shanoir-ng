@@ -106,3 +106,19 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
+    
+---
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:h2:mem:SHANOIR_NG_DATASET;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    initialize: true
+    data: classpath:/scripts/test-data-h2.sql
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create-drop

@@ -2,7 +2,7 @@ package org.shanoir.ng.dataset.modality;
 
 import javax.persistence.Entity;
 
-import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * MR dataset metadata that could be updated by study card.
@@ -11,7 +11,7 @@ import org.shanoir.ng.shared.model.AbstractGenericItem;
  *
  */
 @Entity
-public class MrDatasetMetadata extends AbstractGenericItem {
+public class MrDatasetMetadata extends AbstractEntity {
 
 	/**
 	 * UID

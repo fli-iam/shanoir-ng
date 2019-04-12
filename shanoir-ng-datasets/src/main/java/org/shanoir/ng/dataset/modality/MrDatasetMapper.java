@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
-import org.shanoir.ng.dataset.DatasetMetadataMapper;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;

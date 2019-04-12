@@ -2,13 +2,16 @@ package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.shanoir.ng.dataset.Dataset;
-import org.shanoir.ng.datasetacquisition.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
@@ -43,7 +46,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	MrProtocolStrategy mrProtocolStrategy;
 	
 	@Autowired
-	DatasetStrategy<Dataset> mrDatasetStrategy;
+	DatasetStrategy<MrDataset> mrDatasetStrategy;
 	
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) {
@@ -66,11 +69,13 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);
 	
 		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level. 
-		DatasetsWrapper<Dataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+		DatasetsWrapper<MrDataset> datasetsWrapper = mrDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, importJob);
+		List<Dataset> genericizedList = new ArrayList<Dataset>();
 		for (Dataset dataset : datasetsWrapper.getDatasets()) {
 			dataset.setDatasetAcquisition(mrDatasetAcquisition);
+			genericizedList.add(dataset);
 		}
-		mrDatasetAcquisition.setDatasets(datasetsWrapper.getDatasets());
+		mrDatasetAcquisition.setDatasets(genericizedList);
 		
 		// total acquisition time
 		if(mrDatasetAcquisition.getMrProtocol().getAcquisitionDuration() == null) {
