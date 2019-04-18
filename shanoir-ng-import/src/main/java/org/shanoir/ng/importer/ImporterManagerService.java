@@ -115,7 +115,7 @@ public class ImporterManagerService {
 				// convert instances to images, as already done after zip file upload
 				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true);
 			} else if (importJob.isFromDicomZip() || importJob.isFromShanoirUploader()) {
-				importJobDir = new File(userImportDir.getAbsolutePath(), importJob.getWorkFolder());
+				importJobDir = new File(importJob.getWorkFolder());
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}

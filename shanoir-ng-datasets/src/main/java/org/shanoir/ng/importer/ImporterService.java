@@ -38,6 +38,8 @@ public class ImporterService {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ImporterService.class);
 	
+	private static final String UPLOAD_EXTENSION = ".upload";
+	
 	@Autowired
 	private ExaminationService examinationService;
 
@@ -108,6 +110,10 @@ public class ImporterService {
 	public void cleanTempFiles(String workFolder) {
 		
 		if (workFolder != null) {
+			// delete workFolder.upload file
+			File uploadZipFile = new File(workFolder.concat(UPLOAD_EXTENSION));
+			uploadZipFile.delete();
+			// delete workFolder
 			final boolean success = Utils.deleteFolder((new File(workFolder)));
 			if (!success) {
 				if (new File(workFolder).exists()) {
