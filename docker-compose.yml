@@ -54,8 +54,8 @@ services:
   database:
     container_name: database
     build: ./docker-compose/database
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
+    env_file:
+      - ./docker-compose/database/variables.env
     volumes:
       - "database-data:/var/lib/mysql"
     ports:
@@ -252,6 +252,7 @@ services:
     build: ./docker-compose/nginx
     volumes:
       - "logs:/var/log/nginx"
+      - "C:/Users/yyao/git/shanoir-ng/shanoir-ng-front/dist:/etc/nginx/html:ro"
       - certificate-share-data:/opt/ssl:ro
     networks:
       - shanoir_ng_network    
