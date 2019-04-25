@@ -252,7 +252,6 @@ services:
     build: ./docker-compose/nginx
     volumes:
       - "logs:/var/log/nginx"
-      - "C:/Users/yyao/git/shanoir-ng/shanoir-ng-front/dist:/etc/nginx/html:ro"
       - certificate-share-data:/opt/ssl:ro
     networks:
       - shanoir_ng_network    
