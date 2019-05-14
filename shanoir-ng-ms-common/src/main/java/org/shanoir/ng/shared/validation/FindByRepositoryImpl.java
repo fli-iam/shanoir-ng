@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * @author msimon
  *
  */
-@Component("CustomRepositoryImpl")
+@Component
 public class FindByRepositoryImpl<T extends AbstractEntity> implements FindByRepository<T> {
 
 	@PersistenceContext

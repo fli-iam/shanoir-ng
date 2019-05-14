@@ -17,10 +17,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.study.model.security.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.subject.controler.SubjectApi;
 import org.shanoir.ng.subject.dto.SubjectFromShupDTO;
 import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
@@ -307,7 +307,7 @@ public class SubjectApiSecurityTest {
 			StudyUser studyUser = new StudyUser();
 			studyUser.setUserId(LOGGED_USER_ID);
 			studyUser.setStudyId(id);
-			studyUser.setStudyUserRight(right);
+			studyUser.setStudyUserRights(Arrays.asList(right));
 			studyUserList.add(studyUser);			
 		}
 		study.setStudyUserList(studyUserList);

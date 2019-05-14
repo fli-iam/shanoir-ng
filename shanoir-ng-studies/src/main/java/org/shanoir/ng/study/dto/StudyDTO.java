@@ -7,7 +7,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.model.StudyType;
-import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.timepoint.TimepointDTO;
@@ -30,8 +30,6 @@ public class StudyDTO {
 	private List<IdNameDTO> experimentalGroupsOfSubjects;
 
 	private Long id;
-
-	private List<MembersCategoryDTO> membersCategories;
 
 	private boolean monoCenter;
 
@@ -143,21 +141,6 @@ public class StudyDTO {
 	 */
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	/**
-	 * @return the membersCategories
-	 */
-	public List<MembersCategoryDTO> getMembersCategories() {
-		return membersCategories;
-	}
-
-	/**
-	 * @param membersCategories
-	 *            the membersCategories to set
-	 */
-	public void setMembersCategories(List<MembersCategoryDTO> membersCategories) {
-		this.membersCategories = membersCategories;
 	}
 
 	/**

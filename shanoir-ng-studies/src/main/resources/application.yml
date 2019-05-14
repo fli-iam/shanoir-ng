@@ -73,6 +73,7 @@ ms.url:
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
   level:
+    org.shanoir: DEBUG
     org.springframework.web: ERROR
     org.hibernate: ERROR
 
@@ -96,6 +97,7 @@ spring:
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
   level:
+    org.shanoir: DEBUG
     org.springframework.web: DEBUG
     org.hibernate: ERROR
     org.springframework.amqp: OFF

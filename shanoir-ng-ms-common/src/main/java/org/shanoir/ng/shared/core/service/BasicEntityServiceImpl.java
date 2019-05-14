@@ -20,7 +20,7 @@ public abstract class BasicEntityServiceImpl<T extends AbstractEntity> implement
 	private CrudRepository<T, Long> repository;
 		
 	
-	/*
+	/**
 	 * Update an entity with the values of another.
 	 * 
 	 * @param from the entity with the new values.

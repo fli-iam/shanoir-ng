@@ -1,6 +1,7 @@
 package org.shanoir.ng.configuration.amqp;
 
-import org.shanoir.ng.messaging.InterMicroservicesCommunicator;
+import org.shanoir.ng.messaging.RabbitMqReceiver;
+import org.shanoir.ng.study.rights.ampq.RabbitMQQueues;
 import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,8 +39,8 @@ public class RabbitMQConfiguration {
 
     
 	@Bean
-	InterMicroservicesCommunicator receiver() {
-		return new InterMicroservicesCommunicator();
+	RabbitMqReceiver receiver() {
+		return new RabbitMqReceiver();
 	}
 
     @Bean
@@ -121,5 +122,19 @@ public class RabbitMQConfiguration {
 	public static Queue studycardQueue() {
 		return new Queue(STUDYCARD_QUEUE_TO_STUDY, true);
 	}
+	
+	@Bean
+	public static Queue studyUserDeleteQueue() {
+		return new Queue(RabbitMQQueues.STUDY_USER_DELETE_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue studyUserCreateQueue() {
+		return new Queue(RabbitMQQueues.STUDY_USER_CREATE_QUEUE, true);
+	}
 
+	@Bean
+	public static Queue studyUserUpdateQueue() {
+		return new Queue(RabbitMQQueues.STUDY_USER_UPDATE_QUEUE, true);
+	}
 }

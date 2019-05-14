@@ -6,7 +6,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
@@ -14,7 +13,6 @@ import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -25,14 +23,11 @@ import org.springframework.test.context.junit4.SpringRunner;
  * 
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT) 
 @ActiveProfiles("test")
 public class SubjectStudyMapperTest {
 
 	private static final Long SUBJECT_ID = 1L;
-
-	@MockBean
-	private AcquisitionEquipmentMapper acquisitionEquipmentMapperMock;
 
 	@Autowired
 	private SubjectStudyMapper subjectStudyMapper;

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { IdName } from '../../shared/models/id-name.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import { Study } from './study.model';
@@ -23,8 +23,8 @@ export class StudyService extends EntityService<Study> {
             .toPromise();
     }
 
-    getStudiesNames(): Promise<IdNameObject[]> {
-        return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
+    getStudiesNames(): Promise<IdName[]> {
+        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
             .toPromise();
     }
     

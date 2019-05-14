@@ -34,7 +34,7 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	 *            user id.
 	 * @return list of studies.
 	 */
-	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(Long userId, Integer studyUseRightId);
+	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(Long userId, Integer studyUseRightId);
 	
 	
 	/**
@@ -44,6 +44,6 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	 * @param studyUserRightId
 	 * @return
 	 */
-	List<IdNameDTO> findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(Long userId, Integer studyUserRightId);
+	List<IdNameDTO> findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(Long userId, Integer studyUserRightId);
 
 }

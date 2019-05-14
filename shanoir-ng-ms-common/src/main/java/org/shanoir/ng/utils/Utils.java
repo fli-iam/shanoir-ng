@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.shanoir.ng.shared.exception.ShanoirException;
 
 /**
  * Utility class

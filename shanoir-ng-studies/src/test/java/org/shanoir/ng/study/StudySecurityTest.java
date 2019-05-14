@@ -13,10 +13,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.study.model.security.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -97,11 +97,11 @@ public class StudySecurityTest {
 	public void testFindAllAsUserThatCanSee() throws ShanoirException {
 		assertAccessAuthorized(service::findAll);
 		
-		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Study[] 
+		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Study[] 
 				{ buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_SEE_ALL) } ));
 		assertEquals(2, service.findAll().size());
 		
-		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Study[] 
+		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Study[] 
 				{ buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL), buildStudyMock(2L, StudyUserRight.CAN_DOWNLOAD) } ));
 		assertEquals(1, service.findAll().size());
 	}
@@ -150,7 +150,7 @@ public class StudySecurityTest {
 			StudyUser studyUser = new StudyUser();
 			studyUser.setUserId(LOGGED_USER_ID);
 			studyUser.setStudyId(id);
-			studyUser.setStudyUserRight(right);
+			studyUser.setStudyUserRights(Arrays.asList(right));
 			studyUserList.add(studyUser);			
 		}
 		study.setStudyUserList(studyUserList);

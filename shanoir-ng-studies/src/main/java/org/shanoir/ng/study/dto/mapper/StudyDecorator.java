@@ -1,20 +1,12 @@
 package org.shanoir.ng.study.dto.mapper;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjectsMapper;
-import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.study.dto.MembersCategoryDTO;
 import org.shanoir.ng.study.dto.SimpleStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.study.model.security.StudyUserRight;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,42 +87,8 @@ public abstract class StudyDecorator implements StudyMapper {
 			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
 					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
-			if (study.getStudyUserList() != null && !study.getStudyUserList().isEmpty()) {
-				prepareMembersCategories(study, studyDTO);
-			}
 		}
 		return studyDTO;
-	}
-
-	private void prepareMembersCategories(final Study study, final StudyDTO studyDTO) {
-		// Sort members by right
-		final Map<StudyUserRight, List<IdNameDTO>> membersMap = new HashMap<>();
-		for (StudyUser studyUser : study.getStudyUserList()) {
-			final IdNameDTO member = new IdNameDTO(studyUser.getUserId(), studyUser.getUserName());
-			if (membersMap.containsKey(studyUser.getStudyUserRight())) {
-				membersMap.get(studyUser.getStudyUserRight()).add(member);
-			} else {
-				final List<IdNameDTO> studyUsers = new ArrayList<>();
-				studyUsers.add(member);
-				membersMap.put(studyUser.getStudyUserRight(), studyUsers);
-			}
-		}
-		// Transform map into list
-		studyDTO.setMembersCategories(new ArrayList<>());
-		for (StudyUserRight type : membersMap.keySet()) {
-			studyDTO.getMembersCategories().add(new MembersCategoryDTO(type, membersMap.get(type)));
-		}
-		// Sort categories by importance
-		Collections.sort(studyDTO.getMembersCategories(), new MembersCategoryComparator());
-	}
-	
-	private class MembersCategoryComparator implements Comparator<MembersCategoryDTO> {
-		
-		@Override
-		public int compare(MembersCategoryDTO category1, MembersCategoryDTO category2) {
-			return (category1.getStudyUserRight().getId() > category2.getStudyUserRight().getId()) ? 1 : -1;
-		}
-		
 	}
 }
 

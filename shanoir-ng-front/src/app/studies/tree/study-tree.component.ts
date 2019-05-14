@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { StudyCenter } from '../shared/study-center.model';
-import { StudyUserType } from '../shared/study-user-type.enum';
+import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 
 
@@ -20,7 +20,7 @@ import { Study } from '../shared/study.model';
 export class StudyTreeComponent {
 
     private brainIconPath: string = ImagesUrlUtil.BRAIN_ICON_PATH;
-    public folderIconPath: string = ImagesUrlUtil.FOLDER_12_ICON_PATH;
+    private folderIconPath: string = ImagesUrlUtil.FOLDER_12_ICON_PATH;
     private homeIconPath: string = ImagesUrlUtil.HOME_ICON_PATH;
     private listIconPath: string = ImagesUrlUtil.LIST_ICON_PATH;
     @Input() study: Study;
@@ -91,8 +91,8 @@ export class StudyTreeComponent {
         this.router.navigate(['/dataset/details/' + datasetId])
     }
 
-    private getStudyUserTypeLabel(studyUserType: StudyUserType) {
-        return StudyUserType.getLabel(studyUserType);
+    private getStudyUserTypeLabel(studyUserRight: StudyUserRight) {
+        return StudyUserRight.getLabel(studyUserRight);
     }
 
 }

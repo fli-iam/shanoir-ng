@@ -8,10 +8,15 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.SubjectType;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
  * Relation between the subjects and the studies.
@@ -33,6 +38,7 @@ public class SubjectStudy extends AbstractEntity {
 	private boolean physicallyInvolved;
 
 	/** Study. */
+	//@JsonManagedReference
 	@ManyToOne
 	@JoinColumn(name = "study_id")
 	@NotNull

@@ -17,11 +17,11 @@ import org.junit.runner.RunWith;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.controler.StudyApi;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.study.model.security.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -137,8 +137,8 @@ public class StudyApiSecurityTest {
 	private void testRead() throws ShanoirException {
 		// No rights
 		Study studyMockNoRights = buildStudyMock(1L);
-		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(LOGGED_USER_ID, null)).willReturn(Arrays.asList(studyMockNoRights));
-		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(LOGGED_USER_ID, null)).willReturn(Arrays.asList(new IdNameDTO(studyMockNoRights.getId(), studyMockNoRights.getName())));
+		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, null)).willReturn(Arrays.asList(studyMockNoRights));
+		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, null)).willReturn(Arrays.asList(new IdNameDTO(studyMockNoRights.getId(), studyMockNoRights.getName())));
 		given(repository.findAll()).willReturn(Arrays.asList(studyMockNoRights));
 		given(repository.findOne(1L)).willReturn(studyMockNoRights);
 		assertAccessAuthorized(api::findStudies);
@@ -150,8 +150,8 @@ public class StudyApiSecurityTest {
 		// Wrong Rights
 		Study studyMockWrongRights = buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
 		given(repository.findAll()).willReturn(Arrays.asList(studyMockWrongRights));
-		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(studyMockWrongRights));
-		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new IdNameDTO(studyMockWrongRights.getId(), studyMockWrongRights.getName())));
+		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(studyMockWrongRights));
+		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new IdNameDTO(studyMockWrongRights.getId(), studyMockWrongRights.getName())));
 		given(repository.findOne(2L)).willReturn(studyMockWrongRights);
 		assertAccessAuthorized(api::findStudies);
 		assertEquals(null, api.findStudies().getBody());
@@ -163,8 +163,8 @@ public class StudyApiSecurityTest {
 		Study studyMockRightRights = buildStudyMock(3L, StudyUserRight.CAN_SEE_ALL);
 		given(repository.findAll()).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
 		given(repository.findAll(Arrays.asList(3L))).willReturn(Arrays.asList(studyMockRightRights));
-		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
-		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRightOrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new IdNameDTO(studyMockWrongRights.getId(), studyMockWrongRights.getName()), new IdNameDTO(studyMockNoRights.getId(), studyMockNoRights.getName()), new IdNameDTO(studyMockRightRights.getId(), studyMockRightRights.getName())));
+		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
+		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new IdNameDTO(studyMockWrongRights.getId(), studyMockWrongRights.getName()), new IdNameDTO(studyMockNoRights.getId(), studyMockNoRights.getName()), new IdNameDTO(studyMockRightRights.getId(), studyMockRightRights.getName())));
 		given(repository.findOne(3L)).willReturn(studyMockRightRights);
 		assertAccessAuthorized(api::findStudies);
 		assertNotNull(api.findStudies().getBody());
@@ -183,7 +183,7 @@ public class StudyApiSecurityTest {
 			StudyUser studyUser = new StudyUser();
 			studyUser.setUserId(LOGGED_USER_ID);
 			studyUser.setStudyId(id);
-			studyUser.setStudyUserRight(right);
+			studyUser.setStudyUserRights(Arrays.asList(right));
 			studyUserList.add(studyUser);			
 		}
 		study.setStudyUserList(studyUserList);

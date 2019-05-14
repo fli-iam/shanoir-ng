@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ManufacturerModel } from './manufacturer-model.model';
 
@@ -12,13 +12,13 @@ export class ManufacturerModelService extends EntityService<ManufacturerModel> {
 
     getEntityInstance() { return new ManufacturerModel(); }
 
-    getManufacturerModelsNames(): Promise<IdNameObject[]> {
-        return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_MANUF_MODEL_NAMES_URL)
+    getManufacturerModelsNames(): Promise<IdName[]> {
+        return this.http.get<IdName[]>(AppUtils.BACKEND_API_MANUF_MODEL_NAMES_URL)
             .toPromise();
     }
 
-    getCenterManufacturerModelsNames(centerId:Number): Promise<IdNameObject[]> {
-        return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_CENTER_MANUF_MODEL_NAMES_URL+ '/' + centerId)
+    getCenterManufacturerModelsNames(centerId:Number): Promise<IdName[]> {
+        return this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_MANUF_MODEL_NAMES_URL+ '/' + centerId)
             .toPromise();
     }
 }

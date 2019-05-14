@@ -91,8 +91,6 @@ public class StudyApiController implements StudyApi {
 		
 		try {
 			studyService.update(study);
-		} catch (AccessDeniedException e) {
-			return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}

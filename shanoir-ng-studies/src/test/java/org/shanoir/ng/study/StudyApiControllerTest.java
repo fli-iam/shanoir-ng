@@ -136,8 +136,7 @@ public class StudyApiControllerTest {
 				.andExpect(status().isOk());
 	}
 
-	// TODO: manage keycloak token
-	// @Test
+	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void updateStudyTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)

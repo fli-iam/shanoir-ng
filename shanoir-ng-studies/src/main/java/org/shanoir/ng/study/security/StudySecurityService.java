@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.study.model.security.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.repository.StudyUserRepository;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
@@ -30,6 +30,9 @@ public class StudySecurityService {
 	
 	@Autowired
 	SubjectRepository subjectRepository;
+	
+	@Autowired
+	StudyUserRepository studyUserRepository;
 		
 	
 	/**
@@ -38,13 +41,33 @@ public class StudySecurityService {
 	 * @param studyId the study id
 	 * @param rightStr the right
 	 * @return true or false
+	 * @throws EntityNotFoundException 
 	 */
-    public boolean hasRightOnStudy(Long studyId, String rightStr) {
+    public boolean hasRightOnStudy(Long studyId, String rightStr) throws EntityNotFoundException {
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
         Study study = studyRepository.findOne(studyId);
         if (study == null) throw new EntityNotFoundException("Cannot find study with id " + studyId);
         return hasPrivilege(study, right);
     }
+    
+    
+    /**
+	 * Check that the connected user has the given right for at least one study.
+	 * 
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+    public boolean hasRightOnOneStudy(String rightStr) {
+    	StudyUserRight right = StudyUserRight.valueOf(rightStr);
+        List<StudyUser> studyUsers = studyUserRepository.findByUserId(KeycloakUtil.getTokenUserId());
+        for (StudyUser su : studyUsers) {
+        	if (su.getStudyUserRights().contains(right)) {
+        		return true;
+        	}
+        }
+        return false;
+    }
+    
     
     /**
 	 * Check that the connected user has the given right for the given study.
@@ -59,6 +82,7 @@ public class StudySecurityService {
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
         return hasPrivilege(study, right);
     }
+    
     
     /**
 	 * Check that the connected user has the given right for the given study.
@@ -81,8 +105,9 @@ public class StudySecurityService {
      * @param subjectId the subject id
      * @param rightStr the right
      * @return true or false
+     * @throws EntityNotFoundException 
      */
-    public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) {
+    public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
     	Subject subject = subjectRepository.findOne(subjectId);
     	if (subject == null) throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
@@ -92,14 +117,16 @@ public class StudySecurityService {
     	return false;
     }
     
+    
     /**
      * Check that the connected user has the given right in every study to which the subject participates.
      * 
      * @param subjectId the subject id
      * @param rightStr the right
      * @return true or false
+     * @throws EntityNotFoundException 
      */
-    public boolean hasRightOnSubjectForEveryStudy(Long subjectId, String rightStr) {
+    public boolean hasRightOnSubjectForEveryStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
     	Subject subject = subjectRepository.findOne(subjectId);
     	if (subject == null) throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
@@ -108,6 +135,7 @@ public class StudySecurityService {
     	}
     	return true;
     }
+    
     
     /**
      * Check that the connected user has the given right in at least one study to which the subject participates.
@@ -127,6 +155,7 @@ public class StudySecurityService {
     	}
     	return false;
     }
+    
     
     /**
      * For every subject of the list, check that the connected user has the given right in at least one study to which the subject participates.
@@ -199,6 +228,7 @@ public class StudySecurityService {
     	return true;
     }
     
+    
     /**
      * For every study of the list, check that the connected user has the given right.
 	 *
@@ -222,6 +252,7 @@ public class StudySecurityService {
     	dtos = newList;
     	return true;
     }
+    
     
     /**
      * For every study of the list, check that the connected user has the given right.
@@ -247,6 +278,28 @@ public class StudySecurityService {
     	return true;
     }
     
+    
+    /**
+     * For every study of the list, check that the connected user has the given right.
+	 *
+     * @param dtos
+     * @param rightStr
+     * @return true or false
+     */
+    public boolean filterStudiesHasRight(List<Long> ids, String rightStr) {
+    	StudyUserRight right = StudyUserRight.valueOf(rightStr);
+    	if (ids == null) return true;
+    	List<Long> newList = new ArrayList<>();
+    	for (Study study : studyRepository.findAll(ids)) {
+    		if (hasPrivilege(study, right)) {
+    			newList.add(study.getId());
+    		}
+    	}
+    	ids = newList;
+    	return true;
+    }
+    
+    
     /**
      * Check that the connected user has the given right for all the studies linked inside the given list.
      * 
@@ -269,6 +322,7 @@ public class StudySecurityService {
     	if (nbStudies != ids.size()) return false;
     	return true;
     }
+    
     
     /**
      * Check that the connected user has this right on this study.
@@ -297,6 +351,6 @@ public class StudySecurityService {
 			.filter(su -> userId.equals(su.getUserId()))
 			.findAny().orElse(null);
 		if (studyUser == null) return false;
-		return neededRight.equals(studyUser.getStudyUserRight());
-    }   
+		return studyUser.getStudyUserRights() != null && studyUser.getStudyUserRights().contains(neededRight);
+    }
 }

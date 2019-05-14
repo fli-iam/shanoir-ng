@@ -26,6 +26,8 @@ public class CoilServiceImpl extends BasicEntityServiceImpl<Coil> implements Coi
 		to.setName(from.getName());
 		to.setNumberOfChannels(from.getNumberOfChannels());
 		to.setSerialNumber(from.getSerialNumber());
+		to.setCenter(from.getCenter());
+		to.setManufacturerModel(from.getManufacturerModel());
 		return to;
 	}
 

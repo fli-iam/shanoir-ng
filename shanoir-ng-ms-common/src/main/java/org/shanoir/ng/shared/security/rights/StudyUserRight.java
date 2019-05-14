@@ -1,4 +1,4 @@
-package org.shanoir.ng.study.model.security;
+package org.shanoir.ng.shared.security.rights;
 
 /**
  * Study rights for an user.

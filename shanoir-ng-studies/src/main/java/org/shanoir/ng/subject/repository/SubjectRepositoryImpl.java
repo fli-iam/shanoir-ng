@@ -29,7 +29,6 @@ public class SubjectRepositoryImpl implements SubjectRepositoryCustom {
 		return em.createQuery(sqlQuery.toString()).setParameter("value", value).getResultList();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Subject findSubjectWithSubjectStudyById(Long id) {
 		// TODO Auto-generated method stu

@@ -3,6 +3,7 @@ package org.shanoir.ng.study;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -33,7 +35,6 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 public class StudyRepositoryTest {
 
 	private static final Long STUDY_TEST_1_ID = 1L;
-	private static final String STUDY_TEST_1_NAME = "shanoirStudy1";
 
 	/*
 	 * Mocks used to avoid unsatisfied dependency exceptions.
@@ -47,6 +48,9 @@ public class StudyRepositoryTest {
 
 	@Autowired
 	private StudyRepository studyRepository;
+	
+	@Autowired
+	private StudyUserRepository studyUserRepository;
 
 	@Test
 	public void create() {
@@ -69,14 +73,6 @@ public class StudyRepositoryTest {
 
 		final List<Study> studyList = (List<Study>) studyRepository.findAll();
 		assertEquals(2, studyList.size());
-	}
-
-	@Test
-	public void findByTest() throws Exception {
-		List<Study> studiesDb = studyRepository.findBy("name", STUDY_TEST_1_NAME);
-		assertNotNull(studiesDb);
-		assertThat(studiesDb.size()).isEqualTo(1);
-		assertThat(studiesDb.get(0).getId()).isEqualTo(STUDY_TEST_1_ID);
 	}
 
 	@Test
@@ -126,5 +122,25 @@ public class StudyRepositoryTest {
 
 		assertEquals("StudyTest", studyFound.getName());
 	}
+	
+	@Test
+	public void testRights() {
+		Study studyFound = studyRepository.findOne(1L);
+		assertEquals(2, studyFound.getStudyUserList().size());
+		assertEquals(2, studyFound.getStudyUserList().get(1).getStudyUserRights().size());
+	}
+	
+//	@Test
+//	public void testUpdateStudyUsers() {
+//		int indexToDelete = 1;
+//		Study studyFound = studyRepository.findOne(1L);
+//		assertEquals(2, studyFound.getStudyUserList().size());
+//		Long deletedId = studyFound.getStudyUserList().get(indexToDelete).getId();
+//		
+//		assertNotNull(studyUserRepository.findOne(deletedId));
+//		studyFound.getStudyUserList().remove(indexToDelete);
+//		studyRepository.save(studyFound);
+//		assertNull(studyUserRepository.findOne(deletedId));
+//	}
 
 }

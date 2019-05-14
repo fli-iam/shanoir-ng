@@ -13,4 +13,8 @@ public class MicroServiceCommunicationException extends ShanoirException {
 	public MicroServiceCommunicationException(String message) {
 		super(message);
 	}
+	
+	public MicroServiceCommunicationException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

@@ -29,13 +29,13 @@ export abstract class EntityService<T extends Entity> {
     }
 
     create(entity: T): Promise<T> {
-        return this.http.post<T>(this.API_URL, entity.stringify())
+        return this.http.post<any>(this.API_URL, entity.stringify())
         .map((entity) => this.toRealObject(entity))
             .toPromise();
     }
 
     update(id: number, entity: T): Promise<void> {
-        return this.http.put<void>(this.API_URL + '/' + id, entity.stringify())
+        return this.http.put<any>(this.API_URL + '/' + id, entity.stringify())
             .toPromise();
     }
 

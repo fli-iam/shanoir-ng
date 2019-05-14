@@ -1,6 +1,7 @@
 package org.shanoir.ng.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.center.model.Center;
@@ -10,9 +11,9 @@ import org.shanoir.ng.manufacturermodel.model.DatasetModalityType;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.common.CommonIdsDTO;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.study.model.security.StudyUserRight;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.subject.model.Subject;
 
 /**
@@ -150,7 +151,7 @@ public final class ModelsUtil {
 	public static StudyUser createStudyUser() {
 		final StudyUser studyUser = new StudyUser();
 		studyUser.setStudyId(STUDY_ID);
-		studyUser.setStudyUserRight(StudyUserRight.CAN_ADMINISTRATE);
+		studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_ADMINISTRATE));
 		studyUser.setUserId(USER_ID);
 		return studyUser;
 	}

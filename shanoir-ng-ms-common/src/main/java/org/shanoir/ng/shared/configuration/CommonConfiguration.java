@@ -1,4 +1,4 @@
-package org.shanoir.ng.configuration;
+package org.shanoir.ng.shared.configuration;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
  *
  */
 @Configuration
-public class ShanoirStudiesConfiguration {
+public class CommonConfiguration {
 
 	@Bean
 	public RestTemplate restTemplate(RestTemplateBuilder builder) {
