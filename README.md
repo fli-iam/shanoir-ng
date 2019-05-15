@@ -1,14 +1,13 @@
-# Shanoir NG - Import, manage and share neuroimaging data
+# Shanoir-NG - Import, manage and share neuroimaging data
 
-Shanoir NG (Next Generation) is a software that helps neuroimaging analysis researchers, radiologists, and MRI operators to organize and share neuroimaging datasets. 
-
-_Here we need to present the main functionnalities of Shanoir (import formats, data model, security and roles, ...)_
-
-Shanoir NG is a complete technological remake of the first version of the Shanoir application, maintaining the key concepts of Shanoir, enhancing the functionalities and the user interface and providing a great flexibility for further improvements.
-
-Shanoir NG is copyrighted by [Inria](https://www.inria.fr/) and is now open source under the GNU General Public License v3.0. See the LICENCE file at the root of this project. If you want to contribute, please see the following page : [Contribution Workflow](https://github.com/fli-iam/shanoir-ng/wiki/Contribution-Workflow).
+Shanoir-NG (Next Generation) is a software that helps neuroimaging analysis researchers, radiologists, and MRI operators to organize and share neuroimaging datasets. 
 
 GitHub is a tool for developers if you are seeking information at a user level view please visit http://shanoir.org.
+
+Shanoir-NG is a complete technological remake of the first version of the Shanoir application, maintaining the key concepts of Shanoir, enhancing the functionalities and the user interface and providing a great flexibility for further improvements.
+
+Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is now open source under the GNU General Public License v3.0. See the LICENCE file at the root of this project. If you want to contribute, please see the following page : [Contribution Workflow](https://github.com/fli-iam/shanoir-ng/wiki/Contribution-Workflow).
+
 
 # :warning: Disclaimers :warning:
 
