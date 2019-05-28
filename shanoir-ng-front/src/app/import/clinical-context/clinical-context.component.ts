@@ -26,6 +26,7 @@ import { NiftiConverterService } from '../../niftiConverters/nifti.converter.ser
 import { slideDown } from '../../shared/animations/animations';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
@@ -65,7 +66,8 @@ export class ClinicalContextComponent{
             private examinationService: ExaminationService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
-            private importDataService: ImportDataService) {
+            private importDataService: ImportDataService,
+            private msgBoxService: MsgBoxService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
             this.router.navigate(['imports'], {replaceUrl: true});
@@ -129,24 +131,27 @@ export class ClinicalContextComponent{
         let completeStudyPromises: Promise<void>[] = [];
         completeStudyPromises.push(Promise.all([this.studyService.findStudiesForImport(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
-                for (let study of allStudies) {
-                    for (let studyCenter of study.studyCenterList) {
-                        let center = allCenters.find(center => center.id === studyCenter.center.id);
-                        if (center) {
-                            let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
-                                && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
-                                && acqEqt.manufacturerModel.manufacturer.name === equipment.manufacturer);
-                            for (let compatibleAcqEqt of compatibleAcqEqts) {
-                                compatibleAcqEqt.compatible = true;
-                                center.compatible = true;
-                                study.compatible = true;
+                if (!allStudies) {this.msgBoxService.log('error', 
+                    'Impossible to import since you are not member of any research study. Please contact the administrator.', 10000);}
+                else {
+                    for (let study of allStudies) {
+                        for (let studyCenter of study.studyCenterList) {
+                            let center = allCenters.find(center => center.id === studyCenter.center.id);
+                            if (center) {
+                                let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
+                                    && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
+                                    && acqEqt.manufacturerModel.manufacturer.name === equipment.manufacturer);
+                                for (let compatibleAcqEqt of compatibleAcqEqts) {
+                                    compatibleAcqEqt.compatible = true;
+                                    center.compatible = true;
+                                    study.compatible = true;
+                                }
+                                studyCenter.center = center;
                             }
-                            studyCenter.center = center;
-                        }
-                    } 
+                        } 
                     this.studies.push(study);
                 }
-            }));
+            }}));
         return Promise.all(completeStudyPromises).then(() => {});
     }
 
@@ -192,6 +197,7 @@ export class ClinicalContextComponent{
     }
 
     private onSelectSubject(): void {
+        console.log('pass in onSelectSubject, this.subject: ', this.subject)
         this.examinations = [];
         this.examination = null;
         if (this.subject) {
@@ -200,6 +206,7 @@ export class ClinicalContextComponent{
             .then(examinations => this.examinations = examinations);
         }
         this.onContextChange();
+        console.log('onselectSubject, contextBackUp: ', this.importDataService.contextBackup, 'this.subject: ', this.subject)
     }
     
     private onSelectExam(): void {
@@ -272,6 +279,7 @@ export class ClinicalContextComponent{
             this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
             importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                 this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+                console.log('openCreateSubject: ', this.importDataService.contextBackup.subject)
             });
         });
     }

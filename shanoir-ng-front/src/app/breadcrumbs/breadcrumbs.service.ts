@@ -14,11 +14,10 @@
 
 import { LocationStrategy } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { Event, NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { Subject } from 'rxjs';
-
-import { Entity } from '../shared/components/entity/entity.abstract';
 import { Title } from '@angular/platform-browser';
+import { Event, NavigationEnd, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { Entity } from '../shared/components/entity/entity.abstract';
 
 @Injectable()
 export class BreadcrumbsService {
