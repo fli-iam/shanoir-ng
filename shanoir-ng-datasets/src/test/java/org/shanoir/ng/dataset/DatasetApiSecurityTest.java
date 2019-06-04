@@ -2,8 +2,8 @@ package org.shanoir.ng.dataset;
 
 import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import java.io.IOException;
 import java.util.Set;
@@ -14,9 +14,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApi;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.shared.communication.StudyCommunicationService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.service.StudyCommunicationService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;

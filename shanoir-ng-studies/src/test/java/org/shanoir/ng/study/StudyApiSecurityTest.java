@@ -20,8 +20,8 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.controler.StudyApi;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
-import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -182,7 +182,7 @@ public class StudyApiSecurityTest {
 		for (StudyUserRight right : rights) {
 			StudyUser studyUser = new StudyUser();
 			studyUser.setUserId(LOGGED_USER_ID);
-			studyUser.setStudyId(id);
+			studyUser.setStudy(study);
 			studyUser.setStudyUserRights(Arrays.asList(right));
 			studyUserList.add(studyUser);			
 		}

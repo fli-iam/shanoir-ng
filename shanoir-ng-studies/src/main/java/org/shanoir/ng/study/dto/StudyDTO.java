@@ -7,7 +7,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.model.StudyType;
-import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.timepoint.TimepointDTO;
@@ -65,7 +65,7 @@ public class StudyDTO {
 	/**
 	 * Default constructor.
 	 */
-	public StudyDTO() {
+	public StudyDTO() { 
 	}
 
 	/**

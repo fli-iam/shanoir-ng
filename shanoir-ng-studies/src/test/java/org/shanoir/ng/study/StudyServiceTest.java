@@ -1,8 +1,5 @@
 package org.shanoir.ng.study;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
 
 import java.util.ArrayList;
@@ -23,9 +20,9 @@ import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
-import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.service.StudyServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -133,17 +130,20 @@ public class StudyServiceTest {
 	public void updateStudyUsersTest() throws EntityNotFoundException {
 		Study existing = createStudy();
 		existing.setStudyUserList(new ArrayList<StudyUser>());
-		existing.getStudyUserList().add(createStudyUsers(1L, 1L, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
-		existing.getStudyUserList().add(createStudyUsers(2L, 2L, StudyUserRight.CAN_ADMINISTRATE));
+		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+		existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, StudyUserRight.CAN_ADMINISTRATE));
 		
 		Study updated = createStudy();
 		updated.setStudyUserList(new ArrayList<StudyUser>());
-		updated.getStudyUserList().add(createStudyUsers(1L, 1L, StudyUserRight.CAN_DOWNLOAD));
-		updated.getStudyUserList().add(createStudyUsers(null, 3L, StudyUserRight.CAN_SEE_ALL));
+		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, StudyUserRight.CAN_DOWNLOAD));
+		updated.getStudyUserList().add(createStudyUsers(null, 3L, updated, StudyUserRight.CAN_SEE_ALL));
 		
 		given(studyRepository.findOne(STUDY_ID)).willReturn(existing);
-		given(studyUserRepository.findOne(1L)).willReturn(existing.getStudyUserList().get(0));
-		given(studyUserRepository.findOne(2L)).willReturn(existing.getStudyUserList().get(1));
+		given(studyUserRepository.findOne(1L)).willReturn((StudyUser) existing.getStudyUserList().get(0));
+		given(studyUserRepository.findOne(2L)).willReturn((StudyUser) existing.getStudyUserList().get(1));
+		List<StudyUser> in = new ArrayList<>(); in.add(updated.getStudyUserList().get(1));
+		List<StudyUser> out = new ArrayList<>(); out.add(createStudyUsers(4L, 3L, updated, StudyUserRight.CAN_SEE_ALL));
+		given(studyUserRepository.save(in)).willReturn(out);
 
 		studyService.update(updated);
 	}
@@ -156,10 +156,10 @@ public class StudyServiceTest {
 		return study;
 	}
 	
-	private StudyUser createStudyUsers(Long suId, Long userId, StudyUserRight... rights) {
+	private StudyUser createStudyUsers(Long suId, Long userId, Study study, StudyUserRight... rights) {
 		StudyUser studyUser = new StudyUser();
 		studyUser.setId(suId);
-		studyUser.setStudyId(STUDY_ID);
+		studyUser.setStudy(study);
 		studyUser.setUserId(userId);
 		List<StudyUserRight> studyUserRights = new ArrayList<>();
 		for (StudyUserRight right : rights) {

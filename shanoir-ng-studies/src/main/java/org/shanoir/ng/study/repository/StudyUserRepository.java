@@ -5,7 +5,8 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
-import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -19,5 +20,4 @@ public interface StudyUserRepository extends CrudRepository<StudyUser, Long> {
 	
 	@Transactional
 	void deleteByIdIn(Set<Long> ids);
-	
 }

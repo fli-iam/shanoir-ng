@@ -7,14 +7,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
-import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.command.CommandType;
+import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
@@ -79,7 +83,7 @@ public class StudyServiceImpl implements StudyService {
 		}
 		if (study.getStudyUserList() != null) {
 			for (final StudyUser studyUser: study.getStudyUserList()) {
-				studyUser.setStudyId(study.getId());
+				studyUser.setStudy(study);
 			}			
 		}
 		return studyRepository.save(study);
@@ -168,12 +172,12 @@ public class StudyServiceImpl implements StudyService {
 		}
 	}
 
+	@Transactional
 	private void updateStudyUsers(Study study, List<StudyUser> studyUsers) {
 		if (studyUsers == null) return;
 		// New lists of created / updated to send via RabbitMQ
 		List<StudyUser> toBeCreated = new ArrayList<>();
 		List<StudyUser> toBeUpdated = new ArrayList<>();
-		List<StudyUser> toBeDeleted = new ArrayList<>();
 
 		// Build maps of existing / replacing study users
 		Map<Long, StudyUser> existing = new HashMap<>();
@@ -201,27 +205,29 @@ public class StudyServiceImpl implements StudyService {
 		}
 		
 		// For those which need to be added, add them.
-		for (StudyUser su : toBeCreated) {
-			su.setStudyId(study.getId());
+		List<StudyUser> created = new ArrayList<>();
+		if (!toBeCreated.isEmpty()) {
+			for (StudyUser su : toBeCreated) {
+				su.setStudy(study);
+			}
+			// save them first to get their id
+			for (StudyUser su : studyUserRepository.save(toBeCreated)) created.add(su);
+			//studyUserRepository.save(toBeCreated);
+			study.getStudyUserList().addAll(created);			
 		}
-		studyUserRepository.save(toBeCreated);
-		study.getStudyUserList().addAll(toBeCreated);
 
-		// Deletes deleted here. Updates / creates will be done by saving the study
-		for (Long id : idsToBeDeleted) {
-			StudyUser su = studyUserRepository.findOne(id);
-			su.setStudyId(null);
-			su.setUserId(null);
-			su.setStudyUserRights(new ArrayList<StudyUserRight>());
-			toBeDeleted.add(su);
-		}
-		studyUserRepository.delete(toBeDeleted);
+		// Remove deleted
+		Utils.removeIdsFromList(idsToBeDeleted, study.getStudyUserList()); 
 		
 		// Send updates via RabbitMQ
 		try {
-			studyUserCom.broadcastDelete(idsToBeDeleted.toArray(new Long[0]));
-			studyUserCom.broadcastCreate(toBeCreated.toArray(new StudyUser[0]));
-			studyUserCom.broadcastUpdate(toBeUpdated.toArray(new StudyUser[0]));
+			List<StudyUserCommand> commands = new ArrayList<>();
+			for (Long id : idsToBeDeleted) commands.add(new StudyUserCommand(CommandType.DELETE, id));
+			for (StudyUser su : created) commands.add(new StudyUserCommand(CommandType.CREATE, su));
+			for (StudyUser su : toBeUpdated) commands.add(new StudyUserCommand(CommandType.UPDATE, su));
+			
+			studyUserCom.broadcast(commands);
+			
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not transmit study-user delete info through RabbitMQ");
 		}

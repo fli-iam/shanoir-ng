@@ -218,12 +218,4 @@ public class UserServiceSecurityTest {
 		assertAccessAuthorized(userService::updateLastLogin, USER_USERNAME);
 	}
 
-	private User createUser() {
-		final User user = new User();
-		user.setId(USER_ID);
-		user.setFirstName(UPDATED_USER_FIRSTNAME);
-		user.setUsername(USER_USERNAME);
-		return user;
-	}
-
 }

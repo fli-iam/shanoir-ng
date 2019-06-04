@@ -15,7 +15,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
  *
  */
 @Mapper(componentModel = "spring")
-public interface ManufacturerModelMapper {
+public interface ManufacturerModelMapper { 
 
 	/**
 	 * Map a @ManufacturerModel to a @IdNameDTO.

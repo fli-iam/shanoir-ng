@@ -112,6 +112,7 @@ public class ImportJobConstructorService {
 							serie.setIsSpectroscopy(false);
 						}
 					}
+					dIS.close();
 				}
 			}
 		}

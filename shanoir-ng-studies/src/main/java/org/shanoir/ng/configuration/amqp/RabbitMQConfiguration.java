@@ -1,7 +1,6 @@
 package org.shanoir.ng.configuration.amqp;
 
-import org.shanoir.ng.messaging.RabbitMqReceiver;
-import org.shanoir.ng.study.rights.ampq.RabbitMQQueues;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,10 +37,10 @@ public class RabbitMQConfiguration {
 	private static final String STUDYCARD_QUEUE_TO_STUDY = "studycard_queue_to_study";
 
     
-	@Bean
-	RabbitMqReceiver receiver() {
-		return new RabbitMqReceiver();
-	}
+//	@Bean
+//	RabbitMqReceiver receiver() {
+//		return new RabbitMqReceiver();
+//	}
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -124,17 +123,13 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
-	public static Queue studyUserDeleteQueue() {
-		return new Queue(RabbitMQQueues.STUDY_USER_DELETE_QUEUE, true);
+	public static Queue studyUserQueue() {
+		return new Queue("study-user", true);
 	}
 	
 	@Bean
-	public static Queue studyUserCreateQueue() {
-		return new Queue(RabbitMQQueues.STUDY_USER_CREATE_QUEUE, true);
-	}
+    public FanoutExchange fanout() {
+        return new FanoutExchange("study-user-exchange", true, false);
+    }
 
-	@Bean
-	public static Queue studyUserUpdateQueue() {
-		return new Queue(RabbitMQQueues.STUDY_USER_UPDATE_QUEUE, true);
-	}
 }

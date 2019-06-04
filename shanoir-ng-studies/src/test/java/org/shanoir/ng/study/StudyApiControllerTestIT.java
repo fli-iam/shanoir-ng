@@ -11,7 +11,7 @@
 //import org.shanoir.ng.center.model.Center;
 //import org.shanoir.ng.study.model.Study;
 //import org.shanoir.ng.study.model.StudyStatus;
-//import org.shanoir.ng.study.model.StudyUser;
+//import org.shanoir.ng.study.rights.StudyUser;
 //import org.shanoir.ng.study.model.security.StudyUserRight;
 //import org.shanoir.ng.studycenter.StudyCenter;
 //import org.shanoir.ng.utils.KeycloakControllerTestIT;

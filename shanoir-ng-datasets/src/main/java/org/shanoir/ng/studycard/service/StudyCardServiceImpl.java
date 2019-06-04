@@ -2,20 +2,15 @@ package org.shanoir.ng.studycard.service;
 
 import java.util.List;
 
-import org.shanoir.ng.configuration.amqp.RabbitMqConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.dto.StudyStudyCardDTO;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.Utils;
-import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Study Card service implementation.
@@ -88,13 +83,14 @@ public class StudyCardServiceImpl implements StudyCardService {
 	 * @throws MicroServiceCommunicationException 
 	 */
 	private boolean updateMsStudies(final StudyStudyCardDTO StudyStudyCardDTO) throws MicroServiceCommunicationException {
-		try {
-			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueToStudy().getName(),
-					new ObjectMapper().writeValueAsString(StudyStudyCardDTO));
-			return true;
-		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException("Error while communicating with Study MS.");
-		} 
+//		try {
+//			rabbitTemplate.convertAndSend(RabbitMqConfiguration.queueToStudy().getName(),
+//					new ObjectMapper().writeValueAsString(StudyStudyCardDTO));
+//			return true;
+//		} catch (AmqpException | JsonProcessingException e) {
+//			throw new MicroServiceCommunicationException("Error while communicating with Study MS.");
+//		} 
+		return true;
 	}
 
 	/**

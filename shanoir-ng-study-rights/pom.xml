@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+	<groupId>org.shanoir-ng</groupId>
+	<artifactId>shanoir-ng-back</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<relativePath>../shanoir-ng-back</relativePath>
+  </parent>
+
+
+  <packaging>jar</packaging>
+
+  <artifactId>shanoir-ng-study-rights</artifactId>
+  <name>shanoir-ng-study-rights</name>
+  <description>Shanoir study rights management</description>
+
+  <properties>
+  	<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
+	<spring.active.profile></spring.active.profile>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+		<groupId>org.shanoir-ng</groupId>
+		<artifactId>shanoir-ng-ms-common</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+  </dependencies>
+</project>

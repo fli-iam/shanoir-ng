@@ -43,4 +43,26 @@ public class Utils {
 		// o1.equals(o2) is not equivalent to o2.equals(o1) ! For instance with
 		// java.sql.Timestamp and java.util.Date
 	}
+	
+	public static <T> List<T> copyList(List<T> list) {
+    	List<T> copy = new ArrayList<T>();
+    	for (T item : list) copy.add(item);
+    	return copy;
+    }
+
+	
+	public static void removeIdsFromList(Iterable<Long> ids, List<? extends AbstractEntity> list) {
+		for (Long id : ids) {
+			int deletedIndex = -1;
+			int i = 0;
+			for (AbstractEntity entity : list) {
+				if (id.equals(entity.getId())) {
+					deletedIndex = i;
+					break;
+				}
+				i++;
+			}
+			if (deletedIndex > -1) list.remove(deletedIndex);
+		}
+	}
 }
