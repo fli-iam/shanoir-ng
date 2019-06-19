@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.center.model.Center;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.repository.StudyRepository;
@@ -76,7 +76,7 @@ public class StudyRepositoryTest {
 
 	@Test
 	public void findIdsAndNamesTest() throws Exception {
-		List<IdNameDTO> studiesDb = studyRepository.findIdsAndNames();
+		List<IdName> studiesDb = studyRepository.findIdsAndNames();
 		assertNotNull(studiesDb);
 		assertThat(studiesDb.size()).isEqualTo(3);
 	}

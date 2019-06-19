@@ -5,7 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.shanoir.ng.manufacturermodel.dto.ManufacturerModelDTO;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 
 
 /**
@@ -24,7 +24,7 @@ public interface ManufacturerModelMapper {
 	 *            manufacturer model to map.
 	 * @return manufacturer model DTO.
 	 */
-	IdNameDTO manufacturerModelToIdNameDTO(ManufacturerModel manufacturerModel);
+	IdName manufacturerModelToIdNameDTO(ManufacturerModel manufacturerModel);
 
 	/**
 	 * Map a @ManufacturerModel to a @ManufacturerModelDTO.

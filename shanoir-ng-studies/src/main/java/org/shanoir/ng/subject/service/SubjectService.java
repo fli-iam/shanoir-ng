@@ -2,6 +2,7 @@ package org.shanoir.ng.subject.service;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
@@ -25,6 +26,16 @@ public interface SubjectService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Subject> findAll();
+	
+	
+	/**
+	 * Get all the subjects.
+	 *
+	 * @return a list of subjects.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostFilter("hasAnyRole('ADMIN', 'EXPERT') or @studySecurityService.hasRightOnSubjectForOneStudy(filterObject.getId(), 'CAN_SEE_ALL')")
+	List<IdName> findNames();
 
 	
 	/**
@@ -116,6 +127,5 @@ public interface SubjectService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id) throws EntityNotFoundException;
-
 
 }

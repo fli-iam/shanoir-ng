@@ -20,6 +20,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.security.EditableOnlyBy;
+import org.shanoir.ng.shared.security.VisibleOnlyBy;
 import org.shanoir.ng.shared.validation.ExtensionWithMotivation;
 import org.shanoir.ng.shared.validation.Unique;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,37 +43,47 @@ public class User extends HalEntity implements UserDetails {
 	 */
 	private static final long serialVersionUID = -5277815428510293236L;
 
-	private boolean accountRequestDemand;
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+	private Boolean accountRequestDemand;
 
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@OneToOne(orphanRemoval = true)
 	private AccountRequestInfo accountRequestInfo;
 
-	private boolean canAccessToDicomAssociation;
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+	private Boolean canAccessToDicomAssociation;
 
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@LocalDateAnnotations
 	private LocalDate creationDate;
 
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@NotBlank
 	@Column(unique = true)
 	@Unique
 	private String email;
 	
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
 	@LocalDateAnnotations
 	private LocalDate expirationDate;
 
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@Embedded
 	private ExtensionRequestInfo extensionRequestInfo;
 
-	private boolean extensionRequestDemand;
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+	private Boolean extensionRequestDemand;
 	
-	private boolean firstExpirationNotificationSent;
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+	private Boolean firstExpirationNotificationSent;
 	
 	@NotBlank
 	private String firstName;
 
 	private String keycloakId;
 
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
 	@LocalDateAnnotations
 	private LocalDate lastLogin;
 
@@ -84,7 +95,8 @@ public class User extends HalEntity implements UserDetails {
 	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
 	private Role role;
 	
-	private boolean secondExpirationNotificationSent;
+	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+	private Boolean secondExpirationNotificationSent;
 
 	@NotBlank
 	@Column(unique = true)
@@ -104,7 +116,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the accountRequestDemand
 	 */
-	public boolean isAccountRequestDemand() {
+	public Boolean isAccountRequestDemand() {
 		return accountRequestDemand;
 	}
 
@@ -112,7 +124,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param accountRequestDemand
 	 *            the accountRequestDemand to set
 	 */
-	public void setAccountRequestDemand(final boolean accountRequestDemand) {
+	public void setAccountRequestDemand(final Boolean accountRequestDemand) {
 		this.accountRequestDemand = accountRequestDemand;
 	}
 
@@ -134,7 +146,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the canAccessToDicomAssociation
 	 */
-	public boolean isCanAccessToDicomAssociation() {
+	public Boolean isCanAccessToDicomAssociation() {
 		return canAccessToDicomAssociation;
 	}
 
@@ -142,7 +154,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param canAccessToDicomAssociation
 	 *            the canAccessToDicomAssociation to set
 	 */
-	public void setCanAccessToDicomAssociation(final boolean canAccessToDicomAssociation) {
+	public void setCanAccessToDicomAssociation(final Boolean canAccessToDicomAssociation) {
 		this.canAccessToDicomAssociation = canAccessToDicomAssociation;
 	}
 
@@ -208,7 +220,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the extensionRequestDemand
 	 */
-	public boolean isExtensionRequestDemand() {
+	public Boolean isExtensionRequestDemand() {
 		return extensionRequestDemand;
 	}
 	
@@ -216,14 +228,14 @@ public class User extends HalEntity implements UserDetails {
 	 * @param extensionRequestDemand
 	 *            the extensionRequestDemand to set
 	 */
-	public void setExtensionRequestDemand(boolean extensionRequestDemand) {
+	public void setExtensionRequestDemand(Boolean extensionRequestDemand) {
 		this.extensionRequestDemand = extensionRequestDemand;
 	}
 	
 	/**
 	 * @return the firstExpirationNotificationSent
 	 */
-	public boolean isFirstExpirationNotificationSent() {
+	public Boolean isFirstExpirationNotificationSent() {
 		return firstExpirationNotificationSent;
 	}
 
@@ -231,7 +243,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param firstExpirationNotificationSent
 	 *            the firstExpirationNotificationSent to set
 	 */
-	public void setFirstExpirationNotificationSent(final boolean firstExpirationNotificationSent) {
+	public void setFirstExpirationNotificationSent(final Boolean firstExpirationNotificationSent) {
 		this.firstExpirationNotificationSent = firstExpirationNotificationSent;
 	}
 
@@ -314,7 +326,7 @@ public class User extends HalEntity implements UserDetails {
 	/**
 	 * @return the secondExpirationNotificationSent
 	 */
-	public boolean isSecondExpirationNotificationSent() {
+	public Boolean isSecondExpirationNotificationSent() {
 		return secondExpirationNotificationSent;
 	}
 
@@ -322,7 +334,7 @@ public class User extends HalEntity implements UserDetails {
 	 * @param secondExpirationNotificationSent
 	 *            the secondExpirationNotificationSent to set
 	 */
-	public void setSecondExpirationNotificationSent(final boolean secondExpirationNotificationSent) {
+	public void setSecondExpirationNotificationSent(final Boolean secondExpirationNotificationSent) {
 		this.secondExpirationNotificationSent = secondExpirationNotificationSent;
 	}
 

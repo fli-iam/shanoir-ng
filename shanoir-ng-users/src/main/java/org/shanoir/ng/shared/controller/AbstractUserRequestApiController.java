@@ -7,6 +7,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.service.UserUniqueConstraintManager;
@@ -24,6 +25,9 @@ public abstract class AbstractUserRequestApiController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private UserRepository userRepository;
 
 	@Autowired
 	private UserFieldEditionSecurityManager fieldEditionSecurityManager;
@@ -65,7 +69,7 @@ public abstract class AbstractUserRequestApiController {
 		String username = usernameAsked;
 
 		int i = 1;
-		while (userService.findByUsername(username).isPresent()) {
+		while (userRepository.findByUsername(username).isPresent()) {
 			username = usernameAsked + i;
 			i++;
 		}

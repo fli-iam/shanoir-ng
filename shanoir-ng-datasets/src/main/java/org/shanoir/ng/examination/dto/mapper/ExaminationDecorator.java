@@ -4,7 +4,7 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.StudyIdsDTO;
 import org.shanoir.ng.examination.dto.StudySubjectCenterNamesDTO;
 import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -88,13 +88,13 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 
 			if (names != null) {
 				if (names.getStudy() != null) {
-					examinationDTO.setStudy(new IdNameDTO(studyIds.getStudyId(), names.getStudy().getName()));
+					examinationDTO.setStudy(new IdName(studyIds.getStudyId(), names.getStudy().getName()));
 				}
 
 				examinationDTO.setSubject(names.getSubject());
 
 				if (names.getCenter() != null) {
-					examinationDTO.setCenter(new IdNameDTO(studyIds.getCenterId(), names.getCenter().getName()));
+					examinationDTO.setCenter(new IdName(studyIds.getCenterId(), names.getCenter().getName()));
 				}
 			}
 		}

@@ -1,5 +1,8 @@
 package org.shanoir.ng.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,7 +13,9 @@ import org.shanoir.ng.shared.exception.TokenNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 
 /**
  * Utility class for Keycloak requests.
@@ -35,6 +40,31 @@ public final class KeycloakUtil {
 			throw new TokenNotFoundException("Access token not found");
 		}
 		return accessToken.getRealmAccess().getRoles();
+	}
+	
+	/**
+	 * Get connected user roles. If anonymous user, returns an empty list.
+	 * 
+	 * @return roles
+	 */
+	@SuppressWarnings("rawtypes")
+	public static Collection<String> getConnectedUserRoles() {
+		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
+			return new ArrayList<String>();
+		} else {
+			final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			if (principal == null) {
+				throw new IllegalArgumentException("connectedUser cannot be null");
+			}
+			if (principal instanceof User) {
+				final List<String> userRoles = new ArrayList<String>();
+				for (GrantedAuthority authority : ((User) principal).getAuthorities()) {
+					userRoles.add(authority.getAuthority());
+				}
+				return userRoles;
+			}
+			return ((KeycloakPrincipal) principal).getKeycloakSecurityContext().getToken().getRealmAccess().getRoles();
+		}
 	}
 
 	/**

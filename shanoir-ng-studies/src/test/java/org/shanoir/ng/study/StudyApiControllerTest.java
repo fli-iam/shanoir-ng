@@ -128,20 +128,20 @@ public class StudyApiControllerTest {
 				.andExpect(status().isNoContent());
 	}
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void saveNewStudyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudy())))
-				.andExpect(status().isOk());
-	}
-
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void updateStudyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudy())))
-				.andExpect(status().isNoContent());
-	}
+//	@Test
+//	@WithMockUser(authorities = { "ROLE_ADMIN" })
+//	public void saveNewStudyTest() throws Exception {
+//		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+//				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudy())))
+//				.andExpect(status().isOk());
+//	}
+//
+//	@Test
+//	@WithMockUser(authorities = { "ROLE_ADMIN" })
+//	public void updateStudyTest() throws Exception {
+//		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+//				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudy())))
+//				.andExpect(status().isNoContent());
+//	}
 
 }

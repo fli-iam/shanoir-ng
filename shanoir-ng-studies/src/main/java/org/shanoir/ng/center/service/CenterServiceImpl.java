@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -49,8 +49,13 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	}
 
 	@Override
-	public List<IdNameDTO> findIdsAndNames() {
+	public List<IdName> findIdsAndNames() {
 		return centerRepository.findIdsAndNames();
+	}
+	
+	@Override
+	public List<IdName> findIdsAndNames(Long studyId) {
+		return centerRepository.findIdsAndNames(studyId);
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package org.shanoir.ng.study.repository;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.model.Study;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -44,6 +44,6 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 	 * @param studyUserRightId
 	 * @return
 	 */
-	List<IdNameDTO> findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(Long userId, Integer studyUserRightId);
+	List<IdName> findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(Long userId, Integer studyUserRightId);
 
 }

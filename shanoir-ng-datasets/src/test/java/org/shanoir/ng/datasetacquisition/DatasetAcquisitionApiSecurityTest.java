@@ -12,9 +12,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.importer.controler.DatasetAcquisitionApi;
 import org.shanoir.ng.importer.dto.ImportJob;
-import org.shanoir.ng.shared.communication.StudyCommunicationService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,7 +43,7 @@ public class DatasetAcquisitionApiSecurityTest {
 	private DatasetAcquisitionApi api;
 	
 	@MockBean
-	StudyCommunicationService commService;
+	StudyRightsService commService;
 	
 	@Before
 	public void setup() {

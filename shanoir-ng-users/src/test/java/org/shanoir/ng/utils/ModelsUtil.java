@@ -142,6 +142,7 @@ public final class ModelsUtil {
 	public static User createUser(final Role role, final Long id) {
 		final User user = new User();
 		user.setCreationDate(LocalDate.now());
+		user.setLastLogin(LocalDate.now());
 		user.setEmail(USER_EMAIL);
 		user.setExpirationDate(LocalDate.now().plusYears(1));
 		user.setFirstName(USER_FIRSTNAME);

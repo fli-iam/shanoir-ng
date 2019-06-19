@@ -1,6 +1,6 @@
 package org.shanoir.ng.studycenter;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * DTO for link between studies and centers.
@@ -12,9 +12,9 @@ public class StudyCenterDTO {
 
 	private Long id;
 	
-	private IdNameDTO center;
+	private IdName center;
 	
-	private IdNameDTO study;
+	private IdName study;
 
 	/** Investigator. */
 	// private Long investigator_id;
@@ -22,11 +22,11 @@ public class StudyCenterDTO {
 	/** Investigator function in the study */
 	// private InvestigatorFunction investigatorFunction;
 
-	public IdNameDTO getStudy() {
+	public IdName getStudy() {
 		return study;
 	}
 
-	public void setStudy(IdNameDTO study) {
+	public void setStudy(IdName study) {
 		this.study = study;
 	}
 
@@ -48,14 +48,14 @@ public class StudyCenterDTO {
 	/**
 	 * @return the center
 	 */
-	public IdNameDTO getCenter() {
+	public IdName getCenter() {
 		return center;
 	}
 
 	/**
 	 * @param center the center to set
 	 */
-	public void setCenter(IdNameDTO center) {
+	public void setCenter(IdName center) {
 		this.center = center;
 	}
 }

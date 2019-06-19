@@ -2,7 +2,7 @@ package org.shanoir.ng.studycard.controler;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdListDTO;
+import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -85,7 +85,7 @@ public class StudyCardApiController implements StudyCardApi {
 
 	@Override
 	public ResponseEntity<List<StudyCard>> searchStudyCards(
-			@ApiParam(value = "study ids", required = true) @RequestBody final IdListDTO studyIds) {
+			@ApiParam(value = "study ids", required = true) @RequestBody final IdList studyIds) {
 		
 		final List<StudyCard> studyCards = studyCardService.search(studyIds.getIdList());
 		if (studyCards.isEmpty()) {

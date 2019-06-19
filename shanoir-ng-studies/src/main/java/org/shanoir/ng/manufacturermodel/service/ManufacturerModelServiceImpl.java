@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerModelRepository;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +23,12 @@ public class ManufacturerModelServiceImpl extends BasicEntityServiceImpl<Manufac
 
 
 	@Override
-	public List<IdNameDTO> findIdsAndNames() {
+	public List<IdName> findIdsAndNames() {
 		return manufacturerModelRepository.findIdsAndNames();
 	}
 
 	@Override
-	public List<IdNameDTO> findIdsAndNamesForCenter(Long centerId) {
+	public List<IdName> findIdsAndNamesForCenter(Long centerId) {
 		return manufacturerModelRepository.findIdsAndNames();
 	}
 

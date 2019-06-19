@@ -7,7 +7,7 @@ import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +33,8 @@ public abstract class DatasetDecorator implements DatasetMapper {
 	private MrDatasetMapper mrMapper;
 
 	@Override
-	public List<IdNameDTO> datasetsToIdNameDTOs(final List<Dataset> datasets) {
-		final List<IdNameDTO> datasetDTOs = new ArrayList<>();
+	public List<IdName> datasetsToIdNameDTOs(final List<Dataset> datasets) {
+		final List<IdName> datasetDTOs = new ArrayList<>();
 		for (Dataset dataset : datasets) {
 			datasetDTOs.add(datasetToIdNameDTO(dataset));
 		}
@@ -59,7 +59,7 @@ public abstract class DatasetDecorator implements DatasetMapper {
 	}
 
 	@Override
-	public IdNameDTO datasetToIdNameDTO(final Dataset dataset) {
+	public IdName datasetToIdNameDTO(final Dataset dataset) {
 		return defaultMapper.datasetToIdNameDTO(dataset);
 	}
 

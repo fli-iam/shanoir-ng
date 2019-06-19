@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
@@ -48,6 +48,19 @@ public class StudySecurityService {
         Study study = studyRepository.findOne(studyId);
         if (study == null) throw new EntityNotFoundException("Cannot find study with id " + studyId);
         return hasPrivilege(study, right);
+    }
+    
+    /**
+	 * Check that the connected user has the given right for the given study.
+	 * 
+	 * @param study the study
+	 * @param rightStr the right
+	 * @return true or false
+	 * @throws EntityNotFoundException 
+	 */
+    public boolean hasRightOnStudy(Study study, String rightStr) throws EntityNotFoundException {
+    	if (study == null) throw new IllegalArgumentException("study cannot be null here.");
+    	return this.hasRightOnStudy(study.getId(), rightStr);
     }
     
     
@@ -110,6 +123,7 @@ public class StudySecurityService {
     public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
     	Subject subject = subjectRepository.findOne(subjectId);
     	if (subject == null) throw new EntityNotFoundException("Cannot find subject with id " + subjectId);
+    	if (subject.getSubjectStudyList() == null) return false;
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
     	for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
     		if (hasPrivilege(subjectStudy.getStudy(), right)) return true;
@@ -212,11 +226,11 @@ public class StudySecurityService {
      * @param rightStr
      * @return true or false
      */
-    public boolean filterSubjectIdNamesDTOsHasRightInOneStudy(List<IdNameDTO> dtos, String rightStr) {
+    public boolean filterSubjectIdNamesDTOsHasRightInOneStudy(List<IdName> dtos, String rightStr) {
     	if (dtos == null) return true;
-    	List<IdNameDTO> newList = new ArrayList<>();
-    	Map<Long, IdNameDTO> map = new HashMap<>();
-    	for (IdNameDTO dto : dtos) {
+    	List<IdName> newList = new ArrayList<>();
+    	Map<Long, IdName> map = new HashMap<>();
+    	for (IdName dto : dtos) {
     		map.put(dto.getId(), dto);
     	}
     	for (Subject subject : subjectRepository.findAll(new ArrayList<>(map.keySet()))) {
@@ -261,12 +275,12 @@ public class StudySecurityService {
      * @param rightStr
      * @return true or false
      */
-    public boolean filterStudyIdNameDTOsHasRight(List<IdNameDTO> dtos, String rightStr) {
+    public boolean filterStudyIdNameDTOsHasRight(List<IdName> dtos, String rightStr) {
     	StudyUserRight right = StudyUserRight.valueOf(rightStr);
     	if (dtos == null) return true;
-    	List<IdNameDTO> newList = new ArrayList<>();
-    	Map<Long, IdNameDTO> map = new HashMap<>();
-    	for (IdNameDTO dto : dtos) {
+    	List<IdName> newList = new ArrayList<>();
+    	Map<Long, IdName> map = new HashMap<>();
+    	for (IdName dto : dtos) {
     		map.put(dto.getId(), dto);
     	}
     	for (Study study : studyRepository.findAll(new ArrayList<>(map.keySet()))) {

@@ -18,21 +18,8 @@ public class ManufacturerModelTypeCheckValidator
 
 	@Override
 	public boolean isValid(final ManufacturerModel manufacturerModel, final ConstraintValidatorContext context) {
-		switch (manufacturerModel.getDatasetModalityType()) {
-		case MR_DATASET:
-			// Magnetic field mandatory for MR models
-			if (manufacturerModel.getMagneticField() == null) {
-				context.disableDefaultConstraintViolation();
-		        context
-		            .buildConstraintViolationWithTemplate("MR manufacturer model has no magnetic field!")
-		            .addConstraintViolation();
-				return false;
-			}
-		default:
-			// No magnetic field for other models
-			manufacturerModel.setMagneticField(null);
-			return true;
-		}
+		
+		return true;
 	}
 
 }

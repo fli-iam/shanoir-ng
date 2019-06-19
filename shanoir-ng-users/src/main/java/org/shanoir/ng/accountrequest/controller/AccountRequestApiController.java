@@ -29,9 +29,11 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 			generateUsername(user);
 		}
 
+		user.setExpirationDate(null);
+		user.setAccountRequestDemand(true);
+
 		validate(user, result);
 		
-		user.setExpirationDate(null);
 		user.setCreationDate(LocalDate.now()); // Set creation date on creation.
 
 		/* Save user in db. */

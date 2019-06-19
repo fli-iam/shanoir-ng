@@ -3,6 +3,7 @@ package org.shanoir.ng.subject.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
@@ -46,6 +47,17 @@ public class SubjectServiceImpl implements SubjectService {
 	public List<Subject> findAll() {
 		// copyList is to prevent a bug with @postFilter
 		return Utils.copyList(Utils.toList(subjectRepository.findAll()));
+	}
+	
+
+	@Override
+	public List<IdName> findNames() {
+		List<IdName> names = new ArrayList<>();
+		for (Subject subject : subjectRepository.findAll()) {
+			IdName name = new IdName(subject.getId(), subject.getName());
+			names.add(name);
+		}
+		return names;
 	}
 
 	@Override
@@ -171,5 +183,4 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		return subjectRepository.findFromCenterCode(centerCode);
 	}
-
 }

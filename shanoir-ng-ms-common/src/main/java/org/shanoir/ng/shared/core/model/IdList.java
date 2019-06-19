@@ -1,22 +1,17 @@
-package org.shanoir.ng.shared.dto;
+package org.shanoir.ng.shared.core.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * DTO with list of ids.
- * 
- * @author msimon
- *
- */
-public class IdListDTO {
+
+public class IdList {
 
 	private List<Long> idList;
 
 	/**
 	 * Default constructor.
 	 */
-	public IdListDTO() {
+	public IdList() {
 		this.idList = new ArrayList<>();
 	}
 
@@ -28,8 +23,7 @@ public class IdListDTO {
 	}
 
 	/**
-	 * @param idList
-	 *            the idList to set
+	 * @param idList the idList to set
 	 */
 	public void setIdList(List<Long> idList) {
 		this.idList = idList;

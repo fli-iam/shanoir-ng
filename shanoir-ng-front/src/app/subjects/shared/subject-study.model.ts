@@ -26,8 +26,8 @@ export class SubjectStudyDTO {
     constructor(subjectStudy: SubjectStudy) {
         this.id = subjectStudy.id;
         this.examinations = subjectStudy.examinations ? subjectStudy.examinations.map(exam => exam.id) : null;
-        this.subject = new Id(subjectStudy.subject.id);
-        this.study = new Id(subjectStudy.study.id);
+        this.subject = subjectStudy.subject ? new Id(subjectStudy.subject.id) : null;
+        this.study = subjectStudy.study ? new Id(subjectStudy.study.id) : null;
         this.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
         this.subjectType = subjectStudy.subjectType;
         this.physicallyInvolved = subjectStudy.physicallyInvolved;

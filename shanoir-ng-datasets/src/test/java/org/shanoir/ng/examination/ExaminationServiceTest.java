@@ -19,7 +19,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
@@ -87,11 +87,11 @@ public class ExaminationServiceTest {
 
 	@Test
 	public void findAllTest() throws ShanoirException {
-		IdNameDTO idNameDTO = new IdNameDTO();
+		IdName idNameDTO = new IdName();
 		idNameDTO.setId(STUDY_ID);
-		IdNameDTO[] tab = { idNameDTO };
+		IdName[] tab = { idNameDTO };
 		given(restTemplate.exchange(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class),
-		Matchers.<Class<IdNameDTO[]>>any())).willReturn(new ResponseEntity<>(tab, HttpStatus.OK));
+		Matchers.<Class<IdName[]>>any())).willReturn(new ResponseEntity<>(tab, HttpStatus.OK));
 		final Page<Examination> examinations = examinationService.findPage(new PageRequest(0, 10));
 		Assert.assertNotNull(examinations);
 		Assert.assertTrue(examinations.getContent().size() == 1);

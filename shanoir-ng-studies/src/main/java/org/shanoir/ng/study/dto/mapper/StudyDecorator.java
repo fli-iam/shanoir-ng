@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjectsMapper;
-import org.shanoir.ng.study.dto.SimpleStudyDTO;
+import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
@@ -53,18 +53,18 @@ public abstract class StudyDecorator implements StudyMapper {
 	}
 	
 	@Override
-	public SimpleStudyDTO studyToSimpleStudyDTO (final Study study) {
-		final SimpleStudyDTO simpleStudyDTO = delegate.studyToSimpleStudyDTO(study);
+	public IdNameCenterStudyDTO studyToExtendedIdNameDTO (final Study study) {
+		final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
 		simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 		
 		return simpleStudyDTO;
 	}
 	
 	@Override
-	public List<SimpleStudyDTO> studiesToSimpleStudyDTOs (final List<Study> studies) {
-		List<SimpleStudyDTO> simpleStudyDTOs = new ArrayList<>();
+	public List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs (final List<Study> studies) {
+		List<IdNameCenterStudyDTO> simpleStudyDTOs = new ArrayList<>();
 		for (Study study: studies) {
-			final SimpleStudyDTO simpleStudyDTO = studyToSimpleStudyDTO(study);
+			final IdNameCenterStudyDTO simpleStudyDTO = studyToExtendedIdNameDTO(study);
 			simpleStudyDTOs.add(simpleStudyDTO);
 		}
 		return simpleStudyDTOs;

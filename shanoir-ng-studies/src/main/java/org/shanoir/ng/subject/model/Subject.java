@@ -18,8 +18,8 @@ import javax.persistence.PostLoad;
 import javax.persistence.SqlResultSetMapping;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
@@ -33,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
 	"preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
 "userPersonalCommentList" })
-@SqlResultSetMapping(name = "subjectNameResult", classes = { @ConstructorResult(targetClass = IdNameDTO.class, columns = {
+@SqlResultSetMapping(name = "subjectNameResult", classes = { @ConstructorResult(targetClass = IdName.class, columns = {
 		@ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name") }) })
 public class Subject extends HalEntity {
 

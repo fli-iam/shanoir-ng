@@ -21,8 +21,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.security.EditableOnlyBy;
@@ -46,7 +46,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-@SqlResultSetMapping(name = "studyNameResult", classes = { @ConstructorResult(targetClass = IdNameDTO.class, columns = {
+@SqlResultSetMapping(name = "studyNameResult", classes = { @ConstructorResult(targetClass = IdName.class, columns = {
 		@ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name") }) })
 @JsonIdentityInfo(scope=Study.class, generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class Study extends HalEntity {

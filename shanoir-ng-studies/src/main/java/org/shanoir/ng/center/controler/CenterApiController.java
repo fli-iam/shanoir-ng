@@ -10,7 +10,7 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.security.CenterFieldEditionSecurityManager;
 import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.center.service.CenterUniqueConstraintManager;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -60,7 +60,7 @@ public class CenterApiController implements CenterApi {
 	}
 
 	@Override
-	public ResponseEntity<CenterDTO> findCenterById(
+	public ResponseEntity<CenterDTO> findCenterById( 
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
 		
 		final Center center = centerService.findById(centerId);
@@ -80,8 +80,18 @@ public class CenterApiController implements CenterApi {
 	}
 
 	@Override
-	public ResponseEntity<List<IdNameDTO>> findCentersNames() {
-		final List<IdNameDTO> centers = centerService.findIdsAndNames();
+	public ResponseEntity<List<IdName>> findCentersNames() {
+		final List<IdName> centers = centerService.findIdsAndNames();
+		if (centers.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(centers, HttpStatus.OK);
+	}
+	
+
+	@Override
+	public ResponseEntity<List<IdName>> findCentersNames(Long studyId) {
+		final List<IdName> centers = centerService.findIdsAndNames(studyId);
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

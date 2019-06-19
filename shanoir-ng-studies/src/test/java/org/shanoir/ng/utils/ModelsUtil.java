@@ -14,7 +14,7 @@ import org.shanoir.ng.shared.common.CommonIdsDTO;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 
 /**
@@ -140,6 +140,9 @@ public final class ModelsUtil {
 		final Study study = new Study();
 		study.setName(STUDY_NAME);
 		study.setStudyCenterList(new ArrayList<>());
+		StudyCenter sc = new StudyCenter();
+		sc.setStudy(study); sc.setCenter(createCenter()); sc.setId(1L);
+		study.getStudyCenterList().add(sc);
 		study.setStudyUserList(new ArrayList<>());
 		return study;
 	}

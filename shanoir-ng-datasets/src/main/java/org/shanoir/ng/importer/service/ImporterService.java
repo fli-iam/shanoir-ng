@@ -8,8 +8,6 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -17,9 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Scope("prototype")
 public class ImporterService {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(ImporterService.class);
-	
+		
 	@Autowired
 	private ExaminationService examinationService;
 
@@ -68,6 +64,7 @@ public class ImporterService {
 			if (serie.getDatasets() != null && !serie.getDatasets().isEmpty()) {
 				if (serie.getDatasets().get(0).getExpressionFormats() != null) {
 					if (serie.getDatasets().get(0).getExpressionFormats().size() > 0) {
+						datasetAcquisitionContext.setDatasetAcquisitionStrategy(serie.getModality());
 						DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
 						datasetAcquisition.setExamination(examination);
 						// Persist Serie in Shanoir DB

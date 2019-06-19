@@ -14,9 +14,9 @@ import org.mockito.Mockito;
 import org.shanoir.ng.examination.controler.ExaminationApi;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.shared.communication.StudyCommunicationService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class ExaminationApiSecurityTest {
 	private ExaminationApi api;
 	
 	@MockBean
-	StudyCommunicationService commService;
+	StudyRightsService commService;
 	
 	@Before
 	public void setup() {

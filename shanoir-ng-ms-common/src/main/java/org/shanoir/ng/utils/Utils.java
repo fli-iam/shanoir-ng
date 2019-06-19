@@ -65,4 +65,16 @@ public class Utils {
 			if (deletedIndex > -1) list.remove(deletedIndex);
 		}
 	}
+	
+	
+	public static boolean haveOneInCommon(final Iterable<String> roles, final Iterable<String> authorities) {
+		for (final String role : roles) {
+			for (final String authority : authorities) {
+				if (role != null && role.equals(authority)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }

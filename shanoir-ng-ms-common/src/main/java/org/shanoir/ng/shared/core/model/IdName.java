@@ -1,12 +1,6 @@
-package org.shanoir.ng.shared.dto;
+package org.shanoir.ng.shared.core.model;
 
-/**
- * DTO for remote entities with id and name.
- * 
- * @author msimon
- *
- */
-public class IdNameDTO {
+public class IdName {
 
 	private Long id;
 
@@ -15,18 +9,16 @@ public class IdNameDTO {
 	/**
 	 * Default constructor.
 	 */
-	public IdNameDTO() {
+	public IdName() {
 	}
 
 	/**
 	 * Constructor with id and name.
 	 * 
-	 * @param id
-	 *            object id.
-	 * @param name
-	 *            object name.
+	 * @param id object id.
+	 * @param name object name.
 	 */
-	public IdNameDTO(final Long id, final String name) {
+	public IdName(final Long id, final String name) {
 		this.id = id;
 		this.name = name;
 	}

@@ -9,7 +9,7 @@ import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.UserDeleteEvent;
 import org.shanoir.ng.role.repository.RoleRepository;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
@@ -66,11 +66,12 @@ public class UserServiceImpl implements UserService {
 			LOG.error("User with id " + user.getId() + " not found");
 			throw new EntityNotFoundException(User.class, user.getId());
 		}
-		if (!userDb.isAccountRequestDemand() && !userDb.isExtensionRequestDemand()) {
+		if ((userDb.isAccountRequestDemand() == null || !userDb.isAccountRequestDemand()) 
+				&& (userDb.isExtensionRequestDemand() == null || !userDb.isExtensionRequestDemand())) {
 			throw new AccountNotOnDemandException(user.getId());
 		}
 		// Confirm and update user
-		if (userDb.isExtensionRequestDemand()) {
+		if (userDb.isExtensionRequestDemand() != null && userDb.isExtensionRequestDemand()) {
 			// Date extension
 			userDb.setExtensionRequestInfo(null);
 			userDb.setExtensionRequestDemand(false);
@@ -107,10 +108,11 @@ public class UserServiceImpl implements UserService {
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, userId);
 		}
-		if (!user.isAccountRequestDemand() && !user.isExtensionRequestDemand()) {
+		if ((user.isAccountRequestDemand() == null || !user.isAccountRequestDemand()) 
+				&& (user.isExtensionRequestDemand() == null || !user.isExtensionRequestDemand())) {
 			throw new AccountNotOnDemandException(userId);
 		}
-		if (user.isAccountRequestDemand()) {
+		if (user.isAccountRequestDemand() != null && user.isAccountRequestDemand()) {
 			// Remove user
 			userRepository.delete(userId);
 			keycloakClient.deleteUser(user.getKeycloakId());
@@ -177,9 +179,6 @@ public class UserServiceImpl implements UserService {
 		
 		User savedUser = userRepository.save(user);
 		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
-		if (keycloakUserId == null) {
-			throw new SecurityException("Could not register the new user into Keycloak.");
-		}
 		savedUser.setKeycloakId(keycloakUserId); // Save keycloak id
 		userRepository.save(savedUser);
 		emailService.notifyCreateUser(savedUser, newPassword); // Send email to user
@@ -200,9 +199,6 @@ public class UserServiceImpl implements UserService {
 		emailService.notifyAdminAccountRequest(savedUser); // Send email to administrators
 
 		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
-		if (keycloakUserId == null) {
-			throw new SecurityException("Could not register the new user into Keycloak.");
-		}
 		savedUser.setKeycloakId(keycloakUserId); // Save keycloak id
 		userRepository.save(savedUser);
 		emailService.notifyCreateAccountRequest(savedUser, newPassword); // Send email to user
@@ -210,12 +206,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<IdNameDTO> findByIds(List<Long> userIdList) {
+	public List<IdName> findByIds(List<Long> userIdList) {
 		final List<User> users = userRepository.findByIdIn(userIdList);
-		List<IdNameDTO> result = new ArrayList<>();
+		List<IdName> result = new ArrayList<>();
 		if (users != null) {
 			for (User user : users) {
-				result.add(new IdNameDTO(user.getId(), user.getUsername()));
+				result.add(new IdName(user.getId(), user.getUsername()));
 			}
 		}
 		return result;
@@ -280,7 +276,7 @@ public class UserServiceImpl implements UserService {
 	 * @return database user with new values.
 	 */
 	private User updateUserValues(final User userDb, final User user) {
-		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
+		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation() != null && user.isCanAccessToDicomAssociation());
 		userDb.setEmail(user.getEmail());
 		userDb.setExpirationDate(user.getExpirationDate());
 		userDb.setFirstName(user.getFirstName());
@@ -289,5 +285,4 @@ public class UserServiceImpl implements UserService {
 		userDb.setUsername(user.getUsername());
 		return userDb;
 	}
-
 }

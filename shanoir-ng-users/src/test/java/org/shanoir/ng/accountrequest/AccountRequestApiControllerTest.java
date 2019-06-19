@@ -13,6 +13,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.service.UserUniqueConstraintManager;
@@ -44,6 +45,9 @@ public class AccountRequestApiControllerTest {
 
 	@MockBean
 	private UserService userServiceMock;
+	
+	@MockBean
+	private UserRepository userRepositoryMock;
 	
 	@MockBean
 	private UserFieldEditionSecurityManager fieldEditionSecurityManager;

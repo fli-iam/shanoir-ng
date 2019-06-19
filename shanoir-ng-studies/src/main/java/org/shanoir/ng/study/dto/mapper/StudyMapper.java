@@ -6,9 +6,8 @@ import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import org.mapstruct.ReportingPolicy;
-import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.study.dto.SimpleStudyDTO;
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.timepoint.TimepointMapper;
@@ -26,8 +25,7 @@ public interface StudyMapper {
 	/**
 	 * Map list of @Study to list of @StudyDTO.
 	 * 
-	 * @param studies
-	 *            list of studies.
+	 * @param studies list of studies.
 	 * @return list of studies DTO.
 	 */
 	List<StudyDTO> studiesToStudyDTOs (List<Study> studies);
@@ -35,8 +33,7 @@ public interface StudyMapper {
 	/**
 	 * Map a @Study to a @StudyDTO.
 	 * 
-	 * @param study
-	 *            study to map.
+	 * @param study study to map.
 	 * @return study DTO.
 	 */
 	@Mappings({ @Mapping(target = "experimentalGroupsOfSubjects", ignore = true),
@@ -46,12 +43,10 @@ public interface StudyMapper {
 	StudyDTO studyToStudyDTO (Study study);
 	
 	@Mappings({ @Mapping(target = "studyCenterList", ignore = true) })
-	SimpleStudyDTO studyToSimpleStudyDTO (Study study);
+	IdNameCenterStudyDTO studyToExtendedIdNameDTO (Study study);
 	
-	List<SimpleStudyDTO> studiesToSimpleStudyDTOs (List<Study> studies);
+	List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs (List<Study> studies);
 	
-	IdNameDTO studyToIdNameDTO (Study study);
-	
-	List<IdNameDTO> studiesToIdNameDTOs (List<Study> studies);
+	IdName studyToIdNameDTO (Study study);
 
 }

@@ -17,7 +17,7 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.security.CenterFieldEditionSecurityManager;
 import org.shanoir.ng.center.service.CenterService;
 import org.shanoir.ng.center.service.CenterUniqueConstraintManager;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -77,7 +77,7 @@ public class CenterApiControllerTest {
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(new Center()));
 		given(centerServiceMock.findById(1L)).willReturn(new Center());
-		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
+		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
 		given(centerServiceMock.create(Mockito.mock(Center.class))).willReturn(new Center());
 		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());

@@ -8,8 +8,6 @@ import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.service.DicomServiceApi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Service;
 @Scope("prototype")
 public class DicomPersisterService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DicomPersisterService.class);
 
 	@Autowired
 	@Qualifier("stowrs")

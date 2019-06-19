@@ -9,9 +9,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
@@ -140,6 +142,36 @@ public class StudySecurityTest {
 		assertAccessAuthorized(service::create, mockExisting);
 		assertAccessAuthorized(service::update, mockExisting);
 		assertAccessAuthorized(service::deleteById, ENTITY_ID);
+	}
+	
+	@Test
+	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
+	public void findAllTestAdmin() {
+		given(repository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
+		List<Study> all = service.findAll();
+		List<Study> repoAll = repository.findAll();
+		Assert.assertNotNull(all);
+		Assert.assertEquals(repoAll.size(), all.size());
+		Assert.assertTrue(all.size() > 0);
+		Assert.assertNotNull(all.get(0).getStudyCenterList());
+	}
+	
+	@Test
+	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
+	public void findAllTestUser() {
+		Study studyMock = ModelsUtil.createStudy();
+		StudyUser studyUser = new StudyUser();
+		studyUser.setStudy(studyMock); studyUser.setUserId(LOGGED_USER_ID); studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
+		studyMock.setStudyUserList(Arrays.asList(studyUser));
+		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId()))
+			.willReturn(Arrays.asList(studyMock));
+		List<Study> repoAll = repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId());
+		List<Study> all = service.findAll();
+		Assert.assertNotNull(all);
+		Assert.assertEquals(repoAll.size(), all.size());
+		Assert.assertTrue(repoAll.size() > 0);
+		Assert.assertTrue(all.size() > 0);
+		Assert.assertNotNull(all.get(0).getStudyCenterList());
 	}
 	
 	private Study buildStudyMock(Long id, StudyUserRight... rights) {

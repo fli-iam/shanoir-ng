@@ -54,13 +54,14 @@ public class MockKeycloakUserContextFactory implements WithSecurityContextFactor
 				}
 				grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role));
 			}
-		} else if(!(withUser.roles().length == 1 && "USER".equals(withUser.roles()[0]))) {
+		} 
+		else if(!(withUser.roles().length == 1 && "USER".equals(withUser.roles()[0]))) {
 			throw new IllegalStateException("You cannot define roles attribute "+ Arrays.asList(withUser.roles())
 				+" with authorities attribute "+ Arrays.asList(withUser.authorities()));
 		}
 
 		@SuppressWarnings("rawtypes")
-		KeycloakPrincipal principal = mockKeycloakPrincipal(withUser.id(), username, withUser.roles());
+		KeycloakPrincipal principal = mockKeycloakPrincipal(withUser.id(), username, withUser.authorities());
 		
 		Authentication authentication = new UsernamePasswordAuthenticationToken(principal, withUser.password(), grantedAuthorities);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
@@ -70,7 +71,9 @@ public class MockKeycloakUserContextFactory implements WithSecurityContextFactor
     
     private KeycloakPrincipal<KeycloakSecurityContext> mockKeycloakPrincipal(long id, String username, String[] roles) {    	
     	Access realmAccess = new Access();
-		for (String role : roles) realmAccess.addRole(role);
+		for (String role : roles) {
+			realmAccess.addRole(role);
+		}
 		AccessToken accessToken = new AccessToken();
 		accessToken.getOtherClaims().put(KeycloakUtil.USER_ID_TOKEN_ATT, id);
 		accessToken.setRealmAccess(realmAccess);

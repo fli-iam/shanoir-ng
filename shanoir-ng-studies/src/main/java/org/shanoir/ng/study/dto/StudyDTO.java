@@ -3,8 +3,8 @@ package org.shanoir.ng.study.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.model.StudyType;
 import org.shanoir.ng.study.model.StudyUser;
@@ -27,7 +27,7 @@ public class StudyDTO {
 	@LocalDateAnnotations
 	private LocalDate endDate;
 
-	private List<IdNameDTO> experimentalGroupsOfSubjects;
+	private List<IdName> experimentalGroupsOfSubjects;
 
 	private Long id;
 
@@ -44,7 +44,7 @@ public class StudyDTO {
 	@LocalDateAnnotations
 	private LocalDate startDate;
 
-	private List<IdNameDTO> studyCards;
+	private List<IdName> studyCards;
 
 	private List<StudyCenterDTO> studyCenterList;
 
@@ -116,7 +116,7 @@ public class StudyDTO {
 	/**
 	 * @return the experimentalGroupsOfSubjects
 	 */
-	public List<IdNameDTO> getExperimentalGroupsOfSubjects() {
+	public List<IdName> getExperimentalGroupsOfSubjects() {
 		return experimentalGroupsOfSubjects;
 	}
 
@@ -124,7 +124,7 @@ public class StudyDTO {
 	 * @param experimentalGroupsOfSubjects
 	 *            the experimentalGroupsOfSubjects to set
 	 */
-	public void setExperimentalGroupsOfSubjects(List<IdNameDTO> experimentalGroupsOfSubjects) {
+	public void setExperimentalGroupsOfSubjects(List<IdName> experimentalGroupsOfSubjects) {
 		this.experimentalGroupsOfSubjects = experimentalGroupsOfSubjects;
 	}
 
@@ -236,7 +236,7 @@ public class StudyDTO {
 	/**
 	 * @return the studyCards
 	 */
-	public List<IdNameDTO> getStudyCards() {
+	public List<IdName> getStudyCards() {
 		return studyCards;
 	}
 
@@ -244,7 +244,7 @@ public class StudyDTO {
 	 * @param studyCards
 	 *            the studyCards to set
 	 */
-	public void setStudyCards(List<IdNameDTO> studyCards) {
+	public void setStudyCards(List<IdName> studyCards) {
 		this.studyCards = studyCards;
 	}
 

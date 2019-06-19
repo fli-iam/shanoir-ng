@@ -14,7 +14,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -22,6 +22,7 @@ import org.shanoir.ng.study.controler.StudyApi;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -81,7 +82,7 @@ public class StudyApiSecurityTest {
 	public void testAsAnonymous() throws ShanoirException, RestServiceException {
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
 		assertAccessDenied(api::findStudies);
-		assertAccessDenied(api::findStudiesNames);
+		assertAccessDenied(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) { fail(e.toString());	} }, null);
 		assertAccessDenied(api::findStudyById, ENTITY_ID);
 		assertAccessDenied((t, u) -> { try { api.saveNewStudy(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, mockNew, mockBindingResult);
 		assertAccessDenied((t, u, v) -> { try { api.updateStudy(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, ENTITY_ID, mockExisting, mockBindingResult);
@@ -128,22 +129,22 @@ public class StudyApiSecurityTest {
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
 		assertAccessAuthorized(api::deleteStudy, ENTITY_ID);
 		assertAccessAuthorized(api::findStudies);
-		assertAccessAuthorized(api::findStudiesNames);
+		assertAccessAuthorized(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) {} }, null);
 		assertAccessAuthorized(api::findStudyById, ENTITY_ID);
 		assertAccessAuthorized((t, u) -> { try { api.saveNewStudy(t, u); } catch (RestServiceException e) {}}, mockNew, mockBindingResult);
 		assertAccessAuthorized((t, u, v) -> { try { api.updateStudy(t, u, v); } catch (RestServiceException e) {}}, ENTITY_ID, mockExisting, mockBindingResult);
 	}
 	
-	private void testRead() throws ShanoirException {
+	private void testRead() throws ShanoirException, RestServiceException {
 		// No rights
 		Study studyMockNoRights = buildStudyMock(1L);
 		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, null)).willReturn(Arrays.asList(studyMockNoRights));
-		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, null)).willReturn(Arrays.asList(new IdNameDTO(studyMockNoRights.getId(), studyMockNoRights.getName())));
+		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, null)).willReturn(Arrays.asList(new IdName(studyMockNoRights.getId(), studyMockNoRights.getName())));
 		given(repository.findAll()).willReturn(Arrays.asList(studyMockNoRights));
 		given(repository.findOne(1L)).willReturn(studyMockNoRights);
 		assertAccessAuthorized(api::findStudies);
 		assertEquals(null, api.findStudies().getBody());
-		assertAccessAuthorized(api::findStudiesNames);
+		assertAccessAuthorized(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) {} }, null);
 		assertEquals(null, api.findStudiesNames().getBody());
 		assertAccessDenied(api::findStudyById, 1L);
 		
@@ -151,11 +152,11 @@ public class StudyApiSecurityTest {
 		Study studyMockWrongRights = buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
 		given(repository.findAll()).willReturn(Arrays.asList(studyMockWrongRights));
 		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(studyMockWrongRights));
-		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new IdNameDTO(studyMockWrongRights.getId(), studyMockWrongRights.getName())));
+		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new IdName(studyMockWrongRights.getId(), studyMockWrongRights.getName())));
 		given(repository.findOne(2L)).willReturn(studyMockWrongRights);
 		assertAccessAuthorized(api::findStudies);
 		assertEquals(null, api.findStudies().getBody());
-		assertAccessAuthorized(api::findStudiesNames);
+		assertAccessAuthorized(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) {} }, null);
 		assertEquals(null, api.findStudiesNames().getBody());
 		assertAccessDenied(api::findStudyById, 2L);
 		
@@ -164,16 +165,32 @@ public class StudyApiSecurityTest {
 		given(repository.findAll()).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
 		given(repository.findAll(Arrays.asList(3L))).willReturn(Arrays.asList(studyMockRightRights));
 		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(studyMockRightRights, studyMockWrongRights, studyMockNoRights));
-		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new IdNameDTO(studyMockWrongRights.getId(), studyMockWrongRights.getName()), new IdNameDTO(studyMockNoRights.getId(), studyMockNoRights.getName()), new IdNameDTO(studyMockRightRights.getId(), studyMockRightRights.getName())));
+		given(repository.findIdsAndNamesByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new IdName(studyMockWrongRights.getId(), studyMockWrongRights.getName()), new IdName(studyMockNoRights.getId(), studyMockNoRights.getName()), new IdName(studyMockRightRights.getId(), studyMockRightRights.getName())));
 		given(repository.findOne(3L)).willReturn(studyMockRightRights);
 		assertAccessAuthorized(api::findStudies);
 		assertNotNull(api.findStudies().getBody());
 		assertEquals(1, api.findStudies().getBody().size());
-		assertAccessAuthorized(api::findStudiesNames);
+		assertAccessAuthorized(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) {} }, null);
 		assertNotNull(api.findStudiesNames().getBody());
 		assertEquals(1, api.findStudiesNames().getBody().size());
 		assertAccessAuthorized(api::findStudyById, 3L);
 	}
+	
+//	@Test
+//	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
+//	public void testStudyCenter() throws ShanoirException, RestServiceException {
+//		given(repository.findAll()).willReturn(Arrays.asList(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL)));
+//		given(repository.findAll(Mockito.anyList())).willReturn(Arrays.asList(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL)));
+//		given(repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc
+//				(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL)));
+//		
+//		given(repository.findOne(1L)).willReturn(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL));
+//		
+//		assertEquals(1, api.findStudies().getBody().size());
+//		assertNotNull(api.findStudies().getBody().get(0).getStudyCenterList());
+//		assertEquals(1, api.findStudies().getBody().get(0).getStudyCenterList().size());
+//		assertEquals(1, api.findStudyById(1L).getBody().getStudyCenterList().size());
+//	}
 
 	private Study buildStudyMock(Long id, StudyUserRight... rights) {
 		Study study = ModelsUtil.createStudy();
@@ -187,6 +204,11 @@ public class StudyApiSecurityTest {
 			studyUserList.add(studyUser);			
 		}
 		study.setStudyUserList(studyUserList);
+		StudyCenter studyCenter = new StudyCenter();
+		studyCenter.setCenter(ModelsUtil.createCenter());
+		studyCenter.setStudy(study);
+		studyCenter.setId(1L);		
+		study.setStudyCenterList(Arrays.asList(studyCenter));
 		return study;		
 	}
 

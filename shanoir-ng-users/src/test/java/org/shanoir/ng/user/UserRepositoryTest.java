@@ -118,4 +118,5 @@ public class UserRepositoryTest {
 		assertTrue(userDb.isPresent());
 		assertThat(userDb.get().getId()).isEqualTo(USER_TEST_1_ID);
 	}
+
 }

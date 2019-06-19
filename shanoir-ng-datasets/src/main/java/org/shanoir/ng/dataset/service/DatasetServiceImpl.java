@@ -5,6 +5,9 @@ import java.util.List;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,6 +26,9 @@ public class DatasetServiceImpl implements DatasetService {
 	
 	@Autowired
 	private DatasetRepository repository;
+	
+	@Autowired
+	private StudyUserRightsRepository rightsRepository;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -81,7 +87,14 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public Page<Dataset> findPage(final Pageable pageable) {
-		return repository.findAll(pageable);
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return repository.findAll(pageable);			
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			
+			return repository.findByStudyIdIn(studyIds, pageable);
+		}
 	}
 
 }

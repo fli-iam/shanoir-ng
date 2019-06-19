@@ -1,17 +1,17 @@
 package org.shanoir.ng.examination.dto;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 
 public class StudySubjectCenterNamesDTO {
 
-	private IdNameDTO study;
-	private IdNameDTO subject;
-	private IdNameDTO center;
+	private IdName study;
+	private IdName subject;
+	private IdName center;
 
 	/**
 	 * @return the study
 	 */
-	public IdNameDTO getStudy() {
+	public IdName getStudy() {
 		return study;
 	}
 
@@ -19,14 +19,14 @@ public class StudySubjectCenterNamesDTO {
 	 * @param study
 	 *            the study to set
 	 */
-	public void setStudy(IdNameDTO study) {
+	public void setStudy(IdName study) {
 		this.study = study;
 	}
 
 	/**
 	 * @return the subject
 	 */
-	public IdNameDTO getSubject() {
+	public IdName getSubject() {
 		return subject;
 	}
 
@@ -34,14 +34,14 @@ public class StudySubjectCenterNamesDTO {
 	 * @param subject
 	 *            the subject to set
 	 */
-	public void setSubject(IdNameDTO subject) {
+	public void setSubject(IdName subject) {
 		this.subject = subject;
 	}
 
 	/**
 	 * @return the center
 	 */
-	public IdNameDTO getCenter() {
+	public IdName getCenter() {
 		return center;
 	}
 
@@ -49,7 +49,7 @@ public class StudySubjectCenterNamesDTO {
 	 * @param center
 	 *            the center to set
 	 */
-	public void setCenter(IdNameDTO center) {
+	public void setCenter(IdName center) {
 		this.center = center;
 	}
 

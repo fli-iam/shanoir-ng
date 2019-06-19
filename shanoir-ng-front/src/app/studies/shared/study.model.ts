@@ -78,7 +78,7 @@ export class StudyDTO {
     withExamination: boolean;
 
     constructor(study: Study) {
-        this.id = study.id;
+        this.id = study.id ? study.id : null;
         this.clinical = study.clinical;
         this.downloadableByDefault = study.downloadableByDefault;
         this.endDate = study.endDate;

@@ -1,6 +1,6 @@
 package org.shanoir.ng.utils;
 
-import org.shanoir.ng.shared.communication.StudyCommunicationService;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class ImportSecurityService {
 	
 	@Autowired
-	StudyCommunicationService commService;
+	StudyRightsService rightsService;
 		
 	
 	/**
@@ -22,7 +22,7 @@ public class ImportSecurityService {
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
     	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
     	if (studyId == null) return false;
-        return commService.hasRightOnStudy(studyId, rightStr);
+        return rightsService.hasRightOnStudy(studyId, rightStr);
     }
     
     /**
@@ -33,6 +33,6 @@ public class ImportSecurityService {
 	 */
     public boolean hasRightOnOneStudy(String rightStr) {
     	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
-        return commService.hasRightOnAtLeastOneStudy(rightStr);
+        return rightsService.hasRightOnAtLeastOneStudy(rightStr);
     }
 }

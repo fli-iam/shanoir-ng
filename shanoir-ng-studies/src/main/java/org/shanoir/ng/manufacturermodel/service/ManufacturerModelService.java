@@ -3,8 +3,8 @@ package org.shanoir.ng.manufacturermodel.service;
 import java.util.List;
 
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.core.service.BasicEntityService;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -22,7 +22,7 @@ public interface ManufacturerModelService extends BasicEntityService<Manufacture
 	 * @return list of IdNameDTO.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<IdNameDTO> findIdsAndNames();
+	List<IdName> findIdsAndNames();
 	
 	/**
 	 * Find id and name for manufacturer models related to a center.
@@ -31,6 +31,6 @@ public interface ManufacturerModelService extends BasicEntityService<Manufacture
 	 * @return list of IdNameDTO.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<IdNameDTO> findIdsAndNamesForCenter(Long centerId);
+	List<IdName> findIdsAndNamesForCenter(Long centerId);
 
 }

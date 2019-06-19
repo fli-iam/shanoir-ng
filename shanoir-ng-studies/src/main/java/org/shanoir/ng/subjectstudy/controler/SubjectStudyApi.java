@@ -36,9 +36,9 @@ public interface SubjectStudyApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{subjectStudyId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') "
-			+ "and (hasPermission(#subjectStudy.getStudy(), 'CAN_IMPORT') || hasPermission(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE'))"
-			+ "and @controlerSecurityService.idMatches(#subjectStudyId, #subjectStudy)")
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') "
+			+ "and (@studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT') || @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE'))"
+			+ "and @controlerSecurityService.idMatches(#subjectStudyId, #subjectStudy))")
 	ResponseEntity<Void> updateSubjectStudy(
 			@ApiParam(value = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
 			@ApiParam(value = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,

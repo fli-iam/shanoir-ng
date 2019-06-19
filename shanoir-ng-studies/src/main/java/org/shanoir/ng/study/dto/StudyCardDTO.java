@@ -1,6 +1,6 @@
 package org.shanoir.ng.study.dto;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * DTO for study cards.
@@ -8,7 +8,7 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
  * @author msimon
  *
  */
-public class StudyCardDTO extends IdNameDTO {
+public class StudyCardDTO extends IdName {
 
 	private Long acquisitionEquipmentId;
 	

@@ -1,9 +1,8 @@
 package org.shanoir.ng.subject.controler;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -79,13 +78,11 @@ public class SubjectApiController implements SubjectApi {
 	}
 		
 	@Override
-	public ResponseEntity<List<IdNameDTO>> findSubjectsNames() {
-		final List<Subject> subjects = subjectService.findAll();
-		if (subjects.isEmpty()) {
+	public ResponseEntity<List<IdName>> findSubjectsNames() {
+		final List<IdName> subjectsNames = subjectService.findNames();
+		if (subjectsNames.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		final List<IdNameDTO> subjectsNames = new ArrayList<IdNameDTO>();
-		for (Subject subject : subjects) subjectsNames.add(new IdNameDTO(subject.getId(), subject.getName()));
 		return new ResponseEntity<>(subjectsNames, HttpStatus.OK);
 	}
 

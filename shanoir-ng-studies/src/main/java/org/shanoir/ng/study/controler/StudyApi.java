@@ -2,9 +2,10 @@ package org.shanoir.ng.study.controler;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.springframework.http.ResponseEntity;
@@ -50,9 +51,9 @@ public interface StudyApi {
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyDTO>> findStudies();
 
-	@ApiOperation(value = "", notes = "Returns id and name for all the studies", response = IdNameDTO.class, responseContainer = "List", tags = {})
+	@ApiOperation(value = "", notes = "Returns id and name for all the studies", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found studies", response = IdNameDTO.class, responseContainer = "List"),
+			@ApiResponse(code = 200, message = "found studies", response = IdName.class, responseContainer = "List"),
 			@ApiResponse(code = 204, message = "no study found", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
@@ -60,8 +61,20 @@ public interface StudyApi {
 	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyIdNameDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<IdNameDTO>> findStudiesNames();
+	ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException;
 
+	@ApiOperation(value = "", notes = "Returns id, name and centers for all the studies", response = IdName.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found studies", response = IdName.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no study found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/namesAndCenters", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyIdNameDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
+	ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException;
+	
 	@ApiOperation(value = "", notes = "If exists, returns the study corresponding to the given id", response = Study.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found study", response = Study.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Study.class),

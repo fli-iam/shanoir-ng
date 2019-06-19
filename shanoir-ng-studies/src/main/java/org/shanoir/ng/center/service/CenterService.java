@@ -3,8 +3,8 @@ package org.shanoir.ng.center.service;
 import java.util.List;
 
 import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.core.service.BasicEntityService;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,6 +43,15 @@ public interface CenterService extends BasicEntityService<Center> {
 	 * @return list of centers.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<IdNameDTO> findIdsAndNames();
+	List<IdName> findIdsAndNames();
+
+	/**
+	 * Find id and name for all centers.
+	 * 
+	 * @param studyId
+	 * @return list of centers.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	List<IdName> findIdsAndNames(Long studyId);
 
 }

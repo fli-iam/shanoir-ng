@@ -7,7 +7,7 @@ import org.mapstruct.Mapping;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.center.dto.CenterDTO;
 import org.shanoir.ng.center.model.Center;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
 
 /**
@@ -45,7 +45,7 @@ public interface CenterMapper {
 	 *            list of centers.
 	 * @return list of centers DTO.
 	 */
-	List<IdNameDTO> centersToIdNameDTOs(List<Center> centers);
+	List<IdName> centersToIdNameDTOs(List<Center> centers);
 
 	/**
 	 * Map a @Center to a @IdNameDTO.
@@ -54,6 +54,6 @@ public interface CenterMapper {
 	 *            center to map.
 	 * @return center DTO.
 	 */
-	IdNameDTO centerToIdNameDTO(Center center);
+	IdName centerToIdNameDTO(Center center);
 
 }

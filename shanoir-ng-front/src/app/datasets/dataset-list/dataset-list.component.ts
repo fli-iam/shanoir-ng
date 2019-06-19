@@ -32,9 +32,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
     }
 
     getPage(pageable: Pageable): Promise<Page<Dataset>> {
-        return this.datasetService.getPage(pageable).then(page => {
-            return page;
-        });
+        return this.datasetService.getPage(pageable);
     }
 
     // Grid columns definition

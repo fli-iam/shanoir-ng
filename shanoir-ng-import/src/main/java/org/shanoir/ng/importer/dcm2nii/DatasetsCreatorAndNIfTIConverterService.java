@@ -98,12 +98,12 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	/** Output files mapped by series UID. */
 	private HashMap<String, List<String>> outputFiles = new HashMap<String, List<String>>();
 	
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public NIfTIConverter findById(Long id) {
 		return niftiConverterRepository.findOne(id);
 	}
 	
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public List<NIfTIConverter> findAll() {
 		return niftiConverterRepository.findAll();
 	}

@@ -18,7 +18,7 @@ public interface SubjectStudyService {
 	 * @return a subject study or null.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	@PostAuthorize("hasPermission(returnObject.getStudy(), 'CAN_SEE_ALL')")
+	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject.getStudy(), 'CAN_SEE_ALL')")
 	SubjectStudy findById(Long id);
 	
 	/**
@@ -28,7 +28,7 @@ public interface SubjectStudyService {
 	 * @return updated subject study.
 	 * @throws EntityNotFoundException 
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and (hasPermission(#subjectStudy.getStudy(), 'CAN_IMPORT') || hasPermission(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and (@studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT') || @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE')))")
 	SubjectStudy update(SubjectStudy subjectStudy) throws EntityNotFoundException;
 
 }

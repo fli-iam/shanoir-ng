@@ -12,6 +12,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.role.repository.RoleRepository;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.utils.KeycloakShanoirUtil;
 import org.slf4j.Logger;
@@ -73,8 +74,9 @@ public class KeycloakClient {
 	 * @param password
 	 *            user password.
 	 * @return keycloak user id.
+	 * @throws SecurityException 
 	 */
-	public String createUserWithPassword(final User user, final String password) {
+	public String createUserWithPassword(final User user, final String password) throws SecurityException {
 		try {
 			final String keycloakId = KeycloakShanoirUtil
 					.getCreatedUserId(getKeycloak().realm(keycloakRealm).users().create(getUserRepresentation(user)));
@@ -94,8 +96,7 @@ public class KeycloakClient {
 					.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
 			return keycloakId;
 		} catch (Exception e) {
-			LOG.error("Error while creating user with id " + user.getId() + " on Keycloak server", e);
-			return null;
+			throw new SecurityException("Could not register the new user into Keycloak.", e);
 		}
 	}
 	
@@ -105,8 +106,9 @@ public class KeycloakClient {
 	 * @param user
 	 *            user to create.
 	 * @return keycloak user id.
+	 * @throws SecurityException 
 	 */
-	public String createUserWithPassword(final User user) {
+	public String createUserWithPassword(final User user) throws SecurityException {
 		return createUserWithPassword(user, user.getPassword());
 	}
 	
@@ -172,7 +174,7 @@ public class KeycloakClient {
 		final UserRepresentation userRepresentation = new UserRepresentation();
 		userRepresentation.setAttributes(attributes);
 		userRepresentation.setEmail(user.getEmail());
-		userRepresentation.setEnabled(user.isEnabled() && !user.isAccountRequestDemand());
+		userRepresentation.setEnabled(user.isEnabled() && (user.isAccountRequestDemand() == null || !user.isAccountRequestDemand()));
 		userRepresentation.setFirstName(user.getFirstName());
 		userRepresentation.setLastName(user.getLastName());
 		userRepresentation.setUsername(user.getUsername());

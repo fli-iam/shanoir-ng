@@ -2,7 +2,7 @@ package org.shanoir.ng.studycard.controler;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdListDTO;
+import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.springframework.http.ResponseEntity;
@@ -80,7 +80,7 @@ public interface StudyCardApi {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<List<StudyCard>> searchStudyCards(
-			@ApiParam(value = "study ids", required = true) @RequestBody IdListDTO studyIds);
+			@ApiParam(value = "study ids", required = true) @RequestBody IdList studyIds);
 	
     @ApiOperation(value = "", notes = "If exists, returns center id", response = Long.class, tags={  })
     @ApiResponses(value = { 

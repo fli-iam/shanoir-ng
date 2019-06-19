@@ -7,7 +7,7 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -103,18 +103,18 @@ public class ExaminationServiceImpl implements ExaminationService {
 		entity = new HttpEntity<>(KeycloakUtil.getKeycloakHeader());
 
 		// Request to study MS to get list of studies reachable by connected user
-		ResponseEntity<IdNameDTO[]> response = null;
+		ResponseEntity<IdName[]> response = null;
 		try {
 			response = restTemplate.exchange(
 					microservicesRequestsService.getStudiesMsUrl() + MicroserviceRequestsService.STUDY, HttpMethod.GET,
-					entity, IdNameDTO[].class);
+					entity, IdName[].class);
 		} catch (RestClientException e) {
 			LOG.error("Error on study microservice request - " + e.getMessage());
 		}
 
 		final List<Long> studyIds = new ArrayList<>();
 		if (response != null) {
-			IdNameDTO[] studies = null;
+			IdName[] studies = null;
 			if (HttpStatus.OK.equals(response.getStatusCode())
 					|| HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
 				studies = response.getBody();
@@ -123,7 +123,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			}
 
 			if (studies != null) {
-				for (IdNameDTO idNameDTO : studies) {
+				for (IdName idNameDTO : studies) {
 					studyIds.add(idNameDTO.getId());
 				}
 			}

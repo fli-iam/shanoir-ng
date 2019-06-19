@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -70,7 +70,7 @@ public class CenterRepositoryTest {
 	
 	@Test
 	public void findIdsAndNamesTest() throws Exception {
-		List<IdNameDTO> centersDb = repository.findIdsAndNames();
+		List<IdName> centersDb = repository.findIdsAndNames();
 		assertNotNull(centersDb);
 		assertThat(centersDb.size()).isEqualTo(2);
 	}

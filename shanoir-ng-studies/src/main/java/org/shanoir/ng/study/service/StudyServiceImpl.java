@@ -61,6 +61,18 @@ public class StudyServiceImpl implements StudyService {
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findOne(id);
 		if (study == null) throw new EntityNotFoundException(Study.class, id);
+		
+		if (study.getStudyUserList() != null) {
+			List<StudyUserCommand> commands = new ArrayList<>();
+			for (StudyUser su : study.getStudyUserList()) 
+				commands.add(new StudyUserCommand(CommandType.DELETE, su.getId()));	
+			try {
+				studyUserCom.broadcast(commands);
+			} catch (MicroServiceCommunicationException e) {
+				LOG.error("Could not transmit study-user delete info through RabbitMQ");
+			}
+		}
+		
 		studyRepository.delete(id);			
 	}
 
@@ -84,9 +96,23 @@ public class StudyServiceImpl implements StudyService {
 		if (study.getStudyUserList() != null) {
 			for (final StudyUser studyUser: study.getStudyUserList()) {
 				studyUser.setStudy(study);
-			}			
+			}
 		}
-		return studyRepository.save(study);
+		Study studyDb = studyRepository.save(study);
+		
+		if (studyDb.getStudyUserList() != null) {
+			List<StudyUserCommand> commands = new ArrayList<>();
+			for (final StudyUser studyUser: studyDb.getStudyUserList()) {
+				commands.add(new StudyUserCommand(CommandType.CREATE, studyUser));
+			}
+			try {
+				studyUserCom.broadcast(commands);
+			} catch (MicroServiceCommunicationException e) {
+				LOG.error("Could not transmit study-user create info through RabbitMQ");
+			}
+		}
+		
+		return studyDb;
 	}
 
 	@Override
@@ -166,7 +192,7 @@ public class StudyServiceImpl implements StudyService {
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return Utils.copyList(studyRepository.findAll());
-		} else {
+		} else {			
 			return Utils.copyList(studyRepository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRights_OrderByNameAsc
 					(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId()));
 		}
@@ -229,7 +255,7 @@ public class StudyServiceImpl implements StudyService {
 			studyUserCom.broadcast(commands);
 			
 		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not transmit study-user delete info through RabbitMQ");
+			LOG.error("Could not transmit study-user update info through RabbitMQ");
 		}
 	}
 }

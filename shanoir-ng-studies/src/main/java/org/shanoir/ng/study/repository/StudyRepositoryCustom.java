@@ -2,7 +2,7 @@ package org.shanoir.ng.study.repository;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * Custom repository for studies.
@@ -17,6 +17,6 @@ public interface StudyRepositoryCustom {
 	 * 
 	 * @return list of studies.
 	 */
-	List<IdNameDTO> findIdsAndNames();
+	List<IdName> findIdsAndNames();
 
 }

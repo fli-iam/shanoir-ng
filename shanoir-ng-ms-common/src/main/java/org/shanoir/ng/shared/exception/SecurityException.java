@@ -13,5 +13,9 @@ public class SecurityException extends ShanoirException {
 	public SecurityException(String message) {
 		super(message);
 	}
+	
+	public SecurityException(String message, Exception cause) {
+		super(message, cause);
+	}
 
 }

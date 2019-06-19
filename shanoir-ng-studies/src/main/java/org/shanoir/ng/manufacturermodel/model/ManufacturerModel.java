@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.Length;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 @SqlResultSetMapping(name="ManufacturerModelNameResult", classes = {
-	    @ConstructorResult(targetClass = IdNameDTO.class, 
+	    @ConstructorResult(targetClass = IdName.class, 
 	    columns = {@ColumnResult(name="id", type = Long.class), @ColumnResult(name="name")})
 	})
 @ManufacturerModelTypeCheck

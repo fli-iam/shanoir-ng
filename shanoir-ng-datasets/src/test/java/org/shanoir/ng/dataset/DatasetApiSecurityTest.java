@@ -14,9 +14,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApi;
 import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.shared.communication.StudyCommunicationService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class DatasetApiSecurityTest {
 	private DatasetApi api;
 	
 	@MockBean
-	StudyCommunicationService commService;
+	StudyRightsService commService;
 	
 	@Before
 	public void setup() {

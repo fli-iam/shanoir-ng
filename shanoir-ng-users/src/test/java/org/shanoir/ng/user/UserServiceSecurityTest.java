@@ -1,5 +1,8 @@
 package org.shanoir.ng.user;
 
+import static org.mockito.BDDMockito.given;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
@@ -88,7 +91,7 @@ public class UserServiceSecurityTest {
 		
 //		given(userRepository.findOne(USER_ID)).willReturn(mockUser);
 //		given(userRepository.findOne(LOGGED_USER_ID)).willReturn(mockMe);
-//		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
+		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
 //		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
 //		given(userRepository.findByIdIn(Mockito.anyListOf(Long.class)))
 //				.willReturn(Arrays.asList(createUser()));
@@ -171,7 +174,12 @@ public class UserServiceSecurityTest {
 		assertAccessDenied(userService::confirmAccountRequest, mockUser);
 		assertAccessDenied(userService::deleteById, USER_ID);
 		assertAccessDenied(userService::denyAccountRequest, USER_ID);
-		assertAccessDenied(userService::findAll);
+		assertAccessAuthorized(userService::findAll);
+		for (User user : userService.findAll()) {
+			assertNull(user.getEmail());
+			assertNull(user.getLastLogin());
+			assertNull(user.getCreationDate());
+		}
 		assertAccessDenied(userService::findByEmail, USER_EMAIL);
 		assertAccessDenied(userService::findById, USER_ID);
 		assertAccessAuthorized(userService::findById, LOGGED_USER_ID);
@@ -201,6 +209,11 @@ public class UserServiceSecurityTest {
 		assertAccessAuthorized(userService::denyAccountRequest, USER_ID);
 		mockUser.setAccountRequestDemand(false);
 		assertAccessAuthorized(userService::findAll);
+		for (User user : userService.findAll()) {
+			assertNotNull(user.getEmail());
+			assertNotNull(user.getLastLogin());
+			assertNotNull(user.getCreationDate());
+		}
 		assertAccessAuthorized(userService::findByEmail, USER_EMAIL);
 		assertAccessAuthorized(userService::findById, USER_ID);
 		assertAccessAuthorized(userService::findById, LOGGED_USER_ID);

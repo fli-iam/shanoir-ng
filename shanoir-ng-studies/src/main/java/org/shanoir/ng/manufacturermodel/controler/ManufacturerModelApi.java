@@ -3,7 +3,7 @@ package org.shanoir.ng.manufacturermodel.controler;
 import java.util.List;
 
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +36,7 @@ public interface ManufacturerModelApi {
 	ResponseEntity<ManufacturerModel> findManufacturerModelById(
 			@ApiParam(value = "id of the manufacturer model", required = true) @PathVariable("manufacturerModelId") Long manufacturerModelId);
 
-	@ApiOperation(value = "", notes = "Returns id and name of all the manufacturer models", response = IdNameDTO.class, responseContainer = "List", tags = {})
+	@ApiOperation(value = "", notes = "Returns id and name of all the manufacturer models", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found manufacturer models", response = ManufacturerModel.class),
 			@ApiResponse(code = 204, message = "no manufacturer model found", response = Void.class),
@@ -45,10 +45,10 @@ public interface ManufacturerModelApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<IdNameDTO>> findManufacturerModelsNames();
+	ResponseEntity<List<IdName>> findManufacturerModelsNames();
 	
 	
-	@ApiOperation(value = "", notes = "Returns id and name of all the manufacturer models", response = IdNameDTO.class, responseContainer = "List", tags = {})
+	@ApiOperation(value = "", notes = "Returns id and name of all the manufacturer models", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found manufacturer models", response = ManufacturerModel.class),
 			@ApiResponse(code = 204, message = "no manufacturer model found", response = Void.class),
@@ -57,7 +57,7 @@ public interface ManufacturerModelApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/centerManuModelsNames/{centerId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<IdNameDTO>> findCenterManufacturerModelsNames(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+	ResponseEntity<List<IdName>> findCenterManufacturerModelsNames(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 	
 	@ApiOperation(value = "", notes = "Returns all the manufacturer models", response = ManufacturerModel.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {

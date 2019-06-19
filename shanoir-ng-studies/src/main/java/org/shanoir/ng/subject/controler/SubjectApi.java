@@ -2,7 +2,7 @@ package org.shanoir.ng.subject.controler;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
@@ -51,17 +51,17 @@ public interface SubjectApi {
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SubjectDTO>> findSubjects();
 	
-	@ApiOperation(value = "", notes = "Returns id and name for all the subjects", response = IdNameDTO.class, responseContainer = "List", tags = {})
+	@ApiOperation(value = "", notes = "Returns id and name for all the subjects", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found subjects", response = IdNameDTO.class, responseContainer = "List"),
+			@ApiResponse(code = 200, message = "found subjects", response = IdName.class, responseContainer = "List"),
 			@ApiResponse(code = 204, message = "no subject found", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectIdNamesDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<IdNameDTO>> findSubjectsNames();	
+	@PostAuthorize("hasAnyRole('ADMIN', 'EXPERT') or @studySecurityService.filterSubjectIdNamesDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
+	ResponseEntity<List<IdName>> findSubjectsNames();	
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given id", response = Subject.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found bubject", response = Subject.class),

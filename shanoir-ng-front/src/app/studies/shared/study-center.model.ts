@@ -16,7 +16,7 @@ export class StudyCenterDTO {
    
     constructor(studyCenter: StudyCenter) {
         this.id = studyCenter.id;
-        this.center = new Id(studyCenter.center.id);
-        this.study = new Id(studyCenter.study.id);
+        this.center = studyCenter.center ? new Id(studyCenter.center.id) : null;
+        this.study = studyCenter.study ? new Id(studyCenter.study.id) : null;
     }
 }

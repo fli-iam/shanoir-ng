@@ -21,10 +21,10 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.shared.communication.StudyCommunicationService;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class ExaminationServiceSecurityTest {
 	private ExaminationRepository repository;
 	
 	@MockBean
-	StudyCommunicationService commService;
+	StudyRightsService commService;
 	
 	@MockBean
 	private RestTemplate restTemplate;
@@ -143,11 +143,11 @@ public class ExaminationServiceSecurityTest {
 	
 	
 	private void testFindPage() throws ShanoirException {
-		IdNameDTO idNameDTO = new IdNameDTO();
+		IdName idNameDTO = new IdName();
 		idNameDTO.setId(1L);
-		IdNameDTO[] tab = { idNameDTO };
+		IdName[] tab = { idNameDTO };
 		given(restTemplate.exchange(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class),
-		Matchers.<Class<IdNameDTO[]>>any())).willReturn(new ResponseEntity<>(tab, HttpStatus.OK));
+		Matchers.<Class<IdName[]>>any())).willReturn(new ResponseEntity<>(tab, HttpStatus.OK));
 		
 		List<Examination> exList = new ArrayList<>();
 		Examination ex1 = mockExam(1L); ex1.setStudyId(1L); exList.add(ex1);
@@ -215,7 +215,7 @@ public class ExaminationServiceSecurityTest {
 	
 	private void testCreateDTO() throws ShanoirException {
 		ExaminationDTO dto = mockExamDTO();
-		IdNameDTO studyDto = new IdNameDTO();
+		IdName studyDto = new IdName();
 		studyDto.setId(10L);
 		dto.setStudy(studyDto);
 		given(commService.hasRightOnStudy(10L, "CAN_ADMINISTRATE")).willReturn(true);

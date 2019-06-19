@@ -17,7 +17,7 @@ import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.role.repository.RoleRepository;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ForbiddenException;
@@ -83,7 +83,7 @@ public class UserServiceTest {
 	private UserService userService;
 
 	@Before
-	public void setup() {
+	public void setup() throws SecurityException {
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
 		given(userRepository.findByIdIn(Mockito.anyListOf(Long.class)))
@@ -210,7 +210,7 @@ public class UserServiceTest {
 	@Test
 	@WithMockUser(authorities = { "ROLE_USER" })
 	public void findByIdsTest() {
-		final List<IdNameDTO> users = userService.findByIds(Arrays.asList(USER_ID));
+		final List<IdName> users = userService.findByIds(Arrays.asList(USER_ID));
 		Assert.assertNotNull(users);
 		Assert.assertTrue(USER_USERNAME.equals(users.get(0).getName()));
 

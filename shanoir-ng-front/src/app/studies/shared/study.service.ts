@@ -17,14 +17,14 @@ export class StudyService extends EntityService<Study> {
         .map(entities => entities.map((entity) => Object.assign(new Study(), entity)))
         .toPromise();
     }
-    
-    findStudiesForImport(): Promise<Study[]> {
-        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_FOR_IMPORT_URL)
-            .toPromise();
-    }
 
     getStudiesNames(): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
+            .toPromise();
+    }
+
+    getStudyNamesAndCenters(): Promise<Study[]> {
+        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL)
             .toPromise();
     }
     

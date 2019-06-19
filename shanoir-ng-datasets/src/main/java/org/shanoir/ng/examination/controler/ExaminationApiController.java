@@ -89,12 +89,12 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<ExaminationDTO> saveNewExamination(
-			@ApiParam(value = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examination,
+			@ApiParam(value = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
 
-		final Examination createdExamination = examinationService.save(examination);
+		final Examination createdExamination = examinationService.save(examinationDTO);
 		return new ResponseEntity<ExaminationDTO>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 
 	}

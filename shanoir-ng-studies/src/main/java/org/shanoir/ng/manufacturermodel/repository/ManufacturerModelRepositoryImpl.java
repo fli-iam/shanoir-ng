@@ -5,7 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * Implementation of custom repository for centers.
@@ -21,13 +21,13 @@ public class ManufacturerModelRepositoryImpl implements ManufacturerModelReposit
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<IdNameDTO> findIdsAndNames() {
+	public List<IdName> findIdsAndNames() {
 		return em.createNativeQuery("SELECT id, name FROM manufacturer_model", "ManufacturerModelNameResult").getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<IdNameDTO> findIdsAndNamesForCenter(Long centerId) {
+	public List<IdName> findIdsAndNamesForCenter(Long centerId) {
 		return em.createNativeQuery("SELECT id, name FROM center ", "ManufacturerModelNameResult").getResultList();
 	}
 

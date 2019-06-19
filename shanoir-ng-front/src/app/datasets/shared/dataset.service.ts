@@ -19,7 +19,9 @@ export class DatasetService extends EntityService<Dataset> {
     getPage(pageable: Pageable): Promise<any> {
         return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL, { 'params': pageable.toParams() })
             .map((page: Page<Dataset>) => {
-                page.content = page.content.map(ds => Object.assign(ds, this.getEntityInstance(ds)));
+                if (page && page.content) {
+                    page.content = page.content.map(ds => Object.assign(ds, this.getEntityInstance(ds)));
+                }
                 return page;
             })
             .toPromise();

@@ -6,7 +6,7 @@ import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
 
@@ -27,7 +27,7 @@ public interface DatasetMapper {
 	 *            list of datasets.
 	 * @return list of datasets DTO.
 	 */
-	List<IdNameDTO> datasetsToIdNameDTOs(List<Dataset> datasets);
+	List<IdName> datasetsToIdNameDTOs(List<Dataset> datasets);
 
 	/**
 	 * Map a @Dataset to a @DatasetDTO.
@@ -63,6 +63,6 @@ public interface DatasetMapper {
 	 *            dataset to map.
 	 * @return dataset DTO.
 	 */
-	IdNameDTO datasetToIdNameDTO(Dataset dataset);
+	IdName datasetToIdNameDTO(Dataset dataset);
 
 }

@@ -14,7 +14,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -43,7 +43,7 @@ public class DatasetMapperTest {
 
 	@Test
 	public void datasetsToIdNameDTOsTest() throws ParseException {
-		final List<IdNameDTO> datasetDTOs = datasetMapper.datasetsToIdNameDTOs(Arrays.asList(createDataset()));
+		final List<IdName> datasetDTOs = datasetMapper.datasetsToIdNameDTOs(Arrays.asList(createDataset()));
 		Assert.assertNotNull(datasetDTOs);
 		Assert.assertTrue(datasetDTOs.size() == 1);
 		Assert.assertTrue(DATASET_ID.equals(datasetDTOs.get(0).getId()));
@@ -59,7 +59,7 @@ public class DatasetMapperTest {
 
 	@Test
 	public void datasetToIdNameDTOTest() throws ParseException {
-		final IdNameDTO datasetDTO = datasetMapper.datasetToIdNameDTO(createDataset());
+		final IdName datasetDTO = datasetMapper.datasetToIdNameDTO(createDataset());
 		Assert.assertNotNull(datasetDTO);
 		Assert.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
 		Assert.assertTrue(DATASET_NAME.equals(datasetDTO.getName()));
@@ -69,7 +69,7 @@ public class DatasetMapperTest {
 	public void datasetWithoutNameToIdNameDTOTest() throws ParseException {
 		final Dataset dataset = createDataset();
 		dataset.getOriginMetadata().setName(null);
-		final IdNameDTO datasetDTO = datasetMapper.datasetToIdNameDTO(dataset);
+		final IdName datasetDTO = datasetMapper.datasetToIdNameDTO(dataset);
 		Assert.assertNotNull(datasetDTO);
 		Assert.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
 		Assert.assertTrue(DATASET_GENERATED_NAME.equals(datasetDTO.getName()));

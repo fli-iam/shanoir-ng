@@ -4,22 +4,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.shared.communication.StudyCommunicationService;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DatasetSecurityService {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetSecurityService.class);
+
 	
 	@Autowired
 	DatasetRepository datasetRepository;
@@ -28,7 +32,7 @@ public class DatasetSecurityService {
 	ExaminationRepository examinationRepository;
 	
 	@Autowired
-	StudyCommunicationService commService;
+	StudyRightsService commService;
 		
 	
 	/**
@@ -51,8 +55,9 @@ public class DatasetSecurityService {
      * @param datasetId the dataset id
      * @param rightStr the right
      * @return true or false
+     * @throws EntityNotFoundException 
      */
-    public boolean hasRightOnDataset(Long datasetId, String rightStr) {
+    public boolean hasRightOnDataset(Long datasetId, String rightStr) throws EntityNotFoundException {
     	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
     	Dataset dataset = datasetRepository.findOne(datasetId);
         if (dataset == null) throw new EntityNotFoundException("Cannot find dataset with id " + datasetId);
@@ -82,8 +87,9 @@ public class DatasetSecurityService {
      * @param dataset the dataset
      * @param rightStr the right
      * @return true or false
+     * @throws EntityNotFoundException 
      */
-    public boolean hasUpdateRightOnDataset(Dataset dataset, String rightStr) {
+    public boolean hasUpdateRightOnDataset(Dataset dataset, String rightStr) throws EntityNotFoundException {
     	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
     	if (dataset == null) throw new IllegalArgumentException("Dataset cannot be null here.");
     	if (dataset.getId() == null) throw new IllegalArgumentException("Dataset id cannot be null here.");
@@ -109,9 +115,11 @@ public class DatasetSecurityService {
     	page.forEach((Dataset dataset) -> {
     		studyIds.add(dataset.getStudyId());
     	});
-    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr); //
     	for (Dataset dataset : page) {
-    		if (!checkedIds.contains(dataset.getStudyId())) return false;
+    		if (!checkedIds.contains(dataset.getStudyId())) {
+    			return false;
+    		}
     	}
     	return true;
     }
@@ -211,6 +219,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterDatasetDTOPage(Page<DatasetDTO> page, String rightStr) {
+    	if (page == null) return true;
     	Set<Long> studyIds = new HashSet<Long>();
     	page.forEach((DatasetDTO dataset) -> {
     		studyIds.add(dataset.getStudyId());
@@ -228,8 +237,9 @@ public class DatasetSecurityService {
      * @param examinationId the examination id
      * @param rightStr the right
      * @return true or false
+     * @throws EntityNotFoundException 
      */
-    public boolean hasRightOnExamination(Long examinationId, String rightStr) {
+    public boolean hasRightOnExamination(Long examinationId, String rightStr) throws EntityNotFoundException {
     	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
     	Examination exam = examinationRepository.findOne(examinationId);
         if (exam == null) throw new EntityNotFoundException("Cannot find examination with id " + examinationId);

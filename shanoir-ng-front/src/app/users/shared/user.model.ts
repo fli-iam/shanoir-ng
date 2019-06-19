@@ -5,7 +5,7 @@ import { Role } from '../../roles/role.model';
 import { ServiceLocator } from '../../utils/locator.service';
 import { UserService } from './user.service';
 
-export class User extends Entity{
+export class User extends Entity {
     id: number;
     accountRequestDemand: boolean;
     accountRequestInfo: AccountRequestInfo;

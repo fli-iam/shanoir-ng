@@ -113,23 +113,25 @@ export class ClinicalContextComponent{
 
     private async completeStudies(equipment: EquipmentDicom): Promise<void> {
         let completeStudyPromises: Promise<void>[] = [];
-        completeStudyPromises.push(Promise.all([this.studyService.findStudiesForImport(), this.centerService.getAll()])
+        completeStudyPromises.push(Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
                 for (let study of allStudies) {
-                    for (let studyCenter of study.studyCenterList) {
-                        let center = allCenters.find(center => center.id === studyCenter.center.id);
-                        if (center) {
-                            let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
-                                && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
-                                && acqEqt.manufacturerModel.manufacturer.name === equipment.manufacturer);
-                            for (let compatibleAcqEqt of compatibleAcqEqts) {
-                                compatibleAcqEqt.compatible = true;
-                                center.compatible = true;
-                                study.compatible = true;
+                    if (study.studyCenterList) {
+                        for (let studyCenter of study.studyCenterList) {
+                            let center = allCenters.find(center => center.id === studyCenter.center.id);
+                            if (center) {
+                                let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
+                                    && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
+                                    && acqEqt.manufacturerModel.manufacturer.name === equipment.manufacturer);
+                                for (let compatibleAcqEqt of compatibleAcqEqts) {
+                                    compatibleAcqEqt.compatible = true;
+                                    center.compatible = true;
+                                    study.compatible = true;
+                                }
+                                studyCenter.center = center;
                             }
-                            studyCenter.center = center;
-                        }
-                    } 
+                        } 
+                    }
                     this.studies.push(study);
                 }
             }));

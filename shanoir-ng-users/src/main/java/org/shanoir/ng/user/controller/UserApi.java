@@ -2,13 +2,14 @@ package org.shanoir.ng.user.controller;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdListDTO;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdList;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ForbiddenException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.user.model.ExtensionRequestInfo;
 import org.shanoir.ng.user.model.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -83,7 +84,8 @@ public interface UserApi {
 			@ApiResponse(code = 403, message = "forbidden", response = User.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = User.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PostAuthorize("hasRole('ADMIN') or @userPrivacySecurityService.filterPersonnalData(returnObject.getBody())")
 	ResponseEntity<List<User>> findUsers();
 
 	@ApiOperation(value = "", notes = "Requests a date extension for current user", response = Void.class, tags = {})
@@ -108,17 +110,17 @@ public interface UserApi {
 	ResponseEntity<User> saveNewUser(@ApiParam(value = "user to create", required = true) @RequestBody User user,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Requests users by id list", response = IdNameDTO.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found users", response = IdNameDTO.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = IdNameDTO.class),
-			@ApiResponse(code = 403, message = "forbidden", response = IdNameDTO.class),
-			@ApiResponse(code = 404, message = "no userfound", response = IdNameDTO.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = IdNameDTO.class) })
+	@ApiOperation(value = "", notes = "Requests users by id list", response = IdName.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found users", response = IdName.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = IdName.class),
+			@ApiResponse(code = 403, message = "forbidden", response = IdName.class),
+			@ApiResponse(code = 404, message = "no userfound", response = IdName.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = IdName.class) })
 	@RequestMapping(value = "/search", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-	ResponseEntity<List<IdNameDTO>> searchUsers(
-			@ApiParam(value = "user ids", required = true) @RequestBody IdListDTO userIds);
+	ResponseEntity<List<IdName>> searchUsers(
+			@ApiParam(value = "user ids", required = true) @RequestBody IdList userIds);
 
 	@ApiOperation(value = "", notes = "Updates a user", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "user updated", response = Void.class),

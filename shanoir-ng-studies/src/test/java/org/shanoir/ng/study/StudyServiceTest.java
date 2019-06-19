@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -24,6 +24,7 @@ import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.study.service.StudyServiceImpl;
+import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -53,12 +54,15 @@ public class StudyServiceTest {
 	private StudyUserRepository studyUserRepository;
 	
 	@Mock
+	private StudyCenterRepository studyCenterRepository;
+
+	@Mock
 	private StudyUserUpdateBroadcastService studyUserCom;
 
 	@Before
 	public void setup() {
 		given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
-		given(studyRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
+		given(studyRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
 		given(studyRepository.findOne(STUDY_ID)).willReturn(ModelsUtil.createStudy());
 		given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy());
 	}
@@ -168,5 +172,5 @@ public class StudyServiceTest {
 		studyUser.setStudyUserRights(studyUserRights);
 		return studyUser;
 	}
-
+	
 }

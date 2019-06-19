@@ -6,8 +6,8 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
-import org.shanoir.ng.shared.dto.IdListDTO;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdList;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -91,7 +91,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
 
-	
 	@Override
 	public ResponseEntity<Void> requestExtension(@RequestBody final ExtensionRequestInfo requestInfo) {
 		try {
@@ -111,8 +110,8 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			generateUsername(user);
 		}
 		
-		validateIgnoreBlankUsername(user, result);
 		user.setCreationDate(LocalDate.now()); // Set creation date on creation, which is now
+		validateIgnoreBlankUsername(user, result);
 
 		/* Save user in db. */
 		try {
@@ -129,8 +128,8 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	}
 
 	@Override
-	public ResponseEntity<List<IdNameDTO>> searchUsers(@RequestBody final IdListDTO userIds) {
-		final List<IdNameDTO> users = getUserService().findByIds(userIds.getIdList());
+	public ResponseEntity<List<IdName>> searchUsers(@RequestBody final IdList userIds) {
+		final List<IdName> users = getUserService().findByIds(userIds.getIdList());
 		if (users.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

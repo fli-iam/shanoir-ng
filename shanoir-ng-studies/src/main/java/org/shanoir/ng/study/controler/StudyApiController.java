@@ -3,12 +3,13 @@ package org.shanoir.ng.study.controler;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
@@ -57,11 +58,20 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<IdNameDTO>> findStudiesNames() {
-		List<IdNameDTO> studiesDTO = new ArrayList<>();
+	public ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException {
+		List<IdName> studiesDTO = new ArrayList<>(); 
 		final List<Study> studies = studyService.findAll();
 		if (studies.isEmpty()) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		for (Study study : studies) studiesDTO.add(studyMapper.studyToIdNameDTO(study));
+		for (Study study : studies) studiesDTO.add(studyMapper.studyToIdNameDTO(study));			
+		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException {
+		List<IdNameCenterStudyDTO> studiesDTO = new ArrayList<>(); 
+		final List<Study> studies = studyService.findAll();
+		if (studies.isEmpty()) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		for (Study study : studies) studiesDTO.add(studyMapper.studyToExtendedIdNameDTO(study));			
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
 

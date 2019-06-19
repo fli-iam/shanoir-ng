@@ -9,3 +9,15 @@ INSERT INTO users
 	(id, account_request_demand, account_request_info_id, can_access_to_dicom_association, creation_date, email, expiration_date, extension_date, extension_motivation, extension_request_demand, first_name, first_expiration_notification_sent, second_expiration_notification_sent, last_name, username, role_id)
 VALUES
 	(1, 0, null, 0, NOW(), 'admin@shanoir.fr', null, null, null, 0, 'adminFirstName', 0, 0, 'adminFirstName', 'admin', 1);
+	
+INSERT INTO users
+	(id, account_request_demand, account_request_info_id, can_access_to_dicom_association, creation_date, email, expiration_date, extension_date, extension_motivation, extension_request_demand, first_name, first_expiration_notification_sent, second_expiration_notification_sent, last_name, username, role_id)
+VALUES
+	(2, 0, null, 0, NOW(), 'yyao@inria.fr', null, null, null, 0, 'Yao', 0, 0, 'Chi', 'yyao', 2);
+	
+INSERT INTO users
+	(id, account_request_demand, account_request_info_id, can_access_to_dicom_association, creation_date, email, expiration_date, extension_date, extension_motivation, extension_request_demand, first_name, first_expiration_notification_sent, second_expiration_notification_sent, last_name, username, role_id)
+VALUES
+	(3, 0, null, 0, NOW(), 'jlouis@inria.fr', null, null, null, 0, 'Julien', 0, 0, 'Louis', 'jlouis', 3);
+
+	

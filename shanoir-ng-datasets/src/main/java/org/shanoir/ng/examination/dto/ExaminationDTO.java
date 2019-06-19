@@ -4,8 +4,8 @@ package org.shanoir.ng.examination.dto;
 
 import java.time.LocalDate;
 
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.shared.dto.IdNameDTO;
 
 /**
  * Examination DTO with necessary information for front
@@ -17,7 +17,7 @@ public class ExaminationDTO {
 
 	private Long id;
 
-	private IdNameDTO center;
+	private IdName center;
 
 	private String comment;
 
@@ -26,9 +26,9 @@ public class ExaminationDTO {
 
 	private String note;
 
-	private IdNameDTO study;
+	private IdName study;
 
-	private IdNameDTO subject;
+	private IdName subject;
 
 	private Double subjectWeight;
 	
@@ -94,26 +94,26 @@ public class ExaminationDTO {
 		this.note = note;
 	}
 
-	public IdNameDTO getCenter() {
+	public IdName getCenter() {
 		return center;
 	}
 
-	public void setCenter(IdNameDTO center) {
+	public void setCenter(IdName center) {
 		this.center = center;
 	}
 
-	public IdNameDTO getStudy() {
+	public IdName getStudy() {
 		return study;
 	}
 
-	public void setStudy(IdNameDTO study) {
+	public void setStudy(IdName study) {
 		this.study = study;
 	}
 
 	/**
 	 * @return the subject
 	 */
-	public IdNameDTO getSubject() {
+	public IdName getSubject() {
 		return subject;
 	}
 
@@ -121,7 +121,7 @@ public class ExaminationDTO {
 	 * @param subject
 	 *            the subject to set
 	 */
-	public void setSubject(IdNameDTO subject) {
+	public void setSubject(IdName subject) {
 		this.subject = subject;
 	}
 

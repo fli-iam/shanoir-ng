@@ -2,7 +2,7 @@ package org.shanoir.ng.manufacturermodel.repository;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * Custom repository for centers.
@@ -17,7 +17,7 @@ public interface ManufacturerModelRepositoryCustom {
 	 * 
 	 * @return list of Manufacturer Models.
 	 */
-	List<IdNameDTO> findIdsAndNames();
+	List<IdName> findIdsAndNames();
 	
 	
 	/**
@@ -27,5 +27,5 @@ public interface ManufacturerModelRepositoryCustom {
 	 * 
 	 * @return list of Manufacturer Models.
 	 */
-	List<IdNameDTO> findIdsAndNamesForCenter(Long centerId);
+	List<IdName> findIdsAndNamesForCenter(Long centerId);
 }

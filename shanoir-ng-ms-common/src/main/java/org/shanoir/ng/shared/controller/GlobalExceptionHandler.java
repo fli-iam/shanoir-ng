@@ -1,5 +1,6 @@
 package org.shanoir.ng.shared.controller;
 
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
@@ -31,7 +32,15 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(value = AccessDeniedException.class)
 	public ResponseEntity<ErrorModel> handleAccessDeniedException(final AccessDeniedException e) {
 		final ErrorModel error = new ErrorModel(HttpStatus.FORBIDDEN.value(), e.getMessage());
+		LOG.warn("Acces denied in the rest service. ", e);
 		return new ResponseEntity<ErrorModel>(error, HttpStatus.FORBIDDEN);
+	}
+	
+	@ExceptionHandler(value = EntityNotFoundException.class)
+	public ResponseEntity<ErrorModel> handleEntityNotFoundException(final EntityNotFoundException e) {
+		final ErrorModel error = new ErrorModel(HttpStatus.NOT_FOUND.value(), e.getMessage());
+		LOG.warn("Entity not found in the rest service. ", e);
+		return new ResponseEntity<ErrorModel>(error, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(value = Exception.class)
