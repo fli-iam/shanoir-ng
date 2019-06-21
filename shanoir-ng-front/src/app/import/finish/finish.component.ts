@@ -91,7 +91,7 @@ export class FinishImportComponent {
         if (true) {
             let importJob = new ImportJob();
             importJob.patients = new Array<PatientDicom>();
-            // this.patient.subject = new IdNameObject(this.context.subject.id, this.context.subject.name);
+            // this.patient.subject = new IdName(this.context.subject.id, this.context.subject.name);
             this.patient.subject = Subject.makeSubject(
                     this.context.subject.id, 
                     this.context.subject.name, 

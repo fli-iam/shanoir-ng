@@ -18,13 +18,20 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.validation.FindByRepository;
+import org.shanoir.ng.studycard.controler.StudyCardApiController;
+import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.service.StudyCardService;
+import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,6 +39,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -46,8 +54,9 @@ import com.google.gson.GsonBuilder;
  *
  */
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = StudyCardApiController.class)
+@WebMvcTest(controllers = {StudyCardApiController.class, StudyCardUniqueConstraintManager.class})
 @AutoConfigureMockMvc(secure = false)
+@ActiveProfiles("test")
 public class StudyCardApiControllerTest {
 
 	private static final String REQUEST_PATH = "/studycards";
@@ -60,15 +69,22 @@ public class StudyCardApiControllerTest {
 
 	@MockBean
 	private StudyCardService studyCardServiceMock;
+	
+	@MockBean
+	FindByRepository<StudyCard> findByRepositoryMock;
 
 	@Before
-	public void setup() throws ShanoirDatasetsException {
+	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+		StudyCard studyCardMock = new StudyCard();
+		studyCardMock.setId(1L);
 
 		doNothing().when(studyCardServiceMock).deleteById(1L);
-		given(studyCardServiceMock.findAll()).willReturn(Arrays.asList(new StudyCard()));
-		given(studyCardServiceMock.findById(1L)).willReturn(new StudyCard());
+		given(studyCardServiceMock.findAll()).willReturn(Arrays.asList(studyCardMock));
+		given(studyCardServiceMock.findById(1L)).willReturn(studyCardMock);
 		given(studyCardServiceMock.save(Mockito.mock(StudyCard.class))).willReturn(new StudyCard());
+		
+		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(new ArrayList<StudyCard>());
 	}
 
 	@Test

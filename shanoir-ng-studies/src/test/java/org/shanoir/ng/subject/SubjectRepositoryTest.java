@@ -15,16 +15,15 @@
 package org.shanoir.ng.subject;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -85,15 +84,9 @@ public class SubjectRepositoryTest {
 
 	@Test
 	public void findByDataTest() throws Exception {
-		Optional<Subject> subjectDb = subjectRepository.findByName(SUBJECT_TEST_1_DATA);
-		assertTrue(subjectDb.isPresent());
-		assertThat(subjectDb.get().getId()).isEqualTo(SUBJECT_TEST_1_ID);
-	}
-
-	@Test
-	public void findOfsepLastNameFromRepository() {
-		String name = subjectRepository.find("001");
-		assertEquals("0010002", name);
+		Subject subjectDb = subjectRepository.findByName(SUBJECT_TEST_1_DATA);
+		assertNotNull(subjectDb);
+		assertThat(subjectDb.getId()).isEqualTo(SUBJECT_TEST_1_ID);
 	}
 
 	@Test
