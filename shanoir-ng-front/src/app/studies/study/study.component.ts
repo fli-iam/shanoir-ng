@@ -220,10 +220,8 @@ export class StudyComponent extends EntityComponent<Study> {
         }
         return false;
     }
-    
-    
-    /** StudyUser management **/
 
+    /** StudyUser management **/
     getPage(pageable: FilterablePageable): Promise<Page<StudyUser>> {
         return new Promise((resolve) => {
             this.studyUsersPromise.then(() => {

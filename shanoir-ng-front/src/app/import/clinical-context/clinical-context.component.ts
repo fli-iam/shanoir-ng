@@ -65,7 +65,8 @@ export class ClinicalContextComponent{
             private examinationService: ExaminationService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
-            private importDataService: ImportDataService) {
+            private importDataService: ImportDataService,
+            private msgBoxService: MsgBoxService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
             this.router.navigate(['imports'], {replaceUrl: true});
@@ -148,7 +149,7 @@ export class ClinicalContextComponent{
                     }
                     this.studies.push(study);
                 }
-            }));
+            }}));
         return Promise.all(completeStudyPromises).then(() => {});
     }
 
@@ -194,6 +195,7 @@ export class ClinicalContextComponent{
     }
 
     private onSelectSubject(): void {
+        console.log('pass in onSelectSubject, this.subject: ', this.subject)
         this.examinations = [];
         this.examination = null;
         if (this.subject) {
@@ -202,6 +204,7 @@ export class ClinicalContextComponent{
             .then(examinations => this.examinations = examinations);
         }
         this.onContextChange();
+        console.log('onselectSubject, contextBackUp: ', this.importDataService.contextBackup, 'this.subject: ', this.subject)
     }
     
     private onSelectExam(): void {
@@ -274,6 +277,7 @@ export class ClinicalContextComponent{
             this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
             importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                 this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+                console.log('openCreateSubject: ', this.importDataService.contextBackup.subject)
             });
         });
     }
