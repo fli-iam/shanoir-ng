@@ -80,19 +80,19 @@ export class TableComponent implements OnInit {
 
 
     public static getCellValue(item: Object, col: any): any {
-        if (col.hasOwnProperty("cellRenderer")) {
+        let result: any;
+        if (col.field == undefined) {
+            return null;
+        } if (col.hasOwnProperty("cellRenderer")) {
             let params = new Object();
             params["data"] = item;
             return col["cellRenderer"](params);
-        } else if (col.field == undefined) {
-            return null;
         } else {
             return this.getFieldRawValue(item, col["field"]);
         }
     }
 
     public static getFieldRawValue(obj: Object, path: string): any {
-        if (path == undefined || path == null) return;
         function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
     }
@@ -115,22 +115,12 @@ export class TableComponent implements OnInit {
      * Set the property value
      */
     private setFieldRawValue(obj: Object, path: string, value: any) {
-        if (path == undefined || path == null) return;
         const split = path.split('.');
         let currentObj = obj;
         for(let i=0; i<split.length-1; i++) {
             currentObj = currentObj[split[i]];
         }
         currentObj[split[split.length-1]] = value;
-    }
-
-    /** 
-     * Triggered when a field is edited
-     */
-    private onFieldEdit(obj: Object, col: Object, value: any) {
-        this.setFieldRawValue(obj, col['field'], value); 
-        this.rowEdit.emit(obj);
-        if (col['onEdit']) col['onEdit'](obj, value);
     }
 
     /**
@@ -151,7 +141,7 @@ export class TableComponent implements OnInit {
     private isFieldBoolean(col: any): boolean {
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
         let val = TableComponent.getCellValue(this.items[0], col);
-        return col.type == 'boolean' || this.isValueBoolean(val);
+        return this.isValueBoolean(val);
     }
 
     private isColumnText(col: any): boolean {

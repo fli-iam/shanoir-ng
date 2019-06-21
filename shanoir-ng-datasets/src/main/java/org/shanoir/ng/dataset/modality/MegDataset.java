@@ -16,7 +16,7 @@ package org.shanoir.ng.dataset.modality;
 
 import javax.persistence.Entity;
 
-import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.Dataset;
 
 /**
  * MEG dataset.

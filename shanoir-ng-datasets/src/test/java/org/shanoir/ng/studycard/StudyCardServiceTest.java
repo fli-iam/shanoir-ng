@@ -27,11 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
+import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -64,8 +60,9 @@ public class StudyCardServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws EntityNotFoundException, MicroServiceCommunicationException {
+	public void deleteByIdTest() throws ShanoirDatasetsException {
 		studyCardService.deleteById(TEMPLATE_ID);
+
 		Mockito.verify(studyCardRepository, Mockito.times(1)).delete(Mockito.anyLong());
 	}
 
@@ -88,18 +85,26 @@ public class StudyCardServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws MicroServiceCommunicationException {
+	public void saveTest() throws ShanoirDatasetsException {
 		studyCardService.save(createStudyCard());
 
 		Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
 	}
 
 	@Test
-	public void updateTest() throws EntityNotFoundException, MicroServiceCommunicationException {
+	public void updateTest() throws ShanoirDatasetsException {
 		final StudyCard updatedStudyCard = studyCardService.update(createStudyCard());
 		Assert.assertNotNull(updatedStudyCard);
 		Assert.assertTrue(UPDATED_STUDYCARD_DATA.equals(updatedStudyCard.getName()));
 
+		Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
+	}
+
+	@Test
+	public void updateFromShanoirOldTest() throws ShanoirDatasetsException {
+		studyCardService.updateFromShanoirOld(createStudyCard());
+
+		Mockito.verify(studyCardRepository, Mockito.times(1)).findOne(Mockito.anyLong());
 		Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
 	}
 

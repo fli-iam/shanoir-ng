@@ -61,22 +61,22 @@ spring:
     properties:
       mail.smtp.from: do-not-reply@inria.fr
 front.server:
-  address: https://shanoir-ng-nginx/shanoir-ng/
-  url: https://shanoir-ng-nginx
+  address: http://shanoir-ng-nginx/shanoir-ng/
+  url: http://shanoir-ng-nginx
 ##### Keycloak #####
 keycloak:
   # attention: this config for the token issuer needs to match the domain of the frontend
   # used for token creation AND the server url needs to be known from inside the docker network:
-  auth-server-url: https://shanoir-ng-nginx/auth
+  auth-server-url: http://shanoir-ng-nginx/auth
   cors: true
   realm: shanoir-ng
   resource: shanoir-ng-users
   ssl-required: external
-  credentials.secret: a0be59b0-5a8d-4a11-82fd-5d8e5358444e
   securityConstraints:
     - authRoles: 
       - ROLE_ADMIN
       - ROLE_EXPERT
+      - ROLE_GUEST
       - ROLE_USER
     - securityCollections:
       - name: user secured api
@@ -88,7 +88,7 @@ keycloak:
         - /role/*
 ##### Keycloak admin client, that ms users can directly communicate with keycloak #####
 kc.admin.client:
-  server.url: https://keycloak:8080/auth
+  server.url: http://keycloak:8080/auth
   realm: master
   client.id: admin-cli
 # logging configuration
@@ -99,6 +99,7 @@ logging:
     org.hibernate: ERROR
 
 ---
+
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
@@ -119,26 +120,3 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
-    
-    
----
-spring:
-  profiles: test
-  datasource:
-    url: jdbc:h2:mem:shanoirNgUsers;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password: 
-    driver-class-name: org.h2.Driver
-    initialize: true
-    data: classpath:/scripts/test-data-h2.sql
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create-drop
-  mail:
-    host: localhost
-    port: 3025
-    protocol: smtp
-    
-    

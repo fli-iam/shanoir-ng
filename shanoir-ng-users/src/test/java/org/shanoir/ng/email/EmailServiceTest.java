@@ -15,10 +15,8 @@
 package org.shanoir.ng.email;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -27,18 +25,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
-import org.shanoir.ng.user.model.User;
-import org.shanoir.ng.user.repository.UserRepository;
+import org.shanoir.ng.accountrequest.AccountRequestInfo;
+import org.shanoir.ng.user.User;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.icegreen.greenmail.util.GreenMail;
-import com.icegreen.greenmail.util.ServerSetup;
+import com.icegreen.greenmail.util.ServerSetupTest;
 
 /**
  * User detail service test.
@@ -56,29 +52,23 @@ public class EmailServiceTest {
 	@Autowired
 	private EmailServiceImpl emailService;
 	
-	public GreenMail greenMail;
-	
-	@MockBean
-	private UserRepository userRepositoryMock;
+	private GreenMail smtpServer;
 
-	
 	@Before
-	public void initGreenMail() {		
-		ServerSetup setup = new ServerSetup(3025, "localhost", "smtp");
-		greenMail = new GreenMail(setup);
-		greenMail.start();
-		
-		given(userRepositoryMock.findAdminEmails()).willReturn(Arrays.asList(new String[]{"admin@test.shanoir.fr"}));
+	public void setup() {
+		smtpServer = new GreenMail(ServerSetupTest.SMTP);
+		smtpServer.start();
 	}
-	
+
 	@After
-    public void stopMailServer() {
-        greenMail.stop();
-    }
+	public void tearDown() throws Exception {
+		smtpServer.stop();
+	}
 
 	@Test
 	public void notifyAccountWillExpireTest() throws Exception {
 		emailService.notifyAccountWillExpire(ModelsUtil.createUser());
+
 		assertReceivedMessageContains("Shanoir Account Expiration", "will expire on");
 	}
 
@@ -101,43 +91,54 @@ public class EmailServiceTest {
 
 	@Test
 	public void notifyNewUserTest() throws Exception {
-		emailService.notifyCreateUser(ModelsUtil.createUser(), "password");
-		assertReceivedMessageContains("Shanoir Account Creation", "Your account has been created");
+		emailService.notifyNewUser(ModelsUtil.createUser(), "password");
+
+		assertReceivedMessageContains("Shanoir Account Creation", "An account has been created");
 	}
 
 	@Test
 	public void notifyAccountRequestAcceptedTest() throws Exception {
 		emailService.notifyAccountRequestAccepted(ModelsUtil.createUser());
-		assertReceivedMessageContains("Granted: Your Shanoir account has been activated", "Your account request has been granted");
+
+		assertReceivedMessageContains("Granted: Your Shanoir account has been activated",
+				"Your account request has been granted");
 	}
 
 	@Test
 	public void notifyAccountRequestDeniedTest() throws Exception {
 		emailService.notifyAccountRequestDenied(ModelsUtil.createUser());
-		assertReceivedMessageContains("DENIED: Your Shanoir account request has been denied", "has been denied");
+
+		assertReceivedMessageContains("DENIED: Your Shanoir account request has been denied",
+				"has been denied");
 	}
 
 	@Test
 	public void notifyExtensionRequestAcceptedTest() throws Exception {
 		emailService.notifyExtensionRequestAccepted(ModelsUtil.createUser());
-		assertReceivedMessageContains("Granted: Your Shanoir account extension has been extended", "Your account extension request has been granted");
+
+		assertReceivedMessageContains("Granted: Your Shanoir account extension has been extended",
+				"Your account extension request has been granted");
 	}
 
 	@Test
 	public void notifyExtensionRequestDeniedTest() throws Exception {
 		emailService.notifyExtensionRequestDenied(ModelsUtil.createUser());
-		assertReceivedMessageContains("DENIED: Your Shanoir account extension request has been denied", "has been denied");
+
+		assertReceivedMessageContains("DENIED: Your Shanoir account extension request has been denied",
+				"has been denied");
 	}
 
 	@Test
 	public void notifyUserResetPasswordTest() throws Exception {
 		emailService.notifyUserResetPassword(ModelsUtil.createUser(), NEW_PASSWORD);
-		assertReceivedMessageContains("[Shanoir] Réinitialisation du mot de passe", NEW_PASSWORD);
+
+		assertReceivedMessageContains("[Shanoir] Réinitialisation du mot de passe",
+				NEW_PASSWORD);
 	}
 
 	private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)
 			throws IOException, MessagingException {
-		final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+		final MimeMessage[] receivedMessages = smtpServer.getReceivedMessages();
 		assertTrue(receivedMessages.length > 0);
 		final String subject = (String) receivedMessages[0].getSubject();
 		assertTrue(subject.contains(expectedSubject));

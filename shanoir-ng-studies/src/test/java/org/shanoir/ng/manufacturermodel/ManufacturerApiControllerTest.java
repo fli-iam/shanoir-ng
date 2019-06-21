@@ -23,11 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.manufacturermodel.controler.ManufacturerApiController;
-import org.shanoir.ng.manufacturermodel.model.Manufacturer;
-import org.shanoir.ng.manufacturermodel.service.ManufacturerService;
-import org.shanoir.ng.manufacturermodel.service.ManufacturerUniqueConstraintManager;
-import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -63,18 +59,14 @@ public class ManufacturerApiControllerTest {
 
 	@MockBean
 	private ManufacturerService manufacturerServiceMock;
-	
-	@MockBean
-	private ManufacturerUniqueConstraintManager uniqueConstraintManager;
 
 	@Before
-	public void setup() {
+	public void setup() throws ShanoirStudiesException {
 		gson = new GsonBuilder().create();
 
 		given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(new Manufacturer()));
 		given(manufacturerServiceMock.findById(1L)).willReturn(new Manufacturer());
-		given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(new Manufacturer());
-		given(uniqueConstraintManager.validate(Mockito.any(Manufacturer.class))).willReturn(new FieldErrorMap());
+		given(manufacturerServiceMock.save(Mockito.mock(Manufacturer.class))).willReturn(new Manufacturer());
 	}
 
 	@Test
@@ -101,10 +93,8 @@ public class ManufacturerApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void updateManufacturerTest() throws Exception {
-		Manufacturer manuf = ModelsUtil.createManufacturer();
-		manuf.setId(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(manuf)))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createManufacturer())))
 				.andExpect(status().isNoContent());
 	}
 

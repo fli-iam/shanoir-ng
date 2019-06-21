@@ -20,7 +20,6 @@ package org.shanoir.ng.importer.dcm2nii;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -45,7 +44,6 @@ public interface NIfTIConverterApi {
 			@ApiResponse(code = 404, message = "no nifti converter found", response = NIfTIConverter.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = NIfTIConverter.class) })
 	@RequestMapping(value = "/{niftiConverterId}", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<NIfTIConverter> findNiftiConverterById(
 			@ApiParam(value = "id of the niftiConverter", required = true) @PathVariable("niftiConverterId") Long niftiConverterId);
 	
@@ -56,6 +54,5 @@ public interface NIfTIConverterApi {
 			@ApiResponse(code = 404, message = "no nifti converter found", response = NIfTIConverter.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = NIfTIConverter.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<NIfTIConverter>> findNiftiConverters();
 }

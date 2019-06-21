@@ -186,7 +186,7 @@ public class QueryPACSService {
 	 * @param newPatient
 	 */
 	private Patient addPatientIfNotExisting(List<Patient> patients, Patient newPatient) {
-		for (Iterator<Patient> iterator = patients.iterator(); iterator.hasNext();) {
+		for (Iterator iterator = patients.iterator(); iterator.hasNext();) {
 			Patient patientInList = (Patient) iterator.next();
 			if (patientInList.getPatientID().equals(newPatient.getPatientID())) {
 				return patientInList;

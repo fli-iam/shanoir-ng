@@ -45,9 +45,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<useSystemClassLoader>false</useSystemClassLoader><!-- due to a bug with openJDK -->
-				</configuration>
 				<version>2.18.1</version>
 			</plugin>
 			<plugin>

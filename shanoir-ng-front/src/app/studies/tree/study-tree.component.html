@@ -12,18 +12,14 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<<<<<<< HEAD
-<node label="Subjects" awesome="far fa-folder" [deploy]="true">
-=======
 <node label="Subjects" [pictoUrl]="folderIconPath" deploy="true">
->>>>>>> upstream/develop
     <ng-template ngFor let-subject [ngForOf]="study.subjectStudyList">
-        <node [label]="subject | subjectStudyLabel" awesome="fas fa-user-injured" [nodeParams]="subject" [dataRequest]="true"
+        <node [label]="subject | subjectStudyLabel" [pictoUrl]="userIconPath" [nodeParams]="subject" [dataRequest]="true"
             (openClick)="getSubjectDetails($event)" link="true" (labelClick)="showSubjectDetails($event)">
             <ng-template ngFor let-examination [ngForOf]="subject.examinations">
-                <node [label]="examination | subjectExaminationLabel" awesome="fas fa-diagnoses" link="true" (labelClick)="showExaminationDetails(examination?.id)">
-                    <node *ngFor="let acquisition of examination.datasetAcquisitions" [label]="acquisition.name" awesome="fas fa-laptop-medical">
-                        <node *ngFor="let dataset of acquisition.datasets" [label]="dataset.name" awesome="fas fa-brain" link="true" (labelClick)="showDatasetDetails(dataset.id)">
+                <node [label]="examination | subjectExaminationLabel" [pictoUrl]="listIconPath" link="true" (labelClick)="showExaminationDetails(examination?.id)">
+                    <node *ngFor="let acquisition of examination.datasetAcquisitions" [label]="acquisition.name" [pictoUrl]="xRay2IconPath">
+                        <node *ngFor="let dataset of acquisition.datasets" [label]="dataset.name" [pictoUrl]="usersIconPathbrainIconPath" link="true" (labelClick)="showDatasetDetails(dataset.id)">
                         </node>
                     </node>
                 </node>
@@ -31,27 +27,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </node>
     </ng-template>
 </node>
-<node label="Experimental Groups (is associated to)" awesome="far fa-folder" [deploy]="true">
+<node label="Experimental Groups (is associated to)" [pictoUrl]="folderIconPath" deploy="true">
     <ng-template ngFor let-experimentalGroupsOfSubject [ngForOf]="study.experimentalGroupsOfSubjects">
-        <node [label]="experimentalGroupsOfSubject.name" awesome="fas fa-users">
+        <node [label]="experimentalGroupsOfSubject.name" [pictoUrl]="usersIconPath">
         </node>
     </ng-template>
 </node>
-<node label="Principal investigators and Centers (takes place in and with)" awesome="far fa-folder" [deploy]="true">
+<node label="Principal investigators and Centers (takes place in and with)" [pictoUrl]="folderIconPath" deploy="true">
     <ng-template ngFor let-studyCenter [ngForOf]="study.studyCenterList">
-        <node [label]="studyCenter.center.name" awesome="fas fa-clinic-medical" [nodeParams]="studyCenter" [dataRequest]="true"
+        <node [label]="studyCenter.center.name" [pictoUrl]="homeIconPath" [nodeParams]="studyCenter" [dataRequest]="true"
             (openClick)="getAcqEptForCenter($event)" link="true" (labelClick)="showCenterDetails($event)">
             <ng-template ngFor let-acquisitionEquipment [ngForOf]="acquisitionEquipments">
-                <node [label]="acquisitionEquipment | acqEqptLabel" awesome="fas fa-microscope" [nodeParams]="acquisitionEquipment.id"
+                <node [label]="acquisitionEquipment | acqEqptLabel" [pictoUrl]="xRay1IconPath" [nodeParams]="acquisitionEquipment.id"
                     link="true" (labelClick)="showAcquisitionEquipmentDetails($event)">
                 </node>
             </ng-template>
         </node>
     </ng-template>
 </node>
-<node label="Members" awesome="far fa-folder" [deploy]="true">
-    <node *ngFor="let member of study.studyUserList" [label]="member.userName" awesome="fas fa-user-md" [deploy]="false">
-        <node *ngFor="let right of member.studyUserRights" [label]="getStudyUserTypeLabel(right)" awesome="fas fa-key" [deploy]="false">
+<node label="Members" [pictoUrl]="folderIconPath" deploy="true">
+    <node *ngFor="let membersCategory of study.membersCategories" [label]="getStudyUserTypeLabel(membersCategory.studyUserType)" [pictoUrl]="folderIconPath" deploy="true">
+        <node *ngFor="let member of membersCategory.members" [label]="member.name" [pictoUrl]="userIconPath" [nodeParams]="member.id" link="true" (labelClick)="showMemberDetails($event)">
         </node>
     </node>
 </node>

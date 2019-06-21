@@ -18,9 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.shanoir.ng.shared.model.DiffusionGradient;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Dataset {

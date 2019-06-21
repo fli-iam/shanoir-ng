@@ -50,11 +50,8 @@ spring:
       WRITE_DATES_AS_TIMESTAMPS: false
   jooq:
     sql-dialect: Mysql
-  rabbitmq:
-    host: rabbitmq
-    port: 5672
-    username: guest
-    password: guest
+#  rabbitmq:
+#    host: rabbitmq
   session:
     store-type: none
 front.server:
@@ -87,9 +84,9 @@ datasets-data: /var/datasets-data
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log
   level:
-    org.springframework.web: ERROR
+    org.springframework.web: DEBUG
     org.hibernate: ERROR
-    org.shanoir: WARN
+    org.springframework.amqp: OFF
         
   
 ### ============================================================= ###
@@ -121,19 +118,3 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
-    
----
-spring:
-  profiles: test
-  datasource:
-    url: jdbc:h2:mem:SHANOIR_NG_DATASET;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password: 
-    driver-class-name: org.h2.Driver
-    initialize: true
-    data: classpath:/scripts/test-data-h2.sql
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      # Hibernate ddl auto (create, create-drop, update, validate)
-      ddl-auto: create-drop

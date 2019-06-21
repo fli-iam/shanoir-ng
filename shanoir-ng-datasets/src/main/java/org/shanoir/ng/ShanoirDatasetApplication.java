@@ -11,24 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-<<<<<<< HEAD
-=======
 
 package org.shanoir.ng;
->>>>>>> upstream/develop
 
-package org.shanoir.ng;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.shanoir.ng.shared.paging.PageSerializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
-
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -40,7 +34,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @SpringBootApplication
 @EnableSwagger2
-@EnableSpringDataWebSupport
 public class ShanoirDatasetApplication {
 
 	public static void main(String[] args) {

@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.role.model.Role;
-import org.shanoir.ng.role.repository.RoleRepository;
+import org.shanoir.ng.role.Role;
+import org.shanoir.ng.role.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -68,7 +68,7 @@ public class RoleRepositoryTest {
 	@Test
 	public void getAllNamesTest() throws Exception {
 		final List<String> rolesName = repository.getAllNames();
-		assertThat(rolesName.size()).isEqualTo(3);
+		assertThat(rolesName.size()).isEqualTo(4);
 	}
 	
 }

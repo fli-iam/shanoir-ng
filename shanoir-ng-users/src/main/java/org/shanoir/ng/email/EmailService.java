@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.email;
 
-import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.User;
 
 /**
  * Email service.
@@ -80,17 +80,7 @@ public interface EmailService {
 	 * @param password
 	 *            user password.
 	 */
-	void notifyCreateUser(User user, String password);
-
-	/**
-	 * Send an email on account creation.
-	 * 
-	 * @param user
-	 *            created user.
-	 * @param password
-	 *            user password.
-	 */
-	void notifyCreateAccountRequest(User user, String password);
+	void notifyNewUser(User user, String password);
 
 	/**
 	 * Send an email on user password reset.

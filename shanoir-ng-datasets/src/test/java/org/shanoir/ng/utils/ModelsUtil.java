@@ -11,21 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-<<<<<<< HEAD
-=======
-
-package org.shanoir.ng.utils;
->>>>>>> upstream/develop
 
 package org.shanoir.ng.utils;
 
+import java.time.LocalDate;
+
+import org.shanoir.ng.dataset.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.DatasetMetadata;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
-import org.shanoir.ng.dataset.model.DatasetMetadata;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.examination.Examination;
+import org.shanoir.ng.studycard.StudyCard;
 
 /**
  * Utility class for test. Generates models.
@@ -92,7 +89,7 @@ public final class ModelsUtil {
 		final Examination examination = new Examination();
 		examination.setCenterId(EXAMINATION_CENTER_ID);
 		examination.setComment(EXAMINATION_COMMENT);
-		//examination.setExaminationDate(LocalDate.now());
+		examination.setExaminationDate(LocalDate.now());
 		examination.setInvestigatorExternal(false);
 		examination.setInvestigatorId(EXAMINATION_INVESTIGATOR_ID);
 		examination.setNote(EXAMINATION_NOTE);

@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.shared.hateoas;
 
-import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @author jlouis
  */
-public abstract class HalEntity extends AbstractEntity {
+public abstract class HalEntity extends AbstractGenericItem {
 
 	/**
 	 * UID

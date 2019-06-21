@@ -27,6 +27,8 @@ import { ExaminationService } from '../shared/examination.service';
 })
 export class ExaminationListComponent extends EntityListComponent<Examination>{
 
+    private createAcqEquip = false;
+    private nbExaminations: number = 0;
     @ViewChild('table') table: TableComponent;
 
     constructor(

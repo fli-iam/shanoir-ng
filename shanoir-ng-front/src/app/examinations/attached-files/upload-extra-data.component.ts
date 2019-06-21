@@ -16,7 +16,7 @@ import { Location } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import { IdName } from '../../shared/models/id-name.model';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
@@ -32,7 +32,7 @@ export class UploadExtraDataComponent implements OnInit {
     public mode: "view" | "edit" | "create";
     fileToUpload: File = null;
     @Input() examination: Examination;
-    @Input() studies:  IdName[];
+    @Input() studies:  IdNameObject[];
     @Output() closing: EventEmitter<any> = new EventEmitter();
     public canModify: Boolean = false;
 

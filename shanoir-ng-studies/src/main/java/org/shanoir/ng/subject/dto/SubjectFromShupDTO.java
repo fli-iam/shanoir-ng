@@ -16,7 +16,7 @@ package org.shanoir.ng.subject.dto;
 
 import java.time.LocalDate;
 
-import org.shanoir.ng.subject.model.PseudonymusHashValues;
+import org.shanoir.ng.subject.PseudonymusHashValues;
 
 public class SubjectFromShupDTO {
 
@@ -170,4 +170,7 @@ public class SubjectFromShupDTO {
 		this.pseudonymusHashValues = pseudonymusHashValues;
 	}
 	
+	
+	
+    
 }

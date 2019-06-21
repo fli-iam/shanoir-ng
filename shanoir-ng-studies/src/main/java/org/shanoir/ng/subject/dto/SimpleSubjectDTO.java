@@ -17,7 +17,7 @@
  */
 package org.shanoir.ng.subject.dto;
 
-import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
+import org.shanoir.ng.subjectstudy.SubjectStudyDTO;
 
 /**
  * Simple DTO for Subject.

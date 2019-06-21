@@ -13,26 +13,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="node">
-    <span class="arrow">
-        <span *ngIf="dataLoading">
-            <div class="fa fa-cog fa-spin"></div>
-        </span>
-        <span *ngIf="hasChildren && isOpen" (click)="close()"><i class="fas fa-angle-down"></i></span>
-        <span *ngIf="hasChildren && !isOpen" (click)="open()"><i class="fas fa-angle-right"></i></span>
-        <span *ngIf="!hasChildren && dataRequest && !isOpen && !dataLoading" (click)="openClick.emit(this)"><i class="fas fa-angle-right"></i></span>
-        <!-- <span *ngIf="!hasChildren && !dataRequest" class="square"><i class="fas fa-asterisk"></i></span> -->
+    <span *ngIf="dataLoading">
+        <img class="arrow picto" [src]="loaderImagePath" />
     </span>
-    <span *ngIf="pictoUrl" (click)="labelClick.emit(nodeParams)" class="clickable picto" >
+    <span *ngIf="hasChildren && isOpen" (click)="close()" class="arrow">&#x25BE;</span>
+    <span *ngIf="hasChildren && !isOpen" (click)="open()" class="arrow">&#9656;</span>
+    <span *ngIf="!hasChildren && dataRequest && !isOpen && !dataLoading" (click)="openClick.emit(this)" class="arrow">&#9656;</span>
+    <span *ngIf="pictoUrl" (click)="labelClick.emit(nodeParams)" class="clickable" >
         <img class="picto" src="{{pictoUrl}}" />
-    </span>
-    <span *ngIf="awesome" (click)="labelClick.emit(nodeParams)" class="clickable picto">
-        <i class="{{awesome}}"></i>
     </span>
     <input #box class="box" type="checkbox" *ngIf="hasBox" [(ngModel)]="value" (change)="chkbxChange.emit(nodeParams)" class="clickable" />
     <input #editableLabel *ngIf="editable" type="text" [(ngModel)]="label" (change)="labelChange.emit(label)" />
     <tool-tip *ngIf="tooltip">{{tooltip}}</tool-tip>
     <span *ngIf="!editable && !link" class="label" [class.clickable]="isClickable()" (click)="labelClick.emit(nodeParams)">{{label}}</span>
-    <span *ngIf="!editable && link" (click)="labelClick.emit(nodeParams)" [class.clickable]="isClickable()">{{label}}</span>
+    <span *ngIf="!editable && link" (click)="labelClick.emit(nodeParams)" href="">{{label}}</span>
     <span *ngIf="buttonPicto" class="clickable">
         <img class="picto" src="{{buttonPicto}}" (click)="buttonClick.emit(nodeParams)" />
     </span>

@@ -97,8 +97,24 @@ public class ImporterApiController implements ImporterApi {
 	
 	@Autowired
 	private QueryPACSService queryPACSService;
+	
+	public ResponseEntity<Void> uploadFiles(
+			@ApiParam(value = "file detail") @RequestPart("files") MultipartFile[] files) throws RestServiceException {
+		if (files.length == 0)
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+		try {
+			// not used currently
+			for (int i = 0; i < files.length; i++) {
+				saveTempFile(new File(importDir), files[i]);
+			}
+			return new ResponseEntity<Void>(HttpStatus.OK);
+		} catch (IOException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+		}
+	}
 
-	@Override
 	public ResponseEntity<ImportJob> uploadDicomZipFile(
 			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
 			throws RestServiceException {
@@ -150,6 +166,10 @@ public class ImporterApiController implements ImporterApi {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
+		} catch (ShanoirException e) {
+			LOG.error(e.getMessage(), e);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
 		}
 	}
 
@@ -194,6 +214,10 @@ public class ImporterApiController implements ImporterApi {
 		} catch (RestClientException e) {
 			LOG.error("Error on dataset microservice request", e);
 			throw new ShanoirException("Error while sending import job", ImportErrorModelCode.SC_MS_COMM_FAILURE);
+		} catch (ShanoirException e) {
+			LOG.error(e.getMessage(), e);
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"Authentication issue.", null));
 		}
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}

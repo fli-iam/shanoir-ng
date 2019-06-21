@@ -27,10 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.manufacturermodel.model.Manufacturer;
-import org.shanoir.ng.manufacturermodel.repository.ManufacturerRepository;
-import org.shanoir.ng.manufacturermodel.service.ManufacturerServiceImpl;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -58,8 +55,10 @@ public class ManufacturerServiceTest {
 	@Before
 	public void setup() {
 		given(manufacturerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturer()));
+		given(manufacturerRepository.findBy("name", ModelsUtil.MANUFACTURER_NAME))
+				.willReturn(Arrays.asList(ModelsUtil.createManufacturer()));
 		given(manufacturerRepository.findOne(MANUFACTURER_ID)).willReturn(ModelsUtil.createManufacturer());
-		given(manufacturerRepository.save(Mockito.any(Manufacturer.class))).willReturn(createManufacturer());
+		given(manufacturerRepository.save(Mockito.any(Manufacturer.class))).willReturn(ModelsUtil.createManufacturer());
 	}
 
 	@Test
@@ -72,6 +71,16 @@ public class ManufacturerServiceTest {
 	}
 
 	@Test
+	public void findByTest() {
+		final List<Manufacturer> manufacturers = manufacturerService.findBy("name", ModelsUtil.MANUFACTURER_NAME);
+		Assert.assertNotNull(manufacturers);
+		Assert.assertTrue(manufacturers.size() == 1);
+		Assert.assertTrue(ModelsUtil.MANUFACTURER_NAME.equals(manufacturers.get(0).getName()));
+
+		Mockito.verify(manufacturerRepository, Mockito.times(1)).findBy(Mockito.anyString(), Mockito.anyObject());
+	}
+
+	@Test
 	public void findByIdTest() {
 		final Manufacturer manufacturer = manufacturerService.findById(MANUFACTURER_ID);
 		Assert.assertNotNull(manufacturer);
@@ -81,14 +90,14 @@ public class ManufacturerServiceTest {
 	}
 
 	@Test
-	public void saveTest() {
-		manufacturerService.create(createManufacturer());
+	public void saveTest() throws ShanoirStudiesException {
+		manufacturerService.save(createManufacturer());
 
 		Mockito.verify(manufacturerRepository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
 	}
 
 	@Test
-	public void updateTest() throws EntityNotFoundException {
+	public void updateTest() throws ShanoirStudiesException {
 		final Manufacturer updatedManufacturer = manufacturerService.update(createManufacturer());
 		Assert.assertNotNull(updatedManufacturer);
 		Assert.assertTrue(UPDATED_MANUFACTURER_NAME.equals(updatedManufacturer.getName()));

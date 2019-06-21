@@ -16,16 +16,17 @@ package org.shanoir.ng.examination;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -61,6 +62,12 @@ public class ExaminationRepositoryTest {
 	private DocumentationPluginsBootstrapper documentationPluginsBootstrapper;
 	@MockBean
 	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
+
+	@Test
+	public void countByStudyIdIn() throws Exception {
+		long nbExaminationsDb = repository.countByStudyIdIn(Arrays.asList(STUDY_TEST_1_ID));
+		assertThat(nbExaminationsDb).isEqualTo(3);
+	}
 
 	@Test
 	public void findAllTest() throws Exception {

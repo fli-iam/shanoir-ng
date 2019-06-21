@@ -18,6 +18,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.shanoir.ng.shared.exception.ShanoirUsersException;
 
 /**
  * @author msimon
@@ -45,33 +46,33 @@ public class PasswordUtilsTest {
 	}
 	
     @Test
-	public void checkPasswordPolicyTest() {
-    	Assert.assertTrue(PasswordUtils.checkPasswordPolicy("aA11@@22"));
+	public void checkPasswordPolicyTest() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy("aA11@@22", null);
 	}
 	
     @Test
-	public void checkGeneratedPasswordPolicyTest() {
-    	Assert.assertTrue(PasswordUtils.checkPasswordPolicy(PasswordUtils.generatePassword()));
+	public void checkGeneratedPasswordPolicyTest() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy(PasswordUtils.generatePassword(), null);
 	}
 	
-    @Test
-	public void checkPasswordPolicyBadPwdTest1() {
-    	Assert.assertFalse(PasswordUtils.checkPasswordPolicy("aa11@"));
+    @Test(expected = ShanoirUsersException.class)
+	public void checkPasswordPolicyBadPwdTest1() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy("aa11@", null);
 	}
 	
-    @Test
-	public void checkPasswordPolicyBadPwdTest2() {
-    	Assert.assertFalse(PasswordUtils.checkPasswordPolicy("@@11@@22"));
+    @Test(expected = ShanoirUsersException.class)
+	public void checkPasswordPolicyBadPwdTest2() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy("@@11@@22", null);
 	}
 	
-    @Test
-	public void checkPasswordPolicyBadPwdTest3()  {
-    	Assert.assertFalse(PasswordUtils.checkPasswordPolicy("aabb@@cc"));
+    @Test(expected = ShanoirUsersException.class)
+	public void checkPasswordPolicyBadPwdTest3() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy("aabb@@cc", null);
 	}
 	
-    @Test
-	public void checkPasswordPolicyBadPwdTest4() {
-    	Assert.assertFalse(PasswordUtils.checkPasswordPolicy("aa11aa22"));
+    @Test(expected = ShanoirUsersException.class)
+	public void checkPasswordPolicyBadPwdTest4() throws ShanoirUsersException {
+		PasswordUtils.checkPasswordPolicy("aa11aa22", null);
 	}
 	
 }

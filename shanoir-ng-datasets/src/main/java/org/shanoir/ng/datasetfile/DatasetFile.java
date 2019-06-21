@@ -20,8 +20,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.dataset.DatasetExpression;
+import org.shanoir.ng.shared.model.AbstractGenericItem;
 
 /**
  * Dataset file.
@@ -30,7 +30,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
  *
  */
 @Entity
-public class DatasetFile extends AbstractEntity {
+public class DatasetFile extends AbstractGenericItem {
 
 	/**
 	 * UID

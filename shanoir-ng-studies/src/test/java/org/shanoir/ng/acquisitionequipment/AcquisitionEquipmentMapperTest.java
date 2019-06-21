@@ -20,11 +20,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
-import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
-import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -35,7 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * 
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class AcquisitionEquipmentMapperTest {
 

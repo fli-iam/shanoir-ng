@@ -22,12 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.dataset.controler.DatasetApiController;
-import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.MrDatasetMapper;
-import org.shanoir.ng.dataset.service.DatasetService;
-import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +31,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -53,7 +47,6 @@ import com.google.gson.GsonBuilder;
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = DatasetApiController.class)
 @AutoConfigureMockMvc(secure = false)
-@ActiveProfiles("test")
 public class DatasetApiControllerTest {
 
 	private static final String REQUEST_PATH = "/datasets";
@@ -65,16 +58,10 @@ public class DatasetApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
-	private DatasetService datasetServiceMock;
+	private DatasetService<Dataset> datasetServiceMock;
 
 	@MockBean
 	private DatasetMapper datasetMapperMock;
-	
-	@MockBean
-	private MrDatasetMapper mrDatasetMapperMock;
-	
-	@MockBean
-	private WADODownloaderService downloader;
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -82,7 +69,7 @@ public class DatasetApiControllerTest {
 
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
-		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
+		given(datasetServiceMock.save(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
 	}
 
 	@Test

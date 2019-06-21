@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -18,78 +16,59 @@ package org.shanoir.ng.shared.exception;
 
 import org.shanoir.ng.shared.error.FieldErrorMap;
 
->>>>>>> upstream/develop
 /**
- * Shanoir NG - Import, manage and share neuroimaging data
- * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
- * Contact us on https://project.inria.fr/shanoir/
+ * Study microservice exception.
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ * @author msimon
+ *
  */
+public class ShanoirStudiesException extends ShanoirException {
 
-//package org.shanoir.ng.shared.exception;
-//
-//import org.shanoir.ng.shared.error.FieldErrorMap;
-//
-///**
-// * Study microservice exception.
-// * 
-// * @author msimon
-// *
-// */
-//public class ShanoirStudiesException extends ShanoirException {
-//
-//	/**
-//	 * UID
-//	 */
-//	private static final long serialVersionUID = 614665107614340916L;
-//
-//	/**
-//	 * Constructor.
-//	 * 
-//	 * @param message
-//	 *            message.
-//	 */
-//	public ShanoirStudiesException(final String message) {
-//		super(message);
-//	}
-//
-//	/**
-//	 * Constructor.
-//	 * 
-//	 * @param errorCode
-//	 *            error code.
-//	 */
-//	public ShanoirStudiesException(final int errorCode) {
-//		super(errorCode);
-//	}
-//
-//	/**
-//	 * Constructor.
-//	 * 
-//	 * @param errorMap
-//	 *            error map.
-//	 */
-//	public ShanoirStudiesException(final FieldErrorMap errorMap) {
-//		super(errorMap);
-//	}
-//
-//	/**
-//	 * Constructor.
-//	 * 
-//	 * @param message
-//	 *            message.
-//	 * @param errorCode
-//	 *            error code.
-//	 */
-//	public ShanoirStudiesException(final String message, final int errorCode) {
-//		super(message, errorCode);
-//	}
-//
-//}
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = 614665107614340916L;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param message
+	 *            message.
+	 */
+	public ShanoirStudiesException(final String message) {
+		super(message);
+	}
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param errorCode
+	 *            error code.
+	 */
+	public ShanoirStudiesException(final int errorCode) {
+		super(errorCode);
+	}
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param errorMap
+	 *            error map.
+	 */
+	public ShanoirStudiesException(final FieldErrorMap errorMap) {
+		super(errorMap);
+	}
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param message
+	 *            message.
+	 * @param errorCode
+	 *            error code.
+	 */
+	public ShanoirStudiesException(final String message, final int errorCode) {
+		super(message, errorCode);
+	}
+
+}

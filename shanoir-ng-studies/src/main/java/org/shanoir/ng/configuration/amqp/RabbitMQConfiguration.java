@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import org.springframework.amqp.core.FanoutExchange;
+import org.shanoir.ng.messaging.InterMicroservicesCommunicator;
 import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,10 +51,10 @@ public class RabbitMQConfiguration {
 	private static final String STUDYCARD_QUEUE_TO_STUDY = "studycard_queue_to_study";
 
     
-//	@Bean
-//	RabbitMqReceiver receiver() {
-//		return new RabbitMqReceiver();
-//	}
+	@Bean
+	InterMicroservicesCommunicator receiver() {
+		return new InterMicroservicesCommunicator();
+	}
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -135,15 +135,5 @@ public class RabbitMQConfiguration {
 	public static Queue studycardQueue() {
 		return new Queue(STUDYCARD_QUEUE_TO_STUDY, true);
 	}
-	
-	@Bean
-	public static Queue studyUserQueue() {
-		return new Queue("study-user", true);
-	}
-	
-	@Bean
-    public FanoutExchange fanout() {
-        return new FanoutExchange("study-user-exchange", true, false);
-    }
 
 }

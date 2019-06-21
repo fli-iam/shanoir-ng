@@ -77,12 +77,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <!-- editable text / number -->
         <span *ngIf="editMode && col.editable && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
-            <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
+            <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);" />
         </span>
 
         <!-- editable text / number with dropdown -->
         <span *ngIf="editMode && col.editable && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
-            <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
+            <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);">
                 <option *ngFor="let possibleValue of col.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
             </select>
         </span>
@@ -95,7 +95,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <!-- editable boolean -->
         <span *ngIf="isFieldBoolean(col) && editMode && col.editable">
-            <input type="checkbox" [ngModel]="getCellValue(item, col)" (ngModelChange)="onFieldEdit(item, col, $event)" /> 
+            <input type="checkbox" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);" /> 
         </span>
 
         <!-- add a link -->

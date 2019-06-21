@@ -2,9 +2,8 @@
 :host(.selected) > .node { background-color: var(--color-b); color: var(--very-light-grey); }
 .node { height: 20px; line-height: 20px; padding: 0 5px; }
 .node > span { display: inline-block; }
-.arrow { display: inline-block; width: 11px; cursor: pointer; }
-.picto { height: 14px; width: 15px; text-align: center; }
+.arrow { display: inline-block; margin-right: 6px; cursor: pointer; }
+.picto { height: 14px; vertical-align: sub; }
 input[type="checkbox"] { vertical-align: middle; }
 input[type="text"] { color: var(--very-dark-grey); }
 .clickable { cursor: pointer; }
-svg { vertical-align: -1; }

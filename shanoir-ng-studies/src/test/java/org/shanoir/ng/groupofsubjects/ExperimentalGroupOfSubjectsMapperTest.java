@@ -20,7 +20,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dto.IdNameDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -45,7 +45,7 @@ public class ExperimentalGroupOfSubjectsMapperTest {
 
 	@Test
 	public void experimentalGroupOfSubjectsToIdNameDTOsTest() {
-		final List<IdName> subjectStudyDTOs = experimentalGroupOfSubjectsMapper
+		final List<IdNameDTO> subjectStudyDTOs = experimentalGroupOfSubjectsMapper
 				.experimentalGroupOfSubjectsToIdNameDTOs(Arrays.asList(createExperimentalGroupOfSubjects()));
 		Assert.assertNotNull(subjectStudyDTOs);
 		Assert.assertTrue(subjectStudyDTOs.size() == 1);
@@ -54,7 +54,7 @@ public class ExperimentalGroupOfSubjectsMapperTest {
 
 	@Test
 	public void experimentalGroupOfSubjectsToIdNameDTOTest() {
-		final IdName subjectStudyDTO = experimentalGroupOfSubjectsMapper
+		final IdNameDTO subjectStudyDTO = experimentalGroupOfSubjectsMapper
 				.experimentalGroupOfSubjectsToIdNameDTO(createExperimentalGroupOfSubjects());
 		Assert.assertNotNull(subjectStudyDTO);
 		Assert.assertTrue(subjectStudyDTO.getId().equals(GROUP_OD_SUBJECTS_ID));

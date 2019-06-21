@@ -28,9 +28,9 @@ VALUES
 	(3, 1, parsedatetime('2017/03/01', 'yyyy/MM/dd'), false, 1, 'examination3', 1, 3);
 
 INSERT INTO mr_protocol_metadata
-	(id, name, dtype)
+	(id, name)
 VALUES
-	(1, 'MRProtocol1', 1);
+	(1, 'MRProtocol1');
 
 INSERT INTO mr_protocol
 	(id, echo_train_length, origin_metadata_id)

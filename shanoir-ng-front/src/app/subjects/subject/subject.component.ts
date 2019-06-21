@@ -19,7 +19,7 @@ import * as shajs from 'sha.js';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date/date.component';
-import { IdName } from '../../shared/models/id-name.model';
+import { IdNameObject } from '../../shared/models/id-name-object.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
@@ -36,7 +36,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
 
     private readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
-    private studies: IdName[] = [];
+    private studies: IdNameObject[] = [];
     private isAlreadyAnonymized: boolean;
     private firstName: string = "";
     private lastName: string = "";

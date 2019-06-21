@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.shared.exception.ShanoirStudiesException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -57,7 +58,7 @@ public class CommonApiControllerTest {
 	private CommonService commonServiceMock;
 
 	@Before
-	public void setup() {
+	public void setup() throws ShanoirStudiesException {
 		gson = new GsonBuilder().create();
 
 		given(commonServiceMock.findByIds(Mockito.any(CommonIdsDTO.class))).willReturn(new CommonIdNamesDTO());

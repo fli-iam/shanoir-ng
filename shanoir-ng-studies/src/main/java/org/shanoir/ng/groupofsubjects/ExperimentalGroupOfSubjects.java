@@ -22,7 +22,7 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.Study;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -36,7 +36,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Entity
 @DiscriminatorValue("EXPERIMENTAL")
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-@JsonIdentityInfo(scope=ExperimentalGroupOfSubjects.class , generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class ExperimentalGroupOfSubjects extends GroupOfSubjects {
 
 	/**
@@ -48,6 +47,7 @@ public class ExperimentalGroupOfSubjects extends GroupOfSubjects {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "study_id")
 	@NotNull
+	@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 	private Study study;
 
 	/**

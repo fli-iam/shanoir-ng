@@ -23,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (labelClick)="showPatientDetails($event)"
             [nodeParams]="patient"
             [class.selected]="detailedPatient == patient"
-            [deploy]=true>
+            deploy=true>
                 <node 
                     *ngFor="let study of patient.studies" 
                     [(label)]="study.studyDescription"
@@ -33,7 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     tooltip="You can change the study description here. The value will then be overwritten in the dicom files."
                     pictoUrl="/assets/images/icons/medical/x-ray-2.png" 
                     hasBox="true"
-                    [deploy]=true>
+                    deploy=true>
                         <node 
                             *ngFor="let serie of study.series" 
                             [label]="serie.seriesDescription" 

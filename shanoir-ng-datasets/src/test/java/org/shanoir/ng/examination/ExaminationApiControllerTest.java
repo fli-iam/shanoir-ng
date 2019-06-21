@@ -24,18 +24,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.examination.controler.ExaminationApiController;
-import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -77,9 +71,16 @@ public class ExaminationApiControllerTest {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(examinationServiceMock).deleteById(1L);
-		given(examinationServiceMock.findPage(Mockito.any(Pageable.class))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
+		given(examinationServiceMock.countExaminationsByUserId()).willReturn(2L);
+		// given(examinationServiceMock.findAll(Mockito.any(Pageable.class))).willReturn(Arrays.asList(new Examination()));
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 		given(examinationServiceMock.save(Mockito.mock(Examination.class))).willReturn(new Examination());
+	}
+
+	@Test
+	public void countExaminationsTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_COUNT).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
 	}
 
 	@Test
@@ -97,8 +98,7 @@ public class ExaminationApiControllerTest {
 
 	@Test
 	public void findExaminationsTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(new PageRequest(0, 10))))
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 

@@ -32,17 +32,16 @@ export abstract class Entity {
         return this.service.delete(this.id);
     }
 
-    protected getIgnoreList() { return ['service', '_links']; }
+    protected getIgnoreList() { return ['service']; }
 
-    protected replacer = (key, value) => {
+    private replacer = (key, value) => {
         if (this.getIgnoreList().indexOf(key) > -1) return undefined;
         else if (this[key] instanceof Date) return this.datePattern(this[key]);
         else return value;
     }
 
     public stringify() {
-        let ret = JSON.stringify(this, this.replacer);
-        return ret;
+        return JSON.stringify(this, this.replacer);
     }
 
     private datePattern(date: Date): string {
