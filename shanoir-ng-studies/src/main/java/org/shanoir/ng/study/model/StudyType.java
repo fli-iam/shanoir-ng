@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/study/model/StudyType.java
 package org.shanoir.ng.study.model;
-=======
-package org.shanoir.ng.study;
->>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/study/StudyType.java
 
 /**
  * Study type.

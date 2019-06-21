@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/center/dto/mapper/CenterMapper.java
 package org.shanoir.ng.center.dto.mapper;
-=======
-package org.shanoir.ng.center;
->>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/center/CenterMapper.java
 
 import java.util.List;
 

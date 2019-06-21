@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/acquisitionequipment/dto/AcquisitionEquipmentDTO.java
 package org.shanoir.ng.acquisitionequipment.dto;
-=======
-package org.shanoir.ng.acquisitionequipment;
->>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/acquisitionequipment/AcquisitionEquipmentDTO.java
 
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.core.model.IdName;

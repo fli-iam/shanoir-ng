@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-users/src/main/java/org/shanoir/ng/user/controller/LastLoginDateApiController.java
 package org.shanoir.ng.user.controller;
-=======
-package org.shanoir.ng.user;
->>>>>>> upstream/develop:shanoir-ng-users/src/main/java/org/shanoir/ng/user/LastLoginDateApiController.java
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;

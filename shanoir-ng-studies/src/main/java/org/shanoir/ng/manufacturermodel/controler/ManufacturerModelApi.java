@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/manufacturermodel/controler/ManufacturerModelApi.java
 package org.shanoir.ng.manufacturermodel.controler;
-=======
-package org.shanoir.ng.manufacturermodel;
->>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/manufacturermodel/ManufacturerModelApi.java
 
 import java.util.List;
 

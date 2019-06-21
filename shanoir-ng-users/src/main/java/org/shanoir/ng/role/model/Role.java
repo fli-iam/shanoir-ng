@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-users/src/main/java/org/shanoir/ng/role/model/Role.java
 package org.shanoir.ng.role.model;
-=======
-package org.shanoir.ng.role;
->>>>>>> upstream/develop:shanoir-ng-users/src/main/java/org/shanoir/ng/role/Role.java
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/examination/dto/StudyIdsDTO.java
 package org.shanoir.ng.examination.dto;
-=======
-package org.shanoir.ng.examination;
->>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/examination/StudyIdsDTO.java
 
 /**
  * DTO with center id, study id and subject id.

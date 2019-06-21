@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/acquisitionequipment/controler/AcquisitionEquipmentApi.java
 package org.shanoir.ng.acquisitionequipment.controler;
-=======
-package org.shanoir.ng.acquisitionequipment;
->>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/acquisitionequipment/AcquisitionEquipmentApi.java
 
 import java.util.List;
 

@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/dataset/dto/mapper/DatasetDecorator.java
 package org.shanoir.ng.dataset.dto.mapper;
-=======
-package org.shanoir.ng.dataset;
->>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/dataset/DatasetDecorator.java
 
 import java.util.ArrayList;
 import java.util.List;

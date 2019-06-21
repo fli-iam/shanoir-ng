@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-users/src/main/java/org/shanoir/ng/user/model/ExtensionRequestInfo.java
 package org.shanoir.ng.user.model;
-=======
-package org.shanoir.ng.user;
->>>>>>> upstream/develop:shanoir-ng-users/src/main/java/org/shanoir/ng/user/ExtensionRequestInfo.java
 
 import java.io.Serializable;
 import java.time.LocalDate;

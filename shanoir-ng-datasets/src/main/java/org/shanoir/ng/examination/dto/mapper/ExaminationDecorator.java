@@ -11,11 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/examination/dto/mapper/ExaminationDecorator.java
-=======
-
-package org.shanoir.ng.examination;
->>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/examination/ExaminationDecorator.java
 
 package org.shanoir.ng.examination.dto.mapper;
 

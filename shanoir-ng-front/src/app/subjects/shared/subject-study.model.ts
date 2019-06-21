@@ -12,12 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import { Study } from '../../studies/shared/study.model';
 import { Subject } from './subject.model';
-=======
->>>>>>> upstream/develop
 import { SubjectType } from './subject.types';
 import { Id } from '../../shared/models/id.model';
 

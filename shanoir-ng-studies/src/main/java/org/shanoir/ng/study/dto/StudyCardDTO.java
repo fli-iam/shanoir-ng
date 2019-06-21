@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/study/dto/StudyCardDTO.java
 package org.shanoir.ng.study.dto;
-=======
-package org.shanoir.ng.study;
->>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/study/StudyCardDTO.java
 
 import org.shanoir.ng.shared.core.model.IdName;
 

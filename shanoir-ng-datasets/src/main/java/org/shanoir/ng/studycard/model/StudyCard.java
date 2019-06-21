@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/model/StudyCard.java
 package org.shanoir.ng.studycard.model;
-=======
-package org.shanoir.ng.studycard;
->>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/StudyCard.java
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

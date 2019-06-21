@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-users/src/main/java/org/shanoir/ng/user/utils/KeycloakClient.java
 package org.shanoir.ng.user.utils;
-=======
-package org.shanoir.ng.user;
->>>>>>> upstream/develop:shanoir-ng-users/src/main/java/org/shanoir/ng/user/KeycloakClient.java
 
 import java.util.ArrayList;
 import java.util.Arrays;

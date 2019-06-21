@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/acquisitionequipment/model/AcquisitionEquipment.java
 package org.shanoir.ng.acquisitionequipment.model;
-=======
-package org.shanoir.ng.acquisitionequipment;
->>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/acquisitionequipment/AcquisitionEquipment.java
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;

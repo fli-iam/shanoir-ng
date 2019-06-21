@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/examination/service/ExaminationServiceImpl.java
 package org.shanoir.ng.examination.service;
-=======
-package org.shanoir.ng.examination;
->>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/examination/ExaminationServiceImpl.java
 
 import java.util.ArrayList;
 import java.util.List;

@@ -12,11 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/importer/controler/DatasetAcquisitionApiController.java
 package org.shanoir.ng.importer.controler;
-=======
-package org.shanoir.ng.importer;
->>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/importer/DatasetAcquisitionApiController.java
 
 import javax.validation.Valid;
 
