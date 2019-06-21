@@ -41,6 +41,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
 
     @Input() label: string;
     @Input() pictoUrl: string;
+    @Input() awesome: string;
     @Input() deploy: boolean;
     @Input() hasBox: boolean;
     @Input() buttonPicto: string;

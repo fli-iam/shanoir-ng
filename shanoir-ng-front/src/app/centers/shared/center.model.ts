@@ -17,6 +17,7 @@ import { Entity } from "../../shared/components/entity/entity.abstract";
 import { CenterService } from "./center.service";
 import { ServiceLocator } from "../../utils/locator.service";
 import { StudyCenter } from "../../studies/shared/study-center.model";
+import { IdName } from "../../shared/models/id-name.model";
 
 export class Center extends Entity {
     acquisitionEquipments: AcquisitionEquipment[];

@@ -12,10 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { IdNameObject } from "../../shared/models/id-name-object.model";
+import { IdName } from "../../shared/models/id-name.model";
 
 export class ExaminationDatasetAcquisition {
     id: number;
     name: string;
-    datasets: IdNameObject[];
+    datasets: IdName[];
 }

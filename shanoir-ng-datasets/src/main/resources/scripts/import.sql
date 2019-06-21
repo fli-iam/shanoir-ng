@@ -82,11 +82,11 @@ VALUES
 	(3, 1, 'CTDataset1');
 
 INSERT INTO dataset
-	(id, dataset_acquisition_id, origin_metadata_id) 
+	(id, dataset_acquisition_id, origin_metadata_id, study_id, subject_id) 
 VALUES 
-	(1, 1, 1),
-	(2, 2, 2),
-	(3, 3, 3);
+	(1, 1, 1, 1, 1),
+	(2, 2, 2, 1, 1),
+	(3, 3, 3, 1, 1);
 
 INSERT INTO mr_dataset_metadata
 	(id, mr_dataset_nature) 

@@ -47,6 +47,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>shanoir-ng-ms-common</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-study-rights</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 
 		<!-- Anonymizer Shanoir -->
 		<dependency>

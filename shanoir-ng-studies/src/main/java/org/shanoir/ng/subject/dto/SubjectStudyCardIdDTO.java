@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.subject.dto;
 
-import org.shanoir.ng.subject.Subject;
+import org.shanoir.ng.subject.model.Subject;
 
 public class SubjectStudyCardIdDTO {
 	
