@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/datasetacquisition/model/mr/MrDatasetAcquisition.java
 package org.shanoir.ng.datasetacquisition.model.mr;
+=======
+package org.shanoir.ng.datasetacquisition.mr;
+>>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/datasetacquisition/mr/MrDatasetAcquisition.java
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;

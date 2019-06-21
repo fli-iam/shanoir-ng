@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/coil/controler/CoilApi.java
 package org.shanoir.ng.coil.controler;
+=======
+package org.shanoir.ng.coil;
+>>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/coil/CoilApi.java
 
 import java.util.List;
 

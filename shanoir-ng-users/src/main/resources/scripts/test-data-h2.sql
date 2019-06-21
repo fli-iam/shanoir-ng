@@ -10,9 +10,15 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
+<<<<<<< HEAD
 INSERT INTO role VALUES (1,'Administrator','ROLE_ADMIN');
 INSERT INTO role VALUES (2,'User','ROLE_USER');
 INSERT INTO role VALUES (3,'Expert','ROLE_EXPERT');
+=======
+-- Populates database
+-- Has to be executed manually inside the docker container, command example : mysql -u {db user name} -p{password} < populate.sql
+-- ! But remember to wait for the java web server to have started since the schema is created by hibernate on startup !
+>>>>>>> upstream/develop
 
 INSERT INTO account_request_info (id, contact, function, institution, service, study, work) 
 VALUES (1, 'contact1', 'function1', 'institution1', 'service1', 'study1', 'work1');

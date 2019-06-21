@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/dataset/model/Dataset.java
 package org.shanoir.ng.dataset.model;
+=======
+package org.shanoir.ng.dataset;
+>>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/dataset/Dataset.java
 
 import java.time.LocalDate;
 import java.util.ArrayList;

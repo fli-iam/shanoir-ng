@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-users/src/main/java/org/shanoir/ng/accountrequest/model/AccountRequestInfo.java
 package org.shanoir.ng.accountrequest.model;
+=======
+package org.shanoir.ng.accountrequest;
+>>>>>>> upstream/develop:shanoir-ng-users/src/main/java/org/shanoir/ng/accountrequest/AccountRequestInfo.java
 
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;

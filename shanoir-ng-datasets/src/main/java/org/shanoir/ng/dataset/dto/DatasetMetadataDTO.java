@@ -12,12 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/dataset/dto/DatasetMetadataDTO.java
 package org.shanoir.ng.dataset.dto;
 
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.ExploredEntity;
 import org.shanoir.ng.dataset.model.ProcessedDatasetType;
+=======
+package org.shanoir.ng.dataset;
+>>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/dataset/DatasetMetadataDTO.java
 
 /**
  * DTO for dataset metadata that could be updated by study card.

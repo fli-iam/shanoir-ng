@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/datasetacquisition/model/DatasetAcquisition.java
 package org.shanoir.ng.datasetacquisition.model;
+=======
+package org.shanoir.ng.datasetacquisition;
+>>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/datasetacquisition/DatasetAcquisition.java
 
 import java.util.List;
 

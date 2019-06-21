@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/dto/StudyStudyCardDTO.java
 package org.shanoir.ng.studycard.dto;
+=======
+package org.shanoir.ng.studycard;
+>>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/StudyStudyCardDTO.java
 
 /**
  * DTO for link between a study card and a study.

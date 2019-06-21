@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/subjectstudy/dto/ExaminationDTO.java
 package org.shanoir.ng.subjectstudy.dto;
+=======
+package org.shanoir.ng.subjectstudy;
+>>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/subjectstudy/ExaminationDTO.java
 
 import java.time.LocalDate;
 

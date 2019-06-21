@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/coil/dto/CoilDTO.java
 package org.shanoir.ng.coil.dto;
+=======
+package org.shanoir.ng.coil;
+>>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/coil/CoilDTO.java
 
 import org.shanoir.ng.center.dto.CenterDTO;
 import org.shanoir.ng.coil.model.CoilType;

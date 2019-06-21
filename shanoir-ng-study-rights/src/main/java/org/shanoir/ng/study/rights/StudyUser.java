@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-study-rights/src/main/java/org/shanoir/ng/study/rights/StudyUser.java
 package org.shanoir.ng.study.rights;
+=======
+package org.shanoir.ng.studyuser;
+>>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/studyuser/StudyUser.java
 
 import java.util.ArrayList;
 import java.util.List;

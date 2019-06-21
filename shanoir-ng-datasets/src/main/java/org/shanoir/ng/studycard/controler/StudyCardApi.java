@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/controler/StudyCardApi.java
 package org.shanoir.ng.studycard.controler;
+=======
+package org.shanoir.ng.studycard;
+>>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/StudyCardApi.java
 
 import java.util.List;
 

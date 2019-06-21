@@ -12,7 +12,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
+<<<<<<< HEAD
 <node label="Subjects" awesome="far fa-folder" [deploy]="true">
+=======
+<node label="Subjects" [pictoUrl]="folderIconPath" deploy="true">
+>>>>>>> upstream/develop
     <ng-template ngFor let-subject [ngForOf]="study.subjectStudyList">
         <node [label]="subject | subjectStudyLabel" awesome="fas fa-user-injured" [nodeParams]="subject" [dataRequest]="true"
             (openClick)="getSubjectDetails($event)" link="true" (labelClick)="showSubjectDetails($event)">

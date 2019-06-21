@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD
 //package org.shanoir.ng.importer;
+=======
+package org.shanoir.ng.importer;
+>>>>>>> upstream/develop
 //
 // import static org.junit.Assert.assertEquals;
 //

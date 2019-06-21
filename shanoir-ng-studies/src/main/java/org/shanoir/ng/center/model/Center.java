@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/center/model/Center.java
 package org.shanoir.ng.center.model;
+=======
+package org.shanoir.ng.center;
+>>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/center/Center.java
 
 import java.util.List;
 

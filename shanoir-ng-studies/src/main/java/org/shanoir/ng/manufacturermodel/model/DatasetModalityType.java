@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/manufacturermodel/model/DatasetModalityType.java
 package org.shanoir.ng.manufacturermodel.model;
+=======
+package org.shanoir.ng.manufacturermodel;
+>>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/manufacturermodel/DatasetModalityType.java
 
 /**
  * Dataset modality type.

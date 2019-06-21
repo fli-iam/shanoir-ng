@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD
 import { IdName } from "../../shared/models/id-name.model";
+=======
+import { IdNameObject } from "../../shared/models/id-name-object.model";
+>>>>>>> upstream/develop
 
 export class ExaminationDatasetAcquisition {
     id: number;

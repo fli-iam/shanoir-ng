@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/study/model/Study.java
 package org.shanoir.ng.study.model;
+=======
+package org.shanoir.ng.study;
+>>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/study/Study.java
 
 import java.time.LocalDate;
 import java.util.List;

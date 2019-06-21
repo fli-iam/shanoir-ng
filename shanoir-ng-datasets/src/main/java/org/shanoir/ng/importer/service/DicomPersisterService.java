@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/importer/service/DicomPersisterService.java
 package org.shanoir.ng.importer.service;
+=======
+package org.shanoir.ng.importer;
+>>>>>>> upstream/develop:shanoir-ng-datasets/src/main/java/org/shanoir/ng/importer/DicomPersisterService.java
 
 import java.util.ArrayList;
 import java.util.List;

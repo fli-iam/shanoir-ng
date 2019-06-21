@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/subjectstudy/dto/mapper/SubjectStudyDecorator.java
 package org.shanoir.ng.subjectstudy.dto.mapper;
+=======
+package org.shanoir.ng.subjectstudy;
+>>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/subjectstudy/SubjectStudyDecorator.java
 
 import java.util.ArrayList;
 import java.util.List;

@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-users/src/main/java/org/shanoir/ng/user/service/UserServiceImpl.java
 package org.shanoir.ng.user.service;
+=======
+package org.shanoir.ng.user;
+>>>>>>> upstream/develop:shanoir-ng-users/src/main/java/org/shanoir/ng/user/UserServiceImpl.java
 
 import java.time.LocalDate;
 import java.util.ArrayList;

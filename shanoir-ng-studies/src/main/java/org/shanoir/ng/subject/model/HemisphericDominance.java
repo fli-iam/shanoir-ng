@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+<<<<<<< HEAD:shanoir-ng-studies/src/main/java/org/shanoir/ng/subject/model/HemisphericDominance.java
 package org.shanoir.ng.subject.model;
+=======
+package org.shanoir.ng.subject;
+>>>>>>> upstream/develop:shanoir-ng-studies/src/main/java/org/shanoir/ng/subject/HemisphericDominance.java
 
 /**
  * Hemispheric dominance.
