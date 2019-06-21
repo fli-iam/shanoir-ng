@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.importer.dto;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * DTO for coil.
@@ -23,13 +23,13 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
  */
 public class CoilDTO {
 
-	private IdNameDTO center;
+	private IdName center;
 
 	private CoilType coilType;
 	
 	private Long id;
 
-	private IdNameDTO manufacturerModel;
+	private IdName manufacturerModel;
 
 	private String name;
 
@@ -46,14 +46,14 @@ public class CoilDTO {
 	/**
 	 * @return the center
 	 */
-	public IdNameDTO getCenter() {
+	public IdName getCenter() {
 		return center;
 	}
 
 	/**
 	 * @param center the center to set
 	 */
-	public void setCenter(IdNameDTO center) {
+	public void setCenter(IdName center) {
 		this.center = center;
 	}
 
@@ -90,14 +90,14 @@ public class CoilDTO {
 	/**
 	 * @return the manufacturerModel
 	 */
-	public IdNameDTO getManufacturerModel() {
+	public IdName getManufacturerModel() {
 		return manufacturerModel;
 	}
 
 	/**
 	 * @param manufacturerModel the manufacturerModel to set
 	 */
-	public void setManufacturerModel(IdNameDTO manufacturerModel) {
+	public void setManufacturerModel(IdName manufacturerModel) {
 		this.manufacturerModel = manufacturerModel;
 	}
 

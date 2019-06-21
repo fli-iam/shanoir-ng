@@ -7,8 +7,8 @@
     "url": "https://github.com/fli-iam/shanoir-ng.git"
   },
   "scripts": {
-  	"build": "npm run build:aot && rimraf dist && webpack --config config/webpack.config.js --progress --profile --bail",
-    "build:dev": "rimraf dist && webpack --config config/webpack.config.js --progress --profile --bail",
+  	"build": "npm run build:aot && rimraf dist/* && webpack --config config/webpack.config.js --progress --profile --bail",
+    "build:dev": "rimraf dist/* && webpack --config config/webpack.config.js --progress --profile --bail",
     "build:aot": "rimraf aot && ngc -p tsconfig-aot.json",
     "i18n": "ng-xi18n --i18nFormat=xlf2",
     "ngc": "ngc --i18nFile=./messages.xlf --locale=en --i18nFormat=xlf2",

@@ -23,7 +23,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.manufacturermodel.controler.ManufacturerModelApiController;
+import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
+import org.shanoir.ng.manufacturermodel.service.ManufacturerModelService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -61,12 +63,12 @@ public class ManufacturerModelApiControllerTest {
 	private ManufacturerModelService manufacturerModelServiceMock;
 
 	@Before
-	public void setup() throws ShanoirStudiesException {
+	public void setup() {
 		gson = new GsonBuilder().create();
 
 		given(manufacturerModelServiceMock.findAll()).willReturn(Arrays.asList(new ManufacturerModel()));
 		given(manufacturerModelServiceMock.findById(1L)).willReturn(new ManufacturerModel());
-		given(manufacturerModelServiceMock.save(Mockito.mock(ManufacturerModel.class)))
+		given(manufacturerModelServiceMock.create(Mockito.mock(ManufacturerModel.class)))
 				.willReturn(new ManufacturerModel());
 	}
 

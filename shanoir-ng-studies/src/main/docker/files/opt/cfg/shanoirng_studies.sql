@@ -873,7 +873,7 @@ VALUES
 CREATE TABLE `study_user` (
   `receive_anonymization_report` bit(1) NOT NULL,
   `receive_new_import_report` bit(1) NOT NULL,
-  `study_user_type` int(11) NOT NULL,
+  `study_user_right` int(11) NOT NULL,
   `user_id` bigint(20) DEFAULT NULL,
   `study_id` bigint(20) DEFAULT NULL,
   UNIQUE KEY (`user_id`,`study_id`),
@@ -882,7 +882,7 @@ CREATE TABLE `study_user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO study_user
-	(receive_anonymization_report, receive_new_import_report, study_id, study_user_type, user_id)
+	(receive_anonymization_report, receive_new_import_report, study_id, study_user_right, user_id)
 VALUES
 	(0, 0, 1, 1, 4),
 	(0, 0, 3, 1, 4),

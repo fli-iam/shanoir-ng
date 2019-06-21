@@ -25,8 +25,7 @@ import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { slideDown } from '../../shared/animations/animations';
 import { Entity } from '../../shared/components/entity/entity.abstract';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { IdName } from '../../shared/models/id-name.model';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
@@ -129,12 +128,10 @@ export class ClinicalContextComponent{
 
     private async completeStudies(equipment: EquipmentDicom): Promise<void> {
         let completeStudyPromises: Promise<void>[] = [];
-        completeStudyPromises.push(Promise.all([this.studyService.findStudiesForImport(), this.centerService.getAll()])
+        completeStudyPromises.push(Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
-                if (!allStudies) {this.msgBoxService.log('error', 
-                    'Impossible to import since you are not member of any research study. Please contact the administrator.', 10000);}
-                else {
-                    for (let study of allStudies) {
+                for (let study of allStudies) {
+                    if (study.studyCenterList) {
                         for (let studyCenter of study.studyCenterList) {
                             let center = allCenters.find(center => center.id === studyCenter.center.id);
                             if (center) {
@@ -149,6 +146,7 @@ export class ClinicalContextComponent{
                                 studyCenter.center = center;
                             }
                         } 
+                    }
                     this.studies.push(study);
                 }
             }}));
@@ -334,8 +332,8 @@ export class ClinicalContextComponent{
 
     private getPrefilledExam(): Examination {
         let newExam = new Examination();
-        newExam.study = new IdNameObject(this.study.id, this.study.name);
-        newExam.center = new IdNameObject(this.center.id, this.center.name);
+        newExam.study = new IdName(this.study.id, this.study.name);
+        newExam.center = new IdName(this.center.id, this.center.name);
         newExam.subject = this.subject;
         newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
         newExam.comment = this.patient.studies[0].studyDescription;
