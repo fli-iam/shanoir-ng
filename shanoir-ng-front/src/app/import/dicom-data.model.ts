@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Subject } from "../subjects/shared/subject.model";
+import { SimpleSubject } from "../subjects/shared/subject.model";
 import { Sex } from "../subjects/shared/subject.types";
 
 export class ImportJob {
@@ -28,7 +28,7 @@ export class ImportJob {
 }
 
 export class PatientDicom {
-    subject: Subject;
+    subject: SimpleSubject;
     patientID: string;
     patientName: string;
     patientBirthDate: Date;

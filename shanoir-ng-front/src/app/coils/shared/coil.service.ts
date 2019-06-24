@@ -12,7 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import * as AppUtils from '../../utils/app.utils';
@@ -25,4 +24,5 @@ export class CoilService extends EntityService<Coil> {
     API_URL = AppUtils.BACKEND_API_COIL_URL;
 
     getEntityInstance() { return new Coil(); }
+
 }

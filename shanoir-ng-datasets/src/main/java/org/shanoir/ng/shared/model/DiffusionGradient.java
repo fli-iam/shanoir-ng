@@ -20,7 +20,8 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
+import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * This class represents a diffusion gradient. It is used in the MR protocol to
@@ -30,7 +31,7 @@ import org.shanoir.ng.datasetacquisition.mr.MrProtocol;
  *
  */
 @Entity
-public class DiffusionGradient extends AbstractGenericItem {
+public class DiffusionGradient extends AbstractEntity {
 
 	/**
 	 * UID

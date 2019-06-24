@@ -28,11 +28,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
-import org.shanoir.ng.studyuser.StudyUser;
-import org.shanoir.ng.studyuser.StudyUserRepository;
-import org.shanoir.ng.studyuser.StudyUserType;
+import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.exception.AccessDeniedException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.repository.StudyUserRepository;
+import org.shanoir.ng.study.service.StudyServiceImpl;
+import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -55,26 +61,32 @@ public class StudyServiceTest {
 	@Mock
 	private RabbitTemplate rabbitTemplate;
 
-	@InjectMocks
+    @InjectMocks
 	private StudyServiceImpl studyService;
 
 	@Mock
 	private StudyUserRepository studyUserRepository;
+	
+	@Mock
+	private StudyCenterRepository studyCenterRepository;
+
+	@Mock
+	private StudyUserUpdateBroadcastService studyUserCom;
 
 	@Before
 	public void setup() {
 		given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
-		given(studyRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
+		given(studyRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
 		given(studyRepository.findOne(STUDY_ID)).willReturn(ModelsUtil.createStudy());
 		given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy());
 	}
 
 	@Test
-	public void deleteByIdTest() {
+	public void deleteByIdTest() throws AccessDeniedException, EntityNotFoundException {
 		final Study newStudy = ModelsUtil.createStudy();
 		final StudyUser studyUser = new StudyUser();
 		studyUser.setUserId(USER_ID);
-		studyUser.setStudyUserType(StudyUserType.RESPONSIBLE);
+		studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_ADMINISTRATE));
 		newStudy.getStudyUserList().add(studyUser);
 		given(studyRepository.findOne(STUDY_ID)).willReturn(newStudy);
 
@@ -83,17 +95,17 @@ public class StudyServiceTest {
 		Mockito.verify(studyRepository, Mockito.times(1)).delete(Mockito.anyLong());
 	}
 
-	@Test
-	public void findAllTest() {
-		final List<Study> studies = studyService.findAll();
-		Assert.assertNotNull(studies);
-		Assert.assertTrue(studies.size() == 1);
+//	@Test
+//	public void findAllTest() {
+//		final List<Study> studies = studyService.findAll();
+//		Assert.assertNotNull(studies);
+//		Assert.assertTrue(studies.size() == 1);
+//
+//		Mockito.verify(studyRepository, Mockito.times(1)).findAll();
+//	}
 
-		Mockito.verify(studyRepository, Mockito.times(1)).findAll();
-	}
-
 	@Test
-	public void findByIdTest() throws ShanoirStudiesException {
+	public void findByIdTest() throws AccessDeniedException {
 		final Study study = studyService.findById(STUDY_ID);
 		Assert.assertNotNull(study);
 		Assert.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
@@ -102,57 +114,56 @@ public class StudyServiceTest {
 	}
 
 	@Test
-	public void findByIdWithAccessRightTest() throws ShanoirStudiesException {
+	public void findByIdWithAccessRightTest() throws AccessDeniedException {
 		final Study newStudy = ModelsUtil.createStudy();
 		final StudyUser studyUser = new StudyUser();
 		studyUser.setUserId(USER_ID);
-		studyUser.setStudyUserType(StudyUserType.SEE_DOWNLOAD);
+		studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_DOWNLOAD));
 		newStudy.getStudyUserList().add(studyUser);
 		given(studyRepository.findOne(STUDY_ID)).willReturn(newStudy);
 
-		final Study study = studyService.findById(STUDY_ID, USER_ID);
+		final Study study = studyService.findById(STUDY_ID);
 		Assert.assertNotNull(study);
 		Assert.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
 
-		Mockito.verify(studyRepository, Mockito.times(2)).findOne(Mockito.anyLong());
-	}
-
-	@Test(expected = ShanoirStudiesException.class)
-	public void findByIdWithoutAccessRightTest() throws ShanoirStudiesException {
-		studyService.findById(STUDY_ID, USER_ID);
+		Mockito.verify(studyRepository, Mockito.times(1)).findOne(Mockito.anyLong());
 	}
 
 	@Test
-	public void findIdsAndNamesTest() {
-		final List<IdNameDTO> studies = studyService.findIdsAndNames();
-		Assert.assertNotNull(studies);
-		Assert.assertTrue(studies.size() == 1);
-
-		Mockito.verify(studyRepository, Mockito.times(1)).findIdsAndNames();
-	}
-
-	@Test
-	public void isUserResponsibleTest() throws ShanoirStudiesException {
-		boolean result = studyService.isUserResponsible(STUDY_ID, USER_ID);
-		Assert.assertFalse(result);
-
-		Mockito.verify(studyRepository, Mockito.times(1)).findOne(STUDY_ID);
-	}
-
-	@Test
-	public void saveTest() throws ShanoirStudiesException {
-		studyService.save(createStudy());
-
+	public void saveTest() {
+		studyService.create(createStudy());
 		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirStudiesException {
+	public void updateTest() throws AccessDeniedException, EntityNotFoundException {
 		final Study updatedStudy = studyService.update(createStudy());
 		Assert.assertNotNull(updatedStudy);
 		Assert.assertTrue(UPDATED_STUDY_NAME.equals(updatedStudy.getName()));
 
 		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
+	}
+	
+	@Test
+	public void updateStudyUsersTest() throws EntityNotFoundException {
+		Study existing = createStudy();
+		existing.setStudyUserList(new ArrayList<StudyUser>());
+		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+		existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, StudyUserRight.CAN_ADMINISTRATE));
+		
+		Study updated = createStudy();
+		updated.setStudyUserList(new ArrayList<StudyUser>());
+		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, StudyUserRight.CAN_DOWNLOAD));
+		updated.getStudyUserList().add(createStudyUsers(null, 3L, updated, StudyUserRight.CAN_SEE_ALL));
+		
+		given(studyRepository.findOne(STUDY_ID)).willReturn(existing);
+		given(studyUserRepository.findOne(1L)).willReturn((StudyUser) existing.getStudyUserList().get(0));
+		given(studyUserRepository.findOne(2L)).willReturn((StudyUser) existing.getStudyUserList().get(1));
+		List<StudyUser> in = new ArrayList<>(); in.add(updated.getStudyUserList().get(1));
+		List<StudyUser> out = new ArrayList<>(); out.add(createStudyUsers(4L, 3L, updated, StudyUserRight.CAN_SEE_ALL));
+		given(studyUserRepository.save(in)).willReturn(out);
+
+		studyService.update(updated);
 	}
 
 	private Study createStudy() {
@@ -162,5 +173,18 @@ public class StudyServiceTest {
 		study.setStudyCenterList(new ArrayList<>());
 		return study;
 	}
-
+	
+	private StudyUser createStudyUsers(Long suId, Long userId, Study study, StudyUserRight... rights) {
+		StudyUser studyUser = new StudyUser();
+		studyUser.setId(suId);
+		studyUser.setStudy(study);
+		studyUser.setUserId(userId);
+		List<StudyUserRight> studyUserRights = new ArrayList<>();
+		for (StudyUserRight right : rights) {
+			studyUserRights.add(right);
+		}
+		studyUser.setStudyUserRights(studyUserRights);
+		return studyUser;
+	}
+	
 }

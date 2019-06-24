@@ -19,7 +19,7 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * Mapper for experimental group of subjects.
@@ -37,7 +37,7 @@ public interface ExperimentalGroupOfSubjectsMapper {
 	 *            list of experimental group of subjects.
 	 * @return list of DTO with id and name.
 	 */
-	List<IdNameDTO> experimentalGroupOfSubjectsToIdNameDTOs(List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects);
+	List<IdName> experimentalGroupOfSubjectsToIdNameDTOs(List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects);
 
 	/**
 	 * Map a @ExperimentalGroupOfSubjects to a @StudyDTO.
@@ -47,6 +47,6 @@ public interface ExperimentalGroupOfSubjectsMapper {
 	 * @return DTO with id and name.
 	 */
 	@Mappings({ @Mapping(target = "name", source = "groupName") })
-	IdNameDTO experimentalGroupOfSubjectsToIdNameDTO(ExperimentalGroupOfSubjects experimentalGroupOfSubjects);
+	IdName experimentalGroupOfSubjectsToIdNameDTO(ExperimentalGroupOfSubjects experimentalGroupOfSubjects);
 
 }

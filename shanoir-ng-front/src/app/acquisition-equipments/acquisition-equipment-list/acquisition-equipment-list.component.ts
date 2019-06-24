@@ -13,7 +13,7 @@
  */
 
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
-import { Step } from 'src/app/breadcrumbs/breadcrumbs.service';
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { ModalComponent } from '../../shared/components/modal/modal.component';

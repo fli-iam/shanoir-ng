@@ -21,7 +21,9 @@ import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.study.Study;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
