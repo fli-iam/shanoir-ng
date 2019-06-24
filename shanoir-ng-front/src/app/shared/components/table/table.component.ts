@@ -15,6 +15,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef } from '@angular/core';
 
 import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pageable.model';
+import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'shanoir-table',
@@ -43,13 +44,25 @@ export class TableComponent implements OnInit {
     private loaderImageUrl: string = "assets/images/loader.gif";
     
 
-    constructor(private applicationRef: ApplicationRef) {
+    constructor(
+            private applicationRef: ApplicationRef,
+            private breadcrumbsService: BreadcrumbsService) {
         this.maxResultsField = this.maxResults;
     }
 
 
     ngOnInit() {
-        this.goToPage(1);
+        let savedState = this.breadcrumbsService.currentStep.data.tableState;
+        if (savedState) {
+            this.lastSortedCol = this.columnDefs.find(col => col && savedState.lastSortedCol && col.field == savedState.lastSortedCol.field);
+            this.lastSortedAsc = savedState.lastSortedAsc;
+            this.filter = savedState.filter;
+            this.maxResults = savedState.maxResults;
+            this.goToPage(savedState.currentPage ? savedState.currentPage : 1);
+        } else {
+            this.getDefaultSorting();
+            this.goToPage(1);
+        }
     }
 
     
@@ -219,6 +232,13 @@ export class TableComponent implements OnInit {
     }
 
     private getPageable(): Pageable {
+        this.breadcrumbsService.currentStep.data.tableState = {
+            lastSortedCol: this.lastSortedCol,
+            lastSortedAsc: this.lastSortedAsc,
+            filter: this.filter,
+            currentPage: this.currentPage,
+            maxResults: this.maxResults
+        };
         let orders: Order[] = [];
         if (this.lastSortedCol) {
             if (this.lastSortedCol['orderBy']) {
@@ -270,6 +290,16 @@ export class TableComponent implements OnInit {
         if (!this.items) return;
         for (let item of this.items) {
             item["isSelectedInTable"] = false;
+        }
+    }
+
+    private getDefaultSorting() {
+        for (let col of this.columnDefs) {
+            if (col.defaultSortCol) {
+                this.lastSortedCol = col;
+                this.lastSortedAsc = col.defaultAsc != undefined ? col.defaultAsc : true;
+            }
+            return;
         }
     }
 
