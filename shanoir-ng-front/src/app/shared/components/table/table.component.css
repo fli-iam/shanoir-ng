@@ -1,7 +1,7 @@
  :host() { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; }
 .full-row { background-color: var(--color-b); overflow: initial; }
 th,
-caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; overflow: hidden; }
+caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
 th { width: 100%; white-space: normal; }
 	.controls { padding: 0; text-align: left; background-color: transparent; color: var(--very-dark-grey); }
 		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 0; border: 1px solid transparent; color: var(--dark-grey); }
@@ -22,8 +22,6 @@ th { width: 100%; white-space: normal; }
 	th.sortable { cursor: pointer; position: relative; overflow: initial; }
 		th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
 	th.checkbox-col { width: 21px; }
-	th.active { z-index: 10; background-color: var(--color-b-light2); }
-	th.sortable:hover { z-index: 5; background-color: var(--color-b-light2); }
 	th.col-date { width: 70px; }
 	th.col-boolean { width: 20px; }
 	th.col-button { width: 20px; }
@@ -58,4 +56,10 @@ a.link { text-decoration: none; color: inherit; }
 	a.link svg:hover { color: var(--color-a); }
 
 .cell-button svg:hover { color: var(--color-a); }
+
 checkbox { height: 15px; width: 15px; }
+
+.triangle { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; }
+	.triangle svg { width: 100%; max-width: 150px; height: 100%;}
+	.triangle svg polygon { fill: var(--color-b-light2); }
+.col-title { z-index: 1; }

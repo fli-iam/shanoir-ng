@@ -1,26 +1,34 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.strategies.datasetexpression;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDateTime;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.shanoir.ng.dataset.DatasetExpression;
-import org.shanoir.ng.dataset.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.shared.model.EchoTime;
-import org.shanoir.ng.shared.model.FlipAngle;
-import org.shanoir.ng.shared.model.InversionTime;
-import org.shanoir.ng.shared.model.RepetitionTime;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +55,7 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 			ExpressionFormat expressionFormat) {
 
 		DatasetExpression pacsDatasetExpression = new DatasetExpression();
-		pacsDatasetExpression.setCreationDate(LocalDate.now());
+		pacsDatasetExpression.setCreationDate(LocalDateTime.now());
 		pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
 
 		if (serie.getIsMultiFrame()) {
@@ -60,8 +68,8 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 			//List<String> dcmFilesToSendToPacs = new ArrayList<String>();
 			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
 				//dcmFilesToSendToPacs.add(datasetFile.getPath());
-				Date contentTime = null;
-				Date acquisitionTime = null;
+				LocalDateTime contentTime = null;
+				LocalDateTime acquisitionTime = null;
 				Attributes dicomAttributes = null;
 				try {
 					dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile,serie.getIsEnhancedMR());
@@ -86,8 +94,8 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 				pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
 
 				// calculate the acquisition duration for this acquisition
-				acquisitionTime = dicomAttributes.getDate(Tag.AcquisitionTime);
-				contentTime = dicomAttributes.getDate(Tag.ContentTime);
+				acquisitionTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.AcquisitionTime));
+				contentTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.ContentTime));
 				if (acquisitionTime != null) {
 					if (pacsDatasetExpression.getLastImageAcquisitionTime() == null) {
 						pacsDatasetExpression.setLastImageAcquisitionTime(acquisitionTime);
@@ -95,9 +103,9 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 					if (pacsDatasetExpression.getFirstImageAcquisitionTime() == null) {
 						pacsDatasetExpression.setFirstImageAcquisitionTime(acquisitionTime);
 					}
-					if (acquisitionTime.after(pacsDatasetExpression.getLastImageAcquisitionTime())) {
+					if (acquisitionTime.isAfter(pacsDatasetExpression.getLastImageAcquisitionTime())) {
 						pacsDatasetExpression.setLastImageAcquisitionTime(acquisitionTime);
-					} else if (acquisitionTime.before(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
+					} else if (acquisitionTime.isBefore(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
 						pacsDatasetExpression.setFirstImageAcquisitionTime(acquisitionTime);
 					}
 				}
@@ -108,9 +116,9 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 					if (pacsDatasetExpression.getFirstImageAcquisitionTime() == null) {
 						pacsDatasetExpression.setFirstImageAcquisitionTime(contentTime);
 					}
-					if (contentTime.after(pacsDatasetExpression.getLastImageAcquisitionTime())) {
+					if (contentTime.isAfter(pacsDatasetExpression.getLastImageAcquisitionTime())) {
 						pacsDatasetExpression.setLastImageAcquisitionTime(contentTime);
-					} else if (contentTime.before(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
+					} else if (contentTime.isBefore(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
 						pacsDatasetExpression.setFirstImageAcquisitionTime(contentTime);
 					}
 				}

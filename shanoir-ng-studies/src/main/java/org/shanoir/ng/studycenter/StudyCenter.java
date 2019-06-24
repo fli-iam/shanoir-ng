@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.studycenter;
 
 import javax.persistence.Entity;
@@ -6,9 +20,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.center.Center;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
-import org.shanoir.ng.study.Study;
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.study.model.Study;
 
 /**
  * Link between studies and centers.
@@ -18,7 +32,7 @@ import org.shanoir.ng.study.Study;
  */
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-public class StudyCenter extends AbstractGenericItem {
+public class StudyCenter extends AbstractEntity {
 
 	/**
 	 * UID

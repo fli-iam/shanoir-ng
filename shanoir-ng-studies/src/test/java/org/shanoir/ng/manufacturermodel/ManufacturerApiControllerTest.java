@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.manufacturermodel;
 
 import static org.mockito.BDDMockito.given;
@@ -9,7 +23,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.manufacturermodel.controler.ManufacturerApiController;
+import org.shanoir.ng.manufacturermodel.model.Manufacturer;
+import org.shanoir.ng.manufacturermodel.service.ManufacturerService;
+import org.shanoir.ng.manufacturermodel.service.ManufacturerUniqueConstraintManager;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -45,14 +63,18 @@ public class ManufacturerApiControllerTest {
 
 	@MockBean
 	private ManufacturerService manufacturerServiceMock;
+	
+	@MockBean
+	private ManufacturerUniqueConstraintManager uniqueConstraintManager;
 
 	@Before
-	public void setup() throws ShanoirStudiesException {
+	public void setup() {
 		gson = new GsonBuilder().create();
 
 		given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(new Manufacturer()));
 		given(manufacturerServiceMock.findById(1L)).willReturn(new Manufacturer());
-		given(manufacturerServiceMock.save(Mockito.mock(Manufacturer.class))).willReturn(new Manufacturer());
+		given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(new Manufacturer());
+		given(uniqueConstraintManager.validate(Mockito.any(Manufacturer.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test
@@ -79,8 +101,10 @@ public class ManufacturerApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void updateManufacturerTest() throws Exception {
+		Manufacturer manuf = ModelsUtil.createManufacturer();
+		manuf.setId(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createManufacturer())))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(manuf)))
 				.andExpect(status().isNoContent());
 	}
 

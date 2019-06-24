@@ -16,6 +16,7 @@
 ul li a {
 	display: block;
 	float: left;
+    height: 26px;
     line-height: 26px;
 	background: var(--bg-color);
 	text-align: center;

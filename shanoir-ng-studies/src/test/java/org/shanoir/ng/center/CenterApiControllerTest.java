@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.center;
 
 import static org.mockito.BDDMockito.given;
@@ -10,8 +24,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.dto.IdNameDTO;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.center.controler.CenterApiController;
+import org.shanoir.ng.center.dto.CenterDTO;
+import org.shanoir.ng.center.dto.mapper.CenterMapper;
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.security.CenterFieldEditionSecurityManager;
+import org.shanoir.ng.center.service.CenterService;
+import org.shanoir.ng.center.service.CenterUniqueConstraintManager;
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -51,9 +73,15 @@ public class CenterApiControllerTest {
 
 	@MockBean
 	private CenterService centerServiceMock;
+	
+	@MockBean
+	private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
+	
+	@MockBean
+	private CenterUniqueConstraintManager uniqueConstraintManager;
 
 	@Before
-	public void setup() throws ShanoirStudiesException {
+	public void setup() throws EntityNotFoundException  {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		given(centerMapperMock.centersToCenterDTOs(Mockito.anyListOf(Center.class)))
@@ -63,8 +91,10 @@ public class CenterApiControllerTest {
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(new Center()));
 		given(centerServiceMock.findById(1L)).willReturn(new Center());
-		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdNameDTO()));
-		given(centerServiceMock.save(Mockito.mock(Center.class))).willReturn(new Center());
+		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
+		given(centerServiceMock.create(Mockito.mock(Center.class))).willReturn(new Center());
+		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
+		given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
 	}
 
 	@Test
@@ -103,8 +133,10 @@ public class CenterApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void updateCenterTest() throws Exception {
+		Center existingCenter = ModelsUtil.createCenter();
+		existingCenter.setId(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createCenter())))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(existingCenter)))
 				.andExpect(status().isNoContent());
 	}
 

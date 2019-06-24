@@ -1,10 +1,23 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirUsersException;
 
 /**
  * @author msimon
@@ -32,33 +45,33 @@ public class PasswordUtilsTest {
 	}
 	
     @Test
-	public void checkPasswordPolicyTest() throws ShanoirUsersException {
-		PasswordUtils.checkPasswordPolicy("aA11@@22", null);
+	public void checkPasswordPolicyTest() {
+    	Assert.assertTrue(PasswordUtils.checkPasswordPolicy("aA11@@22"));
 	}
 	
     @Test
-	public void checkGeneratedPasswordPolicyTest() throws ShanoirUsersException {
-		PasswordUtils.checkPasswordPolicy(PasswordUtils.generatePassword(), null);
+	public void checkGeneratedPasswordPolicyTest() {
+    	Assert.assertTrue(PasswordUtils.checkPasswordPolicy(PasswordUtils.generatePassword()));
 	}
 	
-    @Test(expected = ShanoirUsersException.class)
-	public void checkPasswordPolicyBadPwdTest1() throws ShanoirUsersException {
-		PasswordUtils.checkPasswordPolicy("aa11@", null);
+    @Test
+	public void checkPasswordPolicyBadPwdTest1() {
+    	Assert.assertFalse(PasswordUtils.checkPasswordPolicy("aa11@"));
 	}
 	
-    @Test(expected = ShanoirUsersException.class)
-	public void checkPasswordPolicyBadPwdTest2() throws ShanoirUsersException {
-		PasswordUtils.checkPasswordPolicy("@@11@@22", null);
+    @Test
+	public void checkPasswordPolicyBadPwdTest2() {
+    	Assert.assertFalse(PasswordUtils.checkPasswordPolicy("@@11@@22"));
 	}
 	
-    @Test(expected = ShanoirUsersException.class)
-	public void checkPasswordPolicyBadPwdTest3() throws ShanoirUsersException {
-		PasswordUtils.checkPasswordPolicy("aabb@@cc", null);
+    @Test
+	public void checkPasswordPolicyBadPwdTest3()  {
+    	Assert.assertFalse(PasswordUtils.checkPasswordPolicy("aabb@@cc"));
 	}
 	
-    @Test(expected = ShanoirUsersException.class)
-	public void checkPasswordPolicyBadPwdTest4() throws ShanoirUsersException {
-		PasswordUtils.checkPasswordPolicy("aa11aa22", null);
+    @Test
+	public void checkPasswordPolicyBadPwdTest4() {
+    	Assert.assertFalse(PasswordUtils.checkPasswordPolicy("aa11aa22"));
 	}
 	
 }

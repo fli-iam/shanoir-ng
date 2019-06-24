@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.studycard;
 
 import static org.mockito.BDDMockito.given;
@@ -13,7 +27,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirDatasetsException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -46,9 +64,8 @@ public class StudyCardServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirDatasetsException {
+	public void deleteByIdTest() throws EntityNotFoundException, MicroServiceCommunicationException {
 		studyCardService.deleteById(TEMPLATE_ID);
-
 		Mockito.verify(studyCardRepository, Mockito.times(1)).delete(Mockito.anyLong());
 	}
 
@@ -71,26 +88,18 @@ public class StudyCardServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirDatasetsException {
+	public void saveTest() throws MicroServiceCommunicationException {
 		studyCardService.save(createStudyCard());
 
 		Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirDatasetsException {
+	public void updateTest() throws EntityNotFoundException, MicroServiceCommunicationException {
 		final StudyCard updatedStudyCard = studyCardService.update(createStudyCard());
 		Assert.assertNotNull(updatedStudyCard);
 		Assert.assertTrue(UPDATED_STUDYCARD_DATA.equals(updatedStudyCard.getName()));
 
-		Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
-	}
-
-	@Test
-	public void updateFromShanoirOldTest() throws ShanoirDatasetsException {
-		studyCardService.updateFromShanoirOld(createStudyCard());
-
-		Mockito.verify(studyCardRepository, Mockito.times(1)).findOne(Mockito.anyLong());
 		Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
 	}
 

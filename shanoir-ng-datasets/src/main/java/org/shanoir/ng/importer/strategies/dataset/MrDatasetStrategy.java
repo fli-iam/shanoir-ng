@@ -1,15 +1,29 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.strategies.dataset;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
-import org.shanoir.ng.dataset.CardinalityOfRelatedSubjects;
-import org.shanoir.ng.dataset.DatasetExpression;
-import org.shanoir.ng.dataset.DatasetMetadata;
-import org.shanoir.ng.dataset.DatasetModalityType;
-import org.shanoir.ng.dataset.ProcessedDatasetType;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
@@ -18,18 +32,17 @@ import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
-import org.shanoir.ng.shared.model.EchoTimeMapper;
-import org.shanoir.ng.shared.model.FlipAngleMapper;
-import org.shanoir.ng.shared.model.InversionTimeMapper;
-import org.shanoir.ng.shared.model.RepetitionTimeMapper;
-import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.shared.mapper.EchoTimeMapper;
+import org.shanoir.ng.shared.mapper.FlipAngleMapper;
+import org.shanoir.ng.shared.mapper.InversionTimeMapper;
+import org.shanoir.ng.shared.mapper.RepetitionTimeMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MrDatasetStrategy<T> implements DatasetStrategy {
+public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrDatasetStrategy.class);
@@ -79,7 +92,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 				if (datasetWrapper.getFirstImageAcquisitionTime() == null) {
 					datasetWrapper.setFirstImageAcquisitionTime(mrDataset.getFirstImageAcquisitionTime());
 				} else {
-					if (datasetWrapper.getFirstImageAcquisitionTime().after(mrDataset.getFirstImageAcquisitionTime())) {
+					if (datasetWrapper.getFirstImageAcquisitionTime().isAfter(mrDataset.getFirstImageAcquisitionTime())) {
 						datasetWrapper.setFirstImageAcquisitionTime(mrDataset.getFirstImageAcquisitionTime());
 					}
 				}
@@ -88,7 +101,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 				if (datasetWrapper.getLastImageAcquisitionTime() == null) {
 					datasetWrapper.setLastImageAcquisitionTime(mrDataset.getLastImageAcquisitionTime());
 				} else {
-					if (datasetWrapper.getLastImageAcquisitionTime().after(mrDataset.getLastImageAcquisitionTime())) {
+					if (datasetWrapper.getLastImageAcquisitionTime().isAfter(mrDataset.getLastImageAcquisitionTime())) {
 						datasetWrapper.setLastImageAcquisitionTime(mrDataset.getLastImageAcquisitionTime());
 					}
 				}
@@ -108,7 +121,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 	public MrDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset, int datasetIndex,
 			ImportJob importJob) {
 		MrDataset mrDataset = new MrDataset();
-		mrDataset.setCreationDate(Utils.DateToLocalDate(serie.getSeriesDate()));
+		mrDataset.setCreationDate(serie.getSeriesDate());
 		mrDataset.setDiffusionGradients(dataset.getDiffusionGradients());
 		final String serieDescription = serie.getSeriesDescription();
 
@@ -186,7 +199,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 				if (mrDataset.getFirstImageAcquisitionTime() == null) {
 					mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
 				} else {
-					if (mrDataset.getFirstImageAcquisitionTime().after(datasetExpression.getFirstImageAcquisitionTime())) {
+					if (mrDataset.getFirstImageAcquisitionTime().isAfter(datasetExpression.getFirstImageAcquisitionTime())) {
 						mrDataset.setFirstImageAcquisitionTime(datasetExpression.getFirstImageAcquisitionTime());
 					}
 				}
@@ -195,7 +208,7 @@ public class MrDatasetStrategy<T> implements DatasetStrategy {
 				if (mrDataset.getLastImageAcquisitionTime() == null) {
 					mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
 				} else {
-					if (mrDataset.getLastImageAcquisitionTime().after(datasetExpression.getLastImageAcquisitionTime())) {
+					if (mrDataset.getLastImageAcquisitionTime().isAfter(datasetExpression.getLastImageAcquisitionTime())) {
 						mrDataset.setLastImageAcquisitionTime(datasetExpression.getLastImageAcquisitionTime());
 					}
 				}

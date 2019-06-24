@@ -14,3 +14,9 @@ input[type="text"] { color: var(--very-dark-grey); width: 160px; }
 .clickable { cursor: pointer; }
 .see svg { vertical-align: -2; margin-left: 6px; color: var(--color-b-light2); }
     :host(.selected) > .node .see svg { color: var(--color-b-light); }
+/* .arrow { display: inline-block; width: 11px; cursor: pointer; }
+.picto { height: 14px; width: 15px; text-align: center; }
+input[type="checkbox"] { vertical-align: middle; }
+input[type="text"] { color: var(--very-dark-grey); }
+.clickable { cursor: pointer; }
+svg { vertical-align: -1; } */

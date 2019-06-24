@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component, ViewChild } from '@angular/core';
 import { AbstractControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -10,18 +24,17 @@ import { BrowserPaging } from '../../shared/components/table/browser-paging.mode
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatepickerComponent } from '../../shared/date/date.component';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { IdName } from '../../shared/models/id-name.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
 import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyCenter } from '../shared/study-center.model';
-import { StudyUserType } from '../shared/study-user-type.enum';
+import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-
-declare type Mode = 'create' | 'edit' | 'view';
+import { userInfo } from 'os';
 
 @Component({
     selector: 'study-detail',
@@ -34,9 +47,9 @@ export class StudyComponent extends EntityComponent<Study> {
     
     @ViewChild('memberTable') table: TableComponent;
 
-    private centers: IdNameObject[];
-    private subjects: IdNameObject[];
-    private selectedCenter: IdNameObject;
+    private centers: IdName[];
+    private subjects: IdName[];
+    private selectedCenter: IdName;
     
     private browserPaging: BrowserPaging<StudyUser>;
     private columnDefs: any[];
@@ -72,7 +85,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
         Promise.all([
             studyPromise,
-            this.userService.getUsers().then(users => this.users = users)
+            this.userService.getAll().then(users => this.users = users)
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
         });
@@ -97,7 +110,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
         });
 
-        this.userService.getUsers().then(users => this.users = users);
+        this.userService.getAll().then(users => this.users = users);
         return Promise.resolve();
     }
 
@@ -135,7 +148,7 @@ export class StudyComponent extends EntityComponent<Study> {
         return study;
     }
 
-    private getCenters(): Promise<IdNameObject[]> {
+    private getCenters(): Promise<IdName[]> {
         return this.centerService
             .getCentersNames()
             .then(centers => this.centers = centers);
@@ -209,10 +222,8 @@ export class StudyComponent extends EntityComponent<Study> {
         }
         return false;
     }
-    
-    
-    /** StudyUser management **/
 
+    /** StudyUser management **/
     getPage(pageable: FilterablePageable): Promise<Page<StudyUser>> {
         return new Promise((resolve) => {
             this.studyUsersPromise.then(() => {
@@ -223,16 +234,40 @@ export class StudyComponent extends EntityComponent<Study> {
         
     private createColumnDefs() {
         this.columnDefs = [
-            { headerName: "Username", field: "userName" },
-            { headerName: "First Name", field: "user.firstName" },
-            { headerName: "Last Name", field: "user.lastName" },
-            { headerName: "Email", field: "user.email", width: "200%" },
-            { headerName: "Role", field: "user.role.displayName", width: "63px" },
-            { headerName: "Role/Position*", field: "studyUserType", editable: true, possibleValues: StudyUserType.getValueLabelJsonArray(), width: "300%"},
-            { headerName: "Received Import Mail", field: "receiveNewImportReport", editable: true },
-            { headerName: "Received Anonymization Mail", field: "receiveAnonymizationReport", editable: true },
-            { headerName: "", type: "button", awesome: "fa-trash", action: this.removeStudyUser }
+            { headerName: 'Username', field: 'userName' },
+            { headerName: 'First Name', field: 'user.firstName' },
+            { headerName: 'Last Name', field: 'user.lastName' },
+            { headerName: 'Email', field: 'user.email', width: '200%' },
+            { headerName: 'Role', field: 'user.role.displayName', width: '80px' },
+            { headerName: 'Can see all', type: 'boolean', editable: true, width: '54px', 
+                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
+            { headerName: 'Can download', type: 'boolean', editable: true, width: '54px', 
+                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_DOWNLOAD, su, value),
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)},
+            { headerName: 'Can import', type: 'boolean', editable: true, width: '54px', 
+                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
+            { headerName: 'Can admin', type: 'boolean', editable: true, width: '54px', 
+                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)},
+            { headerName: 'Received Import Mail', field: 'receiveNewImportReport', editable: true, width: '54px' },
+            { headerName: 'Received Anonymization Mail', field: 'receiveAnonymizationReport', editable: true, width: '54px' },
+            { headerName: '', type: 'button', awesome: 'fa-trash', action: this.removeStudyUser }
         ];
+    }
+
+    /**
+     * On select/unselect given right for the given study user 
+     */
+    private onEditRight(right: StudyUserRight, su: StudyUser, selected: boolean) {
+        if (!su.studyUserRights.includes(right) && selected) {
+            su.studyUserRights.push(right);
+        }
+        else if (su.studyUserRights.includes(right) && !selected) {
+            const index = su.studyUserRights.indexOf(right, 0);
+            if (index > -1) su.studyUserRights.splice(index, 1);
+        }
     }
 
     private onUserSelect(selectedUser: User) {
@@ -242,7 +277,7 @@ export class StudyComponent extends EntityComponent<Study> {
         studyUser.userName = selectedUser.username;
         studyUser.receiveAnonymizationReport = false;
         studyUser.receiveNewImportReport = false;
-        studyUser.studyUserType = StudyUserType.NOT_SEE_DOWNLOAD;
+        studyUser.studyUserRights = [];
         studyUser.completeMember(this.users);
         this.study.studyUserList.push(studyUser);
         this.browserPaging.setItems(this.study.studyUserList);
@@ -251,12 +286,12 @@ export class StudyComponent extends EntityComponent<Study> {
 
     private removeStudyUser = (item: StudyUser) => {
         const index: number = this.study.studyUserList.indexOf(item);
-        item.user.selected = false;
         if (index !== -1) {
             this.study.studyUserList.splice(index, 1);
         }
         this.browserPaging.setItems(this.study.studyUserList);
         this.table.refresh();
+        StudyUser.completeMember(item, this.users);
     }
 
     private studyStatusStr(studyStatus: string) {

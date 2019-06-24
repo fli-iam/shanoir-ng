@@ -1,10 +1,26 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.shared.dateTime.DateTimeUtils;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -20,7 +36,8 @@ public class Study {
 	private String studyInstanceUID;
 
 	@JsonProperty("studyDate")
-	private Date studyDate;
+	@LocalDateAnnotations
+	private LocalDate studyDate;
 
 	@JsonProperty("studyDescription")
 	private String studyDescription;
@@ -33,7 +50,7 @@ public class Study {
 
 	public Study(final Attributes attributes) {
 		this.studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
-		this.studyDate = attributes.getDate(Tag.StudyDate);
+		this.studyDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.StudyDate));
 		this.studyDescription = attributes.getString(Tag.StudyDescription);
 	}
 
@@ -45,11 +62,11 @@ public class Study {
 		this.studyInstanceUID = studyInstanceUID;
 	}
 
-	public Date getStudyDate() {
+	public LocalDate getStudyDate() {
 		return studyDate;
 	}
 
-	public void setStudyDate(Date studyDate) {
+	public void setStudyDate(LocalDate studyDate) {
 		this.studyDate = studyDate;
 	}
 

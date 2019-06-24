@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.acquisitionequipment;
 
 import static org.mockito.BDDMockito.given;
@@ -10,7 +24,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.acquisitionequipment.controler.AcquisitionEquipmentApiController;
+import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
+import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -51,7 +70,7 @@ public class AcquisitionEquipmentApiControllerTest {
 	private AcquisitionEquipmentService acquisitionEquipmentServiceMock;
 
 	@Before
-	public void setup() throws ShanoirStudiesException {
+	public void setup() throws EntityNotFoundException  {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		given(acquisitionEquipmentMapperMock
@@ -64,7 +83,7 @@ public class AcquisitionEquipmentApiControllerTest {
 		doNothing().when(acquisitionEquipmentServiceMock).deleteById(1L);
 		given(acquisitionEquipmentServiceMock.findAll()).willReturn(Arrays.asList(new AcquisitionEquipment()));
 		given(acquisitionEquipmentServiceMock.findById(1L)).willReturn(new AcquisitionEquipment());
-		given(acquisitionEquipmentServiceMock.save(Mockito.mock(AcquisitionEquipment.class)))
+		given(acquisitionEquipmentServiceMock.create(Mockito.mock(AcquisitionEquipment.class)))
 				.willReturn(new AcquisitionEquipment());
 	}
 

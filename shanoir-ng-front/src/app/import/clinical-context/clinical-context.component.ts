@@ -1,4 +1,17 @@
-import { Component, HostListener } from '@angular/core';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
@@ -11,7 +24,7 @@ import { SubjectExamination } from '../../examinations/shared/subject-examinatio
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { slideDown } from '../../shared/animations/animations';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { IdName } from '../../shared/models/id-name.model';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
@@ -21,6 +34,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EquipmentDicom, PatientDicom } from '../dicom-data.model';
 import { ContextData, ImportDataService } from '../import.data-service';
+
 
 @Component({
     selector: 'clinical-context',
@@ -37,11 +51,11 @@ export class ClinicalContextComponent{
     private subjects: SubjectWithSubjectStudy[] = [];
     private examinations: SubjectExamination[] = [];
     private niftiConverters: NiftiConverter[] = [];
-    private _study: Study;
-    private _center: Center;
-    private _acquisitionEquipment: AcquisitionEquipment;
-    private _subject: SubjectWithSubjectStudy;
-    private _examination: SubjectExamination;
+    private study: Study;
+    private center: Center;
+    private acquisitionEquipment: AcquisitionEquipment;
+    private subject: SubjectWithSubjectStudy;
+    private examination: SubjectExamination;
     private niftiConverter: NiftiConverter;
     
     constructor(
@@ -69,13 +83,30 @@ export class ClinicalContextComponent{
             let subject = this.importDataService.contextBackup.subject;
             let examination = this.importDataService.contextBackup.examination;
             let niftiConverter = this.importDataService.contextBackup.niftiConverter;
-            if (study) this.study = study;
-            if (center) this.center = center;
-            if (acquisitionEquipment) this.acquisitionEquipment = acquisitionEquipment;
-            if (subject) this.subject = subject;
-            if (examination) this.examination = examination;
-            if (niftiConverter) this.niftiConverter = niftiConverter;
-            this.onContextChange();
+            if (study) {
+                this.study = study;
+                this.onSelectStudy();
+            }
+            if (center) {
+                this.center = center;
+                this.onSelectCenter();
+            }
+            if (acquisitionEquipment) {
+                this.acquisitionEquipment = acquisitionEquipment;
+                this.onSelectAcquisitonEquipment();
+            }
+            if (subject) {
+                this.subject = subject;
+                this.onSelectSubject();
+            }
+            if (examination) {
+                this.examination = examination;
+                this.onSelectExam();
+            }
+            if (niftiConverter) {
+                this.niftiConverter = niftiConverter;
+                this.onContextChange();
+            }
         }
     }
 
@@ -85,23 +116,20 @@ export class ClinicalContextComponent{
             /* For the moment, we import only zip files with the same equipment, 
             That's why the calculation is only based on the equipment of the first series of the first study */
             .then(() => {
-                if (this.studies) {
-                    let hasOneCompatible: boolean = this.studies.filter(study => study.compatible).length == 1;
-                    if (hasOneCompatible) {
-                        this.study = this.studies.filter(study => study.compatible)[0];
-                    }
-                } else {
-                    this.study = null;
+                let hasOneCompatible: boolean = this.studies.filter(study => study.compatible).length == 1;
+                if (hasOneCompatible) {
+                    this.study = this.studies.filter(study => study.compatible)[0];
+                    this.onSelectStudy(); 
                 }
             })
     }
 
     private completeStudies(equipment: EquipmentDicom): Promise<void> {
         let completeStudyPromises: Promise<void>[] = [];
-        completeStudyPromises.push(Promise.all([this.studyService.findStudiesForImport(), this.centerService.getAll()])
+        completeStudyPromises.push(Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
-                if (allStudies) {
-                    for (let study of allStudies) {
+                for (let study of allStudies) {
+                    if (study.studyCenterList) {
                         for (let studyCenter of study.studyCenterList) {
                             let center = allCenters.find(center => center.id === studyCenter.center.id);
                             if (center) {
@@ -116,63 +144,45 @@ export class ClinicalContextComponent{
                                 studyCenter.center = center;
                             }
                         } 
-                        this.studies.push(study);
                     }
+                    this.studies.push(study);
                 }
-            }));
+            })
+        );
         return Promise.all(completeStudyPromises).then(() => {});
     }
 
-    private get study(): Study {
-        return this._study;
-    }
-    
-    private get center(): Center {
-        return this._center;
-    }
-    
-    private get acquisitionEquipment(): AcquisitionEquipment {
-        return this._acquisitionEquipment;
-    }
-    
-    private get subject(): SubjectWithSubjectStudy {
-        return this._subject;
-    }
-    
-    private get examination(): SubjectExamination {
-        return this._examination;
-    }
-    
-    private set study(study: Study) {
-        this._study = study;
+    private onSelectStudy(): void {
         this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
-        this._center = this.acquisitionEquipment = this.subject = this.examination = null;
+        this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.study.id && this.study.studyCenterList) {
             let hasOneCompatible: boolean = this.study.studyCenterList.filter(studyCenter => studyCenter.center.compatible).length == 1;
             if (hasOneCompatible) {
                 this.center = this.study.studyCenterList.filter(studyCenter => studyCenter.center.compatible)[0].center;
+                this.onSelectCenter();
             }
             for (let studyCenter of this.study.studyCenterList) {
                 this.centers.push(studyCenter.center);
             }
         }
+        this.onContextChange();
     }
 
-    private set center(center: Center) {
-        this._center = center;
+    private onSelectCenter(): void {
         this.acquisitionEquipments = this.subjects = this.examinations = [];
-        this._acquisitionEquipment = this.subject = this.examination = null;
+        this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.center && this.center.acquisitionEquipments) {
             let hasOneCompatible: boolean = this.center.acquisitionEquipments.filter(acqEqt => acqEqt.compatible).length == 1;
             if (hasOneCompatible) {
                 this.acquisitionEquipment = this.center.acquisitionEquipments.filter(acqEqt => acqEqt.compatible)[0];
+                this.onSelectAcquisitonEquipment();
             }
             this.acquisitionEquipments = this.center.acquisitionEquipments;
         }
+        this.onContextChange();
     }
 
-    private set acquisitionEquipment(acqEpt: AcquisitionEquipment) {
-        this._acquisitionEquipment = acqEpt;
+    private onSelectAcquisitonEquipment(): void {
         this.subjects = this.examinations = [];
         this.subject = this.examination = null;
         if (this.acquisitionEquipment) {
@@ -180,10 +190,10 @@ export class ClinicalContextComponent{
                 .findSubjectsByStudyId(this.study.id)
                 .then(subjects => this.subjects = subjects);
         }
+        this.onContextChange();
     }
-    
-    private set subject(subject: SubjectWithSubjectStudy) {
-        this._subject = subject;
+
+    private onSelectSubject(): void {
         this.examinations = [];
         this.examination = null;
         if (this.subject) {
@@ -191,43 +201,19 @@ export class ClinicalContextComponent{
             .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
             .then(examinations => this.examinations = examinations);
         }
+        this.onContextChange();
     }
 
-    private set examination(exam: SubjectExamination) {
-        this._examination = exam;
+    private onSelectExam(): void {
         this.niftiConverters = [];
         if (this.examination) {
             this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
         }
-    }
-
-    private onSelectStudy(study: Study): void {
-        this.study = study;
-        this.onContextChange();
-    }
-
-    private onSelectCenter(center: Center): void {
-        this.center = center;
-        this.onContextChange();
-    }
-
-    private onSelectAcquisitonEquipment(acqEqt: AcquisitionEquipment): void {
-        this.acquisitionEquipment = acqEqt;
-        this.onContextChange();
-    }
-
-    private onSelectSubject(subject: SubjectWithSubjectStudy): void {
-        this.subject = subject;
         this.onContextChange();
     }
 
     private onSelectExamination(examination: SubjectExamination) {
         this.examination = examination;
-        this.onContextChange();
-    }
-
-    private onSelectNifti(nifti: NiftiConverter) {
-        this.niftiConverter = nifti;
         this.onContextChange();
     }
 
@@ -347,8 +333,8 @@ export class ClinicalContextComponent{
 
     private getPrefilledExam(): Examination {
         let newExam = new Examination();
-        newExam.study = new IdNameObject(this.study.id, this.study.name);
-        newExam.center = new IdNameObject(this.center.id, this.center.name);
+        newExam.study = new IdName(this.study.id, this.study.name);
+        newExam.center = new IdName(this.center.id, this.center.name);
         newExam.subject = this.subject;
         newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
         newExam.comment = this.patient.studies[0].studyDescription;
@@ -408,16 +394,5 @@ export class ClinicalContextComponent{
 
     private next() {
         this.router.navigate(['imports/finish']);
-    }
-
-    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
-        if (event.key == 'œ') {
-            console.log('study', this._study);
-            console.log('center', this._center);
-            console.log('acqEq', this._acquisitionEquipment);
-            console.log('subject', this._subject);
-            console.log('examination', this._examination);
-            console.log('nifti', this.niftiConverter);
-        }
     }
 }

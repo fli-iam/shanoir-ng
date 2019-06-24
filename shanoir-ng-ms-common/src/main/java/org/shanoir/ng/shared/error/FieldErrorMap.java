@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.shared.error;
 
 import java.util.ArrayList;
@@ -10,12 +24,13 @@ import org.springframework.validation.ObjectError;
 /**
  * Field error map.
  * 
- * @author msimon
+ * @author jlouis
  *
  */
 public class FieldErrorMap extends HashMap<String, List<FieldError>> {
 
 	private static final long serialVersionUID = 1L;
+	
 
 	/**
 	 * Constructor
@@ -24,12 +39,6 @@ public class FieldErrorMap extends HashMap<String, List<FieldError>> {
 		super();
 	}
 
-	/**
-	 * Constructor
-	 */
-	public FieldErrorMap(FieldErrorMap... maps) {
-		this.merge(maps);
-	}
 
 	/**
 	 * Constructor
@@ -56,16 +65,17 @@ public class FieldErrorMap extends HashMap<String, List<FieldError>> {
 	 *
 	 * @param maps
 	 */
-	public void merge(FieldErrorMap... maps) {
-		for (FieldErrorMap map : maps) {
-			for (String fieldName : map.keySet()) {
-				List<FieldError> error = map.get(fieldName);
-				if (!this.containsKey(fieldName)) {
-					this.put(fieldName, error);
-				} else {
-					this.get(fieldName).addAll(error);
-				}
+	public FieldErrorMap add(FieldErrorMap map) {
+		for (String fieldName : map.keySet()) {
+			List<FieldError> error = map.get(fieldName);
+			if (!this.containsKey(fieldName)) {
+				this.put(fieldName, error);
+			} else {
+				this.get(fieldName).addAll(error);
 			}
 		}
+		return this;
 	}
+
+
 }

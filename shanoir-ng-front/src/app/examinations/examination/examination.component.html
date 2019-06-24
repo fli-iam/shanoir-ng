@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="content-component">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
@@ -18,10 +32,10 @@
 						<label i18n="Examination detail|Id label@@examinationDetailId" class="required-label">Id</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.id}}
+								{{examination?.id}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="id" [(ngModel)]="examination.id" readonly/>
+								<input type="text" id="examId" [(ngModel)]="examination.id" [ngModelOptions]="{standalone: true}" readonly/>
 							</ng-template>
 						</span>
 					</li>
@@ -30,7 +44,7 @@
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/study/details/', examination.study?.id]">
-									{{examination.studyName}}
+									{{examination.study?.name}}
 								</a>		
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -46,7 +60,7 @@
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/subject/details/', examination.subject?.id]">
-									{{examination.subject?.name}}
+									{{examination?.subject?.name}}
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -62,7 +76,7 @@
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/center/details/', examination.center?.id]">
-									{{examination.center.name}}
+									{{examination?.center?.name}}
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -73,24 +87,24 @@
 							</ng-template>
 						</span>
 					</li>
-					<li>
+					<!-- <li>
 						<label i18n="Examination detail|Examination executive label@@examinationDetailExaminationExecutive">Examination executive</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.examinationExecutive?.name}}
+								{{examination?.examinationExecutive?.name}}
 							</ng-template>
-							<!--<ng-template ngSwitchDefault>
+							<ng-template ngSwitchDefault>
 								<select id="examinationExecutive" required formControlName="Examination executive" [(ngModel)]="examination.examinationExecutive">
 									<option *ngFor="let examinationExecutive of examinationExecutives" [ngValue]="subject">{{examinationExecutive.name}}</option>
 								</select>
-							</ng-template>-->
+							</ng-template>
 						</span>
-					</li>
+					</li> -->
 					<li>
 						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.examinationDate | date: 'dd/MM/yyyy'}}
+								{{examination?.examinationDate | date: 'dd/MM/yyyy'}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<datepicker [(ngModel)]="examination.examinationDate" formControlName="examinationDate" required></datepicker>
@@ -103,7 +117,7 @@
 						<label i18n="Examination detail|Comment label@@examinationDetailComment">Comment</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.comment}}
+								{{examination?.comment}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="comment" formControlName="comment" [(ngModel)]="examination.comment" />
@@ -114,7 +128,7 @@
 						<label i18n="Examination detail|Note label@@examinationDetailNote">Note</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.note}}
+								{{examination?.note}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="note" formControlName="note" [(ngModel)]="examination.note" />
@@ -125,7 +139,7 @@
 						<label i18n="Examination detail|Subject weight label@@examinationDetailSubjectWeight">Subject weight</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination.subjectWeight}}
+								{{examination?.subjectWeight}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="subjectWeight" formControlName="subjectWeight" [(ngModel)]="examination.subjectWeight" />

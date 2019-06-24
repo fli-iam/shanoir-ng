@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component, forwardRef, Input } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -34,12 +48,12 @@ export class SubjectStudyListComponent extends AbstractInput {
         super.writeValue(obj);
         if (this.model && this.selectableList) {
             if (this.compMode == 'study') {
-                for (let item of this.selectableList) {
-                    item.selected = this.model.find(subStu => subStu.subject.id == item.id) 
+                for (let selectableItem of this.selectableList) {
+                    if(this.model.find(subStu => subStu.subject.id == selectableItem.id)) selectableItem.selected = true; 
                 }
             } else if (this.compMode == 'subject') {
-                for (let item of this.selectableList) {
-                    item.selected = this.model.find(subStu => subStu.study.id == item.id) 
+                for (let selectableItem of this.selectableList) {
+                    if(this.model.find(subStu => subStu.study.id == selectableItem.id)) selectableItem.selected = true;
                 }
             }
         }
@@ -77,8 +91,20 @@ export class SubjectStudyListComponent extends AbstractInput {
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
         const index: number = this.model.indexOf(subjectStudy);
         if (index > -1) {
-            this.model[index].selected = false;
             this.model.splice(index, 1);
+            if (this.compMode == 'study') {
+                for (let selectableItem of this.selectableList) {
+                    if (selectableItem.id == subjectStudy.subject.id) {
+                        selectableItem.selected = false;
+                    }
+                }
+            } else if (this.compMode == 'subject') {
+                for (let selectableItem of this.selectableList) {
+                    if (selectableItem.id == subjectStudy.study.id) {
+                        selectableItem.selected = false;
+                    }
+                }
+            }
         }
     }
 }

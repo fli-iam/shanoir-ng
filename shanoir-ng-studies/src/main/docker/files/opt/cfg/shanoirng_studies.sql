@@ -1,3 +1,15 @@
+-- Shanoir NG - Import, manage and share neuroimaging data
+-- Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+-- Contact us on https://project.inria.fr/shanoir/
+-- 
+-- This program is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+-- 
+-- You should have received a copy of the GNU General Public License
+-- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
 ﻿use shanoir_ng_studies;
 
 CREATE TABLE `center` (
@@ -861,7 +873,7 @@ VALUES
 CREATE TABLE `study_user` (
   `receive_anonymization_report` bit(1) NOT NULL,
   `receive_new_import_report` bit(1) NOT NULL,
-  `study_user_type` int(11) NOT NULL,
+  `study_user_right` int(11) NOT NULL,
   `user_id` bigint(20) DEFAULT NULL,
   `study_id` bigint(20) DEFAULT NULL,
   UNIQUE KEY (`user_id`,`study_id`),
@@ -870,7 +882,7 @@ CREATE TABLE `study_user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO study_user
-	(receive_anonymization_report, receive_new_import_report, study_id, study_user_type, user_id)
+	(receive_anonymization_report, receive_new_import_report, study_id, study_user_right, user_id)
 VALUES
 	(0, 0, 1, 1, 4),
 	(0, 0, 3, 1, 4),

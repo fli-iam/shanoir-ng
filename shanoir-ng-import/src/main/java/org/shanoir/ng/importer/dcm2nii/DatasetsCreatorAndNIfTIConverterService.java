@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.dcm2nii;
 
 import java.io.BufferedReader;
@@ -36,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 /**
@@ -97,14 +112,17 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	/** Output files mapped by series UID. */
 	private HashMap<String, List<String>> outputFiles = new HashMap<String, List<String>>();
 	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public NIfTIConverter findById(Long id) {
 		return niftiConverterRepository.findOne(id);
 	}
 	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public List<NIfTIConverter> findAll() {
 		return niftiConverterRepository.findAll();
 	}
 	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public void createDatasetsAndRunConversion(Patient patient, File workFolder, Long converterId) throws ShanoirException {
 		File seriesFolderFile = new File(workFolder.getAbsolutePath() + File.separator + SERIES);
 		if(!seriesFolderFile.exists()) {
@@ -223,6 +241,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
                             xValues = items.get(0).split("\\s");
                             yValues = items.get(1).split("\\s");
                             zValues = items.get(2).split("\\s");
+                            reader.close();
                         }
                         if (file.getName().endsWith(".bval")) {
                             BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -232,6 +251,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
                                 items.add(line);
                             }
                             bValues = items.get(0).split("\\s");
+                            reader.close();
                         }
                     }
 
@@ -444,7 +464,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			final String value = item.split(DOUBLE_EQUAL)[1];
 			LOG.debug("checkDicomFromProperties : tag=" + tag + ", value=" + value);
 			try {
-				Class aClass = serie.getClass();
+				Class<? extends Serie> aClass = serie.getClass();
 				Field field = aClass.getDeclaredField(tag);
 				field.setAccessible(true);
 				String dicomValue = (String) field.get(serie);

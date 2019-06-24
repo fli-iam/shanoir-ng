@@ -1,6 +1,21 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef } from '@angular/core';
 
 import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pageable.model';
+import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'shanoir-table',
@@ -29,13 +44,25 @@ export class TableComponent implements OnInit {
     private loaderImageUrl: string = "assets/images/loader.gif";
     
 
-    constructor(private applicationRef: ApplicationRef) {
+    constructor(
+            private applicationRef: ApplicationRef,
+            private breadcrumbsService: BreadcrumbsService) {
         this.maxResultsField = this.maxResults;
     }
 
 
     ngOnInit() {
-        this.goToPage(1);
+        let savedState = this.breadcrumbsService.currentStep.data.tableState;
+        if (savedState) {
+            this.lastSortedCol = this.columnDefs.find(col => col && savedState.lastSortedCol && col.field == savedState.lastSortedCol.field);
+            this.lastSortedAsc = savedState.lastSortedAsc;
+            this.filter = savedState.filter;
+            this.maxResults = savedState.maxResults;
+            this.goToPage(savedState.currentPage ? savedState.currentPage : 1);
+        } else {
+            this.getDefaultSorting();
+            this.goToPage(1);
+        }
     }
 
     
@@ -66,19 +93,19 @@ export class TableComponent implements OnInit {
 
 
     public static getCellValue(item: Object, col: any): any {
-        let result: any;
-        if (col.field == undefined) {
-            return null;
-        } if (col.hasOwnProperty("cellRenderer")) {
+        if (col.hasOwnProperty("cellRenderer")) {
             let params = new Object();
             params["data"] = item;
             return col["cellRenderer"](params);
+        } else if (col.field == undefined) {
+            return null;
         } else {
             return this.getFieldRawValue(item, col["field"]);
         }
     }
 
     public static getFieldRawValue(obj: Object, path: string): any {
+        if (path == undefined || path == null) return;
         function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
     }
@@ -101,12 +128,22 @@ export class TableComponent implements OnInit {
      * Set the property value
      */
     private setFieldRawValue(obj: Object, path: string, value: any) {
+        if (path == undefined || path == null) return;
         const split = path.split('.');
         let currentObj = obj;
         for(let i=0; i<split.length-1; i++) {
             currentObj = currentObj[split[i]];
         }
         currentObj[split[split.length-1]] = value;
+    }
+
+    /** 
+     * Triggered when a field is edited
+     */
+    private onFieldEdit(obj: Object, col: Object, value: any) {
+        this.setFieldRawValue(obj, col['field'], value); 
+        this.rowEdit.emit(obj);
+        if (col['onEdit']) col['onEdit'](obj, value);
     }
 
     /**
@@ -127,7 +164,7 @@ export class TableComponent implements OnInit {
     private isFieldBoolean(col: any): boolean {
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
         let val = TableComponent.getCellValue(this.items[0], col);
-        return this.isValueBoolean(val);
+        return col.type == 'boolean' || this.isValueBoolean(val);
     }
 
     private isColumnText(col: any): boolean {
@@ -195,6 +232,13 @@ export class TableComponent implements OnInit {
     }
 
     private getPageable(): Pageable {
+        this.breadcrumbsService.currentStep.data.tableState = {
+            lastSortedCol: this.lastSortedCol,
+            lastSortedAsc: this.lastSortedAsc,
+            filter: this.filter,
+            currentPage: this.currentPage,
+            maxResults: this.maxResults
+        };
         let orders: Order[] = [];
         if (this.lastSortedCol) {
             if (this.lastSortedCol['orderBy']) {
@@ -246,6 +290,16 @@ export class TableComponent implements OnInit {
         if (!this.items) return;
         for (let item of this.items) {
             item["isSelectedInTable"] = false;
+        }
+    }
+
+    private getDefaultSorting() {
+        for (let col of this.columnDefs) {
+            if (col.defaultSortCol) {
+                this.lastSortedCol = col;
+                this.lastSortedAsc = col.defaultAsc != undefined ? col.defaultAsc : true;
+            }
+            return;
         }
     }
 
