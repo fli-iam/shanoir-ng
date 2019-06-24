@@ -98,7 +98,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <!-- editable boolean -->
         <span *ngIf="isFieldBoolean(col) && editMode && col.editable">
-            <input type="checkbox" [ngModel]="getCellValue(item, col)" (ngModelChange)="onFieldEdit(item, col, $event)" /> 
+            <checkbox [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);"></checkbox> 
         </span>
 
         <!-- add a link -->

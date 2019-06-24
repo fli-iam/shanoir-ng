@@ -25,6 +25,7 @@ import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
+import { Center } from 'src/app/centers/shared/center.model';
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -132,6 +133,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     save(): Promise<void> {
         this.lastSubmittedManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
         return super.save();
+    }
+
+    private viewCenter(center: Center) {
+        this.router.navigate(['center/details/' + center.id]);
     }
 }
 

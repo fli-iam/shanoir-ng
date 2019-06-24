@@ -11,16 +11,16 @@ th { width: 100%; white-space: normal; }
 			.controls .awesome { vertical-align: middle; margin-right: 4px; }
 				.controls .awesome svg { vertical-align: -1; color: var(--color-c); }
 		.controls input,
-		.controls select { border: 1px solid var(--grey); border-radius: 2px;  height: 20px; vertical-align: middle; }
+		.controls select { height: 20px; vertical-align: middle; }
 		.controls input { padding: 0 5px; width: 150px; }
 		.controls select { width: 150px; margin-right: 5px; }
 		.controls .text-search,
 		.controls .options,
-		.select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 0; border-right: 1px solid var(--grey); }
+		.select-ctrl { margin: 0 3px 0 0; padding: 0 0 0 0; }
 			.controls .options .max-results { width: 40px; text-align: right; }
 	.select-ctrl button { padding: 0 5px; }
-	.select-ctrl input[type="checkbox"] { margin: 0; width: 15px; }
-	th.sortable { cursor: pointer; position: relative; z-index: 0; }
+	th.sortable { cursor: pointer; position: relative; overflow: initial; }
+		th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
 	th.checkbox-col { width: 21px; }
 	th.col-date { width: 70px; }
 	th.col-boolean { width: 20px; }
@@ -38,7 +38,7 @@ tr { height: 20px; }
 td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
 	td + td { border-left: 1px solid var(--light-grey); }
 	td.bool { text-align: center; }
-	td.cell input:not([type='checkbox']), td.cell select { width: 100%; }
+	td.cell input:not([type='checkbox']), td.cell select { width: 100%; border: none; }
 	td.cell-date { text-align: right; }
 	td.cell-number { text-align: right; }
 	td.cell-nofield { text-align: center; }
@@ -56,6 +56,8 @@ a.link { text-decoration: none; color: inherit; }
 	a.link svg:hover { color: var(--color-a); }
 
 .cell-button svg:hover { color: var(--color-a); }
+
+checkbox { height: 15px; width: 15px; }
 
 .triangle { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; }
 	.triangle svg { width: 100%; max-width: 150px; height: 100%;}

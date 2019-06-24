@@ -1,10 +1,22 @@
-:host() { position: relative; padding: 0 4px; cursor: default; margin: 2px 0 0 12px; display: block; }
-:host(.selected) > .node { background-color: var(--color-b); color: var(--very-light-grey); }
-.node { height: 20px; line-height: 20px; padding: 0 5px; }
+:host() { position: relative; padding: 0 4px; cursor: default; margin: 2px 0 0 18px; display: block; }
+:host(.selected) > .node .selectable { background-color: var(--color-b); color: var(--very-light-grey); border-radius: 2px; }
+.node { height: 20px; line-height: 20px; display: inline-block; }
+.selectable { padding: 0 7px; }
 .node > span { display: inline-block; }
-.arrow { display: inline-block; width: 11px; cursor: pointer; }
+.arrow { cursor: pointer; width: 8px; height: 20px; vertical-align: top; }
+    .arrow svg { vertical-align: 0; font-size: 8px; height: 21px; }
+.picto { height: 14px; vertical-align: sub; }
+checkbox { vertical-align: middle; margin: 0 5px 1px; width: 12px; height: 12px; }
+    :host(.selected) > .node checkbox svg { color: var(--color-b-light) !important; }
+input[type="text"] { color: var(--very-dark-grey); width: 160px; }
+:host(.selected) > .node input { color: var(--very-light-grey); }
+:host(.selected) > .node tooltip { color: var(--very-light-grey); }
+.clickable { cursor: pointer; }
+.see svg { vertical-align: -2; margin-left: 6px; color: var(--color-b-light2); }
+    :host(.selected) > .node .see svg { color: var(--color-b-light); }
+/* .arrow { display: inline-block; width: 11px; cursor: pointer; }
 .picto { height: 14px; width: 15px; text-align: center; }
 input[type="checkbox"] { vertical-align: middle; }
 input[type="text"] { color: var(--very-dark-grey); }
 .clickable { cursor: pointer; }
-svg { vertical-align: -1; }
+svg { vertical-align: -1; } */

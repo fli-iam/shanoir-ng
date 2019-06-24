@@ -11,9 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
@@ -24,7 +24,6 @@ import { SubjectExamination } from '../../examinations/shared/subject-examinatio
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { slideDown } from '../../shared/animations/animations';
-import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdName } from '../../shared/models/id-name.model';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 import { Study } from '../../studies/shared/study.model';
@@ -35,6 +34,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EquipmentDicom, PatientDicom } from '../dicom-data.model';
 import { ContextData, ImportDataService } from '../import.data-service';
+
 
 @Component({
     selector: 'clinical-context',
@@ -65,16 +65,14 @@ export class ClinicalContextComponent{
             private examinationService: ExaminationService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
-            private importDataService: ImportDataService,
-            private msgBoxService: MsgBoxService) {
+            private importDataService: ImportDataService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
         breadcrumbsService.nameStep('3. Context');
-        this.setPatient(importDataService.patients[0]);
-        this.reloadSavedData();
+        this.setPatient(this.importDataService.patients[0]).then(() => this.reloadSavedData());
     }
 
     private reloadSavedData() {
@@ -112,21 +110,21 @@ export class ClinicalContextComponent{
         }
     }
 
-    setPatient(patient: PatientDicom) {
+    setPatient(patient: PatientDicom): Promise<void> {
         this.patient = patient;
-        this.completeStudies(this.patient.studies[0].series[0].equipment)
+        return this.completeStudies(this.patient.studies[0].series[0].equipment)
             /* For the moment, we import only zip files with the same equipment, 
             That's why the calculation is only based on the equipment of the first series of the first study */
             .then(() => {
                 let hasOneCompatible: boolean = this.studies.filter(study => study.compatible).length == 1;
                 if (hasOneCompatible) {
                     this.study = this.studies.filter(study => study.compatible)[0];
-                    this.onSelectStudy();
+                    this.onSelectStudy(); 
                 }
             })
     }
 
-    private async completeStudies(equipment: EquipmentDicom): Promise<void> {
+    private completeStudies(equipment: EquipmentDicom): Promise<void> {
         let completeStudyPromises: Promise<void>[] = [];
         completeStudyPromises.push(Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
@@ -149,7 +147,8 @@ export class ClinicalContextComponent{
                     }
                     this.studies.push(study);
                 }
-            }}));
+            })
+        );
         return Promise.all(completeStudyPromises).then(() => {});
     }
 
@@ -195,7 +194,6 @@ export class ClinicalContextComponent{
     }
 
     private onSelectSubject(): void {
-        console.log('pass in onSelectSubject, this.subject: ', this.subject)
         this.examinations = [];
         this.examination = null;
         if (this.subject) {
@@ -204,14 +202,18 @@ export class ClinicalContextComponent{
             .then(examinations => this.examinations = examinations);
         }
         this.onContextChange();
-        console.log('onselectSubject, contextBackUp: ', this.importDataService.contextBackup, 'this.subject: ', this.subject)
     }
-    
+
     private onSelectExam(): void {
         this.niftiConverters = [];
         if (this.examination) {
             this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
         }
+        this.onContextChange();
+    }
+
+    private onSelectExamination(examination: SubjectExamination) {
+        this.examination = examination;
         this.onContextChange();
     }
 
@@ -277,7 +279,6 @@ export class ClinicalContextComponent{
             this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
             importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                 this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
-                console.log('openCreateSubject: ', this.importDataService.contextBackup.subject)
             });
         });
     }
@@ -350,6 +351,11 @@ export class ClinicalContextComponent{
         return subjectExam;
     }
 
+    private get hasCompatibleCenters(): boolean {
+        return this.centers.find(center => center.compatible) != undefined;
+    }
+
+    
     private get hasCompatibleEquipments(): boolean {
         return this.acquisitionEquipments.find(ae => ae.compatible) != undefined;
     }
@@ -383,14 +389,10 @@ export class ClinicalContextComponent{
             && context.subject != undefined && context.subject != null
             && context.examination != undefined && context.examination != null
             && context.niftiConverter != undefined && context.niftiConverter != null
-            );
+        );
     }
 
     private next() {
         this.router.navigate(['imports/finish']);
-    }
-
-    private compareEntities(e1: Entity, e2: Entity) : boolean {
-        return e1 && e2 && e1.id === e2.id;
     }
 }

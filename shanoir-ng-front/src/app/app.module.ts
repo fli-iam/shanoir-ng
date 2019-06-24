@@ -12,22 +12,27 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import '../assets/css/common.css';
+import '../assets/css/papaya.css';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
-import '../assets/css/common.css';
-import '../assets/css/papaya.css';
-import { AcquisitionEquipmentListComponent } from "./acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component";
-import { AcquisitionEquipmentComponent } from "./acquisition-equipments/acquisition-equipment/acquisition-equipment.component";
+
+import {
+    AcquisitionEquipmentListComponent,
+} from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
+import {
+    AcquisitionEquipmentComponent,
+} from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
 import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
-import { AcquisitionEquipmentPipe } from "./acquisition-equipments/shared/acquisition-equipment.pipe";
-import { AcquisitionEquipmentService } from "./acquisition-equipments/shared/acquisition-equipment.service";
+import { AcquisitionEquipmentPipe } from './acquisition-equipments/shared/acquisition-equipment.pipe';
+import { AcquisitionEquipmentService } from './acquisition-equipments/shared/acquisition-equipment.service';
 import { ManufacturerModelPipe } from './acquisition-equipments/shared/manufacturer-model.pipe';
 import { ManufacturerModelService } from './acquisition-equipments/shared/manufacturer-model.service';
 import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
@@ -70,21 +75,21 @@ import { ImportService } from './import/import.service';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { NiftiConverterService } from './niftiConverters/nifti.converter.service';
 import { RoleService } from './roles/role.service';
-import { ConfirmDialogComponent } from "./shared/components/confirm-dialog/confirm-dialog.component";
-import { ConfirmDialogService } from "./shared/components/confirm-dialog/confirm-dialog.service";
+import { CheckboxComponent } from './shared/checkbox/checkbox.component';
+import { ConfirmDialogComponent } from './shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
 import { DropdownMenuComponent } from './shared/components/dropdown-menu/dropdown-menu.component';
 import { MenuItemComponent } from './shared/components/dropdown-menu/menu-item/menu-item.component';
 import { FormFooterComponent } from './shared/components/form-footer/form-footer.component';
 import { LoadingBarComponent } from './shared/components/loading-bar/loading-bar.component';
-import { ModalComponent } from "./shared/components/modal/modal.component";
-//import { ModalService} from './shared/components/modal/modal.service';
+import { ModalComponent } from './shared/components/modal/modal.component';
 import { ModalService } from './shared/components/modals/modal.service';
-import { ModalsComponent } from "./shared/components/modals/modals.component";
+import { ModalsComponent } from './shared/components/modals/modals.component';
 import { PapayaComponent } from './shared/components/papaya/papaya.component';
-import { SubjectStudyListComponent } from "./shared/components/subject-study-list/subject-study-list.component";
+import { SubjectStudyListComponent } from './shared/components/subject-study-list/subject-study-list.component';
 import { PagerComponent } from './shared/components/table/pager/pager.component';
 import { TableSearchComponent } from './shared/components/table/search/search.component';
-import { TableComponent } from "./shared/components/table/table.component";
+import { TableComponent } from './shared/components/table/table.component';
 import { TooltipComponent } from './shared/components/tooltip/tooltip.component';
 import { TreeNodeComponent } from './shared/components/tree/tree-node.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
@@ -92,13 +97,17 @@ import { ConsoleComponent } from './shared/console/console.line.component';
 import { DatepickerComponent } from './shared/date/date.component';
 import { HeaderComponent } from './shared/header/header.component';
 import { HelpMessageComponent } from './shared/help-message/help-message.component';
-import { KeycloakHttpInterceptor } from "./shared/keycloak/keycloak.http.interceptor";
-import { KeycloakService } from "./shared/keycloak/keycloak.service";
+import { KeycloakHttpInterceptor } from './shared/keycloak/keycloak.http.interceptor';
+import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { MsgBoxComponent } from './shared/msg-box/msg-box.component';
 import { MsgBoxService } from './shared/msg-box/msg-box.service';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { AuthNotGuestGuard } from './shared/roles/auth-not-guest-guard';
+import { SelectBoxComponent } from './shared/select/select.component';
+import { SelectOptionComponent } from './shared/select/select.option.component';
+import { GlobalService } from './shared/services/global.service';
+import { ToggleSwitchComponent } from './shared/switch/switch.component';
 import { HandleErrorService } from './shared/utils/handle-error.service';
 import { StudyService } from './studies/shared/study.service';
 import { StudyListComponent } from './studies/study-list/study-list.component';
@@ -110,8 +119,8 @@ import { SubjectService } from './subjects/shared/subject.service';
 import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
 import { SubjectComponent } from './subjects/subject/subject.component';
 import { SubjectTreeComponent } from './subjects/tree/subject-tree.component';
-import { AccountRequestInfoComponent } from "./users/account-request-info/account-request-info.component";
-import { AccountRequestComponent } from "./users/account-request/account-request.component";
+import { AccountRequestInfoComponent } from './users/account-request-info/account-request-info.component';
+import { AccountRequestComponent } from './users/account-request/account-request.component';
 import { AccountEventsService } from './users/account/account-events.service';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserService } from './users/shared/user.service';
@@ -119,6 +128,8 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
+
+//import { ModalService} from './shared/components/modal/modal.service';
 
 @NgModule({
     imports: [
@@ -198,8 +209,12 @@ import { ServiceLocator } from './utils/locator.service';
         FormFooterComponent,
         ModalsComponent,
         BreadcrumbsComponent,
+        SelectBoxComponent,
+        SelectOptionComponent,
         FinishImportComponent,
         UploaderComponent,
+        ToggleSwitchComponent,
+        CheckboxComponent,
         HelpMessageComponent
     ],
     entryComponents: [
@@ -239,6 +254,7 @@ import { ServiceLocator } from './utils/locator.service';
         },
         BreadcrumbsService,
         Router,
+        GlobalService,
         ImportDataService,
         NiftiConverterService
     ],

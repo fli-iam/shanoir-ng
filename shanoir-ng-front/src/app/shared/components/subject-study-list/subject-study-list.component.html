@@ -20,14 +20,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <li>
         <label>List of the {{legend | lowercase}} available</label>
         <span class="right-col">
-            <select id="title" [(ngModel)]="selected" [ngModelOptions]="{standalone: true}">
-                <option disabled [ngValue]="undefined">Please select...</option>
-                <option *ngFor="let object of selectableList" [ngValue]="object" [disabled]="object?.selected">{{object.name}}</option>
-            </select>
-            <button (click)="onAdd()" [disabled]="!selected">
-                <i class="fas fa-plus-square"></i>
-                Add
-            </button>
+            <select-box [(ngModel)]="selected" [ngModelOptions]="{standalone: true}" placeholder="Please select ..." (onAddClick)="onAdd()" [addDisabled]="!selected">
+                <select-option *ngFor="let object of selectableList" [value]="object" [disabled]="object?.selected">{{object.name}}</select-option>
+            </select-box>
         </span>
     </li>
     <li *ngIf="model && model.length > 0">
@@ -51,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
                     </td>
                     <td class="chkbx-col">
-                        <input type="checkbox" [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"/>
+                        <checkbox [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                     </td>
                     <td class="dropdown-col">
                         <select id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">

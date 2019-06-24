@@ -174,6 +174,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     private onCenterAdd(): void {
+        if (!this.selectedCenter) return;
         let studyCenter: StudyCenter = new StudyCenter();
         studyCenter.center = new Center();
         studyCenter.center.id = this.selectedCenter.id;
@@ -182,7 +183,8 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').updateValueAndValidity();
     }
 
-    private onCenterChange(): void {
+    private onCenterChange(center: IdNameObject): void {
+        this.selectedCenter = center;
         if (this.study.monoCenter) {
             this.study.studyCenterList = []
             this.onCenterAdd();

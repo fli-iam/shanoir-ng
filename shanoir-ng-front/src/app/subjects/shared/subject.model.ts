@@ -36,6 +36,11 @@ export class Subject extends Entity {
     subjectStudyList: SubjectStudy[] = [];
 
     service = ServiceLocator.injector.get(SubjectService);
+    
+    // Override
+    public stringify() {
+        return JSON.stringify(new SubjectDTO(this), this.replacer);
+    }
 }
 
 export interface SimpleSubject {
@@ -43,15 +48,7 @@ export interface SimpleSubject {
     name: string;
     identifier: string; 
     subjectStudyList: SubjectStudy[];
-
-    // Override
-    public stringify() {
-        return JSON.stringify(new SubjectDTO(this), this.replacer);
-    }
-
-    service = ServiceLocator.injector.get(SubjectService);
 }
-
 
 export class SubjectDTO {
 

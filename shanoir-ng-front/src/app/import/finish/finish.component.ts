@@ -97,7 +97,12 @@ export class FinishImportComponent {
                 subjectStudyList: [this.context.subject.subjectStudy]
             };
             this.patient.subject = simpleSubject;
-            importJob.patients.push(this.patient);
+            let filteredPatient: PatientDicom = this.patient;
+            filteredPatient.studies = this.patient.studies.map(study => {
+                study.series = study.series.filter(serie => serie.selected);
+                return study;
+            });
+            importJob.patients.push(filteredPatient);
             importJob.workFolder = this.importJob.workFolder;
             importJob.fromDicomZip = true;
             importJob.examinationId = this.context.examination.id;

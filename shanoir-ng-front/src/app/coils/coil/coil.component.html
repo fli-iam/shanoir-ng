@@ -57,9 +57,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{coil.coilType}}
 							</ng-template> 
 								<ng-template ngSwitchDefault>
-								<select id="coilType" required formControlName="coilType" [(ngModel)]="coil.coilType">
-									<option *ngFor="let coilType of coilTypes" [value]="coilType">{{coilType}}</option>
-								</select>
+								<select-box formControlName="coilType" [(ngModel)]="coil.coilType">
+									<select-option *ngFor="let coilType of coilTypes" [value]="coilType">{{coilType}}</select-option>
+								</select-box>
 							</ng-template>
 						</span>
 					</li>
@@ -83,13 +83,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a> 
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="center" formControlName="center" [(ngModel)]="coil.center" (ngModelChange)="updateManufList($event)" [compareWith]="compareEntities">
-									<option *ngFor="let center of centers" [ngValue]="center">{{center?.name}}</option>
-								</select>
-								<button i18n="Coil detail|Create new center label@@coilDetailNewCenter" (click)="openNewCenter()" [disabled]="form.get('center').disabled">
-									<i class="fas fa-plus-square"></i>
-									new center
-								</button>
+								<select-box
+										(onNewClick)="openNewCenter()" 
+										[newDisabled]="form.get('center').disabled"
+										formControlName="center" 
+										[ngModel]="coil.center"  
+										(change)="updateManufList($event)">
+									<select-option *ngFor="let center of centers" [value]="center">{{center?.name}}</select-option>
+								</select-box>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Coil detail|Center required error@@coilDetailCenterRequiredError">Center is required!</label>
 							</ng-template>
 						</span>
@@ -103,13 +104,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel" [compareWith]="compareEntities">
-									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</option>
-								</select>
-								<button i18n="Coil detail|Create new model label@@coilDetailNewManufModel" (click)="openNewManufModel()" [disabled]="form.get('acquiEquipModel').disabled">
-									<i class="fas fa-plus-square"></i>
-									new model
-								</button>
+								<select-box formControlName="acquiEquipModel" [(ngModel)]="coil.manufacturerModel" (onNewClick)="openNewManufModel()" [newDisabled]="form.get('acquiEquipModel').disabled">
+									<select-option *ngFor="let manufacturerModel of manufModels" [value]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</select-option>
+								</select-box>
 								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="Coil detail|Manufacturer model required error@@coilDetailManufModelRequiredError">Acquisition Equipment model is required!</label>
 							</ng-template>
 						</span>
