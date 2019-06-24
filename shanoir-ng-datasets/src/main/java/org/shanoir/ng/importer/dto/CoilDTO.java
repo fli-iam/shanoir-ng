@@ -1,6 +1,20 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.dto;
 
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * DTO for coil.
@@ -9,13 +23,13 @@ import org.shanoir.ng.shared.dto.IdNameDTO;
  */
 public class CoilDTO {
 
-	private IdNameDTO center;
+	private IdName center;
 
 	private CoilType coilType;
 	
 	private Long id;
 
-	private IdNameDTO manufacturerModel;
+	private IdName manufacturerModel;
 
 	private String name;
 
@@ -32,14 +46,14 @@ public class CoilDTO {
 	/**
 	 * @return the center
 	 */
-	public IdNameDTO getCenter() {
+	public IdName getCenter() {
 		return center;
 	}
 
 	/**
 	 * @param center the center to set
 	 */
-	public void setCenter(IdNameDTO center) {
+	public void setCenter(IdName center) {
 		this.center = center;
 	}
 
@@ -76,14 +90,14 @@ public class CoilDTO {
 	/**
 	 * @return the manufacturerModel
 	 */
-	public IdNameDTO getManufacturerModel() {
+	public IdName getManufacturerModel() {
 		return manufacturerModel;
 	}
 
 	/**
 	 * @param manufacturerModel the manufacturerModel to set
 	 */
-	public void setManufacturerModel(IdNameDTO manufacturerModel) {
+	public void setManufacturerModel(IdName manufacturerModel) {
 		this.manufacturerModel = manufacturerModel;
 	}
 

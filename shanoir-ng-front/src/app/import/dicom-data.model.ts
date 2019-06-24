@@ -1,6 +1,19 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+import { SimpleSubject } from "../subjects/shared/subject.model";
 import { Sex } from "../subjects/shared/subject.types";
-import { IdNameObject } from "../shared/models/id-name-object.model";
-import { Subject } from "../subjects/shared/subject.model";
 
 export class ImportJob {
     fromDicomZip: boolean;
@@ -8,15 +21,14 @@ export class ImportJob {
     fromPacs: boolean;
     workFolder: string;
     patients: PatientDicom[];
-    frontExperimentalGroupOfSubjectId: number;
     examinationId: number;
     frontStudyId: number;
-    frontStudyCardId: number;
+    frontAcquisitionEquipmentId: number;
     frontConverterId: number;
 }
 
 export class PatientDicom {
-    subject: Subject;
+    subject: SimpleSubject;
     patientID: string;
     patientName: string;
     patientBirthDate: Date;
@@ -43,6 +55,7 @@ export class SerieDicom {
     numberOfSeriesRelatedInstances: number;
     sopClassUID: string;
     equipment: EquipmentDicom; 
+    institution: InstitutionDicom;
     isCompressed: boolean;
     isSpectroscopy: boolean;
     isEnhancedMR: boolean;
@@ -66,4 +79,9 @@ export class ImageDicom {
     acquisitionNumber: number;
     echoNumbers: number[];
     imageOrientationPatient: number[];
+}
+
+export class InstitutionDicom {
+    institutionName: string;
+    institutionAddress: string;
 }

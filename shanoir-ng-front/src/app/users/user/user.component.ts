@@ -1,9 +1,22 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Location } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IMyDate } from 'mydatepicker';
-
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
@@ -62,7 +75,7 @@ export class UserComponent implements OnInit {
         if (this.mode == 'create') {
             this.user = new User();
         } else {
-            this.userService.getUser(this.id).then((user: User) => {
+            this.userService.get(this.id).then((user: User) => {
                 user.role = this.getRoleById(user.role.id);
                 this.user = user;
                 if (user.extensionRequestDemand) {
@@ -73,12 +86,8 @@ export class UserComponent implements OnInit {
         }
     }
 
-    getOut(user: User = null): void {
-        if (this.closing.observers.length > 0) {
-            this.closing.emit(user);
-        } else {
-            this.location.back();
-        }
+    getOut(): void {
+        this.location.back();
     }
 
     cancelAccountRequest(): void {
@@ -88,7 +97,7 @@ export class UserComponent implements OnInit {
     accept(): void {
         this.submit();
         this.userService.confirmAccountRequest(this.id, this.user)
-            .subscribe((user) => {
+            .then((user) => {
                 this.getOut();
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
@@ -112,8 +121,8 @@ export class UserComponent implements OnInit {
     create(): void {
         this.submit();
         this.userService.create(this.user)
-            .subscribe((user) => {
-                this.getOut(user);
+            .then((user) => {
+                this.getOut();
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
@@ -124,8 +133,8 @@ export class UserComponent implements OnInit {
     accountRequest(): void {
         this.submit();
         this.userService.requestAccount(this.user)
-            .subscribe((res) => {
-                this.getOut(res);
+            .then((res) => {
+                this.getOut();
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
@@ -138,8 +147,8 @@ export class UserComponent implements OnInit {
     update(): void {
         this.submit();
         this.userService.update(this.id, this.user)
-            .subscribe((user) => {
-                this.getOut(user);
+            .then((user) => {
+                this.getOut();
             }, (err: String) => {
                 if (err.indexOf("email should be unique") != -1) {
                     this.isEmailUnique = false;
@@ -148,7 +157,7 @@ export class UserComponent implements OnInit {
     }
 
     submit(): void {
-        this.user = this.userForm.value;
+        // this.user = this.userForm.value;
         this.user.accountRequestInfo = this.accountRequestInfo;
     }
 

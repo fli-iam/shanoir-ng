@@ -1,14 +1,27 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { Subject } from '../../subjects/shared/subject.model';
+import { SimpleSubject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { ImportJob, PatientDicom } from '../dicom-data.model';
+import { ContextData, ImportDataService } from '../import.data-service';
 import { ImportService } from '../import.service';
-import { ImportDataService, ContextData } from '../import.data-service';
 
 @Component({
     selector: 'finish-import',
@@ -77,19 +90,20 @@ export class FinishImportComponent {
         if (true) {
             let importJob = new ImportJob();
             importJob.patients = new Array<PatientDicom>();
-            // this.patient.subject = new IdNameObject(this.context.subject.id, this.context.subject.name);
-            this.patient.subject = Subject.makeSubject(
-                    this.context.subject.id, 
-                    this.context.subject.name, 
-                    this.context.subject.identifier, 
-                    this.context.subject.subjectStudy);
+            let simpleSubject: SimpleSubject = {
+                id: this.context.subject.id,
+                name: this.context.subject.name,
+                identifier: this.context.subject.identifier, 
+                subjectStudyList: [this.context.subject.subjectStudy]
+            };
+            this.patient.subject = simpleSubject;
             importJob.patients.push(this.patient);
             importJob.workFolder = this.importJob.workFolder;
             importJob.fromDicomZip = true;
             importJob.examinationId = this.context.examination.id;
             importJob.frontStudyId = this.context.study.id;
-            importJob.frontStudyCardId = this.context.studycard.id;
-            importJob.frontConverterId = this.context.studycard.niftiConverter.id;
+            importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;
+            importJob.frontConverterId = this.context.niftiConverter.id;
             return this.importService.startImportJob(importJob);
         }
     }

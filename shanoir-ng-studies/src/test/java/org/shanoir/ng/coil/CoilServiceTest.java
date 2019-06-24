@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.coil;
 
 import static org.mockito.BDDMockito.given;
@@ -13,7 +27,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.coil.dto.mapper.CoilMapper;
+import org.shanoir.ng.coil.model.Coil;
+import org.shanoir.ng.coil.repository.CoilRepository;
+import org.shanoir.ng.coil.service.CoilServiceImpl;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -48,13 +66,13 @@ public class CoilServiceTest {
 		given(coilRepository.save(Mockito.any(Coil.class))).willReturn(ModelsUtil.createCoil());
 	}
 
-	@Test(expected=ShanoirStudiesException.class)
-	public void deleteByBadIdTest() throws ShanoirStudiesException {
+	@Test(expected=EntityNotFoundException.class)
+	public void deleteByBadIdTest() throws EntityNotFoundException {
 		coilService.deleteById(2L);
 	}
 	
 	@Test
-	public void deleteByIdTest() throws ShanoirStudiesException {
+	public void deleteByIdTest() throws EntityNotFoundException {
 		coilService.deleteById(COIL_ID);
 
 		Mockito.verify(coilRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -79,26 +97,19 @@ public class CoilServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirStudiesException {
-		coilService.save(createCoil());
+	public void saveTest() {
+		coilService.create(createCoil());
 
 		Mockito.verify(coilRepository, Mockito.times(1)).save(Mockito.any(Coil.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirStudiesException {
-		final Coil updatedCoil = coilService.update(createCoil());
+	public void updateTest() throws EntityNotFoundException {
+		final Coil coil = createCoil();
+		final Coil updatedCoil = coilService.update(coil);
 		Assert.assertNotNull(updatedCoil);
-		Assert.assertTrue(UPDATED_COIL_NAME.equals(updatedCoil.getName()));
+		Assert.assertTrue(UPDATED_COIL_NAME.equals(coil.getName()));
 
-		Mockito.verify(coilRepository, Mockito.times(1)).save(Mockito.any(Coil.class));
-	}
-
-	@Test
-	public void updateFromShanoirOldTest() throws ShanoirStudiesException {
-		coilService.updateFromShanoirOld(createCoil());
-
-		Mockito.verify(coilRepository, Mockito.times(1)).findOne(Mockito.anyLong());
 		Mockito.verify(coilRepository, Mockito.times(1)).save(Mockito.any(Coil.class));
 	}
 

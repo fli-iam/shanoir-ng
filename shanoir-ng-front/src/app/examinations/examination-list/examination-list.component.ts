@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Component, ViewChild } from '@angular/core';
 
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
@@ -13,8 +27,6 @@ import { ExaminationService } from '../shared/examination.service';
 })
 export class ExaminationListComponent extends EntityListComponent<Examination>{
 
-    private createAcqEquip = false;
-    private nbExaminations: number = 0;
     @ViewChild('table') table: TableComponent;
 
     constructor(
@@ -48,12 +60,12 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
             },
             {
                 headerName: "Research study", field: "studyName", type: "link", 
-                action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.studyId])
+                action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.study.id])
             },
             { headerName: "Examination executive", field: "" },
             {
                 headerName: "Center", field: "centerName", type: "link", 
-                action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.centerId])
+                action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.center.id])
             }
         ];
         return colDef;       

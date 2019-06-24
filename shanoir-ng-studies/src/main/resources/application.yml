@@ -1,3 +1,15 @@
+# Shanoir NG - Import, manage and share neuroimaging data
+# Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+# Contact us on https://project.inria.fr/shanoir/
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
 ######################################
 # Default profile is production      #
 ######################################
@@ -39,16 +51,18 @@ spring:
   rabbitmq:
     host: rabbitmq
     port: 5672
+    username: guest
+    password: guest
   session:
     store-type: none
 front.server:
-  address: http://shanoir-ng-nginx/shanoir-ng/
-  url: http://shanoir-ng-nginx
+  address: https://shanoir-ng-nginx/shanoir-ng/
+  url: https://shanoir-ng-nginx
 ##### Keycloak #####
 keycloak:
   # attention: this config for the token issuer needs to match the domain of the frontend
   # used for token creation AND the server url needs to be known from inside the docker network:
-  auth-server-url: http://shanoir-ng-nginx/auth
+  auth-server-url: https://shanoir-ng-nginx/auth
   cors: true
   realm: shanoir-ng
   resource: shanoir-ng-studies
@@ -73,6 +87,7 @@ ms.url:
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
   level:
+    org.shanoir: WARN
     org.springframework.web: ERROR
     org.hibernate: ERROR
 
@@ -96,6 +111,24 @@ spring:
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
   level:
+    org.shanoir: DEBUG
     org.springframework.web: DEBUG
     org.hibernate: ERROR
     org.springframework.amqp: OFF
+    
+    
+---
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:h2:mem:SHANOIR_NG_STUDY;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    initialize: true
+    data: classpath:/scripts/test-data-h2.sql
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create-drop

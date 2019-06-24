@@ -1,21 +1,29 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.anonymization.anonymization;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
@@ -27,48 +35,41 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Anonymization serviceImpl.
+ * Anonymization serviceImpl. mkain: bug fixing done for multi-threading errors,
+ * e.g. when used by server.
  * 
  * @author ifakhfakh
+ * @author mkain
  * 
  */
 public class AnonymizationServiceImpl implements AnonymizationService {
 
-	/**
-	 * Logger
-	 */
 	private static final Logger LOG = LoggerFactory.getLogger(AnonymizationServiceImpl.class);
 
 	private static final String ANONYMIZATION_FILE_PATH = "anonymization.xlsx";
 	private static final String xTagsColumn = "0xTag";
-	private final String privateTags = "0xggggeeee";
-	private final String curveDataTags = "0x50xxxxxx";
-	private final String overlayCommentsTags = "0x60xx4000";
-	private final String overlayDataTags = "0x60xx3000";
+	private static final String privateTags = "0xggggeeee";
+	private static final String curveDataTags = "0x50xxxxxx";
+	private static final String overlayCommentsTags = "0x60xx4000";
+	private static final String overlayDataTags = "0x60xx3000";
+
 	private Map<String, String> anonymizationMAP;
 	private List<String> tagsToKeep = new ArrayList< String>();
-
-
-	private String patientBirthDate;
-
-	private String mediaStorageSOPInstanceUID;
-
-	Map<String, String> seriesInstanceUIDs = new HashMap<String, String>();
-
-	Map<String, String> studyInstanceUIDs = new HashMap<String, String>();
-
-	Map<String, String> studyIds = new HashMap<String, String>();
 
 	public void anonymize(ArrayList<File> dicomFiles, String profile) {
 		anonymizationMAP = AnonymizationRulesSingleton.getInstance().getAnonymizationMAP();
 		tagsToKeep = AnonymizationRulesSingleton.getInstance().getTagsToKeep();
+		// init here for multi-threading reasons
+		Map<String, String> seriesInstanceUIDs = new HashMap<String, String>();
+		Map<String, String> studyInstanceUIDs = new HashMap<String, String>();
+		Map<String, String> studyIds = new HashMap<String, String>();
 		final int totalAmount = dicomFiles.size();
 		LOG.debug("anonymize : totalAmount=" + totalAmount);
 		int current = 0;
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
-			performAnonymization(file, profile, false, "", "");
+			performAnonymization(file, profile, false, "", "", seriesInstanceUIDs, studyInstanceUIDs, studyIds);
 			current++;
 			final int currentPercent = (int) (current * 100 / totalAmount);
 			LOG.debug("anonymize : anonymization current percent= " + currentPercent + " %");
@@ -83,21 +84,24 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) {
 		this.anonymizationMAP = AnonymizationRulesSingleton.getInstance().getAnonymizationMAP();
 		this.tagsToKeep = AnonymizationRulesSingleton.getInstance().getTagsToKeep();
+		// init here for multi-threading reasons
+		Map<String, String> seriesInstanceUIDs = new HashMap<String, String>();
+		Map<String, String> studyInstanceUIDs = new HashMap<String, String>();
+		Map<String, String> studyIds = new HashMap<String, String>();
 		final int totalAmount = dicomFiles.size();
 		LOG.debug("anonymize : totalAmount=" + totalAmount);
 		int current = 0;
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
-			performAnonymization(file, profile, true, patientName, patientID);
+			performAnonymization(file, profile, true, patientName, patientID, seriesInstanceUIDs, studyInstanceUIDs, studyIds);
 			current++;
 			final int currentPercent = (int) (current * 100 / totalAmount);
 			LOG.debug("anonymize : anonymization current percent= " + currentPercent + " %");
-
 		}
 	}
 
-	private void anonymizePatientMetaData(Attributes attributes, String patientName, String patientID) {
+	private void anonymizePatientMetaData(Attributes attributes, String patientName, String patientID, String patientBirthDate) {
 		anonymizeTagAccordingToVR(attributes, Tag.PatientName, patientName);
 		anonymizeTagAccordingToVR(attributes, Tag.PatientID, patientID);
 		// patient birth date
@@ -116,7 +120,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 *            anonymization profile
 	 */
 	public void performAnonymization(final File dicomFile, String profile, boolean isShanoirAnonymization,
-			String patientName, String patientID) {
+			String patientName, String patientID, Map<String, String> seriesInstanceUIDs, Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) {
 		DicomInputStream din = null;
 		DicomOutputStream dos = null;
 		try {
@@ -130,23 +134,18 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 					anonymizeTag(tagInt, basicProfile, metaInformationAttributes);
 				}
 			}
-
 			// read the other tags
 			Attributes datasetAttributes = din.readDataset(-1, -1);
-			
-			// save the patient birth date if isShanoirAnonymization
-			if (isShanoirAnonymization)
-				patientBirthDate = datasetAttributes.getString(Tag.PatientBirthDate);
+			// save the patient birth date for isShanoirAnonymization
+			String patientBirthDate = datasetAttributes.getString(Tag.PatientBirthDate);
 
 			// anonymize DICOM files according to selected profile
 			for (int tagInt : datasetAttributes.tags()) {
 				String tagString = String.format("0x%08X", Integer.valueOf(tagInt));
-
 				String gggg = tagString.substring(2, 6);
 				Integer intgggg = Integer.decode("0x" + gggg);
 				if (intgggg % 2 == 1) {
 					final String basicProfile = anonymizationMAP.get(privateTags);
-					
 					if(!this.tagsToKeep.contains(tagString)) {
 						anonymizeTag(tagInt, basicProfile, datasetAttributes);
 					}
@@ -154,13 +153,12 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 					if (tagInt == Tag.SOPInstanceUID) {
 						anonymizeSOPInstanceUID(tagInt, datasetAttributes);
 					} else if (tagInt == Tag.SeriesInstanceUID) {
-						anonymizeSeriesInstanceUID(tagInt, datasetAttributes);
+						anonymizeSeriesInstanceUID(tagInt, datasetAttributes, seriesInstanceUIDs);
 					} else if (tagInt == Tag.StudyInstanceUID) {
-						anonymizeStudyInstanceUID(tagInt, datasetAttributes);
+						anonymizeStudyInstanceUID(tagInt, datasetAttributes, studyInstanceUIDs);
 					} else if (tagInt == Tag.StudyID) {
-						anonymizeStudyId(tagInt, datasetAttributes);
+						anonymizeStudyId(tagInt, datasetAttributes, studyIds);
 					}
-
 					else {
 						final String basicProfile = anonymizationMAP.get(tagString);
 						anonymizeTag(tagInt, basicProfile, datasetAttributes);
@@ -180,7 +178,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			}
 			// Special anonymization of patient data if isShanoirAnonymization
 			if (isShanoirAnonymization) {
-				anonymizePatientMetaData(datasetAttributes, patientName, patientID);
+				anonymizePatientMetaData(datasetAttributes, patientName, patientID, patientBirthDate);
 			}
 			LOG.debug("finish anonymization: begin storage");
 			dos = new DicomOutputStream(dicomFile);
@@ -197,127 +195,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 					dos.close();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOG.error(e.getMessage(), e);
 			}
 		}
-
 	}
-//	
-//	/**
-//	 * Read the excel document containing the list of private tags to keep 
-//	 * 
-//	 * @param profile
-//	 * @return
-//	 */
-//	public List<String> readPrivateTagToKeepInAnonymizationFile() {
-//		List<String> tagsToKeep = new ArrayList< String>();
-//
-//
-//		try {
-//			ClassLoader classLoader = getClass().getClassLoader();
-//			InputStream in = classLoader.getResourceAsStream(ANONYMIZATION_FILE_PATH);
-//
-//			XSSFWorkbook myWorkBook = new XSSFWorkbook(in);
-//
-//			// Return first sheet from the XLSX workbook
-//			XSSFSheet mySheet = myWorkBook.getSheetAt(1);
-//
-//			// Get iterator to all the rows in current sheet
-//			Iterator<Row> rowIterator = mySheet.iterator();
-//
-//			// Traversing over each row of XLSX file
-//			while (rowIterator.hasNext()) {
-//				Row row = rowIterator.next();
-//				Cell cell = row.getCell(0);
-//				tagsToKeep.add(cell.getStringCellValue());
-//			}
-//		} catch (IOException e) {
-//			LOG.error("Unable to read anonymization file: " + e);
-//		}
-//		return tagsToKeep;
-//	}
-
-//	/**
-//	 * Read the excel document containing the list of tags to anonymize
-//	 * 
-//	 * @param profile
-//	 * @return
-//	 */
-//	public Map<String, String> readAnonymizationFile(final String profile) {
-//		Map<String, String> anonymizationMAP = new HashMap<String, String>();
-//		List<String> tagsToKeep = new ArrayList< String>();
-//		Integer xtagColumn = null;
-//		Integer profileColumn = null;
-//
-//		try {
-//			ClassLoader classLoader = getClass().getClassLoader();
-//			InputStream in = classLoader.getResourceAsStream(ANONYMIZATION_FILE_PATH);
-//
-//			XSSFWorkbook myWorkBook = new XSSFWorkbook(in);
-//
-//			// Return first sheet from the XLSX workbook
-//			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
-//
-//			// Get iterator to all the rows in current sheet
-//			Iterator<Row> rowIterator = mySheet.iterator();
-//
-//			// Traversing over each row of XLSX file
-//			while (rowIterator.hasNext()) {
-//				Row row = rowIterator.next();
-//				int rowNumber = row.getRowNum();
-//				if (rowNumber == 0) {
-//					Iterator<Cell> cellIterator = row.cellIterator();
-//					while (cellIterator.hasNext() && (xtagColumn == null || profileColumn == null)) {
-//
-//						Cell cell = cellIterator.next();
-//
-//						if (cell.getStringCellValue().equals(xTagsColumn)) {
-//							xtagColumn = cell.getColumnIndex();
-//							LOG.debug("Tags column : " + xtagColumn);
-//						} else if (cell.getStringCellValue().equals(profile)) {
-//							profileColumn = cell.getColumnIndex();
-//						}
-//
-//					}
-//
-//				}
-//				if (xtagColumn != null && profileColumn != null) {
-//					Cell xtagCell = row.getCell(xtagColumn);
-//					if (xtagCell != null) {
-//						String tagString = xtagCell.getStringCellValue();
-//						if (tagString != null && tagString.length() != 0 && !tagString.equals("0xTag")) {
-//							Cell basicProfileCell = row.getCell(profileColumn);
-//							LOG.debug("The basic profile of tag " + tagString + " = "
-//									+ basicProfileCell.getStringCellValue());
-//							anonymizationMAP.put(tagString, basicProfileCell.getStringCellValue());
-//						}
-//					}
-//				} else {
-//					LOG.error("Unable to read anonymization tags or/and anonymization profile ");
-//				}
-//			}
-//			
-//			// Return second sheet from the XLSX workbook
-//			XSSFSheet mySheet2 = myWorkBook.getSheetAt(1);
-//
-//			// Get iterator to all the rows in current sheet
-//			Iterator<Row> rowIterator2 = mySheet2.iterator();
-//
-//			// Traversing over each row of XLSX file
-//			while (rowIterator2.hasNext()) {
-//				Row row = rowIterator2.next();
-//				Cell cell = row.getCell(0);
-//				tagsToKeep.add(cell.getStringCellValue());
-//			}
-//			this.tagsToKeep = tagsToKeep;
-//			
-//		} catch (IOException e) {
-//			LOG.error("Unable to read anonymization file: " + e);
-//		}
-//
-//		return anonymizationMAP;
-//	}
 
 	/**
 	 * Tag Anonymization
@@ -342,6 +223,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	private void anonymizeSOPInstanceUID(int tagInt, Attributes attributes) {
 		String value;
+		String mediaStorageSOPInstanceUID = attributes.getString(Tag.MediaStorageSOPInstanceUID);
 		if (mediaStorageSOPInstanceUID != null) {
 			value = mediaStorageSOPInstanceUID;
 		} else {
@@ -357,7 +239,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}
 
-	private void anonymizeSeriesInstanceUID(int tagInt, Attributes attributes) {
+	private void anonymizeSeriesInstanceUID(int tagInt, Attributes attributes, Map<String, String> seriesInstanceUIDs) {
 		String value;
 		if (seriesInstanceUIDs != null && seriesInstanceUIDs.size() != 0
 				&& seriesInstanceUIDs.get(attributes.getString(tagInt)) != null) {
@@ -376,7 +258,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}
 
-	private void anonymizeStudyInstanceUID(int tagInt, Attributes attributes) {
+	private void anonymizeStudyInstanceUID(int tagInt, Attributes attributes, Map<String, String> studyInstanceUIDs) {
 		String value;
 		if (studyInstanceUIDs != null && studyInstanceUIDs.size() != 0
 				&& studyInstanceUIDs.get(attributes.getString(tagInt)) != null) {
@@ -395,7 +277,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		anonymizeTagAccordingToVR(attributes, tagInt, value);
 	}
 
-	private void anonymizeStudyId(int tagInt, Attributes attributes) {
+	private void anonymizeStudyId(int tagInt, Attributes attributes, Map<String, String> studyIds) {
 		String value;
 		if (studyIds != null && studyIds.size() != 0 && studyIds.get(attributes.getString(tagInt)) != null) {
 			value = studyIds.get(attributes.getString(tagInt));
@@ -441,8 +323,6 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				} catch (UIDException e) {
 					LOG.error(e.getMessage());
 				}
-				if (tag == Tag.MediaStorageSOPInstanceUID)
-					mediaStorageSOPInstanceUID = newUID;
 				result = newUID;
 			} else if (basicProfie.equals("K")) {
 				result = "KEEP";

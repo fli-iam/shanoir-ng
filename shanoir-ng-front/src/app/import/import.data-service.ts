@@ -1,17 +1,36 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Injectable } from '@angular/core';
-import { ImportJob, PatientDicom } from './dicom-data.model';
-import { Study } from '../studies/shared/study.model';
-import { StudyCard } from '../study-cards/shared/study-card.model';
-import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject-study.model';
+import { AcquisitionEquipment } from '../acquisition-equipments/shared/acquisition-equipment.model';
+import { Center } from '../centers/shared/center.model';
 import { SubjectExamination } from '../examinations/shared/subject-examination.model';
+import { NiftiConverter } from '../niftiConverters/nifti.converter.model';
+import { Study } from '../studies/shared/study.model';
+import { SubjectWithSubjectStudy } from '../subjects/shared/subject.with.subject-study.model';
+import { ImportJob, PatientDicom } from './dicom-data.model';
 
 export class ContextData {
-    constructor(
+    
+    constructor (
         public study: Study,
-        public studycard: StudyCard,
+        public center: Center,
+        public acquisitionEquipment: AcquisitionEquipment,
         public subject: SubjectWithSubjectStudy,
-        public examination: SubjectExamination
-    ) {};
+        public examination: SubjectExamination,
+        public niftiConverter: NiftiConverter
+    ) {}
 }
 
 @Injectable()

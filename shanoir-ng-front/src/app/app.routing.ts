@@ -1,30 +1,42 @@
-import { ModuleWithProviders } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
 
-import { AccountRequestComponent } from './users/account-request/account-request.component';
-import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
+import { ModuleWithProviders } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
-import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
-import { AuthNotGuestGuard } from './shared/roles/auth-not-guest-guard';
-import { CenterComponent } from './centers/center/center.component';
-import { CenterListComponent } from './centers/center-list/center-list.component';
-import { ExaminationComponent } from './examinations/examination/examination.component';
-import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
-import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
-import { HomeComponent } from './home/home.component';
-import { ImportComponent } from './import/import.component';
-import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
+import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
-import { StudyComponent } from './studies/study/study.component';
-import { StudyListComponent } from './studies/study-list/study-list.component';
-import { StudyTreeComponent } from './studies/tree/study-tree.component';
-import { UserComponent } from './users/user/user.component';
-import { UserListComponent } from './users/user-list/user-list.component';
-import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
+import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
+import { CenterListComponent } from './centers/center-list/center-list.component';
+import { CenterComponent } from './centers/center/center.component';
 import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
+import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
+import { ExaminationComponent } from './examinations/examination/examination.component';
+import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
+import { HomeComponent } from './home/home.component';
+import { ImportComponent } from './import/import.component';
+import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
+import { AuthNotGuestGuard } from './shared/roles/auth-not-guest-guard';
+import { StudyListComponent } from './studies/study-list/study-list.component';
+import { StudyComponent } from './studies/study/study.component';
 import { SubjectListComponent } from './subjects/subject-list/subject-list.component';
 import { SubjectComponent } from './subjects/subject/subject.component';
+import { AccountRequestComponent } from './users/account-request/account-request.component';
+import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
+import { UserListComponent } from './users/user-list/user-list.component';
+import { UserComponent } from './users/user/user.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';

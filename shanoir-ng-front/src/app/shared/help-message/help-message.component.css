@@ -1,0 +1,10 @@
+.root { 
+    display: block; 
+    margin: 0 15px;     
+    background-color: var(--color-b-light);
+    padding: 5px 10px;
+    border-radius: 2px;
+}
+strong { color: var(--color-a); }
+svg { color: var(--color-b); font-size: 16px; vertical-align: -2; margin-right: 7px; }
+code { color: var(--color-a); margin: 5px 0 0 0; display: block;}

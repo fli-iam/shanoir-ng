@@ -1,8 +1,22 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { LocationStrategy } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { Event, NavigationEnd, NavigationStart, Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { Event, NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
-
 import { Entity } from '../shared/components/entity/entity.abstract';
 
 @Injectable()
@@ -18,7 +32,8 @@ export class BreadcrumbsService {
 
     constructor(
             private router: Router, 
-            private locationStrategy: LocationStrategy) {
+            private locationStrategy: LocationStrategy,
+            private titleService: Title) {
                 
         locationStrategy.onPopState((event: PopStateEvent) => {
             /* detect back & forward browser events and find the target step using its timestamp */
@@ -43,6 +58,7 @@ export class BreadcrumbsService {
                     this.steps.push(new Step(this.nextLabel, this.router.url, timestamp));
                     this.currentStepIndex = this.steps.length - 1;
                     locationStrategy.replaceState(timestamp, 'todo', this.router.url, '');
+                    titleService.setTitle('Shanoir' + (this.nextLabel ? ' - ' + this.nextLabel : ''));
                 }
                 if (this.nextMilestone) this.processMilestone();
                 this.nextMilestone = false;
@@ -108,6 +124,14 @@ export class BreadcrumbsService {
         return this.previousStep.isWaitingFor(this.currentStep);
     }
 
+    public isImporting(): boolean {
+        for (let i=this.currentStepIndex; i>=0; i--) {
+            if (this.steps[i].importStart) return true;
+            else if (this.steps[i].milestone) return false;
+        }
+        return false;
+    }
+
 }
 
 export class Step {
@@ -150,6 +174,7 @@ export class Step {
     public milestone: boolean = false;
     public entity: Entity;
     public data: any = {};
+    public importStart: boolean = false;
 
     private onSave(): Subject<Entity> {
         this.subscribers++;

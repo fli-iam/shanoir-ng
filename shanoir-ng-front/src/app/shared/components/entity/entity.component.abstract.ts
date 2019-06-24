@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Location } from '@angular/common';
 import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
@@ -143,6 +157,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                         let fieldControl: AbstractControl = this.form.get(managedField);
                         if (!fieldControl) throw new Error(managedField + 'is not a field managed by this form. Check the arguments of registerOnSubmitValidator().');
                         fieldControl.updateValueAndValidity({emitEvent : false});
+                        if (!fieldControl.valid) fieldControl.markAsTouched();
                     }
                     this.footerState.valid = this.form.status == 'VALID';
                 } else throw reason;
@@ -160,7 +175,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         return (control: AbstractControl): ValidationErrors | null => {
             if (this.saveError && this.saveError.hasFieldError(errorFieldName ? errorFieldName : controlFieldName, constraintName, control.value)
                     //&& this.form.get(controlFieldName).pristine
-            ) {       
+            ) {
                 let ret = {};
                 ret[constraintName] = true;
                 return ret;
@@ -228,7 +243,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
-        if (event.key == 'œ') {
+        if (event.key == 'a') {
             console.log('form', this.form);
             console.log('entity', this.entity);
         }

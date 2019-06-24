@@ -1,3 +1,15 @@
+# Shanoir NG - Import, manage and share neuroimaging data
+# Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+# Contact us on https://project.inria.fr/shanoir/
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
 ######################################
 # Default profile is production      #
 ######################################
@@ -38,8 +50,11 @@ spring:
       WRITE_DATES_AS_TIMESTAMPS: false
   jooq:
     sql-dialect: Mysql
-#  rabbitmq:
-#    host: rabbitmq
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
   session:
     store-type: none
 front.server:
@@ -70,10 +85,11 @@ ms.url:
 datasets-data: /var/datasets-data
 # logging configuration
 logging:
-  file: /var/log/shanoir-ng-logs/shanoir-ng-dataset.log
+  file: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
+    org.shanoir: WARN
         
   
 ### ============================================================= ###
@@ -105,3 +121,19 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
+    
+---
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:h2:mem:SHANOIR_NG_DATASET;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    initialize: true
+    data: classpath:/scripts/test-data-h2.sql
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate)
+      ddl-auto: create-drop

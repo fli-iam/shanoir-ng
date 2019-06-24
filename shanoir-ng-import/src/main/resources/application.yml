@@ -1,3 +1,15 @@
+# Shanoir NG - Import, manage and share neuroimaging data
+# Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+# Contact us on https://project.inria.fr/shanoir/
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
 ######################################
 # Default profile is production      #
 ######################################
@@ -39,6 +51,8 @@ spring:
   rabbitmq:
     host: rabbitmq
     port: 5672
+    username: guest
+    password: guest
   session:
     store-type: none
   http:
@@ -76,11 +90,28 @@ logging:
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
+    org.shanoir: DEBUG
 # Shanoir configurations
 shanoir:
   import:
-    upload:
-      folder: /tmp
+    directory: /tmp
+    # Import from PACS configuration
+    pacs:
+      query:
+        aet.calling:
+          name: SHANOIR-SCU
+          host: import
+          port: 11115
+        aet.called:
+          name: DCM4CHEE
+          host: dcm4chee-arc
+          port: 11112
+      store:
+        aet.called:
+          name: SHANOIR-SCP
+          host: import
+          port: 44105
+        folder: /tmp/shanoir-dcmrcv
     # In a dicom file. Format "tag==value;" If it is not needed to separate image files into separated folders for a dicom serie.
     series:
       # this long name has been kept, as Elise and Isabelle know it like this; to find it for further adaptions in later time

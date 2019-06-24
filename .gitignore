@@ -16,3 +16,6 @@ shanoir-ng-nginx/webapp
 shanoir-ng-resource-server.log
 target
 **/.classpath
+.factorypath
+.project
+bin/

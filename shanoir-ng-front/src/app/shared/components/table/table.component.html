@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <!-- Control bar -->
 <caption class="controls">
     <span *ngIf="selectionAllowed" class="select-ctrl">
@@ -66,12 +80,12 @@
 
         <!-- editable text / number -->
         <span *ngIf="editMode && col.editable && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
-            <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);" />
+            <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
         </span>
 
         <!-- editable text / number with dropdown -->
         <span *ngIf="editMode && col.editable && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
-            <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);">
+            <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
                 <option *ngFor="let possibleValue of col.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
             </select>
         </span>
@@ -84,7 +98,7 @@
 
         <!-- editable boolean -->
         <span *ngIf="isFieldBoolean(col) && editMode && col.editable">
-            <input type="checkbox" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="setFieldRawValue(item, col['field'], $event); rowEdit.emit(item);" /> 
+            <input type="checkbox" [ngModel]="getCellValue(item, col)" (ngModelChange)="onFieldEdit(item, col, $event)" /> 
         </span>
 
         <!-- add a link -->

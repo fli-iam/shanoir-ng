@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.shared.common;
 
 import static org.mockito.BDDMockito.given;
@@ -10,9 +24,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.center.CenterRepository;
-import org.shanoir.ng.study.StudyRepository;
-import org.shanoir.ng.subject.SubjectRepository;
+import org.shanoir.ng.center.repository.CenterRepository;
+import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 

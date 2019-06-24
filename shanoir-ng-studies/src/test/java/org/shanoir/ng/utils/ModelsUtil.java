@@ -1,19 +1,35 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
-import org.shanoir.ng.acquisitionequipment.AcquisitionEquipment;
-import org.shanoir.ng.center.Center;
-import org.shanoir.ng.coil.Coil;
-import org.shanoir.ng.coil.CoilType;
-import org.shanoir.ng.manufacturermodel.DatasetModalityType;
-import org.shanoir.ng.manufacturermodel.Manufacturer;
-import org.shanoir.ng.manufacturermodel.ManufacturerModel;
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.coil.model.Coil;
+import org.shanoir.ng.coil.model.CoilType;
+import org.shanoir.ng.manufacturermodel.model.DatasetModalityType;
+import org.shanoir.ng.manufacturermodel.model.Manufacturer;
+import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.common.CommonIdsDTO;
-import org.shanoir.ng.study.Study;
-import org.shanoir.ng.studyuser.StudyUser;
-import org.shanoir.ng.studyuser.StudyUserType;
-import org.shanoir.ng.subject.Subject;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.studycenter.StudyCenter;
+import org.shanoir.ng.subject.model.Subject;
 
 /**
  * Utility class for test. Generates models.
@@ -138,6 +154,9 @@ public final class ModelsUtil {
 		final Study study = new Study();
 		study.setName(STUDY_NAME);
 		study.setStudyCenterList(new ArrayList<>());
+		StudyCenter sc = new StudyCenter();
+		sc.setStudy(study); sc.setCenter(createCenter()); sc.setId(1L);
+		study.getStudyCenterList().add(sc);
 		study.setStudyUserList(new ArrayList<>());
 		return study;
 	}
@@ -149,8 +168,8 @@ public final class ModelsUtil {
 	 */
 	public static StudyUser createStudyUser() {
 		final StudyUser studyUser = new StudyUser();
-		studyUser.setStudyId(STUDY_ID);
-		studyUser.setStudyUserType(StudyUserType.RESPONSIBLE);
+		studyUser.setStudy(createStudy());
+		studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_ADMINISTRATE));
 		studyUser.setUserId(USER_ID);
 		return studyUser;
 	}

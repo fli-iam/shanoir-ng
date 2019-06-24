@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dataset;
 
 import java.text.ParseException;
@@ -8,8 +22,13 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.shared.dto.IdNameDTO;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -38,7 +57,7 @@ public class DatasetMapperTest {
 
 	@Test
 	public void datasetsToIdNameDTOsTest() throws ParseException {
-		final List<IdNameDTO> datasetDTOs = datasetMapper.datasetsToIdNameDTOs(Arrays.asList(createDataset()));
+		final List<IdName> datasetDTOs = datasetMapper.datasetsToIdNameDTOs(Arrays.asList(createDataset()));
 		Assert.assertNotNull(datasetDTOs);
 		Assert.assertTrue(datasetDTOs.size() == 1);
 		Assert.assertTrue(DATASET_ID.equals(datasetDTOs.get(0).getId()));
@@ -54,7 +73,7 @@ public class DatasetMapperTest {
 
 	@Test
 	public void datasetToIdNameDTOTest() throws ParseException {
-		final IdNameDTO datasetDTO = datasetMapper.datasetToIdNameDTO(createDataset());
+		final IdName datasetDTO = datasetMapper.datasetToIdNameDTO(createDataset());
 		Assert.assertNotNull(datasetDTO);
 		Assert.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
 		Assert.assertTrue(DATASET_NAME.equals(datasetDTO.getName()));
@@ -64,7 +83,7 @@ public class DatasetMapperTest {
 	public void datasetWithoutNameToIdNameDTOTest() throws ParseException {
 		final Dataset dataset = createDataset();
 		dataset.getOriginMetadata().setName(null);
-		final IdNameDTO datasetDTO = datasetMapper.datasetToIdNameDTO(dataset);
+		final IdName datasetDTO = datasetMapper.datasetToIdNameDTO(dataset);
 		Assert.assertNotNull(datasetDTO);
 		Assert.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
 		Assert.assertTrue(DATASET_GENERATED_NAME.equals(datasetDTO.getName()));

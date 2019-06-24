@@ -1,14 +1,23 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.utils;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import org.shanoir.ng.shared.model.AbstractGenericItem;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * Utility class
@@ -41,26 +50,45 @@ public class Utils {
 			return o2 == null;
 		if (o2 == null)
 			return o1 == null;
-		if (o1 instanceof AbstractGenericItem && o2 instanceof AbstractGenericItem) {
-			return ((AbstractGenericItem) o1).getId().equals(((AbstractGenericItem) o2).getId());
+		if (o1 instanceof AbstractEntity && o2 instanceof AbstractEntity) {
+			return ((AbstractEntity) o1).getId().equals(((AbstractEntity) o2).getId());
 		}
 		return o1.equals(o2) || o2.equals(o1);
 		// o1.equals(o2) is not equivalent to o2.equals(o1) ! For instance with
 		// java.sql.Timestamp and java.util.Date
 	}
 	
-	public static LocalDate DateToLocalDate(Date date)  {
-		return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalDate();
+	public static <T> List<T> copyList(List<T> list) {
+    	List<T> copy = new ArrayList<T>();
+    	for (T item : list) copy.add(item);
+    	return copy;
+    }
+
+	
+	public static void removeIdsFromList(Iterable<Long> ids, List<? extends AbstractEntity> list) {
+		for (Long id : ids) {
+			int deletedIndex = -1;
+			int i = 0;
+			for (AbstractEntity entity : list) {
+				if (id.equals(entity.getId())) {
+					deletedIndex = i;
+					break;
+				}
+				i++;
+			}
+			if (deletedIndex > -1) list.remove(deletedIndex);
+		}
 	}
 	
-	public static LocalDate StringToLocalDate(String yyyyMMdd) {
-		if (yyyyMMdd != null && !yyyyMMdd.isEmpty()) {
-			final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
-			LocalDate localDate = LocalDate.parse(yyyyMMdd, dtf);
-			return localDate;
-		} else {
-			return null;
-		}
 	
+	public static boolean haveOneInCommon(final Iterable<String> roles, final Iterable<String> authorities) {
+		for (final String role : roles) {
+			for (final String authority : authorities) {
+				if (role != null && role.equals(authority)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

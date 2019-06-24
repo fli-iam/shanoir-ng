@@ -1,12 +1,26 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Pipe, PipeTransform } from "@angular/core";
 
 import { SubjectStudy } from "./subject-study.model";
-import { IdNameObject } from "../../shared/models/id-name-object.model";
+import { IdName } from "../../shared/models/id-name.model";
 
 @Pipe({ name: "studyNamePipe" })
 export class StudyNamePipe implements PipeTransform {
 
-    transform(subjectStudy: SubjectStudy, studies: IdNameObject[]) {
+    transform(subjectStudy: SubjectStudy, studies: IdName[]) {
         if (subjectStudy && studies) {
             for (let study of studies) {
                 if(subjectStudy.study.id == study.id)
