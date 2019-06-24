@@ -26,9 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<keycloak.version>3.1.0.Final</keycloak.version>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<keycloak.version>4.6.0.Final</keycloak.version>
 	</properties>
 
 	<dependencies>
