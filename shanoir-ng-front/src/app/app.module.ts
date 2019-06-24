@@ -128,6 +128,9 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
+import { NotificationsComponent } from './shared/notifications/notifications.component';
+import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
+import { TaskService } from './async-tasks/task.service';
 
 //import { ModalService} from './shared/components/modal/modal.service';
 
@@ -213,6 +216,9 @@ import { ServiceLocator } from './utils/locator.service';
         SelectOptionComponent,
         FinishImportComponent,
         UploaderComponent,
+        HelpMessageComponent,
+        NotificationsComponent,
+        AsyncTasksComponent
         ToggleSwitchComponent,
         CheckboxComponent,
         HelpMessageComponent
@@ -256,7 +262,8 @@ import { ServiceLocator } from './utils/locator.service';
         Router,
         GlobalService,
         ImportDataService,
-        NiftiConverterService
+        NiftiConverterService,
+        TaskService
     ],
     bootstrap: [AppComponent],
 })

@@ -12,26 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input } from '@angular/core';
+import { Entity } from '../shared/components/entity/entity.abstract';
+import { ServiceLocator } from '../utils/locator.service';
+import { TaskService } from './task.service';
 
+export class Task extends Entity {
 
-@Component({
-    selector: 'progress-bar',
-    templateUrl: 'loading-bar.component.html',
-    styleUrls: ['loading-bar.component.css']
-})
+    id: number;
+    label: string;
+    startDate: Date;
+    endDate: Date;
+    progress: number;
 
-export class LoadingBarComponent {
-
-    @Input() progress: number = 0;
-    private width: number = 200;
-
-    getProgressText(): string {
-        return Math.round(this.progress * 100) + "%";
-    }
-
-    onResized(event) {
-        console.log(event);
-    }
-
-} 
+    service = ServiceLocator.injector.get(TaskService);
+}

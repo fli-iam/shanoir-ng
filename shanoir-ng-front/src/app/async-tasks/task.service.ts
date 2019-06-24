@@ -12,26 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input } from '@angular/core';
+import { Injectable } from '@angular/core';
 
+import { EntityService } from '../shared/components/entity/entity.abstract.service';
+import * as AppUtils from '../utils/app.utils';
+import { Task } from './task.model';
 
-@Component({
-    selector: 'progress-bar',
-    templateUrl: 'loading-bar.component.html',
-    styleUrls: ['loading-bar.component.css']
-})
+@Injectable()
+export class TaskService extends EntityService<Task> {
 
-export class LoadingBarComponent {
+    API_URL = AppUtils.BACKEND_API_TASKS_URL;
 
-    @Input() progress: number = 0;
-    private width: number = 200;
+    getEntityInstance() { return new Task(); }
 
-    getProgressText(): string {
-        return Math.round(this.progress * 100) + "%";
-    }
-
-    onResized(event) {
-        console.log(event);
-    }
-
-} 
+}
