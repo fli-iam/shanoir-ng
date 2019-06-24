@@ -20,11 +20,12 @@ import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { IdName } from '../../shared/models/id-name.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
+import { Center } from 'src/app/centers/shared/center.model';
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -34,7 +35,7 @@ import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {
 
     private manufModels: ManufacturerModel[];
-    private centers: IdNameObject[];
+    private centers: IdName[];
     private datasetModalityTypeEnumValue: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
@@ -132,6 +133,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     save(): Promise<void> {
         this.lastSubmittedManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
         return super.save();
+    }
+
+    private viewCenter(center: Center) {
+        this.router.navigate(['center/details/' + center.id]);
     }
 }
 

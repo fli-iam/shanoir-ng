@@ -30,9 +30,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{getSubjectName(dataset.subjectId)}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<select [(ngModel)]="dataset.subjectId" formControlName="subject" >
-						<option *ngFor="let subject of subjects" [value]="subject.id">{{subject.name}}</option>
-					</select>
+					<select-box [(ngModel)]="dataset.subjectId" formControlName="subject" >
+						<select-option *ngFor="let subject of subjects" [value]="subject.id">{{subject.name}}</select-option>
+					</select-box>
 				</ng-template>
 			</span>
 		</li>
@@ -41,9 +41,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{getStudyName(dataset.studyId)}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<select [(ngModel)]="dataset.studyId" formControlName="study">
-						<option *ngFor="let study of studies" [value]="study.id">{{study.name}}</option>
-					</select>
+					<select-box [(ngModel)]="dataset.studyId" formControlName="study">
+						<select-option *ngFor="let study of studies" [value]="study.id">{{study.name}}</select-option>
+					</select-box>
 				</ng-template>
 			</span>
 		</li>

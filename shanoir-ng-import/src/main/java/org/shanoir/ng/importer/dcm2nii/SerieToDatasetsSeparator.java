@@ -15,7 +15,6 @@
 package org.shanoir.ng.importer.dcm2nii;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 import org.shanoir.ng.importer.model.EchoTime;

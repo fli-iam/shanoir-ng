@@ -51,6 +51,8 @@ spring:
   rabbitmq:
     host: rabbitmq
     port: 5672
+    username: guest
+    password: guest
   session:
     store-type: none
   http:
@@ -88,6 +90,7 @@ logging:
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
+    org.shanoir: DEBUG
 # Shanoir configurations
 shanoir:
   import:

@@ -1,0 +1,16 @@
+<div class="root" [class.disabled]="disabled">
+    <span class="frame">
+        <span [class.hidden]="!this.selectedOption" #label class="label" (click)="open = !disabled && !open"></span>
+        <span *ngIf="options.length > 0 && !this.selectedOption" class="label placeholder" (click)="open = !disabled && !open">{{placeholder ? placeholder : 'Select an option...'}}</span>
+        <span *ngIf="options.length == 0" class="label empty">Empty list</span>
+        <span class="commands">
+            <span class="open button" (click)="open = !open"><i class="fas fa-chevron-down"></i></span>
+            <span *ngIf="onViewClick.observers.length > 0 && !viewHidden" (click)="clickView()" [class.disabled]="viewDisabled || !ngModel" class="button"><i class="fas fa-eye"></i></span>
+            <span *ngIf="onNewClick.observers.length > 0 && !newHidden" (click)="clickNew()" [class.disabled]="newDisabled" class="button"><i class="far fa-file"></i></span>
+            <span *ngIf="onAddClick.observers.length > 0 && !addwHidden" (click)="clickAdd()" [class.disabled]="addDisabled" class="button"><i class="fas fa-plus"></i></span>
+        </span>
+    </span>
+    <div *ngIf="open" [class.hidden-list]="hideToComputeHeight" class="list" [class.down]="way=='down'" [class.up]="way=='up'">
+        <ng-content></ng-content>
+    </div>
+</div>

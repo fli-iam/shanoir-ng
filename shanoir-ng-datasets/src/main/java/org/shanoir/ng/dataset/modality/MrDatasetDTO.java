@@ -15,7 +15,8 @@
 package org.shanoir.ng.dataset.modality;
 
 import java.util.List;
-import org.shanoir.ng.dataset.DatasetDTO;
+
+import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.FlipAngle;
 import org.shanoir.ng.shared.model.InversionTime;

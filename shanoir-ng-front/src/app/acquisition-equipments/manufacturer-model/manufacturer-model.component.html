@@ -42,13 +42,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select id="name" required formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer" [compareWith]="compareEntities">
-									<option *ngFor="let manufacturer of manufs" [ngValue]="manufacturer">{{manufacturer.name}}</option>
-								</select>
-								<button i18n="ManufModel detail|Create manuf label@@manufModelDetailCreateManuf" (click)="openNewManuf()">
-									<i class="fas fa-plus-square"></i>
-									new manufacturer
-								</button>
+								<select-box formControlName="manufacturer" [(ngModel)]="manufModel.manufacturer" (onNewClick)="openNewManuf()">
+									<select-option *ngFor="let manufacturer of manufs" [value]="manufacturer">{{manufacturer.name}}</select-option>
+								</select-box>
 							</ng-template>
 						</span>
 					</li>

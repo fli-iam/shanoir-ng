@@ -20,7 +20,7 @@ import { CenterService } from '../../centers/shared/center.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { DatepickerComponent } from '../../shared/date/date.component';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { IdName } from '../../shared/models/id-name.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Examination } from '../shared/examination.model';
@@ -28,16 +28,15 @@ import { ExaminationService } from '../shared/examination.service';
 
 @Component({
     selector: 'examination',
-    templateUrl: 'examination.component.html',
-    styleUrls: ['examination.component.css'],
+    templateUrl: 'examination.component.html'
 })
 
 export class ExaminationComponent extends EntityComponent<Examination> {
 
     @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
-    private centers: IdNameObject[];
-    public studies: IdNameObject[];
+    private centers: IdName[];
+    public studies: IdName[];
     private subjects: SubjectWithSubjectStudy[];
     private examinationExecutives: Object[];
     private inImport: boolean; 

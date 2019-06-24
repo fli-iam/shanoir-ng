@@ -10,14 +10,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM debian:jessie
+FROM debian:stretch
 
 RUN set -ex && \
-    echo 'deb http://deb.debian.org/debian jessie-backports main' \
-      > /etc/apt/sources.list.d/jessie-backports.list && \
+    echo 'deb http://deb.debian.org/debian stretch-backports main' \
+      > /etc/apt/sources.list.d/stretch-backports.list && \
     apt update -y && \
     apt install -t \
-      jessie-backports \
+      stretch-backports \
       openjdk-8-jre-headless \
       ca-certificates-java -y
 

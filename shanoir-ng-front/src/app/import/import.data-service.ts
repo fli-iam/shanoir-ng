@@ -25,7 +25,7 @@ export class ContextData {
     
     constructor (
         public study: Study,
-        public center: Center,
+        public center: Center, 
         public acquisitionEquipment: AcquisitionEquipment,
         public subject: SubjectWithSubjectStudy,
         public examination: SubjectExamination,

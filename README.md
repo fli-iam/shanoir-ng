@@ -10,6 +10,12 @@ Shanoir NG is copyrighted by [Inria](https://www.inria.fr/) and is now open sour
 
 GitHub is a tool for developers if you are seeking information at a user level view please visit http://shanoir.org.
 
+# :warning: Disclaimers :warning:
+
+* Shanoir NG is still in the developement phase. While many functionalities work well, some are not developed yet and some might be unstable. Also It still misses production features like database backup.
+
+* A few .env files in the docker-compose layer contain clear Keycloak password. Please choose your own password (check Keycloak password format policy first).
+
 # About Shanoir NG's architecture
 
 * Shanoir-NG is based on a microservice architecture, that heavily uses Docker.

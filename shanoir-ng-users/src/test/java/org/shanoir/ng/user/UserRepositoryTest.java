@@ -28,6 +28,8 @@ import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -77,14 +79,6 @@ public class UserRepositoryTest {
 			nbUsers++;
 		}
 		assertThat(nbUsers).isEqualTo(7);
-	}
-	
-	@Test
-	public void findByTest() throws Exception {
-		List<User> usersDb = repository.findBy("email", USER_TEST_1_EMAIL);
-		assertNotNull(usersDb);
-		assertThat(usersDb.size()).isEqualTo(1);
-		assertThat(usersDb.get(0).getUsername()).isEqualTo(USER_TEST_1_USERNAME);
 	}
 	
 	@Test
@@ -138,5 +132,5 @@ public class UserRepositoryTest {
 		assertTrue(userDb.isPresent());
 		assertThat(userDb.get().getId()).isEqualTo(USER_TEST_1_ID);
 	}
-	
+
 }
