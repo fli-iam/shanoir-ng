@@ -49,7 +49,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [attr.title]="col.tip != undefined ? col.tip : col.headerName"
         [style.width]="col.width"
         >
-            <span class="triangle" *ngIf="lastSortedCol?.field==col.field && !col.suppressSorting && col.type!='button'">
+            <span class="triangle" [class.down]="lastSortedAsc" [class.up]="!lastSortedAsc" *ngIf="lastSortedCol?.field==col.field && !col.suppressSorting && col.type!='button'">
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none">
                     <polygon *ngIf="lastSortedAsc" points="0,0 100,0 50,100" />
                     <polygon *ngIf="!lastSortedAsc" points="0,100 100,100 50,0" />
@@ -76,7 +76,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         >
         
         <!-- default display -->
-        <span *ngIf="col.type != 'progress' && (!editMode || !col.editable)">{{renderCell(item, col)}}</span>
+        <span *ngIf="!editMode || !col.editable">{{renderCell(item, col)}}</span>
 
         <!-- editable text / number -->
         <span *ngIf="editMode && col.editable && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
@@ -114,11 +114,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <img *ngIf="col.img" src="{{col.img}}" />
                 <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
             </span>
-        </span>
-
-        <!-- display a progress bar -->
-        <span class="progress" *ngIf="col.type == 'progress'">
-            <progress-bar [progress]="getCellValue(item, col)"></progress-bar>
         </span>
     </td>
 </tr>

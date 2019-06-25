@@ -23,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label class="required-label">Select an existing research study</label> 
             <span class="right-col">
-                <select-box [ngModel]="study" (change)="onSelectStudy($event)" (onViewClick)="showStudyDetails()" [viewDisabled]="!study">
+                <select-box [(ngModel)]="study" (change)="onSelectStudy()" (onViewClick)="showStudyDetails()" [viewDisabled]="!study">
                     <select-option *ngFor="let study of studies" [value]="study"
                         [class.compatible]="study?.compatible" [class.not-compatible]="!study?.compatible">{{study?.name}}</select-option>
                 </select-box>
@@ -32,7 +32,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label class="required-label">Select a center</label> 
             <span class="right-col">
-                <select-box [disabled]="!study || !centers" [ngModel]="center" (change)="onSelectCenter($event)" 
+                <select-box [disabled]="!study || !centers" [(ngModel)]="center" (change)="onSelectCenter()" 
                         (onViewClick)="showCenterDetails()" [viewDisabled]="!center"
                         (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters">
                     <select-option *ngFor="let center of centers" [value]="center"
@@ -53,7 +53,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label class="required-label">Select an acquisition equipment</label> 
             <span class="right-col">
-                <select-box [disabled]="!center || !acquisitionEquipments" [ngModel]="acquisitionEquipment" (change)="onSelectAcquisitonEquipment($event)"
+                <select-box [disabled]="!center || !acquisitionEquipments" [(ngModel)]="acquisitionEquipment" (change)="onSelectAcquisitonEquipment()"
                         (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
                         (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments">
                     <select-option *ngFor="let acquisitionEquipment of acquisitionEquipments" [value]="acquisitionEquipment" 
@@ -82,7 +82,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
-                <select-box [disabled]="!study || !acquisitionEquipment" [ngModel]="subject" (change)="onSelectSubject($event)" 
+                <select-box [disabled]="!study || !acquisitionEquipment" [(ngModel)]="subject" (change)="onSelectSubject()" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
                         (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment">
                     <select-option *ngFor="let subject of subjects" [value]="subject">{{subject?.name}}</select-option>
@@ -134,7 +134,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select-box [disabled]="!study || !subject" [ngModel]="examination" (change)="onSelectExamination($event)"
+                <select-box [disabled]="!study || !subject" [(ngModel)]="examination" (change)="onSelectExam()"
                         (onViewClick)="showExaminationDetails()" [viewDisabled]="!examination"
                         (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject">
                     <select-option *ngFor="let examination of examinations" [value]="examination">{{examination | subjectExaminationLabel}}</select-option>
@@ -148,7 +148,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="required">
             <label label class="required-label">Select a Nifti converter</label> 
             <span class="right-col">
-                <select-box [disabled]="!examination" [ngModel]="niftiConverter" (change)="onSelectNifti($event)">
+                <select-box [disabled]="!examination" [(ngModel)]="niftiConverter" (change)="onSelectNifti()">
                     <select-option *ngFor="let niftiConverter of niftiConverters" [value]="niftiConverter">{{niftiConverter?.name}}</select-option>
                 </select-box>
             </span>
