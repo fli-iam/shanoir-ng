@@ -28,6 +28,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,11 @@ public class DatasetApiControllerTest {
 	private MrDatasetMapper mrDatasetMapperMock;
 	
 	@MockBean
+	private ExaminationService examinationService;
+	
+	@MockBean
 	private WADODownloaderService downloader;
+
 
 	@Before
 	public void setup() throws ShanoirException {

@@ -143,7 +143,7 @@ public class ImporterApiController implements ImporterApi {
 			ImportJob importJob = new ImportJob();
 			importJob.setFromDicomZip(true);
 			// Work folder is always relative to general import directory and userId (not shown to outside world)
-			importJob.setWorkFolder(File.separator + importJobDir.getName());
+			importJob.setWorkFolder(File.separator + importJobDir.getAbsolutePath());
 			importJob.setPatients(patients);
 			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException e) {

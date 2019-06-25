@@ -16,6 +16,7 @@ package org.shanoir.ng.dataset.service;
 
 import java.util.List;
 
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -91,6 +92,10 @@ public class DatasetServiceImpl implements DatasetService {
 		datasetDb.setStudyId(dataset.getStudyId());
 		datasetDb.setSubjectId(dataset.getSubjectId());
 		datasetDb.setUpdatedMetadata(dataset.getUpdatedMetadata());
+		if (dataset instanceof MrDataset) {
+			MrDataset mrDataset = (MrDataset) dataset;
+			((MrDataset) datasetDb).setUpdatedMrMetadata(mrDataset.getUpdatedMrMetadata());
+		}
 		return datasetDb;
 	}
 

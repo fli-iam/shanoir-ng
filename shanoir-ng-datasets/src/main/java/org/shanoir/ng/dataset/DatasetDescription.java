@@ -11,16 +11,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+package org.shanoir.ng.dataset;
 
-package org.shanoir.ng.importer.strategies.datasetexpression;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
-import org.shanoir.ng.importer.dto.Serie;
-
-public interface DatasetExpressionStrategy {
+/**
+ * @author yyao
+ *
+ */
+public class DatasetDescription {
 	
-	DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat);
+	@JsonProperty("Name")
+	private String name;
+	
+	@JsonProperty("BIDSVersion")
+	private String BIDSVersion = "1.1.2-dev";
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	
 
 }

@@ -20,6 +20,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 
+
 @Component({
     selector: 'dataset-detail',
     templateUrl: 'dataset.component.html',
@@ -104,5 +105,4 @@ export class DatasetComponent extends EntityComponent<Dataset> {
             this.papayaParams = params;
         });
     }
-
 }

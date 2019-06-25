@@ -13,6 +13,7 @@
  */
 
 import { Dataset } from "../../shared/dataset.model";
+import { allOfEnum } from '../../../utils/app.utils';
 
 declare type MrQualityProcedureType = 'MAGNETIC_FIELD_QUALITY_DATASET_LONG_ECHO_TIME' | 'MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME';
 
@@ -22,6 +23,8 @@ export class MrDataset extends Dataset {
     inversionTime: InversionTime[];
     repetitionTime: RepetitionTime[];
     mrQualityProcedureType: MrQualityProcedureType;
+    originMrMetadata: MrDatasetMetadata;
+    updatedMrMetadata: MrDatasetMetadata = new MrDatasetMetadata();
 }
 
 export class EchoTime {
@@ -43,4 +46,62 @@ export class InversionTime {
 export class RepetitionTime {
     id: number;
     repetitionTimeValue: number;
+}
+
+export class MrDatasetMetadata {
+    mrDatasetNature: MrDatasetNature;
+}
+
+export enum MrDatasetNature {
+
+    T1_WEIGHTED_MR_DATASET = "T1_WEIGHTED_MR_DATASET",
+    T2_WEIGHTED_MR_DATASET = 'T2_WEIGHTED_MR_DATASET',
+    T2_STAR_WEIGHTED_MR_DATASET = 'T2_STAR_WEIGHTED_MR_DATASET',
+    PROTON_DENSITY_WEIGHTED_MR_DATASET = 'PROTON_DENSITY_WEIGHTED_MR_DATASET',
+    DIFFUSION_WEIGHTED_MR_DATASET = 'DIFFUSION_WEIGHTED_MR_DATASET',
+    VELOCITY_ENCODED_ANGIO_MR_DATASET = 'VELOCITY_ENCODED_ANGIO_MR_DATASET',
+    TIME_OF_FLIGHT_MR_DATASET = 'TIME_OF_FLIGHT_MR_DATASET',
+    CONTRAST_AGENT_USED_ANGIO_MR_DATASET = 'CONTRAST_AGENT_USED_ANGIO_MR_DATASET',
+    SPIN_TAGGING_PERFUSION_MR_DATASET = 'SPIN_TAGGING_PERFUSION_MR_DATASET',
+    T1_WEIGHTED_DCE_MR_DATASET = 'T1_WEIGHTED_DCE_MR_DATASET',
+    T2_WEIGHTED_DCE_MR_DATASET = 'T2_WEIGHTED_DCE_MR_DATASET',
+    T2_STAR_WEIGHTED_DCE_MR_DATASET = 'T2_STAR_WEIGHTED_DCE_MR_DATASET',
+    FIELD_MAP_DATASET_SHORT_ECHO_TIME = 'FIELD_MAP_DATASET_SHORT_ECHO_TIME',
+    FIELD_MAP_DATASET_LONG_ECHO_TIME = 'FIELD_MAP_DATASET_LONG_ECHO_TIME',
+    H1_SINGLE_VOXEL_SPECTROSCOPY_DATASET = 'H1_SINGLE_VOXEL_SPECTROSCOPY_DATASET',
+    H1_SPECTROSCOPIC_IMAGING_DATASET = 'H1_SPECTROSCOPIC_IMAGING_DATASET'
+
+} export namespace MrDatasetNature {
+    
+    const allMrDatasetNatures: any[] = [
+        { value: MrDatasetNature.T1_WEIGHTED_MR_DATASET, label: "T1WeightedMRDataset" },
+        { value: MrDatasetNature.T2_WEIGHTED_MR_DATASET, label: "T2WeightedMRDataset" },
+        { value: MrDatasetNature.T2_STAR_WEIGHTED_MR_DATASET, label: "T2StarWeightedMRDataset" },
+        { value: MrDatasetNature.PROTON_DENSITY_WEIGHTED_MR_DATASET, label: "ProtonDensityWeightedMRDataset" },
+        { value: MrDatasetNature.DIFFUSION_WEIGHTED_MR_DATASET, label: "DiffusionWeightedMRDataset" },
+        { value: MrDatasetNature.VELOCITY_ENCODED_ANGIO_MR_DATASET, label: "VelocityEncodedAngioMRDataset" },
+        { value: MrDatasetNature.TIME_OF_FLIGHT_MR_DATASET, label: "TimeOfFlightMRDataset" },
+        { value: MrDatasetNature.CONTRAST_AGENT_USED_ANGIO_MR_DATASET, label: "ContrastAgentUsedAngioMRDataset" },
+        { value: MrDatasetNature.SPIN_TAGGING_PERFUSION_MR_DATASET, label: "SpinTaggingPerfusionMRDataset" },
+        { value: MrDatasetNature.T1_WEIGHTED_DCE_MR_DATASET, label: "T1WeightedDCEMRDataset" },
+        { value: MrDatasetNature.T2_WEIGHTED_DCE_MR_DATASET, label: "T2WeightedDCEMRDataset" },
+        { value: MrDatasetNature.T2_STAR_WEIGHTED_DCE_MR_DATASET, label: "T2StarWeightedDCEMRDataset" },
+        { value: MrDatasetNature.FIELD_MAP_DATASET_SHORT_ECHO_TIME, label: "FieldMapDatasetShortEchoTime" },
+        { value: MrDatasetNature.FIELD_MAP_DATASET_LONG_ECHO_TIME, label: "FieldMapDatasetLongEchoTime" },
+        { value: MrDatasetNature.H1_SINGLE_VOXEL_SPECTROSCOPY_DATASET, label: "H1SinglevoxelSpectroscopyDataset" },
+        { value: MrDatasetNature.H1_SPECTROSCOPIC_IMAGING_DATASET, label: "H1SpectroscopicImagingDataset" }
+    ];
+    
+    export function all(): Array<MrDatasetNature> {
+        return allOfEnum<MrDatasetNature>(MrDatasetNature);
+    }
+
+    export function getLabel(nature: MrDatasetNature) {
+        let founded = allMrDatasetNatures.find(entry => entry.value == nature);
+        return founded ? founded.label : undefined;
+    }
+
+    export function getValueLabelJsonArray() {
+        return allMrDatasetNatures;
+    }
 }

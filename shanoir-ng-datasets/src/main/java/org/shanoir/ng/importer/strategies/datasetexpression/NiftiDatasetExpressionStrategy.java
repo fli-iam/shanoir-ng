@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 
@@ -29,12 +28,22 @@ import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.processing.DatasetProcessingType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy {
 
+	private static final String SUB_PREFIX = "sub-";
+	
+	private static final String SES_PREFIX = "ses-";
+	
+	private static final String ANAT = "anat";
+	
+	/** Logger. */
+	private static final Logger LOG = LoggerFactory.getLogger(NiftiDatasetExpressionStrategy.class);
 	
 	@Value("${datasets-data}")
 	private String niftiStorageDir;
@@ -59,33 +68,34 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 		
 		if (expressionFormat != null & expressionFormat.getType().equals("nii")) {
 
+			final String subLabel = SUB_PREFIX + importJob.getPatients().get(0).getSubject().getName();
+			// TODO BIDS: Remove ses level if only one examination, add ses level if new examination imported for the same subject
+			final String sesLabel = SES_PREFIX + importJob.getExaminationId();
+			// TODO BIDS: Get data type (anat, func, dwi, fmap, meg and beh) from MrDatasetNature and/or ExploredEntity
+			final String dataTypeLabel = ANAT + "/";
+			
+			final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + dataTypeLabel + File.separator);
+			outDir.mkdirs();
+			
 			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
-
-				String originalNiftiName  = datasetFile.getPath().substring(datasetFile.getPath().lastIndexOf('/') + 1);
-
-				String storagePath = niftiStorageDir+"/"+importJob.getPatients().get(0).getPatientID()+"/"+importJob.getExaminationId()+"/MR/";
-				File outDir = new File(storagePath);
-				outDir.mkdirs();
 				
-				
-				
-				Path NiftiFinalLocation = null;
+				File srcFile = new File(datasetFile.getPath().replace("file:" , ""));
+				String originalNiftiName = srcFile.getAbsolutePath().substring(datasetFile.getPath().lastIndexOf('/') + 1);
+				File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
+				Path niftiFinalLocation = null;
 				try {
-					NiftiFinalLocation = Files.copy(Paths.get(datasetFile.getPath().replace("file:","")), Paths.get(storagePath+originalNiftiName), StandardCopyOption.REPLACE_EXISTING);
+					niftiFinalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOG.error("IOException generating nifti Dataset Expression", e);
 				}
 
 				DatasetFile niftiDatasetFile = new DatasetFile();
 				niftiDatasetFile.setPacs(false);
-				niftiDatasetFile.setPath(NiftiFinalLocation.toUri().toString().replaceAll(" ", "%20"));
+				niftiDatasetFile.setPath(niftiFinalLocation.toUri().toString());
 				niftiDatasetExpression.getDatasetFiles().add(niftiDatasetFile);
 				niftiDatasetFile.setDatasetExpression(niftiDatasetExpression);
-
 			}
 		}
-		
 		
 		
 //		final DatasetExpression datasetExpressionNifti = createDatasetExpression(mrDataset, datasetExpressionToPacs,

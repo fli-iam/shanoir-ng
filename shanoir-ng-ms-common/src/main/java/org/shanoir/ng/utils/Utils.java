@@ -14,10 +14,13 @@
 
 package org.shanoir.ng.utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class
@@ -25,6 +28,8 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
  * @author jlouis
  */
 public class Utils {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
 	/**
 	 * Convert Iterable to List
@@ -58,6 +63,34 @@ public class Utils {
 		// java.sql.Timestamp and java.util.Date
 	}
 	
+
+	/**
+	 * Deletes all files and subdirectories under dir. Returns true if all
+	 * deletions were successful. If a deletion fails, the method stops
+	 * attempting to delete and returns false.
+	 *
+	 * @param tempFolder the temp folder
+	 *
+	 * @return true, if delete folder
+	 */
+	public static boolean deleteFolder(final File tempFolder) {
+		if (tempFolder.isDirectory()) {
+			String[] children = tempFolder.list();
+
+			for (int i = 0; i < children.length; i++) {
+				boolean success = deleteFolder(new File(tempFolder, children[i]));
+
+				if (!success) {
+					LOG.error("deleteFolder : the removing of " + tempFolder.getAbsolutePath() + " failed");
+					return false;
+				}
+			}
+		}
+
+		// The directory is now empty so delete it
+		return tempFolder.delete();
+	}
+		
 	public static <T> List<T> copyList(List<T> list) {
     	List<T> copy = new ArrayList<T>();
     	for (T item : list) copy.add(item);

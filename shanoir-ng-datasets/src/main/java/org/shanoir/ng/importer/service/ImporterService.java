@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.importer.service;
 
+import java.io.File;
+
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.model.Examination;
@@ -22,6 +24,9 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
+import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -29,6 +34,10 @@ import org.springframework.stereotype.Service;
 @Service
 @Scope("prototype")
 public class ImporterService {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ImporterService.class);
+	
+	private static final String UPLOAD_EXTENSION = ".upload";
 		
 	@Autowired
 	private ExaminationService examinationService;
@@ -89,6 +98,26 @@ public class ImporterService {
 					}
 				}
 			}
+		}
+	}
+	
+	public void cleanTempFiles(String workFolder) {
+		
+		if (workFolder != null) {
+			// delete workFolder.upload file
+			File uploadZipFile = new File(workFolder.concat(UPLOAD_EXTENSION));
+			uploadZipFile.delete();
+			// delete workFolder
+			final boolean success = Utils.deleteFolder((new File(workFolder)));
+			if (!success) {
+				if (new File(workFolder).exists()) {
+					LOG.error("cleanTempFiles: " + workFolder + " could not be deleted" );
+				} else {
+					LOG.error("cleanTempFiles: " + workFolder + " does not exist" );
+				}
+			}
+		} else {
+			LOG.error("cleanTempFiles: workFolder is null");
 		}
 	}
 

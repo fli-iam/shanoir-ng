@@ -66,7 +66,7 @@ public class MrDataset extends Dataset {
 	private Integer mrQualityProcedureType;
 
 	/** Origin metadata. */
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	private MrDatasetMetadata originMrMetadata;
 
 	/** Repetition time. */
@@ -74,7 +74,7 @@ public class MrDataset extends Dataset {
 	private List<RepetitionTime> repetitionTime;
 
 	/** Metadata updated by study card. */
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	private MrDatasetMetadata updatedMrMetadata;
 	
 	/** Store temporarily the first image acquisition time until all images are processed*/
