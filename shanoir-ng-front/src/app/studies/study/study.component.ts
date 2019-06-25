@@ -183,7 +183,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').updateValueAndValidity();
     }
 
-    private onCenterChange(center: IdNameObject): void {
+    private onCenterChange(center: IdName): void {
         this.selectedCenter = center;
         if (this.study.monoCenter) {
             this.study.studyCenterList = []

@@ -218,7 +218,7 @@ import { TaskService } from './async-tasks/task.service';
         UploaderComponent,
         HelpMessageComponent,
         NotificationsComponent,
-        AsyncTasksComponent
+        AsyncTasksComponent,
         ToggleSwitchComponent,
         CheckboxComponent,
         HelpMessageComponent
