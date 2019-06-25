@@ -119,6 +119,20 @@
           }
         },
         {
+          "name": "canImportFromPACS",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "false",
+            "user.attribute": "canImportFromPACS",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "canImportFromPACS",
+            "jsonType.label": "boolean"
+          }
+        },
+        {
           "name": "role list",
           "protocol": "saml",
           "protocolMapper": "saml-role-list-mapper",

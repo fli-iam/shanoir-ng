@@ -12,12 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewContainerRef } from '@angular/core';
+import { Component, ElementRef, ViewContainerRef } from '@angular/core';
 
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { ModalService } from './shared/components/modals/modal.service';
 import { KeycloakService } from './shared/keycloak/keycloak.service';
+import { GlobalService } from './shared/services/global.service';
 import { ServiceLocator } from './utils/locator.service';
+
 
 @Component({
     selector: 'shanoir-ng-app',
@@ -29,7 +31,9 @@ export class AppComponent {
     constructor(
             public viewContainerRef: ViewContainerRef,
             private modalService: ModalService,
-            private breadcrumbsService: BreadcrumbsService) {
+            private breadcrumbsService: BreadcrumbsService,
+            private globalService: GlobalService,
+            private element: ElementRef) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
@@ -45,6 +49,10 @@ export class AppComponent {
         //     if (storedBC.savedStep)
         //         this.breadcrumbsService.savedStep = Step.parse(storedBC.savedStep);
         // }
+    }
+
+    ngOnInit() {
+        this.globalService.registerGlobalClick(this.element);
     }
 
     isAuthenticated(): boolean {

@@ -30,5 +30,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<name>shanoir-ng-ms-common</name>
 	<description>Common project for Shanoir NG microservices</description>
+	
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
 
 </project>

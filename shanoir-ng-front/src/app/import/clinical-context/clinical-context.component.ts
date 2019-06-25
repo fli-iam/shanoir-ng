@@ -11,9 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
@@ -24,8 +24,7 @@ import { SubjectExamination } from '../../examinations/shared/subject-examinatio
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { slideDown } from '../../shared/animations/animations';
-import { Entity } from '../../shared/components/entity/entity.abstract';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { IdName } from '../../shared/models/id-name.model';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
@@ -33,16 +32,17 @@ import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-catego
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { EquipmentDicom, PatientDicom } from '../dicom-data.model';
-import { ContextData, ImportDataService } from '../import.data-service';
+import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
+import { ContextData, ImportDataService } from '../shared/import.data-service';
+
 
 @Component({
     selector: 'clinical-context',
     templateUrl: 'clinical-context.component.html',
-    styleUrls: ['clinical-context.component.css', '../import.step.css'],
+    styleUrls: ['clinical-context.component.css', '../shared/import.step.css'],
     animations: [slideDown]
 })
-export class ClinicalContextComponent{
+export class ClinicalContextComponent {
     
     patient: PatientDicom;
     private studies: Study[] = [];
@@ -57,6 +57,7 @@ export class ClinicalContextComponent{
     private subject: SubjectWithSubjectStudy;
     private examination: SubjectExamination;
     private niftiConverter: NiftiConverter;
+    private importMode: "DICOM" | "PACS";
     
     constructor(
             private studyService: StudyService,
@@ -71,9 +72,15 @@ export class ClinicalContextComponent{
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
-        breadcrumbsService.nameStep('3. Context');
-        this.setPatient(importDataService.patients[0]);
-        this.reloadSavedData();
+        breadcrumbsService.nameStep('3. Context'); 
+
+        if (this.importDataService.patientList.fromDicomZip) {
+            this.importMode = 'DICOM';
+        } else if (this.importDataService.patientList.fromPacs) {
+            this.importMode = 'PACS';
+        }
+        
+        this.setPatient(this.importDataService.patients[0]).then(() => this.reloadSavedData());
     }
 
     private reloadSavedData() {
@@ -111,49 +118,59 @@ export class ClinicalContextComponent{
         }
     }
 
-    setPatient(patient: PatientDicom) {
+    setPatient(patient: PatientDicom): Promise<void> {
         this.patient = patient;
-        this.completeStudies(this.patient.studies[0].series[0].equipment)
+        return this.completeStudiesAndCompatibilities(this.patient.studies[0].series[0].equipment)
             /* For the moment, we import only zip files with the same equipment, 
             That's why the calculation is only based on the equipment of the first series of the first study */
             .then(() => {
                 let hasOneCompatible: boolean = this.studies.filter(study => study.compatible).length == 1;
                 if (hasOneCompatible) {
                     this.study = this.studies.filter(study => study.compatible)[0];
-                    this.onSelectStudy();
+                    this.onSelectStudy(); 
                 }
             })
     }
 
-    private async completeStudies(equipment: EquipmentDicom): Promise<void> {
+    private completeStudiesAndCompatibilities(equipment: EquipmentDicom): Promise<void> {
         let completeStudyPromises: Promise<void>[] = [];
-        completeStudyPromises.push(Promise.all([this.studyService.findStudiesForImport(), this.centerService.getAll()])
+        completeStudyPromises.push(Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
                 for (let study of allStudies) {
-                    for (let studyCenter of study.studyCenterList) {
-                        let center = allCenters.find(center => center.id === studyCenter.center.id);
-                        if (center) {
-                            let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
-                                && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
-                                && acqEqt.manufacturerModel.manufacturer.name === equipment.manufacturer);
-                            for (let compatibleAcqEqt of compatibleAcqEqts) {
-                                compatibleAcqEqt.compatible = true;
-                                center.compatible = true;
-                                study.compatible = true;
-                            }
-                            studyCenter.center = center;
+                    if (study.studyCenterList) {
+                        for (let studyCenter of study.studyCenterList) {
+                            let center = allCenters.find(center => center.id === studyCenter.center.id);
+                            if (center) {
+                                if (this.importMode == 'DICOM') {
+                                    /* calculate compatibilites only if import from dicom zip */
+                                    let compatibleAcqEqts = center.acquisitionEquipments.filter(acqEqt => acqEqt.serialNumber === equipment.deviceSerialNumber
+                                        && acqEqt.manufacturerModel.name === equipment.manufacturerModelName
+                                        && acqEqt.manufacturerModel.manufacturer.name === equipment.manufacturer);
+                                    for (let compatibleAcqEqt of compatibleAcqEqts) {
+                                        compatibleAcqEqt.compatible = true;
+                                        center.compatible = true;
+                                        study.compatible = true;
+                                    }
+                                } else if (this.importMode == 'PACS') {
+                                    center.acquisitionEquipments.forEach(acqEqt => acqEqt.compatible = true);
+                                    center.compatible = true;
+                                    study.compatible = true;
+                                }
+                                studyCenter.center = center;
+                            } 
                         }
-                    } 
-                    this.studies.push(study);
+                        this.studies.push(study);
+                    }
                 }
-            }));
+            })
+        );
         return Promise.all(completeStudyPromises).then(() => {});
     }
 
     private onSelectStudy(): void {
         this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.center = this.acquisitionEquipment = this.subject = this.examination = null;
-        if (this.study.id && this.study.studyCenterList) {
+        if (this.study && this.study.id && this.study.studyCenterList) {
             let hasOneCompatible: boolean = this.study.studyCenterList.filter(studyCenter => studyCenter.center.compatible).length == 1;
             if (hasOneCompatible) {
                 this.center = this.study.studyCenterList.filter(studyCenter => studyCenter.center.compatible)[0].center;
@@ -201,12 +218,16 @@ export class ClinicalContextComponent{
         }
         this.onContextChange();
     }
-    
+
     private onSelectExam(): void {
         this.niftiConverters = [];
         if (this.examination) {
             this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
         }
+        this.onContextChange();
+    }
+
+    private onSelectNifti(): void {
         this.onContextChange();
     }
 
@@ -326,8 +347,8 @@ export class ClinicalContextComponent{
 
     private getPrefilledExam(): Examination {
         let newExam = new Examination();
-        newExam.study = new IdNameObject(this.study.id, this.study.name);
-        newExam.center = new IdNameObject(this.center.id, this.center.name);
+        newExam.study = new IdName(this.study.id, this.study.name);
+        newExam.center = new IdName(this.center.id, this.center.name);
         newExam.subject = this.subject;
         newExam.examinationDate = this.patient.studies[0].series[0].seriesDate;
         newExam.comment = this.patient.studies[0].studyDescription;
@@ -344,6 +365,11 @@ export class ClinicalContextComponent{
         return subjectExam;
     }
 
+    private get hasCompatibleCenters(): boolean {
+        return this.centers.find(center => center.compatible) != undefined;
+    }
+
+    
     private get hasCompatibleEquipments(): boolean {
         return this.acquisitionEquipments.find(ae => ae.compatible) != undefined;
     }
@@ -377,14 +403,10 @@ export class ClinicalContextComponent{
             && context.subject != undefined && context.subject != null
             && context.examination != undefined && context.examination != null
             && context.niftiConverter != undefined && context.niftiConverter != null
-            );
+        );
     }
 
     private next() {
         this.router.navigate(['imports/finish']);
-    }
-
-    private compareEntities(e1: Entity, e2: Entity) : boolean {
-        return e1 && e2 && e1.id === e2.id;
     }
 }

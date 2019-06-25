@@ -20,9 +20,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.acquisitionequipment.AcquisitionEquipmentMapper;
-import org.shanoir.ng.center.CenterMapper;
-import org.shanoir.ng.study.Study;
+import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
+import org.shanoir.ng.center.dto.mapper.CenterMapper;
+import org.shanoir.ng.study.model.Study;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -58,14 +58,14 @@ public class StudyCenterMapperTest {
 				.studyCenterListToStudyCenterDTOList(Arrays.asList(createStudyCenter()));
 		Assert.assertNotNull(subjectStudyDTOs);
 		Assert.assertTrue(subjectStudyDTOs.size() == 1);
-		Assert.assertTrue(subjectStudyDTOs.get(0).getId().equals(STUDY_ID));
+		Assert.assertTrue(subjectStudyDTOs.get(0).getStudy().getId().equals(STUDY_ID));
 	}
 
 	@Test
 	public void studyCenterToStudyCenterDTOTest() {
 		final StudyCenterDTO subjectStudyDTO = studyCenterMapper.studyCenterToStudyCenterDTO(createStudyCenter());
 		Assert.assertNotNull(subjectStudyDTO);
-		Assert.assertTrue(subjectStudyDTO.getId().equals(STUDY_ID));
+		Assert.assertTrue(subjectStudyDTO.getStudy().getId().equals(STUDY_ID));
 	}
 
 	private StudyCenter createStudyCenter() {

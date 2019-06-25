@@ -13,7 +13,7 @@
  */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { ImportDataService } from '../../import/import.data-service';
+import { ImportDataService } from '../../import/shared/import.data-service';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 
 @Component({

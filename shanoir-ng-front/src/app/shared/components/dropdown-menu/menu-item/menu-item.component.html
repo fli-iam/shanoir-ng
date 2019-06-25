@@ -40,8 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (click)="click()"
         ><img src="{{icon}}" onerror="if (this.src != folderIconPath) this.src = folderIconPath;"/>{{label}}
     </span>
-    <!-- ul #contentWrapper class="sub-content" [class.hidden]="!opened" [@myAnimation]="opened" -->
-    <ul #contentWrapper class="sub-content" *ngIf="opened" [@slideRight]="opened" [hidden]="!init">
+    <ul #contentWrapper class="sub-content" *ngIf="opened" [@menuSlideRight]="opened" [hidden]="!init">
         <div class="sub-sub-content"><ng-content></ng-content></div>
     </ul>
 </li>

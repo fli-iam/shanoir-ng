@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { query, style, state, animate, transition, trigger } from '@angular/animations';
+import { animate, query, style, transition, trigger } from '@angular/animations';
 
 export const slideDown = trigger('slideDown', [
     transition(
@@ -28,6 +28,38 @@ export const slideDown = trigger('slideDown', [
         ]
     )
 ]);
+
+export const menuAnimDur = 100;
+export const menuSlideDown = trigger('menuSlideDown', [
+    transition(
+        ':enter', [
+            style({ height: 0 }),
+            animate(menuAnimDur + 'ms ease-in-out', style({ height: '*', 'padding-bottom': '*' }))
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({ height: '*' }),
+            animate(menuAnimDur + 'ms ease-in-out', style({ height: 0, 'padding-bottom': '0' }))
+        ]
+    )
+]);
+
+export const menuSlideRight = trigger('menuSlideRight', [
+    transition(
+        ':enter', [
+            style({width: 0}),
+            animate(menuAnimDur+'ms ease-in-out', style({width: '*'}))
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({width: '*'}),
+            animate(menuAnimDur+'ms ease-in-out', style({width: 0}))
+        ]
+    )
+]);
+    
 
 export const preventInitialChildAnimations = trigger('preventInitialChildAnimations', [
     transition(

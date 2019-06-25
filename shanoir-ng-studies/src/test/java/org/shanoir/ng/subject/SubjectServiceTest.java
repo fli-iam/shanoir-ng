@@ -16,8 +16,6 @@ package org.shanoir.ng.subject;
 
 import static org.mockito.BDDMockito.given;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -32,13 +30,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.subject.model.HemisphericDominance;
+import org.shanoir.ng.subject.model.ImagedObjectCategory;
+import org.shanoir.ng.subject.model.PseudonymusHashValues;
+import org.shanoir.ng.subject.model.Sex;
+import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subject.model.UserPersonalCommentSubject;
+import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subject.service.SubjectServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
@@ -52,7 +54,6 @@ public class SubjectServiceTest {
 
 	private static final Long SUBJECT_ID = 1L;
 	private static final String UPDATED_SUBJECT_DATA = "subject1";
-	private static final String JSON_FILE_PATH = "C:/Users/ifakhfak/Documents/Shanoir NG/Study microService/SUBJECT/jsonTest2.json";
 
 	@Mock
 	private SubjectRepository subjectRepository;
@@ -73,7 +74,7 @@ public class SubjectServiceTest {
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirStudiesException {
+	public void deleteByIdTest() throws EntityNotFoundException {
 		subjectService.deleteById(SUBJECT_ID);
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).delete(Mockito.anyLong());
@@ -98,31 +99,17 @@ public class SubjectServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirStudiesException {
-		subjectService.save(createSubjectTosave());
+	public void saveTest() {
+		subjectService.create(createSubjectTosave());
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
 
 	@Test
-	public void saveJsonTest() throws ShanoirStudiesException {
-		subjectService.save(createJsonSubjectTosave());
-		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
-	}
-
-	@Test
-	public void updateTest() throws ShanoirStudiesException {
+	public void updateTest() throws EntityNotFoundException {
 		final Subject updatedSubject = subjectService.update(createSubjectToUpdate());
 		Assert.assertNotNull(updatedSubject);
 		Assert.assertTrue(UPDATED_SUBJECT_DATA.equals(updatedSubject.getName()));
 
-		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
-	}
-
-	@Test
-	public void updateFromShanoirOldTest() throws ShanoirStudiesException {
-		subjectService.updateFromShanoirOld(createSubjectToUpdate());
-
-		Mockito.verify(subjectRepository, Mockito.times(1)).findOne(Mockito.anyLong());
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
 
@@ -157,26 +144,4 @@ public class SubjectServiceTest {
 		subject.setUserPersonalCommentList(listSubjectComments);
 		return subject;
 	}
-
-
-	private Subject createJsonSubjectTosave() {
-		ObjectMapper mapper = new ObjectMapper();
-		Subject subject=new Subject();
-		try {
-			subject = mapper.readValue(new File(JSON_FILE_PATH), Subject.class);
-		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return subject;
-
-	}
-
 }

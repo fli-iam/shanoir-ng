@@ -39,7 +39,7 @@ export class NewInstrumentComponent implements OnInit {
     
     ngOnInit(): void {
         this.buildForm();
-        if (this.keycloakService.isUserAdmin() || this.keycloakService.isUserExpert()) {
+        if (this.keycloakService.isUserAdminOrExpert()) {
             this.canModify = true;
         }
     }

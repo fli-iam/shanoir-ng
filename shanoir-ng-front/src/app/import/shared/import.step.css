@@ -1,0 +1,8 @@
+.step h2 { overflow: hidden; white-space: nowrap; }
+    .step h2 span { display: inline-block; }
+    .step h2 .hr { width: 100%; border-bottom: 1px solid var(--grey); margin-left: 10px; vertical-align: middle; }
+
+.header { cursor: pointer; position: relative; }
+.header.disabled:after { background-color: white; opacity: 0.8; content: ""; position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+
+.next { display: block; margin: 10px 0; }
