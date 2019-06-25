@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { ModuleWithProviders } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
@@ -31,6 +45,7 @@ import { AccountRequestComponent } from './users/account-request/account-request
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
+import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 
 let appRoutes: Routes = [
     {
@@ -73,6 +88,9 @@ let appRoutes: Routes = [
         path: 'new-instrument',
         component: NewInstrumentComponent,
         canActivate: [AuthNotGuestGuard]
+    }, {
+        path: 'task',
+        component: AsyncTasksComponent
     }
 ];
 

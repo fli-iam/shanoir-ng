@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { Pageable, Page, Sort, FilterablePageable, Filter } from './pageable.model';
 import { TableComponent } from './table.component';
 
@@ -99,12 +113,12 @@ export class BrowserPaging<T> {
             if (cell1 == null) {
                 cell1 = negInf;
             } else if (typeof cell1 == 'string') {
-                cell1 = cell1.toLowerCase();
+                cell1 = cell1.toLowerCase().trim();
             }
             if (cell2 == null) {
                 cell2 = negInf;
             } else if (typeof cell2 == 'string') {
-                cell2 = cell2.toLowerCase();
+                cell2 = cell2.toLowerCase().trim();
             }
 
             // Comparison

@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="header command-zone">3. Set the clinical context</div>
 <fieldset class="step">
 
@@ -9,42 +23,42 @@
         <li class="required">
             <label class="required-label">Select an existing research study</label> 
             <span class="right-col">
-                <select [(ngModel)]="study" (ngModelChange)="onSelectStudy($event)" [compareWith]="compareEntities"
-                        [class.compatible]="study?.compatible" [class.not-compatible]="!study?.compatible">
-                    <option *ngFor="let study of studies" [ngValue]="study"
-                            [class.compatible]="study?.compatible" [class.not-compatible]="!study?.compatible">{{study?.name}}</option>
-                </select>
-                <button i18n="Import|StudyDetails label" [disabled]="!study" (click)="showStudyDetails()">details</button>
+                <select-box [(ngModel)]="study" (change)="onSelectStudy()" (onViewClick)="showStudyDetails()" [viewDisabled]="!study">
+                    <select-option *ngFor="let study of studies" [value]="study"
+                        [class.compatible]="study?.compatible" [class.not-compatible]="!study?.compatible">{{study?.name}}</select-option>
+                </select-box>
             </span>
         </li>
         <li class="required">
             <label class="required-label">Select a center</label> 
             <span class="right-col">
-                <select [disabled]="!study || !centers" [(ngModel)]="center" (ngModelChange)="onSelectCenter($event)" [compareWith]="compareEntities"
-                        [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">
-                    <option *ngFor="let center of centers" [ngValue]="center"
-                            [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">{{center?.name}}</option>
-                </select>
-                <button i18n="Import|CenterDetails label" [disabled]="!center" (click)="showCenterDetails()">details</button>
-                <button [disabled]="!center || center?.compatible" (click)="openCreateCenter()">add</button>
+                <select-box [disabled]="!study || !centers" [(ngModel)]="center" (change)="onSelectCenter()" 
+                        (onViewClick)="showCenterDetails()" [viewDisabled]="!center"
+                        (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters">
+                    <select-option *ngFor="let center of centers" [value]="center"
+                            [class.compatible]="center?.compatible" [class.not-compatible]="!center?.compatible">{{center?.name}}</select-option>
+                </select-box>
             </span>
         </li>
         <li class="info" *ngIf="center && !center?.compatible">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>This center may not be not compatible with the imported data !</strong>
-            <br/>Your archive contains this data : <code>{{patient.studies[0].series[0]?.institution?.institutionName}}, {{patient.studies[0].series[0]?.institution?.institutionAddress}}.</code>
+            <br/>Your archive contains this data : 
+            <code>
+                {{patient?.studies[0]?.series[0]?.institution?.institutionName}} - 
+                {{patient?.studies[0]?.series[0]?.institution?.institutionAddress}}
+            </code>
             <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
         </li>
         <li class="required">
             <label class="required-label">Select an acquisition equipment</label> 
             <span class="right-col">
-                <select [disabled]="!center || !acquisitionEquipments" [(ngModel)]="acquisitionEquipment" (ngModelChange)="onSelectAcquisitonEquipment($event)" [compareWith]="compareEntities"
-                        [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">
-                    <option *ngFor="let acquisitionEquipment of acquisitionEquipments" [ngValue]="acquisitionEquipment" 
-                            [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">{{acquisitionEquipment | acqEqptLabel}}</option>
-                </select>
-                <button i18n="Import|AcquisitionEquipmentDetails label" [disabled]="!acquisitionEquipment" (click)="showAcquistionEquipmentDetails()">details</button>
-                <button [disabled]="acquisitionEquipment?.compatible || hasCompatibleEquipments || !center" (click)="openCreateAcqEqt()">add</button>
+                <select-box [disabled]="!center || !acquisitionEquipments" [(ngModel)]="acquisitionEquipment" (change)="onSelectAcquisitonEquipment()"
+                        (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
+                        (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments">
+                    <select-option *ngFor="let acquisitionEquipment of acquisitionEquipments" [value]="acquisitionEquipment" 
+                            [class.compatible]="acquisitionEquipment?.compatible" [class.not-compatible]="!acquisitionEquipment?.compatible">{{acquisitionEquipment | acqEqptLabel}}</select-option>
+                </select-box>
             </span>
         </li>
         <li class="info" *ngIf="acquisitionEquipment && !acquisitionEquipment?.compatible">
@@ -52,9 +66,9 @@
             <strong>The acquisition equipment may not be not compatible with the imported data !</strong>
             <br/>Your archive contains this data : 
             <code>
-                {{patient.studies[0].series[0].equipment.manufacturer}} - 
-                {{patient.studies[0].series[0].equipment.manufacturerModelName}} - 
-                {{patient.studies[0].series[0].equipment.deviceSerialNumber}}
+                {{patient?.studies[0]?.series[0]?.equipment?.manufacturer}} - 
+                {{patient?.studies[0]?.series[0]?.equipment?.manufacturerModelName}} - 
+                {{patient?.studies[0]?.series[0]?.equipment?.deviceSerialNumber}}
             </code>
             <br/>If the acquisition equipment you need is not in the above list, you can create a new acquisition equipment from this data by clicking on the 'add' button.
         </li>
@@ -68,11 +82,11 @@
         <li class="required">
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
-                <select [disabled]="!study || !acquisitionEquipment" [(ngModel)]="subject" (ngModelChange)="onSelectSubject($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let subject of subjects" [ngValue]="subject">{{subject?.name}}</option>
-                </select>
-                <button [disabled]="!subject" (click)="showSubjectDetails()" i18n="Import|SubjectDetails label">details</button>
-                <button [disabled]="!study || !acquisitionEquipment" (click)="openCreateSubject()">add</button>
+                <select-box [disabled]="!study || !acquisitionEquipment" [(ngModel)]="subject" (change)="onSelectSubject()" 
+                        (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
+                        (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment">
+                    <select-option *ngFor="let subject of subjects" [value]="subject">{{subject?.name}}</select-option>
+                </select-box>
             </span>
         </li>
         <li *ngIf="subject !== null && subject !== undefined">
@@ -96,16 +110,14 @@
                                     [ngModelOptions]="{standalone: true}"/>
                             </td>
                             <td class="chkbx-col">
-                                <input type="checkbox" [(ngModel)]="subject.subjectStudy.physicallyInvolved" 
-                                    [ngModelOptions]="{standalone: true}"/>
+                                <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                             </td>
                             <td class="dropdown-col">
-                                <select id="subjectType" [(ngModel)]="subject.subjectStudy.subjectType" 
-                                    [ngModelOptions]="{standalone: true}">
-                                        <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
-                                        <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
-                                        <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
-                                </select>
+                                <select-box [(ngModel)]="subject.subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
+                                    <select-option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</select-option>
+                                    <select-option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</select-option>
+                                    <select-option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</select-option>
+                                </select-box>
                             </td>
                         </tr>
                     </tbody>
@@ -122,11 +134,11 @@
         <li class="required">
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select [disabled]="!study || !subject" [(ngModel)]="examination" (ngModelChange)="onSelectExam($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let examination of examinations" [ngValue]="examination">{{examination | subjectExaminationLabel}}</option>
-                </select>
-                <button [disabled]="!examination" (click)="showExaminationDetails()" i18n="Import|ExaminationtDetails label">details</button>
-                <button [disabled]="!study || !subject" (click)="openCreateExam()">add</button>
+                <select-box [disabled]="!study || !subject" [(ngModel)]="examination" (change)="onSelectExam()"
+                        (onViewClick)="showExaminationDetails()" [viewDisabled]="!examination"
+                        (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject">
+                    <select-option *ngFor="let examination of examinations" [value]="examination">{{examination | subjectExaminationLabel}}</select-option>
+                </select-box>  
             </span>
         </li>
     </ol>
@@ -136,11 +148,9 @@
         <li class="required">
             <label label class="required-label">Select a Nifti converter</label> 
             <span class="right-col">
-                <select [disabled]="!examination" [(ngModel)]="niftiConverter" (ngModelChange)="onContextChange($event)" [compareWith]="compareEntities">
-                    <option *ngFor="let niftiConverter of niftiConverters" [ngValue]="niftiConverter">{{niftiConverter?.name}}</option>
-                </select>
-                <!-- TODO when nifti converters page is done -->
-                <button i18n="Import|NiftiConverterDetails label" [disabled]="true">details</button>
+                <select-box [disabled]="!examination" [(ngModel)]="niftiConverter" (change)="onSelectNifti()">
+                    <select-option *ngFor="let niftiConverter of niftiConverters" [value]="niftiConverter">{{niftiConverter?.name}}</select-option>
+                </select-box>
             </span>
         </li>
     </ol>

@@ -1,27 +1,28 @@
-import { animate, Component, ContentChildren, forwardRef, Input, QueryList, style, transition, trigger } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ImagesUrlUtil } from '../../../utils/images-url.util';
 
-export const animDur: number = 100;
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+import { Component, ContentChildren, forwardRef, Input, QueryList } from '@angular/core';
+import { Observable } from 'rxjs';
+import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
+import { ImagesUrlUtil } from '../../../utils/images-url.util';
 
 @Component({
     selector: 'menu-item',
     templateUrl: 'menu-item.component.html',
     styleUrls: ['menu-item.component.css'],
-    animations: [trigger('slideRight', [
-        transition(
-            ':enter', [
-                style({width: 0}),
-                animate(animDur+'ms ease-in-out', style({width: '*'}))
-            ]
-        ),
-        transition(
-            ':leave', [
-                style({width: '*'}),
-                animate(animDur+'ms ease-in-out', style({width: 0}))
-            ]
-        )
-    ])]
+    animations: [menuSlideRight]
 })
 
 export class MenuItemComponent {
@@ -67,7 +68,7 @@ export class MenuItemComponent {
     public open() {
         this.closeSiblings(() => {
             this.opened =  true;
-            setTimeout(() => this.overflow = false, animDur);
+            setTimeout(() => this.overflow = false, menuAnimDur);
         })
     }
 
@@ -76,7 +77,7 @@ export class MenuItemComponent {
             this.closeChildren(() => {
                 this.overflow = true;
                 this.opened =  false;
-                setTimeout(callback, animDur);
+                setTimeout(callback, menuAnimDur);
             });
         } else {
             callback();
@@ -122,7 +123,7 @@ export class MenuItemComponent {
     }
 
     public cascadingClose() {
-        this.parent.cascadingClose();
+        if (this.parent) this.parent.cascadingClose();
     }
 
     public getMode(): "top" | "tree" {

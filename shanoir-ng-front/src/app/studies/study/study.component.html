@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="content-component detail max-content">
 	<div class="layout" [ngClass]="{'left': mode=='view'}">
 		<form *ngIf="form" [formGroup]="form" novalidate>
@@ -61,10 +75,10 @@
 								{{studyStatusStr(study.studyStatus)}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select id="studyStatus" required formControlName="studyStatus" [(ngModel)]="study.studyStatus">
-									<option value="IN_PROGRESS">In Progress</option>
-									<option value="FINISHED">Finished</option>
-								</select>
+								<select-box formControlName="studyStatus" [(ngModel)]="study.studyStatus">
+									<select-option value="IN_PROGRESS">In Progress</select-option>
+									<select-option value="FINISHED">Finished</select-option>
+								</select-box>
 								<label *ngIf="hasError('studyStatus', ['required'])" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
 							</ng-template>
 						</span>
@@ -77,10 +91,7 @@
 								<span *ngIf="!study.clinical" class="bool-false">&#x2717;</span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="radio" formControlName="clinical" [(ngModel)]="study.clinical" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.clinical" />Yes
-								<input type="radio" formControlName="clinical" [(ngModel)]="study.clinical" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="!study.clinical" />No
+								<checkbox [(ngModel)]="study.clinical" formControlName="clinical"></checkbox>
 							</ng-template>
 						</span>
 					</li>
@@ -92,10 +103,7 @@
 								<span *ngIf="!study.withExamination" class="bool-false">&#x2717;</span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="radio" formControlName="withExamination" [(ngModel)]="study.withExamination" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.withExamination" />Yes
-								<input type="radio" formControlName="withExamination" [(ngModel)]="study.withExamination" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="!study.withExamination" />No
+								<checkbox [(ngModel)]="study.withExamination" formControlName="withExamination"></checkbox>
 							</ng-template>
 						</span>
 					</li>
@@ -112,10 +120,7 @@
 								<span *ngIf="!study.visibleByDefault" class="bool-false">&#x2717;</span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="radio" formControlName="visibleByDefault" [(ngModel)]="study.visibleByDefault" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.visibleByDefault" />Yes
-								<input type="radio" formControlName="visibleByDefault" [(ngModel)]="study.visibleByDefault" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="!study.visibleByDefault" />No
+								<checkbox [(ngModel)]="study.visibleByDefault" formControlName="visibleByDefault"></checkbox>
 							</ng-template>
 						</span>
 					</li>
@@ -127,10 +132,7 @@
 								<span *ngIf="!study.downloadableByDefault" class="bool-false">&#x2717;</span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="radio" formControlName="downloadableByDefault" [(ngModel)]="study.downloadableByDefault" [value]="true" i18n="Study detail|Yes label@@yesLabel"
-								 [checked]="study.downloadableByDefault" />Yes
-								<input type="radio" formControlName="downloadableByDefault" [(ngModel)]="study.downloadableByDefault" [value]="false" i18n="Study detail|No label@@noLabel"
-								 [checked]="!study.downloadableByDefault" />No
+								<checkbox [(ngModel)]="study.downloadableByDefault" formControlName="downloadableByDefault"></checkbox>
 							</ng-template>
 						</span>
 					</li>
@@ -150,23 +152,18 @@
 								<span *ngIf="!study.monoCenter">Multicenter</span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<span [class.disabled]="study.studyCenterList?.length > 1" class="mono">
-									<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="true" i18n="Study detail|Yes label@@noLabel"
-										[checked]="study.monoCenter" />Single center
-								</span>
-								<input type="radio" formControlName="monoCenter" [(ngModel)]="study.monoCenter" [value]="false" i18n="Study detail|No label@@yesLabel"
-									[checked]="!study.monoCenter" />Multicenter
+								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
+								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" [reverse]="true" [disabled]="study.studyCenterList?.length > 1"></toggle-switch>
+								<span>Multicenter</span>
 							</ng-template>
 						</span>
 					</li>
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers and principal investigator label@@studyDetailCentersAndPI">List of centers and principal investigators</label>
 						<span class="right-col">
-							<select [(ngModel)]="selectedCenter" formControlName="studyCenterList" (change)="onCenterChange()">
-								<option *ngIf="!study.studyCenterList || study.studyCenterList.length == 0" [ngValue]="null" disabled>Select a center...</option>
-								<option *ngFor="let center of centers" [ngValue]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</option>
-							</select>
-							<span *ngIf="enableAddIcon()" class="icon icon-clickable" (click)="onCenterAdd()"><i class="fas fa-plus"></i></span>
+							<select-box [ngModel]="selectedCenter" formControlName="studyCenterList" (change)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()">
+								<select-option *ngFor="let center of centers" [value]="center" [disabled]="isCenterAlreadyLinked(center.id)">{{center.name}}</select-option>
+							</select-box>
 							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>
@@ -200,10 +197,9 @@
 					<li>
 						<label i18n="Study detail|List of users label@@studyDetailUsers">List of users</label>
 						<span class="right-col">
-							<select id="title" [ngModel]="selectedUser" [ngModelOptions]="{standalone: true}" (ngModelChange)="onUserSelect($event)">
-								<option disabled>Please select...</option>
-								<option *ngFor="let user of users" [ngValue]="user" [disabled]="user?.selected">{{user.username}}</option>
-							</select>
+							<select-box (change)="onUserSelect($event)" placeholder="Add a user ...">
+								<select-option *ngFor="let user of users" [value]="user" [disabled]="user?.selected">{{user.username}}</select-option>
+							</select-box>
 						</span>
 					</li>
 					<li>

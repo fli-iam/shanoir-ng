@@ -1,10 +1,26 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 
 import org.keycloak.admin.client.Keycloak;
@@ -13,8 +29,8 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.email.EmailService;
-import org.shanoir.ng.user.User;
-import org.shanoir.ng.user.UserRepository;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.KeycloakShanoirUtil;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
@@ -23,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import groovyjarjarcommonscli.MissingArgumentException;
@@ -58,6 +75,7 @@ import groovyjarjarcommonscli.MissingArgumentException;
  *
  */
 @Component
+//@EnableRetry
 public class ShanoirUsersManagement implements ApplicationRunner {
 
 	/**
@@ -99,7 +117,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	
 	@Override
-	public void run(ApplicationArguments args) throws Exception {
+	public void run(ApplicationArguments args) throws Exception { 
 		if (args.getOptionNames().isEmpty()) {
 			LOG.info("ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
 		} else {
@@ -111,7 +129,24 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 			} else if (args.containsOption("syncAllUsersToKeycloak")
 					&& args.getOptionValues("syncAllUsersToKeycloak").get(0) != null
 					&& args.getOptionValues("syncAllUsersToKeycloak").get(0).equals("true")) {
-				createUsersIfNotExisting();
+				
+				int tries = 0;
+				boolean success = false;
+				while (!success && tries < 50) {
+					try {
+						createUsersIfNotExisting();
+						success = true;
+					} catch (ProcessingException e) {
+						tries++;
+						String msg = "Try " + tries + " failed for updating keycloak users on startup (" + e.getMessage() + ")";
+						LOG.error(msg); // users logs
+						System.out.println(msg); // docker compose console
+						TimeUnit.SECONDS.sleep(5);
+					} 
+				}
+				if (!success) {
+					throw new IllegalStateException("Could not export users to Keycloak.");		
+				}
 			}
 		}
 	}
@@ -125,6 +160,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 				kcAdminClientClientId);
 	}
 
+	//@Retryable(value = { ProcessingException.class }, maxAttempts = 50, backoff = @Backoff(delay = 5000))
 	private void createUsersIfNotExisting() {
 		LOG.info("syncAllUsersToKeycloak");
 		final Iterable<User> users = userRepository.findAll();

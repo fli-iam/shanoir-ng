@@ -1,20 +1,37 @@
-import { Component, forwardRef } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors, NgControl } from '@angular/forms';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+import { AfterViewChecked, Component, ElementRef, forwardRef } from '@angular/core';
+import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
 import { IMyOptions } from 'mydatepicker';
 
 @Component({
     selector: 'datepicker',
     template: `
-        <my-date-picker 
-            [options]="options" 
-            [ngModel]="convertedDate"
-            (ngModelChange)="onModelChange($event)"
-            (inputFieldChanged)="onInputFieldChanged($event)"
-            (inputFocusBlur)="onTouch()">
-        </my-date-picker>
+        <span>
+            <my-date-picker 
+                [options]="options" 
+                [ngModel]="convertedDate"
+                (ngModelChange)="onModelChange($event)"
+                (inputFieldChanged)="onInputFieldChanged($event)"
+                (inputFocusBlur)="onTouch()">
+            </my-date-picker>
+        </span>
     `,
     styles: [
-        ':host() { display: inline-block; height: 19px; }'
+        ':host() { display: inline-block; height: 19px; }',
+        ':host():has(input:focus) { border-bottom: 2px solid var(--color-a); }'
     ],
     providers: [
         {
@@ -24,14 +41,13 @@ import { IMyOptions } from 'mydatepicker';
         }]   
 })
 
-export class DatepickerComponent implements ControlValueAccessor {
+export class DatepickerComponent implements ControlValueAccessor, AfterViewChecked {
 
     private inputFieldContent: string;
     private lastInputFieldContent: string;
     private convertedDate: Object;
     private onTouch: () => void;
     private onChange: (value) => void;
-    private ngControl: NgControl;
 
     private options: IMyOptions = {
         dateFormat: 'dd/mm/yyyy',
@@ -40,8 +56,12 @@ export class DatepickerComponent implements ControlValueAccessor {
         indicateInvalidDate: false
     };
 
-    constructor() {
+    constructor(private element: ElementRef) { }
 
+    ngAfterViewChecked() {
+        [].slice.call(this.element.nativeElement.getElementsByTagName('button')).forEach(elt => {
+            elt.setAttribute('tabindex', -1);
+        });
     }
 
     private onInputFieldChanged(event) {

@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="content-component">
     <form [formGroup]="uploadExtraDataForm" class="max-content" novalidate>
 		<div class="layout">
@@ -17,9 +31,9 @@
 					<li class="required">
 						    <label i18n="uploadExtraData|research study label@@uploadExtraDataResearchStudy" class="required-label">Select an existing research study 
 								</label>
-								<select id="studyId" required formControlName="studyId" [(ngModel)]="examinationStudyId">
-										<option *ngFor="let study of studies" [ngValue]="study.id">{{study.name}}</option>
-									</select> 
+								<select-box formControlName="studyId" [(ngModel)]="examinationStudyId">
+									<select-option *ngFor="let study of studies" [value]="study.id">{{study.name}}</select-option>
+								</select-box> 
 					</li>
 					<li class="required">
 						    <label i18n="uploadExtraData|subject label@@uploadExtraDataSubject" class="required-label">Select a subject 

@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import {
     Component, Input, Output, ContentChildren, forwardRef, QueryList, ChangeDetectorRef,
     EventEmitter, ViewChild, ElementRef
@@ -6,6 +20,7 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component'
 import { ImagesUrlUtil } from '../../utils/images-url.util';
+import { CheckboxComponent } from '../../checkbox/checkbox.component';
 
 const noop = () => {
 };
@@ -27,9 +42,9 @@ export class TreeNodeComponent implements ControlValueAccessor {
 
     @Input() label: string;
     @Input() pictoUrl: string;
+    @Input() awesome: string;
     @Input() deploy: boolean;
     @Input() hasBox: boolean;
-    @Input() buttonPicto: string;
     @Input() nodeParams: any;
     @Input() editable: boolean = false;
     @Input() link: boolean = false;
@@ -42,10 +57,9 @@ export class TreeNodeComponent implements ControlValueAccessor {
     public loaded: boolean = false;
     private loaderImagePath: string = ImagesUrlUtil.LOADER_IMAGE_PATH;
     public hasChildren: boolean;
-    public checked: boolean;
-    @ViewChild('box') boxElt: ElementRef;
+    public checked: boolean | 'indeterminate';
+    @ViewChild('box') boxElt: CheckboxComponent;
     @Output() labelChange = new EventEmitter();
-    @Output() buttonClick = new EventEmitter();
     @Output() labelClick = new EventEmitter();
     @Output() chkbxChange = new EventEmitter();
     @Output() openClick = new EventEmitter();
@@ -100,11 +114,11 @@ export class TreeNodeComponent implements ControlValueAccessor {
         });
     }
 
-    get value(): boolean {
+    get value(): boolean | 'indeterminate' {
         return this.checked;
     };
 
-    set value(value: boolean) {
+    set value(value: boolean | 'indeterminate') {
         if (value !== this.checked) {
             this.checked = value;
             this.onChangeCallback(value);
@@ -133,11 +147,11 @@ export class TreeNodeComponent implements ControlValueAccessor {
         });
         if (allOff) this.setBox(false);
         else if (allOn) this.setBox(true);
-        else this.setBox(null);
+        else this.setBox('indeterminate');
     };
 
-    setBox(value: Boolean) {
-        if (this.boxElt) this.boxElt.nativeElement.indeterminate = value == null;
+    setBox(value: boolean | 'indeterminate') {
+        if (this.boxElt) this.boxElt.ngModel = value;
         this.writeValue(value != null && value);
     }
 

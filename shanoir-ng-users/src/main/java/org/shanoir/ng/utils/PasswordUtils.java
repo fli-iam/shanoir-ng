@@ -1,10 +1,23 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-import org.shanoir.ng.shared.exception.UsersErrorModelCode;
 import org.shanoir.ng.shared.exception.ShanoirUsersException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +70,7 @@ public final class PasswordUtils {
 	 * @param username user name.
 	 * @throws ShanoirUsersException exception thrown if password doesn't match policy
 	 */
-	public static void checkPasswordPolicy(final String password, final String username) throws ShanoirUsersException {
+	public static boolean checkPasswordPolicy(final String password) {
 		// Shanoir NG password check
 		if (password != null && password.length() >= PASSWORD_MIN_LENGTH) {
 			boolean hasLowerCaseAlpha = false;
@@ -76,13 +89,11 @@ public final class PasswordUtils {
 					hasSpecialChar = true;
 				}
 				if (hasLowerCaseAlpha && hasUpperCaseAlpha && hasNumeric && hasSpecialChar) {
-					return;
+					return true;
 				}
 			}
 		}
-		
-		LOG.error("Password does not match policy for user " + username + " : ");
-		throw new ShanoirUsersException(UsersErrorModelCode.PASSWORD_NOT_CORRECT);
+		return false;
 	}
 
 	/**

@@ -1,6 +1,6 @@
 .root { 
     display: block; 
-    margin: 0 15px;     
+    margin-top: 15px;     
     background-color: var(--color-b-light);
     padding: 5px 10px;
     border-radius: 2px;

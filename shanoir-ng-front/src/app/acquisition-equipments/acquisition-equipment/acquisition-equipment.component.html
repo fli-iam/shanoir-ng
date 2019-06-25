@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="content-component">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout">
@@ -32,12 +46,9 @@
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select id="manufModel" required formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel" [compareWith]="compareEntities">
-									<option *ngFor="let manufacturerModel of manufModels" [ngValue]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</option>
-								</select>
-								<button i18n="AcqEquip detail|Create new model label@@acqEqptDetailNewManufModel" (click)="openNewManufModel()">
-									<i class="fas fa-plus-square"></i> new manufacturer model
-								</button>
+								<select-box formControlName="manufacturerModel" [(ngModel)]="acqEquip.manufacturerModel" (onNewClick)="openNewManufModel()">
+									<select-option *ngFor="let manufacturerModel of manufModels" [value]="manufacturerModel">{{manufacturerModel | manufModelLabel}}</select-option>
+								</select-box>
 								<label *ngIf="hasError('manufacturerModel', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Manufacturer model required error@@acqEqptDetailManufModelRequiredError">Manufacturer model is required!</label>
 							</ng-template>
 						</span>
@@ -57,11 +68,10 @@
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select id="center" required formControlName="center" [(ngModel)]="acqEquip.center" [compareWith]="compareEntities">
-									<option *ngFor="let center of centers" [ngValue]="center">{{center.name}}</option>
-								</select>
+								<select-box formControlName="center" [(ngModel)]="acqEquip.center" (onViewClick)="viewCenter($event)" [viewDisabled]="!acqEquip.center">
+									<select-option *ngFor="let center of centers" [value]="center">{{center.name}}</select-option>
+								</select-box>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
-								<a *ngIf="acqEquip.center" [routerLink]="['/center/details/', acqEquip.center.id]">details</a>
 							</ng-template>
 						</span>
 					</li>

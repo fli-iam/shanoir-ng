@@ -1,14 +1,28 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { Subject } from '../../subjects/shared/subject.model';
+import { SimpleSubject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { ImportJob, PatientDicom } from '../shared/dicom-data.model';
+import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-import { ImportDataService, ContextData } from '../shared/import.data-service';
+
 
 @Component({
     selector: 'finish-import',
@@ -33,8 +47,9 @@ export class FinishImportComponent {
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
             
-        if (!this.importDataService.patientList || !importDataService.patients 
-            || !importDataService.patients[0] || !importDataService.contextData) {
+        if (!this.importDataService.inMemoryExtracted
+                || !importDataService.patients || !importDataService.patients[0]
+                || !importDataService.contextData || !this.importDataService.patientList) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
@@ -89,13 +104,19 @@ export class FinishImportComponent {
         if (true) {
             let importJob = new ImportJob();
             importJob.patients = new Array<PatientDicom>();
-            // this.patient.subject = new IdNameObject(this.context.subject.id, this.context.subject.name);
-            this.patient.subject = Subject.makeSubject(
-                    this.context.subject.id, 
-                    this.context.subject.name, 
-                    this.context.subject.identifier, 
-                    this.context.subject.subjectStudy);
-            importJob.patients.push(this.patient);
+            let simpleSubject: SimpleSubject = {
+                id: this.context.subject.id,
+                name: this.context.subject.name,
+                identifier: this.context.subject.identifier, 
+                subjectStudyList: [this.context.subject.subjectStudy]
+            };
+            this.patient.subject = simpleSubject;
+            let filteredPatient: PatientDicom = this.patient;
+            filteredPatient.studies = this.patient.studies.map(study => {
+                study.series = study.series.filter(serie => serie.selected);
+                return study;
+            });
+            importJob.patients.push(filteredPatient);
             importJob.workFolder = this.importJob.workFolder;
             if (this.importMode == 'DICOM') importJob.fromDicomZip = true;
             else if (this.importMode == 'PACS') importJob.fromPacs = true;

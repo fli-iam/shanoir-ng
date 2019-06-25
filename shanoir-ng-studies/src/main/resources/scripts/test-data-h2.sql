@@ -1,3 +1,15 @@
+-- Shanoir NG - Import, manage and share neuroimaging data
+-- Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+-- Contact us on https://project.inria.fr/shanoir/
+-- 
+-- This program is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+-- 
+-- You should have received a copy of the GNU General Public License
+-- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
 -- Populates database for test
 
 INSERT INTO study
@@ -8,13 +20,22 @@ VALUES
 	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 0, 1);
 
 INSERT INTO study_user
-	(receive_anonymization_report, receive_new_import_report, study_id, study_user_type, user_id)
+	(id, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name)
 VALUES
-	(0, 1, 1, 1, 1),
-	(0, 1, 3, 1, 1),
-	(0, 0, 1, 3, 2),
-	(0, 1, 2, 1, 1);
+	(1, 0, 1, 1, 1, 'admin'),
+	(2, 0, 1, 3, 1, 'admin'),
+	(3, 0, 0, 1, 2, 'jlouis'),
+	(4, 0, 1, 2, 1, 'admin');
 
+INSERT INTO study_user_study_user_rights
+	(study_user_id, study_user_rights)
+VALUES
+    (1, 1),
+    (2, 1),
+    (3, 3),
+    (3, 4),
+    (4, 1);
+	
 insert into `center`(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`) values (1,'France','CHU Rennes','','','','Rennes','');
 insert into `center`(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`) values (2,'France','CHU Reims','','','','Reims','');
 

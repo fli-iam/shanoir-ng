@@ -1,4 +1,17 @@
-import { Component } from '@angular/core';
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+import { Component, HostListener } from '@angular/core';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../breadcrumbs/router';
@@ -7,6 +20,7 @@ import * as AppUtils from '../../utils/app.utils';
 import { PatientDicom, SerieDicom } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+
 
 @Component({
     selector: 'select-series',
@@ -21,6 +35,7 @@ export class SelectSeriesComponent {
     private dataFiles: any;
     private detailedPatient: Object;
     private detailedSerie: Object;
+    private detailedStudy: Object;
     private papayaParams: object[];
 
     constructor(
@@ -42,6 +57,7 @@ export class SelectSeriesComponent {
 
     private showSerieDetails(nodeParams: any, serie: SerieDicom): void {
         this.detailedPatient = null;
+        this.detailedStudy = null;
         if (nodeParams && this.detailedSerie && nodeParams.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
             this.detailedSerie = null;
         } else {
@@ -50,8 +66,19 @@ export class SelectSeriesComponent {
         }
     }
 
+    private showStudyDetails(nodeParams: any): void {
+        this.detailedSerie = null;
+        this.detailedPatient = null;
+        if (nodeParams && this.detailedStudy && nodeParams.studyID == this.detailedStudy["studyID"]) {
+            this.detailedStudy = null;
+        } else {
+            this.detailedStudy = nodeParams;
+        }
+    }
+
     private showPatientDetails(nodeParams: any): void {
         this.detailedSerie = null;
+        this.detailedStudy = null;
         if (nodeParams && this.detailedPatient && nodeParams.patientID == this.detailedPatient["patientID"]) {
             this.detailedPatient = null;
         } else {
@@ -97,5 +124,11 @@ export class SelectSeriesComponent {
 
     private next() {
         this.router.navigate(['imports/context']);
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == 'œ') {
+            console.log('patients', this.patients);
+        }
     }
 }

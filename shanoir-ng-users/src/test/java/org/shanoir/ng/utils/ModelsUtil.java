@@ -1,9 +1,23 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.utils;
 
 import java.time.LocalDate;
 
-import org.shanoir.ng.role.Role;
-import org.shanoir.ng.user.User;
+import org.shanoir.ng.role.model.Role;
+import org.shanoir.ng.user.model.User;
 
 /**
  * Utility class for test.
@@ -16,13 +30,16 @@ public final class ModelsUtil {
 
 	// Role data
 	public static final Long ADMIN_ROLE_ID = 1L;
-	public static final int ADMIN_ROLE_ACCESS_LEVEL = 1;
 	public static final String ADMIN_ROLE_DISPLAY_NAME = "admin";
 	public static final String ADMIN_ROLE_NAME = "ROLE_ADMIN";
-	public static final Long ROLE_ID = 2L;
-	public static final int ROLE_ACCESS_LEVEL = 3;
-	public static final String ROLE_DISPLAY_NAME = "guest";
-	public static final String ROLE_NAME = "ROLE_GUEST";
+	
+	public static final Long EXPERT_ROLE_ID = 3L;
+	public static final String EXPERT_ROLE_DISPLAY_NAME = "expert";
+	public static final String EXPERT_ROLE_NAME = "ROLE_EXPERT";
+	
+	public static final Long USER_ROLE_ID = 2L;
+	public static final String USER_ROLE_DISPLAY_NAME = "user";
+	public static final String USER_ROLE_NAME = "ROLE_USER";
 	
 	// User data
 	public static final String USER_EMAIL = "toto@to.to";
@@ -45,23 +62,34 @@ public final class ModelsUtil {
 	public static Role createAdminRole() {
 		final Role role = new Role();
 		role.setId(ADMIN_ROLE_ID);
-		role.setAccessLevel(ADMIN_ROLE_ACCESS_LEVEL);
 		role.setDisplayName(ADMIN_ROLE_DISPLAY_NAME);
 		role.setName(ADMIN_ROLE_NAME);
 		return role;
 	}
 	
 	/**
-	 * Create a role 'guest'.
+	 * Create a role 'expert'.
 	 * 
 	 * @return role
 	 */
-	public static Role createGuestRole() {
+	public static Role createExpertRole() {
 		final Role role = new Role();
-		role.setId(ROLE_ID);
-		role.setAccessLevel(ROLE_ACCESS_LEVEL);
-		role.setDisplayName(ROLE_DISPLAY_NAME);
-		role.setName(ROLE_NAME);
+		role.setId(EXPERT_ROLE_ID);
+		role.setDisplayName(EXPERT_ROLE_DISPLAY_NAME);
+		role.setName(EXPERT_ROLE_NAME);
+		return role;
+	}
+	
+	/**
+	 * Create a role 'user'.
+	 * 
+	 * @return role
+	 */
+	public static Role createUserRole() {
+		final Role role = new Role();
+		role.setId(USER_ROLE_ID);
+		role.setDisplayName(USER_ROLE_DISPLAY_NAME);
+		role.setName(USER_ROLE_NAME);
 		return role;
 	}
 	
@@ -70,8 +98,53 @@ public final class ModelsUtil {
 	 * 
 	 * @return user.
 	 */
+	public static User createAdmin() {
+		return createUser(createAdminRole(), null);
+	}
+	
+	/**
+	 * Create a user.
+	 * 
+	 * @return user.
+	 */
+	public static User createAdmin(Long id) {
+		return createUser(createAdminRole(), id);
+	}
+	
+	/**
+	 * Create a user.
+	 * 
+	 * @return user.
+	 */
 	public static User createUser() {
-		return createUser(createGuestRole());
+		return createUser(createUserRole(), null);
+	}
+	
+	/**
+	 * Create a user.
+	 * 
+	 * @return user.
+	 */
+	public static User createUser(Long id) {
+		return createUser(createUserRole(), id);
+	}
+	
+	/**
+	 * Create a user.
+	 * 
+	 * @return user.
+	 */
+	public static User createExpert() {
+		return createUser(createExpertRole(), null);
+	}
+	
+	/**
+	 * Create a user.
+	 * 
+	 * @return user.
+	 */
+	public static User createExpert(Long id) {
+		return createUser(createExpertRole(), id);
 	}
 	
 	/**
@@ -80,15 +153,17 @@ public final class ModelsUtil {
 	 * @param role role.
 	 * @return user.
 	 */
-	public static User createUser(final Role role) {
+	public static User createUser(final Role role, final Long id) {
 		final User user = new User();
 		user.setCreationDate(LocalDate.now());
+		user.setLastLogin(LocalDate.now());
 		user.setEmail(USER_EMAIL);
-		user.setExpirationDate(LocalDate.now());
+		user.setExpirationDate(LocalDate.now().plusYears(1));
 		user.setFirstName(USER_FIRSTNAME);
 		user.setLastName(USER_LASTNAME);
 		user.setRole(role);
 		user.setUsername(NEW_USER_LOGIN);
+		user.setId(id);
 		return user;
 	}
 	
