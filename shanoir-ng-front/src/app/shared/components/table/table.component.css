@@ -59,7 +59,9 @@ a.link { text-decoration: none; color: inherit; }
 
 checkbox { height: 15px; width: 15px; }
 
-.triangle { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: -1; }
-	.triangle svg { width: 100%; max-width: 150px; height: 100%;}
-	.triangle svg polygon { fill: var(--color-b-light2); }
+.triangle { position: absolute;  left: 0; right: 0; z-index: 1; }
+.triangle.up { bottom: 100%; }
+.triangle.down { top: 100%; }
+	.triangle svg { width: 15px; height: 5px;  }
+	.triangle svg polygon { fill: var(--color-b); }
 .col-title { z-index: 1; }

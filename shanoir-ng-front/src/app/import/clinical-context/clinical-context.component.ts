@@ -155,7 +155,7 @@ export class ClinicalContextComponent{
     private onSelectStudy(): void {
         this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.center = this.acquisitionEquipment = this.subject = this.examination = null;
-        if (this.study.id && this.study.studyCenterList) {
+        if (this.study && this.study.id && this.study.studyCenterList) {
             let hasOneCompatible: boolean = this.study.studyCenterList.filter(studyCenter => studyCenter.center.compatible).length == 1;
             if (hasOneCompatible) {
                 this.center = this.study.studyCenterList.filter(studyCenter => studyCenter.center.compatible)[0].center;
@@ -212,8 +212,7 @@ export class ClinicalContextComponent{
         this.onContextChange();
     }
 
-    private onSelectExamination(examination: SubjectExamination) {
-        this.examination = examination;
+    private onSelectNifti(): void {
         this.onContextChange();
     }
 
