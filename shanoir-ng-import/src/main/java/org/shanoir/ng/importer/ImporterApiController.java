@@ -79,7 +79,7 @@ public class ImporterApiController implements ImporterApi {
 	private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
 	private static final String ZIP_FILE_SUFFIX = ".zip";
-
+	
 	@Value("${shanoir.import.directory}")
 	private String importDir;
 	
@@ -226,7 +226,10 @@ public class ImporterApiController implements ImporterApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							e.getMessage(), null));
-		}	
+		}
+		if (importJob.getPatients() == null || importJob.getPatients().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
 		return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
 	}
 

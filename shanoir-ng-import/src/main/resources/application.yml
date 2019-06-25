@@ -106,6 +106,7 @@ shanoir:
           name: DCM4CHEE
           host: dcm4chee-arc
           port: 11112
+        maxPatients: 10
       store:
         aet.called:
           name: SHANOIR-SCP

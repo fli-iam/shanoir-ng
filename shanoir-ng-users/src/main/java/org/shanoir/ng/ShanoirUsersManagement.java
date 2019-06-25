@@ -193,6 +193,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	private UserRepresentation getUserRepresentation(final User user) {
 		final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
 		attributes.put("userId", Arrays.asList(user.getId().toString()));
+		attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
 		if (user.getExpirationDate() != null) {
 			attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
 		}

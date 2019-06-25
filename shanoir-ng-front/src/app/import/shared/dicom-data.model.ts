@@ -12,8 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { SimpleSubject } from "../subjects/shared/subject.model";
-import { Sex } from "../subjects/shared/subject.types";
+import { SimpleSubject } from "../../subjects/shared/subject.model";
+import { Sex } from "../../subjects/shared/subject.types";
 
 export class ImportJob {
     fromDicomZip: boolean;
@@ -84,4 +84,12 @@ export class ImageDicom {
 export class InstitutionDicom {
     institutionName: string;
     institutionAddress: string;
+}
+
+export class DicomQuery {
+    patientName: string = "";
+    patientID: string = "";
+    patientBirthDate: string = "";
+    studyDescription: string = "";
+    studyDate: string = "";
 }

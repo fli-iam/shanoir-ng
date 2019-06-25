@@ -69,6 +69,9 @@ public class QueryPACSService {
 	@Value("${shanoir.import.pacs.query.aet.called.port}")
 	private Integer calledPort;
 	
+	@Value("${shanoir.import.pacs.query.maxPatients}")
+	private Integer maxPatientsFromPACS;
+	
 	private DicomNode calling;
 	
 	private DicomNode called;
@@ -89,22 +92,25 @@ public class QueryPACSService {
 		/**
 		 * In case of any patient specific search field is filled, work on patient level. Highest priority.
 		 */
-		if (StringUtils.isNotEmpty(dicomQuery.getPatientName())
-			|| StringUtils.isNotEmpty(dicomQuery.getPatientID())
-			|| StringUtils.isNotEmpty(dicomQuery.getPatientBirthDate())) {
+		if (StringUtils.isNotBlank(dicomQuery.getPatientName())
+			|| StringUtils.isNotBlank(dicomQuery.getPatientID())
+			|| StringUtils.isNotBlank(dicomQuery.getPatientBirthDate())) {
+			// For Patient Name and Patient ID, wild card search is not allowed
+			if (!dicomQuery.getPatientName().contains("*") && !dicomQuery.getPatientID().contains("*")) {
+				queryPatientLevel(dicomQuery, calling, called, importJob);
+			}
 			// @Todo: implement wild card search
 			// Do Fuzzy search on base of patient name here
 //			if (StringUtils.isNotEmpty(dicomQuery.getPatientName())
 //				&& (dicomQuery.getPatientName().contains("*") || !dicomQuery.getPatientName().contains("^"))) {
-			queryPatientLevel(dicomQuery, calling, called, importJob);
 			// Do precise search here, using name, id or date
 //			} else {	
 //			}
 		/**
 		 * In case of any study specific search field is filled, work on study level. Second priority.
 		 */
-		} else if (StringUtils.isNotEmpty(dicomQuery.getStudyDescription())
-			|| StringUtils.isNotEmpty(dicomQuery.getStudyDate())) {
+		} else if (StringUtils.isNotBlank(dicomQuery.getStudyDescription())
+			|| StringUtils.isNotBlank(dicomQuery.getStudyDate())) {
 			queryStudyLevel(dicomQuery, calling, called, importJob);
 		} else {
 			throw new ShanoirImportException("DicomQuery: missing parameters.");
@@ -141,8 +147,13 @@ public class QueryPACSService {
 		DicomParam[] params = { patientName, patientID, patientBirthDate, new DicomParam(Tag.PatientBirthName), new DicomParam(Tag.PatientSex) };
 		List<Attributes> attributesPatients = queryCFIND(params, QueryRetrieveLevel.PATIENT, calling, called);
 		if (attributesPatients != null) {
+			// Limit the max number of patients returned 
+			int patientsNbre = attributesPatients.size();
+			if (maxPatientsFromPACS < attributesPatients.size()) {
+				patientsNbre = maxPatientsFromPACS;
+			}
 			List<Patient> patients = new ArrayList<Patient>();
-			for (int i = 0; i < attributesPatients.size(); i++) {
+			for (int i = 0; i < patientsNbre; i++) {
 				Patient patient = new Patient(attributesPatients.get(i));
 				patients.add(patient);
 				queryStudies(calling, called, patient);
@@ -175,6 +186,10 @@ public class QueryPACSService {
 				Study study = new Study(attributesStudies.get(i));
 				patient.getStudies().add(study);
 				querySeries(calling, called, study);
+			}
+			// Limit the max number of patients returned 
+			if (maxPatientsFromPACS < patients.size()) {
+				patients = patients.subList(0, maxPatientsFromPACS);
 			}
 			importJob.setPatients(patients);
 		}

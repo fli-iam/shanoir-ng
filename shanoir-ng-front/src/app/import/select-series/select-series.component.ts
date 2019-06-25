@@ -17,15 +17,15 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../breadcrumbs/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
-import { PatientDicom, SerieDicom } from '../dicom-data.model';
-import { ImportDataService } from '../import.data-service';
-import { ImportService } from '../import.service';
+import { PatientDicom, SerieDicom } from '../shared/dicom-data.model';
+import { ImportDataService } from '../shared/import.data-service';
+import { ImportService } from '../shared/import.service';
 
 
 @Component({
     selector: 'select-series',
     templateUrl: 'select-series.component.html',
-    styleUrls: ['select-series.component.css', '../import.step.css'],
+    styleUrls: ['select-series.component.css', '../shared/import.step.css'],
     animations: [slideDown]
 })
 export class SelectSeriesComponent {
@@ -44,24 +44,25 @@ export class SelectSeriesComponent {
             private router: Router,
             private importDataService: ImportDataService) {
 
-        if (!this.importDataService.archiveUploaded || !this.importDataService.inMemoryExtracted) {
+        if (!this.importDataService.patientList) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
         breadcrumbsService.nameStep('2. Series');
-        this.dataFiles = this.importDataService.inMemoryExtracted;
-        this.patients = this.importDataService.archiveUploaded.patients;
-        this.workFolder = this.importDataService.archiveUploaded.workFolder;
+        this.patients = this.importDataService.patientList.patients;
+        this.workFolder = this.importDataService.patientList.workFolder;
+        if (this.importDataService.inMemoryExtracted) {this.dataFiles = this.importDataService.inMemoryExtracted;}
     }
 
 
-    private showSerieDetails(nodeParams: any): void {
+    private showSerieDetails(nodeParams: any, serie: SerieDicom): void {
         this.detailedPatient = null;
         this.detailedStudy = null;
         if (nodeParams && this.detailedSerie && nodeParams.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
             this.detailedSerie = null;
         } else {
             this.detailedSerie = nodeParams;
+            if (serie && serie.images) this.initPapaya(serie); 
         }
     }
 
@@ -90,7 +91,6 @@ export class SelectSeriesComponent {
     }
 
     private initPapaya(serie: SerieDicom): void {
-        if (!serie) return;
         let listOfPromises;
         if (this.dataFiles) {
             listOfPromises = serie.images.map((image) => {

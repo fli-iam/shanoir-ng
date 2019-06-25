@@ -1,3 +1,4 @@
+
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -15,7 +16,6 @@
 import { Component, ContentChildren, forwardRef, Input, QueryList } from '@angular/core';
 import { Observable } from 'rxjs';
 import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
-
 import { ImagesUrlUtil } from '../../../utils/images-url.util';
 
 @Component({
