@@ -243,7 +243,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
-        if (event.key == 'a') {
+        if (event.key == '²') {
             console.log('form', this.form);
             console.log('entity', this.entity);
         }
