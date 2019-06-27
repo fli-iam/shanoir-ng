@@ -53,7 +53,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
     @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes: QueryList<any>;
     @ContentChildren(forwardRef(() => DropdownMenuComponent)) menus: QueryList<any>;
     public dataLoading: boolean = false;
-    public isOpen: boolean = false;
+    private isOpen: boolean = false;
     public loaded: boolean = false;
     private loaderImagePath: string = ImagesUrlUtil.LOADER_IMAGE_PATH;
     public hasChildren: boolean;
@@ -172,5 +172,4 @@ export class TreeNodeComponent implements ControlValueAccessor {
     registerOnTouched(fn: any) {
         this.onTouchedCallback = fn;
     }
-
 } 
