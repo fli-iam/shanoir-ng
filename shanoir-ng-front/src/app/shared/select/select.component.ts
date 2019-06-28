@@ -335,4 +335,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private clickAdd(): void {
         if(!this.addDisabled) this.onAddClick.emit();
     }
+
+    setDisabledState(isDisabled: boolean) {
+        this.disabled = isDisabled;
+    }
 }
