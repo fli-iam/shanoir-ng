@@ -130,6 +130,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             cloned.children[0].style.padding = '0';
             cloned.children[0].style.overflow = 'hidden';
             cloned.children[0].style.textOverflow = 'ellipsis';
+            cloned.children[0].style.color = 'var(--dark-grey)';
             this.renderer.appendChild(this.labelNode.nativeElement, cloned);
         }
     }
