@@ -238,8 +238,8 @@ export class StudyComponent extends EntityComponent<Study> {
             { headerName: 'Last Name', field: 'user.lastName' },
             { headerName: 'Email', field: 'user.email', width: '200%' },
             { headerName: 'Role', field: 'user.role.displayName', width: '80px' },
-            { headerName: 'Can see all', type: 'boolean', editable: true, width: '54px', 
-                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
+            { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', 
+                //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
             { headerName: 'Can download', type: 'boolean', editable: true, width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_DOWNLOAD, su, value),
@@ -269,14 +269,14 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    private onUserSelect(selectedUser: User) {
+    private onUserAdd(selectedUser: User) {
         selectedUser.selected = true;
         let studyUser: StudyUser = new StudyUser();
         studyUser.userId = selectedUser.id;
         studyUser.userName = selectedUser.username;
         studyUser.receiveAnonymizationReport = false;
         studyUser.receiveNewImportReport = false;
-        studyUser.studyUserRights = [];
+        studyUser.studyUserRights = [StudyUserRight.CAN_SEE_ALL];
         studyUser.completeMember(this.users);
         this.study.studyUserList.push(studyUser);
         this.browserPaging.setItems(this.study.studyUserList);

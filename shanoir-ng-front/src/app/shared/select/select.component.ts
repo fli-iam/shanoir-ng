@@ -326,7 +326,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     } 
 
     private clickView(): void {
-        if(!this.viewDisabled && this.ngModel) this.onViewClick.emit(this.ngModel);
+        if(!this.viewDisabled && this.selectedOption) this.onViewClick.emit(this.selectedOption.value);
     }
 
     private clickNew(): void {
@@ -334,7 +334,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private clickAdd(): void {
-        if(!this.addDisabled) this.onAddClick.emit();
+        if(!this.addDisabled && this.selectedOption) this.onAddClick.emit(this.selectedOption.value);
     }
 
     setDisabledState(isDisabled: boolean) {

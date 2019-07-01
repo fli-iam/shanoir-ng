@@ -15,6 +15,8 @@
 import { Component, OnInit } from '@angular/core';
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ImagesUrlUtil } from '../shared/utils/images-url.util';
+import { KeycloakService } from '../shared/keycloak/keycloak.service';
 
 @Component({
     selector: 'imports',
@@ -24,13 +26,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class ImportComponent implements OnInit {
 
     private importMode: "DICOM" | "PACS";
-    private title: string = '';
 
-    constructor(private breadcrumbsService: BreadcrumbsService,
-        private route: ActivatedRoute, private router: Router) {
+    constructor(
+        private breadcrumbsService: BreadcrumbsService, 
+        private keycloakService: KeycloakService,
+        private route: ActivatedRoute, 
+        private router: Router) {
             route.url.subscribe(() => {
                 if (this.route.snapshot.firstChild && this.route.snapshot.firstChild.data['importMode']) {
-                    this.title = 'from ' + this.route.snapshot.firstChild.data['importMode'];
+                    this.importMode = this.route.snapshot.firstChild.data['importMode'];
                 }
         })
     }

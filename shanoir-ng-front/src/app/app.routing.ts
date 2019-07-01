@@ -65,7 +65,12 @@ let appRoutes: Routes = [
         path: 'imports',
         component: ImportComponent,
         children: [
-            {   path: 'upload',
+            {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: '/home'
+            }, {   
+                path: 'upload',
                 component: DicomUploadComponent,
                 data: {importMode: 'DICOM'}
             }, {

@@ -153,7 +153,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
-								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" [reverse]="true" [disabled]="study.studyCenterList?.length > 1"></toggle-switch>
+								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" [reverse]="true"></toggle-switch>
 								<span>Multicenter</span>
 							</ng-template>
 						</span>
@@ -196,7 +196,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li>
 						<label i18n="Study detail|List of users label@@studyDetailUsers">List of users</label>
 						<span class="right-col">
-							<select-box (change)="onUserSelect($event)" placeholder="Add a user ...">
+							<select-box placeholder="Add a user ..." (onAddClick)="onUserAdd($event)">
 								<select-option *ngFor="let user of users" [value]="user" [disabled]="user?.selected">{{user.username}}</select-option>
 							</select-box>
 						</span>
