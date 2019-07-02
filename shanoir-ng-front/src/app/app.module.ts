@@ -133,6 +133,7 @@ import { ServiceLocator } from './utils/locator.service';
 import { NotificationsComponent } from './shared/notifications/notifications.component';
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 import { TaskService } from './async-tasks/task.service';
+import { StudyRightsService } from './studies/shared/study-rights.service';
 
 //import { ModalService} from './shared/components/modal/modal.service';
 
@@ -267,7 +268,8 @@ import { TaskService } from './async-tasks/task.service';
         GlobalService,
         ImportDataService,
         NiftiConverterService,
-        TaskService
+        TaskService,
+        StudyRightsService
     ],
     bootstrap: [AppComponent],
 })

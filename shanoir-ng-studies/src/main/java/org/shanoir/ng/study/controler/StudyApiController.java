@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
@@ -30,6 +31,7 @@ import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
+import org.shanoir.ng.study.service.StudyUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +54,9 @@ public class StudyApiController implements StudyApi {
 	
 	@Autowired
 	private StudyUniqueConstraintManager uniqueConstraintManager;
+	
+	@Autowired
+	private StudyUserService studyUserService;
 
 	@Override
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
@@ -118,6 +123,17 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+	
+
+	@Override
+	public ResponseEntity<List<StudyUserRight>> rights(@PathVariable("studyId") final Long studyId) throws RestServiceException {
+		List<StudyUserRight> rights = this.studyUserService.getRightsForStudy(studyId);
+		if (!rights.isEmpty()) {
+			return new ResponseEntity<>(rights, HttpStatus.OK);			
+		} else {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
 	}
 	
 	

@@ -19,9 +19,11 @@ import java.util.List;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -126,6 +128,18 @@ public interface StudyApi {
 	ResponseEntity<Void> updateStudy(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "study to update", required = true) @RequestBody Study study, BindingResult result)
+			throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Get my rights on this study", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "here are your rights", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "/rights/{studyId}", produces = { "application/json" }, consumes = {
+			"application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	ResponseEntity<List<StudyUserRight>> rights(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException;
 
 }

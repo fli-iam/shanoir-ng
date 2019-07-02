@@ -20,7 +20,6 @@ import java.util.Set;
 import javax.transaction.Transactional;
 
 import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -31,7 +30,9 @@ import org.springframework.data.repository.CrudRepository;
 public interface StudyUserRepository extends CrudRepository<StudyUser, Long> {
 
 	List<StudyUser> findByUserId(Long userId);
-	
+
+	StudyUser findByUserIdAndStudy_Id(Long userId, Long studyId);
+
 	@Transactional
 	void deleteByIdIn(Set<Long> ids);
 }
