@@ -87,5 +87,4 @@ export class KeycloakService {
     canUserImportFromPACS(): boolean {
         return KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed.canImportFromPACS;
     }
-
 }

@@ -87,8 +87,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Clinical label@@studyDetailClinical" class="required-label">Is clinical</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.clinical" class="bool-true">&#x2713;</span>
-								<span *ngIf="!study.clinical" class="bool-false">&#x2717;</span>
+								<span *ngIf="study.clinical" class="bool-true"><i class="fas fa-check"></i></span>
+								<span *ngIf="!study.clinical" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<checkbox [(ngModel)]="study.clinical" formControlName="clinical"></checkbox>
@@ -99,8 +99,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|With examination label@@studyDetailWithExamination">Is with examination</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.withExamination" class="bool-true">&#x2713;</span>
-								<span *ngIf="!study.withExamination" class="bool-false">&#x2717;</span>
+								<span *ngIf="study.withExamination" class="bool-true"><i class="fas fa-check"></i></span>
+								<span *ngIf="!study.withExamination" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<checkbox [(ngModel)]="study.withExamination" formControlName="withExamination"></checkbox>
@@ -116,8 +116,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Visible by default label@@studyDetailVisibleByDefault">Visible by default</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.visibleByDefault" class="bool-true">&#x2713;</span>
-								<span *ngIf="!study.visibleByDefault" class="bool-false">&#x2717;</span>
+								<span *ngIf="study.visibleByDefault" class="bool-true"><i class="fas fa-check"></i></span>
+								<span *ngIf="!study.visibleByDefault" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<checkbox [(ngModel)]="study.visibleByDefault" formControlName="visibleByDefault"></checkbox>
@@ -128,8 +128,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Data downloadable by default label@@studyDetailDownloadableByDefault">Data downloadable by default</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								<span *ngIf="study.downloadableByDefault" class="bool-true">&#x2713;</span>
-								<span *ngIf="!study.downloadableByDefault" class="bool-false">&#x2717;</span>
+								<span *ngIf="study.downloadableByDefault" class="bool-true"><i class="fas fa-check"></i></span>
+								<span *ngIf="!study.downloadableByDefault" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<checkbox [(ngModel)]="study.downloadableByDefault" formControlName="downloadableByDefault"></checkbox>
@@ -205,7 +205,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<shanoir-table #memberTable
 							[getPage]="getPage.bind(this)" 
 							[columnDefs]="columnDefs"
-							[editMode]="true">
+							[editMode]="true"
+							[disableCondition]="disableEdit.bind(this)">
 						</shanoir-table>
 					</li>
 				</ol>
