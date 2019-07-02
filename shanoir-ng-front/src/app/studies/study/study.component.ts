@@ -262,7 +262,7 @@ export class StudyComponent extends EntityComponent<Study> {
             { headerName: 'Can import', type: 'boolean', editable: true, width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
-            { headerName: 'Can admin', type: 'boolean', editable: true, width: '54px', 
+            { headerName: 'Can admin', type: 'boolean', editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User', width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)},
             { headerName: 'Received Import Mail', field: 'receiveNewImportReport', editable: true, width: '54px' },
