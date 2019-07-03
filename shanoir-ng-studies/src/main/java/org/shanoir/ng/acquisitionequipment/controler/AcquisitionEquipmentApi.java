@@ -97,10 +97,10 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{acquisitionEquipmentId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#userId, #user)")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#acquisitionEquipmentId, #acquisitionEquipment)")
 	ResponseEntity<Void> updateAcquisitionEquipment(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId,
-			@ApiParam(value = "acquisition equipment to update", required = true) @RequestBody AcquisitionEquipment acquisitionequipment,
+			@ApiParam(value = "acquisition equipment to update", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException;
 
 }

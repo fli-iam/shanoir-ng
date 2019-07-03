@@ -16,7 +16,6 @@ package org.shanoir.ng.utils;
 
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,5 +47,15 @@ public class ImportSecurityService {
     public boolean hasRightOnOneStudy(String rightStr) {
     	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
         return rightsService.hasRightOnAtLeastOneStudy(rightStr);
+    }
+    
+    /**
+	 * Know if connected user can import from PACS
+	 * 
+	 * @return a boolean
+	 */
+    public boolean canImportFromPACS() {
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return true;
+    	return KeycloakUtil.canImportFromPACS();
     }
 }

@@ -57,6 +57,17 @@ public final class KeycloakUtil {
 	}
 	
 	/**
+	 * Know if connected user can import from PACS
+	 * 
+	 * @return a boolean
+	 */
+	public static boolean canImportFromPACS() {
+		final KeycloakSecurityContext context = getKeycloakSecurityContext();
+		final AccessToken accessToken = context.getToken();
+		return Boolean.parseBoolean(accessToken.getOtherClaims().get("canImportFromPACS").toString());
+	}
+	
+	/**
 	 * Get connected user roles. If anonymous user, returns an empty list.
 	 * 
 	 * @return roles
