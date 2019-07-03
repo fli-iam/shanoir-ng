@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>		
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="study" [(ngModel)]="examination.study">
+								<select-box formControlName="study" [(ngModel)]="examination.study" (change)="onStudyChange()">
 									<select-option *ngFor="let study of studies" [value]="study">{{study.name}}</select-option>
 								</select-box>
 								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>

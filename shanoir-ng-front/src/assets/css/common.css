@@ -151,8 +151,8 @@ form { color: var(--dark-grey); }
 .error-message label { color: var(--color-error); }
 .error-message li { color: var(--color-error); }
 
-.bool-true { color: green; font-weight: bold }
-.bool-false { color: darkred; font-weight: bold }
+.bool-true { color: var(--color-c); font-size: 14px; }
+.bool-false { color: var(--color-error); font-size: 14px; }
 
 .shanoir-table table { border-collapse: collapse; }
   .shanoir-table table td, .shanoir-table table th { border: 1px solid gray; }

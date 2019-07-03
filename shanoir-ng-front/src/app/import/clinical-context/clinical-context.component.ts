@@ -80,7 +80,10 @@ export class ClinicalContextComponent {
             this.importMode = 'PACS';
         }
         
-        this.setPatient(this.importDataService.patients[0]).then(() => this.reloadSavedData());
+        this.setPatient(this.importDataService.patients[0]).then(() => {
+            this.reloadSavedData();
+            this.onContextChange();
+        });
     }
 
     private reloadSavedData() {
@@ -113,7 +116,6 @@ export class ClinicalContextComponent {
             }
             if (niftiConverter) {
                 this.niftiConverter = niftiConverter;
-                this.onContextChange();
             }
         }
     }
@@ -127,7 +129,7 @@ export class ClinicalContextComponent {
                 let hasOneCompatible: boolean = this.studies.filter(study => study.compatible).length == 1;
                 if (hasOneCompatible) {
                     this.study = this.studies.filter(study => study.compatible)[0];
-                    this.onSelectStudy(); 
+                    this.onSelectStudy();
                 }
             })
     }
@@ -180,7 +182,6 @@ export class ClinicalContextComponent {
                 this.centers.push(studyCenter.center);
             }
         }
-        this.onContextChange();
     }
 
     private onSelectCenter(): void {
@@ -194,7 +195,6 @@ export class ClinicalContextComponent {
             }
             this.acquisitionEquipments = this.center.acquisitionEquipments;
         }
-        this.onContextChange();
     }
 
     private onSelectAcquisitonEquipment(): void {
@@ -205,7 +205,6 @@ export class ClinicalContextComponent {
                 .findSubjectsByStudyId(this.study.id)
                 .then(subjects => this.subjects = subjects);
         }
-        this.onContextChange();
     }
 
     private onSelectSubject(): void {
@@ -216,7 +215,6 @@ export class ClinicalContextComponent {
             .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
             .then(examinations => this.examinations = examinations);
         }
-        this.onContextChange();
     }
 
     private onSelectExam(): void {
@@ -224,11 +222,9 @@ export class ClinicalContextComponent {
         if (this.examination) {
             this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
         }
-        this.onContextChange();
     }
 
     private onSelectNifti(): void {
-        this.onContextChange();
     }
 
     private onContextChange() {

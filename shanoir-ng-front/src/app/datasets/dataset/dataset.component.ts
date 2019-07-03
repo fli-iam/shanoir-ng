@@ -19,6 +19,7 @@ import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
 
 
 @Component({
@@ -32,11 +33,13 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private papayaParams: any;
     private blob: Blob;
     private filename: string;
+    private hasDownloadRight: boolean = false;
     
     constructor(
             private datasetService: DatasetService,
             private route: ActivatedRoute,
-            private dicomArchiveService: DicomArchiveService) {
+            private dicomArchiveService: DicomArchiveService,
+            private studyRightsService: StudyRightsService) {
 
         super(route, 'dataset');
     }
@@ -46,11 +49,17 @@ export class DatasetComponent extends EntityComponent<Dataset> {
 
     ngOnInit(): void {
         super.ngOnInit();
-        this.loadDicomInMemory();
     }
-
+    
     initView(): Promise<void> {
-        return this.fetchDataset().then(() => null);
+        return this.fetchDataset().then(() => {
+            this.studyRightsService.canDownloadStudy(this.dataset.studyId).then(
+                hasRight => {
+                    this.hasDownloadRight = hasRight;
+                    if (hasRight) this.loadDicomInMemory();
+                }
+            );
+        });
     }
 
     initEdit(): Promise<void> {

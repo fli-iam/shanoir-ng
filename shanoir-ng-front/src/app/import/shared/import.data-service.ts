@@ -42,6 +42,7 @@ export class ImportDataService {
     private _contextData: ContextData;    // 3. context
     public contextBackup: ContextData;
 
+
     public reset() {
         this._inMemoryExtracted = undefined;
         this._patientList = undefined;

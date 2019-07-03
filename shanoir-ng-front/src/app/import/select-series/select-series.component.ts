@@ -127,7 +127,7 @@ export class SelectSeriesComponent {
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
-        if (event.key == 'œ') {
+        if (event.key == '²') {
             console.log('patients', this.patients);
         }
     }

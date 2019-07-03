@@ -34,6 +34,7 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
 @Component({
     selector: 'study-detail',
@@ -55,6 +56,7 @@ export class StudyComponent extends EntityComponent<Study> {
     private users: User[] = [];
     
     private studyUsersPromise: Promise<any>;
+    private freshlyAddedMe: boolean = false;
 
     constructor(
             private route: ActivatedRoute, 
@@ -109,7 +111,12 @@ export class StudyComponent extends EntityComponent<Study> {
             this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
         });
 
-        this.userService.getAll().then(users => this.users = users);
+        this.userService.getAll().then(users => {
+            this.users = users;
+            // Add the connected user by default
+            let connectedUser: User = users.find(user => this.isMe(user));
+            this.addUser(connectedUser, [StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE]);
+        });
         return Promise.resolve();
     }
 
@@ -230,6 +237,14 @@ export class StudyComponent extends EntityComponent<Study> {
             });
         });
     }
+
+    isMe(user: User): boolean {
+        return user.id == KeycloakService.auth.userId;
+    }
+
+    disableEdit(studyUser: StudyUser): boolean {
+        return !this.freshlyAddedMe && studyUser.userId == KeycloakService.auth.userId;
+    }
         
     private createColumnDefs() {
         this.columnDefs = [
@@ -237,9 +252,9 @@ export class StudyComponent extends EntityComponent<Study> {
             { headerName: 'First Name', field: 'user.firstName' },
             { headerName: 'Last Name', field: 'user.lastName' },
             { headerName: 'Email', field: 'user.email', width: '200%' },
-            { headerName: 'Role', field: 'user.role.displayName', width: '80px' },
-            { headerName: 'Can see all', type: 'boolean', editable: true, width: '54px', 
-                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
+            { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true },
+            { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', 
+                //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
             { headerName: 'Can download', type: 'boolean', editable: true, width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_DOWNLOAD, su, value),
@@ -247,7 +262,7 @@ export class StudyComponent extends EntityComponent<Study> {
             { headerName: 'Can import', type: 'boolean', editable: true, width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
-            { headerName: 'Can admin', type: 'boolean', editable: true, width: '54px', 
+            { headerName: 'Can admin', type: 'boolean', editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User', width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)},
             { headerName: 'Received Import Mail', field: 'receiveNewImportReport', editable: true, width: '54px' },
@@ -269,14 +284,19 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    private onUserSelect(selectedUser: User) {
+    private onUserAdd(selectedUser: User) {
+        if (this.isMe(selectedUser)) this.freshlyAddedMe = true;
+        this.addUser(selectedUser);
+    }
+
+    private addUser(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
         selectedUser.selected = true;
         let studyUser: StudyUser = new StudyUser();
         studyUser.userId = selectedUser.id;
         studyUser.userName = selectedUser.username;
         studyUser.receiveAnonymizationReport = false;
         studyUser.receiveNewImportReport = false;
-        studyUser.studyUserRights = [];
+        studyUser.studyUserRights = rights;
         studyUser.completeMember(this.users);
         this.study.studyUserList.push(studyUser);
         this.browserPaging.setItems(this.study.studyUserList);

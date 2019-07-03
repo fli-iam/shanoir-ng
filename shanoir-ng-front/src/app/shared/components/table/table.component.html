@@ -76,28 +76,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         >
         
         <!-- default display -->
-        <span *ngIf="!editMode || !col.editable">{{renderCell(item, col)}}</span>
+        <span *ngIf="!editMode || !cellEditable(item, col)">{{renderCell(item, col)}}</span>
 
         <!-- editable text / number -->
-        <span *ngIf="editMode && col.editable && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
+        <span *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
             <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
         </span>
 
         <!-- editable text / number with dropdown -->
-        <span *ngIf="editMode && col.editable && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
+        <span *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
             <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
                 <option *ngFor="let possibleValue of col.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
             </select>
         </span>
 
         <!-- display a boolean -->
-        <span *ngIf="isFieldBoolean(col) && (!editMode || !col.editable)">
-            <span *ngIf="getCellValue(item, col)" class="bool-true">&#x2713;</span>
-            <span *ngIf="!getCellValue(item, col)" class="bool-false">&#x2717;</span>
+        <span *ngIf="isFieldBoolean(col) && (!editMode || !cellEditable(item, col))">
+            <span *ngIf="getCellValue(item, col)" class="bool-true"><i class="fas fa-check"></i></span>
+            <span *ngIf="!getCellValue(item, col)" class="bool-false"><i class="fas fa-times"></i></span>
         </span>
 
         <!-- editable boolean -->
-        <span *ngIf="isFieldBoolean(col) && editMode && col.editable">
+        <span *ngIf="isFieldBoolean(col) && editMode && cellEditable(item, col)">
             <checkbox [ngModel]="getCellValue(item, col)" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox> 
         </span>
 

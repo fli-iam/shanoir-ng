@@ -49,11 +49,20 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             protected breadcrumbsService: BreadcrumbsService) {
 
         super(route, 'examination');
-        this.inImport = breadcrumbsService.isImporting();
+        this.inImport = this.breadcrumbsService.isImporting();
     }
-
+    
     set examination(examination: Examination) { this.entity = examination; }
     get examination(): Examination { return this.entity; }
+    
+    set entity(exam: Examination) {
+        super.entity = exam;
+        this.getSubjects();
+    }
+
+    get entity(): Examination {
+        return super.entity;
+    }
 
     initView(): Promise<void> {
         return this.examinationService.get(this.id).then((examination: Examination) => {
@@ -66,7 +75,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.getStudies();
         return this.examinationService.get(this.id).then((examination: Examination) => {
             this.examination = examination
-        });
+        }).then(exam => this.getSubjects());
     }
 
     initCreate(): Promise<void> {
@@ -106,10 +115,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     private getSubjects(): void {
-        if (!this.examination.study) return;
+        if (!this.examination || !this.examination.study) return;
         this.studyService
             .findSubjectsByStudyId(this.examination.study.id)
             .then(subjects => this.subjects = subjects);
+    }
+
+    private onStudyChange() {
+        this.getSubjects();
     }
 
     private instAssessment() {

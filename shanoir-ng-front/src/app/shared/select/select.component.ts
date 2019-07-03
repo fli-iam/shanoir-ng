@@ -130,6 +130,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             cloned.children[0].style.padding = '0';
             cloned.children[0].style.overflow = 'hidden';
             cloned.children[0].style.textOverflow = 'ellipsis';
+            cloned.children[0].style.color = 'var(--dark-grey)';
             this.renderer.appendChild(this.labelNode.nativeElement, cloned);
         }
     }
@@ -325,7 +326,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     } 
 
     private clickView(): void {
-        if(!this.viewDisabled && this.ngModel) this.onViewClick.emit(this.ngModel);
+        if(!this.viewDisabled && this.selectedOption) this.onViewClick.emit(this.selectedOption.value);
     }
 
     private clickNew(): void {
@@ -333,6 +334,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private clickAdd(): void {
-        if(!this.addDisabled) this.onAddClick.emit();
+        if(!this.addDisabled && this.selectedOption) this.onAddClick.emit(this.selectedOption.value);
+    }
+
+    setDisabledState(isDisabled: boolean) {
+        this.disabled = isDisabled;
     }
 }

@@ -31,7 +31,7 @@ export type Mode =  "view" | "edit" | "create";
 export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy {
 
     protected id: number;
-    protected entity: T;
+    private _entity: T;
     @Input() mode: Mode;
     @Output() close: EventEmitter<any> = new EventEmitter();
     private footerState: FooterState;
@@ -73,6 +73,14 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.addBCStep();
     }
 
+    protected get entity(): T {
+        return this._entity;
+    }
+
+    protected set entity(entity: T) {
+        this._entity = entity;
+    }
+
     ngOnInit(): void {
         const choose = (): Promise<void> => {
             switch (this.mode) { 
@@ -83,8 +91,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             }
         }
         choose().then(() => {
-            if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) 
+            if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
                 this.entity = this.breadcrumbsService.currentStep.entity as T;
+            }
             this.breadcrumbsService.currentStep.entity = this.entity;
             this.manageFormSubscriptions();
         });

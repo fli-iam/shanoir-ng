@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,7 +31,7 @@ import org.springframework.stereotype.Service;
 @Service
 public interface StudyUserService {
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE')")
-	Study updateStudyUsers(Study study, List<StudyUser> studyUsers) throws EntityNotFoundException, AccessDeniedException;
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	List<StudyUserRight> getRightsForStudy(Long studyId);
 
 }

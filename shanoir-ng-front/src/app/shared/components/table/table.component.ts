@@ -32,6 +32,7 @@ export class TableComponent implements OnInit {
     @Input() editMode: boolean = false;
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
+    @Input() disableCondition: (item: any) => boolean;
     
     private page: Page<Object>;
     private isLoading: boolean = false;
@@ -301,6 +302,11 @@ export class TableComponent implements OnInit {
             }
             return;
         }
+    }
+
+    private cellEditable(item, col) {
+        let colEditable: boolean = col.editable && (typeof col.editable === 'function' ? col.editable(item) : col.editable);
+        return colEditable && (!this.disableCondition || !this.disableCondition(item));
     }
 
 }

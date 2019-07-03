@@ -34,6 +34,7 @@ import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
+import org.shanoir.ng.study.service.StudyUserService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -75,6 +76,9 @@ public class StudyApiControllerTest {
 
 	@MockBean
 	private StudyService studyServiceMock;
+	
+	@MockBean
+	private StudyUserService studyUserServiceMock;
 	
 	@MockBean
 	private StudyFieldEditionSecurityManager fieldEditionSecurityManager;
