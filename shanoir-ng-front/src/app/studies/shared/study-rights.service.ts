@@ -35,5 +35,11 @@ export class StudyRightsService {
                 return false;
             });
     }
+
+    hasOnStudyToImport(): Promise<boolean> {
+        if (this.keycloakService.isUserAdmin()) return Promise.resolve(true);
+        return this.http.get<boolean>(AppUtils.BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT)
+            .toPromise();
+    }
     
 }

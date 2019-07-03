@@ -136,6 +136,13 @@ public class StudyApiController implements StudyApi {
 		}
 	}
 	
+
+	@Override
+	public ResponseEntity<Boolean> hasOneStudyToImport() throws RestServiceException {
+		boolean hasOneStudy = this.studyUserService.hasOneStudyToImport();
+		return new ResponseEntity<>(hasOneStudy, HttpStatus.OK);
+	}
+	
 	
 	private void validate(Study study, BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap()

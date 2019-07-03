@@ -33,5 +33,8 @@ public interface StudyUserService {
 
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	List<StudyUserRight> getRightsForStudy(Long studyId);
+	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	boolean hasOneStudyToImport();
 
 }
