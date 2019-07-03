@@ -311,6 +311,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.browserPaging.setItems(this.study.studyUserList);
         this.table.refresh();
         StudyUser.completeMember(item, this.users);
+        item.user.selected = false;
     }
 
     private studyStatusStr(studyStatus: string) {

@@ -306,7 +306,10 @@ export class TableComponent implements OnInit {
 
     private cellEditable(item, col) {
         let colEditable: boolean = col.editable && (typeof col.editable === 'function' ? col.editable(item) : col.editable);
-        return colEditable && (!this.disableCondition || !this.disableCondition(item));
+        return colEditable && !this.rowDisabled(item);
     }
 
+    private rowDisabled(item): boolean {
+        return this.disableCondition && this.disableCondition(item);
+    }
 }
