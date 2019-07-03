@@ -299,8 +299,8 @@ export class TableComponent implements OnInit {
             if (col.defaultSortCol) {
                 this.lastSortedCol = col;
                 this.lastSortedAsc = col.defaultAsc != undefined ? col.defaultAsc : true;
+                return;
             }
-            return;
         }
     }
 
