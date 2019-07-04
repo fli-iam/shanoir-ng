@@ -77,12 +77,12 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         if (this.edit && this.keycloakService.isUserAdminOrExpert()) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.goToEdit(item.id) });
         }
-        if (this.view && !this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-eye", action: item => this.goToView(item.id) });
-        }
-        if (this.delete && !this.keycloakService.isUserGuest()) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.openDeleteConfirmDialog(item) });
-        }
+        // if (this.view && !this.keycloakService.isUserGuest()) {
+        //     this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-eye", action: item => this.goToView(item.id) });
+        // }
+        // if (this.delete && !this.keycloakService.isUserGuest()) {
+        //     this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.openDeleteConfirmDialog(item) });
+        // }
     }
 
     private completeCustomActions(): void {
@@ -98,13 +98,10 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     abstract getCustomActionsDefs(): any[];
 
     private onRowClick(entity: T) {
-        if (!this.keycloakService.isUserGuest()) {
-            this.goToView(entity.id);
-        }
+        this.goToView(entity.id);
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
-        if (this.keycloakService.isUserGuest()) return;
         this.confirmDialogService
             .confirm(
                 'Delete', 'Are you sure you want to delete ' + this.ROUTING_NAME + ' n° ' + entity.id + ' ?',

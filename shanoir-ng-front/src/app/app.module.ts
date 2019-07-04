@@ -104,7 +104,7 @@ import { MsgBoxComponent } from './shared/msg-box/msg-box.component';
 import { MsgBoxService } from './shared/msg-box/msg-box.service';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
-import { AuthNotGuestGuard } from './shared/roles/auth-not-guest-guard';
+import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
 import { SelectBoxComponent } from './shared/select/select.component';
 import { SelectOptionComponent } from './shared/select/select.option.component';
@@ -235,7 +235,7 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         AccountEventsService,
         AcquisitionEquipmentService,
         AuthAdminGuard,
-        AuthNotGuestGuard,
+        AuthAdminOrExpertGuard,
         CanImportFromPACSGuard,
         CenterService,
         ConfirmDialogService,
