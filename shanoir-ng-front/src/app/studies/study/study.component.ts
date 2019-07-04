@@ -57,6 +57,7 @@ export class StudyComponent extends EntityComponent<Study> {
     
     private studyUsersPromise: Promise<any>;
     private freshlyAddedMe: boolean = false;
+    private studyUserBackup: StudyUser[];
 
     constructor(
             private route: ActivatedRoute, 
@@ -89,6 +90,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.userService.getAll().then(users => this.users = users)
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
+            this.studyUserBackup = study.studyUserList ? study.studyUserList.map(a => Object.assign(new StudyUser, a)) : [];
         });
         Promise.all([
             studyPromise,
@@ -291,14 +293,20 @@ export class StudyComponent extends EntityComponent<Study> {
 
     private addUser(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
         selectedUser.selected = true;
-        let studyUser: StudyUser = new StudyUser();
-        studyUser.userId = selectedUser.id;
-        studyUser.userName = selectedUser.username;
-        studyUser.receiveAnonymizationReport = false;
-        studyUser.receiveNewImportReport = false;
-        studyUser.studyUserRights = rights;
-        studyUser.completeMember(this.users);
-        this.study.studyUserList.push(studyUser);
+
+        let backedUpStudyUser: StudyUser = this.studyUserBackup.find(su => su.userId == selectedUser.id);
+        if (backedUpStudyUser) {
+            this.study.studyUserList.push(backedUpStudyUser);
+        } else {
+            let studyUser: StudyUser = new StudyUser();
+            studyUser.userId = selectedUser.id;
+            studyUser.userName = selectedUser.username;
+            studyUser.receiveAnonymizationReport = false;
+            studyUser.receiveNewImportReport = false;
+            studyUser.studyUserRights = rights;
+            studyUser.completeMember(this.users);
+            this.study.studyUserList.push(studyUser);
+        }
         this.browserPaging.setItems(this.study.studyUserList);
         this.table.refresh();
     }
