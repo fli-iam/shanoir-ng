@@ -58,18 +58,14 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                 headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {
                     return (params.data.subject) ? params.data.subject.name : "";
                 }
-            },
-            {
+            },{
                 headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
                     return dateRenderer(params.data.examinationDate);
                 }, width: "100px"
-            },
-            {
-                headerName: "Research study", field: "studyName", type: "link", 
+            },{
+                headerName: "Research study", field: "study.name", type: "link", 
                 action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.study.id])
-            },
-            { headerName: "Examination executive", field: "" },
-            {
+            },{
                 headerName: "Center", field: "centerName", type: "link", 
                 action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.center.id])
             }
