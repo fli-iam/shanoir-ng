@@ -32,6 +32,15 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
            super('user');
     }
 
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: true, 
+            delete: true
+        };
+    }
+
     getEntities(): Promise<User[]> {
         return this.userService.getAll();
     }

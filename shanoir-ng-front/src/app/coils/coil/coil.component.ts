@@ -116,6 +116,10 @@ export class CoilComponent extends EntityComponent<Coil> {
         }
     }
 
+    public hasEditRight(): boolean {
+        return this.keycloakService.isUserAdminOrExpert();
+    }
+
     private openNewCenter() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {

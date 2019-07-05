@@ -110,7 +110,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         
         <!-- display a button -->
         <span class="button" *ngIf="col.type == 'button' && !rowDisabled(item)">
-            <span *ngIf="col.action" (click)="col.action(item)">
+            <span *ngIf="col.action && (!col.condition || col.condition(item))" (click)="col.action(item)">
                 <img *ngIf="col.img" src="{{col.img}}" />
                 <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
             </span>

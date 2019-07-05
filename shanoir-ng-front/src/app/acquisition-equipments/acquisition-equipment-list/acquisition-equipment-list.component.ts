@@ -44,6 +44,15 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
         super('acquisition-equipment');
     }
 
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
     // Grid data
     getEntities(): Promise<AcquisitionEquipment[]> {
         return this.acqEquipService.getAll();

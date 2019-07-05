@@ -146,6 +146,14 @@ export class StudyComponent extends EntityComponent<Study> {
         return null;
     }
 
+    public hasEditRight(): boolean {
+        if (this.keycloakService.isUserAdmin()) return true;
+        if (!this.study.studyUserList) return false;
+        let studyUser: StudyUser = this.study.studyUserList.find(su => su.userId == KeycloakService.auth.userId);
+        if (!studyUser) return false;
+        return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
+
     private newStudy(): Study {
         let study: Study = new Study();
         study.clinical = false;

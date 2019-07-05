@@ -20,6 +20,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 
 
 @Component({
@@ -34,6 +35,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private blob: Blob;
     private filename: string;
     private hasDownloadRight: boolean = false;
+    private hasAdministrateRight: boolean = false;
     
     constructor(
             private datasetService: DatasetService,
@@ -46,17 +48,13 @@ export class DatasetComponent extends EntityComponent<Dataset> {
 
     get dataset(): Dataset { return this.entity; }
     set dataset(dataset: Dataset) { this.entity = dataset; }
-
-    ngOnInit(): void {
-        super.ngOnInit();
-    }
     
     initView(): Promise<void> {
         return this.fetchDataset().then(() => {
-            this.studyRightsService.canDownloadStudy(this.dataset.studyId).then(
-                hasRight => {
-                    this.hasDownloadRight = hasRight;
-                    if (hasRight) this.loadDicomInMemory();
+            this.studyRightsService.getMyRightsForStudy(this.dataset.studyId).then(rights => {
+                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                    if (this.hasDownloadRight) this.loadDicomInMemory();
                 }
             );
         });
@@ -74,7 +72,6 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         return this.formBuilder.group({});
     }
     
-
     private fetchDataset(): Promise<Dataset> {
         if (this.mode != 'create') {
             return this.datasetService.get(this.id).then((dataset: Dataset) => {
@@ -113,5 +110,9 @@ export class DatasetComponent extends EntityComponent<Dataset> {
             params['binaryImages'] = [values];
             this.papayaParams = params;
         });
+    }
+
+    public hasEditRight(): boolean {
+        return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 }

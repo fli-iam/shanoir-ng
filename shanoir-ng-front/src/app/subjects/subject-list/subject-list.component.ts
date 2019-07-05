@@ -11,14 +11,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, ViewChild } from '@angular/core';
 
+import { DatasetService } from '../../datasets/shared/dataset.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { DatasetService } from '../../datasets/shared/dataset.service';
+
 
 @Component({
     selector: 'subject-list',
@@ -29,9 +32,15 @@ import { DatasetService } from '../../datasets/shared/dataset.service';
 export class SubjectListComponent extends BrowserPaginEntityListComponent<Subject> {
     
     @ViewChild('table') table: TableComponent;
+    private studiesICanAdmin: number[];
 
-    constructor(private subjectService: SubjectService, private datasetService: DatasetService) {       
+    constructor(
+            private subjectService: SubjectService, 
+            private datasetService: DatasetService,
+            private studyService: StudyService) {       
+                
         super('subject');
+        this.studyService.findStudiesIcanAdmin().then(ids => this.studiesICanAdmin = ids);
     }
 
     getEntities(): Promise<Subject[]> {
@@ -74,5 +83,21 @@ export class SubjectListComponent extends BrowserPaginEntityListComponent<Subjec
             studyName = subject.subjectStudyList[0].study.name;
         }
         this.datasetService.exportBIDSBySubjectId(subject.id, subject.name, studyName);
+    }
+
+    getOptions() {
+        return {
+            new: false,
+            view: true, 
+            edit: false, 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
+    canDelete(subject: Subject): boolean {
+        return this.keycloakService.isUserAdmin() || (
+            subject.subjectStudyList &&
+            subject.subjectStudyList.filter(ss => this.studiesICanAdmin.includes(ss.study.id)).length > 0
+        );
     }
 }

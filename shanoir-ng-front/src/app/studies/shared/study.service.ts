@@ -18,6 +18,8 @@ import { IdName } from '../../shared/models/id-name.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import { Study } from './study.model';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { StudyUserRight } from './study-user-right.enum';
 
 @Injectable()
 export class StudyService extends EntityService<Study> {
@@ -45,5 +47,14 @@ export class StudyService extends EntityService<Study> {
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
             .toPromise();
+    }
+
+    findStudiesIcanAdmin(): Promise<number[]> {
+        return this.getAll().then(studies => {
+            const myId: number = KeycloakService.auth.userId;
+            return studies.filter(study => {
+                return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0;
+            }).map(study => study.id);
+        });
     }
 }

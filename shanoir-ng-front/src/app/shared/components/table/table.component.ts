@@ -33,7 +33,7 @@ export class TableComponent implements OnInit {
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Input() disableCondition: (item: any) => boolean;
-    
+
     private page: Page<Object>;
     private isLoading: boolean = false;
     private maxResultsField: number;

@@ -102,7 +102,7 @@ appRoutes = appRoutes.concat(
     getRoutesFor('study', StudyComponent, StudyListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('subject', SubjectComponent, SubjectListComponent, {update: AuthAdminGuard}),
     getRoutesFor('examination', ExaminationComponent, ExaminationListComponent, {update: AuthAdminGuard}),
-    getRoutesFor('dataset', DatasetComponent, DatasetListComponent, {update: AuthAdminOrExpertGuard}),
+    getRoutesFor('dataset', DatasetComponent, DatasetListComponent, {update: AuthAdminGuard}),
     getRoutesFor('center', CenterComponent, CenterListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('acquisition-equipment', AcquisitionEquipmentComponent, AcquisitionEquipmentListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('coil', CoilComponent, CoilListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),

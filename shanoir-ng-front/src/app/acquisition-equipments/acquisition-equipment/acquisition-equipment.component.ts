@@ -57,7 +57,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.updateAcquEq();
     }
 
-    async initEdit(): Promise<void> {
+    initEdit(): Promise<void> {
         this.getManufModels();
         return Promise.all([
             this.centerService.getCentersNames(),
@@ -69,11 +69,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         });
     }
 
-    initCreate(): Promise<void> {
+    async initCreate(): Promise<void> {
         this.entity = new AcquisitionEquipment();
         this.centerService.getCentersNames().then(centers => this.centers = centers);
         this.getManufModels();
-        return Promise.resolve();
     }
 
     private prefill() {
@@ -101,6 +100,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     private getManufModels(manufModelId?: number): void {
         this.manufModelService.getAll()
             .then(manufModels => this.manufModels = manufModels);
+    }
+
+    public hasEditRight(): boolean {
+        return this.keycloakService.isUserAdminOrExpert();
     }
 
     private openNewManufModel() {
