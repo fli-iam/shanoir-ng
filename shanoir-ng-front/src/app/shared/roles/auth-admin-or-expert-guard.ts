@@ -11,26 +11,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
 
-import { KeycloakService } from "../keycloak/keycloak.service";
+import { KeycloakService } from '../keycloak/keycloak.service';
+import { MsgBoxService } from '../msg-box/msg-box.service';
+
 
 @Injectable()
-export class AuthNotGuestGuard implements CanActivate {
+export class AuthAdminOrExpertGuard implements CanActivate {
 
-    constructor(private keycloakService: KeycloakService, private router: Router) {
+    constructor(
+            private keycloakService: KeycloakService, 
+            private router: Router,
+            private msgService: MsgBoxService) {
 
     }
 
     canActivate() {
-        if (this.keycloakService.isUserGuest() === true) {
+        if (this.keycloakService.isUserAdminOrExpert()) {
+            return true;
+        } else {
             this.router.navigate(['/home']);
+            this.msgService.log('warn', 'Sorry, you have no right to visit to this page.');
             return false;
         }
-        return true;
     }
 
 }

@@ -11,7 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, ViewChild } from '@angular/core';
 
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
@@ -19,6 +18,10 @@ import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import { StudyService } from '../../studies/shared/study.service';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+
 
 @Component({
     selector: 'examination-list',
@@ -28,11 +31,14 @@ import { ExaminationService } from '../shared/examination.service';
 export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     @ViewChild('table') table: TableComponent;
+    private studiesICanAdmin: number[];
 
     constructor(
-            private examinationService: ExaminationService) {
+            private examinationService: ExaminationService,
+            private studyService: StudyService) {
         
         super('examination');
+        this.studyService.findStudiesIcanAdmin().then(ids => this.studiesICanAdmin = ids);
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
@@ -52,18 +58,14 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                 headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {
                     return (params.data.subject) ? params.data.subject.name : "";
                 }
-            },
-            {
+            },{
                 headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
                     return dateRenderer(params.data.examinationDate);
                 }, width: "100px"
-            },
-            {
-                headerName: "Research study", field: "studyName", type: "link", 
+            },{
+                headerName: "Research study", field: "study.name", type: "link", 
                 action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.study.id])
-            },
-            { headerName: "Examination executive", field: "" },
-            {
+            },{
                 headerName: "Center", field: "centerName", type: "link", 
                 action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.center.id])
             }
@@ -73,5 +75,21 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     getCustomActionsDefs(): any[] {
         return [];
+    }
+
+    getOptions() {
+        return {
+            new: false,
+            view: true, 
+            edit: false, 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
+    canDelete(exam: Examination): boolean {
+        return this.keycloakService.isUserAdmin() || (
+            exam.study &&
+            this.studiesICanAdmin.includes(exam.study.id)
+        );
     }
 }

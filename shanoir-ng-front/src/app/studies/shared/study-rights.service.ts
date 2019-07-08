@@ -26,14 +26,27 @@ export class StudyRightsService {
     }
 
     public canDownloadStudy(studyId: number): Promise<boolean> {
+        return this.hasRightForStudy(studyId, StudyUserRight.CAN_DOWNLOAD);
+    }
+
+    public canAdministrateStudy(studyId: number): Promise<boolean> {
+        return this.hasRightForStudy(studyId, StudyUserRight.CAN_ADMINISTRATE);
+    }
+
+    public hasRightForStudy(studyId: number, right: StudyUserRight): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return Promise.resolve(true);
+        return this.getMyRightsForStudy(studyId).then(studyRights => studyRights.includes(right));
+    }
+
+    public getMyRightsForStudy(studyId: number): Promise<StudyUserRight[]> {
         return this.http.get<StudyUserRight[]>(AppUtils.BACKEND_API_STUDY_RIGHTS + '/' + studyId)
-            .toPromise().then(rights => {
-                for (let right of rights) {
-                    if (StudyUserRight.CAN_DOWNLOAD == right) return true;
-                }
-                return false;
-            });
+            .toPromise();
+    }
+
+    hasOnStudyToImport(): Promise<boolean> {
+        if (this.keycloakService.isUserAdmin()) return Promise.resolve(true);
+        return this.http.get<boolean>(AppUtils.BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT)
+            .toPromise();
     }
     
 }

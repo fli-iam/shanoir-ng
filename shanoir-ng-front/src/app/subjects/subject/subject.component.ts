@@ -167,4 +167,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         let newDate: Date = new Date(new Date(this.subject.birthDate).getFullYear(), 0, 1);
         this.subject.birthDate = newDate;
     }
+
+    public hasEditRight(): boolean {
+        return false;
+    }
 }

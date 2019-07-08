@@ -33,7 +33,7 @@ export class TableComponent implements OnInit {
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Input() disableCondition: (item: any) => boolean;
-    
+
     private page: Page<Object>;
     private isLoading: boolean = false;
     private maxResultsField: number;
@@ -299,14 +299,17 @@ export class TableComponent implements OnInit {
             if (col.defaultSortCol) {
                 this.lastSortedCol = col;
                 this.lastSortedAsc = col.defaultAsc != undefined ? col.defaultAsc : true;
+                return;
             }
-            return;
         }
     }
 
     private cellEditable(item, col) {
         let colEditable: boolean = col.editable && (typeof col.editable === 'function' ? col.editable(item) : col.editable);
-        return colEditable && (!this.disableCondition || !this.disableCondition(item));
+        return colEditable && !this.rowDisabled(item);
     }
 
+    private rowDisabled(item): boolean {
+        return this.disableCondition && this.disableCondition(item);
+    }
 }

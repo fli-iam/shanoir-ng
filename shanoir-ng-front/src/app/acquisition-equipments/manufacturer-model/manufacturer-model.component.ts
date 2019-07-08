@@ -47,6 +47,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
 
 
     initView(): Promise<void> {
+        this.footerState.canEdit = this.keycloakService.isUserAdminOrExpert();
         return this.getManufacturerModel();
     }
 
@@ -107,6 +108,10 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
             }
         }
         return null;
+    }
+
+    public hasEditRight(): boolean {
+        return this.keycloakService.isUserAdminOrExpert();
     }
 
     private openNewManuf() {

@@ -34,7 +34,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private _entity: T;
     @Input() mode: Mode;
     @Output() close: EventEmitter<any> = new EventEmitter();
-    private footerState: FooterState;
+    protected footerState: FooterState;
     protected onSave: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
     protected form: FormGroup;
@@ -46,7 +46,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected router: Router;
     private location: Location;
     protected formBuilder: FormBuilder;
-    private keycloakService: KeycloakService;
+    protected keycloakService: KeycloakService;
     private msgBoxService: MsgBoxService; 
     protected breadcrumbsService: BreadcrumbsService;
 
@@ -91,13 +91,14 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             }
         }
         choose().then(() => {
+            this.footerState = new FooterState(this.mode);
+            this.footerState.canEdit = this.hasEditRight();
             if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
                 this.entity = this.breadcrumbsService.currentStep.entity as T;
             }
             this.breadcrumbsService.currentStep.entity = this.entity;
             this.manageFormSubscriptions();
         });
-        this.footerState = new FooterState(this.mode, this.keycloakService.isUserAdminOrExpert());
     }
 
     private manageFormSubscriptions() {
@@ -249,6 +250,15 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         for(let subscribtion of this.subscribtions) {
             subscribtion.unsubscribe();
         }
+    }
+
+    /**
+     * Says if current user has the right to display the edit button.
+     * Default is true and this method should be overriden when rights control is needed.
+     * It is called after initialization so the entity value can be used inside.
+     */
+    public hasEditRight(): boolean {
+        return true;
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {

@@ -3,3 +3,5 @@
 form { border: none !important; background-color: transparent; }
 
 h2 { margin: 15px 0; }
+
+svg { margin-right: 7px; vertical-align: -1; color: var(--color-important); }

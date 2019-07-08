@@ -16,8 +16,6 @@ import { Component } from '@angular/core';
 
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 
-const GUEST_ROLE_ID: number = 2;
-
 @Component({
     selector: 'accountRequest',
     templateUrl: 'account-request.component.html'

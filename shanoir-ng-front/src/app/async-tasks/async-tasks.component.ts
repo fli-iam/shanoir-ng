@@ -29,7 +29,11 @@ export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
     @ViewChild('table') table: TableComponent;
 
     constructor() {       
-        super('task', {'new': false, 'edit': false, 'view': false, 'delete': false});
+        super('task');
+    }
+
+    getOptions() {
+        return {'new': false, 'edit': false, 'view': false, 'delete': false};
     }
 
     getEntities(): Promise<Task[]> {

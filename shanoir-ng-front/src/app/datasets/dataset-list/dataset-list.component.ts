@@ -23,6 +23,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 
 @Component({
     selector: 'dataset-list',
@@ -40,11 +41,11 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             private studyService: StudyService,
             private subjectService: SubjectService) {
                 
-        super('dataset', {'new': false});
+        super('dataset');
         this.fetchStudies();
         this.fetchSubjects();
     }
-
+    
     getPage(pageable: Pageable): Promise<Page<Dataset>> {
         return this.datasetService.getPage(pageable);
     }
@@ -73,13 +74,13 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             this.subjects = subjects;
         });
     }
-
+    
     private fetchStudies() {
         this.studyService.getAll().then(studies => {
             this.studies = studies;
         });
     }
-
+    
     private getSubjectName(id: number): string {
         if (!this.subjects || this.subjects.length == 0 || !id) return id ? id+'' : '';
         for (let subject of this.subjects) { 
@@ -87,7 +88,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
         }
         throw new Error('Cannot find subject for id = ' + id);
     }
-
+    
     private getStudyName(id: number): string {
         if (!this.studies || this.studies.length == 0 || !id) return id+'';
         for (let study of this.studies) {
@@ -100,4 +101,26 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
         return [];
     }
 
+    getOptions() {
+        return {
+            new: false,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
+    canEdit(ds: Dataset): boolean {
+        let study: Study = this.studies.find(study => study.id == ds.studyId);
+        return this.keycloakService.isUserAdmin() || (
+            study &&
+            study.studyUserList && 
+            study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
+        );
+    }
+
+    canDelete(ds: Dataset): boolean {
+        return this.canEdit(ds);
+    }
+    
 }

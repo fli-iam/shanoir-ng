@@ -63,4 +63,8 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
         });
 
     }
+
+    public hasEditRight(): boolean {
+        return this.keycloakService.isUserAdminOrExpert();
+    }
 }

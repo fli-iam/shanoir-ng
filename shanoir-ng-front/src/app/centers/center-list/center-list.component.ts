@@ -39,6 +39,15 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
         this.manageDelete();
     }
 
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
     getEntities(): Promise<Center[]> {
         return this.centerService.getAll(); 
     }

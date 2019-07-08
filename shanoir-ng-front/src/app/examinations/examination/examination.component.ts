@@ -131,4 +131,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     private attachNewFiles() {
     }
 
+    public hasEditRight(): boolean {
+        return false;
+    }
+
 }

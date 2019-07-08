@@ -140,5 +140,15 @@ public interface StudyApi {
 	ResponseEntity<List<StudyUserRight>> rights(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Know if I'm in one study at least with CAN_IMPORT", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "/hasOneStudy", produces = { "application/json" }, consumes = {
+			"application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<Boolean> hasOneStudyToImport() throws RestServiceException;
 
 }

@@ -24,6 +24,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.keyvalue.core.IterableConverter;
 import org.springframework.stereotype.Component;
 
 /**
@@ -45,6 +46,17 @@ public class StudyUserServiceImpl implements StudyUserService {
 		Long userId = KeycloakUtil.getTokenUserId();
 		StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
 		return studyUser.getStudyUserRights();
+	}
+
+	@Override
+	public boolean hasOneStudyToImport() {
+		Long userId = KeycloakUtil.getTokenUserId();
+		for (StudyUser studyUser : studyUserRepository.findByUserId(userId)) {
+			if (studyUser.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	

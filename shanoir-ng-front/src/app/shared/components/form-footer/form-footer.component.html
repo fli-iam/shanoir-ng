@@ -15,13 +15,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="footer command-zone">
     <span [ngSwitch]="state.mode">
         <button i18n="View subject|Back button label@@backButton" class="Button left-icon" (click)="onBack()"><i class="fas fa-angle-left"></i>Back</button>
-        <ng-template [ngSwitchCase]="'view'" *ngIf="state.canModify">
+        <ng-template [ngSwitchCase]="'view'" *ngIf="state.canEdit">
             <button type="submit" i18n="View subject|Edit button label@@editButton" (click)="onEdit()" class="Button right-icon">Edit<i class="far fa-edit"></i></button>
         </ng-template>
-        <ng-template [ngSwitchCase]="'edit'" *ngIf="state.canModify">
+        <ng-template [ngSwitchCase]="'edit'">
             <button type="submit" i18n="Edit center|Update button label@@updateButton" (click)="onUpdate()" class="Button right-icon" [disabled]="!state.valid">Update<i class="far fa-save"></i></button>
         </ng-template>
-        <ng-template [ngSwitchCase]="'create'" *ngIf="state.canModify">
+        <ng-template [ngSwitchCase]="'create'">
             <button type="submit" i18n="Edit subject|Create button label@@createButton" (click)="onCreate()" class="Button right-icon" [disabled]="!state.valid">Create<i class="far fa-save"></i></button>
         </ng-template>
         <ng-content></ng-content>
