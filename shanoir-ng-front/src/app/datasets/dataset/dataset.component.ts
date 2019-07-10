@@ -51,12 +51,18 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     
     initView(): Promise<void> {
         return this.fetchDataset().then(() => {
-            this.studyRightsService.getMyRightsForStudy(this.dataset.studyId).then(rights => {
-                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                    if (this.hasDownloadRight) this.loadDicomInMemory();
-                }
-            );
+            if (this.keycloakService.isUserAdmin()) {
+                this.hasAdministrateRight = true;
+                this.hasDownloadRight = true;
+                this.loadDicomInMemory();
+            } else {
+                this.studyRightsService.getMyRightsForStudy(this.dataset.studyId).then(rights => {
+                        this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                        this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                        if (this.hasDownloadRight) this.loadDicomInMemory();
+                    }
+                );
+            }
         });
     }
 
