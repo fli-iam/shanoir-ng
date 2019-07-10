@@ -45,7 +45,11 @@ public class StudyUserServiceImpl implements StudyUserService {
 	public List<StudyUserRight> getRightsForStudy(Long studyId) {
 		Long userId = KeycloakUtil.getTokenUserId();
 		StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
-		return studyUser.getStudyUserRights();
+		if (studyUser != null) {
+			return studyUser.getStudyUserRights();			
+		} else {
+			return new ArrayList<StudyUserRight>(); 
+		}
 	}
 
 	@Override
