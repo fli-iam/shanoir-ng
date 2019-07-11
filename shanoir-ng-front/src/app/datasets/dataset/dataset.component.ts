@@ -50,24 +50,28 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     set dataset(dataset: Dataset) { this.entity = dataset; }
     
     initView(): Promise<void> {
-        return this.fetchDataset().then(() => {
+        return this.fetchDataset().then(dataset => {
             if (this.keycloakService.isUserAdmin()) {
                 this.hasAdministrateRight = true;
                 this.hasDownloadRight = true;
                 this.loadDicomInMemory();
+                this.dataset = dataset;
+                return;
             } else {
-                this.studyRightsService.getMyRightsForStudy(this.dataset.studyId).then(rights => {
-                        this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
-                        this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                        if (this.hasDownloadRight) this.loadDicomInMemory();
-                    }
-                );
+                return this.studyRightsService.getMyRightsForStudy(dataset.studyId).then(rights => {
+                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                    if (this.hasDownloadRight) this.loadDicomInMemory();
+                    this.dataset = dataset;
+                });
             }
         });
     }
 
     initEdit(): Promise<void> {
-        return this.fetchDataset().then(() => null);
+        return this.fetchDataset().then(dataset => {
+            this.dataset = dataset;
+        });
     }
 
     initCreate(): Promise<void> {
@@ -82,7 +86,6 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         if (this.mode != 'create') {
             return this.datasetService.get(this.id).then((dataset: Dataset) => {
                 if (!dataset.updatedMetadata) dataset.updatedMetadata = new DatasetMetadata();
-                this.dataset = dataset;
                 return dataset;
             });
         }
