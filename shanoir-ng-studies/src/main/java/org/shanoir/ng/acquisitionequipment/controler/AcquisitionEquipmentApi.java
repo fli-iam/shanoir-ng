@@ -40,8 +40,8 @@ import io.swagger.annotations.ApiResponses;
 public interface AcquisitionEquipmentApi {
 
 	@ApiOperation(value = "", notes = "Deletes an acquisition equipment", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "acquisition equipment deleted", response = Void.class),
-			@ApiResponse(code = 204, message = "no acquisition equipment found", response = Void.class),
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "acquisition equipment deleted", response = Void.class),
+			@ApiResponse(code = 404, message = "no acquisition equipment found", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })

@@ -37,7 +37,9 @@ export class ExaminationService extends EntityService<Examination> {
         return this.http.get<Page<Examination>>(
             AppUtils.BACKEND_API_EXAMINATION_URL, 
             { 'params': pageable.toParams() }
-        ).toPromise();
+        )
+        .map(this.mapPage)
+        .toPromise();
     }
 
     postFile(fileToUpload: File): Observable<any> {

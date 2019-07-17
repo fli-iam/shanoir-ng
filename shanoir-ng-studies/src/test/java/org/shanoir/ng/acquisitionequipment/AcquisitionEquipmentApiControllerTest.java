@@ -91,7 +91,7 @@ public class AcquisitionEquipmentApiControllerTest {
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void deleteAcquisitionEquipmentTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 	}
 
 	@Test

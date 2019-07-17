@@ -48,7 +48,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		try {
 			acquisitionEquipmentService.deleteById(acquisitionEquipmentId);
-			return new ResponseEntity<Void>(HttpStatus.OK);
+			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
