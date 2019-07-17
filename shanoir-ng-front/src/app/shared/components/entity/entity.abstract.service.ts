@@ -16,6 +16,7 @@ import { HttpClient } from '@angular/common/http';
 
 import { ServiceLocator } from '../../../utils/locator.service';
 import { Entity } from './entity.abstract';
+import { Page } from '../table/pageable.model';
 
 export abstract class EntityService<T extends Entity> {
     
@@ -27,7 +28,7 @@ export abstract class EntityService<T extends Entity> {
 
     getAll(): Promise<T[]> {
         return this.http.get<T[]>(this.API_URL)
-            .map(entities => entities ? entities.map((entity) => this.toRealObject(entity)) : [])
+            .map(this.mapEntityList)
             .toPromise();
     }
 
@@ -38,19 +39,32 @@ export abstract class EntityService<T extends Entity> {
 
     get(id: number): Promise<T> {
         return this.http.get<T>(this.API_URL + '/' + id)
-            .map((entity) => this.toRealObject(entity))
+            .map(this.mapEntity)
             .toPromise();
     }
 
     create(entity: T): Promise<T> {
         return this.http.post<any>(this.API_URL, entity.stringify())
-            .map((entity) => this.toRealObject(entity))
+            .map(this.mapEntity)
             .toPromise();
     }
 
     update(id: number, entity: T): Promise<void> {
         return this.http.put<any>(this.API_URL + '/' + id, entity.stringify())
             .toPromise();
+    }
+
+    protected mapEntity = (entity: T): T => {
+        return this.toRealObject(entity);
+    }
+
+    protected mapEntityList = (entities: T[]): T[] => {
+        return entities ? entities.map(this.mapEntity) : [];
+    }
+
+    protected mapPage = (page: Page<T>): Page<T> => {
+            page.content = page.content.map(this.mapEntity);
+            return page;
     }
 
     private toRealObject(entity: T) {

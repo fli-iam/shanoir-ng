@@ -116,6 +116,8 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                         if (reason && reason.error) {
                             this.onDelete.next(new ShanoirError(reason));
                             if (reason.error.code != 422) throw Error(reason);
+                        } else {
+                            console.error(reason);
                         }
                     });                    
                 }
