@@ -40,8 +40,16 @@ form { margin: 0; }
 select:disabled { opacity: 0.5; }
 svg { vertical-align: -1; }
 
+@-webkit-keyframes autofill {
+  to {
+      color: var(--dark-grey);
+      background: transparent;
+  }
+}
+
 input:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 30px white inset;
+  -webkit-animation-name: autofill;
+  -webkit-animation-fill-mode: both;
 }
 
 table.layout { border: none; border-collapse: collapse; }
