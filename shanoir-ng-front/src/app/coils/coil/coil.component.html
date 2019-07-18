@@ -100,7 +100,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/manufacturer-model/details/', coil.manufacturerModel?.id]">
-									{{coil.manufacturerModel?.name}}
+									{{coil.manufacturerModel | manufModelLabel}}
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
