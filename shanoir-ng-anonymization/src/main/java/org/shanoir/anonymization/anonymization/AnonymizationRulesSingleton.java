@@ -17,6 +17,7 @@ package org.shanoir.anonymization.anonymization;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,71 +31,72 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AnonymizationRulesSingleton {
-	
+
 	/**
 	 * Logger
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(AnonymizationRulesSingleton.class);
-	
+
 	private static final AnonymizationRulesSingleton instance = new AnonymizationRulesSingleton();
-	
+
 	private static final String ANONYMIZATION_FILE_PATH = "anonymization.xlsx";
 
 	private static final String xTagsColumn = "0xTag";
-	
-	private Map<String, String> anonymizationMAP;
-	private List<String> tagsToKeep = new ArrayList< String>();
-	
-	private AnonymizationRulesSingleton() {
-		Map<String, String> anonymizationMAP = new HashMap<String, String>();
-		List<String> tagsToKeep = new ArrayList< String>();
-		Integer xtagColumn = null;
-		Integer profileColumn = null;
 
+	private static final String PROFILE = "Profile ";
+
+	private Map<String, Profile> profiles;
+
+	private List<String> tagsToDelete;
+
+	private AnonymizationRulesSingleton() {
+		this.profiles = new HashMap<String, Profile>();
+		this.tagsToDelete = new ArrayList<String>();
+		Integer xtagColumn = null;
 		try {
 			ClassLoader classLoader = getClass().getClassLoader();
 			InputStream in = classLoader.getResourceAsStream(ANONYMIZATION_FILE_PATH);
-
 			XSSFWorkbook myWorkBook = new XSSFWorkbook(in);
-
 			// Return first sheet from the XLSX workbook
 			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
-
 			// Get iterator to all the rows in current sheet
 			Iterator<Row> rowIterator = mySheet.iterator();
-
-			// Traversing over each row of XLSX file
+			// Traversing over each row of XLSX file (line by line)
 			while (rowIterator.hasNext()) {
 				Row row = rowIterator.next();
 				int rowNumber = row.getRowNum();
+				// rowNumber == 0 is the header line in bold
 				if (rowNumber == 0) {
 					Iterator<Cell> cellIterator = row.cellIterator();
-					while (cellIterator.hasNext() && (xtagColumn == null || profileColumn == null)) {
+					while (cellIterator.hasNext()) {
 						Cell cell = cellIterator.next();
 						if (cell.getStringCellValue().equals(xTagsColumn)) {
 							xtagColumn = cell.getColumnIndex();
-							LOG.debug("Tags column : " + xtagColumn);
-						} else if (cell.getStringCellValue().equals("Shanoir Profile")) {
-							profileColumn = cell.getColumnIndex();
+						} else if (cell.getStringCellValue().startsWith(PROFILE)) {
+							// init map of profiles here
+							Profile profile = new Profile(cell.getColumnIndex());
+							profiles.put(cell.getStringCellValue(), profile);
 						}
 					}
 				}
-				if (xtagColumn != null && profileColumn != null) {
+				if (xtagColumn != null && !profiles.isEmpty()) {
 					Cell xtagCell = row.getCell(xtagColumn);
-					if (xtagCell != null) {
+					if (xtagCell != null && xtagCell.getStringCellValue().length() == 10) {
 						String tagString = xtagCell.getStringCellValue();
 						if (tagString != null && tagString.length() != 0 && !tagString.equals("0xTag")) {
-							Cell basicProfileCell = row.getCell(profileColumn);
-							LOG.debug("The basic profile of tag " + tagString + " = "
-									+ basicProfileCell.getStringCellValue());
-							anonymizationMAP.put(tagString, basicProfileCell.getStringCellValue());
+							Collection<Profile> profilesColl = profiles.values();
+							for (Iterator<Profile> iterator = profilesColl.iterator(); iterator.hasNext();) {
+								Profile profile = (Profile) iterator.next();
+								Cell actionCell = row.getCell(profile.getProfileColumn());
+								profile.getAnonymizationMap().put(tagString, actionCell.getStringCellValue());	
+							}
 						}
 					}
 				} else {
 					LOG.error("Unable to read anonymization tags or/and anonymization profile ");
 				}
 			}
-			
+
 			// Return second sheet from the XLSX workbook
 			XSSFSheet mySheet2 = myWorkBook.getSheetAt(1);
 
@@ -105,27 +107,27 @@ public class AnonymizationRulesSingleton {
 			while (rowIterator2.hasNext()) {
 				Row row = rowIterator2.next();
 				Cell cell = row.getCell(0);
-				tagsToKeep.add(cell.getStringCellValue());
+				tagsToDelete.add(cell.getStringCellValue());
 			}
-			this.tagsToKeep = tagsToKeep;
-			
+
+			myWorkBook.close();
+
 		} catch (IOException e) {
 			LOG.error("Unable to read anonymization file: " + e);
 		}
 
-		this.anonymizationMAP = anonymizationMAP;
 	}
-	
+
 	public static AnonymizationRulesSingleton getInstance() {
 		return instance;
 	}
 
-	public Map<String, String> getAnonymizationMAP() {
-		return anonymizationMAP;
+	public Map<String, Profile> getProfiles() {
+		return profiles;
 	}
 
 	public List<String> getTagsToKeep() {
-		return tagsToKeep;
+		return tagsToDelete;
 	}
 
 }

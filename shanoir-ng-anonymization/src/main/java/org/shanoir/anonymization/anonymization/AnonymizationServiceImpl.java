@@ -36,7 +36,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Anonymization serviceImpl. mkain: bug fixing done for multi-threading errors,
- * e.g. when used by server.
+ * e.g. when used by server. bug fixed for identical media storage sop instance
+ * uid and sop instance uid and bug fixed for invalid uid generation.
  * 
  * @author ifakhfakh
  * @author mkain
@@ -46,62 +47,75 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AnonymizationServiceImpl.class);
 
-	private static final String ANONYMIZATION_FILE_PATH = "anonymization.xlsx";
-	private static final String xTagsColumn = "0xTag";
 	private static final String privateTags = "0xggggeeee";
 	private static final String curveDataTags = "0x50xxxxxx";
 	private static final String overlayCommentsTags = "0x60xx4000";
 	private static final String overlayDataTags = "0x60xx3000";
 
-	private Map<String, String> anonymizationMAP;
-	private List<String> tagsToKeep = new ArrayList< String>();
+	private List<String> tagsToKeep = new ArrayList<String>();
 
 	public void anonymize(ArrayList<File> dicomFiles, String profile) {
-		anonymizationMAP = AnonymizationRulesSingleton.getInstance().getAnonymizationMAP();
+		long startTime = System.currentTimeMillis();
+		final int totalAmount = dicomFiles.size();
+		LOG.info("Start anonymization, for " + totalAmount + " DICOM files.");
+		Map<String, Profile> profiles = AnonymizationRulesSingleton.getInstance().getProfiles();
+		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
 		tagsToKeep = AnonymizationRulesSingleton.getInstance().getTagsToKeep();
 		// init here for multi-threading reasons
 		Map<String, String> seriesInstanceUIDs = new HashMap<String, String>();
 		Map<String, String> studyInstanceUIDs = new HashMap<String, String>();
 		Map<String, String> studyIds = new HashMap<String, String>();
-		final int totalAmount = dicomFiles.size();
 		LOG.debug("anonymize : totalAmount=" + totalAmount);
 		int current = 0;
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
-			performAnonymization(file, profile, false, "", "", seriesInstanceUIDs, studyInstanceUIDs, studyIds);
+			performAnonymization(file, anonymizationMap, false, "", "", seriesInstanceUIDs, studyInstanceUIDs, studyIds);
 			current++;
 			final int currentPercent = (int) (current * 100 / totalAmount);
 			LOG.debug("anonymize : anonymization current percent= " + currentPercent + " %");
 		}
+		logInfos("End anonymization", startTime);
 	}
-	
-	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName, String patientFirstName, String patientID) {
+
+	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
+			String patientFirstName, String patientID) {
 		String patientName = patientLastName + "^" + patientFirstName + "^^^";
 		anonymizeForShanoir(dicomFiles, profile, patientName, patientID);
 	}
 
 	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) {
-		this.anonymizationMAP = AnonymizationRulesSingleton.getInstance().getAnonymizationMAP();
+		long startTime = System.currentTimeMillis();
+		final int totalAmount = dicomFiles.size();
+		LOG.info("Start anonymization, for " + totalAmount + " DICOM files.");
+		Map<String, Profile> profiles = AnonymizationRulesSingleton.getInstance().getProfiles();
+		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
 		this.tagsToKeep = AnonymizationRulesSingleton.getInstance().getTagsToKeep();
 		// init here for multi-threading reasons
 		Map<String, String> seriesInstanceUIDs = new HashMap<String, String>();
 		Map<String, String> studyInstanceUIDs = new HashMap<String, String>();
 		Map<String, String> studyIds = new HashMap<String, String>();
-		final int totalAmount = dicomFiles.size();
 		LOG.debug("anonymize : totalAmount=" + totalAmount);
 		int current = 0;
 		for (int i = 0; i < dicomFiles.size(); ++i) {
 			final File file = dicomFiles.get(i);
 			// Perform the anonymization
-			performAnonymization(file, profile, true, patientName, patientID, seriesInstanceUIDs, studyInstanceUIDs, studyIds);
+			performAnonymization(file, anonymizationMap, true, patientName, patientID, seriesInstanceUIDs, studyInstanceUIDs, studyIds);
 			current++;
 			final int currentPercent = (int) (current * 100 / totalAmount);
 			LOG.debug("anonymize : anonymization current percent= " + currentPercent + " %");
 		}
+		logInfos("End anonymization", startTime);
+	}
+	
+	private void logInfos(final String methodName, long startTime) {
+		long stopTime = System.currentTimeMillis();
+	    long elapsedTime = stopTime - startTime;
+		LOG.info(methodName + ", duration (ms): " + elapsedTime);
 	}
 
-	private void anonymizePatientMetaData(Attributes attributes, String patientName, String patientID, String patientBirthDate) {
+	private void anonymizePatientMetaData(Attributes attributes, String patientName, String patientID,
+			String patientBirthDate) {
 		anonymizeTagAccordingToVR(attributes, Tag.PatientName, patientName);
 		anonymizeTagAccordingToVR(attributes, Tag.PatientID, patientID);
 		// patient birth date
@@ -112,29 +126,44 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	}
 
 	/**
-	 * Perform the anonymization for an image according to choosed profile
+	 * Perform the anonymization for an DICOM image according to chosen profile. To
+	 * have a consistent DICOM file: the attribute in the "header" (0002,0003) Media
+	 * Storage SOP Instance UID and the attribute in the "body" (0008 0018) SOP
+	 * Instance UID have to match. If they do not match the PACS returns the
+	 * following error: SOP Instance UID in Dataset [xxx] differs from Affected SOP
+	 * Instance UID [yyy]. The problem is, that when doing the dcmSend, the tool
+	 * reads the SOP Instance UID from the meta-information/header and sends the
+	 * file with a C-STORE request and an Affected SOP Instance UID (== header) in
+	 * the request header. If the file arrives in the PACS, the SOP Instance UID in
+	 * the file does not match with the request header and this is refused.
+	 * 
+	 * Further does each part of an UID has to start with a non-zero value, see
+	 * UIDGeneration code.
 	 * 
 	 * @param dicomFile
 	 *            the image path
 	 * @param profile
 	 *            anonymization profile
 	 */
-	public void performAnonymization(final File dicomFile, String profile, boolean isShanoirAnonymization,
-			String patientName, String patientID, Map<String, String> seriesInstanceUIDs, Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) {
+	public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap, boolean isShanoirAnonymization,
+			String patientName, String patientID, Map<String, String> seriesInstanceUIDs,
+			Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) {
 		DicomInputStream din = null;
 		DicomOutputStream dos = null;
 		try {
 			din = new DicomInputStream(dicomFile);
-			// read metadata
+			// DICOM "header"/meta-information fields: read tags
 			Attributes metaInformationAttributes = din.readFileMetaInformation();
 			for (int tagInt : metaInformationAttributes.tags()) {
 				String tagString = String.format("0x%08x", Integer.valueOf(tagInt));
-				if (anonymizationMAP.containsKey(tagString)) {
-					final String basicProfile = anonymizationMAP.get(tagString);
-					anonymizeTag(tagInt, basicProfile, metaInformationAttributes);
+				if (anonymizationMap.containsKey(tagString)) {
+					final String action = anonymizationMap.get(tagString);
+					anonymizeTag(tagInt, action, metaInformationAttributes);
 				}
 			}
-			// read the other tags
+			final String mediaStorageSOPInstanceUIDGenerated = metaInformationAttributes
+					.getString(Tag.MediaStorageSOPInstanceUID);
+			// DICOM "body": read tags
 			Attributes datasetAttributes = din.readDataset(-1, -1);
 			// save the patient birth date for isShanoirAnonymization
 			String patientBirthDate = datasetAttributes.getString(Tag.PatientBirthDate);
@@ -145,33 +174,32 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				String gggg = tagString.substring(2, 6);
 				Integer intgggg = Integer.decode("0x" + gggg);
 				if (intgggg % 2 == 1) {
-					final String basicProfile = anonymizationMAP.get(privateTags);
-					if(!this.tagsToKeep.contains(tagString)) {
-						anonymizeTag(tagInt, basicProfile, datasetAttributes);
+					final String action = anonymizationMap.get(privateTags);
+					if (!this.tagsToKeep.contains(tagString)) {
+						anonymizeTag(tagInt, action, datasetAttributes);
 					}
-				} else if (anonymizationMAP.containsKey(tagString)) {
+				} else if (anonymizationMap.containsKey(tagString)) {
 					if (tagInt == Tag.SOPInstanceUID) {
-						anonymizeSOPInstanceUID(tagInt, datasetAttributes);
+						anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
 					} else if (tagInt == Tag.SeriesInstanceUID) {
 						anonymizeSeriesInstanceUID(tagInt, datasetAttributes, seriesInstanceUIDs);
 					} else if (tagInt == Tag.StudyInstanceUID) {
 						anonymizeStudyInstanceUID(tagInt, datasetAttributes, studyInstanceUIDs);
 					} else if (tagInt == Tag.StudyID) {
 						anonymizeStudyId(tagInt, datasetAttributes, studyIds);
-					}
-					else {
-						final String basicProfile = anonymizationMAP.get(tagString);
+					} else {
+						final String basicProfile = anonymizationMap.get(tagString);
 						anonymizeTag(tagInt, basicProfile, datasetAttributes);
 					}
 				} else {
 					if ((0x50000000 <= tagInt) && (tagInt <= 0x50FFFFFF)) {
-						final String basicProfile = anonymizationMAP.get(curveDataTags);
+						final String basicProfile = anonymizationMap.get(curveDataTags);
 						anonymizeTag(tagInt, basicProfile, datasetAttributes);
 					} else if ((0x60004000 <= tagInt) && (tagInt <= 0x60FF4000)) {
-						final String basicProfile = anonymizationMAP.get(overlayCommentsTags);
+						final String basicProfile = anonymizationMap.get(overlayCommentsTags);
 						anonymizeTag(tagInt, basicProfile, datasetAttributes);
 					} else if ((0x60003000 <= tagInt) && (tagInt <= 0x60FF3000)) {
-						final String basicProfile = anonymizationMAP.get(overlayDataTags);
+						final String basicProfile = anonymizationMap.get(overlayDataTags);
 						anonymizeTag(tagInt, basicProfile, datasetAttributes);
 					}
 				}
@@ -205,13 +233,13 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 * 
 	 * @param tagInt
 	 *            : the tag to anonymize
-	 * @param basicProfile
-	 *            : the tag's basic profile
+	 * @param action
+	 *            : the action letter to apply
 	 * @param attributes
 	 *            : the list of dicom attributes to modify
 	 */
-	private void anonymizeTag(Integer tagInt, String basicProfile, Attributes attributes) {
-		String value = getFinalValueForTag(tagInt, basicProfile);
+	private void anonymizeTag(Integer tagInt, String action, Attributes attributes) {
+		String value = getFinalValueForTag(tagInt, action);
 		if (value == null) {
 			attributes.remove(tagInt);
 		} else if (value == "KEEP") {
@@ -221,22 +249,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 		}
 	}
 
-	private void anonymizeSOPInstanceUID(int tagInt, Attributes attributes) {
-		String value;
-		String mediaStorageSOPInstanceUID = attributes.getString(Tag.MediaStorageSOPInstanceUID);
-		if (mediaStorageSOPInstanceUID != null) {
-			value = mediaStorageSOPInstanceUID;
-		} else {
-			UIDGeneration generator = new UIDGeneration();
-			String newUID = null;
-			try {
-				newUID = generator.getNewUID();
-			} catch (UIDException e) {
-				LOG.error(e.getMessage());
-			}
-			value = newUID;
-		}
-		anonymizeTagAccordingToVR(attributes, tagInt, value);
+	private void anonymizeSOPInstanceUID(int tagInt, Attributes attributes, String mediaStorageSOPInstanceUID) {
+		anonymizeTagAccordingToVR(attributes, tagInt, mediaStorageSOPInstanceUID);
 	}
 
 	private void anonymizeSeriesInstanceUID(int tagInt, Attributes attributes, Map<String, String> seriesInstanceUIDs) {
@@ -301,30 +315,30 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 * 
 	 * @param tag
 	 *            : the tag to anonymize
-	 * @param basicProfie
-	 *            : the tag's basic profile
+	 * @param action
+	 *            : the action letter to apply
 	 * @return
 	 */
-	private String getFinalValueForTag(final int tag, final String basicProfie) {
+	private String getFinalValueForTag(final int tag, final String action) {
 		String result = "";
-		if (basicProfie != null) {
-			if (basicProfie.equals("X")) {
+		if (action != null) {
+			if (action.equals("X")) {
 				result = null;
-			} else if (basicProfie.equals("Z")) {
+			} else if (action.equals("Z")) {
 				result = "";
-			} else if (basicProfie.equals("D")) {
+			} else if (action.equals("D")) {
 				SecureRandom random = new SecureRandom();
 				result = new BigInteger(130, random).toString(32);
-			} else if (basicProfie.equals("U")) {
+			} else if (action.equals("U")) {
 				UIDGeneration generator = new UIDGeneration();
 				String newUID = null;
 				try {
 					newUID = generator.getNewUID();
 				} catch (UIDException e) {
-					LOG.error(e.getMessage());
+					LOG.error(e.getMessage(), e);
 				}
 				result = newUID;
-			} else if (basicProfie.equals("K")) {
+			} else if (action.equals("K")) {
 				result = "KEEP";
 			}
 		}
