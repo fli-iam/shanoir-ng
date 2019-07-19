@@ -28,6 +28,7 @@ export class FormFooterComponent {
     @Output() private create: EventEmitter<void> = new EventEmitter<void>();
     @Output() private update: EventEmitter<void> = new EventEmitter<void>();
     @Output() private edit: EventEmitter<void> = new EventEmitter<void>();
+    @Output() private cancel: EventEmitter<void> = new EventEmitter<void>();
     @Output() private back: EventEmitter<void> = new EventEmitter<void>();
 
     
@@ -52,6 +53,10 @@ export class FormFooterComponent {
 
     private onBackToList(): void {
         this.back.emit();
+    }
+
+    private onCancel(): void {
+        this.cancel.emit();
     }
 
     private onBack(): void {

@@ -77,7 +77,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     ngOnChanges(changes: SimpleChanges) {
         if (changes['ngModel']) {
             this.updateSelectedOption();
-            this.onChangeCallback(this.ngModel);
+            if (!changes['ngModel'].firstChange) this.onChangeCallback(this.ngModel);
         }
     }
 
@@ -303,7 +303,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     writeValue(obj: any): void {
         this.ngModel = obj;
-        this.onChangeCallback(this.ngModel);
+        //this.onChangeCallback(this.ngModel);
     }
     
     registerOnChange(fn: any): void {

@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <li>
         <label>List of the {{legend | lowercase}} available</label>
         <span class="right-col">
-            <select-box [(ngModel)]="selected" [ngModelOptions]="{standalone: true}" placeholder="Please select ..." (onAddClick)="onAdd()" [addDisabled]="!selected">
+            <select-box [(ngModel)]="selected" [ngModelOptions]="{standalone: true}" placeholder="Please select ..." (onAddClick)="onAdd()" [addDisabled]="!selected" (blur)="onTouch()">
                 <select-option *ngFor="let object of selectableList" [value]="object" [disabled]="object?.selected">{{object.name}}</select-option>
             </select-box>
         </span>
@@ -43,13 +43,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span *ngIf="compMode == 'subject'">{{subjectStudy.study.name}}</span>
                     </td>
                     <td class="input-col">
-                        <input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}"/>
+                        <input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}" (change)="onChange()" (blur)="onTouch()"/>
                     </td>
                     <td class="chkbx-col">
-                        <checkbox [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
+                        <checkbox [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}" (onChange)="onChange()" (blur)="onTouch()"></checkbox>
                     </td>
                     <td class="dropdown-col">
-                        <select id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}">
+                        <select id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" (change)="onChange()" (blur)="onTouch()">
                             <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
                             <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
                             <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
