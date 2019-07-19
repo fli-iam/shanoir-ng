@@ -38,6 +38,7 @@ import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,58 +144,16 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setWithExamination(study.isWithExamination());
 		studyDb.setMonoCenter(study.isMonoCenter());
 
-		// Copy list of database links study/center
-		final List<StudyCenter> studyCenterDbList = new ArrayList<>(studyDb.getStudyCenterList());
-		for (final StudyCenter studyCenter : study.getStudyCenterList()) {
-			if (studyCenter.getId() == null) {
-				// Add link study/center
-				studyCenter.setStudy(studyDb);
-				studyDb.getStudyCenterList().add(studyCenter);
-			}
-		}
-		for (final StudyCenter studyCenterDb : studyCenterDbList) {
-			boolean keepStudyCenter = false;
-			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
-				if (studyCenterDb.getId().equals(studyCenter.getId())) {
-					keepStudyCenter = true;
-					break;
-				}
-			}
-			if (!keepStudyCenter) {
-				// Move link study/center
-				studyDb.getStudyCenterList().remove(studyCenterDb);
-				studyCenterRepository.delete(studyCenterDb.getId());
-			}
+		if (study.getStudyCenterList() != null) {
+			ListDependencyUpdate.updateWith(studyDb.getStudyCenterList(), study.getStudyCenterList());
+			for (StudyCenter studyCenter : studyDb.getStudyCenterList()) studyCenter.setStudy(studyDb);			
 		}
 		
-		// Copy list of database links subject/study
-		final List<SubjectStudy> subjectStudyDbList = studyDb.getSubjectStudyList() != null 
-				? new ArrayList<>(studyDb.getSubjectStudyList())
-				: new ArrayList<>();
 		if (study.getSubjectStudyList() != null) {
-			for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-				if (subjectStudy.getId() == null) {
-					// Add link subject/study
-					subjectStudy.setStudy(studyDb);
-					studyDb.getSubjectStudyList().add(subjectStudy);
-				}
-			}			
+			ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), study.getSubjectStudyList());
+			for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) subjectStudy.setStudy(studyDb);			
 		}
-		for (final SubjectStudy subjectStudyDb : subjectStudyDbList) {
-			boolean keepSubjectStudy = false;
-			for (final SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-				if (subjectStudyDb.getId().equals(subjectStudy.getId())) {
-					keepSubjectStudy = true;
-					break;
-				}
-			}
-			if (!keepSubjectStudy) {
-				// Move link subject/study
-				studyDb.getSubjectStudyList().remove(subjectStudyDb);
-				subjectStudyRepository.delete(subjectStudyDb.getId());
-			}
-		}
-
+		
 		updateStudyUsers(studyDb, study.getStudyUserList());
 		studyRepository.save(studyDb);
 

@@ -78,16 +78,6 @@ public class Study extends HalEntity {
 	// TODO: replace by investigator
 	private Long coordinatorId;
 
-	/** Associated datasets (is result of). */
-//	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE })
-//	@JoinColumn(name = "STUDY_ID")
-//	private List<Dataset> datasetIsResultOfList = new ArrayList<Dataset>(0);
-	
-	/** Associated dataset processing lists. */
-//	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE })
-//	@JoinColumn(name = "STUDY_ID")
-//	private List<DatasetProcessing> datasetProcessingList = new ArrayList<DatasetProcessing>(0);
-
 	/** Is with downloadable by default. */
 	private boolean downloadableByDefault;
 
@@ -125,11 +115,6 @@ public class Study extends HalEntity {
 	@LocalDateAnnotations
 	private LocalDate startDate;
 
-	/** Dataset list. */
-//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "study")
-//	@Cascade( { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
-//	private List<RelStudyDataset> relStudyDatasetList = new ArrayList<RelStudyDataset>(0);
-
 	/** Relations between the investigators, the centers and the studies. */
 	@NotEmpty
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -145,7 +130,7 @@ public class Study extends HalEntity {
 	private List<StudyUser> studyUserList;
 
 	/** Relations between the subjects and the studies. */
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
 
 	/** List of Timepoints dividing the study **/
