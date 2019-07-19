@@ -105,10 +105,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.form = this.buildForm();
         if (this.form) {
             this.subscribtions.push(
-                this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID')
+                this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID' && this.form.dirty)
             );
         } else {
-            this.footerState.valid = true;
+            this.footerState.valid = false;
         }
     }
 

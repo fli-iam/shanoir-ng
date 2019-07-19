@@ -196,6 +196,7 @@ export class StudyComponent extends EntityComponent<Study> {
         studyCenter.center.id = this.selectedCenter.id;
         studyCenter.center.name = this.selectedCenter.name;
         this.study.studyCenterList.push(studyCenter);
+        this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
     }
 
@@ -317,6 +318,8 @@ export class StudyComponent extends EntityComponent<Study> {
         }
         this.browserPaging.setItems(this.study.studyUserList);
         this.table.refresh();
+        this.form.get('subjectStudyList').markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     private removeStudyUser = (item: StudyUser) => {
@@ -326,8 +329,15 @@ export class StudyComponent extends EntityComponent<Study> {
         }
         this.browserPaging.setItems(this.study.studyUserList);
         this.table.refresh();
+        this.form.get('subjectStudyList').markAsDirty();
+        this.form.updateValueAndValidity();
         StudyUser.completeMember(item, this.users);
         item.user.selected = false;
+    }
+
+    private onStudyUserEdit() {
+        this.form.get('subjectStudyList').markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     private studyStatusStr(studyStatus: string) {

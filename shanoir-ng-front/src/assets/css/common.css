@@ -39,9 +39,20 @@ li { list-style: none; }
 form { margin: 0; }
 select:disabled { opacity: 0.5; }
 svg { vertical-align: -1; }
+a:link, a:visited { color: inherit; text-decoration: none; }
+a:hover, a:active { color: var(--color-a); text-decoration: none; }
+
+
+@-webkit-keyframes autofill {
+  to {
+      color: var(--dark-grey);
+      background: transparent;
+  }
+}
 
 input:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 30px white inset;
+  -webkit-animation-name: autofill;
+  -webkit-animation-fill-mode: both;
 }
 
 table.layout { border: none; border-collapse: collapse; }

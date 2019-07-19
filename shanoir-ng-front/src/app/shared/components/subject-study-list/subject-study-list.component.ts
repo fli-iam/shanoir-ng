@@ -86,12 +86,14 @@ export class SubjectStudyListComponent extends AbstractInput {
         }
         this.selected = undefined;
         this.model.push(newSubjectStudy);
+        this.propagateChange(this.model);
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
         const index: number = this.model.indexOf(subjectStudy);
         if (index > -1) {
             this.model.splice(index, 1);
+            this.propagateChange(this.model);
             if (this.compMode == 'study') {
                 for (let selectableItem of this.selectableList) {
                     if (selectableItem.id == subjectStudy.subject.id) {
@@ -106,5 +108,13 @@ export class SubjectStudyListComponent extends AbstractInput {
                 }
             }
         }
+    }
+
+    onChange() {
+        this.propagateChange(this.model);
+    }
+
+    onTouch() {
+        this.propagateTouched();
     }
 }

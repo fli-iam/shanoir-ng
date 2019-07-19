@@ -26,6 +26,7 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -124,40 +125,16 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectDb.setIdentifier(subject.getIdentifier());
 		subjectDb.setPseudonymusHashValues(subject.getPseudonymusHashValues());
 		subjectDb.setSex(subject.getSex());
-		subjectDb.setSubjectStudyList(subject.getSubjectStudyList());
 		subjectDb.setManualHemisphericDominance(subject.getManualHemisphericDominance());
 		subjectDb.setLanguageHemisphericDominance(subject.getLanguageHemisphericDominance());
 		subjectDb.setImagedObjectCategory(subject.getImagedObjectCategory());
 		subjectDb.setUserPersonalCommentList(subject.getUserPersonalCommentList());
 		
-		// Copy list of database links subject/study
-		final List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
-		if (subjectStudyList != null) {
-			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-				if (subjectStudy.getId() == null) {
-					// Add link subject/study
-					subjectStudy.setSubject(subjectDb);
-					subjectDb.getSubjectStudyList().add(subjectStudy);
-				}
-			}			
+		if (subject.getSubjectStudyList() != null) {
+			ListDependencyUpdate.updateWith(subjectDb.getSubjectStudyList(), subject.getSubjectStudyList());
+			for (SubjectStudy subjectStudy : subjectDb.getSubjectStudyList()) subjectStudy.setSubject(subjectDb);			
 		}
-		final List<SubjectStudy> subjectStudyDbList = subjectDb.getSubjectStudyList();
-		if (subjectStudyDbList != null) {
-			for (final SubjectStudy subjectStudyDb : subjectStudyDbList) {
-				boolean keepSubjectStudy = false;
-				for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-					if (subjectStudyDb.getId().equals(subjectStudy.getId())) {
-						keepSubjectStudy = true;
-						break;
-					}
-				}
-				if (!keepSubjectStudy) {
-					// Move link subject/study
-					subjectDb.getSubjectStudyList().remove(subjectStudyDb);
-					subjectStudyRepository.delete(subjectStudyDb.getId());
-				}
-			}			
-		}
+		
 		return subjectDb;
 	}
 	

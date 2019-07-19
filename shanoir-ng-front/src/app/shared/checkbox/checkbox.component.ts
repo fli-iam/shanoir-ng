@@ -31,6 +31,8 @@ export class CheckboxComponent implements ControlValueAccessor {
         this.ngModel = !this.ngModel;
         this.ngModelChange.emit(this.ngModel);
         this.onChange.emit(this.ngModel);
+        this.onChangeCallback(this.ngModel);
+        this.onTouchedCallback();
     }
 
     @HostListener('keydown', ['$event']) 
@@ -40,12 +42,14 @@ export class CheckboxComponent implements ControlValueAccessor {
             this.ngModel = !this.ngModel;
             this.ngModelChange.emit(this.ngModel);
             this.onChange.emit(this.ngModel);
+            this.onChangeCallback(this.ngModel);
+            this.onTouchedCallback();
             event.preventDefault();
         }
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes['ngModel']) {
+        if (changes['ngModel'] && !changes['ngModel'].firstChange) {
             this.onChangeCallback(this.ngModel);
         }
     }

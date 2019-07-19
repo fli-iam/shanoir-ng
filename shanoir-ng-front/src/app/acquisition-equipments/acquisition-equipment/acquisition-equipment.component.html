@@ -42,7 +42,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								<a [routerLink]="['/manufacturer-model/details/', acqEquip.manufacturerModel?.id]">
-									{{acqEquip.manufacturerModel?.name}}
+									{{acqEquip.manufacturerModel | manufModelLabel}}
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
@@ -96,6 +96,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				[state]="footerState"
 				(save)="save()"
 				(edit)="goToEdit()"
+				(cancel)="goToView()"
 				(back)="goBack()"
 			></form-footer>
 		</div>
