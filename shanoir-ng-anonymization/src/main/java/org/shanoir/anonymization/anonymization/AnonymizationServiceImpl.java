@@ -20,6 +20,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -51,16 +52,16 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	private static final String curveDataTags = "0x50xxxxxx";
 	private static final String overlayCommentsTags = "0x60xx4000";
 	private static final String overlayDataTags = "0x60xx3000";
+	
+	private static Map<String, List<String>> tagsToDeleteForManufacturer;
 
-	private List<String> tagsToKeep = new ArrayList<String>();
-
-	public void anonymize(ArrayList<File> dicomFiles, String profile) {
+	public void anonymize(ArrayList<File> dicomFiles, String profile) throws Exception {
 		long startTime = System.currentTimeMillis();
 		final int totalAmount = dicomFiles.size();
 		LOG.info("Start anonymization, for " + totalAmount + " DICOM files.");
 		Map<String, Profile> profiles = AnonymizationRulesSingleton.getInstance().getProfiles();
 		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
-		tagsToKeep = AnonymizationRulesSingleton.getInstance().getTagsToKeep();
+		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
 		// init here for multi-threading reasons
 		Map<String, String> seriesInstanceUIDs = new HashMap<String, String>();
 		Map<String, String> studyInstanceUIDs = new HashMap<String, String>();
@@ -79,18 +80,18 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	}
 
 	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
-			String patientFirstName, String patientID) {
+			String patientFirstName, String patientID) throws Exception {
 		String patientName = patientLastName + "^" + patientFirstName + "^^^";
 		anonymizeForShanoir(dicomFiles, profile, patientName, patientID);
 	}
 
-	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) {
+	public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) throws Exception {
 		long startTime = System.currentTimeMillis();
 		final int totalAmount = dicomFiles.size();
 		LOG.info("Start anonymization, for " + totalAmount + " DICOM files.");
 		Map<String, Profile> profiles = AnonymizationRulesSingleton.getInstance().getProfiles();
 		Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
-		this.tagsToKeep = AnonymizationRulesSingleton.getInstance().getTagsToKeep();
+		tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
 		// init here for multi-threading reasons
 		Map<String, String> seriesInstanceUIDs = new HashMap<String, String>();
 		Map<String, String> studyInstanceUIDs = new HashMap<String, String>();
@@ -144,15 +145,19 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 	 *            the image path
 	 * @param profile
 	 *            anonymization profile
+	 * @throws Exception 
 	 */
 	public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap, boolean isShanoirAnonymization,
 			String patientName, String patientID, Map<String, String> seriesInstanceUIDs,
-			Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) {
+			Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
 		DicomInputStream din = null;
 		DicomOutputStream dos = null;
 		try {
 			din = new DicomInputStream(dicomFile);
-			// DICOM "header"/meta-information fields: read tags
+			
+			/**
+			 * DICOM "header"/meta-information fields: read tags
+			 */
 			Attributes metaInformationAttributes = din.readFileMetaInformation();
 			for (int tagInt : metaInformationAttributes.tags()) {
 				String tagString = String.format("0x%08x", Integer.valueOf(tagInt));
@@ -163,21 +168,38 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 			}
 			final String mediaStorageSOPInstanceUIDGenerated = metaInformationAttributes
 					.getString(Tag.MediaStorageSOPInstanceUID);
-			// DICOM "body": read tags
+			
+			/**
+			 * DICOM "body": read tags
+			 */
 			Attributes datasetAttributes = din.readDataset(-1, -1);
-			// save the patient birth date for isShanoirAnonymization
-			String patientBirthDate = datasetAttributes.getString(Tag.PatientBirthDate);
+			
+			// temporarily keep the patient credentials in memory to search in private tags
+			String patientNameAttr = datasetAttributes.getString(Tag.PatientName);
+			String[] patientNameArrayAttr = null;
+			if (patientNameAttr != null && !patientNameAttr.isEmpty()) {
+				patientNameArrayAttr = patientNameAttr.split("\\^");
+			}
+			String patientIDAttr = datasetAttributes.getString(Tag.PatientID);
+			String patientBirthNameAttr = datasetAttributes.getString(Tag.PatientBirthName);
+			// temporarily keep the patient birth date for isShanoirAnonymization
+			String patientBirthDateAttr = datasetAttributes.getString(Tag.PatientBirthDate);
 
 			// anonymize DICOM files according to selected profile
 			for (int tagInt : datasetAttributes.tags()) {
 				String tagString = String.format("0x%08X", Integer.valueOf(tagInt));
 				String gggg = tagString.substring(2, 6);
 				Integer intgggg = Integer.decode("0x" + gggg);
+				// odd: for private tags
 				if (intgggg % 2 == 1) {
-					final String action = anonymizationMap.get(privateTags);
-					if (!this.tagsToKeep.contains(tagString)) {
-						anonymizeTag(tagInt, action, datasetAttributes);
+					String action = anonymizationMap.get(privateTags);
+					String value = datasetAttributes.getString(tagInt);
+					if (value != null && !value.isEmpty()) {
+						checkForPHI(patientNameArrayAttr, patientIDAttr, patientBirthNameAttr, patientBirthDateAttr, tagInt, value);
+						action = handleTagsToDeleteForManufacturer(datasetAttributes, tagString, action);
 					}
+					anonymizeTag(tagInt, action, datasetAttributes);
+				// even: public tags
 				} else if (anonymizationMap.containsKey(tagString)) {
 					if (tagInt == Tag.SOPInstanceUID) {
 						anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
@@ -188,25 +210,25 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 					} else if (tagInt == Tag.StudyID) {
 						anonymizeStudyId(tagInt, datasetAttributes, studyIds);
 					} else {
-						final String basicProfile = anonymizationMap.get(tagString);
-						anonymizeTag(tagInt, basicProfile, datasetAttributes);
+						final String action = anonymizationMap.get(tagString);
+						anonymizeTag(tagInt, action, datasetAttributes);
 					}
 				} else {
 					if ((0x50000000 <= tagInt) && (tagInt <= 0x50FFFFFF)) {
-						final String basicProfile = anonymizationMap.get(curveDataTags);
-						anonymizeTag(tagInt, basicProfile, datasetAttributes);
+						final String action = anonymizationMap.get(curveDataTags);
+						anonymizeTag(tagInt, action, datasetAttributes);
 					} else if ((0x60004000 <= tagInt) && (tagInt <= 0x60FF4000)) {
-						final String basicProfile = anonymizationMap.get(overlayCommentsTags);
-						anonymizeTag(tagInt, basicProfile, datasetAttributes);
+						final String action = anonymizationMap.get(overlayCommentsTags);
+						anonymizeTag(tagInt, action, datasetAttributes);
 					} else if ((0x60003000 <= tagInt) && (tagInt <= 0x60FF3000)) {
-						final String basicProfile = anonymizationMap.get(overlayDataTags);
-						anonymizeTag(tagInt, basicProfile, datasetAttributes);
+						final String action = anonymizationMap.get(overlayDataTags);
+						anonymizeTag(tagInt, action, datasetAttributes);
 					}
 				}
 			}
 			// Special anonymization of patient data if isShanoirAnonymization
 			if (isShanoirAnonymization) {
-				anonymizePatientMetaData(datasetAttributes, patientName, patientID, patientBirthDate);
+				anonymizePatientMetaData(datasetAttributes, patientName, patientID, patientBirthDateAttr);
 			}
 			LOG.debug("finish anonymization: begin storage");
 			dos = new DicomOutputStream(dicomFile);
@@ -224,6 +246,64 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 				}
 			} catch (IOException e) {
 				LOG.error(e.getMessage(), e);
+			}
+		}
+	}
+
+	/**
+	 * Handle tags to delete for manufacturer here
+	 * 
+	 * @param datasetAttributes
+	 * @param tagString
+	 * @param action
+	 * @return
+	 */
+	private String handleTagsToDeleteForManufacturer(Attributes datasetAttributes, String tagString, String action) {
+		String manufacturer = datasetAttributes.getString(Tag.Manufacturer);
+		List<String> tagsToDelete = tagsToDeleteForManufacturer.get(manufacturer);
+		if (tagsToDelete != null) {
+			for (Iterator<String> iterator = tagsToDelete.iterator(); iterator.hasNext();) {
+				String tagToDelete = (String) iterator.next();
+				if (tagString.equals(tagToDelete)) {
+					action = "X";
+					break;
+				}
+			}
+		}
+		return action;
+	}
+
+	/**
+	 * @param patientNameArrayAttr
+	 * @param patientIDAttr
+	 * @param patientBirthNameAttr
+	 * @param patientBirthDateAttr
+	 * @param tagInt
+	 * @param value
+	 * @throws Exception
+	 */
+	private void checkForPHI(String[] patientNameArrayAttr, String patientIDAttr, String patientBirthNameAttr,
+			String patientBirthDateAttr, int tagInt, String value) throws Exception {
+		// check for patient name elements
+		for (int i = 0; i < patientNameArrayAttr.length; i++) {
+			String patientNamePart = patientNameArrayAttr[i];
+			checkContains(tagInt, value, patientNamePart);
+		}
+		checkContains(tagInt, value, patientIDAttr);
+		checkContains(tagInt, value, patientBirthNameAttr);
+		checkContains(tagInt, value, patientBirthDateAttr);
+	}
+
+	/**
+	 * @param tagInt
+	 * @param value
+	 * @param patientNamePart
+	 * @throws Exception
+	 */
+	private void checkContains(int tagInt, String value, String patientNamePart) throws Exception {
+		if (patientNamePart != null && !patientNamePart.isEmpty() && patientNamePart.length() > 2) {
+			if (value.contains(patientNamePart)) {
+				throw new Exception("Potential PHI found in private tag: " + tagInt + ": " + value);
 			}
 		}
 	}

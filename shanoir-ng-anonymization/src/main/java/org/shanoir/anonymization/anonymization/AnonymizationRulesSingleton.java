@@ -47,17 +47,20 @@ public class AnonymizationRulesSingleton {
 
 	private Map<String, Profile> profiles;
 
-	private List<String> tagsToDelete;
+	private Map<String, List<String>> tagsToDeleteForManufacturer;
 
 	private AnonymizationRulesSingleton() {
 		this.profiles = new HashMap<String, Profile>();
-		this.tagsToDelete = new ArrayList<String>();
+		this.tagsToDeleteForManufacturer = new HashMap<String, List<String>>();
 		Integer xtagColumn = null;
 		try {
 			ClassLoader classLoader = getClass().getClassLoader();
 			InputStream in = classLoader.getResourceAsStream(ANONYMIZATION_FILE_PATH);
 			XSSFWorkbook myWorkBook = new XSSFWorkbook(in);
-			// Return first sheet from the XLSX workbook
+			
+			/**
+			 * Read profiles from the sheet "Profiles"
+			 */
 			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
 			// Get iterator to all the rows in current sheet
 			Iterator<Row> rowIterator = mySheet.iterator();
@@ -97,17 +100,31 @@ public class AnonymizationRulesSingleton {
 				}
 			}
 
-			// Return second sheet from the XLSX workbook
+			/**
+			 * Read tagsToDeleteForManufacturer from the sheet "TagsToDeleteForManufacturer"
+			 */
 			XSSFSheet mySheet2 = myWorkBook.getSheetAt(1);
-
 			// Get iterator to all the rows in current sheet
 			Iterator<Row> rowIterator2 = mySheet2.iterator();
-
 			// Traversing over each row of XLSX file
 			while (rowIterator2.hasNext()) {
 				Row row = rowIterator2.next();
-				Cell cell = row.getCell(0);
-				tagsToDelete.add(cell.getStringCellValue());
+				Cell cellManufacturer = row.getCell(0);
+				if (cellManufacturer != null) {
+					String manufacturer = cellManufacturer.getStringCellValue();
+					Cell cellTag = row.getCell(1);
+					if (cellTag != null) {
+						String tag = cellTag.getStringCellValue();
+						List<String> tagsForManufacturer = tagsToDeleteForManufacturer.get(manufacturer);
+						if (tagsForManufacturer == null) {
+							tagsForManufacturer = new ArrayList<>();
+							tagsForManufacturer.add(tag);
+							tagsToDeleteForManufacturer.put(manufacturer, tagsForManufacturer);
+						} else {
+							tagsForManufacturer.add(tag);
+						}
+					}
+				}
 			}
 
 			myWorkBook.close();
@@ -126,8 +143,8 @@ public class AnonymizationRulesSingleton {
 		return profiles;
 	}
 
-	public List<String> getTagsToKeep() {
-		return tagsToDelete;
+	public Map<String, List<String>> getTagsToDeleteForManufacturer() {
+		return tagsToDeleteForManufacturer;
 	}
 
 }

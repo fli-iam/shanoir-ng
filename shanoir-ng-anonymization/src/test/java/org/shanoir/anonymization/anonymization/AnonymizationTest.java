@@ -62,7 +62,7 @@ public class AnonymizationTest {
 	 * 
 	 */
 
-	public static void anonymizationTest() throws IOException {
+	public static void anonymizationTest() throws Exception {
 		ArrayList<File> dicomImages = createImageArray();
 		long chrono = java.lang.System.currentTimeMillis();
 		printDICOMFile(dicomImages.get(0));
@@ -133,7 +133,7 @@ public class AnonymizationTest {
 	public static void main(String args[]) {
 		try {
 			anonymizationTest();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOG.error("anonymization failed: ", e);
 		}
 	}
