@@ -123,7 +123,12 @@ public class ImporterManagerService {
 				Patient patient = (Patient) patientsIt.next();
 				ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
 				final String subjectName = patient.getSubject().getName();
-				ANONYMIZER.anonymizeForShanoir(dicomFiles, "Profile Neurinfo", subjectName, subjectName);
+				try {
+					ANONYMIZER.anonymizeForShanoir(dicomFiles, "Profile Neurinfo", subjectName, subjectName);
+				} catch (Exception e) {
+					LOG.error(e.getMessage(), e);
+					throw new ShanoirException("Error during anonymization.");
+				}
 				Long converterId = importJob.getFrontConverterId();
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId);
 			}
