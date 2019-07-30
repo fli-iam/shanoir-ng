@@ -23,8 +23,6 @@ import java.util.ArrayList;
  * @author ifakhfakh
  * 
  */
-
-
 public interface AnonymizationService {
 	
 	/**
@@ -58,5 +56,5 @@ public interface AnonymizationService {
 			String patientLastName, String patientID) throws Exception;
 	
 	void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID) throws Exception;
-
+	
 }
