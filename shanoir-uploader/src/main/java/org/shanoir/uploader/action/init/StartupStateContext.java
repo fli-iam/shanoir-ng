@@ -38,7 +38,11 @@ public class StartupStateContext {
 	}
 	
 	public void nextState(){
-		getState().load(this);
+		try {
+			getState().load(this);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
 	}
 
 	public ShUpStartupDialog getShUpStartupDialog() {

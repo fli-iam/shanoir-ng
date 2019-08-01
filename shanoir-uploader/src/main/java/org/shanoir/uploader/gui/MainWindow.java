@@ -735,7 +735,7 @@ public class MainWindow extends JFrame {
 		File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
 		Pseudonymizer pseudonymizer = null;
 		try {
-			pseudonymizer = new Pseudonymizer("0", pseudonymusFolder.getAbsolutePath());
+			pseudonymizer = new Pseudonymizer(ShUpConfig.generalProperties.getProperty("key"), pseudonymusFolder.getAbsolutePath());
 		} catch (PseudonymusException e1) {
 			logger.error(e1.getMessage(), e1);
 		}

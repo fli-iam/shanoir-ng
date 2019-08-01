@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
+import org.shanoir.uploader.utils.Encryption;
+
 /**
  * This class contains all static data needed by ShanoirUploader upon startup.
  * 
@@ -23,7 +25,7 @@ public class ShUpConfig {
 	/**
 	 * Constants
 	 */
-	public static final String SHANOIR_UPLOADER_VERSION = "6.0.0 - 2019-07-30";
+	public static final String SHANOIR_UPLOADER_VERSION = "6.0.0 - 2019-08-01";
 	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
@@ -57,8 +59,6 @@ public class ShUpConfig {
 	
 	public static final String UPLOAD_SERVICE_JOB = "uploadServiceJob";
 	
-	public static final String PRIVATE_KEY = "0";
-	
 	public static final int UPLOAD_SERVICE_INTERVAL = 5;
 	
 	/**
@@ -83,6 +83,8 @@ public class ShUpConfig {
 	public static File shanoirUploaderFolder;
 
 	public static Integer studyCardComplianceLevel;
+	
+	public static Encryption encryption;
 	
 	public static boolean isModePseudonymus() {
 		return Boolean.parseBoolean(generalProperties.getProperty(MODE_PSEUDONYMUS));

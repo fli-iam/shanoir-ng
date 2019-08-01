@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.LoginConfigurationPanel;
 import org.shanoir.uploader.service.wsdl.ServiceConfiguration;
-import org.shanoir.uploader.utils.Encryption;
 
 public class LoginPanelActionListener implements ActionListener {
 
@@ -28,7 +27,7 @@ public class LoginPanelActionListener implements ActionListener {
 				serviceConfiguration.getUsername());
 		ShUpConfig.shanoirServerProperties.setProperty("shanoir.server.user.password",
 				serviceConfiguration.getPassword());
-		new Encryption().decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
+		ShUpConfig.encryption.decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
 				ShUpConfig.shanoirServerProperties, "shanoir.server.user.password",
 				ShUpConfig.SHANOIR_SERVER_PROPERTIES);
 
@@ -36,7 +35,7 @@ public class LoginPanelActionListener implements ActionListener {
 				serviceConfiguration.getUsername());
 		ShUpConfig.shanoirNGServerProperties.setProperty("shanoir.server.user.password",
 				serviceConfiguration.getPassword());
-		new Encryption().decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
+		ShUpConfig.encryption.decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
 				ShUpConfig.shanoirNGServerProperties, "shanoir.server.user.password",
 				ShUpConfig.SHANOIR_NG_SERVER_PROPERTIES);
 		
