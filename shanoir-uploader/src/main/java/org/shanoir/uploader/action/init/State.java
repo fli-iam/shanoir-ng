@@ -20,6 +20,6 @@ package org.shanoir.uploader.action.init;
  */
 public interface State {
 
-	public void load(StartupStateContext context);
+	public void load(StartupStateContext context) throws Exception;
 
 }

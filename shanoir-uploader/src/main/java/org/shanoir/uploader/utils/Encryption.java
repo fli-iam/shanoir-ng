@@ -12,24 +12,31 @@ import org.jboss.seam.util.Hex;
 import org.shanoir.uploader.cryptography.BlowfishAlgorithm;
 
 /**
+ * This class is used to crypt/uncrypt the user and proxy passwords
  * 
  * @author ifakhfak
- * 
- *         This class is used to crypt/uncrypt the user and proxy passwords
  *
  */
 public class Encryption {
 
 	private Logger logger = Logger.getLogger(Encryption.class);
-	private BlowfishAlgorithm blow = new BlowfishAlgorithm();
-	// private BlowfishAlgorithm blow = new BlowfishAlgorithm();
+	
+	private BlowfishAlgorithm blow;
+	
+	public Encryption(String key) {
+		this.blow = new BlowfishAlgorithm(key);
+	}
 
+	/**
+	 * decrypt password
+	 * @param shanoirUploaderFolder
+	 * @param propertyObject
+	 * @param propertyString
+	 * @param propertyFile
+	 */
 	public void decryptIfEncryptedString(File shanoirUploaderFolder, Properties propertyObject, String propertyString,
 			String propertyFile) {
-
 		String unknownString = propertyObject.getProperty(propertyString);
-		// decrypt password
-
 		try {
 			logger.debug("Start decrypting string " + propertyString);
 			byte[] ibyte = Hex.decodeHex(unknownString.toCharArray());
@@ -61,7 +68,11 @@ public class Encryption {
 		}
 	}
 
-	// encrypt password
+	/**
+	 * encrypt password
+	 * @param stringToEncrypt
+	 * @return
+	 */
 	public String cryptEncryptedString(String stringToEncrypt) {
 		try {
 			byte[] ibyte = stringToEncrypt.getBytes();

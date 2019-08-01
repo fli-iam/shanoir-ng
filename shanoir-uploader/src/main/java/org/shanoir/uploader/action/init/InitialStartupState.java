@@ -3,10 +3,13 @@ package org.shanoir.uploader.action.init;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
 
@@ -41,7 +44,7 @@ public class InitialStartupState implements State {
 	
 	private static final String LOG4J_PROPERTIES = "/log4j.properties";
 	
-	public void load(StartupStateContext context) {
+	public void load(StartupStateContext context) throws Exception {
 		initLogging();
 		logger.info("Start running of ShanoirUploader...");
 		logger.info("Version: " + ShUpConfig.SHANOIR_UPLOADER_VERSION);	
@@ -84,50 +87,93 @@ public class InitialStartupState implements State {
 		}
 	}
 	
-	private void initPropertiesFiles() {
-		// load properties into ShUpConfig properties
+	private void initPropertiesFiles() throws FileNotFoundException, IOException {
+		// load properties into ShUpConfig properties (and copy into .su if necessary)
 		initProperties(ShUpConfig.GENERAL_PROPERTIES, ShUpConfig.generalProperties);
-		logger.info("General properties successfully initialized.");
+		logger.info("general.properties successfully initialized.");
+		
+		String randomSeed = generateRandomSeed();
+		ShUpConfig.encryption = new Encryption(randomSeed);
+		logger.info("random.seed successfully initialized.");
 		
 		initProperties(ShUpConfig.DICOM_SERVER_PROPERTIES,
 				ShUpConfig.dicomServerProperties);
-		logger.info("DicomServer properties successfully initialized.");
+		logger.info("dicom_server.properties successfully initialized.");
 		
 		initProperties(ShUpConfig.SHANOIR_SERVER_PROPERTIES,
 				ShUpConfig.shanoirServerProperties);
-		new Encryption().decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
+		ShUpConfig.encryption.decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
 				ShUpConfig.shanoirServerProperties, "shanoir.server.user.password",
 				ShUpConfig.SHANOIR_SERVER_PROPERTIES);
-		logger.info("ShanoirServer properties successfully initialized.");
+		logger.info("shanoir_server.properties successfully initialized.");
 		
 		initProperties(ShUpConfig.SHANOIR_NG_SERVER_PROPERTIES,
 				ShUpConfig.shanoirNGServerProperties);
-		new Encryption().decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
+		ShUpConfig.encryption.decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
 				ShUpConfig.shanoirNGServerProperties, "shanoir.server.user.password",
 				ShUpConfig.SHANOIR_NG_SERVER_PROPERTIES);
-		logger.info("ShanoirNGServer properties successfully initialized.");
+		logger.info("shanoir_ng_server.properties successfully initialized.");
 
 		initProperties(ShUpConfig.PROXY_PROPERTIES, ShUpConfig.proxyProperties);
 		if (ShUpConfig.proxyProperties.getProperty("proxy.password") != null
 				&& !ShUpConfig.proxyProperties.getProperty("proxy.password").equals("")) {
-			new Encryption().decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
+			ShUpConfig.encryption.decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
 					ShUpConfig.proxyProperties, "proxy.password",
 					ShUpConfig.PROXY_PROPERTIES);
 		}
-		logger.info("Proxy properties successfully initialized.");
+		logger.info("proxy.properties successfully initialized.");
 		
 		initProperties(ShUpConfig.LANGUAGE_PROPERTIES, ShUpConfig.languageProperties);
-		logger.info("Language properties successfully initialized.");
+		logger.info("language.properties successfully initialized.");
+		
+		// check if pseudonymus has been copied in case of true
+		if (Boolean.parseBoolean(ShUpConfig.generalProperties.getProperty("mode.pseudonymus"))) {
+			// check at first for the executables
+			File pseudonymusFolder = new File(ShUpConfig.shanoirUploaderFolder + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
+			if (!pseudonymusFolder.exists()) {
+				throw new FileNotFoundException("/.su/pseudonymus folder missing for mode pseudonymus! Please copy manually.");
+			}
+			// than check for key
+			String pseudonymusKeyPath = ShUpConfig.generalProperties.getProperty("mode.pseudonymus.path");
+			if (pseudonymusKeyPath != null && !pseudonymusKeyPath.isEmpty()) {
+				File pseudonymusKeyPropertiesFile = new File(ShUpConfig.shanoirUploaderFolder + File.separator + pseudonymusKeyPath);
+				if (!pseudonymusKeyPropertiesFile.exists()) {
+					throw new FileNotFoundException("/.su/" + pseudonymusKeyPath + " file missing for mode pseudonymus! Please copy manually.");
+				} else {
+					Properties keyProperties = new Properties();
+					loadPropertiesFromFile(keyProperties, pseudonymusKeyPropertiesFile);
+					// copy into generalProperties in the memory, to avoid using another props file
+					ShUpConfig.generalProperties.put("key", keyProperties.get("key"));
+				}
+			} else {
+				throw new FileNotFoundException("/.su/" + pseudonymusKeyPath + " file missing. Please configure your path accordingly.");
+			}
+		}
 		
 		// put settings into ShUpOnloadConfig
-		ShUpOnloadConfig.setOfsep(Boolean.parseBoolean(ShUpConfig.generalProperties.getProperty("is.ofsep")));
 		ShUpOnloadConfig.setShanoirNg(
 				Boolean.parseBoolean(ShUpConfig.shanoirNGServerProperties.getProperty("is.ng.up")));
-		if (ShUpOnloadConfig.isOfsep()) {
-			Util.copyPseudonymusFolder("/" + Pseudonymizer.PSEUDONYMUS_FOLDER);
+	}
+
+	/**
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private String generateRandomSeed() throws FileNotFoundException, IOException {
+		String randomSeed = ShUpConfig.generalProperties.getProperty("random.seed");
+		if (randomSeed != null && !randomSeed.isEmpty() && !randomSeed.equals("0")) {
+			return randomSeed;
+		} else {
+			Random r = new Random();
+			int num = r.nextInt(10000);
+			String knum = String.valueOf(num);
+			ShUpConfig.generalProperties.setProperty("random.seed", knum);
+			final File generalProps = new File(ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.GENERAL_PROPERTIES);
+			OutputStream out = new FileOutputStream(generalProps);
+			ShUpConfig.generalProperties.store(out, "general.properties");
+			out.close();
+			return knum;
 		}
-		ShUpOnloadConfig.setAutoImportEnabled(
-				Boolean.parseBoolean(ShUpConfig.generalProperties.getProperty("autoimport.enable")));
 	}
 	
 	/**
@@ -150,8 +196,7 @@ public class InitialStartupState implements State {
 	/**
 	 * Reads properties from .su folder into memory, or copies property file if not existing.
 	 */
-	private void initProperties(final String fileName,
-			final Properties properties) {
+	private void initProperties(final String fileName, final Properties properties) {
 		final File propertiesFile = new File(ShUpConfig.shanoirUploaderFolder + File.separator + fileName);
 		boolean propertiesExists = propertiesFile.exists();
 		if (propertiesExists) {
@@ -159,9 +204,18 @@ public class InitialStartupState implements State {
 		} else {
 			Util.copyPropertiesFile(fileName, propertiesFile);
 		}
+		loadPropertiesFromFile(properties, propertiesFile);
+	}
+
+	/**
+	 * @param properties
+	 * @param propertiesFile
+	 */
+	private void loadPropertiesFromFile(final Properties properties, final File propertiesFile) {
 		try {
 			final FileInputStream fIS = new FileInputStream(propertiesFile);
 			properties.load(fIS);
+			fIS.close();
 		} catch (FileNotFoundException e) {
 			logger.error(e.getMessage(), e);
 		} catch (IOException e) {

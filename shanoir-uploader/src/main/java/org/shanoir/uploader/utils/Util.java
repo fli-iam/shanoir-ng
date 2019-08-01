@@ -428,7 +428,7 @@ public final class Util {
 		if (propertyObject.getProperty(passwordPropertyName) != null
 				&& !propertyObject.getProperty(passwordPropertyName).equals("")) {
 			propertyObject.setProperty(passwordPropertyName,
-					new Encryption().cryptEncryptedString(propertyObject.getProperty(passwordPropertyName)));
+					ShUpConfig.encryption.cryptEncryptedString(propertyObject.getProperty(passwordPropertyName)));
 		} else {
 			propertyObject.setProperty(passwordPropertyName, "");
 		}
