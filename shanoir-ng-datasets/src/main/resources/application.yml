@@ -83,6 +83,8 @@ keycloak:
 ms.url:
   shanoir-ng-studies: http://studies:9902/
 datasets-data: /var/datasets-data
+# Solr
+spring.data.solr.host: http://localhost:8983/solr
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log
