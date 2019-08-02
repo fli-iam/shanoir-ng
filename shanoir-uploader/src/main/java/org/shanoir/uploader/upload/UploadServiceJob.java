@@ -93,6 +93,11 @@ public class UploadServiceJob implements Job {
 			// do not transfer nominativeDataUploadJob as only for display in ShUp
 			if (file.getName().equals(NominativeDataUploadJobManager.NOMINATIVE_DATA_JOB_XML)) {
 				nominativeDataUploadJobManager = new NominativeDataUploadJobManager(file);
+		    // remove upload-job.xml from the list of files to transfer, to guarantee later
+			// that this file is for sure transferred as the last file to avoid sync problems
+			// on the server, when auto-import starts with still missing files
+			} else if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)) {
+				// do not add to list
 		    } else {
 				filesToTransfer.add(file);
 			}
@@ -132,17 +137,21 @@ public class UploadServiceJob implements Job {
 			for (Iterator iterator = allFiles.iterator(); iterator.hasNext();) {
 				File file = (File) iterator.next();
 				i++;
-				if (!file.getName().equals(NominativeDataUploadJobManager.NOMINATIVE_DATA_JOB_XML)) {
-					logger.debug("UploadServiceJob started to upload file: " + file.getName());
-					uploadServiceClient.uploadFile(folder, file);
-					logger.debug("UploadServiceJob finished to upload file: " + file.getName());
-					uploadPercentage = i * 100 / allFiles.size() + " %";
-					nominativeDataUploadJob.setUploadPercentage(uploadPercentage);
-					currentNominativeDataController.updateNominativeDataPercentage(folder, uploadPercentage);
-					nominativeDataUploadJobManager.writeUploadDataJob(nominativeDataUploadJob);
-					logger.debug("Upload percentage of folder " + folder.getName() + " = " + uploadPercentage + ".");
-				}
+				logger.debug("UploadServiceJob started to upload file: " + file.getName());
+				uploadServiceClient.uploadFile(folder, file);
+				logger.debug("UploadServiceJob finished to upload file: " + file.getName());
+				uploadPercentage = i * 100 / allFiles.size() + " %";
+				nominativeDataUploadJob.setUploadPercentage(uploadPercentage);
+				currentNominativeDataController.updateNominativeDataPercentage(folder, uploadPercentage);
+				nominativeDataUploadJobManager.writeUploadDataJob(nominativeDataUploadJob);
+				logger.debug("Upload percentage of folder " + folder.getName() + " = " + uploadPercentage + ".");
 			}
+			/**
+			 * Explicitly upload the upload-job.xml as the last file to avoid sync problems on server in case of
+			 * many files have to be uploaded.
+			 */
+			File uploadJobXML = new File(folder.getAbsolutePath() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
+			uploadServiceClient.uploadFile(folder, uploadJobXML);
 			uploadJob.setUploadState(UploadState.FINISHED_UPLOAD);
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
 					UploadState.FINISHED_UPLOAD.toString());
