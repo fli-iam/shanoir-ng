@@ -89,8 +89,16 @@ public class ImportDialogOpener {
 		Serie firstSerie = uploadJob.getSeries().iterator().next();
 		String institutionName = firstSerie.getMriInformation().getInstitutionName();
 		String institutionAddress = firstSerie.getMriInformation().getInstitutionAddress();
+		String stationName = firstSerie.getMriInformation().getStationName();
+		String manufacturer = firstSerie.getMriInformation().getManufacturer();
+		String manufacturersModelName = firstSerie.getMriInformation().getManufacturersModelName();
+		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
 		importDialog.mriCenterText.setText(institutionName);
 		importDialog.mriCenterAddressText.setText(institutionAddress);
+		importDialog.mriStationNameText.setText(stationName);
+		importDialog.mriManufacturerText.setText(manufacturer);
+		importDialog.mriManufacturersModelNameText.setText(manufacturersModelName);
+		importDialog.mriDeviceSerialNumberText.setText(deviceSerialNumber);
 	}
 
 	/**
