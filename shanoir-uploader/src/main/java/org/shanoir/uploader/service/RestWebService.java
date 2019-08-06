@@ -5,9 +5,6 @@ package org.shanoir.uploader.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +35,6 @@ import org.shanoir.uploader.model.dto.SubjectDTO;
 import org.shanoir.uploader.model.dto.SubjectStudyDTO;
 import org.shanoir.uploader.model.dto.rest.IdNameDTO;
 import org.shanoir.uploader.model.dto.rest.SubjectFromShupDTO;
-import org.shanoir.uploader.service.keycloak.KeycloakClient;
-import org.shanoir.uploader.service.keycloak.KeycloakConfiguration;
 import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.utils.Util;
 
@@ -58,8 +53,6 @@ public class RestWebService implements IWebService {
 
 	private static Logger logger = Logger.getLogger(RestWebService.class);
 
-	private KeycloakConfiguration keycloakConfig = KeycloakConfiguration.getInstance();
-
 	private AccessTokenResponse tokenReponse;
 
 	private RestWebService() {
@@ -75,16 +68,6 @@ public class RestWebService implements IWebService {
 	 * @see org.shanoir.uploader.service.WebServiceItf#init()
 	 */
 	public Integer init() {
-		keycloakConfig.setKeycloakRequestsRealm(
-				ShUpConfig.shanoirNGServerProperties.getProperty("shanoir.server.keycloak.realm"));
-		keycloakConfig.setKeycloakRequestsUserLogin(
-				ShUpConfig.shanoirNGServerProperties.getProperty("shanoir.server.user.name"));
-		keycloakConfig.setKeycloakRequestsUserPassword(
-				ShUpConfig.shanoirNGServerProperties.getProperty("shanoir.server.user.password"));
-		keycloakConfig.setKeycloakRequestsAuthServerUrl(
-				ShUpConfig.shanoirNGServerProperties.getProperty("shanoir.server.keycloak.host"));
-		keycloakConfig.setKeycloakRequestsClientId(
-				ShUpConfig.shanoirNGServerProperties.getProperty("shanoir.server.keycloak.client"));
 		return 0;
 	}
 
@@ -94,41 +77,7 @@ public class RestWebService implements IWebService {
 	 * @see org.shanoir.uploader.service.WebServiceItf#testConnection()
 	 */
 	public Integer testConnection() {
-		WebServiceResponse<AccessTokenResponse> response = null;
-		// 401 : token expired
-		try {
-			HttpURLConnection connection = (HttpURLConnection) new URL(
-					keycloakConfig.getKeycloakRequestsAuthServerUrl()).openConnection();
-			connection.setRequestMethod("HEAD");
-			int responseCode = connection.getResponseCode();
-			switch (Integer.parseInt(Integer.toString(responseCode).substring(0, 1))) {
-			case 2:
-				response = KeycloakClient.getAccessToken(keycloakConfig, false);
-				switch (response.getStatusCode()) {
-				case 0:
-					
-					tokenReponse = response.getObj();
-					return 0;
-				case -1:
-					return -1;
-				default:
-					return -3;
-				}
-			default:
-				return -3;
-			}
-
-			// InetAddress.getByName(keycloakConfig.getKeycloakRequestsAuthServerUrl()).isReachable(3000);
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			return -3;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return -3;
-		}
-
 	}
 
 	public WebServiceResponse<List<StudyDTO>> findStudies(EquipmentDicom equipment) {
@@ -449,10 +398,6 @@ public class RestWebService implements IWebService {
 	}
 
 	public void validateOrRefreshToken() {
-		if (!KeycloakClient.verifyToken(keycloakConfig, tokenReponse)) {
-			tokenReponse = KeycloakClient.getAccessToken(keycloakConfig, true).getObj();
-		}
-		;
 	}
 
 	public String subjectTypeNGToOLD(Integer subjectTypeId) {

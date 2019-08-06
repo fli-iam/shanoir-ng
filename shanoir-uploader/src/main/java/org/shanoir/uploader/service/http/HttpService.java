@@ -12,7 +12,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.keycloak.representations.AccessTokenResponse;
-import org.shanoir.uploader.service.keycloak.KeycloakConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,7 @@ public class HttpService {
 	
 	CrunchifyRetryOnExceptionStrategy retry = new CrunchifyRetryOnExceptionStrategy();
 
-	public HttpResponse queryRestService(String url, KeycloakConfiguration keycloakConfig, AccessTokenResponse tokenReponse) {
+	public HttpResponse queryRestService(String url, AccessTokenResponse tokenReponse) {
 
 		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout((int)retry.DEFAULT_WAIT_TIME_IN_MILLI).build();
 		HttpClient client = HttpClientBuilder.create().build();
@@ -71,7 +70,7 @@ public class HttpService {
 
 	}
 	
-	public HttpResponse postRestService(String url, KeycloakConfiguration keycloakConfig, AccessTokenResponse tokenReponse, String json) {
+	public HttpResponse postRestService(String url, AccessTokenResponse tokenReponse, String json) {
 
 		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout((int)retry.DEFAULT_WAIT_TIME_IN_MILLI).build();
 		HttpClient client = HttpClientBuilder.create().build();
