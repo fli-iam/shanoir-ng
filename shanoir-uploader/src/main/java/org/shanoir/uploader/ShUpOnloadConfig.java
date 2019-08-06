@@ -9,7 +9,6 @@ import org.quartz.Trigger;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.service.http.UrlConfig;
-import org.shanoir.uploader.service.keycloak.KeycloakConfiguration;
 
 /**
  * 
@@ -35,8 +34,6 @@ public class ShUpOnloadConfig {
 	private static Scheduler scheduler;
 	
 	private static CurrentNominativeDataController currentNominativeDataController;
-	
-	private static KeycloakConfiguration keycloakConfig = KeycloakConfiguration.getInstance();
 	
 	private static UrlConfig urlConfig = new UrlConfig();
 
@@ -119,14 +116,6 @@ public class ShUpOnloadConfig {
 
 	public static void setCurrentNominativeDataController(CurrentNominativeDataController currentNominativeDataController) {
 		ShUpOnloadConfig.currentNominativeDataController = currentNominativeDataController;
-	}
-
-	public static KeycloakConfiguration getKeycloakConfig() {
-		return keycloakConfig;
-	}
-
-	public static void setKeycloakConfig(KeycloakConfiguration keycloakConfig) {
-		ShUpOnloadConfig.keycloakConfig = keycloakConfig;
 	}
 
 	public static UrlConfig getUrlConfig() {

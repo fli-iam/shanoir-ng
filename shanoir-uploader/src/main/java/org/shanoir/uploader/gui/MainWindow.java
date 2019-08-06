@@ -60,7 +60,6 @@ import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.service.IWebService;
 import org.shanoir.uploader.service.SoapWebService;
 import org.shanoir.uploader.service.http.UrlConfig;
-import org.shanoir.uploader.service.keycloak.KeycloakConfiguration;
 import org.shanoir.uploader.service.wsdl.ServiceConfiguration;
 
 
@@ -143,7 +142,6 @@ public class MainWindow extends JFrame {
 			final String DICOM_SERVER_PROPERTIES,
 			final String SHANOIR_SERVER_PROPERTIES,
 			final String LANGUAGE_PROPERTIES,
-			final KeycloakConfiguration keycloakConfig,
 			final UrlConfig urlConfig,
 			final ResourceBundle resourceBundle) {		
 		this.dicomServerClient=dicomServerClient;

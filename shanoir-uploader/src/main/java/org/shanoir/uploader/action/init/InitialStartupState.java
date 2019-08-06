@@ -11,7 +11,6 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
 import java.util.ResourceBundle;
-import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -112,7 +111,8 @@ public class InitialStartupState implements State {
 		ShUpConfig.encryption.decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
 				ShUpConfig.shanoirNGServerProperties, "shanoir.server.user.password",
 				ShUpConfig.SHANOIR_NG_SERVER_PROPERTIES);
-		logger.info("shanoir_ng_server.properties successfully initialized.");
+		ShUpConfig.keycloakJson = initFile(ShUpConfig.KEYCLOAK_JSON);
+		logger.info("shanoir_ng_server.properties and keycloak.json successfully initialized.");
 
 		initProperties(ShUpConfig.PROXY_PROPERTIES, ShUpConfig.proxyProperties);
 		if (ShUpConfig.proxyProperties.getProperty("proxy.password") != null
@@ -198,13 +198,27 @@ public class InitialStartupState implements State {
 	 */
 	private void initProperties(final String fileName, final Properties properties) {
 		final File propertiesFile = new File(ShUpConfig.shanoirUploaderFolder + File.separator + fileName);
-		boolean propertiesExists = propertiesFile.exists();
-		if (propertiesExists) {
+		if (propertiesFile.exists()) {
 			// do nothing
 		} else {
 			Util.copyPropertiesFile(fileName, propertiesFile);
 		}
 		loadPropertiesFromFile(properties, propertiesFile);
+	}
+	
+	/**
+	 * Read file from .su folder into memory, or copy file from .jar into .su folder
+	 * @param fileName
+	 * @return
+	 */
+	private File initFile(final String fileName) {
+		final File file = new File(ShUpConfig.shanoirUploaderFolder + File.separator + fileName);
+		if (file.exists()) {
+			// do nothing
+		} else {
+			Util.copyPropertiesFile(fileName, file);
+		}
+		return file;
 	}
 
 	/**

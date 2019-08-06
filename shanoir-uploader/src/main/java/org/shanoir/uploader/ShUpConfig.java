@@ -49,6 +49,8 @@ public class ShUpConfig {
 	
 	public static final String SHANOIR_NG_SERVER_PROPERTIES = "/shanoir_ng_server.properties";
 	
+	public static final String KEYCLOAK_JSON = "/keycloak.json";
+	
 	public static final String SU = ".su";
 	
 	public static final String USER_HOME = "user.home";
@@ -77,6 +79,8 @@ public class ShUpConfig {
 	public static Properties shanoirNGServerProperties = new Properties();
 	
 	public static Properties autoImportServerProperties = new Properties();
+	
+	public static File keycloakJson;
 	
 	public static ResourceBundle resourceBundle;
 

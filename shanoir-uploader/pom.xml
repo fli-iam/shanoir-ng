@@ -12,12 +12,13 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<keycloak.version>3.4.3.Final</keycloak.version>
+		<keycloak.version>4.6.0.Final</keycloak.version>
 	</properties>
 
 	<dependencies>
-		<!-- ********************************************************** ** basic 
-			dependencies ************************************ ********************************************************** -->
+		<!-- **********************************************************
+			 ** basic dependencies ************************************
+			 ********************************************************** -->
 		<!-- Spring Framework 4.3.3, stable release, same as used by Spring Boot 
 			1.4.1 in Shanoir-NG -->
 		<!-- Referenced here to use shared Spring beans between Shanoir-NG and 
@@ -99,43 +100,19 @@
 			<artifactId>xmlbeans</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-		<!-- ********************************************************** ** Keycloak 
-			dependencies ********************************* ********************************************************** -->
+		<!-- **********************************************************
+			 Dependency to KeycloakInstalled, to connect desktop apps
+			 (e.g. Swing or JavaFX) with Keycloak, see
+			 https://www.keycloak.org/docs/latest/securing_apps/index.html#_installed_adapter 
+		     ********************************************************** -->
 		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-adapter-core</artifactId>
-			<version>${keycloak.version}</version>
+		        <groupId>org.keycloak</groupId>
+		        <artifactId>keycloak-installed-adapter</artifactId>
+		        <version>${keycloak.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-admin-client</artifactId>
-			<version>${keycloak.version}</version>
-		</dependency>
-		<!-- ********************************************************** ** RESTEasy 
-			dependencies ********************************* ********************************************************** -->
-		<!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jaxrs -->
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-			<version>3.1.1.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>2.8.7</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client</artifactId>
-			<version>3.1.1.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jackson2-provider</artifactId>
-			<version>3.0.12.Final</version>
-		</dependency>
-		<!-- ********************************************************** ** DCM4CHE 
-			dependencies ********************************** ********************************************************** -->
+		<!-- **********************************************************
+			 ** DCM4CHE dependencies **********************************
+			 ********************************************************** -->
 		<!-- dependency DCM4CHE core -->
 		<dependency>
 			<groupId>dcm4che</groupId>
