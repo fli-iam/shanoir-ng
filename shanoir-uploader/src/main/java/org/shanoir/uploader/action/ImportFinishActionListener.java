@@ -84,13 +84,17 @@ public class ImportFinishActionListener implements ActionListener {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
 						"Error", JOptionPane.ERROR_MESSAGE);
+				mainWindow.setCursor(null); // turn off the wait cursor
+				((JButton) event.getSource()).setEnabled(true);
 				return;
 			}
-			subjectDTO = shanoirUploaderServiceClient.createSubject(study.getId(), studyCard.getId(), true, subjectDTO);
+			subjectDTO = shanoirUploaderServiceClient.createSubject(study.getId(), studyCard.getId(), ShUpConfig.isModeSubjectCommonNameManual(), subjectDTO);
 			if (subjectDTO == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
 						"Error", JOptionPane.ERROR_MESSAGE);
+				mainWindow.setCursor(null); // turn off the wait cursor
+				((JButton) event.getSource()).setEnabled(true);
 				return;
 			} else {
 				subjectId = new Long(subjectDTO.getId());
@@ -114,6 +118,8 @@ public class ImportFinishActionListener implements ActionListener {
 				JOptionPane.showMessageDialog(mainWindow.frame,
 						mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),
 						"Error", JOptionPane.ERROR_MESSAGE);
+				mainWindow.setCursor(null); // turn off the wait cursor
+				((JButton) event.getSource()).setEnabled(true);
 				return;
 			} else {
 				examinationId = new Long(createExaminationId);
