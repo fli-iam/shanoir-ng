@@ -55,7 +55,6 @@ export class TreeNodeComponent implements ControlValueAccessor {
     public dataLoading: boolean = false;
     private isOpen: boolean = false;
     public loaded: boolean = false;
-    private loaderImagePath: string = ImagesUrlUtil.LOADER_IMAGE_PATH;
     public hasChildren: boolean;
     public checked: boolean | 'indeterminate';
     @ViewChild('box') boxElt: CheckboxComponent;

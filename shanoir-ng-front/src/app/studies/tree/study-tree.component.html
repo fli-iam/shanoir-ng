@@ -36,10 +36,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node label="Principal investigators and Centers (takes place in and with)" awesome="far fa-folder" [deploy]="true">
     <ng-template ngFor let-studyCenter [ngForOf]="study.studyCenterList">
         <node [label]="studyCenter.center.name" awesome="fas fa-clinic-medical" [nodeParams]="studyCenter" [dataRequest]="true"
-            (openClick)="getAcqEptForCenter($event)" link="true" (labelClick)="showCenterDetails($event)">
+            (openClick)="getAcqEptForCenter($event)" link="true" (labelClick)="showCenterDetails(studyCenter.center.id)">
             <ng-template ngFor let-acquisitionEquipment [ngForOf]="acquisitionEquipments">
                 <node [label]="acquisitionEquipment | acqEqptLabel" awesome="fas fa-microscope" [nodeParams]="acquisitionEquipment.id"
-                    link="true" (labelClick)="showAcquisitionEquipmentDetails($event)">
+                    link="true" (labelClick)="showAcquisitionEquipmentDetails(acquisitionEquipment.id)">
                 </node>
             </ng-template>
         </node>

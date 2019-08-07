@@ -12,10 +12,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="preview">
-    <button [disabled]="isLoading() || !params" *ngIf="!this.autoLoading && !loaded" (click)="load()">
-        <span *ngIf="!(isLoading() || !params)" class="right-icon">Load preview<i class="fas fa-search"></i></span>
-        <span *ngIf="isLoading() || !params">&nbsp;<img class="loader" [src]="ImagesUrlUtil.SMALL_LOADER_IMAGE_PATH"/></span>
-    </button>
-    <div [hidden]="!loaded || !params" class="papaya" data-params="params"></div> 
-</div> 
+<button [disabled]="isLoading() || !params" *ngIf="!this.autoLoading && !loaded" (click)="load()">
+    <span *ngIf="!(isLoading() || !params)" class="right-icon">Load preview<i class="fas fa-search"></i></span>
+    <span *ngIf="isLoading() || !params" class="loader right-icon">Load preview<i class="fa fa-cog fa-spin"></i></span>
+</button>
+<div [hidden]="!loaded || !params" class="preview papaya" data-params="params"></div> 

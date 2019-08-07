@@ -20,10 +20,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </ng-template>
         <ng-template [ngSwitchCase]="'edit'">
             <button type="button" (click)="onCancel()" class="Button right-icon">Cancel<i class="fas fa-ban"></i></button>
-            <button type="button" i18n="Edit center|Update button label@@updateButton" (click)="onUpdate()" class="Button right-icon" [disabled]="!state.valid">Update<i class="far fa-save"></i></button>
+            <button type="button" i18n="Edit center|Update button label@@updateButton" (click)="onUpdate()" class="Button right-icon" [disabled]="!state.valid">
+                Update<span *ngIf="!state.loading">
+                    <i class="far fa-save"></i>
+                </span><span *ngIf="state.loading">
+                    <i class="fa fa-cog fa-spin"></i>
+                </span>
+            </button>
         </ng-template>
         <ng-template [ngSwitchCase]="'create'">
-            <button type="button" i18n="Edit subject|Create button label@@createButton" (click)="onCreate()" class="Button right-icon" [disabled]="!state.valid">Create<i class="far fa-save"></i></button>
+            <button type="button" i18n="Edit subject|Create button label@@createButton" (click)="onCreate()" class="Button right-icon" [disabled]="!state.valid">
+                Create<span *ngIf="!state.loading">
+                    <i class="far fa-save"></i>
+                </span><span *ngIf="state.loading">
+                    <i class="fa fa-cog fa-spin"></i>
+                </span>
+            </button>
         </ng-template>
         <ng-content></ng-content>
     </span>

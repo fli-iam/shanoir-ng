@@ -106,7 +106,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.form = this.buildForm();
         if (this.form) {
             this.subscribtions.push(
-                this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID' && this.form.dirty)
+                this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create'))
             );
             if (this.mode != 'view') setTimeout(() => this.styleRequiredLabels());
         } else {
@@ -212,10 +212,14 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     protected save(): Promise<void> {
+        this.footerState.loading = true;
         return this.modeSpecificSave()
-            .then()
+            .then(() => {
+                this.footerState.loading = false;
+            })
             /* manages "after submit" errors like a unique constraint */      
             .catch(reason => {
+                this.footerState.loading = false;
                 if (reason && reason.error && reason.error.code == 422) {
                     this.saveError = new ShanoirError(reason);
                     for (let managedField of this.onSubmitValidatedFields) {
