@@ -91,7 +91,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             });
             this.updateSelectedOption();
         })
-        this.updateSelectedOption();
+        setTimeout(() => this.updateSelectedOption());
     }
 
     private updateSelectedOption() {

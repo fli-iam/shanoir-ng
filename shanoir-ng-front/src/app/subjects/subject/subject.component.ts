@@ -118,6 +118,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         formGroup.get('firstName').updateValueAndValidity();
         formGroup.get('lastName').updateValueAndValidity();
         formGroup.get('birthDate').updateValueAndValidity();
+        this.reloadRequiredStyles();
     }
 
     save(): Promise<void> {

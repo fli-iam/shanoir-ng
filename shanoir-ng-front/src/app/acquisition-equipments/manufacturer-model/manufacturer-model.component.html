@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="content-component">
+<div #formContainer class="content-component">
     <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout">
 			<span [ngSwitch]="mode">
@@ -29,12 +29,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<help-message [help]="'equipment'"></help-message>
 			<fieldset>
 				<ol>
-                    <li class="required">
-						<label i18n="ManufModel detail|Modality type label@@manufModelDetailModalityType" class="required-label">Modality type</label> 
-						<select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="manufModel.datasetModalityType" formControlName="datasetModalityType"></select-dataset-type>
+                    <li>
+						<label i18n="ManufModel detail|Modality type label@@manufModelDetailModalityType">Modality type</label> 
+						<select-dataset-type class="right-col" [mode]="mode" [(ngModel)]="manufModel.datasetModalityType" (change)="onModalityChange($event)" formControlName="datasetModalityType"></select-dataset-type>
                     </li>
-					<li class="required">
-						<label i18n="ManufModel detail|Manufacturer label@@manufModelDetailManuf" class="required-label">Manufacturer</label> 
+					<li>
+						<label i18n="ManufModel detail|Manufacturer label@@manufModelDetailManuf">Manufacturer</label> 
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								<a [routerLink]="['/manufacturer/details/', manufModel?.manufacturer?.id]">
@@ -48,8 +48,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-					<li class="required">
-						<label i18n="ManufModel detail|Model name label@@manufModelDetailName" class="required-label">Model name</label> 
+					<li>
+						<label i18n="ManufModel detail|Model name label@@manufModelDetailName">Model name</label> 
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								{{manufModel.name}}
@@ -62,8 +62,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-                    <li class="required" *ngIf="isMR">
-						<label i18n="ManufModel detail|Magnetic field label@@manufModelDetailMagneticField" class="required-label">Magnetic field</label> 
+                    <li *ngIf="isMR">
+						<label i18n="ManufModel detail|Magnetic field label@@manufModelDetailMagneticField">Magnetic field</label> 
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								{{manufModel.magneticField}}
