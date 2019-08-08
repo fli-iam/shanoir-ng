@@ -100,7 +100,10 @@ export class TreeNodeComponent implements ControlValueAccessor {
 
     public toggle() {
         if (this.isOpen) this.close();
-        else this.open();
+        else {
+            if (!this.hasChildren && this.dataRequest) this.openClick.emit(this);
+            this.open();
+        }
     }
 
     public updateChildren(): void {
