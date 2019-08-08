@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<fieldset>
 			<ol>
 				<li class="required">
-					<label i18n="Edit user|First name label@@editUserFirstName" class="required-label">First Name</label>
+					<label i18n="Edit user|First name label@@editUserFirstName">First Name</label>
 					<span class="right-col">
 						<input type="text" id="firstName" required minlength="2" maxlength="50" formControlName="firstName" [(ngModel)]="user.firstName"/>
 						<label *ngIf="formErrors.firstName.includes('required')" class="form-validation-alert" i18n="Edit user|First name required error@@editUserFirstNameRequiredError">First Name is required!</label>
@@ -28,7 +28,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 				<li class="required">
-					<label i18n="Edit user|Last name label@@editUserLastName" class="required-label">Last Name</label>
+					<label i18n="Edit user|Last name label@@editUserLastName">Last Name</label>
 					<span class="right-col">
 						<input type="text" id="lastName" required minlength="2" maxlength="50" formControlName="lastName" [(ngModel)]="user.lastName"/>
 						<label *ngIf="formErrors.lastName.includes('required')" class="form-validation-alert" i18n="Edit user|Last name required error@@editUserLastNameRequiredError">Last Name is required!</label>
@@ -36,14 +36,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 				<li *ngIf="mode != 'create'">
-					<label i18n="Edit user|Username label@@editUserUsername" class="required-label">Username</label>
+					<label i18n="Edit user|Username label@@editUserUsername">Username</label>
 					<span class="right-col">
 						<input type="text" id="username" formControlName="username" [(ngModel)]="user.username" readonly/>
 					</span>
 				</li>
 				<li class="required">
-					<label *ngIf="requestAccountMode" i18n="Edit user|Pro email label@@editUserProEmail" class="required-label">Professional email</label>
-					<label *ngIf="!requestAccountMode" i18n="Edit user|Email label@@editUserEmail" class="required-label">Email</label>
+					<label *ngIf="requestAccountMode" i18n="Edit user|Pro email label@@editUserProEmail">Professional email</label>
+					<label *ngIf="!requestAccountMode" i18n="Edit user|Email label@@editUserEmail">Email</label>
 					<span class="right-col">
 						<input type="email" id="email" required formControlName="email" [(ngModel)]="user.email"/>
 						<label *ngIf="formErrors.email.includes('required')" class="form-validation-alert" i18n="Edit user|Email required error@@editUserEmailRequiredError">Email is required!</label>
@@ -63,7 +63,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 				<li class="required">
-					<label i18n="Edit user|Role label@@editUserRole" class="required-label">Role of the user</label>
+					<label i18n="Edit user|Role label@@editUserRole">Role of the user</label>
 					<span class="right-col">
 						<select id="role" required formControlName="role" [(ngModel)]="user.role">
 							<option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>

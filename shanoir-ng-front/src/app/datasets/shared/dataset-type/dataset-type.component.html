@@ -15,7 +15,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <span [ngSwitch]="mode">
     <ng-template [ngSwitchCase]="'view'">{{model}}</ng-template>
     <ng-template ngSwitchDefault>
-        <select-box required [(ngModel)]="model" (change)="onChange()" [ngModelOptions]="{standalone: true}" [disabled]="disabled">
+        <select-box [(ngModel)]="model" (change)="propagateChange(model); change.emit(model);" [ngModelOptions]="{standalone: true}" [disabled]="disabled">
             <!-- <option value="Calibration" i18n="Dataset detail|Dataset type@@datasetDetailTypeCalibration" disabled>Calibration</option>
             <option value="Ct" i18n="Dataset detail|Dataset type@@datasetDetailTypeCt" disabled>Ct</option>
             <option value="Eeg" i18n="Dataset detail|Dataset type@@datasetDetailTypeEeg" disabled>Eeg</option>

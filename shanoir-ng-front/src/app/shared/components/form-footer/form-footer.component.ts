@@ -30,7 +30,6 @@ export class FormFooterComponent {
     @Output() private edit: EventEmitter<void> = new EventEmitter<void>();
     @Output() private cancel: EventEmitter<void> = new EventEmitter<void>();
     @Output() private back: EventEmitter<void> = new EventEmitter<void>();
-
     
     private onCreate(): void {
         this.save.emit();

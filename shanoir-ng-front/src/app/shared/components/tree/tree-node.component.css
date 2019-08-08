@@ -1,17 +1,14 @@
 :host() { position: relative; padding: 0 4px; cursor: default; margin: 2px 0 0 18px; display: block; }
-:host(.selected) > .node .selectable { background-color: var(--color-b); color: var(--very-light-grey); border-radius: 2px; }
+:host(.selected) > .node .label { color: blue; }
+.clickable-node:hover > .label { color: blue; }
 .node { height: 20px; line-height: 20px; display: inline-block; }
-.selectable { padding: 0 7px; }
 .node > span { display: inline-block; }
 .arrow { display: inline-block; width: 11px; cursor: pointer; vertical-align: top; }
     .arrow svg { vertical-align: 0; font-size: 12px; height: 18px; }
 .picto { height: 14px; width: 15px; text-align: center; }
 checkbox { vertical-align: middle; margin: 0 5px 1px; width: 12px; height: 12px; }
-    :host(.selected) > .node checkbox svg { color: var(--color-b-light) !important; }
     input[type="text"] { color: var(--very-dark-grey); width: 160px; }
     input[type="checkbox"] { vertical-align: middle; }
-    :host(.selected) > .node input { color: var(--very-light-grey); }
-:host(.selected) > .node tooltip { color: var(--very-light-grey); }
 .clickable { cursor: pointer; }
 
 svg { vertical-align: -1; }

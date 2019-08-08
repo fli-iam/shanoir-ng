@@ -13,7 +13,7 @@
  */
 
 import { Location } from '@angular/common';
-import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChildren, QueryList, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
@@ -40,6 +40,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected form: FormGroup;
     protected saveError: ShanoirError;
     protected onSubmitValidatedFields: string[] = [];
+    @ViewChild('formContainer') formContainerElement: ElementRef;
 
     /* services */
     private entityRoutes: EntityRoutes;
@@ -105,8 +106,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.form = this.buildForm();
         if (this.form) {
             this.subscribtions.push(
-                this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID' && this.form.dirty)
+                this.form.statusChanges.subscribe(status => this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create'))
             );
+            if (this.mode != 'view') setTimeout(() => this.styleRequiredLabels());
         } else {
             this.footerState.valid = false;
         }
@@ -119,6 +121,59 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         else if (this.mode == 'view') label = 'View ' + this.ROUTING_NAME;
         this.breadcrumbsService.nameStep(label);
     }
+
+    private styleRequiredLabels() {
+        if (this.formContainerElement) {
+            for (const field in this.form.controls) {
+                const control = this.form.get(field);
+                if (this.hasRequiredField(control)) {
+                    const input = this.formContainerElement.nativeElement.querySelector('li [formControlName="' + field + '"]');
+                    if (input) {
+                        const li = input.closest('li');
+                        if (li) {
+                            const label = li.querySelector(':scope > label');
+                            if (label) label.classList.add('required-label');
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private clearRequiredStyles() {
+        if (this.formContainerElement) {
+            this.formContainerElement.nativeElement.querySelectorAll('li > label')
+            .forEach(label => {
+                label.classList.remove('required-label');
+            }); 
+        }
+    }
+
+    protected reloadRequiredStyles() {
+        setTimeout(() => {
+            this.clearRequiredStyles();
+            this.styleRequiredLabels();
+        });
+    }
+
+    private hasRequiredField (abstractControl: AbstractControl): boolean {
+        if (abstractControl.validator) {
+            const validator = abstractControl.validator({}as AbstractControl);
+            if (validator && validator.required) {
+                return true;
+            }
+        }
+        if (abstractControl['controls']) {
+            for (const controlName in abstractControl['controls']) {
+                if (abstractControl['controls'][controlName]) {
+                    if (this.hasRequiredField(abstractControl['controls'][controlName])) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    };
 
     formErrors(field: string): any {
         if (!this.form) return;
@@ -157,10 +212,14 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     protected save(): Promise<void> {
+        this.footerState.loading = true;
         return this.modeSpecificSave()
-            .then()
+            .then(() => {
+                this.footerState.loading = false;
+            })
             /* manages "after submit" errors like a unique constraint */      
             .catch(reason => {
+                this.footerState.loading = false;
                 if (reason && reason.error && reason.error.code == 422) {
                     this.saveError = new ShanoirError(reason);
                     for (let managedField of this.onSubmitValidatedFields) {

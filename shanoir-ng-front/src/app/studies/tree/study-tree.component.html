@@ -15,11 +15,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node label="Subjects" awesome="far fa-folder" [deploy]="true">
     <ng-template ngFor let-subject [ngForOf]="study.subjectStudyList">
         <node [label]="subject | subjectStudyLabel" awesome="fas fa-user-injured" [nodeParams]="subject" [dataRequest]="true"
-            (openClick)="getSubjectDetails($event)" link="true" (labelClick)="showSubjectDetails($event)">
+            (openClick)="getSubjectDetails($event)" (labelClick)="showSubjectDetails($event)">
             <ng-template ngFor let-examination [ngForOf]="subject.examinations">
-                <node [label]="examination | subjectExaminationLabel" awesome="fas fa-diagnoses" link="true" (labelClick)="showExaminationDetails(examination?.id)">
+                <node [label]="examination | subjectExaminationLabel" awesome="fas fa-diagnoses" (labelClick)="showExaminationDetails(examination?.id)">
                     <node *ngFor="let acquisition of examination.datasetAcquisitions" [label]="acquisition.name" awesome="fas fa-laptop-medical">
-                        <node *ngFor="let dataset of acquisition.datasets" [label]="dataset.name" awesome="fas fa-brain" link="true" (labelClick)="showDatasetDetails(dataset.id)">
+                        <node *ngFor="let dataset of acquisition.datasets" [label]="dataset.name" awesome="fas fa-brain" (labelClick)="showDatasetDetails(dataset.id)">
                         </node>
                     </node>
                 </node>
@@ -36,10 +36,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node label="Principal investigators and Centers (takes place in and with)" awesome="far fa-folder" [deploy]="true">
     <ng-template ngFor let-studyCenter [ngForOf]="study.studyCenterList">
         <node [label]="studyCenter.center.name" awesome="fas fa-clinic-medical" [nodeParams]="studyCenter" [dataRequest]="true"
-            (openClick)="getAcqEptForCenter($event)" link="true" (labelClick)="showCenterDetails($event)">
+            (openClick)="getAcqEptForCenter($event)" (labelClick)="showCenterDetails(studyCenter.center.id)">
             <ng-template ngFor let-acquisitionEquipment [ngForOf]="acquisitionEquipments">
                 <node [label]="acquisitionEquipment | acqEqptLabel" awesome="fas fa-microscope" [nodeParams]="acquisitionEquipment.id"
-                    link="true" (labelClick)="showAcquisitionEquipmentDetails($event)">
+                    (labelClick)="showAcquisitionEquipmentDetails(acquisitionEquipment.id)">
                 </node>
             </ng-template>
         </node>

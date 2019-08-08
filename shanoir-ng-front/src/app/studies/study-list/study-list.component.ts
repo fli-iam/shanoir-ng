@@ -81,6 +81,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
     getOptions() {
         return {
+            new: this.keycloakService.isUserAdminOrExpert(),
             view: true, 
             edit: this.keycloakService.isUserAdminOrExpert(), 
             delete: this.keycloakService.isUserAdminOrExpert()

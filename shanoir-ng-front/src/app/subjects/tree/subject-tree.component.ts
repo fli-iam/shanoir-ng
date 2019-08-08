@@ -15,13 +15,13 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Subject } from '../shared/subject.model';
+import { ExaminationService } from '../../examinations/shared/examination.service';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { SubjectStudy } from '../shared/subject-study.model';
-import { ExaminationService } from '../../examinations/shared/examination.service';
-import { Examination } from '../../examinations/shared/examination.model';
+import { Subject } from '../shared/subject.model';
+
 
 
 @Component({
@@ -58,6 +58,18 @@ export class SubjectTreeComponent {
 
     showExaminationDetails(examinationId: number) {
         this.router.navigate(['/examination/details/' + examinationId])
+    }
+
+    showStudyDetails(studyId: number) {
+        this.router.navigate(['/study/details/' + studyId])
+    }
+
+    showAcquisitionDetails(studyId: number) {
+        
+    }
+
+    showDatasetDetails(datasetId: number) {
+        this.router.navigate(['/dataset/details/' + datasetId])
     }
 
 }
