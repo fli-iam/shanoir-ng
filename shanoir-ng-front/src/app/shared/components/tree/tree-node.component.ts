@@ -47,7 +47,6 @@ export class TreeNodeComponent implements ControlValueAccessor {
     @Input() hasBox: boolean;
     @Input() nodeParams: any;
     @Input() editable: boolean = false;
-    @Input() link: boolean = false;
     @Input() tooltip: string;
     @Input() dataRequest: boolean = false;
     @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes: QueryList<any>;

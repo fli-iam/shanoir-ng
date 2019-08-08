@@ -61,6 +61,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     }
 
     initView(): Promise<void> {
+        this.loadAllStudies();
         return this.subjectService.get(this.id).then(subject => { this.subject = subject; });
     }
 

@@ -1,5 +1,6 @@
 :host() { position: relative; padding: 0 4px; cursor: default; margin: 2px 0 0 18px; display: block; }
 :host(.selected) > .node .label { color: blue; }
+.clickable-node:hover > .label { color: blue; }
 .node { height: 20px; line-height: 20px; display: inline-block; }
 .node > span { display: inline-block; }
 .arrow { display: inline-block; width: 11px; cursor: pointer; vertical-align: top; }
