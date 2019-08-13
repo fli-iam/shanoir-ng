@@ -59,7 +59,7 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
             { headerName: "Country", field: "country" }
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
-            columnDefs.push({ headerName: "", type: "button", awesome: "fa-podcast", tip: "Add acq. equip.", action: item => this.openCreateAcqEquip(item) });
+            columnDefs.push({ headerName: "", type: "button", awesome: "fa-microscope", tip: "Add acq. equip.", action: item => this.openCreateAcqEquip(item) });
         }
         return columnDefs;
     }

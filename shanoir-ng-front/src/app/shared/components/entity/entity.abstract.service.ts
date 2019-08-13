@@ -63,7 +63,7 @@ export abstract class EntityService<T extends Entity> {
     }
 
     protected mapPage = (page: Page<T>): Page<T> => {
-            page.content = page.content.map(this.mapEntity);
+            if (page) page.content = page.content.map(this.mapEntity);
             return page;
     }
 

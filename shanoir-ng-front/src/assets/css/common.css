@@ -13,6 +13,7 @@
     --color-overlay: rgba(70, 70, 70, 0.8); 
 
     --color-a: #5f0f4e;
+    --color-a-light: #6C1C5B;
     --color-b: #675682;
     --color-b-light: #E3E0E8;
     --color-b-light2: #827498;
@@ -41,6 +42,7 @@ select:disabled { opacity: 0.5; }
 svg { vertical-align: -1; }
 a:link, a:visited { color: inherit; text-decoration: none; }
 a:hover, a:active { color: var(--color-a); text-decoration: none; }
+a:hover { cursor: pointer; }
 
 
 @-webkit-keyframes autofill {
@@ -156,7 +158,7 @@ form { color: var(--dark-grey); }
 .right-icon svg { margin-left: 7px; vertical-align: -2; }
 
 .content-component { background-color: var(--very-light-grey); text-align: left; display: inline-block; }
-.main-content { padding: 0 20px 10px 20px; position: relative; }
+.main-content { padding: 0 20px 10px 20px; position: relative; margin-left: 300px; }
 .max-content { display: inline-block; }
 
 .error-message label { color: var(--color-error); }

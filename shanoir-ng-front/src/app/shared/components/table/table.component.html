@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </tr>
 </thead>
 <!-- Table content -->
-<tbody>
+<tbody *ngIf="isLoading || items?.length > 0">
 <tr
     *ngFor="let item of items; let i = index" 
     [class.odd]="i%2!=0" 
@@ -131,6 +131,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <th class="status-bar controls" [attr.colspan]="columnDefs?.length + 1">
         <!-- Nb results per page input -->
         <span class="options">
+            <span click="refresh()"><i class="fas fa-sync-alt"></i></span>
             <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
             <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
             <span *ngIf="page">Total : {{page?.totalElements}}</span>

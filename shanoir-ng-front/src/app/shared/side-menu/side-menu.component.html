@@ -1,0 +1,60 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+
+
+
+<div *ngIf="isAuthenticated()" class="logo"><a [routerLink]="['/home']"><img [src]="shanoirLogoUrl" /></a></div>
+<div *ngIf="!isAuthenticated()" class="logo"><img [src]="shanoirLogoUrl" /></div>
+
+<div *ngIf="isAuthenticated()" class="user">
+    <div class="user-logo">
+        <i *ngIf="!keycloakService.isUserAdminOrExpert()" class="fas fa-user"></i>
+        <i *ngIf="keycloakService.isUserExpert()" class="fas fa-user-tie"></i>
+        <i *ngIf="keycloakService.isUserAdmin()" class="fas fa-user-graduate"></i>
+    </div>
+    <div class="welcome">{{username}}</div> 
+    <div class="logout">
+        <a (click)="logout($event)" i18n="Shanoir NG|Logout@@logout">Logout<i class="fas fa-sign-out-alt"></i></a>
+    </div>
+</div>
+
+<ul class="menu-list">
+
+    <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
+    <li (click)="dataOpened = !dataOpened"><i class="fas fa-file-medical-alt"></i>Manage data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
+    <div *ngIf="dataOpened" class="sub-menu" [@slideDown]="dataOpened">
+        <li routerLink="/study/list" routerLinkActive="active"><i class="fas fa-folder-open"></i>Studies</li>
+        <li routerLink="/subject/list" routerLinkActive="active"><i class="fas fa-user-injured"></i>Subjects</li>
+        <li routerLink="/examination/list" routerLinkActive="active"><i class="fas fa-procedures"></i>Examinations</li>
+        <li routerLink="/dataset/list" routerLinkActive="active"><i class="fas fa-brain"></i>Datasets</li>
+        <li routerLink="/center/list" routerLinkActive="active"><i class="fas fa-hospital"></i>Centers</li>
+        <li routerLink="/acquisition-equipment/list" routerLinkActive="active"><i class="fas fa-microscope"></i>Acquisition equipment</li>
+        <li routerLink="/coil/list" routerLinkActive="active"><i class="fas fa-magnet"></i>Coils</li>
+    </div>
+    <li (click)="uploadOpened = !uploadOpened"><i class="fas fa-upload"></i>Import data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
+    <div *ngIf="uploadOpened" class="sub-menu" [@slideDown]="uploadOpened">
+        <li routerLink="/imports/upload" routerLinkActive="active"><i class="fas fa-compact-disc"></i>From DICOM CD/DVD</li>
+        <li routerLink="/imports/pacs" routerLinkActive="active" *ngIf="canUserImportFromPACS()"><i class="fas fa-server"></i>From Neurinfo PACS</li>
+        <li routerLink="" routerLinkActive="active"><i class="fas fa-cat"></i>From ShanoirUploader</li>
+        <li routerLink="" routerLinkActive="active"><i class="fas fa-brain"></i>Processed datasets (NifTi)</li>
+        <li routerLink="" routerLinkActive="active"><i class="fas fa-file-archive"></i>From files ...</li>
+    </div>
+    <li (click)="adminOpened = !adminOpened" *ngIf="isUserAdmin()"><i class="fas fa-cogs"></i>Administration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
+    <div *ngIf="isUserAdmin() && adminOpened" class="sub-menu" [@slideDown]="adminOpened">
+        <li routerLink="/user" routerLinkActive="active"><i class="fas fa-users"></i>Manage users</li>
+    </div>
+    <li routerLink="/task" routerLinkActive="active"><i class="fas fa-tasks"></i>Tasks</li>
+
+</ul>

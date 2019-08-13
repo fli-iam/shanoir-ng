@@ -134,6 +134,7 @@ import { NotificationsComponent } from './shared/notifications/notifications.com
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 import { TaskService } from './async-tasks/task.service';
 import { StudyRightsService } from './studies/shared/study-rights.service';
+import { SideMenuComponent } from './shared/side-menu/side-menu.component';
 
 //import { ModalService} from './shared/components/modal/modal.service';
 
@@ -225,7 +226,8 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         AsyncTasksComponent,
         ToggleSwitchComponent,
         CheckboxComponent,
-        HelpMessageComponent
+        HelpMessageComponent,
+        SideMenuComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
