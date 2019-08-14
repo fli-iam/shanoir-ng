@@ -2,10 +2,11 @@ package org.shanoir.uploader.action.init;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Locale;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.keycloak.OAuthErrorException;
@@ -15,8 +16,7 @@ import org.keycloak.common.VerificationException;
 import org.keycloak.representations.AccessToken;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.service.IWebService;
-import org.shanoir.uploader.service.SoapWebService;
+import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
 
 /**
  * This concrete state class defines the state when the ShanoirUploader tests
@@ -38,7 +38,6 @@ public class AuthenticationConfigurationState implements State {
 	private static Logger logger = Logger.getLogger(AuthenticationConfigurationState.class);
 
 	public void load(StartupStateContext context) {
-		IWebService webService = null;
 		if (ShUpOnloadConfig.isShanoirNg()) {
 			try {
 				FileInputStream fIS = new FileInputStream(ShUpConfig.keycloakJson);
@@ -46,30 +45,30 @@ public class AuthenticationConfigurationState implements State {
 				keycloak.setLocale(Locale.ENGLISH);
 				keycloak.loginDesktop();
 				AccessToken token = keycloak.getToken();
-				Executors.newSingleThreadExecutor().submit(() -> {
-					logger.info("Logged in...");
-					logger.info("Token: " + token.getSubject());
-					logger.info("Username: " + token.getPreferredUsername());
-					try {
-						logger.info("AccessToken: " + keycloak.getTokenString());
-					} catch (Exception ex) {
-						logger.error(ex.getMessage(), ex);
-					}
-//					int timeoutSeconds = 20;
-//					System.out.printf("Logging out in...%d Seconds%n", timeoutSeconds);
+//				Executors.newSingleThreadExecutor().submit(() -> {
+//					logger.info("Logged in...");
+//					logger.info("Token: " + token.getSubject());
+//					logger.info("Username: " + token.getPreferredUsername());
 //					try {
-//						TimeUnit.SECONDS.sleep(timeoutSeconds);
-//					} catch (Exception e) {
-//						logger.error(e.getMessage(), e);
+//						logger.info("AccessToken: " + keycloak.getTokenString());
+//					} catch (Exception ex) {
+//						logger.error(ex.getMessage(), ex);
 //					}
-//					try {
-//						keycloak.logout();
-//					} catch (Exception e) {
-//						logger.error(e.getMessage(), e);
-//					}
-//					logger.info("Exiting...");
-//					System.exit(0);
-				});
+////					int timeoutSeconds = 20;
+////					System.out.printf("Logging out in...%d Seconds%n", timeoutSeconds);
+////					try {
+////						TimeUnit.SECONDS.sleep(timeoutSeconds);
+////					} catch (Exception e) {
+////						logger.error(e.getMessage(), e);
+////					}
+////					try {
+////						keycloak.logout();
+////					} catch (Exception e) {
+////						logger.error(e.getMessage(), e);
+////					}
+////					logger.info("Exiting...");
+////					System.exit(0);
+//				});
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			} catch (VerificationException e) {
@@ -86,40 +85,41 @@ public class AuthenticationConfigurationState implements State {
 			context.setState(new PacsConfigurationState());
 			context.nextState();
 		} else {
-			webService = SoapWebService.getInstance();
-			int initSuccessful = webService.init();
-			switch (initSuccessful) {
-			case 0:
-				break;
-			case -3:
+			String serviceURI = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.uploader.service.qname.namespace.uri");
+			String serviceLocalPart = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.uploader.service.qname.local.part");
+			URL serviceURL = null;
+			try {
+				serviceURL = new URL(ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.uploader.service.url"));
+			} catch (MalformedURLException e) {
+				logger.error("Property defined in shanoir.server.uploader.service.url (File shanoir_server.properties in .su folder) is not properly configured", e);
 				context.getShUpStartupDialog().updateStartupText(
 						"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
 				context.setState(new ServerUnreachableState());
 				context.nextState();
 				return;
 			}
-			int isAccountValid = webService.testConnection();
-			switch (isAccountValid) {
-			case 0:
-				context.getShUpStartupDialog().updateStartupText(
-						"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
-				context.setState(new PacsConfigurationState());
-				context.nextState();
-				break;
-			case -1:
+			try {
+				ShanoirUploaderServiceClient shanoirUploaderServiceClient = new ShanoirUploaderServiceClient(serviceURI, serviceLocalPart, serviceURL);
+				ShUpOnloadConfig.setShanoirUploaderServiceClient(shanoirUploaderServiceClient);
+				boolean isAccountValid = shanoirUploaderServiceClient.login();
+				if (isAccountValid) {
+					context.getShUpStartupDialog().updateStartupText(
+							"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
+					context.setState(new PacsConfigurationState());
+					context.nextState();
+				} else {
+					context.getShUpStartupDialog().updateStartupText(
+							"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
+					context.setState(new AuthenticationManualConfigurationState());
+					context.nextState();
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
 				context.getShUpStartupDialog().updateStartupText(
 						"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
-				context.setState(new AuthenticationManualConfigurationState());
-				context.nextState();
-				break;
-			case -2:
-				context.setState(new ProxyManualConfigurationState());
-				context.nextState();
-				break;
-			case -3:
 				context.setState(new ServerUnreachableState());
 				context.nextState();
-				break;
+				return;
 			}
 		}
 	}

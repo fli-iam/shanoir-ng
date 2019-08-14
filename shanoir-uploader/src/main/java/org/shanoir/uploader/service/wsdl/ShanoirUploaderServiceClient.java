@@ -4,18 +4,16 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 
 import org.apache.log4j.Logger;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.model.dto.CenterDTO;
 import org.shanoir.uploader.model.dto.ExaminationDTO;
 import org.shanoir.uploader.model.dto.InvestigatorDTO;
@@ -50,6 +48,12 @@ public class ShanoirUploaderServiceClient {
 		logger.info("ShanoirUploaderService successfully initialized.");
 	}
 
+	public boolean login() {
+		String userName = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.user.name");
+		String password = ShUpConfig.shanoirServerProperties.getProperty("shanoir.server.user.password");
+		return shanoirUploaderService.login(userName, password);
+	}
+	
 	public boolean login(final String userName, final String password) {
 		return shanoirUploaderService.login(userName, password);
 	}
@@ -125,10 +129,14 @@ public class ShanoirUploaderServiceClient {
 		}
 	}
 	
-	public String uploadFile(final String folderName, final File file) {
+	public String uploadFile(final String folderName, final File file) throws Exception {
 		final FileDataSource fDS = new FileDataSource(file);
 		final DataHandler dataHandler = new DataHandler(fDS);
 		final String result = shanoirUploaderService.uploadFile(dataHandler, folderName, file.getName());
+		if (!"200".equals(result)) {
+			logger.error(result);
+			throw new Exception("File upload error occured!");
+		}
 		return result;
 	}
 	

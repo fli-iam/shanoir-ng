@@ -1,7 +1,6 @@
 package org.shanoir.uploader.action.init;
 
 import org.apache.log4j.Logger;
-import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 
 /**

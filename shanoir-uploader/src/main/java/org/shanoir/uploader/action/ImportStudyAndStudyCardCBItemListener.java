@@ -2,7 +2,6 @@ package org.shanoir.uploader.action;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;

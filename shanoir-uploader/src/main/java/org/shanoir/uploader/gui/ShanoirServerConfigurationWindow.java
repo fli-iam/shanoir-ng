@@ -22,8 +22,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
+import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.ShanoirServerConfigurationListener;
-import org.shanoir.uploader.service.SoapWebService;
 import org.shanoir.uploader.service.wsdl.ServiceConfiguration;
 
 /**
@@ -110,7 +110,7 @@ public class ShanoirServerConfigurationWindow extends JDialog {
 		addItem(configurationPanel, configureButton, 2, 7, 1, GridBagConstraints.WEST);
 
 		// listener
-		sSCL = new ShanoirServerConfigurationListener(this, SoapWebService.getInstance().getShanoirUploaderService());
+		sSCL = new ShanoirServerConfigurationListener(this, ShUpOnloadConfig.getShanoirUploaderServiceClient());
 		pingButton.addActionListener(sSCL);
 		configureButton.addActionListener(sSCL);
 

@@ -27,6 +27,7 @@ import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 import org.shanoir.dicom.importer.UploadJob;
+import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.CancelButtonActionListener;
 import org.shanoir.uploader.action.ImportCreateNewExamCBItemListener;
 import org.shanoir.uploader.action.ImportFinishActionListener;
@@ -35,7 +36,6 @@ import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.gui.customcomponent.JTextFieldMandatory;
 import org.shanoir.uploader.model.StudyCard;
 import org.shanoir.uploader.model.dto.SubjectDTO;
-import org.shanoir.uploader.service.SoapWebService;
 import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
 
 /**
@@ -729,7 +729,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		container.add(exportButton, importDialogGBC);
 		
-		ShanoirUploaderServiceClient shanoirUploaderServiceClient = SoapWebService.getInstance().getShanoirUploaderService();
+		ShanoirUploaderServiceClient shanoirUploaderServiceClient = ShUpOnloadConfig.getShanoirUploaderServiceClient();
 		ImportFinishActionListener iFAL = new ImportFinishActionListener(mainWindow, shanoirUploaderServiceClient);
 		exportButton.addActionListener(iFAL);
 	}
