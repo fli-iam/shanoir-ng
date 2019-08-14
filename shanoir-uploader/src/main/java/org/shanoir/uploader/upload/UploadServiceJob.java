@@ -20,7 +20,7 @@ import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
-import org.shanoir.uploader.service.IWebService;
+import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
 import org.shanoir.util.ShanoirUtil;
 
 /**
@@ -34,7 +34,7 @@ public class UploadServiceJob implements Job {
 
 	private static Logger logger = Logger.getLogger(UploadServiceJob.class);
 
-	private IWebService uploadServiceClient;
+	private ShanoirUploaderServiceClient uploadServiceClient;
 
 	private String uploadPercentage = "";
 
@@ -46,7 +46,7 @@ public class UploadServiceJob implements Job {
 		JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 		CurrentNominativeDataController currentNominativeDataController = (CurrentNominativeDataController) dataMap
 				.get("nominativeDataController");
-		uploadServiceClient = (IWebService) dataMap.get("uploadServiceClient");
+		uploadServiceClient = (ShanoirUploaderServiceClient) dataMap.get("uploadServiceClient");
 		String workFolderFilePath = dataMap.getString(ShUpConfig.WORK_FOLDER);
 		File workFolder = new File(workFolderFilePath);
 		processWorkFolder(workFolder, currentNominativeDataController);
@@ -138,7 +138,7 @@ public class UploadServiceJob implements Job {
 				File file = (File) iterator.next();
 				i++;
 				logger.debug("UploadServiceJob started to upload file: " + file.getName());
-				uploadServiceClient.uploadFile(folder, file);
+				uploadServiceClient.uploadFile(folder.getName(), file);
 				logger.debug("UploadServiceJob finished to upload file: " + file.getName());
 				uploadPercentage = i * 100 / allFiles.size() + " %";
 				nominativeDataUploadJob.setUploadPercentage(uploadPercentage);
@@ -151,7 +151,7 @@ public class UploadServiceJob implements Job {
 			 * many files have to be uploaded.
 			 */
 			File uploadJobXML = new File(folder.getAbsolutePath() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
-			uploadServiceClient.uploadFile(folder, uploadJobXML);
+			uploadServiceClient.uploadFile(folder.getName(), uploadJobXML);
 			uploadJob.setUploadState(UploadState.FINISHED_UPLOAD);
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
 					UploadState.FINISHED_UPLOAD.toString());

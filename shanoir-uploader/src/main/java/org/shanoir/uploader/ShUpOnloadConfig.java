@@ -9,46 +9,49 @@ import org.quartz.Trigger;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.service.http.UrlConfig;
+import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
 
 /**
  * 
  * This class contains all dynamic data needed by ShanoirUploader upon startup.
  * 
  * @author atouboul
+ * @author mkain
  * 
  */
 public class ShUpOnloadConfig {
-	
+
 	private static File workFolder;
-	
+
 	private static IDicomServerClient dicomServerClient;
-	
+
 	private static JobDataMap jobDataMap = new JobDataMap();
-	
+
 	private static JobDataMap jobDataMapMain = new JobDataMap();
-	
+
 	private static JobDetail uploadServiceJob;
-	
+
 	private static Trigger trigger;
-	
+
 	private static Scheduler scheduler;
-	
+
 	private static CurrentNominativeDataController currentNominativeDataController;
-	
+
+	private static ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+
 	private static UrlConfig urlConfig = new UrlConfig();
 
-	private static boolean isOfsep;
-	
 	private static boolean autoImportEnabled;
-	
+
 	private static boolean shanoirNg;
-	
+
 	/** Constructeur privé */
-	private ShUpOnloadConfig()	{}
- 
+	private ShUpOnloadConfig() {
+	}
+
 	/** Instance unique pré-initialisée */
 	private static ShUpOnloadConfig INSTANCE = new ShUpOnloadConfig();
- 
+
 	/** Point d'accès pour l'instance unique du singleton */
 	public static ShUpOnloadConfig getInstance() {
 		return INSTANCE;
@@ -114,8 +117,17 @@ public class ShUpOnloadConfig {
 		return currentNominativeDataController;
 	}
 
-	public static void setCurrentNominativeDataController(CurrentNominativeDataController currentNominativeDataController) {
+	public static void setCurrentNominativeDataController(
+			CurrentNominativeDataController currentNominativeDataController) {
 		ShUpOnloadConfig.currentNominativeDataController = currentNominativeDataController;
+	}
+
+	public static ShanoirUploaderServiceClient getShanoirUploaderServiceClient() {
+		return shanoirUploaderServiceClient;
+	}
+
+	public static void setShanoirUploaderServiceClient(ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
+		ShUpOnloadConfig.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
 	}
 
 	public static UrlConfig getUrlConfig() {
@@ -124,14 +136,6 @@ public class ShUpOnloadConfig {
 
 	public static void setUrlConfig(UrlConfig urlConfig) {
 		ShUpOnloadConfig.urlConfig = urlConfig;
-	}
-
-	public static boolean isOfsep() {
-		return isOfsep;
-	}
-
-	public static void setOfsep(boolean isOfsep) {
-		ShUpOnloadConfig.isOfsep = isOfsep;
 	}
 
 	public static boolean isAutoImportEnabled() {
@@ -149,5 +153,5 @@ public class ShUpOnloadConfig {
 	public static void setShanoirNg(boolean shanoirNg) {
 		ShUpOnloadConfig.shanoirNg = shanoirNg;
 	}
-	
+
 }

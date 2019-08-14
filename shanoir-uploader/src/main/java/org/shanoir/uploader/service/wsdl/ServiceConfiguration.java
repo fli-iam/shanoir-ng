@@ -1,7 +1,5 @@
 package org.shanoir.uploader.service.wsdl;
 
-import java.net.URL;
-
 import org.shanoir.uploader.ShUpConfig;
 
 /**
@@ -12,10 +10,6 @@ import org.shanoir.uploader.ShUpConfig;
  *
  */
 public class ServiceConfiguration {
-
-	private URL shanoirUploaderServiceURL;
-	private String shanoirUploaderServiceURI;
-	private String shanoirUploaderServiceLocalPart;
 
 	private String username;
 
@@ -47,30 +41,6 @@ public class ServiceConfiguration {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public URL getShanoirUploaderServiceURL() {
-		return shanoirUploaderServiceURL;
-	}
-
-	public void setShanoirUploaderServiceURL(URL shanoirUploaderServiceURL) {
-		this.shanoirUploaderServiceURL = shanoirUploaderServiceURL;
-	}
-
-	public String getShanoirUploaderServiceURI() {
-		return shanoirUploaderServiceURI;
-	}
-
-	public void setShanoirUploaderServiceURI(String shanoirUploaderServiceURI) {
-		this.shanoirUploaderServiceURI = shanoirUploaderServiceURI;
-	}
-
-	public String getShanoirUploaderServiceLocalPart() {
-		return shanoirUploaderServiceLocalPart;
-	}
-
-	public void setShanoirUploaderServiceLocalPart(String shanoirUploaderServiceLocalPart) {
-		this.shanoirUploaderServiceLocalPart = shanoirUploaderServiceLocalPart;
 	}
 
 	public String getProxyHost() {
@@ -150,8 +120,7 @@ public class ServiceConfiguration {
 				&& !ShUpConfig.proxyProperties.getProperty("proxy.test.url").equals("")) {
 			return (ShUpConfig.proxyProperties.getProperty("proxy.test.url"));
 		} else {
-			//return "https://shanoir-ofsep-qualif.irisa.fr/Shanoir/login.seam";
-			return "http://localhost:8080/Shanoir/login.seam";
+			return "https://shanoir.irisa.fr/Shanoir/login.seam";
 		}
 	}
 

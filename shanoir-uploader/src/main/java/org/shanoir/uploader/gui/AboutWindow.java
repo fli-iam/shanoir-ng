@@ -16,7 +16,6 @@ import java.net.URISyntaxException;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;

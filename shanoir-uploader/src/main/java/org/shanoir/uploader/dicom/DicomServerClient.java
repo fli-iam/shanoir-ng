@@ -10,7 +10,6 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.dcm4che2.data.DicomObject;
-import org.dcm4che2.data.Tag;
 import org.shanoir.dicom.importer.Serie;
 import org.shanoir.uploader.dicom.query.ConfigBean;
 //import org.shanoir.dicom.query.DicomQueryHelper;

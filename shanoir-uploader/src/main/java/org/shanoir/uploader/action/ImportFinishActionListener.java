@@ -5,12 +5,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
@@ -55,22 +52,17 @@ public class ImportFinishActionListener implements ActionListener {
 	 * button is clicked.
 	 */
 	public void actionPerformed(final ActionEvent event) {
+		final Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
+		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
+		final UploadJob uploadJob = mainWindow.importDialog.getUploadJob();
+		if (study == null || study.getId() == null || studyCard == null || studyCard.getId() == null) {
+			return;
+		}
 		
 		// block further action
 		((JButton) event.getSource()).setEnabled(false);
 		mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-		/**
-		 *  1. Validate user entries in GUI, all present?
-		 */
-
-		
-		/**
-		 * 2. Create subject (if necessary) and examination (if necessary)
-		 */
-		final Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
-		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
-		final UploadJob uploadJob = mainWindow.importDialog.getUploadJob();
 		// TODO the next lines are totally strange as GUI and two different DTOs are used: totally strange,
 		// but I did not refactor here as too time demanding at the moment and bad legacy of developer before
 		Long subjectId = null;

@@ -57,8 +57,6 @@ import org.shanoir.uploader.dicom.anonymize.ISubjectIdentifierGenerator;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.dicom.anonymize.SubjectIdentifierGenerator;
 import org.shanoir.uploader.exception.PseudonymusException;
-import org.shanoir.uploader.service.IWebService;
-import org.shanoir.uploader.service.SoapWebService;
 import org.shanoir.uploader.service.http.UrlConfig;
 import org.shanoir.uploader.service.wsdl.ServiceConfiguration;
 
@@ -716,43 +714,31 @@ public class MainWindow extends JFrame {
 		editPanel.add(downloadOrCopyButton, gbc_btnRetrieve);
 		
 		menuBar.add(Box.createHorizontalGlue());
-		JMenu mnPseudonymus;
 		
 		/**
-		 * 1. ActionListener
+		 * Init pseudonymizer and subjectIdentifierGenerator and create
+		 * DownloadOrCopyActionListener, and add AL to button.
 		 */
-//		if (pAL.getAnonymizer().isPseudonymusMode()) {
-//			mnPseudonymus = new JMenu(resourceBundle.getString("shanoir.uploader.yesPseudonymusTag"));
-//		} else {
-//			mnPseudonymus = new JMenu(resourceBundle.getString("shanoir.uploader.noPseudonymusTag"));
-//		}
-//		menuBar.add(mnPseudonymus);
-
-		importDialog = new ImportDialog(this, ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle);
-		IWebService webService = SoapWebService.getInstance();
 		File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
 		Pseudonymizer pseudonymizer = null;
 		try {
 			pseudonymizer = new Pseudonymizer(ShUpConfig.generalProperties.getProperty("key"), pseudonymusFolder.getAbsolutePath());
-		} catch (PseudonymusException e1) {
-			logger.error(e1.getMessage(), e1);
+		} catch (PseudonymusException e) {
+			logger.error(e.getMessage(), e);
 		}
 		ISubjectIdentifierGenerator generator = new SubjectIdentifierGenerator();
 		dOCAL = new DownloadOrCopyActionListener(this, pseudonymizer, generator, dicomServerClient);
-		importDialogOpener = new ImportDialogOpener(this, webService);
 		downloadOrCopyButton.addActionListener(dOCAL);		
 		downloadOrCopyButton.setEnabled(false);	
 		
+		/**
+		 * Init ImportDialog and its Opener here.
+		 */
+		importDialog = new ImportDialog(this, ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle);
+		importDialogOpener = new ImportDialogOpener(this, ShUpOnloadConfig.getShanoirUploaderServiceClient());
+		
 		autoImportEnabled = true;
-//			iDL = new ImportDetailsListener(importDetailsDialog, this, keycloakConfig, urlConfig, shanoirUploaderConfiguration, resourceBundle);
-//			if (iDL.isAccessTokenGranted()) {
-//				mnAutoimport = new JMenu(resourceBundle.getString("shanoir.uploader.yesKeycloakToken"));
-//			} else {
-//				mnAutoimport = new JMenu(resourceBundle.getString("shanoir.uploader.noKeycloakToken"));				
-//			}
-//		mnAutoimport = new JMenu(resourceBundle.getString("shanoir.uploader.disableKeycloakToken"));
-//		menuBar.add(mnAutoimport);
-
+		
 		// add ShUp principal panel (splitPane) and upload job display pane
 		// (scrollPaneUpload) to TabbedPane
 		final JPanel notificationPanel = new JPanel();

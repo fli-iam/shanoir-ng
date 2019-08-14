@@ -28,9 +28,6 @@ import org.shanoir.uploader.gui.ShUpStartupDialog;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
-import org.shanoir.uploader.service.IWebService;
-import org.shanoir.uploader.service.RestWebService;
-import org.shanoir.uploader.service.SoapWebService;
 import org.shanoir.uploader.upload.UploadServiceJob;
 import org.shanoir.util.ShanoirUtil;
 
@@ -55,14 +52,8 @@ public class ReadyState implements State {
 	 */
 	private void initUploadService() {
 		try {
-			IWebService webService = null;
-			if (ShUpOnloadConfig.isShanoirNg()){
-				webService = RestWebService.getInstance();
-			} else {
-				webService = SoapWebService.getInstance();	
-			}
 			try {
-				ShUpOnloadConfig.getJobDataMapMain().put("uploadServiceClient", webService);
+				ShUpOnloadConfig.getJobDataMapMain().put("uploadServiceClient", ShUpOnloadConfig.getShanoirUploaderServiceClient());
 				ShUpOnloadConfig.getJobDataMapMain().put("nominativeDataController", ShUpOnloadConfig.getCurrentNominativeDataController());
 				ShUpOnloadConfig.setUploadServiceJob(JobBuilder.newJob(UploadServiceJob.class)
 						.usingJobData(ShUpConfig.WORK_FOLDER,ShUpOnloadConfig.getWorkFolder().getAbsolutePath())
