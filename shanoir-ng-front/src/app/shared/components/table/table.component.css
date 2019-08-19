@@ -52,8 +52,9 @@ td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-o
 	.loader img { margin-left: 5px; vertical-align: -1; height: 10px; }
 
 a.link { text-decoration: none; color: inherit; }
-	a.link svg { font-size: 10px; vertical-align: 0; margin-left: 5px; color: var(--greyer); }
-	a.link svg:hover { color: var(--color-a); }
+	a.link svg { font-size: 9px; vertical-align: 0; margin-left: 5px; color: var(--greyer); }
+	a.link:hover svg,
+	a.link:hover { color: var(--color-a); text-decoration: underline; }
 
 .cell-button svg:hover { color: var(--color-a); }
 

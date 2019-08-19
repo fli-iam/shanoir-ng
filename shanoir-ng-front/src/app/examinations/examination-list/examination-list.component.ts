@@ -63,11 +63,11 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                     return dateRenderer(params.data.examinationDate);
                 }, width: "100px"
             },{
-                headerName: "Research study", field: "study.name", type: "link", 
-                action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.study.id])
+                headerName: "Research study", field: "study.name",
+                route: (examination: Examination) => '/study/details/' + examination.study.id
             },{
-                headerName: "Center", field: "centerName", type: "link", 
-                action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.center.id])
+                headerName: "Center", field: "centerName",
+                route: (examination: Examination) => '/center/details/' + examination.center.id
             }
         ];
         return colDef;       

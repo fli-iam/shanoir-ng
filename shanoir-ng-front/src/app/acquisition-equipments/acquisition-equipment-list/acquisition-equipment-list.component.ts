@@ -79,17 +79,17 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
                 }
             },
             {
-                headerName: "Manufacturer", field: "manufacturerModel.manufacturer.name", type: "link", 
-                action: (acqEquip: AcquisitionEquipment) => this.router.navigate(['/manufacturer/details/' + acqEquip.manufacturerModel.manufacturer.id])
+                headerName: "Manufacturer", field: "manufacturerModel.manufacturer.name",
+                route: (acqEquip: AcquisitionEquipment) => '/manufacturer/details/' + acqEquip.manufacturerModel.manufacturer.id
             },
             {
-                headerName: "Manufacturer model name", field: "manufacturerModel.name", type: "link", 
-                action: (acqEquip: AcquisitionEquipment) => this.router.navigate(['/manufacturer-model/details/' + acqEquip.manufacturerModel.id])
+                headerName: "Manufacturer model name", field: "manufacturerModel.name",
+                route: (acqEquip: AcquisitionEquipment) => '/manufacturer-model/details/' + acqEquip.manufacturerModel.id
             },
             { headerName: "Serial number", field: "serialNumber", width: "200px" },
             {
-                headerName: "Center", field: "center.name", type: "link", 
-                action: (acqEquip: AcquisitionEquipment) => this.router.navigate(['/center/details/' + acqEquip.center.id])
+                headerName: "Center", field: "center.name",
+                route: (acqEquip: AcquisitionEquipment) => '/center/details/' + acqEquip.center.id
             }
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
