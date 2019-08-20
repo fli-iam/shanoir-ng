@@ -15,6 +15,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+
 declare var JSZip: any;
 
 @Injectable()
@@ -24,15 +25,15 @@ export class DicomArchiveService {
 
 	constructor() {}
 
-	importFromZip(blob: Blob): Observable<any> {
+	importFromZip(blob: Blob): Promise<any> {
 		this.fileReader.readAsArrayBuffer(blob);
-		return Observable.create(observer => {
+		return new Promise((resolve, reject) => {
 			// if success
 			this.fileReader.onload = () => {
-				observer.next(this.fileReader);
+				resolve(this.fileReader);
 			}
 			// if failed
-			this.fileReader.onerror = error => observer.error(error);
+			this.fileReader.onerror = error => reject(error);
 		});
 	}
 
@@ -40,13 +41,9 @@ export class DicomArchiveService {
 		this.fileReader = new FileReader();
 	}
 
-	extractFileDirectoryStructure(): Observable<any>{
-		return Observable.create(observer => {
-			var zip = new JSZip();
-			zip.loadAsync(this.fileReader.result).then(function (x) {
-				observer.next(x);
-			}).catch((error) => {});
-		});
+	extractFileDirectoryStructure(): Promise<any>{
+		var zip = new JSZip();
+		return zip.loadAsync(this.fileReader.result);
 	}
 }
 

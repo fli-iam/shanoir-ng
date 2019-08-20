@@ -66,6 +66,7 @@ export class UploadExtraDataComponent implements OnInit {
     }
 
     uploadFileToActivity() {
+        // TODO : Manage unsubscribe
         this.examinationService.postFile(this.fileToUpload).subscribe(data => {
             this.msgService.log('info', 'The file has been sucessfully uploaded');
         });

@@ -57,9 +57,9 @@ export class DicomUploadComponent {
     private loadInMemory(fileEvent: any) {
     	this.dicomArchiveService.clearFileInMemory();
     	this.dicomArchiveService.importFromZip((fileEvent.target).files[0])
-            .subscribe(_ => {
+            .then(_ => {
                 this.dicomArchiveService.extractFileDirectoryStructure()
-                .subscribe(response => {
+                .then(response => {
                     this.importDataService.inMemoryExtracted = response;
                 });
             });

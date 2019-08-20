@@ -12,16 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 import { AccountRequestInfo } from './account-request-info.model';
+import { Subscription } from 'rxjs';
 
 @Component ({
     selector: 'account-request-info',
     templateUrl: 'account-request-info.component.html'
 })
-export class AccountRequestInfoComponent implements OnInit {
+export class AccountRequestInfoComponent implements OnInit, OnDestroy {
+
     @Input() userAccountRequestInfo: AccountRequestInfo;
     @Input() accountRequestDemand: boolean;
     @Input() requestAccountMode: boolean;
@@ -29,6 +31,7 @@ export class AccountRequestInfoComponent implements OnInit {
     @Output() isValid: EventEmitter<boolean> = new EventEmitter<boolean>();
     public accountRequestInfoForm: FormGroup;
     ari: AccountRequestInfo = new AccountRequestInfo();
+    private infoSubscription: Subscription;
 
     constructor(private formBuilder: FormBuilder) { 
     }
@@ -58,8 +61,7 @@ export class AccountRequestInfoComponent implements OnInit {
             'study':studyFC,
             'work': workFC
     });
-    this.accountRequestInfoForm.valueChanges
-            .subscribe(data => this.onValueChanged(data));
+    this.infoSubscription = this.accountRequestInfoForm.valueChanges.subscribe(data => this.onValueChanged(data));
     this.onValueChanged(); // (re)set validation messages now
     }
 
@@ -97,4 +99,8 @@ export class AccountRequestInfoComponent implements OnInit {
         'study': '',
         'work': ''
     };
+
+    ngOnDestroy() {
+        if (this.infoSubscription) this.infoSubscription.unsubscribe();
+    }
 }

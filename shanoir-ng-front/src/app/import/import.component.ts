@@ -12,10 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
-import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 
 
@@ -32,15 +31,9 @@ export class ImportComponent implements OnInit {
     constructor(
             private breadcrumbsService: BreadcrumbsService, 
             private rightsService: StudyRightsService,
-            private keycloakService: KeycloakService,
-            private route: ActivatedRoute, 
-            private router: Router) {
+            private route: ActivatedRoute) {
 
-        route.url.subscribe(() => {
-            if (this.route.snapshot.firstChild && this.route.snapshot.firstChild.data['importMode']) {
-                this.importMode = this.route.snapshot.firstChild.data['importMode'];
-            }
-        })
+        this.importMode = route.snapshot.firstChild.data['importMode'];
         this.rightsService.hasOnStudyToImport().then(hasOne => this.hasOneStudy = hasOne);
     }
         

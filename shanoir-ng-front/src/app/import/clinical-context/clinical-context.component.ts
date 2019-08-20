@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
@@ -34,6 +34,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { EquipmentDicom, PatientDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -42,7 +43,7 @@ import { ContextData, ImportDataService } from '../shared/import.data-service';
     styleUrls: ['clinical-context.component.css', '../shared/import.step.css'],
     animations: [slideDown]
 })
-export class ClinicalContextComponent {
+export class ClinicalContextComponent implements OnDestroy {
     
     patient: PatientDicom;
     private studies: Study[] = [];
@@ -58,6 +59,7 @@ export class ClinicalContextComponent {
     private examination: SubjectExamination;
     private niftiConverter: NiftiConverter;
     private importMode: "DICOM" | "PACS";
+    private subscribtions: Subscription[] = [];
     
     constructor(
             private studyService: StudyService,
@@ -243,9 +245,11 @@ export class ClinicalContextComponent {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledCenter();
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.center = this.updateStudyCenter(entity as Center);
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    this.importDataService.contextBackup.center = this.updateStudyCenter(entity as Center);
+                })
+            );
         });
     }
 
@@ -268,9 +272,11 @@ export class ClinicalContextComponent {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledAcqEqt();
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.acquisitionEquipment = (entity as AcquisitionEquipment);
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    this.importDataService.contextBackup.acquisitionEquipment = (entity as AcquisitionEquipment);
+                })
+            );
         });
     }
 
@@ -287,9 +293,11 @@ export class ClinicalContextComponent {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
             this.breadcrumbsService.currentStep.data.firstName = this.computeNameFromDicomTag(this.patient.patientName)[1];
             this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
-            importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
-            });
+            this.subscribtions.push(
+                importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+                })
+            );
         });
     }
 
@@ -335,9 +343,11 @@ export class ClinicalContextComponent {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/examination/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
+                })
+            );
         });
     }
 
@@ -404,5 +414,11 @@ export class ClinicalContextComponent {
 
     private next() {
         this.router.navigate(['imports/finish']);
+    }
+
+    ngOnDestroy() {
+        for(let subscribtion of this.subscribtions) {
+            subscribtion.unsubscribe();
+        }
     }
 }

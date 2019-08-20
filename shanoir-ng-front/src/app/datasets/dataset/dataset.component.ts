@@ -98,13 +98,13 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private loadDicomInMemory() {
         this.datasetService.downloadToBlob(this.id, 'dcm').subscribe(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
-            this.dicomArchiveService.importFromZip(blobReponse.body)
-                .subscribe(response => {
-                    this.dicomArchiveService.extractFileDirectoryStructure()
-                    .subscribe(response => {
-                        this.initPapaya(response);
-                    });
-                });
+                this.dicomArchiveService.importFromZip(blobReponse.body)
+                    .then(response => {
+                            this.dicomArchiveService.extractFileDirectoryStructure()
+                            .then(response => {
+                                this.initPapaya(response);
+                            })
+                    })
         });
     }
 

@@ -50,6 +50,7 @@ export class InstrumentAssessmentComponent implements OnInit {
         this.instAssessemntForm = this.fb.group({
             select: 'select'
         });
+        // TODO : manage unsubscribe
         this.instAssessemntForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now

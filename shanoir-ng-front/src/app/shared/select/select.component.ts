@@ -59,6 +59,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private selectedOption: SelectOptionComponent;
     private openState: boolean = false;
     private globalClickSubscription: Subscription;
+    private optionChangeSubscription: Subscription;
     private way: 'up' | 'down' = 'down';
     private hideToComputeHeight: boolean = false;
     private onTouchedCallback = () => {};
@@ -86,6 +87,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     ngOnDestroy() {
         this.unsubscribeToGlobalClick();
+        if (this.optionChangeSubscription) this.optionChangeSubscription.unsubscribe();
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -99,7 +101,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.options.forEach((option) => {
             option.parent = this;
         });
-        this.options.changes.subscribe(() => {
+        this.optionChangeSubscription = this.options.changes.subscribe(() => {
             this.options.forEach((option) => {
                 option.parent = this;
             });
