@@ -10,8 +10,10 @@ public class Center implements Comparable<Center> {
 
 	private List<Investigator> investigators;
 
+	public Center() {
+	}
+	
 	public Center(Long id, String name) {
-		super();
 		this.id = id;
 		this.name = name;
 	}

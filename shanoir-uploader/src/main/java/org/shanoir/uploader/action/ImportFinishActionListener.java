@@ -3,6 +3,7 @@ package org.shanoir.uploader.action;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -14,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.shanoir.dicom.importer.PreImportData;
 import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.Center;
@@ -39,12 +41,20 @@ public class ImportFinishActionListener implements ActionListener {
 
 	private MainWindow mainWindow;
 	
+	private UploadJob uploadJob;
+	
+	private File uploadFolder;
+	
+	private org.shanoir.uploader.model.dto.SubjectDTO subjectDTO;
+	
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
-	public ImportFinishActionListener(final MainWindow mainWindow,
-			final ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
+	public ImportFinishActionListener(final MainWindow mainWindow, UploadJob uploadJob, File uploadFolder, org.shanoir.uploader.model.dto.SubjectDTO subjectDTO) {
 		this.mainWindow = mainWindow;
-		this.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
+		this.uploadJob = uploadJob;
+		this.uploadFolder = uploadFolder;
+		this.subjectDTO = subjectDTO;
+		this.shanoirUploaderServiceClient = ShUpOnloadConfig.getShanoirUploaderServiceClient();
 	}
 
 	/**
@@ -54,7 +64,6 @@ public class ImportFinishActionListener implements ActionListener {
 	public void actionPerformed(final ActionEvent event) {
 		final Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
 		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
-		final UploadJob uploadJob = mainWindow.importDialog.getUploadJob();
 		if (study == null || study.getId() == null || studyCard == null || studyCard.getId() == null) {
 			return;
 		}
@@ -67,7 +76,7 @@ public class ImportFinishActionListener implements ActionListener {
 		// but I did not refactor here as too time demanding at the moment and bad legacy of developer before
 		Long subjectId = null;
 		String subjectName = null;
-		if (mainWindow.importDialog.getSubjectDTO() == null) {
+		if (subjectDTO == null) {
 			SubjectDTO subjectDTO = null;
 			try {
 				 subjectDTO = fillSubjectDTO(mainWindow.importDialog, uploadJob);
@@ -94,8 +103,8 @@ public class ImportFinishActionListener implements ActionListener {
 				logger.info("Auto-Import: subject created on server with ID: " + subjectId);
 			}
 		} else {
-			subjectId = mainWindow.importDialog.getSubjectDTO().getId();
-			subjectName = mainWindow.importDialog.getSubjectDTO().getName();
+			subjectId = subjectDTO.getId();
+			subjectName = subjectDTO.getName();
 			logger.info("Auto-Import: subject used on server with ID: " + subjectId);
 		}
 		Long examinationId = null;
@@ -127,7 +136,7 @@ public class ImportFinishActionListener implements ActionListener {
 		 * 3. Fill PreImportData, later added to upload-job.xml
 		 */
 		PreImportData preImportData = fillPreImportData(mainWindow.importDialog, subjectId, examinationId);
-		Runnable runnable = new ImportFinishRunnable(uploadJob, mainWindow.importDialog.getUploadFolder(), preImportData, subjectName);
+		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, preImportData, subjectName);
 		Thread thread = new Thread(runnable);
 		thread.start();
 		

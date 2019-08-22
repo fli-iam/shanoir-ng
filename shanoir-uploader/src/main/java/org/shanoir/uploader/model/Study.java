@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.shanoir.uploader.ShUpConfig;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Study implements Comparable<Study> {
 
 	private Long id;
@@ -13,6 +15,7 @@ public class Study implements Comparable<Study> {
 
 	private List<StudyCard> studyCards;
 
+	@JsonProperty("studyCenterList")
 	private List<Center> centers;
 
 	private Boolean compatible;

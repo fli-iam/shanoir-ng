@@ -1,22 +1,16 @@
 package org.shanoir.uploader.action.init;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Locale;
-import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
-import org.keycloak.OAuthErrorException;
-import org.keycloak.adapters.ServerRequest.HttpFailure;
 import org.keycloak.adapters.installed.KeycloakInstalled;
-import org.keycloak.common.VerificationException;
-import org.keycloak.representations.AccessToken;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClientNG;
 
 /**
  * This concrete state class defines the state when the ShanoirUploader tests
@@ -39,49 +33,25 @@ public class AuthenticationConfigurationState implements State {
 
 	public void load(StartupStateContext context) {
 		if (ShUpOnloadConfig.isShanoirNg()) {
+			ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG = new ShanoirUploaderServiceClientNG();
+			ShUpOnloadConfig.setShanoirUploaderServiceClientNG(shanoirUploaderServiceClientNG);
+
 			try {
 				FileInputStream fIS = new FileInputStream(ShUpConfig.keycloakJson);
-				KeycloakInstalled keycloak = new KeycloakInstalled(fIS);
-				keycloak.setLocale(Locale.ENGLISH);
-				keycloak.loginDesktop();
-				AccessToken token = keycloak.getToken();
-//				Executors.newSingleThreadExecutor().submit(() -> {
-//					logger.info("Logged in...");
-//					logger.info("Token: " + token.getSubject());
-//					logger.info("Username: " + token.getPreferredUsername());
-//					try {
-//						logger.info("AccessToken: " + keycloak.getTokenString());
-//					} catch (Exception ex) {
-//						logger.error(ex.getMessage(), ex);
-//					}
-////					int timeoutSeconds = 20;
-////					System.out.printf("Logging out in...%d Seconds%n", timeoutSeconds);
-////					try {
-////						TimeUnit.SECONDS.sleep(timeoutSeconds);
-////					} catch (Exception e) {
-////						logger.error(e.getMessage(), e);
-////					}
-////					try {
-////						keycloak.logout();
-////					} catch (Exception e) {
-////						logger.error(e.getMessage(), e);
-////					}
-////					logger.info("Exiting...");
-////					System.exit(0);
-//				});
-			} catch (IOException e) {
+				KeycloakInstalled keycloakInstalled = new KeycloakInstalled(fIS);
+				keycloakInstalled.setLocale(Locale.ENGLISH);
+				keycloakInstalled.loginDesktop();
+				ShUpOnloadConfig.setKeycloakInstalled(keycloakInstalled);
+			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
-			} catch (VerificationException e) {
-				logger.error(e.getMessage(), e);
-			} catch (OAuthErrorException e) {
-				logger.error(e.getMessage(), e);
-			} catch (URISyntaxException e) {
-				logger.error(e.getMessage(), e);
-			} catch (HttpFailure e) {
-				logger.error(e.getMessage(), e);
-			} catch (InterruptedException e) {
-				logger.error(e.getMessage(), e);
+				context.getShUpStartupDialog().updateStartupText(
+						"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
+				context.setState(new ServerUnreachableState());
+				context.nextState();	
+				return;
 			}
+			context.getShUpStartupDialog().updateStartupText(
+					"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
 			context.setState(new PacsConfigurationState());
 			context.nextState();
 		} else {
@@ -119,7 +89,6 @@ public class AuthenticationConfigurationState implements State {
 						"\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
 				context.setState(new ServerUnreachableState());
 				context.nextState();
-				return;
 			}
 		}
 	}

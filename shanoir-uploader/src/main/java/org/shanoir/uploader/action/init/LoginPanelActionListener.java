@@ -30,16 +30,7 @@ public class LoginPanelActionListener implements ActionListener {
 		ShUpConfig.encryption.decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
 				ShUpConfig.shanoirServerProperties, "shanoir.server.user.password",
 				ShUpConfig.SHANOIR_SERVER_PROPERTIES);
-
-		ShUpConfig.shanoirNGServerProperties.setProperty("shanoir.server.user.name",
-				serviceConfiguration.getUsername());
-		ShUpConfig.shanoirNGServerProperties.setProperty("shanoir.server.user.password",
-				serviceConfiguration.getPassword());
-		ShUpConfig.encryption.decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
-				ShUpConfig.shanoirNGServerProperties, "shanoir.server.user.password",
-				ShUpConfig.SHANOIR_NG_SERVER_PROPERTIES);
-		
-		// attention: values are never stored in config files
+		// attention: values are never stored in config files (bug introduced by AT, GitHub issue #188)
 		sSC.nextState();
 	}
 

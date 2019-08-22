@@ -64,7 +64,7 @@ public class UploadServiceJob implements Job {
 		for (Iterator foldersIt = folders.iterator(); foldersIt.hasNext();) {
 			final File folder = (File) foldersIt.next();
 			final File uploadJobFile = new File(folder.getAbsolutePath() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
-			// file could be missing in case of upload ongoing
+			// file could be missing in case of downloadOrCopy ongoing
 			if (uploadJobFile.exists()) {
 				UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
 				final UploadJob uploadJob = uploadJobManager.readUploadJob();

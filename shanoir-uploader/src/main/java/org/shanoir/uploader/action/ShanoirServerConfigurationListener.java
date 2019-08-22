@@ -100,7 +100,7 @@ public class ShanoirServerConfigurationListener implements ActionListener {
 										"shanoir.uploader.configurationMenu.shanoirServer.configure.succeeded.title"),
 								JOptionPane.INFORMATION_MESSAGE);
 					} catch (Exception e) {
-						logger.error("Failed to configure shanoir connexion :", e);
+						logger.error("Failed to configure shanoir connection :", e);
 					}
 				} else {
 					String message = resourceBundle
