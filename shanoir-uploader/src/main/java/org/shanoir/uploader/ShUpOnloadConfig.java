@@ -2,6 +2,7 @@ package org.shanoir.uploader;
 
 import java.io.File;
 
+import org.keycloak.adapters.installed.KeycloakInstalled;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -10,6 +11,7 @@ import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.service.http.UrlConfig;
 import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClientNG;
 
 /**
  * 
@@ -38,6 +40,10 @@ public class ShUpOnloadConfig {
 	private static CurrentNominativeDataController currentNominativeDataController;
 
 	private static ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+	
+	private static KeycloakInstalled keycloakInstalled;
+	
+	private static ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
 
 	private static UrlConfig urlConfig = new UrlConfig();
 
@@ -152,6 +158,22 @@ public class ShUpOnloadConfig {
 
 	public static void setShanoirNg(boolean shanoirNg) {
 		ShUpOnloadConfig.shanoirNg = shanoirNg;
+	}
+
+	public static KeycloakInstalled getKeycloakInstalled() {
+		return keycloakInstalled;
+	}
+
+	public static void setKeycloakInstalled(KeycloakInstalled keycloakInstalled) {
+		ShUpOnloadConfig.keycloakInstalled = keycloakInstalled;
+	}
+
+	public static ShanoirUploaderServiceClientNG getShanoirUploaderServiceClientNG() {
+		return shanoirUploaderServiceClientNG;
+	}
+
+	public static void setShanoirUploaderServiceClientNG(ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG) {
+		ShUpOnloadConfig.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
 	}
 
 }

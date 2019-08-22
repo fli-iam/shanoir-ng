@@ -7,7 +7,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.io.File;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -26,17 +27,10 @@ import org.jdatepicker.JDatePicker;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
-import org.shanoir.dicom.importer.UploadJob;
-import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.CancelButtonActionListener;
 import org.shanoir.uploader.action.ImportCreateNewExamCBItemListener;
-import org.shanoir.uploader.action.ImportFinishActionListener;
-import org.shanoir.uploader.action.ImportStudyAndStudyCardCBItemListener;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.gui.customcomponent.JTextFieldMandatory;
-import org.shanoir.uploader.model.StudyCard;
-import org.shanoir.uploader.model.dto.SubjectDTO;
-import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
 
 /**
  * This is the view class for the Study, StudyCard, Subject and MR Examination
@@ -127,22 +121,28 @@ public class ImportDialog extends JDialog {
 	public String[] leftOrRightManual = { "", "Left", "Right" };
 	public String[] imageObjectCategories = { "Phantom", "Living human being", "Human cadaver", "Anatomical piece", "Animal" };
 	public String[] subjectTypeValues = { "Healthy volunteer", "Patient", "Phantom" };
-
-	/**
-	 * Important design here: one import dialog exists for all imports.
-	 * One dialog references one uploadJob (== importJob) and one uploadFolder, that is processed at one time.
-	 */
-	private UploadJob uploadJob;
-	private File uploadFolder;
-	private SubjectDTO subjectDTO;
 	
-	public ImportDialog(MainWindow mainWindow, String title, Boolean trueOrFalse, ResourceBundle resourceBundle) {
+	/**
+	 * On injecting both listeners the ImportDialog becomes invisible of
+	 * the differences between sh-old and sh-ng. ImportDialog is a clean
+	 * view component, no dependency to the models.
+	 * 
+	 * @param mainWindow
+	 * @param title
+	 * @param trueOrFalse
+	 * @param resourceBundle
+	 * @param importStudyAndStudyCardCBIL
+	 * @param importFinishAL
+	 */
+	public ImportDialog(MainWindow mainWindow, String title, Boolean trueOrFalse, ResourceBundle resourceBundle,
+			ItemListener importStudyAndStudyCardCBIL, ActionListener importFinishAL) {
 		super(mainWindow, title, trueOrFalse);
 
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		this.setSize(700, 900);
 		this.setLocationRelativeTo(mainWindow);
 		this.mainWindow = mainWindow;
+		this.mainWindow.importDialog = this;
 
 		Container container = new Container();
 		container.setLayout(new GridBagLayout());
@@ -327,9 +327,6 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 1;
 		importDialogGBC.gridheight = 1;
 		container.add(studyCB, importDialogGBC);
-
-		ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL
-			= new ImportStudyAndStudyCardCBItemListener(this);
 		studyCB.addItemListener(importStudyAndStudyCardCBIL);
 
 		studyCardLabel = new JLabel(resourceBundle.getString("shanoir.uploader.studycardLabel") + " *");
@@ -343,7 +340,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridheight = 1;
 		container.add(studyCardLabel, importDialogGBC);
 
-		studyCardCB = new JComboBoxMandatory<StudyCard>();
+		studyCardCB = new JComboBoxMandatory();
 		studyCardCB.setBackground(Color.WHITE);
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -728,10 +725,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridy = 25;
 		importDialogGBC.gridwidth = 2;
 		container.add(exportButton, importDialogGBC);
-		
-		ShanoirUploaderServiceClient shanoirUploaderServiceClient = ShUpOnloadConfig.getShanoirUploaderServiceClient();
-		ImportFinishActionListener iFAL = new ImportFinishActionListener(mainWindow, shanoirUploaderServiceClient);
-		exportButton.addActionListener(iFAL);
+		exportButton.addActionListener(importFinishAL);
 	}
 
 	public boolean isExaminationFilledCorrectly(XMLGregorianCalendar dateMrExam, boolean skip) {
@@ -753,30 +747,6 @@ public class ImportDialog extends JDialog {
 		} else {
 			return false;
 		}
-	}
-
-	public UploadJob getUploadJob() {
-		return uploadJob;
-	}
-
-	public void setUploadJob(UploadJob uploadJob) {
-		this.uploadJob = uploadJob;
-	}
-
-	public File getUploadFolder() {
-		return uploadFolder;
-	}
-
-	public void setUploadFolder(File uploadFolder) {
-		this.uploadFolder = uploadFolder;
-	}
-
-	public SubjectDTO getSubjectDTO() {
-		return subjectDTO;
-	}
-
-	public void setSubjectDTO(SubjectDTO subjectDTO) {
-		this.subjectDTO = subjectDTO;
 	}
 
 }

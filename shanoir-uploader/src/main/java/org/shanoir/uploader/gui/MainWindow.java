@@ -50,6 +50,9 @@ import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.DownloadOrCopyActionListener;
 import org.shanoir.uploader.action.FindDicomActionListener;
 import org.shanoir.uploader.action.ImportDialogOpener;
+import org.shanoir.uploader.action.ImportDialogOpenerNG;
+import org.shanoir.uploader.action.ImportFinishActionListener;
+import org.shanoir.uploader.action.ImportStudyAndStudyCardCBItemListener;
 import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -121,7 +124,7 @@ public class MainWindow extends JFrame {
 	public JLabel errorUploadsLB;
 	public JLabel errorAlert;
 	public JProgressBar uploadProgressBar;
-	public boolean autoImportEnabled;
+	
 	public IDicomServerClient dicomServerClient;
 	public File shanoirUploaderFolder;
 	public String DICOM_SERVER_PROPERTIES;
@@ -131,6 +134,7 @@ public class MainWindow extends JFrame {
 	public ShUpConfig shanoirUploaderConfiguration;
 	
 	private ImportDialogOpener importDialogOpener;
+	private ImportDialogOpenerNG importDialogOpenerNG;
 
 	/**
 	 * Create the frame.
@@ -734,10 +738,9 @@ public class MainWindow extends JFrame {
 		/**
 		 * Init ImportDialog and its Opener here.
 		 */
-		importDialog = new ImportDialog(this, ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle);
+
 		importDialogOpener = new ImportDialogOpener(this, ShUpOnloadConfig.getShanoirUploaderServiceClient());
-		
-		autoImportEnabled = true;
+		importDialogOpenerNG = new ImportDialogOpenerNG(this, ShUpOnloadConfig.getShanoirUploaderServiceClientNG());
 		
 		// add ShUp principal panel (splitPane) and upload job display pane
 		// (scrollPaneUpload) to TabbedPane
@@ -847,6 +850,14 @@ public class MainWindow extends JFrame {
 
 	public void setImportDialogOpener(ImportDialogOpener importDialogOpener) {
 		this.importDialogOpener = importDialogOpener;
+	}
+
+	public ImportDialogOpenerNG getImportDialogOpenerNG() {
+		return importDialogOpenerNG;
+	}
+
+	public void setImportDialogOpenerNG(ImportDialogOpenerNG importDialogOpenerNG) {
+		this.importDialogOpenerNG = importDialogOpenerNG;
 	}
 	
 }

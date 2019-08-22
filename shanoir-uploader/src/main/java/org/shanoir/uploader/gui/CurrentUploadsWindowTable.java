@@ -79,15 +79,18 @@ public class CurrentUploadsWindowTable implements Observer {
 		for (Map.Entry<String, NominativeDataUploadJob> entry : initialUpload.entrySet()) {
 			if (entry.getValue() != null) {
 				String key = entry.getKey();
-				NominativeDataUploadJob value = (NominativeDataUploadJob) entry.getValue();
-				if (UploadState.READY.equals(value.getUploadState())) {
-					model.addRow(new Object[] { key, value.getPatientPseudonymusHash(), value.getPatientName(),
-						value.getIPP(), value.getStudyDate(), value.getMriSerialNumber(), value.getUploadPercentage(),
+				NominativeDataUploadJob nDUJob = (NominativeDataUploadJob) entry.getValue();
+				if (UploadState.READY.equals(nDUJob.getUploadState())) {
+					model.addRow(new Object[] { key, nDUJob.getPatientPseudonymusHash(), nDUJob.getPatientName(),
+						nDUJob.getIPP(), nDUJob.getStudyDate(), nDUJob.getMriSerialNumber(), nDUJob.getUploadPercentage(),
 						(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import") });
+				} else if (UploadState.FINISHED_UPLOAD.equals(nDUJob.getUploadState())) {
+					model.addRow(new Object[] { key, nDUJob.getPatientPseudonymusHash(), nDUJob.getPatientName(),
+							nDUJob.getIPP(), nDUJob.getStudyDate(), nDUJob.getMriSerialNumber(), nDUJob.getUploadPercentage(),
+							(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });					
 				} else {
-					model.addRow(new Object[] { key, value.getPatientPseudonymusHash(), value.getPatientName(),
-							value.getIPP(), value.getStudyDate(), value.getMriSerialNumber(), value.getUploadPercentage(),
-							 });					
+					model.addRow(new Object[] { key, nDUJob.getPatientPseudonymusHash(), nDUJob.getPatientName(),
+							nDUJob.getIPP(), nDUJob.getStudyDate(), nDUJob.getMriSerialNumber(), nDUJob.getUploadPercentage(), ""});	
 				}
 			}
 		}

@@ -108,9 +108,6 @@ public class InitialStartupState implements State {
 		
 		initProperties(ShUpConfig.SHANOIR_NG_SERVER_PROPERTIES,
 				ShUpConfig.shanoirNGServerProperties);
-		ShUpConfig.encryption.decryptIfEncryptedString(ShUpConfig.shanoirUploaderFolder,
-				ShUpConfig.shanoirNGServerProperties, "shanoir.server.user.password",
-				ShUpConfig.SHANOIR_NG_SERVER_PROPERTIES);
 		ShUpConfig.keycloakJson = initFile(ShUpConfig.KEYCLOAK_JSON);
 		logger.info("shanoir_ng_server.properties and keycloak.json successfully initialized.");
 

@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.io.File;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -19,17 +18,11 @@ import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
-import org.shanoir.uploader.model.Center;
-import org.shanoir.uploader.model.Investigator;
 import org.shanoir.uploader.model.Study;
 import org.shanoir.uploader.model.StudyCard;
-import org.shanoir.uploader.model.dto.CenterDTO;
 import org.shanoir.uploader.model.dto.ExaminationDTO;
-import org.shanoir.uploader.model.dto.InvestigatorDTO;
-import org.shanoir.uploader.model.dto.StudyCardDTO;
-import org.shanoir.uploader.model.dto.StudyDTO;
 import org.shanoir.uploader.model.dto.SubjectDTO;
-import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClientNG;
 
 /**
  * This class implements the logic when the start import button is clicked.
@@ -37,9 +30,9 @@ import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
  * @author mkain
  * 
  */
-public class ImportDialogOpener {
+public class ImportDialogOpenerNG {
 
-	private static Logger logger = Logger.getLogger(ImportDialogOpener.class);
+	private static Logger logger = Logger.getLogger(ImportDialogOpenerNG.class);
 
 	private MainWindow mainWindow;
 
@@ -47,18 +40,18 @@ public class ImportDialogOpener {
 
 	private ResourceBundle resourceBundle;
 
-	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+	private ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG;
 
-	public ImportDialogOpener(final MainWindow mainWindow,
-			final ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
+	public ImportDialogOpenerNG(final MainWindow mainWindow,
+			final ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG) {
 		this.mainWindow = mainWindow;
 		this.resourceBundle = mainWindow.resourceBundle;
-		this.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
+		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
 	}
 
 	public void openImportDialog(UploadJob uploadJob, File uploadFolder) {
 		// login again, in case session has been expired
-		if (shanoirUploaderServiceClient.login()) {
+//		if (shanoirUploaderServiceClient.login()) {
 			try {
 				SubjectDTO subjectDTO = getSubject(uploadJob);
 				ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow);
@@ -77,9 +70,9 @@ public class ImportDialogOpener {
 				return;
 			}
 			importDialog.setVisible(true);
-		} else {
-			return;
-		}
+//		} else {
+//			return;
+//		}
 	}
 
 	/**
@@ -113,71 +106,8 @@ public class ImportDialogOpener {
 		String manufacturer = firstSerie.getMriInformation().getManufacturer();
 		String manufacturerModelName = firstSerie.getMriInformation().getManufacturersModelName();
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
-		List<Study> studiesWithStudyCards = new ArrayList<Study>();
-		List<StudyDTO> studyDTOList = shanoirUploaderServiceClient.findStudiesWithStudyCards();
-		for (StudyDTO studyDTO : studyDTOList) {
-			if (studyDTO != null && !studyDTO.getStudyCards().isEmpty()) {
-				final Study study = new Study();
-				study.setId(studyDTO.getId());
-				study.setName(studyDTO.getName());
-				// add centers with investigators
-				List<Center> centerWithInvestigators = new ArrayList<Center>();
-				for (CenterDTO centerDTO : studyDTO.getCenters()) {
-					Center center = new Center(centerDTO.getId(), centerDTO.getName());
-					List<Investigator> investigators = new ArrayList<Investigator>();
-					if (centerDTO.getInvestigators() != null) {
-						for (InvestigatorDTO investigatorDTO : centerDTO.getInvestigators()) {
-							Investigator investigator = new Investigator(Long.valueOf(investigatorDTO.getId()),
-									investigatorDTO.getName());
-							investigators.add(investigator);
-						}
-						center.setInvestigatorList(investigators);
-					}
-					centerWithInvestigators.add(center);
-				}
-				study.setCenters(centerWithInvestigators);
-				// add study cards
-				Boolean compatibleStudyCard = false;
-				List<StudyCard> studyCardList = new ArrayList<StudyCard>();
-				for (StudyCardDTO studyCardDTO : studyDTO.getStudyCards()) {
-					if (studyCardDTO != null) {
-						final StudyCard studyCard = new StudyCard();
-						String studyCardName = studyCardDTO.getName();
-						if (studyCardDTO.getAcqEquipmentManufacturer() != null) {
-							studyCardName = studyCardName + " (" + studyCardDTO.getAcqEquipmentManufacturer() + " - "
-									+ studyCardDTO.getAcqEquipmentManufacturerModel() + " "
-									+ studyCardDTO.getAcqEquipmentSerialNumber() + " - " + studyCardDTO.getCenterName()
-									+ ")";
-							if (studyCardDTO.getAcqEquipmentManufacturer().compareToIgnoreCase(manufacturer) == 0
-									&& studyCardDTO.getAcqEquipmentManufacturerModel()
-											.compareToIgnoreCase(manufacturerModelName) == 0
-									&& studyCardDTO.getAcqEquipmentSerialNumber()
-											.compareToIgnoreCase(deviceSerialNumber) == 0) {
-								studyCard.setCompatible(true);
-								compatibleStudyCard = true;
-							} else {
-								studyCard.setCompatible(false);
-							}
-						} else {
-							studyCard.setCompatible(false);
-						}
-						studyCard.setName(studyCardName);
-						studyCard.setId(studyCardDTO.getId());
-						studyCard.setCenter(new org.shanoir.uploader.model.Center(studyCardDTO.getCenterId(),
-								studyCardDTO.getCenterName()));
-						studyCardList.add(studyCard);
-					}
-				}
-				if (compatibleStudyCard) {
-					study.setCompatible(true);
-				} else {
-					study.setCompatible(false);
-				}
-				study.setStudyCards(studyCardList);
-				studiesWithStudyCards.add(study);
-			}
-		}
-		return studiesWithStudyCards;
+		List<Study> studies = shanoirUploaderServiceClientNG.findStudiesWithStudyCards();
+		return studies;
 	}
 
 	/**
@@ -189,7 +119,7 @@ public class ImportDialogOpener {
 			boolean firstCompatibleStudyFound = false;
 			for (Study study : studiesWithStudyCards) {
 				importDialog.studyCB.addItem(study);
-				if (study.getCompatible() && !firstCompatibleStudyFound) {
+				if (study.getCompatible() != null && !firstCompatibleStudyFound) {
 					importDialog.studyCB.setSelectedItem(study);
 					importDialog.studyCardCB.removeAllItems();
 					boolean firstCompatibleStudyCardFound = false;
@@ -217,7 +147,7 @@ public class ImportDialogOpener {
 	private SubjectDTO getSubject(final UploadJob uploadJob) throws Exception {
 		SubjectDTO foundSubject = null;
 		if (uploadJob.getSubjectIdentifier() != null) {
-			foundSubject = shanoirUploaderServiceClient
+			foundSubject = shanoirUploaderServiceClientNG
 					.findSubjectBySubjectIdentifier(uploadJob.getSubjectIdentifier());
 		}
 		return foundSubject;
@@ -283,7 +213,7 @@ public class ImportDialogOpener {
 
 	private List<ExaminationDTO> getExaminations(SubjectDTO subjectDTO) throws Exception {
 		if (subjectDTO != null) {
-			List<ExaminationDTO> examinationList = shanoirUploaderServiceClient
+			List<ExaminationDTO> examinationList = shanoirUploaderServiceClientNG
 					.findExaminationsBySubjectId(subjectDTO.getId());
 			return examinationList;
 		}

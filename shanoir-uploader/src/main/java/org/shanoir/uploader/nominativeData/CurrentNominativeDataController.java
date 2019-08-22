@@ -42,13 +42,10 @@ public class CurrentNominativeDataController {
 
 	private CurrentUploadsWindowTable cuw;
 
-	private File workFolderFilePath;
-
 	public CurrentNominativeDataController(final File workFolderFilePath, final CurrentUploadsWindowTable cuw) {
 		super();
 		this.currentNominativeDataModel = new CurrentNominativeDataModel();
 		currentNominativeDataModel.addObserver(cuw);
-		this.workFolderFilePath = workFolderFilePath;
 		this.cuw = cuw;
 		processWorkFolder(workFolderFilePath);
 
@@ -102,9 +99,11 @@ public class CurrentNominativeDataController {
 						File uploadJobFile = new File(uploadJobFilePath);
 						uploadJobManager = new UploadJobManager(uploadJobFile);
 						UploadJob uploadJob = uploadJobManager.readUploadJob();
-						cuw.frame.importDialog.setUploadJob(uploadJob);
-						cuw.frame.importDialog.setUploadFolder(uploadJobFile.getParentFile());
-						cuw.frame.getImportDialogOpener().openImportDialog();
+						if (!ShUpOnloadConfig.isShanoirNg()) {
+							cuw.frame.getImportDialogOpener().openImportDialog(uploadJob, uploadJobFile.getParentFile());
+						} else {
+							cuw.frame.getImportDialogOpenerNG().openImportDialog(uploadJob, uploadJobFile.getParentFile());
+						}
 					} else {
 						showDeleteConfirmationDialog(workFolderFilePath, cuw, row);
 					}
@@ -192,7 +191,7 @@ public class CurrentNominativeDataController {
 	}
 
 	/**
-	 * Inspects the content of a folder. Copies the infos from one xml into the other XML, really bad.
+	 * Inspects the content of a folder. Copies the infos from one xml into the other xml, really bad.
 	 * 
 	 * @param folder
 	 */
@@ -202,33 +201,24 @@ public class CurrentNominativeDataController {
 		initUploadJobManager(folder); // UPLOAD_JOB_XML
 		if (nominativeDataUploadJobManager != null) {
 			final NominativeDataUploadJob nominativeDataUploadJob = nominativeDataUploadJobManager.readUploadDataJob();
-			if (!ShUpOnloadConfig.isShanoirNg()) {
-				if (uploadJobManager != null) {
-					final UploadJob uploadJob = uploadJobManager.readUploadJob();
-					final UploadState uploadState = uploadJob.getUploadState();
-					nominativeDataUploadJob.setUploadState(uploadState);
-					String uploadPercentage = nominativeDataUploadJob.getUploadPercentage();
-					if (uploadPercentage == null || uploadPercentage.equals(""))
-						uploadPercentage = "0 %";
-					if (uploadState.toString().equals("FINISHED_UPLOAD")) {
-						nominativeDataUploadJob.setUploadPercentage("FINISHED");
-					} else if (uploadState.toString().equals("START")
-							|| uploadState.toString().equals("START_AUTOIMPORT")) {
-						nominativeDataUploadJob.setUploadPercentage(uploadPercentage);
-					} else {
-						nominativeDataUploadJob.setUploadPercentage((String) uploadState.toString());
-					}
-					return nominativeDataUploadJob;
-				} else {
-					logger.error("Folder found in workFolder without upload-job.xml.");
-				}
-			} else {
-				if (uploadJobManager != null) {
+			if (uploadJobManager != null) {
+				final UploadJob uploadJob = uploadJobManager.readUploadJob();
+				final UploadState uploadState = uploadJob.getUploadState();
+				nominativeDataUploadJob.setUploadState(uploadState);
+				String uploadPercentage = nominativeDataUploadJob.getUploadPercentage();
+				if (uploadPercentage == null || uploadPercentage.equals(""))
+					uploadPercentage = "0 %";
+				if (uploadState.toString().equals("FINISHED_UPLOAD")) {
 					nominativeDataUploadJob.setUploadPercentage("FINISHED");
+				} else if (uploadState.toString().equals("START")
+						|| uploadState.toString().equals("START_AUTOIMPORT")) {
+					nominativeDataUploadJob.setUploadPercentage(uploadPercentage);
 				} else {
-					nominativeDataUploadJob.setUploadPercentage("0 %");
+					nominativeDataUploadJob.setUploadPercentage((String) uploadState.toString());
 				}
 				return nominativeDataUploadJob;
+			} else {
+				logger.error("Folder found in workFolder without upload-job.xml.");
 			}
 		} else {
 			logger.error("Folder found in workFolder without nominative-data-job.xml.");
