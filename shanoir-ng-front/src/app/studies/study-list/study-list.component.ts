@@ -51,7 +51,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         let colDef: any[] = [
             { headerName: "Name", field: "name" },
             {
-                headerName: "Status", field: "studyStatus", cellRenderer: function (params: any) {
+                headerName: "Status", field: "studyStatus", width: '70px', cellRenderer: function (params: any) {
                     return capitalsAndUnderscoresToDisplayable(params.data.studyStatus);
                 }
             },

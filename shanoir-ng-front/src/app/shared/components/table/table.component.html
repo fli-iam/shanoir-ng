@@ -128,11 +128,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <th class="status-bar controls" [attr.colspan]="columnDefs?.length + 1">
         <!-- Nb results per page input -->
         <span class="options">
-            <span click="refresh()"><i class="fas fa-sync-alt"></i></span>
-            <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
-            <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
-            <span *ngIf="page">Total : {{page?.totalElements}}</span>
-            <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
+            <ng-container *ngIf="!isLoading">
+                <span class="clickable" (click)="refresh()"><i class="fas fa-sync-alt"></i></span>
+                <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
+                <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
+                <span *ngIf="page">Total : {{page?.totalElements}}</span>
+                <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
+            </ng-container>
             <span class="loader" *ngIf="isLoading">Loading
                 <img [src]="loaderImageUrl" />
             </span>
@@ -145,6 +147,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <tr>
     <td [attr.colspan]="columnDefs?.length + 1" class="empty">
         No results
+        <br/><span class="clickable refresh" (click)="refresh()">Refresh<i class="fas fa-sync-alt"></i></span>
     </td>
 </tr>
 </tbody>
