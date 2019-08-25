@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div #formContainer class="content-component detail max-content">
 	<div class="layout" [ngClass]="{'left': mode=='view'}">
-		<form *ngIf="form" [formGroup]="form" novalidate>
+		<form *ngIf="form" [formGroup]="form" novalidate [class.disabled]="footerState.loading">
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</h2>
@@ -39,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<input type="text" formControlName="name" [(ngModel)]="study.name" />
 								<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
 								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
-								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
+								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
 							</ng-template>
 						</span>
 					</li>

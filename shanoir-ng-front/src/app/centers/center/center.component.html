@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component detail">
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<span [ngSwitch]="mode">
 			<ng-template [ngSwitchCase]="'view'">
 				<h2 class="header command-zone"i18n="View center|Title@@centerDetailViewTitle">Details on center</h2>

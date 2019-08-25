@@ -47,7 +47,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
         this.buildForm();
     }
 
-     getUser(): void {
+    getUser(): void {
         this.userService.get(KeycloakService.auth.userId)
         .then((user: User) => {
             this.extensionRequestInfo.extensionDate = new Date();
@@ -79,7 +79,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
         }
     }
 
-   buildForm(): void {
+    buildForm(): void {
         this.extensionRequestForm = this.fb.group({
             'extensionDate': [this.extensionRequestInfo.extensionDate, [Validators.required]],
             'extensionMotivation': [this.extensionRequestInfo.extensionMotivation, [Validators.required]],

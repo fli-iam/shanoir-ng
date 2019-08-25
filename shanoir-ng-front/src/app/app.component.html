@@ -14,9 +14,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <!-- <header></header>
 <navbar *ngIf="isAuthenticated()"></navbar> -->
-<side-menu *ngIf="isAuthenticated()"></side-menu>
-<div class="main-content">
-    <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
-    <router-outlet></router-outlet>
-</div>
+
+<ng-container *ngIf="isAuthenticated()">
+    <side-menu *ngIf="isAuthenticated()"></side-menu>
+    <div class="main-content">
+        <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
+        <router-outlet></router-outlet>
+    </div>
+</ng-container>
+
+<ng-container *ngIf="!isAuthenticated()">
+    <header></header>
+    <div class="main-offline">
+        <router-outlet></router-outlet>
+    </div>
+</ng-container>
+
 <msg-box></msg-box>

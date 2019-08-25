@@ -48,7 +48,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private location: Location;
     protected formBuilder: FormBuilder;
     protected keycloakService: KeycloakService;
-    private msgBoxService: MsgBoxService; 
+    protected msgBoxService: MsgBoxService; 
     protected breadcrumbsService: BreadcrumbsService;
 
     /* abstract methods */
@@ -178,7 +178,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     formErrors(field: string): any {
         if (!this.form) return;
         const control = this.form.get(field);
-        if (control && control.touched && !control.valid) {
+        if (control && (control.touched || this.mode != 'create') && !control.valid) {
             return control.errors;
         }
     }
