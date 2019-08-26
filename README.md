@@ -75,6 +75,7 @@ If you want to login, please configure a user in Keycloak :
 ### Configure a user in Keycloak
 
 * Access to Keycloak admin interface: http://localhost:8080/auth/admin/
+* The account and password is defined in .env and has to be changed for production scenarios
 
 By default, new user accounts have been created in Keycloak by ms users with temporary passwords.
 Please access to Keycloak admin interface below to reset the password, when you want to login (Manage users - Edit your desired user - Credentials - Reset password and Temporary password: No). When a SMTP server has been configured properly, emails with a temporary password will have been sent to each user (not the case in dev environment).
