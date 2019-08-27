@@ -47,7 +47,6 @@ export class TreeNodeComponent implements ControlValueAccessor {
     @Input() hasBox: boolean;
     @Input() nodeParams: any;
     @Input() editable: boolean = false;
-    @Input() link: boolean = false;
     @Input() tooltip: string;
     @Input() dataRequest: boolean = false;
     @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes: QueryList<any>;
@@ -55,7 +54,6 @@ export class TreeNodeComponent implements ControlValueAccessor {
     public dataLoading: boolean = false;
     private isOpen: boolean = false;
     public loaded: boolean = false;
-    private loaderImagePath: string = ImagesUrlUtil.LOADER_IMAGE_PATH;
     public hasChildren: boolean;
     public checked: boolean | 'indeterminate';
     @ViewChild('box') boxElt: CheckboxComponent;
@@ -102,7 +100,10 @@ export class TreeNodeComponent implements ControlValueAccessor {
 
     public toggle() {
         if (this.isOpen) this.close();
-        else this.open();
+        else {
+            if (!this.hasChildren && this.dataRequest) this.openClick.emit(this);
+            this.open();
+        }
     }
 
     public updateChildren(): void {

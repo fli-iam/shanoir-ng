@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
@@ -31,7 +31,6 @@ import { ManufacturerService } from '../shared/manufacturer.service';
 
 export class ManufacturerModelComponent extends EntityComponent<ManufacturerModel> {
 
-    private datasetModalityTypes: Enum[] = [];
     private manufs: Manufacturer[];
 
     constructor(
@@ -47,7 +46,6 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
 
 
     initView(): Promise<void> {
-        this.footerState.canEdit = this.keycloakService.isUserAdminOrExpert();
         return this.getManufacturerModel();
     }
 
@@ -69,20 +67,26 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     }
 
     buildForm(): FormGroup {
-        let magneticFieldFC: FormControl;
-        if (this.isMR) {
-            magneticFieldFC = new FormControl(this.manufModel.magneticField, Validators.required);
-        } else {
-            magneticFieldFC = new FormControl(this.manufModel.magneticField);
-        }
         return this.formBuilder.group({
             'name': [this.manufModel.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'manufacturer': [this.manufModel.manufacturer, Validators.required],
-            'magneticField': magneticFieldFC,
+            'magneticField': [this.manufModel.magneticField, this.getMagneticFieldValidators()],
             'datasetModalityType': [this.manufModel.datasetModalityType, Validators.required]
         });
     }
 
+    private getMagneticFieldValidators(): ValidatorFn | ValidatorFn[] {
+        if (this.isMR) return Validators.required;
+        else return;
+    }
+
+    private onModalityChange(modality: string) {
+        if (modality) {
+            this.form.get('magneticField').setValidators(this.getMagneticFieldValidators());
+            this.reloadRequiredStyles();
+        }
+    }
+    
     private get isMR(): boolean { 
         return this.manufModel && this.manufModel.datasetModalityType == 'MR_DATASET'; 
     }

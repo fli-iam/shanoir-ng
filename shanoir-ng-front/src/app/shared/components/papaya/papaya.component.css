@@ -1,4 +1,5 @@
 :host() { display: block; }
 img { height: 12px; margin-left: 10px; vertical-align: middle; }
-button { width: 120px; margin: 0; background-color: var(--color-b); }
-button:hover, button:disabled { color: var(--very-light-grey); background-color: var(--color-b-light2); }
+button { width: 120px; margin: 0; background-color: var(--color-b); height: 27px; }
+.loader svg { vertical-align: -1; }
+button:disabled { background-color: var(--grey); border-color: var(--grey); cursor: auto; } 

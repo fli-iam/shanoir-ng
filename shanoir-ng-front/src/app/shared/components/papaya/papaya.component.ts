@@ -28,7 +28,6 @@ export class PapayaComponent implements OnInit {
     @Input() autoLoading: boolean = false;
     private loaded: boolean = false;
     private static loading: boolean = false;
-    private ImagesUrlUtil = ImagesUrlUtil;
 
     constructor() {}
 

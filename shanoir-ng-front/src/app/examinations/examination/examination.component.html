@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="content-component">
+<div #formContainer class="content-component">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout" [ngClass]="{'left': mode=='view'}">
 			<span [ngSwitch]="mode">
@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<fieldset>
 				<ol>
 					<li *ngIf="mode != 'create'">
-						<label i18n="Examination detail|Id label@@examinationDetailId" class="required-label">Id</label>
+						<label i18n="Examination detail|Id label@@examinationDetailId">Id</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{examination?.id}}
@@ -40,7 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Examination detail|Research study label@@examinationDetailStudy" class="required-label">Research study</label>
+						<label i18n="Examination detail|Research study label@@examinationDetailStudy">Research study</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/study/details/', examination.study?.id]">
@@ -56,7 +56,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Examination detail|Subject label@@examinationDetailSubject" class="required-label">Subject</label>
+						<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/subject/details/', examination.subject?.id]">
@@ -72,7 +72,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Examination detail|Center label@@examinationDetailCenter" class="required-label">Center</label>
+						<label i18n="Examination detail|Center label@@examinationDetailCenter">Center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/center/details/', examination.center?.id]">
@@ -101,7 +101,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li> -->
 					<li>
-						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate" class="required-label">Examination date</label>
+						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate">Examination date</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{examination?.examinationDate | date: 'dd/MM/yyyy'}}
