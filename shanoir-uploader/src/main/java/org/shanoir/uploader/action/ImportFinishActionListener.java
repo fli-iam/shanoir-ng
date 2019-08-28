@@ -23,7 +23,7 @@ import org.shanoir.uploader.model.Investigator;
 import org.shanoir.uploader.model.Study;
 import org.shanoir.uploader.model.StudyCard;
 import org.shanoir.uploader.model.dto.ExaminationDTO;
-import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.service.soap.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.utils.Util;
 import org.shanoir.ws.generated.uploader.PseudonymusHashValues;
 import org.shanoir.ws.generated.uploader.SubjectDTO;

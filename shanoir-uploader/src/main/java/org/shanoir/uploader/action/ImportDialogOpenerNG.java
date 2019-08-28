@@ -21,8 +21,11 @@ import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.Study;
 import org.shanoir.uploader.model.StudyCard;
 import org.shanoir.uploader.model.dto.ExaminationDTO;
-import org.shanoir.uploader.model.dto.SubjectDTO;
-import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.dto.ImagedObjectCategory;
+import org.shanoir.uploader.service.rest.dto.SubjectDTO;
+import org.shanoir.uploader.service.rest.dto.SubjectStudyDTO;
+import org.shanoir.uploader.service.rest.dto.SubjectType;
 
 /**
  * This class implements the logic when the start import button is clicked.
@@ -55,11 +58,11 @@ public class ImportDialogOpenerNG {
 			try {
 				SubjectDTO subjectDTO = getSubject(uploadJob);
 				ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow);
-				ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subjectDTO);
+				ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, null);
 				importDialog = new ImportDialog(this.mainWindow,
 						ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
 						importStudyAndStudyCardCBIL, importFinishAL);
-				updateImportDialogForSubject(subjectDTO);
+				updateImportDialogForSubject(subjectDTO); // this has to be done after init of dialog
 				List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
 				updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
 				List<ExaminationDTO> examinationDTOs = getExaminations(subjectDTO);
@@ -153,32 +156,54 @@ public class ImportDialogOpenerNG {
 		return foundSubject;
 	}
 
-	/**
-	 * @param subjectDTO
-	 */
 	private void updateImportDialogForSubject(SubjectDTO subjectDTO) {
 		// Existing subject found with identifier:
 		if (subjectDTO != null) {
-			// Common name
+			// Manage subject values here:
 			importDialog.subjectTextField.setText(subjectDTO.getName());
 			importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
 			importDialog.subjectTextField.setEnabled(false);
 			importDialog.subjectTextField.setEditable(false);
 			importDialog.subjectTextField.setValueSet(true);
-
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(subjectDTO.getImagedObjectCategory());
-			importDialog.subjectImageObjectCategoryCB.setEnabled(false);
-
+			updateImagedObjectCategory(subjectDTO);
 			importDialog.subjectLanguageHemisphericDominanceCB
-					.setSelectedItem(subjectDTO.getLanguageHemisphericDominance());
+					.setSelectedItem(subjectDTO.getLanguageHemisphericDominance().name());
 			importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
 			importDialog.subjectManualHemisphericDominanceCB
-					.setSelectedItem(subjectDTO.getManualHemisphericDominance());
+					.setSelectedItem(subjectDTO.getManualHemisphericDominance().name());
 			importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
-
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
 			importDialog.subjectPersonalCommentTextArea.setEditable(false);
-			// No existing subject found with identifier:
+			// Manage subject_study values here:
+			List<SubjectStudyDTO> subjectStudyList = subjectDTO.getSubjectStudyList();
+			for (Iterator iterator = subjectStudyList.iterator(); iterator.hasNext();) {
+				SubjectStudyDTO subjectStudyDTO = (SubjectStudyDTO) iterator.next();
+				importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudyDTO.isPhysicallyInvolved());
+				importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
+				if (SubjectType.HEALTHY_VOLUNTEER.equals(subjectStudyDTO.getSubjectType())) {
+					importDialog.subjectTypeCB.setSelectedItem(importDialog.subjectTypeValues[0]);
+				} else if (SubjectType.PATIENT.equals(subjectStudyDTO.getSubjectType())) {
+					importDialog.subjectTypeCB.setSelectedItem(importDialog.subjectTypeValues[1]);
+				} else if (SubjectType.PHANTOM.equals(subjectStudyDTO.getSubjectType())) {
+					importDialog.subjectTypeCB.setSelectedItem(importDialog.subjectTypeValues[2]);
+				}
+				importDialog.subjectTypeCB.setEnabled(false);
+				break; // use the first relation here to display some info
+				/**
+				 * At this time we have found a subject on using the identifier.
+				 * This subject could be in multiple studies, or not, even in a
+				 * study not available to the importing user.
+				 * The subject could be in the future study, the user chooses to
+				 * import into, but could also be in another study. So we display
+				 * the first info we have here, as in the current implementation
+				 * the user can not change and modify anything on using ShUp.
+				 * When we import for the subject and the subject is not yet in
+				 * the selected study, we add it automatically to this study on
+				 * using the same values as in the other study. This could be
+				 * extended later.
+				 */
+			}
+		// No existing subject found with identifier:
 		} else {
 			// Common name
 			if (ShUpConfig.isModeSubjectCommonNameManual()) {
@@ -194,21 +219,39 @@ public class ImportDialogOpenerNG {
 				importDialog.subjectTextField.setEditable(false);
 			}
 			importDialog.subjectTextField.setValueSet(false);
-
 			importDialog.subjectImageObjectCategoryCB.setEnabled(true);
 			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[1]);
-
 			importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
 			importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem(importDialog.leftOrRightLanguage[0]);
 			importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
 			importDialog.subjectManualHemisphericDominanceCB.setSelectedItem(importDialog.leftOrRightManual[0]);
-
 			importDialog.subjectPersonalCommentTextArea.setText("");
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
 			importDialog.subjectPersonalCommentTextArea.setEditable(true);
 		}
-		importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
-		importDialog.subjectTypeCB.setSelectedItem(importDialog.subjectTypeValues[1]);
+	}
+
+	/**
+	 * This method maps the REST model with the enum to the model in the
+	 * ImportDialog, used for sh-old and sh-ng. Like this the ImportDialog
+	 * remains blind of the differences between sh-old and sh-ng.
+	 * 
+	 * @param subjectDTO
+	 */
+	private void updateImagedObjectCategory(SubjectDTO subjectDTO) {
+		ImagedObjectCategory category = subjectDTO.getImagedObjectCategory();
+		if (ImagedObjectCategory.PHANTOM.equals(category)) {
+			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[0]);
+		} else if (ImagedObjectCategory.LIVING_HUMAN_BEING.equals(category)) {
+			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[1]);
+		} else if (ImagedObjectCategory.HUMAN_CADAVER.equals(category)) {
+			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[2]);
+		} else if (ImagedObjectCategory.ANATOMICAL_PIECE.equals(category)) {
+			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[3]);
+		} else if (ImagedObjectCategory.ANIMAL.equals(category)) {
+			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[4]);
+		}
+		importDialog.subjectImageObjectCategoryCB.setEnabled(false);
 	}
 
 	private List<ExaminationDTO> getExaminations(SubjectDTO subjectDTO) throws Exception {

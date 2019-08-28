@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.LoginConfigurationPanel;
-import org.shanoir.uploader.service.wsdl.ServiceConfiguration;
+import org.shanoir.uploader.service.soap.ServiceConfiguration;
 
 public class LoginPanelActionListener implements ActionListener {
 

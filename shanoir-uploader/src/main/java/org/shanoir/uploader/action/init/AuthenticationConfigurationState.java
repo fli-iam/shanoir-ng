@@ -9,8 +9,8 @@ import org.apache.log4j.Logger;
 import org.keycloak.adapters.installed.KeycloakInstalled;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.soap.ShanoirUploaderServiceClient;
 
 /**
  * This concrete state class defines the state when the ShanoirUploader tests
