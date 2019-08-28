@@ -38,7 +38,7 @@ The installation of Shanoir NG has two steps :
 * Download or git clone the shanoir-ng code. The `master` branch should be the most stable while `develop` will contain the newests functionalities if you are interested in testing thoses.
 * Execute the Maven build on the parent project with the following commands:
     * cd shanoir-ng-parent/
-    * **mvn install**
+    * mvn install
 * The build creates all .jar and .js executable files and copies them
 into the folder /docker-compose to be used from there by docker-compose
 
