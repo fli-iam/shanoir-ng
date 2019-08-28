@@ -20,7 +20,7 @@ import javax.swing.border.EmptyBorder;
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.init.StartupStateContext;
-import org.shanoir.uploader.service.wsdl.ServiceConfiguration;
+import org.shanoir.uploader.service.soap.ServiceConfiguration;
 
 /**
  * This class is the shanoir startup GUI which : - Display the startup info -

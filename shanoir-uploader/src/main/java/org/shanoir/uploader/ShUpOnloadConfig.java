@@ -9,9 +9,9 @@ import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
-import org.shanoir.uploader.service.http.UrlConfig;
-import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.UrlConfig;
+import org.shanoir.uploader.service.soap.ShanoirUploaderServiceClient;
 
 /**
  * 

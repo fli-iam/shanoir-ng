@@ -1,4 +1,4 @@
-package org.shanoir.uploader.service.http;
+package org.shanoir.uploader.service.rest;
 
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;

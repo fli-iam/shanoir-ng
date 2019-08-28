@@ -1,4 +1,4 @@
-package org.shanoir.uploader.service.http;
+package org.shanoir.uploader.service.rest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

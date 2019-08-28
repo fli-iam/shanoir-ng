@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.subject.model;
+package org.shanoir.uploader.service.rest.dto;
 
 /**
  * Imaged object category.
@@ -46,7 +46,7 @@ public enum ImagedObjectCategory {
 	 * Animal
 	 */
 	ANIMAL(5);
-	
+
 	private int id;
 
 	/**

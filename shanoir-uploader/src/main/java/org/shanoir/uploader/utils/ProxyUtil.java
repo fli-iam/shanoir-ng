@@ -7,8 +7,8 @@ import java.net.URL;
 import javax.xml.ws.BindingProvider;
 
 import org.apache.log4j.Logger;
-import org.shanoir.uploader.service.http.ProxyAuthenticator;
-import org.shanoir.uploader.service.wsdl.ServiceConfiguration;
+import org.shanoir.uploader.service.rest.ProxyAuthenticator;
+import org.shanoir.uploader.service.soap.ServiceConfiguration;
 
 /**
  * 
