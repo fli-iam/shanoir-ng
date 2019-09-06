@@ -105,29 +105,6 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<Subject> saveNewOFSEPSubject(
-			@ApiParam(value = "subject to create", required = true) @RequestBody SubjectStudyCardIdDTO subjectStudyCardIdDTO,
-			final BindingResult result) throws RestServiceException {
-		Long studyCardId = subjectStudyCardIdDTO.getStudyCardId();
-		Subject subject = subjectStudyCardIdDTO.getSubject();
-		validate(subject, result);
-		String commonName;
-		try {
-			commonName = mappingUtils.getOfsepCommonName(studyCardId);
-		} catch (MicroServiceCommunicationException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-					"Communication error beetween microservices"));
-		}
-		if (commonName == null || commonName.equals(""))
-			subject.setName("NoCommonName");
-		else
-			subject.setName(commonName);
-
-		final Subject createdSubject = subjectService.create(subject);
-		return new ResponseEntity<Subject>(createdSubject, HttpStatus.OK);
-	}
-
-	@Override
 	public ResponseEntity<Void> updateSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "subject to update", required = true) @RequestBody Subject subject,

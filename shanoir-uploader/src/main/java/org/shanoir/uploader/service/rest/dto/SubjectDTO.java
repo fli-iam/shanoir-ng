@@ -17,7 +17,11 @@ package org.shanoir.uploader.service.rest.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.shanoir.uploader.model.PseudonymusHashValues;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class SubjectDTO {
 
@@ -28,6 +32,7 @@ public class SubjectDTO {
 	private String identifier;
 
 	@JsonDeserialize(using = LocalDateDeserializer.class)
+	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate birthDate;
 
 	private HemisphericDominance languageHemisphericDominance;
@@ -35,8 +40,12 @@ public class SubjectDTO {
 	private HemisphericDominance manualHemisphericDominance;
 
 	private ImagedObjectCategory imagedObjectCategory;
+	
+	private Sex sex;
 
 	private List<SubjectStudyDTO> subjectStudyList;
+	
+	private PseudonymusHashValues pseudonymusHashValues;
 
 	private boolean preclinical;
 
@@ -166,6 +175,22 @@ public class SubjectDTO {
 
 	public void setPreclinical(boolean preclinical) {
 		this.preclinical = preclinical;
+	}
+
+	public Sex getSex() {
+		return sex;
+	}
+
+	public void setSex(Sex sex) {
+		this.sex = sex;
+	}
+
+	public PseudonymusHashValues getPseudonymusHashValues() {
+		return pseudonymusHashValues;
+	}
+
+	public void setPseudonymusHashValues(PseudonymusHashValues pseudonymusHashValues) {
+		this.pseudonymusHashValues = pseudonymusHashValues;
 	}
 
 }

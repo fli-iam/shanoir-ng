@@ -35,7 +35,6 @@ public class AuthenticationConfigurationState implements State {
 		if (ShUpOnloadConfig.isShanoirNg()) {
 			ShanoirUploaderServiceClientNG shanoirUploaderServiceClientNG = new ShanoirUploaderServiceClientNG();
 			ShUpOnloadConfig.setShanoirUploaderServiceClientNG(shanoirUploaderServiceClientNG);
-
 			try {
 				FileInputStream fIS = new FileInputStream(ShUpConfig.keycloakJson);
 				KeycloakInstalled keycloakInstalled = new KeycloakInstalled(fIS);

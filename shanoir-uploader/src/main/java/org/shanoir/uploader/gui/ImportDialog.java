@@ -116,11 +116,6 @@ public class ImportDialog extends JDialog {
 	public JSeparator separatorMrExamination;
 	
 	public MainWindow mainWindow;
-
-	public String[] leftOrRightLanguage = { "", "Left", "Right" };
-	public String[] leftOrRightManual = { "", "Left", "Right" };
-	public String[] imageObjectCategories = { "Phantom", "Living human being", "Human cadaver", "Anatomical piece", "Animal" };
-	public String[] subjectTypeValues = { "Healthy volunteer", "Patient", "Phantom" };
 	
 	/**
 	 * On injecting both listeners the ImportDialog becomes invisible of
@@ -411,7 +406,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectImageObjectCategoryLabel, importDialogGBC);
 
-		subjectImageObjectCategoryCB = new JComboBoxMandatory(imageObjectCategories);
+		subjectImageObjectCategoryCB = new JComboBoxMandatory();
 		subjectImageObjectCategoryCB.setBackground(Color.LIGHT_GRAY);
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -432,7 +427,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectLanguageHemisphericDominanceLabel, importDialogGBC);
 
-		subjectLanguageHemisphericDominanceCB = new JComboBox(leftOrRightLanguage);
+		subjectLanguageHemisphericDominanceCB = new JComboBox();
 		subjectLanguageHemisphericDominanceCB.setBackground(Color.LIGHT_GRAY);
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -453,7 +448,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectManualHemisphericDominanceLabel, importDialogGBC);
 
-		subjectManualHemisphericDominanceCB = new JComboBox(leftOrRightManual);
+		subjectManualHemisphericDominanceCB = new JComboBox();
 		subjectManualHemisphericDominanceCB.setBackground(Color.LIGHT_GRAY);
 		importDialogGBC.weightx = 0.7;
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
@@ -537,7 +532,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 2;
 		container.add(subjectTypeLabel, importDialogGBC);
 
-		subjectTypeCB = new JComboBoxMandatory(subjectTypeValues);
+		subjectTypeCB = new JComboBoxMandatory();
 		subjectTypeCB.setBackground(Color.LIGHT_GRAY);
 		subjectTypeCB.setEditable(false);
 		importDialogGBC.weightx = 0.7;

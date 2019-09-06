@@ -20,19 +20,19 @@ public class LocalDateDeserializer extends StdDeserializer<LocalDate> {
 	@Override
 	public LocalDate deserialize(JsonParser jp, DeserializationContext ctxt)
 			throws IOException, JsonProcessingException {
-	    if (jp.isExpectedStartArrayToken()) {
-	        jp.nextToken();
-	        int year = jp.getIntValue(); 
-	        jp.nextToken();
-	        int month = jp.getIntValue();
-	        jp.nextToken();
-	        int day = jp.getIntValue();
-	        if (jp.nextToken() != JsonToken.END_ARRAY) {
-	            throw ctxt.wrongTokenException(jp, JsonToken.END_ARRAY, "after LocalDate ints");
-	        }
-	        return LocalDate.of(year, month, day);
-	    }
-	    throw ctxt.wrongTokenException(jp, JsonToken.END_ARRAY, "non array LocalDate");
+		if (jp.isExpectedStartArrayToken()) {
+			jp.nextToken();
+			int year = jp.getIntValue();
+			jp.nextToken();
+			int month = jp.getIntValue();
+			jp.nextToken();
+			int day = jp.getIntValue();
+			if (jp.nextToken() != JsonToken.END_ARRAY) {
+				throw ctxt.wrongTokenException(jp, JsonToken.END_ARRAY, "after LocalDate ints");
+			}
+			return LocalDate.of(year, month, day);
+		}
+		throw ctxt.wrongTokenException(jp, JsonToken.END_ARRAY, "non array LocalDate");
 	}
 
 }
