@@ -21,7 +21,6 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
-import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -99,19 +98,6 @@ public interface SubjectApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
 	ResponseEntity<SubjectDTO> saveNewSubject(
 			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
-			final BindingResult result) throws RestServiceException;
-
-	@ApiOperation(value = "", notes = "Saves a new subject with auto generated common name", response = Subject.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created subject", response = Subject.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Subject.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
-	@RequestMapping(value = "/OFSEP/", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subjectStudyCardIdDTO.getSubject().getSubjectStudyList(), 'CAN_IMPORT'))")
-	ResponseEntity<Subject> saveNewOFSEPSubject(
-			@ApiParam(value = "subject to create and the id of the study card", required = true) @RequestBody SubjectStudyCardIdDTO subjectStudyCardIdDTO,
 			final BindingResult result) throws RestServiceException;
 	
 	@ApiOperation(value = "", notes = "Updates a subject", response = Void.class, tags = {})

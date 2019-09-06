@@ -25,19 +25,21 @@ public enum SubjectType {
 	/**
 	 * Healthy volunteer.
 	 */
-	HEALTHY_VOLUNTEER(1),
+	HEALTHY_VOLUNTEER(1, "Healthy volunteer"),
 
 	/**
 	 * Patient.
 	 */
-	PATIENT(2),
+	PATIENT(2, "Patient"),
 
 	/**
 	 * Phantom.
 	 */
-	PHANTOM(3);
+	PHANTOM(3, "Phantom");
 
 	private int id;
+	
+	private String name;
 
 	/**
 	 * Constructor.
@@ -45,8 +47,9 @@ public enum SubjectType {
 	 * @param id
 	 *            id
 	 */
-	private SubjectType(final int id) {
+	private SubjectType(final int id, final String name) {
 		this.id = id;
+		this.name = name;
 	}
 
 	/**
@@ -73,6 +76,14 @@ public enum SubjectType {
 	 */
 	public int getId() {
 		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String toString() {
+		return this.name;
 	}
 
 }

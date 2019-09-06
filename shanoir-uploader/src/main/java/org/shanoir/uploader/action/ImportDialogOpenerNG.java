@@ -20,8 +20,9 @@ import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.Study;
 import org.shanoir.uploader.model.StudyCard;
-import org.shanoir.uploader.model.dto.ExaminationDTO;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
+import org.shanoir.uploader.service.rest.dto.ExaminationDTO;
+import org.shanoir.uploader.service.rest.dto.HemisphericDominance;
 import org.shanoir.uploader.service.rest.dto.ImagedObjectCategory;
 import org.shanoir.uploader.service.rest.dto.SubjectDTO;
 import org.shanoir.uploader.service.rest.dto.SubjectStudyDTO;
@@ -57,8 +58,8 @@ public class ImportDialogOpenerNG {
 //		if (shanoirUploaderServiceClient.login()) {
 			try {
 				SubjectDTO subjectDTO = getSubject(uploadJob);
-				ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow);
-				ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, null);
+				ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListenerNG(this.mainWindow);
+				ImportFinishActionListenerNG importFinishAL = new ImportFinishActionListenerNG(this.mainWindow, uploadJob, uploadFolder, null);
 				importDialog = new ImportDialog(this.mainWindow,
 						ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
 						importStudyAndStudyCardCBIL, importFinishAL);
@@ -77,7 +78,7 @@ public class ImportDialogOpenerNG {
 //			return;
 //		}
 	}
-
+	
 	/**
 	 * @param uploadJob
 	 */
@@ -157,6 +158,24 @@ public class ImportDialogOpenerNG {
 	}
 
 	private void updateImportDialogForSubject(SubjectDTO subjectDTO) {
+		/**
+		 * Insert subject specific items into combo boxes from model classes.
+		 * Should be there nevertheless if subject exists or not.
+		 */
+		// Insert ImageObjectCategory objects
+		for (int i = 0; i < ImagedObjectCategory.values().length; i++) {
+			importDialog.subjectImageObjectCategoryCB.addItem(ImagedObjectCategory.values()[i]);					
+		}
+		// Insert String here, as the model does not contain "", the unknown, not selected hemdom
+		importDialog.subjectLanguageHemisphericDominanceCB.addItem("");
+		importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
+		importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
+		importDialog.subjectManualHemisphericDominanceCB.addItem("");
+		importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
+		importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
+		for (int i = 0; i < SubjectType.values().length; i++) {
+			importDialog.subjectTypeCB.addItem(SubjectType.values()[i]);
+		}
 		// Existing subject found with identifier:
 		if (subjectDTO != null) {
 			// Manage subject values here:
@@ -165,12 +184,13 @@ public class ImportDialogOpenerNG {
 			importDialog.subjectTextField.setEnabled(false);
 			importDialog.subjectTextField.setEditable(false);
 			importDialog.subjectTextField.setValueSet(true);
-			updateImagedObjectCategory(subjectDTO);
+			importDialog.subjectImageObjectCategoryCB.setSelectedItem(subjectDTO.getImagedObjectCategory());
+			importDialog.subjectImageObjectCategoryCB.setEnabled(false);
 			importDialog.subjectLanguageHemisphericDominanceCB
-					.setSelectedItem(subjectDTO.getLanguageHemisphericDominance().name());
+					.setSelectedItem(subjectDTO.getLanguageHemisphericDominance());
 			importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
 			importDialog.subjectManualHemisphericDominanceCB
-					.setSelectedItem(subjectDTO.getManualHemisphericDominance().name());
+					.setSelectedItem(subjectDTO.getManualHemisphericDominance());
 			importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
 			importDialog.subjectPersonalCommentTextArea.setEditable(false);
@@ -180,13 +200,7 @@ public class ImportDialogOpenerNG {
 				SubjectStudyDTO subjectStudyDTO = (SubjectStudyDTO) iterator.next();
 				importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudyDTO.isPhysicallyInvolved());
 				importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
-				if (SubjectType.HEALTHY_VOLUNTEER.equals(subjectStudyDTO.getSubjectType())) {
-					importDialog.subjectTypeCB.setSelectedItem(importDialog.subjectTypeValues[0]);
-				} else if (SubjectType.PATIENT.equals(subjectStudyDTO.getSubjectType())) {
-					importDialog.subjectTypeCB.setSelectedItem(importDialog.subjectTypeValues[1]);
-				} else if (SubjectType.PHANTOM.equals(subjectStudyDTO.getSubjectType())) {
-					importDialog.subjectTypeCB.setSelectedItem(importDialog.subjectTypeValues[2]);
-				}
+				importDialog.subjectTypeCB.setSelectedItem(subjectStudyDTO.getSubjectType());
 				importDialog.subjectTypeCB.setEnabled(false);
 				break; // use the first relation here to display some info
 				/**
@@ -220,38 +234,17 @@ public class ImportDialogOpenerNG {
 			}
 			importDialog.subjectTextField.setValueSet(false);
 			importDialog.subjectImageObjectCategoryCB.setEnabled(true);
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[1]);
+			importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.LIVING_HUMAN_BEING);			
 			importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
-			importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem(importDialog.leftOrRightLanguage[0]);
+			importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");			
 			importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
-			importDialog.subjectManualHemisphericDominanceCB.setSelectedItem(importDialog.leftOrRightManual[0]);
+			importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
 			importDialog.subjectPersonalCommentTextArea.setText("");
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
 			importDialog.subjectPersonalCommentTextArea.setEditable(true);
+			importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
+			importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
 		}
-	}
-
-	/**
-	 * This method maps the REST model with the enum to the model in the
-	 * ImportDialog, used for sh-old and sh-ng. Like this the ImportDialog
-	 * remains blind of the differences between sh-old and sh-ng.
-	 * 
-	 * @param subjectDTO
-	 */
-	private void updateImagedObjectCategory(SubjectDTO subjectDTO) {
-		ImagedObjectCategory category = subjectDTO.getImagedObjectCategory();
-		if (ImagedObjectCategory.PHANTOM.equals(category)) {
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[0]);
-		} else if (ImagedObjectCategory.LIVING_HUMAN_BEING.equals(category)) {
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[1]);
-		} else if (ImagedObjectCategory.HUMAN_CADAVER.equals(category)) {
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[2]);
-		} else if (ImagedObjectCategory.ANATOMICAL_PIECE.equals(category)) {
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[3]);
-		} else if (ImagedObjectCategory.ANIMAL.equals(category)) {
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[4]);
-		}
-		importDialog.subjectImageObjectCategoryCB.setEnabled(false);
 	}
 
 	private List<ExaminationDTO> getExaminations(SubjectDTO subjectDTO) throws Exception {

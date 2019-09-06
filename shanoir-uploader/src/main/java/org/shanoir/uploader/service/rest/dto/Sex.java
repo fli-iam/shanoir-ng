@@ -11,30 +11,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 package org.shanoir.uploader.service.rest.dto;
 
 /**
- * Hemispheric dominance.
+ * Sex.
  * 
  * @author msimon
  *
  */
-public enum HemisphericDominance {
+public enum Sex {
 
 	/**
-	 * Left.
+	 * Male.
 	 */
-	Left(1, "Left"),
+	M(1),
 
 	/**
-	 * Right.
+	 * Female.
 	 */
-	Right(2, "Right");
+	F(2);
 
 	private int id;
-	
-	private String name;
 
 	/**
 	 * Constructor.
@@ -42,28 +39,27 @@ public enum HemisphericDominance {
 	 * @param id
 	 *            id
 	 */
-	private HemisphericDominance(final int id, final String name) {
+	private Sex(final int id) {
 		this.id = id;
-		this.name = name;
 	}
 
 	/**
-	 * Get a hemispheric dominance by its id.
+	 * Get a sex by its id.
 	 * 
 	 * @param id
-	 *            dominance id.
-	 * @return hemispheric dominance.
+	 *            sex id.
+	 * @return sex.
 	 */
-	public static HemisphericDominance getDominance(final Integer id) {
+	public static Sex getSex(final Integer id) {
 		if (id == null) {
 			return null;
 		}
-		for (HemisphericDominance dominance : HemisphericDominance.values()) {
-			if (id.equals(dominance.getId())) {
-				return dominance;
+		for (Sex sex : Sex.values()) {
+			if (id.equals(sex.getId())) {
+				return sex;
 			}
 		}
-		throw new IllegalArgumentException("No matching hemispheric dominance for id " + id);
+		throw new IllegalArgumentException("No matching sex for id " + id);
 	}
 
 	/**
@@ -71,10 +67,6 @@ public enum HemisphericDominance {
 	 */
 	public int getId() {
 		return id;
-	}
-
-	public String getName() {
-		return name;
 	}
 
 }

@@ -50,6 +50,14 @@ public class ImportDialogOpener {
 
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
+	private String[] imageObjectCategories = { "Phantom", "Living human being", "Human cadaver", "Anatomical piece",
+			"Animal" };
+	private String[] leftOrRightLanguage = { "", "Left", "Right" };
+	
+	private String[] leftOrRightManual = { "", "Left", "Right" };
+	
+	private String[] subjectTypeValues = { "Healthy volunteer", "Patient", "Phantom" };
+
 	public ImportDialogOpener(final MainWindow mainWindow,
 			final ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
 		this.mainWindow = mainWindow;
@@ -224,10 +232,23 @@ public class ImportDialogOpener {
 		return foundSubject;
 	}
 
-	/**
-	 * @param subjectDTO
-	 */
 	private void updateImportDialogForSubject(SubjectDTO subjectDTO) {
+		/**
+		 * Insert subject specific items into combo boxes from arrays.
+		 * Should be there nevertheless if subject exists or not.
+		 */
+		for (int i = 0; i < imageObjectCategories.length; i++) {
+			importDialog.subjectImageObjectCategoryCB.addItem(imageObjectCategories[i]);					
+		}
+		for (int i = 0; i < leftOrRightLanguage.length; i++) {
+			importDialog.subjectLanguageHemisphericDominanceCB.addItem(leftOrRightLanguage[i]);
+		}
+		for (int i = 0; i < leftOrRightManual.length; i++) {
+			importDialog.subjectManualHemisphericDominanceCB.addItem(leftOrRightManual[i]);
+		}
+		for (int i = 0; i < subjectTypeValues.length; i++) {
+			importDialog.subjectTypeCB.addItem(subjectTypeValues[i]);
+		}
 		// Existing subject found with identifier:
 		if (subjectDTO != null) {
 			// Manage subject values here:
@@ -286,14 +307,16 @@ public class ImportDialogOpener {
 			}
 			importDialog.subjectTextField.setValueSet(false);
 			importDialog.subjectImageObjectCategoryCB.setEnabled(true);
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(importDialog.imageObjectCategories[1]);
+			importDialog.subjectImageObjectCategoryCB.setSelectedItem(imageObjectCategories[1]);			
 			importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
-			importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem(importDialog.leftOrRightLanguage[0]);
+			importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem(leftOrRightLanguage[0]);			
 			importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
-			importDialog.subjectManualHemisphericDominanceCB.setSelectedItem(importDialog.leftOrRightManual[0]);
+			importDialog.subjectManualHemisphericDominanceCB.setSelectedItem(leftOrRightManual[0]);
 			importDialog.subjectPersonalCommentTextArea.setText("");
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
 			importDialog.subjectPersonalCommentTextArea.setEditable(true);
+			importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(true);
+			importDialog.subjectIsPhysicallyInvolvedCB.setSelected(true);
 		}
 	}
 

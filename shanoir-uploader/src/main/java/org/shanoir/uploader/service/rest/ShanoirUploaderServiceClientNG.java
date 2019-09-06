@@ -1,7 +1,6 @@
 package org.shanoir.uploader.service.rest;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -13,13 +12,17 @@ import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.model.Study;
-import org.shanoir.uploader.model.dto.ExaminationDTO;
+import org.shanoir.uploader.service.rest.dto.ExaminationDTO;
 import org.shanoir.uploader.service.rest.dto.SubjectDTO;
 import org.shanoir.uploader.utils.Util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 /**
  * 
- * Service layer for org.shanoir.ws.generated.uploader.ShanoirUploaderService.
+ * Service layer for REST services of sh-ng.
  *
  * @author mkain
  *
@@ -33,6 +36,10 @@ public class ShanoirUploaderServiceClientNG {
 	private static final String SERVICE_SUBJECTS_FIND_BY_IDENTIFIER = "service.subjects.find.by.identifier";
 
 	private static final String SERVICE_STUDIES_NAMES_CENTERS = "service.studies.names.centers";
+	
+	private static final String SERVICE_EXAMINATIONS_BY_SUBJECT_ID = "service.examinations.find.by.subject.id";
+	
+	private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
 
 	private HttpService httpService;
 	
@@ -41,6 +48,10 @@ public class ShanoirUploaderServiceClientNG {
 	private String serviceURLStudiesNamesAndCenters;
 	
 	private String serviceURLSubjectsFindByIdentifier;
+	
+	private String serviceURLExaminationsBySubjectId;
+	
+	private String serviceURLSubjectsCreate;
 
 	public ShanoirUploaderServiceClientNG() {
 		this.httpService = new HttpService();
@@ -48,7 +59,11 @@ public class ShanoirUploaderServiceClientNG {
 		this.serviceURLStudiesNamesAndCenters = this.serverURL
 			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
-				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);	
+			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
+		this.serviceURLExaminationsBySubjectId = this.serverURL
+			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
+		this.serviceURLSubjectsCreate = this.serverURL
+				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_CREATE);		
 		logger.info("ShanoirUploaderServiceNG successfully initialized.");
 	}
 	
@@ -79,12 +94,17 @@ public class ShanoirUploaderServiceClientNG {
 
 	public List<ExaminationDTO> findExaminationsBySubjectId(Long subjectId) throws Exception {
 		if (subjectId != null) {
-			List<org.shanoir.ws.generated.uploader.ExaminationDTO> examinations = null;
-			List<ExaminationDTO> examinationDTOs = new ArrayList<ExaminationDTO>();
-			return examinationDTOs;
-		} else {
-			return null;
+			HttpResponse response = httpService.get(this.serviceURLExaminationsBySubjectId + subjectId);
+			int code = response.getStatusLine().getStatusCode();
+			if (code == 200) {
+//				ResponseHandler<String> handler = new BasicResponseHandler();
+//				String body = handler.handleResponse(response);
+//				logger.info(body);
+				List<ExaminationDTO> examinations = Util.getMappedList(response, ExaminationDTO.class);
+				return examinations;
+			}
 		}
+		return null;
 	}
 	
 	public String uploadFile(final String folderName, final File file) throws Exception {
@@ -107,11 +127,23 @@ public class ShanoirUploaderServiceClientNG {
 	 * @param subjectDTO
 	 * @return boolean true, if success
 	 */
-	public org.shanoir.ws.generated.uploader.SubjectDTO createSubject(
+	public SubjectDTO createSubject(
 			final Long studyId,
 			final Long studyCardId,
 			final boolean modeSubjectCommonName,
-			final org.shanoir.ws.generated.uploader.SubjectDTO subjectDTO) {
+			final SubjectDTO subjectDTO) {
+		try {
+			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+			String json = ow.writeValueAsString(subjectDTO);
+			HttpResponse response = httpService.post(this.serviceURLSubjectsCreate, json);
+			int code = response.getStatusLine().getStatusCode();
+			if (code == 200) {
+				SubjectDTO subjectDTOCreated = Util.getMappedObject(response, SubjectDTO.class);
+				return subjectDTOCreated;
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		}
 		return null;
 	}
 	
