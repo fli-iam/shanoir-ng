@@ -32,6 +32,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<description>Studies management project for Shanoir NG</description>
 
 	<properties>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
 		<org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
 		<spring.active.profile></spring.active.profile>
 		<docker.image.name>shanoir-ng/studies</docker.image.name>
