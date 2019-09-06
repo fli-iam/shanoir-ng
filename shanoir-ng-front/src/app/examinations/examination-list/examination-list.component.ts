@@ -66,7 +66,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                 headerName: "Research study", field: "study.name",
                 route: (examination: Examination) => '/study/details/' + examination.study.id
             },{
-                headerName: "Center", field: "centerName",
+                headerName: "Center", field: "center.name",
                 route: (examination: Examination) => '/center/details/' + examination.center.id
             }
         ];
