@@ -101,7 +101,6 @@ public class SubjectApiSecurityTest {
 		assertAccessDenied(api::findSubjectsNames);
 		assertAccessDenied(api::findSubjectById, ENTITY_ID);
 		assertAccessDenied((t, u) -> { try { api.saveNewSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, mockNew, mockBindingResult);
-		assertAccessDenied((t, u) -> { try { api.saveNewOFSEPSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, new SubjectStudyCardIdDTO(), mockBindingResult);
 		assertAccessDenied((t, u, v) -> { try { api.updateSubject(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, ENTITY_ID, mockExisting, mockBindingResult);
 		assertAccessDenied(api::findSubjectsByStudyId, ENTITY_ID);
 		assertAccessDenied(api::findSubjectByIdentifier, "identifier");
@@ -164,7 +163,6 @@ public class SubjectApiSecurityTest {
 		assertAccessAuthorized(api::findSubjectsNames);
 		assertAccessAuthorized(api::findSubjectById, ENTITY_ID);
 		assertAccessAuthorized((t, u) -> { try { api.saveNewSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, mockNew, mockBindingResult);
-		assertAccessAuthorized((t, u) -> { try { api.saveNewOFSEPSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, new SubjectStudyCardIdDTO(), mockBindingResult);
 		assertAccessAuthorized((t, u, v) -> { try { api.updateSubject(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, ENTITY_ID, mockExisting, mockBindingResult);
 		assertAccessAuthorized(api::findSubjectsByStudyId, ENTITY_ID);
 		assertAccessAuthorized(api::findSubjectByIdentifier, "identifier");
@@ -254,7 +252,6 @@ public class SubjectApiSecurityTest {
 		// Create subject without subject <-> study
 		Subject newSubjectMock = buildSubjectMock(null);
 		assertAccessDenied((t, u) -> { try { api.saveNewSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, newSubjectMock, mockBindingResult);
-		assertAccessDenied((t, u) -> { try { api.saveNewOFSEPSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, convertToStudyCardIdDto(newSubjectMock), mockBindingResult);
 		
 		// Create subject 
 		studiesMock = new ArrayList<>();
@@ -264,7 +261,6 @@ public class SubjectApiSecurityTest {
 		newSubjectMock = buildSubjectMock(null);
 		addStudyToMock(newSubjectMock, 9L);
 		assertAccessDenied((t, u) -> { try { api.saveNewSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, newSubjectMock, mockBindingResult);
-		assertAccessDenied((t, u) -> { try { api.saveNewOFSEPSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, convertToStudyCardIdDto(newSubjectMock), mockBindingResult);
 		
 		// Create subject linked to a study where I can admin, download, see all but not import.
 		studiesMock = new ArrayList<>();
@@ -274,7 +270,6 @@ public class SubjectApiSecurityTest {
 		newSubjectMock = buildSubjectMock(null);
 		addStudyToMock(newSubjectMock, 10L);
 		assertAccessDenied((t, u) -> { try { api.saveNewSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, newSubjectMock, mockBindingResult);
-		assertAccessDenied((t, u) -> { try { api.saveNewOFSEPSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, convertToStudyCardIdDto(newSubjectMock), mockBindingResult);
 		
 		// Create subject linked to a study where I can import and also to a study where I can't.
 		studiesMock = new ArrayList<>();
@@ -288,7 +283,6 @@ public class SubjectApiSecurityTest {
 		addStudyToMock(newSubjectMock, 11L);
 		addStudyToMock(newSubjectMock, 12L);
 		assertAccessDenied((t, u) -> { try { api.saveNewSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, newSubjectMock, mockBindingResult);
-		assertAccessDenied((t, u) -> { try { api.saveNewOFSEPSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, convertToStudyCardIdDto(newSubjectMock), mockBindingResult);
 		
 		// Create subject linked to a study where I can import
 		studiesMock = new ArrayList<>();
@@ -298,7 +292,6 @@ public class SubjectApiSecurityTest {
 		newSubjectMock = buildSubjectMock(null);
 		addStudyToMock(newSubjectMock, 13L);
 		assertAccessAuthorized((t, u) -> { try { api.saveNewSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, newSubjectMock, mockBindingResult);
-		assertAccessAuthorized((t, u) -> { try { api.saveNewOFSEPSubject(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, convertToStudyCardIdDto(newSubjectMock), mockBindingResult);
 	}
 	
 	private Study buildStudyMock(Long id, StudyUserRight... rights) {
