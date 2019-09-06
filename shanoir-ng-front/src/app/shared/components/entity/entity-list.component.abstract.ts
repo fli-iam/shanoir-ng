@@ -104,9 +104,10 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected openDeleteConfirmDialog = (entity: T) => {
         this.confirmDialogService
             .confirm(
-                'Delete', 'Are you sure you want to delete ' + this.ROUTING_NAME + ' n° ' + entity.id + ' ?',
-                ServiceLocator.rootViewContainerRef
-            ).subscribe(res => {
+                'Delete ' + this.ROUTING_NAME, 
+                'Are you sure you want to delete the ' + this.ROUTING_NAME 
+                + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
+            ).then(res => {
                 if (res) {
                     entity.delete().then(() => {
                         this.onDelete.next(entity);

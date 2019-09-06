@@ -18,7 +18,6 @@ import { CommonModule } from '@angular/common';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
@@ -144,7 +143,6 @@ import { SideMenuComponent } from './shared/side-menu/side-menu.component';
         CommonModule,
         FormsModule,
         HttpClientModule,
-        MatDialogModule,
         MyDatePickerModule,
         ReactiveFormsModule,
         routing
@@ -250,7 +248,6 @@ import { SideMenuComponent } from './shared/side-menu/side-menu.component';
         KeycloakService,
         ManufacturerModelService,
         ManufacturerService,
-        MatDialog,
         ModalService,
         RoleService,
         StudyService,
