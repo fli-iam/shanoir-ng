@@ -21,13 +21,10 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
-import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
-import org.shanoir.ng.subject.dto.mapper.SubjectMappingUtilsService;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
@@ -38,6 +35,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.ApiParam;
 
@@ -46,9 +44,6 @@ public class SubjectApiController implements SubjectApi {
 
 	@Autowired
 	private SubjectMapper subjectMapper;
-
-	@Autowired
-	private SubjectMappingUtilsService mappingUtils;
 
 	@Autowired
 	private SubjectService subjectService;
@@ -97,11 +92,18 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<SubjectDTO> saveNewSubject(
-			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
+			@RequestBody Subject subject,
+			@RequestParam(required = false) Long centerId,
 			final BindingResult result) throws RestServiceException {
 		validate(subject, result);
-		final Subject createdSubject = subjectService.create(subject);
-		return new ResponseEntity<SubjectDTO>(subjectMapper.subjectToSubjectDTO(createdSubject), HttpStatus.OK);
+		Subject createdSubject;
+		if (centerId == null) {
+			createdSubject = subjectService.create(subject);
+		} else {
+			createdSubject = subjectService.createAutoIncrement(subject, centerId);
+		}
+		final SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(createdSubject);
+		return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
 	}
 
 	@Override
@@ -126,7 +128,6 @@ public class SubjectApiController implements SubjectApi {
 			return new ResponseEntity<List<SimpleSubjectDTO>>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<List<SimpleSubjectDTO>>(simpleSubjectDTOList, HttpStatus.OK);
-
 	}
 
 	@Override
@@ -137,7 +138,6 @@ public class SubjectApiController implements SubjectApi {
 			return new ResponseEntity<SubjectDTO>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<SubjectDTO>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
-
 	}
 
 	private void validate(Subject subject, BindingResult result) throws RestServiceException {

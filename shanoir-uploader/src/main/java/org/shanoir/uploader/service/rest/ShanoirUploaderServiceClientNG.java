@@ -130,12 +130,17 @@ public class ShanoirUploaderServiceClientNG {
 	public SubjectDTO createSubject(
 			final Long studyId,
 			final Long studyCardId,
-			final boolean modeSubjectCommonName,
+			final boolean modeSubjectCommonNameManual,
 			final SubjectDTO subjectDTO) {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(subjectDTO);
-			HttpResponse response = httpService.post(this.serviceURLSubjectsCreate, json);
+			HttpResponse response;
+			if (modeSubjectCommonNameManual) {
+				response = httpService.post(this.serviceURLSubjectsCreate, json);
+			} else {
+				response = httpService.post(this.serviceURLSubjectsCreate + "?centerId="+ studyCardId, json);
+			}
 			int code = response.getStatusLine().getStatusCode();
 			if (code == 200) {
 				SubjectDTO subjectDTOCreated = Util.getMappedObject(response, SubjectDTO.class);
