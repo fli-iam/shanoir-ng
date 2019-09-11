@@ -11,10 +11,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
-import { ImagesUrlUtil } from '../utils/images-url.util';
-import { KeycloakService } from '../keycloak/keycloak.service';
+
+import { Component, EventEmitter, Output } from '@angular/core';
 import { slideDown } from '../animations/animations';
+import { KeycloakService } from '../keycloak/keycloak.service';
+import { ImagesUrlUtil } from '../utils/images-url.util';
 
 
 @Component({

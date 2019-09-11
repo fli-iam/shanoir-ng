@@ -12,21 +12,26 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, ViewContainerRef } from '@angular/core';
+import { Component, ElementRef, ViewContainerRef, HostBinding } from '@angular/core';
 
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { ModalService } from './shared/components/modals/modal.service';
 import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { GlobalService } from './shared/services/global.service';
 import { ServiceLocator } from './utils/locator.service';
+import { slideRight, parent, slideMarginLeft } from './shared/animations/animations';
 
 
 @Component({
     selector: 'shanoir-ng-app',
-    templateUrl: 'app.component.html'
+    templateUrl: 'app.component.html',
+    styleUrls: ['app.component.css'],
+    animations: [ slideRight, slideMarginLeft, parent ]
 })
 
 export class AppComponent {
+
+    @HostBinding('@parent') private menuOpen: boolean = true; 
 
     constructor(
             public viewContainerRef: ViewContainerRef,
@@ -53,6 +58,10 @@ export class AppComponent {
 
     ngOnInit() {
         this.globalService.registerGlobalClick(this.element);
+    }
+
+    toggleMenu(open: boolean) {
+        this.menuOpen = open;
     }
 
     isAuthenticated(): boolean {

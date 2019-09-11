@@ -1,16 +1,15 @@
-:host() { position: fixed; display: block; width: 300px; height: 100vh; top: 0; overflow-x: hidden; overflow-y: scroll; overflow: -moz-scrollbars-none; -ms-overflow-style: none;
-    background-color: var(--color-a); color: white;}
+:host() { height: 100vh; background-color: var(--color-a); color: white; }
 :host()::-webkit-scrollbar { width: 0 !important }
 
-.logo { overflow: hidden; margin-bottom: 20px; display: flex; justify-content: center; }
+.logo { overflow: hidden; margin-bottom: 20px; display: flex; justify-content: center; min-width: 300px; }
 
 .logo img { height: 78px; opacity: 0.2; margin-top: 4px;
     -webkit-filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9)); 
     filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9)); 
 }
 
-.user { text-align: center; }
-.user .welcome { margin: 10px 0; color: var(--color-b-light); }
+.user { text-align: center; min-width: 300px; }
+.user .welcome { margin-top: 10px; color: var(--color-b-light); }
 .user-logo { background-color: #888; opacity: 0.5; border-radius: 50%; display: inline-block; padding: 13px; }
 .user-logo svg { height: 40px; width: 40px; }
 
@@ -18,7 +17,7 @@ a svg { margin-left: 7px; vertical-align: -2;}
 a { color: var(--grey); }
 a:hover, a:active { color: white; }
 
-.menu-list { margin-top: 20px; }
+.menu-list { margin-top: 20px; min-width: 300px; }
 .menu-list li { font-size: 16px; padding: 5px 10px; cursor: pointer; }
 .menu-list li:hover,
 .menu-list .sub-menu li:hover { background-color: var(--color-b); cursor: pointer; }
@@ -28,4 +27,4 @@ a:hover, a:active { color: white; }
 .menu-list .sub-menu li > svg { vertical-align: -2px; }
 
 .chevron { float: right; font-size: 10px; margin-right: 10px; }
-.chevron svg { margin-top: 10px; }
+.chevron svg { margin-top: 7px; }

@@ -14,6 +14,10 @@
 
 import { animate, query, style, transition, trigger } from '@angular/animations';
 
+export const parent = trigger('parent', [
+    transition(':enter', [])
+]);
+
 export const slideDown = trigger('slideDown', [
     transition(
         ':enter', [
@@ -25,6 +29,36 @@ export const slideDown = trigger('slideDown', [
         ':leave', [
             style({height: '*', 'padding-bottom': '*', overflow: 'hidden'}),
             animate('500ms ease-in-out', style({height: '0', 'padding-bottom': '0', overflow: 'hidden'}))
+        ]
+    )
+]);
+
+export const slideRight = trigger('slideRight', [
+    transition(
+        ':enter', [
+            style({width: 0}),
+            animate('500ms ease-in-out', style({width: '*'}))
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({width: '*'}),
+            animate('500ms ease-in-out', style({width: 0}))
+        ]
+    )
+]);
+
+export const slideMarginLeft = trigger('slideMarginLeft', [
+    transition(
+        'margin => nomargin', [
+            style({'margin-left': 300}),
+            animate('500ms ease-in-out', style({'margin-left': 0}))
+        ]
+    ),
+    transition(
+        'nomargin => margin', [
+            style({'margin-left': 0}),
+            animate('500ms ease-in-out', style({'margin-left': 300}))
         ]
     )
 ]);
