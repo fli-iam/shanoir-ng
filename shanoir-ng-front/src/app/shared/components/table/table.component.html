@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </tr>
 </thead>
 <!-- Table content -->
-<tbody *ngIf="isLoading || items?.length > 0">
+<tbody *ngIf="items?.length > 0">
 <tr
     *ngFor="let item of items; let i = index" 
     [class.odd]="i%2!=0" 
@@ -128,26 +128,43 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <th class="status-bar controls" [attr.colspan]="columnDefs?.length + 1">
         <!-- Nb results per page input -->
         <span class="options">
-            <ng-container *ngIf="!isLoading">
-                <span class="clickable" (click)="refresh()"><i class="fas fa-sync-alt"></i></span>
+            <ng-container>
+                <span class="clickable" (click)="refresh()">
+                    <span *ngIf="!isLoading">
+                        <i class="fas fa-sync-alt"></i>
+                    </span>
+                    <span *ngIf="isLoading">
+                        <i class="fas fa-sync-alt fa-spin"></i>
+                    </span>
+                </span>
                 <span *ngIf="selectionAllowed">Selected : {{getNbSelected()}}</span>
                 <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
                 <span *ngIf="page">Total : {{page?.totalElements}}</span>
                 <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
             </ng-container>
-            <span class="loader" *ngIf="isLoading">Loading
-                <img [src]="loaderImageUrl" />
-            </span>
         </span>
     </th>
 </tr>
 </tbody>
 <!-- Empty table msg -->
-<tbody *ngIf="!isLoading && items?.length == 0">
+<tbody *ngIf="!items || items.length == 0">
 <tr>
-    <td [attr.colspan]="columnDefs?.length + 1" class="empty">
+    <td  *ngIf="!firstLoading"[attr.colspan]="columnDefs?.length + 1" class="empty">
         No results
-        <br/><span class="clickable refresh" (click)="refresh()">Refresh<i class="fas fa-sync-alt"></i></span>
+        <br/><span class="clickable refresh" (click)="isLoading ? refresh() : null">
+            Refresh
+            <span *ngIf="!isLoading">
+                <i class="fas fa-sync-alt"></i>
+            </span>
+            <span *ngIf="isLoading">
+                <i class="fas fa-sync-alt fa-spin"></i>
+            </span>
+        </span>
+    </td>
+
+    <td  *ngIf="firstLoading && isLoading"[attr.colspan]="columnDefs?.length + 1" class="empty">
+        The data is loading
+        <i class="fas fa-sync-alt fa-spin"></i>
     </td>
 </tr>
 </tbody>

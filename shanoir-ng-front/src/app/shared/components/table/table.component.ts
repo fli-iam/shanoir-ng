@@ -24,7 +24,7 @@ import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 })
 
 export class TableComponent implements OnInit {
-    @Input() getPage: (pageable: Pageable) => Promise<Page<any>>;
+    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>>;
     @Input() columnDefs: any[];
     @Input() customActionDefs: any[];
     @Input() selectionAllowed: boolean = false; // TODO : selectable
@@ -42,7 +42,7 @@ export class TableComponent implements OnInit {
     private lastSortedAsc: boolean = true;
     private currentPage: number = 1;
     private filter: Filter;
-    private loaderImageUrl: string = "assets/images/loader.gif";
+    private firstLoading: boolean = true;
     
 
     constructor(
@@ -59,10 +59,12 @@ export class TableComponent implements OnInit {
             this.lastSortedAsc = savedState.lastSortedAsc;
             this.filter = savedState.filter;
             this.maxResults = savedState.maxResults;
-            this.goToPage(savedState.currentPage ? savedState.currentPage : 1);
+            this.goToPage(savedState.currentPage ? savedState.currentPage : 1)
+                .then(() => this.firstLoading = false);
         } else {
             this.getDefaultSorting();
-            this.goToPage(1);
+            this.goToPage(1)
+                .then(() => this.firstLoading = false);
         }
     }
 
@@ -216,10 +218,10 @@ export class TableComponent implements OnInit {
         return type != null ? "cell-" + type : "";
     }
 
-    private goToPage(p: number): void {
+    private goToPage(p: number, forceRefresh: boolean = false): Promise<void> {
         this.currentPage = p;
         this.isLoading = true;
-        this.getPage(this.getPageable()).then(page => {
+        return this.getPage(this.getPageable(), forceRefresh).then(page => {
             this.page = page;
             setTimeout(() => this.isLoading = false, 200);
         });
@@ -229,7 +231,7 @@ export class TableComponent implements OnInit {
      * Call to refresh from outsilde
      */
     public refresh() {
-        this.goToPage(this.currentPage);
+        this.goToPage(this.currentPage, true);
     }
 
     private getPageable(): Pageable {
