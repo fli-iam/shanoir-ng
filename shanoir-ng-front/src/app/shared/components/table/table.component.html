@@ -129,7 +129,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <!-- Nb results per page input -->
         <span class="options">
             <ng-container>
-                <span class="clickable" (click)="refresh()">
+                <span class="clickable bottom-refresh" (click)="refresh()">
                     <span *ngIf="!isLoading">
                         <i class="fas fa-sync-alt"></i>
                     </span>
@@ -151,7 +151,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <tr>
     <td  *ngIf="!firstLoading"[attr.colspan]="columnDefs?.length + 1" class="empty">
         No results
-        <br/><span class="clickable refresh" (click)="isLoading ? refresh() : null">
+        <br/><span class="clickable refresh" (click)="!isLoading ? refresh() : null">
             Refresh
             <span *ngIf="!isLoading">
                 <i class="fas fa-sync-alt"></i>
@@ -164,7 +164,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <td  *ngIf="firstLoading && isLoading"[attr.colspan]="columnDefs?.length + 1" class="empty">
         The data is loading
-        <i class="fas fa-sync-alt fa-spin"></i>
+        <span class="refresh"><i class="fas fa-sync-alt fa-spin"></i></span>
     </td>
 </tr>
 </tbody>
