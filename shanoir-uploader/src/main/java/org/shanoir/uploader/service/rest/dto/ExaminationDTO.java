@@ -3,7 +3,6 @@ package org.shanoir.uploader.service.rest.dto;
 import java.util.Date;
 
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.utils.Util;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

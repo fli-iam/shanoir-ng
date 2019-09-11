@@ -59,7 +59,7 @@ public class ImportDialogOpenerNG {
 			try {
 				SubjectDTO subjectDTO = getSubject(uploadJob);
 				ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListenerNG(this.mainWindow);
-				ImportFinishActionListenerNG importFinishAL = new ImportFinishActionListenerNG(this.mainWindow, uploadJob, uploadFolder, null);
+				ImportFinishActionListenerNG importFinishAL = new ImportFinishActionListenerNG(this.mainWindow, uploadJob, uploadFolder, subjectDTO);
 				importDialog = new ImportDialog(this.mainWindow,
 						ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
 						importStudyAndStudyCardCBIL, importFinishAL);

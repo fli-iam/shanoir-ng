@@ -5,7 +5,6 @@ import java.awt.event.ItemListener;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.model.Center;

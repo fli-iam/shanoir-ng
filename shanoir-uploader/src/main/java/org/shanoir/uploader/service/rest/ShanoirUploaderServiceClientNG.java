@@ -1,12 +1,10 @@
 package org.shanoir.uploader.service.rest;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
@@ -40,6 +38,8 @@ public class ShanoirUploaderServiceClientNG {
 	private static final String SERVICE_EXAMINATIONS_BY_SUBJECT_ID = "service.examinations.find.by.subject.id";
 	
 	private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
+	
+	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";
 
 	private HttpService httpService;
 	
@@ -52,6 +52,8 @@ public class ShanoirUploaderServiceClientNG {
 	private String serviceURLExaminationsBySubjectId;
 	
 	private String serviceURLSubjectsCreate;
+	
+	private String serviceURLExaminationsCreate;
 
 	public ShanoirUploaderServiceClientNG() {
 		this.httpService = new HttpService();
@@ -63,7 +65,9 @@ public class ShanoirUploaderServiceClientNG {
 		this.serviceURLExaminationsBySubjectId = this.serverURL
 			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
 		this.serviceURLSubjectsCreate = this.serverURL
-				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_CREATE);		
+				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_CREATE);
+		this.serviceURLExaminationsCreate = this.serverURL
+				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
 		logger.info("ShanoirUploaderServiceNG successfully initialized.");
 	}
 	
@@ -155,18 +159,23 @@ public class ShanoirUploaderServiceClientNG {
 	/**
 	 * This method creates an examination on the server.
 	 * 
-	 * @param studyId
-	 * @param subjectId
-	 * @param centerId
-	 * @param investigatorId
-	 * @param examinationDate
-	 * @param examinationComment
+	 * @param examinationDTO
 	 * @return
 	 */
-	public long createExamination(final Long studyId, final Long subjectId, final Long centerId, final Long investigatorId,
-			final Date examinationDate, final String examinationComment) {
-		XMLGregorianCalendar examinationDateAsXMLGregorianCalendar = Util.toXMLGregorianCalendar(examinationDate);
-		return 1;
+	public ExaminationDTO createExamination(final ExaminationDTO examinationDTO) {
+		try {
+			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+			String json = ow.writeValueAsString(examinationDTO);
+			HttpResponse response = httpService.post(this.serviceURLExaminationsCreate, json);
+			int code = response.getStatusLine().getStatusCode();
+			if (code == 200) {
+				ExaminationDTO examinationDTOCreated = Util.getMappedObject(response, ExaminationDTO.class);
+				return examinationDTOCreated;
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
 	}
 
 }
