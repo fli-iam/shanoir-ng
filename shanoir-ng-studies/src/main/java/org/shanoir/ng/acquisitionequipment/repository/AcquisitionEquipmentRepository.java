@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.acquisitionequipment.repository;
 
+import java.util.List;
+
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.springframework.data.repository.CrudRepository;
 
@@ -24,5 +26,6 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface AcquisitionEquipmentRepository extends CrudRepository<AcquisitionEquipment, Long> {
 
+	List<AcquisitionEquipment> findByCenterId(Long centerId);
 
 }

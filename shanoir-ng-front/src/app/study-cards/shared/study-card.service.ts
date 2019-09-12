@@ -15,18 +15,14 @@ import { Injectable } from '@angular/core';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
-import { AcquisitionEquipment } from './acquisition-equipment.model';
+import { StudyCard } from './study-card.model';
 
 
 @Injectable()
-export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipment> {
+export class StudyCardService extends EntityService<StudyCard> {
 
-    API_URL = AppUtils.BACKEND_API_ACQ_EQUIP_URL ;
+    API_URL = AppUtils.BACKEND_API_STUDY_CARD_URL;
 
-    getEntityInstance() { return new AcquisitionEquipment(); }
+    getEntityInstance() { return new StudyCard(); }
 
-    getAllByCenter(centerId: number): Promise<AcquisitionEquipment[]> {
-        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/byCenter/' + centerId)
-            .toPromise();
-    }
 }

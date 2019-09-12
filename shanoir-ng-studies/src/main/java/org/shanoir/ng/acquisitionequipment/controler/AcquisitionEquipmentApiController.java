@@ -20,7 +20,7 @@ import java.util.List;
 import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
-import org.shanoir.ng.shared.core.service.BasicEntityService;
+import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -47,7 +47,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	private AcquisitionEquipmentMapper acquisitionEquipmentMapper;
 	
 	@Autowired
-	private BasicEntityService<AcquisitionEquipment> acquisitionEquipmentService;
+	private AcquisitionEquipmentService acquisitionEquipmentService;
 
 	public ResponseEntity<Void> deleteAcquisitionEquipment(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
@@ -70,6 +70,15 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments() {
 		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAll();
+		if (equipments.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(
+				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
+	}
+	
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
+		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByCenterId(centerId);
 		if (equipments.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}

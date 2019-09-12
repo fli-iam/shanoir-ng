@@ -149,8 +149,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <!-- Empty table msg -->
 <tbody *ngIf="!items || items.length == 0">
 <tr>
-    <td  *ngIf="!firstLoading"[attr.colspan]="columnDefs?.length + 1" class="empty">
-        No results
+    <td *ngIf="!firstLoading" [attr.colspan]="columnDefs?.length + 1" class="empty">
+        <span *ngIf="!isError">No results</span>
+        <span *ngIf="isError" class="error">Error<i class="fas fa-exclamation-circle"></i></span>
         <br/><span class="clickable refresh" (click)="!isLoading ? refresh() : null">
             Refresh
             <span *ngIf="!isLoading">

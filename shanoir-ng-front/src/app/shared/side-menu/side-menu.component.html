@@ -39,6 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li routerLink="/center/list" routerLinkActive="active"><i class="fas fa-hospital"></i>Centers</li>
         <li routerLink="/acquisition-equipment/list" routerLinkActive="active"><i class="fas fa-microscope"></i>Acquisition equipment</li>
         <li routerLink="/coil/list" routerLinkActive="active"><i class="fas fa-magnet"></i>Coils</li>
+        <li routerLink="/study-card/list" routerLinkActive="active"><i class="fab fa-accusoft"></i>Study Cards</li>
     </div>
     <li (click)="uploadOpened = !uploadOpened"><i class="fas fa-upload"></i>Import data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="uploadOpened" class="sub-menu" [@slideDown]="uploadOpened">

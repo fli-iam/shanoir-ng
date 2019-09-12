@@ -134,6 +134,9 @@ import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 import { TaskService } from './async-tasks/task.service';
 import { StudyRightsService } from './studies/shared/study-rights.service';
 import { SideMenuComponent } from './shared/side-menu/side-menu.component';
+import { StudyCardComponent } from './study-cards/study-card/study-card.component';
+import { StudyCardListComponent } from './study-cards/study-card-list/study-card-list.component';
+import { StudyCardService } from './study-cards/shared/study-card.service';
 
 //import { ModalService} from './shared/components/modal/modal.service';
 
@@ -225,7 +228,9 @@ import { SideMenuComponent } from './shared/side-menu/side-menu.component';
         ToggleSwitchComponent,
         CheckboxComponent,
         HelpMessageComponent,
-        SideMenuComponent
+        SideMenuComponent,
+        StudyCardComponent,
+        StudyCardListComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -268,7 +273,8 @@ import { SideMenuComponent } from './shared/side-menu/side-menu.component';
         ImportDataService,
         NiftiConverterService,
         TaskService,
-        StudyRightsService
+        StudyRightsService,
+        StudyCardService
     ],
     bootstrap: [AppComponent],
 })

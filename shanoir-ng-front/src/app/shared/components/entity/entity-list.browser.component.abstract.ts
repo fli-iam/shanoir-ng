@@ -37,12 +37,14 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
     }
 
     getPage(pageable: FilterablePageable, forceRefresh: boolean = false): Promise<Page<T>> {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             this.entitiesPromise.then(() => {
                 if (forceRefresh) {
                     this.loadEntities();
                 }
                 resolve(this.browserPaging.getPage(pageable));
+            }).catch(reason => {
+                reject(reason);
             });
         });
     }

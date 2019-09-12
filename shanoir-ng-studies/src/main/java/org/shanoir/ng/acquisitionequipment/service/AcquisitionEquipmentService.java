@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.acquisitionequipment.service;
 
+import java.util.List;
+
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.core.service.BasicEntityService;
 import org.springframework.stereotype.Service;
@@ -27,4 +29,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface AcquisitionEquipmentService extends BasicEntityService<AcquisitionEquipment> {
 
+	List<AcquisitionEquipment> findAllByCenterId(Long centerId);
+	
 }

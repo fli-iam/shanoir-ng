@@ -46,6 +46,8 @@ import { ExtensionRequestComponent } from './users/extension-request/extension-r
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
+import { StudyCardComponent } from './study-cards/study-card/study-card.component';
+import { StudyCardListComponent } from './study-cards/study-card-list/study-card-list.component';
 
 let appRoutes: Routes = [
     {
@@ -108,13 +110,13 @@ appRoutes = appRoutes.concat(
     getRoutesFor('coil', CoilComponent, CoilListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
     getRoutesFor('user', UserComponent, UserListComponent, {create: AuthAdminGuard, update: AuthAdminGuard}),
     getRoutesFor('manufacturer', ManufacturerComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
-    getRoutesFor('manufacturer-model', ManufacturerModelComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard})
+    getRoutesFor('manufacturer-model', ManufacturerModelComponent, HomeComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+    getRoutesFor('study-card', StudyCardComponent, StudyCardListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard})
 );
 
 export const routing: ModuleWithProviders = RouterModule.forRoot(appRoutes); 
 
 function getRoutesFor(entityName: string, entityComponent, listComponent, 
-       // auth): Routes {
         auth: {read?: any, create?: any, update?: any} ): Routes {
 
     return [
@@ -127,17 +129,17 @@ function getRoutesFor(entityName: string, entityComponent, listComponent,
             component: listComponent,
             canActivate: auth.read ? [auth.read] : undefined,
         }, {
-            path: entityName+'/details/:id',
+            path: entityName + '/details/:id',
             component: entityComponent,
             data: { mode: 'view' },
             canActivate: auth.read ? [auth.read] : undefined,
         }, {
-            path: entityName+'/edit/:id',
+            path: entityName + '/edit/:id',
             component: entityComponent,
             data: { mode: 'edit' },
             canActivate: auth.update ? [auth.update] : undefined,
         }, {
-            path: entityName+'/create',
+            path: entityName + '/create',
             component: entityComponent,
             data: { mode: 'create' },
             canActivate: auth.create ? [auth.create] : undefined,

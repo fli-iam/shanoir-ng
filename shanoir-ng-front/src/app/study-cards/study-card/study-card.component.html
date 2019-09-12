@@ -1,0 +1,105 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div #formContainer class="content-component">
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+		<div class="layout">
+			<span [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">
+					<h2 class="header command-zone">Details on study card</h2>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'">
+					<h2 class="header command-zone">Edit study card</h2>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'">
+					<h2 class="header command-zone">Create study card</h2>
+				</ng-template>
+			</span>
+			<fieldset>
+				<ol>
+					<li>
+						<label>Name</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">	
+								{{studyCard.name}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<input type="text" required formControlName="name" [(ngModel)]="studyCard.name" />
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Study</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{studyCard.study}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="study" [(ngModel)]="studyCard.study">
+									<select-option *ngFor="let study of studies" [value]="study">{{study.name}}</select-option>
+								</select-box>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Center</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{studyCard.center}}
+							</ng-template> 
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="center" [(ngModel)]="studyCard.center">
+									<select-option *ngFor="let center of centers" [value]="center">{{center.name}}</select-option>
+								</select-box>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Acquisition equipment</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{studyCard.acquisitionEquipment}}
+							</ng-template> 
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="acquisitionEquipment" [(ngModel)]="studyCard.acquisitionEquipment">
+									<select-option *ngFor="let acquisitionEquipment of acquisitionEquipments" [value]="acquisitionEquipment">{{acquisitionEquipment | acqEqptLabel}}</select-option>
+								</select-box>
+							</ng-template>
+						</span>
+					</li>
+					<li>
+						<label>Nifti converter</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{studyCard.niftiConverter}}
+							</ng-template> 
+							<ng-template ngSwitchDefault>
+								<select-box formControlName="niftiConverter" [(ngModel)]="studyCard.niftiConverter">
+									<select-option *ngFor="let niftiConverter of niftiConverters" [value]="niftiConverter">{{niftiConverter.name}}</select-option>
+								</select-box>
+							</ng-template>
+						</span>
+					</li>
+				</ol>
+			</fieldset>
+			<form-footer
+				[state]="footerState"
+				(save)="save()"
+				(edit)="goToEdit()"
+				(cancel)="goToView()"
+				(back)="goBack()"
+			></form-footer>
+		</div>
+	</form>
+</div>

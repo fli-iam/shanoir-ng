@@ -63,6 +63,17 @@ public interface AcquisitionEquipmentApi {
 	ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
 
+	@ApiOperation(value = "", notes = "Returns all the acquisition equipments for a center", response = AcquisitionEquipment.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found acquisition equipments", response = AcquisitionEquipment.class),
+			@ApiResponse(code = 204, message = "no acquisition equipment found", response = AcquisitionEquipment.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = AcquisitionEquipment.class),
+			@ApiResponse(code = 403, message = "forbidden", response = AcquisitionEquipment.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = AcquisitionEquipment.class) })
+	@RequestMapping(value = "/byCenter/{centerId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
+	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+	
 	@ApiOperation(value = "", notes = "Returns all the acquisition equipments", response = AcquisitionEquipment.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found acquisition equipments", response = AcquisitionEquipment.class),

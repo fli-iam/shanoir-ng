@@ -36,6 +36,7 @@ export class TableComponent implements OnInit {
 
     private page: Page<Object>;
     private isLoading: boolean = false;
+    private isError: boolean = false;
     private maxResultsField: number;
     private maxResults: number = 20;
     private lastSortedCol: Object = null;
@@ -223,7 +224,16 @@ export class TableComponent implements OnInit {
         this.isLoading = true;
         return this.getPage(this.getPageable(), forceRefresh).then(page => {
             this.page = page;
-            setTimeout(() => this.isLoading = false, 200);
+            setTimeout(() => {
+                this.isError = false;
+                this.isLoading = false;
+            }, 200);
+        }).catch(reason => {
+            setTimeout(() => {
+                this.isError = true;
+                this.isLoading = false;
+                throw reason;
+            }, 200);
         });
     }
 
