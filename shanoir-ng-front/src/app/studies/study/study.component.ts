@@ -222,6 +222,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.monoCenter = true;
             this.onMonoMultiChange();
         }
+        this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
     }
     
