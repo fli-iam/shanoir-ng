@@ -42,7 +42,7 @@ export class TableComponent implements OnInit {
     private lastSortedCol: Object = null;
     private lastSortedAsc: boolean = true;
     private currentPage: number = 1;
-    private filter: Filter;
+    private filter: Filter = new Filter(null, null);
     private firstLoading: boolean = true;
     
 
@@ -86,7 +86,6 @@ export class TableComponent implements OnInit {
 
 
     private onSearchChange(filter: Filter) {
-        this.filter = filter;
         this.goToPage(1);
     }
 

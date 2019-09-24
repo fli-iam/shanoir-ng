@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </span>
     <!-- Text search -->
     <span *ngIf="browserSearch" class="text-search">
-        <shanoir-table-search [columnDefs]="columnDefs" (onChange)="onSearchChange($event)"></shanoir-table-search>
+        <shanoir-table-search #search [columnDefs]="columnDefs" [(filter)]="filter" (filterChange)="onSearchChange($event)"></shanoir-table-search>
     </span>
     <!-- User defined buttons -->
     <span *ngFor="let command of customActionDefs">
