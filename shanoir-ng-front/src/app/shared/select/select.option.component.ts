@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, Input } from '@angular/core';
+import { Component, ElementRef, Input, ContentChild, HostBinding } from '@angular/core';
 
 import { SelectBoxComponent } from './select.component';
 
@@ -24,11 +24,12 @@ import { SelectBoxComponent } from './select.component';
         </div>
     `,
     styles: [
-        ':host() { height: 20px; display:block; border: none; white-space: nowrap; color: var(--dark-grey); }',
+        ':host() { height: 20px; display:block; border: none; white-space: nowrap; color: var(--dark-grey); cursor: pointer; }',
         'div { padding: 0 5px; }',
         'div.focus { background-color: var(--grey); }',
         'div.selected { background-color: var(--color-b-light); }',
-        'div.disabled { opacity: 0.5; }'
+        'div.disabled { opacity: 0.5; }',
+        ':host().hidden { display: none; }'
     ]
     
 })
@@ -40,6 +41,7 @@ export class SelectOptionComponent {
     public parent: SelectBoxComponent;
     public selected: boolean = false;
     public focus: boolean = false;
+    @HostBinding('class.hidden') public hidden: boolean = false;
 
     constructor(public elt: ElementRef) { }
 
@@ -49,6 +51,10 @@ export class SelectOptionComponent {
 
     private over() {
         if (!this.disabled) this.parent.onOptionOver(this);
+    }
+
+    public get label(): string {
+        return this.elt.nativeElement.innerText.trim();
     }
 
 }

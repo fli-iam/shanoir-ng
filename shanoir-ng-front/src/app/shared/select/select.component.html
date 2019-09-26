@@ -14,8 +14,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="root" [class.disabled]="disabled">
     <span class="frame">
-        <span [class.hidden]="!this.selectedOption" #label class="label" (click)="open = !disabled && !open"></span>
-        <span *ngIf="options.length > 0 && !this.selectedOption" class="label placeholder" (click)="open = !disabled && !open">{{placeholder ? placeholder : 'Select an option...'}}</span>
+        <input #input id=""
+            *ngIf="options.length > 0"
+            type="text" 
+            tabindex="-1" 
+            class="label" 
+            [(ngModel)]="inputText" 
+            (ngModelChange)="onTypeText($event)" 
+            [placeholder]="placeholder ? placeholder : 'Select an option...'" 
+            (click)="open = !disabled"
+            (focus)="onInputFocus()" />
         <span *ngIf="options.length == 0" class="label empty">Empty list</span>
         <span class="commands">
             <span class="open button" (click)="open = !open"><i class="fas fa-chevron-down"></i></span>

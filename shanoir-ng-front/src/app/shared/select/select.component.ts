@@ -11,7 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import {
     AfterContentInit,
     Component,
@@ -37,6 +36,7 @@ import { Subscription } from 'rxjs';
 import { GlobalService } from '../services/global.service';
 import { SelectOptionComponent } from './select.option.component';
 
+
 @Component({
     selector: 'select-box',
     templateUrl: 'select.component.html',
@@ -55,7 +55,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Output() ngModelChange = new EventEmitter();
     @Output() change = new EventEmitter();
     @ContentChildren(forwardRef(() => SelectOptionComponent)) private options: QueryList<SelectOptionComponent>;
-    @ViewChild('label', {read: ElementRef}) labelNode: ElementRef;
+    @ViewChild('input') textInput: ElementRef;
     private selectedOption: SelectOptionComponent;
     private openState: boolean = false;
     private globalClickSubscription: Subscription;
@@ -64,8 +64,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private hideToComputeHeight: boolean = false;
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
-    private lastSearchTime: number = 0;
-    private currentSearch: string;
+    private inputText: string;
     @Input() disabled: boolean = false;
     @Input() placeholder: string;
     
@@ -136,19 +135,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
     
     private updateLabel() {
-        Array.from(this.labelNode.nativeElement.children).forEach(child => {
-            this.renderer.removeChild(this.labelNode.nativeElement, child);
-        });
-        if (this.selectedOption) {
-            let cloned = this.selectedOption.elt.nativeElement.cloneNode(true);
-            cloned.children[0].classList.remove('focus');
-            cloned.children[0].classList.remove('selected');
-            cloned.children[0].style.padding = '0';
-            cloned.children[0].style.overflow = 'hidden';
-            cloned.children[0].style.textOverflow = 'ellipsis';
-            cloned.children[0].style.color = 'var(--dark-grey)';
-            this.renderer.appendChild(this.labelNode.nativeElement, cloned);
-        }
+        if (this.selectedOption) this.inputText = this.selectedOption.label;
     }
 
     private optionsEqual(option1: SelectOptionComponent, option2: SelectOptionComponent) {
@@ -171,6 +158,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private set open(open: boolean) {
+        if(this.open == open) return;
         if (open && !this.openState && this.options.length > 0) { //open
             this.subscribeToGlobalClick();
             this.openState = true;
@@ -190,8 +178,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private scrollToSelectedOption() {
-        if (!this.selectedOption) return;
         setTimeout(() => {
+            if (!this.selectedOption) return;
             let top: number = this.selectedOption.elt.nativeElement.offsetTop;
             let listElt = this.element.nativeElement.querySelector('.list');
             if (listElt) listElt.scrollTop = top;
@@ -245,25 +233,29 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @HostListener('keydown', ['$event']) 
     private onKeyPress(event: any) {
         if ('ArrowDown' == event.key) {
+            let optArr = this.options.toArray();
             let focusIndex = this.getFocusIndex();
-            if (focusIndex == -1) focusIndex = 0;
-            if (focusIndex < this.options.length - 1) {
-                this.options.toArray()[focusIndex].focus = false;
-                this.options.toArray()[(focusIndex+1)].focus = true;
-                if (!this.open) this.onSelectedOptionChange(this.options.toArray()[(focusIndex+1)]);
+            let nextFocusIndex = this.nextOptionIndex(focusIndex);
+            if (nextFocusIndex != -1) {
+                if (optArr[focusIndex]) optArr[focusIndex].focus = false;
+                optArr[nextFocusIndex].focus = true;
+                if (!this.open) this.onSelectedOptionChange(optArr[nextFocusIndex]);
                 else this.scrollToFocusedOption();
             }
             event.preventDefault();
         } else if ('ArrowUp' == event.key) {
+            let optArr = this.options.toArray();
             let focusIndex = this.getFocusIndex();
-            if (focusIndex >= 1) {
-                this.options.toArray()[focusIndex].focus = false;
-                this.options.toArray()[(focusIndex-1)].focus = true;
-                if (!this.open) this.onSelectedOptionChange(this.options.toArray()[(focusIndex-1)]);
+            if (focusIndex == -1) focusIndex = optArr.length - 1;
+            let prevFocusIndex = this.prevOptionIndex(focusIndex);
+            if (prevFocusIndex != -1 ) {
+                if (optArr[focusIndex]) optArr[focusIndex].focus = false;
+                optArr[prevFocusIndex].focus = true;
+                if (!this.open) this.onSelectedOptionChange(optArr[prevFocusIndex]);
                 else this.scrollToFocusedOption();
             }
             event.preventDefault();
-        } else if ('Enter' == event.key || ' ' == event.key) {
+        } else if ('Enter' == event.key) {
             if (!this.open && !this.disabled) {
                 this.open = true;
             } else {
@@ -273,35 +265,66 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 }
             }
             event.preventDefault();
-        } else if (event.keyCode >= 65 && event.keyCode <= 90) {
-            let key = event.key.toLowerCase();
-            let now = new Date().getTime();
-            if ((now - this.lastSearchTime) > 1000 || key == this.currentSearch ) {
-                this.currentSearch = '';
-            } 
-            this.lastSearchTime = now;
-            this.currentSearch += key;
-            let focusIndex = this.getFocusIndex();
-            let currentText = this.options.toArray()[focusIndex].elt.nativeElement.textContent.trim().toLowerCase();
-            let serachIn;
-            if (focusIndex >= 0 && currentText.startsWith(this.currentSearch)) {
-                serachIn = this.options.toArray().slice(focusIndex + 1);
-            } else {
-                serachIn = this.options.toArray();
+        } 
+        else if (event.keyCode >= 65 && event.keyCode <= 90) {
+            if (this.textInput.nativeElement != document.activeElement) {
+                this.inputText = '';
+                this.textInput.nativeElement.focus();
             }
-            for (let option of serachIn) {
-                let text: string = option.elt.nativeElement.textContent.trim().toLowerCase();
-                if (text.startsWith(this.currentSearch)) {
-                    if (focusIndex >= 0) this.options.toArray()[focusIndex].focus = false;
-                    option.focus = true;
-                    if (!this.open) this.onSelectedOptionChange(this.options.toArray()[this.getFocusIndex()]);
-                    else this.scrollToFocusedOption();
-                    return;
-                }
-            }
-        }
-            
+        }       
     }
+
+    private nextOptionIndex(currentIndex: number): number {
+        if (currentIndex >= this.options.length - 1) return -1;
+        let optArr = this.options.toArray();
+        for (let i = currentIndex + 1; i < optArr.length; i++) {
+            if (!optArr[i].hidden && !optArr[i].disabled) return i;
+        }
+        return -1;
+    }
+
+    private prevOptionIndex(currentIndex: number): number {
+        if (currentIndex <= 0) return -1;
+        let optArr = this.options.toArray();
+        for (let i = currentIndex - 1; i >= 0; i--) {
+            if (!optArr[i].hidden && !optArr[i].disabled) return i;
+        }
+        return -1;
+    }
+
+    private onTypeText(text: string) {
+        this.open = true;
+        if (this.selectedOption) {
+            this.selectedOption = null;
+            this.ngModelChange.emit(null);
+            this.change.emit(null);
+        }
+        if (text && text.length > 0) {
+            text = text.trim().toLowerCase();
+            this.options.forEach(option => {
+                option.hidden = !option.label.toLowerCase().includes(text);
+            });
+        } else {
+            this.options.forEach(option => {
+                option.hidden = false;
+            });
+        }
+    }
+
+    private hasDisplayedOptions() {
+        let found: boolean = false;
+        this.options.forEach(option => {
+            if (!option.hidden) {
+                found = true;
+                return;
+            }
+        });
+        return found;
+    }
+
+    private onInputFocus() {
+        this.textInput.nativeElement.select();
+    }    
 
     private getFocusIndex(): number {
         let foundedIndex = -1;
@@ -311,7 +334,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                     foundedIndex = index;
                     return;
                 }
-                if (option.selected) selectedIndex = index;
+                if (option.selected && !option.disabled && !option.hidden) selectedIndex = index;
             });
         if (foundedIndex == -1 && selectedIndex != -1) return selectedIndex;
         return foundedIndex;
@@ -331,9 +354,11 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     @HostListener('focusout', ['$event']) 
-    private onFocusOut() {
-        this.open = false; 
-        this.onTouchedCallback();
+    private onFocusOut(event: FocusEvent) {
+        if (!this.element.nativeElement.contains(event.relatedTarget)) {
+            this.open = false; 
+            this.onTouchedCallback();
+        } 
     }
 
     @HostBinding('attr.tabindex')
