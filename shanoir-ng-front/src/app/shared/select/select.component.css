@@ -43,3 +43,5 @@
 .list.up { bottom: 20px; } 
 .hidden-list { opacity: 0; }
 input { border: none !important; }
+:host()::ng-deep caption { display: block; text-align: center; color: var(--color-a); padding: 0 5px; font-style: italic; }
+:host()::ng-deep .option-section.hidden { display: none; }

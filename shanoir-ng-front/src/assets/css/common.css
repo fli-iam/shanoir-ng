@@ -74,7 +74,7 @@ h2 + shanoir-table { margin-top: 20px; }
 textarea, input, select, select-box, datepicker { 
   border: none; border-bottom: 1px solid var(--grey); background-color: transparent; height: 19px; padding: 1px 0;
 }
-textarea:focus, input:focus, select:focus, select-box:focus, datepicker:focus {
+textarea:focus, input:focus, select:focus, select-box:focus, select-box:focus-within, datepicker:focus {
   outline: none; border-bottom: 2px inset var(--color-a) !important; padding-bottom: 0;
 }
 textarea.ng-invalid.ng-touched,

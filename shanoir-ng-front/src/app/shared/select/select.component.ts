@@ -49,14 +49,14 @@ import { SelectOptionComponent } from './select.option.component';
         }]   
 })
 
-export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnChanges, AfterContentInit {
+export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, AfterContentInit {
 
-    @Input() ngModel: any = null;
-    @Output() ngModelChange = new EventEmitter();
+    private model: any = null;
     @Output() change = new EventEmitter();
     @ContentChildren(forwardRef(() => SelectOptionComponent)) private options: QueryList<SelectOptionComponent>;
+    @ContentChildren('optionSection') private sections: QueryList<ElementRef>;
     @ViewChild('input') textInput: ElementRef;
-    private selectedOption: SelectOptionComponent;
+    private _selectedOption: SelectOptionComponent;
     private openState: boolean = false;
     private globalClickSubscription: Subscription;
     private optionChangeSubscription: Subscription;
@@ -89,53 +89,54 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if (this.optionChangeSubscription) this.optionChangeSubscription.unsubscribe();
     }
 
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes['ngModel']) {
-            this.updateSelectedOption();
-            if (!changes['ngModel'].firstChange) this.onChangeCallback(this.ngModel);
-        }
-    }
-
     ngAfterContentInit() {
         this.options.forEach((option) => {
             option.parent = this;
+            if (this.valuesEqual(option.value, this.model)) this.selectedOption = option;
         });
         this.optionChangeSubscription = this.options.changes.subscribe(() => {
+            this.inputText = null;
+            let founded: boolean = false;
             this.options.forEach((option) => {
                 option.parent = this;
-            });
-            this.updateSelectedOption();
-        })
-        setTimeout(() => this.updateSelectedOption());
-    }
-
-    private updateSelectedOption() {
-        this.selectedOption = null;
-        if (this.ngModel && this.options) {
-            this.options.forEach((option) => {
-                if(this.valuesEqual(option.value, this.ngModel)) {
+                if (this.valuesEqual(option.value, this.model)) {
                     this.selectedOption = option;
-                    option.selected = true;
-                } else {
-                    option.selected = false;
+                    founded = true;
+                    return;
                 }
             });
+            if (!founded) this.selectedOption = null;
+        })
+    }
+
+    private get selectedOption(): SelectOptionComponent {
+        return this._selectedOption;
+    }
+
+    private set selectedOption(option: SelectOptionComponent) {
+        this.model = option ? option.value : null;
+        if (this._selectedOption) this._selectedOption.selected = false;
+        this._selectedOption = option;
+        if (this._selectedOption) {
+            this._selectedOption.selected = true;
+            this.inputText = this.selectedOption.label;
         }
-        this.updateLabel();
     }
     
     public onSelectedOptionChange(option: SelectOptionComponent) {
         if (!this.optionsEqual(option, this.selectedOption)) {
             this.selectedOption = option;
-            this.ngModelChange.emit(option.value);
+            if (!option) this.inputText = this.selectedOption.label;
+            this.onChangeCallback(option.value);
             this.change.emit(option.value);
-            this.updateLabel();
         }
         this.open = false;
-    }
-    
-    private updateLabel() {
-        if (this.selectedOption) this.inputText = this.selectedOption.label;
+        this.options.forEach(option => {
+            option.hidden = false;
+        });
+        this.sections.forEach(section => {
+            section.nativeElement.classList.remove('hidden');
+        });
     }
 
     private optionsEqual(option1: SelectOptionComponent, option2: SelectOptionComponent) {
@@ -296,7 +297,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.open = true;
         if (this.selectedOption) {
             this.selectedOption = null;
-            this.ngModelChange.emit(null);
+            this.onChangeCallback(null);
             this.change.emit(null);
         }
         if (text && text.length > 0) {
@@ -309,17 +310,18 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 option.hidden = false;
             });
         }
-    }
-
-    private hasDisplayedOptions() {
-        let found: boolean = false;
-        this.options.forEach(option => {
-            if (!option.hidden) {
-                found = true;
-                return;
+        this.sections.forEach(section => {
+            section.nativeElement.classList.remove('hidden');
+            let hidden: boolean = true;
+            for (let optionElt of section.nativeElement.getElementsByTagName('select-option')) {
+                let option: SelectOptionComponent = this.options.find(opt => opt.elt.nativeElement == optionElt);
+                if (!option.hidden) {
+                    hidden = false;
+                    break;
+                }
             }
+            if (hidden) section.nativeElement.classList.add('hidden');
         });
-        return found;
     }
 
     private onInputFocus() {
@@ -341,8 +343,14 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     writeValue(obj: any): void {
-        this.ngModel = obj;
-        //this.onChangeCallback(this.ngModel);
+        this.model = obj;
+        this.inputText = null;
+        if (this.options) {
+            this.options.forEach((option) => {
+                option.parent = this;
+                if (this.valuesEqual(option.value, this.model)) this.selectedOption = option;
+            });
+        }
     }
     
     registerOnChange(fn: any): void {
