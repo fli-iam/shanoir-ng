@@ -21,7 +21,7 @@ import { StudyService } from '../../../studies/shared/study.service';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { Dataset } from '../../shared/dataset.model';
-import { DatepickerComponent } from '../../../shared/date/date.component';
+import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 
 
 @Component({

@@ -13,7 +13,7 @@
  */
 
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
-import { Step } from 'src/app/breadcrumbs/breadcrumbs.service';
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
@@ -42,6 +42,15 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
             private acqEquipService: AcquisitionEquipmentService,
             private viewContainerRef: ViewContainerRef) {
         super('acquisition-equipment');
+    }
+
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
     }
 
     // Grid data

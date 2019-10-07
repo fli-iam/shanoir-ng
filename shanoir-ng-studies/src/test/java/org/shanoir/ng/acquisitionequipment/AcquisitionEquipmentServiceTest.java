@@ -27,7 +27,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
+import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentServiceImpl;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -56,18 +59,18 @@ public class AcquisitionEquipmentServiceTest {
 	public void setup() {
 		given(acquisitionEquipmentRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createAcquisitionEquipment()));
 		given(acquisitionEquipmentRepository.findOne(ACQ_EQPT_ID)).willReturn(ModelsUtil.createAcquisitionEquipment());
-		given(acquisitionEquipmentRepository.save(Mockito.any(AcquisitionEquipment.class))).willReturn(ModelsUtil.createAcquisitionEquipment());
+		given(acquisitionEquipmentRepository.save(Mockito.any(AcquisitionEquipment.class))).willReturn(createAcquisitionEquipment());
 	}
 
-	@Test(expected=ShanoirStudiesException.class)
-	public void deleteByBadIdTest() throws ShanoirStudiesException {
+	@Test(expected = EntityNotFoundException.class)
+	public void deleteByBadIdTest() throws EntityNotFoundException  {
 		acquisitionEquipmentService.deleteById(2L);
 	}
 	
 	@Test
-	public void deleteByIdTest() throws ShanoirStudiesException {
+	public void deleteByIdTest() throws EntityNotFoundException {
 		acquisitionEquipmentService.deleteById(ACQ_EQPT_ID);
-
+		
 		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).delete(Mockito.anyLong());
 	}
 
@@ -90,14 +93,14 @@ public class AcquisitionEquipmentServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirStudiesException {
-		acquisitionEquipmentService.save(createAcquisitionEquipment());
+	public void saveTest() {
+		acquisitionEquipmentService.create(createAcquisitionEquipment());
 
 		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).save(Mockito.any(AcquisitionEquipment.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirStudiesException {
+	public void updateTest() throws EntityNotFoundException {
 		final AcquisitionEquipment updatedEquipment = acquisitionEquipmentService.update(createAcquisitionEquipment());
 		Assert.assertNotNull(updatedEquipment);
 		Assert.assertTrue(UPDATED_ACQ_EQPT_SERIAL_NUMBER.equals(updatedEquipment.getSerialNumber()));

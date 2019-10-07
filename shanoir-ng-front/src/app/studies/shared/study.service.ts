@@ -14,10 +14,12 @@
 
 import { Injectable } from '@angular/core';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { IdName } from '../../shared/models/id-name.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import { Study } from './study.model';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { StudyUserRight } from './study-user-right.enum';
 
 @Injectable()
 export class StudyService extends EntityService<Study> {
@@ -31,19 +33,28 @@ export class StudyService extends EntityService<Study> {
         .map(entities => entities.map((entity) => Object.assign(new Study(), entity)))
         .toPromise();
     }
-    
-    findStudiesForImport(): Promise<Study[]> {
-        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_FOR_IMPORT_URL)
+
+    getStudiesNames(): Promise<IdName[]> {
+        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
             .toPromise();
     }
 
-    getStudiesNames(): Promise<IdNameObject[]> {
-        return this.http.get<IdNameObject[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
+    getStudyNamesAndCenters(): Promise<Study[]> {
+        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL)
             .toPromise();
     }
     
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
             .toPromise();
+    }
+
+    findStudiesIcanAdmin(): Promise<number[]> {
+        return this.getAll().then(studies => {
+            const myId: number = KeycloakService.auth.userId;
+            return studies.filter(study => {
+                return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0;
+            }).map(study => study.id);
+        });
     }
 }

@@ -16,21 +16,17 @@ package org.shanoir.ng.shared.paging;
 
 import java.io.IOException;
 
+import org.springframework.boot.jackson.JsonComponent;
+import org.springframework.data.domain.PageImpl;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.jackson.JsonComponent;
-import org.springframework.data.domain.PageImpl;
 
 @JsonComponent
 public class PageSerializer extends StdSerializer<PageImpl> {
 	
 	private static final long serialVersionUID = 1L;
-
-	private static final Logger LOG = LoggerFactory.getLogger(PageSerializer.class);
 
 	public PageSerializer() {
 		super(PageImpl.class);

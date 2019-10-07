@@ -12,36 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, ContentChildren, forwardRef, QueryList, ViewChild, ElementRef, HostBinding, Renderer } from '@angular/core';
-import { style, animate, transition, trigger } from '@angular/core';
-import { MenuItemComponent } from './menu-item/menu-item.component'
+import { Component, ContentChildren, ElementRef, forwardRef, Input, QueryList, Renderer, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 
-
-export const animDur: number = 100;
+import { menuAnimDur, menuSlideDown } from '../../animations/animations';
+import { MenuItemComponent } from './menu-item/menu-item.component';
 
 @Component({
     selector: 'dropdown-menu',
     templateUrl: 'dropdown-menu.component.html',
     styleUrls: ['dropdown-menu.component.css'],
-    animations: [trigger('slideDown', [
-        transition(
-            ':enter', [
-                style({ height: 0 }),
-                animate(animDur + 'ms ease-in-out', style({ height: '*', 'padding-bottom': '*' }))
-            ]
-        ),
-        transition(
-            ':leave', [
-                style({ height: '*' }),
-                animate(animDur + 'ms ease-in-out', style({ height: 0, 'padding-bottom': '0' }))
-            ]
-        )
-    ])]
+    animations: [menuSlideDown]
 })
 export class DropdownMenuComponent {
 
     @Input() label: string;
+    @Input() awesome: string;
     @Input() link: string;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
     @Input() boolVar: boolean;
@@ -58,6 +44,8 @@ export class DropdownMenuComponent {
     private static openedMenus: Set<DropdownMenuComponent>; // every opened menu in the document (upgrade idea : named groups of menu)
 
     constructor(public elementRef: ElementRef, private renderer: Renderer) {
+        this.elementRef = elementRef;
+        this.renderer = renderer;
         this.mode = "top";
         DropdownMenuComponent.openedMenus = new Set<DropdownMenuComponent>();
 
@@ -98,7 +86,7 @@ export class DropdownMenuComponent {
     private openAction() {
         this.opened = true;
         DropdownMenuComponent.openedMenus.add(this);
-        setTimeout(() => this.overflow = false, animDur);
+        setTimeout(() => this.overflow = false, menuAnimDur);
     }
 
     public close(callback: () => void = () => { }) {
@@ -107,7 +95,7 @@ export class DropdownMenuComponent {
                 this.overflow = true;
                 this.opened = false;
                 DropdownMenuComponent.openedMenus.delete(this);
-                setTimeout(callback, animDur);
+                setTimeout(callback, menuAnimDur);
             });
         } else {
             callback();

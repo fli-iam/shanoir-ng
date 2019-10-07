@@ -34,7 +34,7 @@ export class ImagesUrlUtil {
     public static SMALL_LOADER_IMAGE_PATH = 'assets/images/loader.gif';
     public static NEURINFO_ICON_PATH = 'assets/images/icons/medical/neurinfo-icon.png';
     public static NIFTI_ICON_PATH = 'assets/images/icons/medical/nifti.png';
-    public static NOTEPAD_ICON_PATH = 'assets/images/icons/medical/notepage.png';
+    public static NOTEPAD_ICON_PATH = 'assets/images/icons/medical/notepad.png';
     public static NURSE_ICON_PATH = 'assets/images/icons/medical/nurse.png';
     public static PODIUM_ICON_PATH = 'assets/images/icons/podium.png'
     public static SHANOIR_BLACK_LOGO_PATH = 'assets/images/logo.shanoir.black.png';

@@ -11,6 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+
 import { Component, ViewChild } from '@angular/core';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
@@ -29,6 +30,15 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
 
     constructor(private userService: UserService) {
            super('user');
+    }
+
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: true, 
+            delete: true
+        };
     }
 
     getEntities(): Promise<User[]> {

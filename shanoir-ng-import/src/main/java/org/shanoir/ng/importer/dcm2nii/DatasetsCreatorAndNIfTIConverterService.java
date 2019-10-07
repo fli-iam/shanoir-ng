@@ -528,7 +528,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 * @return List of nifti files
 	 */
 	
-	private List<File> niftiFileSorting(Long converterId, List<File> existingFiles,File directory,File serieIDFolderFile) {
+	private List<File> niftiFileSorting(Long converterId, List<File> existingFiles, File directory, File serieIDFolderFile) {
 		NIfTIConverter converter = findById(converterId);
 		// If one of the output files is a prop file, there has been an error
 		List<File> niftiFileResult = null;
@@ -634,8 +634,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 						} catch (NoSuchFieldException | SecurityException e) {
 							LOG.error(e.getMessage());
 						}
-						List<File> niftiGeneratedFiles = niftiFileSorting(converterId, existingFiles,directory,serieIDFolderFile);
-						constructNiftiExpressionAndDatasetFiles(converter,dataset,serie,niftiGeneratedFiles);
+						List<File> niftiGeneratedFiles = niftiFileSorting(converterId, existingFiles, directory, serieIDFolderFile);
+						constructNiftiExpressionAndDatasetFiles(converter, dataset, serie, niftiGeneratedFiles);
 						++index;
 						
 					}
@@ -652,8 +652,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					} catch (NoSuchFieldException | SecurityException e) {
 						LOG.error(e.getMessage());
 					}
-					List<File> niftiGeneratedFiles = niftiFileSorting(converterId, existingFiles,serieIDFolderFile,serieIDFolderFile);
-					constructNiftiExpressionAndDatasetFiles(converter,dataset,serie,niftiGeneratedFiles);
+					List<File> niftiGeneratedFiles = niftiFileSorting(converterId, existingFiles, serieIDFolderFile, serieIDFolderFile);
+					constructNiftiExpressionAndDatasetFiles(converter, dataset, serie, niftiGeneratedFiles);
 				}
 			}
 		}

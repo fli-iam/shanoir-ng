@@ -18,6 +18,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.io.DicomOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +40,9 @@ public class AnonymizationTest {
 
 	private static AnonymizationServiceImpl anonymizationService = new AnonymizationServiceImpl();
 
-	private SendToPacs sendToPacs;
-
-	private static final String DICOM_IMAGE_FOLDER_PATH = "C:/Users/ifakhfak/Documents/Agen - Optima (GE)/IMAGES";
-	private static final String PROFILE = "MR Profile";
-	private static final String LAST_NAME = "lastName";
-	private static final String FIRST_NAME = "firstName";
+	private static final String DICOM_IMAGE_FOLDER_PATH = "/Users/mkain/Desktop/sample1/IMAGES";
+	private static final String PROFILE = "Profile OFSEP";
+	private static final String NAME = "commonName";
 	private static final String ID = "id";
 
 	/**
@@ -52,7 +53,7 @@ public class AnonymizationTest {
 	 */
 
 	public void readAnonymizationFileTest() {
-		AnonymizationRulesSingleton.getInstance().getAnonymizationMAP();
+		AnonymizationRulesSingleton.getInstance().getProfiles().get(PROFILE).getAnonymizationMap();
 //		anonymizationService.readAnonymizationFile(PROFILE);
 	}
 
@@ -61,23 +62,52 @@ public class AnonymizationTest {
 	 * 
 	 */
 
-	public static void anonymizationTest() throws IOException {
-
+	public static void anonymizationTest() throws Exception {
 		ArrayList<File> dicomImages = createImageArray();
-
 		long chrono = java.lang.System.currentTimeMillis();
-		anonymizationService.anonymizeForShanoir(dicomImages, PROFILE, FIRST_NAME, LAST_NAME, ID);
+		printDICOMFile(dicomImages.get(0));
+		anonymizationService.anonymizeForShanoir(dicomImages, PROFILE, NAME, ID);
+		printDICOMFile(dicomImages.get(0));
 		long chrono2 = java.lang.System.currentTimeMillis();
 		long temps = chrono2 - chrono;
-		LOG.info("Spended time to anonymize file = " + temps + " ms");
-
+		System.out.println("Spended time to anonymize file = " + temps + " ms");
+	}
+	
+	private static void printDICOMFile(final File dicomFile) {
+		DicomInputStream din = null;
+		try {
+			din = new DicomInputStream(dicomFile);
+			// DICOM "header"/meta-information fields: read tags
+			System.out.println("DICOM header/meta-information --------------------------------------------------");
+			Attributes metaInformationAttributes = din.readFileMetaInformation();
+			for (int tagInt : metaInformationAttributes.tags()) {
+				String tagString = String.format("0x%08x", Integer.valueOf(tagInt));
+				System.out.println("Tag: " + tagString + ": " + metaInformationAttributes.getString(tagInt));
+			}
+			System.out.println("DICOM body ---------------------------------------------------------------------");
+			Attributes datasetAttributes = din.readDataset(-1, -1);
+			// print DICOM file body
+			for (int tagInt : datasetAttributes.tags()) {
+				String tagString = String.format("0x%08X", Integer.valueOf(tagInt));
+				System.out.println("Tag: " + tagString + ": " + datasetAttributes.getString(tagInt));
+			}
+		} catch (final IOException exc) {
+			LOG.error("printDICOMFile : error while printing file " + dicomFile.toString() + " : ", exc);
+		} finally {
+			try {
+				if (din != null) {
+					din.close();
+				}
+			} catch (IOException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
 	}
 
 	private static ArrayList<File> createImageArray() throws IOException {
 		ArrayList<File> array = new ArrayList<File>();
 		File folder = new File(DICOM_IMAGE_FOLDER_PATH);
 		File[] listOfFiles = folder.listFiles();
-
 		for (File file : listOfFiles) {
 			if (file.isFile()) {
 				array.add(file);
@@ -103,7 +133,7 @@ public class AnonymizationTest {
 	public static void main(String args[]) {
 		try {
 			anonymizationTest();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOG.error("anonymization failed: ", e);
 		}
 	}

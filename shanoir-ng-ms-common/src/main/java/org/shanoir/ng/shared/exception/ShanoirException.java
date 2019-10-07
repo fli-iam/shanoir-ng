@@ -39,6 +39,10 @@ public class ShanoirException extends Exception {
 	 * @param message
 	 *            message.
 	 */
+	public ShanoirException(final String message, Throwable cause) {
+		super(message, cause);
+	}
+	
 	public ShanoirException(final String message) {
 		super(message);
 	}

@@ -19,8 +19,8 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { DatepickerComponent } from '../../shared/date/date.component';
-import { IdNameObject } from '../../shared/models/id-name-object.model';
+import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
+import { IdName } from '../../shared/models/id-name.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Examination } from '../shared/examination.model';
@@ -28,16 +28,15 @@ import { ExaminationService } from '../shared/examination.service';
 
 @Component({
     selector: 'examination',
-    templateUrl: 'examination.component.html',
-    styleUrls: ['examination.component.css'],
+    templateUrl: 'examination.component.html'
 })
 
 export class ExaminationComponent extends EntityComponent<Examination> {
 
     @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
-    private centers: IdNameObject[];
-    public studies: IdNameObject[];
+    private centers: IdName[];
+    public studies: IdName[];
     private subjects: SubjectWithSubjectStudy[];
     private examinationExecutives: Object[];
     private inImport: boolean; 
@@ -50,11 +49,20 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             protected breadcrumbsService: BreadcrumbsService) {
 
         super(route, 'examination');
-        this.inImport = breadcrumbsService.isImporting();
+        this.inImport = this.breadcrumbsService.isImporting();
     }
-
+    
     set examination(examination: Examination) { this.entity = examination; }
     get examination(): Examination { return this.entity; }
+    
+    set entity(exam: Examination) {
+        super.entity = exam;
+        this.getSubjects();
+    }
+
+    get entity(): Examination {
+        return super.entity;
+    }
 
     initView(): Promise<void> {
         return this.examinationService.get(this.id).then((examination: Examination) => {
@@ -67,7 +75,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.getStudies();
         return this.examinationService.get(this.id).then((examination: Examination) => {
             this.examination = examination
-        });
+        }).then(exam => this.getSubjects());
     }
 
     initCreate(): Promise<void> {
@@ -107,16 +115,24 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     private getSubjects(): void {
-        if (!this.examination.study) return;
+        if (!this.examination || !this.examination.study) return;
         this.studyService
             .findSubjectsByStudyId(this.examination.study.id)
             .then(subjects => this.subjects = subjects);
+    }
+
+    private onStudyChange() {
+        this.getSubjects();
     }
 
     private instAssessment() {
     }
 
     private attachNewFiles() {
+    }
+
+    public hasEditRight(): boolean {
+        return false;
     }
 
 }

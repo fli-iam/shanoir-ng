@@ -27,7 +27,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.shanoir.ng.shared.exception.ShanoirStudiesException;
+import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
+import org.shanoir.ng.manufacturermodel.repository.ManufacturerModelRepository;
+import org.shanoir.ng.manufacturermodel.service.ManufacturerModelServiceImpl;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -58,7 +61,7 @@ public class ManufacturerModelServiceTest {
 		given(manufacturerModelRepository.findOne(MANUFACTURER_MODEL_ID))
 				.willReturn(ModelsUtil.createManufacturerModel());
 		given(manufacturerModelRepository.save(Mockito.any(ManufacturerModel.class)))
-				.willReturn(ModelsUtil.createManufacturerModel());
+				.willReturn(createManufacturerModel());
 	}
 
 	@Test
@@ -80,14 +83,14 @@ public class ManufacturerModelServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws ShanoirStudiesException {
-		manufacturerModelService.save(createManufacturerModel());
+	public void saveTest() {
+		manufacturerModelService.create(createManufacturerModel());
 
 		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).save(Mockito.any(ManufacturerModel.class));
 	}
 
 	@Test
-	public void updateTest() throws ShanoirStudiesException {
+	public void updateTest() throws EntityNotFoundException {
 		final ManufacturerModel updatedManufacturerModel = manufacturerModelService.update(createManufacturerModel());
 		Assert.assertNotNull(updatedManufacturerModel);
 		Assert.assertTrue(UPDATED_MANUFACTURER_MODEL_NAME.equals(updatedManufacturerModel.getName()));

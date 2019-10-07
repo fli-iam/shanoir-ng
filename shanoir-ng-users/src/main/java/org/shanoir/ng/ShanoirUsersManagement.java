@@ -18,7 +18,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 
 import org.keycloak.admin.client.Keycloak;
@@ -27,8 +29,8 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.email.EmailService;
-import org.shanoir.ng.user.User;
-import org.shanoir.ng.user.UserRepository;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.KeycloakShanoirUtil;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
@@ -37,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import groovyjarjarcommonscli.MissingArgumentException;
@@ -72,6 +75,7 @@ import groovyjarjarcommonscli.MissingArgumentException;
  *
  */
 @Component
+//@EnableRetry
 public class ShanoirUsersManagement implements ApplicationRunner {
 
 	/**
@@ -113,7 +117,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
 	
 	@Override
-	public void run(ApplicationArguments args) throws Exception {
+	public void run(ApplicationArguments args) throws Exception { 
 		if (args.getOptionNames().isEmpty()) {
 			LOG.info("ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
 		} else {
@@ -125,7 +129,24 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 			} else if (args.containsOption("syncAllUsersToKeycloak")
 					&& args.getOptionValues("syncAllUsersToKeycloak").get(0) != null
 					&& args.getOptionValues("syncAllUsersToKeycloak").get(0).equals("true")) {
-				createUsersIfNotExisting();
+				
+				int tries = 0;
+				boolean success = false;
+				while (!success && tries < 50) {
+					try {
+						createUsersIfNotExisting();
+						success = true;
+					} catch (ProcessingException e) {
+						tries++;
+						String msg = "Try " + tries + " failed for updating keycloak users on startup (" + e.getMessage() + ")";
+						LOG.error(msg); // users logs
+						System.out.println(msg); // docker compose console
+						TimeUnit.SECONDS.sleep(5);
+					} 
+				}
+				if (!success) {
+					throw new IllegalStateException("Could not export users to Keycloak.");		
+				}
 			}
 		}
 	}
@@ -139,6 +160,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 				kcAdminClientClientId);
 	}
 
+	//@Retryable(value = { ProcessingException.class }, maxAttempts = 50, backoff = @Backoff(delay = 5000))
 	private void createUsersIfNotExisting() {
 		LOG.info("syncAllUsersToKeycloak");
 		final Iterable<User> users = userRepository.findAll();
@@ -171,6 +193,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	private UserRepresentation getUserRepresentation(final User user) {
 		final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
 		attributes.put("userId", Arrays.asList(user.getId().toString()));
+		attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
 		if (user.getExpirationDate() != null) {
 			attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
 		}

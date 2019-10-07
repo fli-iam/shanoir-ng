@@ -1,3 +1,4 @@
+
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -25,10 +26,11 @@ export class MsgBoxService {
 
     private opened: boolean = false;
     private messages: Message[] = [];
-    private appRef: ApplicationRef;
+    //private appRef: ApplicationRef;
+    private appRef: Promise<ApplicationRef> = new Promise((resolve, reject) => {});
 
     constructor(private injector: Injector) {
-        setTimeout(() => this.appRef = this.injector.get(ApplicationRef));
+        setTimeout(() => this.appRef = Promise.resolve(this.injector.get(ApplicationRef)));
      }
 
     public log(type: msgType, txt: string, duration: number = MSG_DURATION) {
@@ -55,14 +57,15 @@ export class MsgBoxService {
     private open() {
         if (!this.opened) {
             this.opened = true;
-            this.appRef.tick();
+            Promise
+            this.appRef.then(appRef => appRef.tick());
         }
     }
 
     private close() {
         if (this.opened) {
             this.opened = false;
-            this.appRef.tick();
+            this.appRef.then(appRef => appRef.tick());
         }
     }
 
