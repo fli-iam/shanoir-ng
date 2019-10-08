@@ -48,12 +48,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li *ngIf="dev" class="horizontal-bar"><hr/></li>
                 <menu-item *ngIf="dev" label="Preferences" i18n-label="Administration menu|Manage user preferences@@navbarUserPreferences" [icon]="ImagesUrlUtil.CONTROLS_ICON_PATH">
                 <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="this.mode == 'pink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>
-                <menu-item label="Extreme pink mode" (click)="toggleXtremPink()" [boolVar]="this.mode == 'xtremPink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>
-                <menu-item label="Preclinical References" link="preclinical-reference" [icon]="ImagesUrlUtil.AGENDA_ICON_PATH"></menu-item>
+                	<menu-item label="Extreme pink mode" (click)="toggleXtremPink()" [boolVar]="this.mode == 'xtremPink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>
+                	<menu-item label="Preclinical References" link="preclinical-reference" [icon]="ImagesUrlUtil.AGENDA_ICON_PATH"></menu-item>
+           		</menu-item>
            </dropdown-menu>
 
             <dropdown-menu label="Tasks">
-                <menu-item label="Manage my tasks" i18n-label="Administration menu|Manage tasks@@navbarManageTasks" link="task" [icon]="ImagesUrlUtil.NOTEPAD_ICON_PATH"></menu-item>
                 <menu-item label="Manage my tasks" i18n-label="Administration menu|Manage tasks@@navbarManageTasks" link="task" [icon]="ImagesUrlUtil.NOTEPAD_ICON_PATH"></menu-item>
             </dropdown-menu>
 

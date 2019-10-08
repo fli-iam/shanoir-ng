@@ -234,7 +234,7 @@ public class ImportUtils {
 	public static String convertFilePath(final String firstImagePath) {
 		return firstImagePath.replaceAll("\\\\", "/");
 	}
-
+	
 	/**
 	 * List all the folders of the given directory.
 	 *
@@ -256,12 +256,11 @@ public class ImportUtils {
 		}
 		return result;
 	}
-
+	
 	/**
 	 * Convert a String with a wildcard to a regular expression.
 	 *
-	 * @param wildcard
-	 *            the wildcard
+	 * @param wildcard the wildcard
 	 *
 	 * @return the string
 	 */
@@ -277,7 +276,7 @@ public class ImportUtils {
 			case '?':
 				s.append(".");
 				break;
-			// escape special regexp-characters
+				// escape special regexp-characters
 			case '(':
 			case ')':
 			case '[':
@@ -300,7 +299,7 @@ public class ImportUtils {
 		s.append('$');
 		return (s.toString());
 	}
-
+	
 	/**
 	 * copyFiles folder into destination,respecting the hierarchy
 	 * 
@@ -428,5 +427,6 @@ public class ImportUtils {
 		}
 		return newName;
 	}
+
 
 }
