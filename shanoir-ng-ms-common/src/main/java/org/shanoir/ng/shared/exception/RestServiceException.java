@@ -33,15 +33,6 @@ public class RestServiceException extends Exception {
 	private ErrorModel errorModel;
 
 	/**
-	 * @param cause
-	 * @param code
-	 */
-	public RestServiceException(Throwable cause, ErrorModel errorModel) {
-		super(cause);
-		this.errorModel = errorModel;
-	}
-
-	/**
 	 * @param code
 	 */
 	public RestServiceException(ErrorModel errorModel) {
