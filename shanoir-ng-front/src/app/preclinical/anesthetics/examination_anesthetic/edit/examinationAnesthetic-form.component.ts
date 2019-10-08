@@ -14,6 +14,8 @@ import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { resolve } from 'path';
+import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+
 
 @Component({
     selector: 'examination-anesthetic-form',

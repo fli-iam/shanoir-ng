@@ -1,19 +1,19 @@
 import { Component } from '@angular/core';
 
-import { ImportDataService, ContextData } from '../../../import/import.data-service';
+import { ImportDataService, ContextData } from '../../../import/shared/import.data-service';
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../../breadcrumbs/router';
 import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
-import { ImportJob, PatientDicom } from '../../../import/dicom-data.model';
-import { ImportService } from '../../../import/import.service';
+import { ImportJob, PatientDicom } from '../../../import/shared/dicom-data.model';
+import { ImportService } from '../../../import/shared/import.service';
 
 @Component({
     selector: 'bruker-finish-import',
     templateUrl: 'bruker-finish.component.html',
-    styleUrls: ['bruker-finish.component.css', '../../../import/import.step.css']
+    styleUrls: ['bruker-finish.component.css', '../../../import/shared/import.step.css']
 })
 export class BrukerFinishImportComponent {
 
@@ -78,7 +78,7 @@ export class BrukerFinishImportComponent {
         if (true) {
             let importJob = new ImportJob();
             importJob.patients = new Array<PatientDicom>();
-            // this.patient.subject = new IdNameObject(this.context.subject.id, this.context.subject.name);
+            // this.patient.subject = new IdName(this.context.subject.id, this.context.subject.name);
             this.patient.subject = Subject.makeSubject(
                     this.context.subject.id, 
                     this.context.subject.name, 

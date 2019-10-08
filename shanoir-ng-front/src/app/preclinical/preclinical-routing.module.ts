@@ -16,12 +16,12 @@ import { ContrastAgentsListComponent } from './contrastAgent/list/contrastAgent-
 import { ContrastAgentFormComponent }      from './contrastAgent/edit/contrastAgent-form.component';
 import { AnimalExaminationFormComponent }      from './examination/edit/animal-examination-form.component';
 import { AnimalExaminationListComponent }      from './examination/list/animal-examination-list.component';
-import {ExaminationAnestheticsListComponent} from './anesthetics/examination_anesthetic/list/examinationAnesthetic-list.component';
-import {ExaminationAnestheticFormComponent} from './anesthetics/examination_anesthetic/edit/examinationAnesthetic-form.component';
+import { ExaminationAnestheticsListComponent } from './anesthetics/examination_anesthetic/list/examinationAnesthetic-list.component';
+import { ExaminationAnestheticFormComponent } from './anesthetics/examination_anesthetic/edit/examinationAnesthetic-form.component';
 import { ImportBrukerComponent } from './importBruker/importBruker.component';
-import { AuthNotGuestGuard } from '../shared/roles/auth-not-guest-guard';
+import { AuthAdminOrExpertGuard } from '../shared/roles/auth-admin-or-expert-guard';
 
-import {getRoutesFor} from '../app.routing'
+import { getRoutesFor } from '../app.routing'
 import { BrukerUploadComponent } from './importBruker/bruker-upload/bruker-upload.component';
 import { BrukerSelectSeriesComponent } from './importBruker/select-series/bruker-select-series.component';
 import { AnimalClinicalContextComponent } from './importBruker/clinical-context/animal-clinical-context.component';
@@ -67,14 +67,14 @@ let routes : Routes= [
   ];
 
   routes = routes.concat(
-      getRoutesFor('preclinical-reference', ReferenceFormComponent, ReferencesListComponent, AuthNotGuestGuard), 
-      getRoutesFor('preclinical-examination', AnimalExaminationFormComponent, AnimalExaminationListComponent, AuthNotGuestGuard),
-      getRoutesFor('preclinical-therapy', TherapyFormComponent, TherapiesListComponent, AuthNotGuestGuard),
-      getRoutesFor('preclinical-pathology', PathologyFormComponent,PathologiesListComponent, AuthNotGuestGuard), 
-      getRoutesFor('preclinical-pathology-model', PathologyModelFormComponent,PathologyModelsListComponent, AuthNotGuestGuard),
-      getRoutesFor('preclinical-anesthetic-ingredient', AnestheticIngredientFormComponent,AnestheticIngredientsListComponent, AuthNotGuestGuard),
-      getRoutesFor('preclinical-anesthetic', AnestheticFormComponent,AnestheticsListComponent, AuthNotGuestGuard),
-      getRoutesFor('preclinical-subject', AnimalSubjectFormComponent,AnimalSubjectsListComponent, AuthNotGuestGuard)
+      getRoutesFor('preclinical-reference', ReferenceFormComponent, ReferencesListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}), 
+      getRoutesFor('preclinical-examination', AnimalExaminationFormComponent, AnimalExaminationListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+      getRoutesFor('preclinical-therapy', TherapyFormComponent, TherapiesListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+      getRoutesFor('preclinical-pathology', PathologyFormComponent,PathologiesListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}), 
+      getRoutesFor('preclinical-pathology-model', PathologyModelFormComponent,PathologyModelsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+      getRoutesFor('preclinical-anesthetic-ingredient', AnestheticIngredientFormComponent,AnestheticIngredientsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+      getRoutesFor('preclinical-anesthetic', AnestheticFormComponent,AnestheticsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard}),
+      getRoutesFor('preclinical-subject', AnimalSubjectFormComponent,AnimalSubjectsListComponent, {create: AuthAdminOrExpertGuard, update: AuthAdminOrExpertGuard})
   );
 
   export const preclinicalRouting: ModuleWithProviders = RouterModule.forRoot(routes); 

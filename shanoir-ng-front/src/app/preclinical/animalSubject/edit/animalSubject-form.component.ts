@@ -16,7 +16,7 @@ import { SubjectTherapyService } from '../../therapies/subjectTherapy/shared/sub
 import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { Study } from '../../../studies/shared/study.model';
-import { IdNameObject } from '../../../shared/models/id-name-object.model';
+import { IdName } from '../../../shared/models/id-name.model';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { StudyService } from '../../../studies/shared/study.service';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
@@ -30,6 +30,8 @@ import { TableComponent } from '../../../shared/components/table/table.component
 import { SubjectTherapy } from '../../therapies/subjectTherapy/shared/subjectTherapy.model';
 import { TherapyType } from '../../shared/enum/therapyType';
 import { Frequency } from '../../shared/enum/frequency';
+import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
+
 
 @Component({
     selector: 'animalSubject-form',
@@ -47,7 +49,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     private readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
-    private studies: IdNameObject[];
+    private studies: IdName[];
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
     species: Reference[] = [];
     strains: Reference[] = [];
@@ -59,7 +61,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     @Input() preFillData: Subject;
     @Input() displayPathologyTherapy: boolean = true;
     private subjectStudyList: SubjectStudy[] = [];
-    private selectedStudy : IdNameObject;
+    private selectedStudy : IdName;
     private hasNameUniqueError: boolean = false;
 
 
@@ -566,7 +568,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.columnDefsPathologies.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.editSubjectPathology(item) });
         }
-        if (this.mode != 'view' && !this.keycloakService.isUserGuest()) {
+        if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.columnDefsPathologies.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeSubjectPathology(item) });
         }
     }
@@ -676,7 +678,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.columnDefsTherapies.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.editSubjectTherapy(item) });
         }
-        if (this.mode != 'view' && !this.keycloakService.isUserGuest()) {
+        if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.columnDefsTherapies.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeSubjectTherapy(item) });
         }
     }

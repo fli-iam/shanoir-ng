@@ -15,7 +15,7 @@ import { PhysiologicalDataFile }    from '../../extraData/physiologicalData/shar
 import { ExtraDataService } from '../../extraData/extraData/shared/extradata.service';
 import { CenterService } from '../../../centers/shared/center.service';
 import { StudyService } from '../../../studies/shared/study.service';
-import { IdNameObject } from '../../../shared/models/id-name-object.model';
+import { IdName } from '../../../shared/models/id-name.model';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
@@ -23,7 +23,7 @@ import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { ModesAware } from "../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { ActivatedRoute } from '@angular/router';
-import { DatepickerComponent } from '../../../shared/date/date.component';
+import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
 
@@ -50,8 +50,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     contrastAgent: ContrastAgent = new ContrastAgent();
     examAnesthetic: ExaminationAnesthetic = new ExaminationAnesthetic();
     examinationExtradatas: ExtraData[] = [];
-    centers: IdNameObject[] = [];
-    studies: IdNameObject[] = [];
+    centers: IdName[] = [];
+    studies: IdName[] = [];
     private subjects: SubjectWithSubjectStudy[];
     animalSubjectId: number;
     private inImport: boolean; 

@@ -1,18 +1,18 @@
 import { Component } from '@angular/core';
 
 
-import { ImportDataService } from '../../../import/import.data-service';
+import { ImportDataService } from '../../../import/shared/import.data-service';
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../../breadcrumbs/router';
 import { slideDown } from '../../../shared/animations/animations';
 import * as AppUtils from '../../../utils/app.utils';
-import { PatientDicom, SerieDicom } from '../../../import/dicom-data.model';
-import { ImportService } from '../../../import/import.service';
+import { PatientDicom, SerieDicom } from '../../../import/shared/dicom-data.model';
+import { ImportService } from '../../../import/shared/import.service';
 
 @Component({
     selector: 'bruker-select-series',
     templateUrl: 'bruker-select-series.component.html',
-    styleUrls: ['bruker-select-series.component.css', '../../../import/import.step.css'],
+    styleUrls: ['bruker-select-series.component.css', '../../../import/shared/import.step.css'],
     animations: [slideDown]
 })
 export class BrukerSelectSeriesComponent {

@@ -8,6 +8,8 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
+import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+
 
 
 @Component({
@@ -97,7 +99,7 @@ export class SubjectPathologiesListComponent extends BrowserPaginEntityListCompo
     }
 
     protected openDeleteConfirmDialog = (entity: SubjectPathology) => {
-        if (this.keycloakService.isUserGuest()) return;
+        if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.confirmDialogService
             .confirm(
                 'Delete', 'Are you sure you want to delete preclinical-subject-pathology n° ' + entity.id + ' ?',

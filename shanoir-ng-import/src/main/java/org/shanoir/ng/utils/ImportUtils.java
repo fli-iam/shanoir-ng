@@ -31,7 +31,6 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.shanoir.ng.shared.model.AbstractGenericItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

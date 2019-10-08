@@ -1,20 +1,20 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { EquipmentDicom, PatientDicom } from '../../../import/dicom-data.model';
+import { EquipmentDicom, PatientDicom } from '../../../import/shared/dicom-data.model';
 import { Study } from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../../subjects/shared/subject.with.subject-study.model';
 import { SubjectExamination } from '../../../examinations/shared/subject-examination.model';
-import { IdNameObject } from '../../../shared/models/id-name-object.model';
+import { IdName } from '../../../shared/models/id-name.model';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { slideDown } from '../../../shared/animations/animations';
 import { AnimalSubject } from '../../animalSubject/shared/animalSubject.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 import { Examination } from '../../../examinations/shared/examination.model';
-import { ImportDataService, ContextData } from '../../../import/import.data-service';
+import { ImportDataService, ContextData } from '../../../import/shared/import.data-service';
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { Entity } from '../../../shared/components/entity/entity.abstract';
 import { PreclinicalSubject } from '../../animalSubject/shared/preclinicalSubject.model';
@@ -29,7 +29,7 @@ import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-cat
 @Component({
     selector: 'animal-clinical-context',
     templateUrl: 'animal-clinical-context.component.html',
-    styleUrls: ['../../../import/clinical-context/clinical-context.component.css', '../../../import/import.step.css'],
+    styleUrls: ['../../../import/clinical-context/clinical-context.component.css', '../../../import/shared/import.step.css'],
     animations: [slideDown]
 })
 export class AnimalClinicalContextComponent  {
@@ -121,7 +121,7 @@ export class AnimalClinicalContextComponent  {
 
     private async completeStudies(equipment: EquipmentDicom): Promise<void> {
         let completeStudyPromises: Promise<void>[] = [];
-        completeStudyPromises.push(Promise.all([this.studyService.findStudiesForImport(), this.centerService.getAll()])
+        completeStudyPromises.push(Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
                 for (let study of allStudies) {
                     for (let studyCenter of study.studyCenterList) {
@@ -336,8 +336,8 @@ export class AnimalClinicalContextComponent  {
         let newExam = new Examination();
         newExam.preclinical = true;
         newExam.hasStudyCenterData = true;
-        newExam.study = new IdNameObject(this.study.id, this.study.name);
-        newExam.center = new IdNameObject(this.center.id, this.center.name);
+        newExam.study = new IdName(this.study.id, this.study.name);
+        newExam.center = new IdName(this.center.id, this.center.name);
         newExam.subjectStudy = this.subject;
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;

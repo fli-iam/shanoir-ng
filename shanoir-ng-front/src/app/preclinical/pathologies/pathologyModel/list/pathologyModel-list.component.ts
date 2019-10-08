@@ -7,6 +7,7 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
+import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
 
 
 @Component({
@@ -45,7 +46,7 @@ export class PathologyModelsListComponent   extends BrowserPaginEntityListCompon
             }} 
             
         ];
-        if (!this.keycloakService.isUserGuest()) {
+        if (this.keycloakService.isUserAdminOrExpert()) {
             colDef.push({headerName: "", type: "button", awesome: "fa-download",action: item => this.downloadModelSpecifications(item) });
         }
         return colDef;       
@@ -98,7 +99,7 @@ export class PathologyModelsListComponent   extends BrowserPaginEntityListCompon
     
  
     private openDeletePathologyModelConfirmDialog = (entity: PathologyModel) => {
-        if (this.keycloakService.isUserGuest()) return;
+        if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.confirmDialogService
             .confirm(
                 'Delete', 'Are you sure you want to delete preclinical-pathology-model n° ' + entity.id + ' ?',

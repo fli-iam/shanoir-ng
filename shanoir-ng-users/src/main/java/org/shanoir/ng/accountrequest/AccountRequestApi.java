@@ -15,7 +15,7 @@
 package org.shanoir.ng.accountrequest;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.user.User;
+import org.shanoir.ng.user.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;

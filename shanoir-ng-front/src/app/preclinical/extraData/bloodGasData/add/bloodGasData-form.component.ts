@@ -11,6 +11,8 @@ import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ExtraData } from '../../extraData/shared/extradata.model';
+import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+
 
 @Component({
   selector: 'bloodgas-data-upload-form',

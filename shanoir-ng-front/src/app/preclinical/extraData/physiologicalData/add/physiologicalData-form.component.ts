@@ -85,7 +85,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     protected save(): Promise<void> {
         this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.physioData).subscribe((physioData) => {
             this.chooseRouteAfterSave(this.physioData);
-            this.msgBoxService.log('info', 'The new preclinical-physiogicaldata has been successfully saved under the number ' + physioData.id);
+            // this.msgBoxService.log('info', 'The new preclinical-physiogicaldata has been successfully saved under the number ' + physioData.id);
         });
         return Promise.resolve();
     }

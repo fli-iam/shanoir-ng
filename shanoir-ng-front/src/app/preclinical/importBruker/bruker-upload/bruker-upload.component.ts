@@ -1,12 +1,12 @@
 import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { ImportJob } from '../../../import/dicom-data.model';
-import { DicomArchiveService } from '../../../import/dicom-archive.service';
+import { ImportJob } from '../../../import/shared/dicom-data.model';
+import { DicomArchiveService } from '../../../import/shared/dicom-archive.service';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
 import { slideDown } from '../../../shared/animations/animations';
-import { ImportService } from '../../../import/import.service';
+import { ImportService } from '../../../import/shared/import.service';
 import { Router } from '../../../breadcrumbs/router';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { ImportDataService } from '../../../import/import.data-service';
+import { ImportDataService } from '../../../import/shared/import.data-service';
 import { ImportBrukerService } from '../importBruker.service';
 
 
@@ -15,7 +15,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 @Component({
     selector: 'bruker-upload',
     templateUrl: 'bruker-upload.component.html',
-    styleUrls: ['bruker-upload.component.css', '../../..//import/import.step.css'],
+    styleUrls: ['bruker-upload.component.css', '../../..//import/shared/import.step.css'],
     animations: [slideDown]
 })
 export class BrukerUploadComponent {

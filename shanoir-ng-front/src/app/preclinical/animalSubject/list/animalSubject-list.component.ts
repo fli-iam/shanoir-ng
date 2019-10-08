@@ -10,6 +10,7 @@ import { BrowserPaginEntityListComponent } from '../../../shared/components/enti
 import { ServiceLocator } from '../../../utils/locator.service';
 import { ShanoirError } from '../../../shared/models/error.model';
 import { resolve } from 'url';
+import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
 
 
 @Component({
@@ -99,7 +100,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
     }
     
     protected openDeleteConfirmDialog = (entity: PreclinicalSubject) => {
-        if (this.keycloakService.isUserGuest()) return;
+        if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.confirmDialogService
             .confirm(
                 'Delete', 'Are you sure you want to delete preclinical-subject n° ' + entity.animalSubject.id+ ' ?',

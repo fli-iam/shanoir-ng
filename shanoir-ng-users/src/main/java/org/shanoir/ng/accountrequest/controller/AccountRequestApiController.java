@@ -16,6 +16,7 @@ package org.shanoir.ng.accountrequest.controller;
 
 import java.time.LocalDate;
 
+import org.shanoir.ng.accountrequest.AccountRequestApi;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;

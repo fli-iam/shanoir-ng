@@ -9,6 +9,7 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
+import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
 
 export type Mode =  "view" | "edit" | "create";
 
@@ -109,7 +110,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
     }
     
     protected openDeleteConfirmDialog = (entity: AnestheticIngredient) => {
-        if (this.keycloakService.isUserGuest()) return;
+        if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.getSelectedIngredient(entity.id).then(selectedIngredient => {
             this.confirmDialogService
                 .confirm(

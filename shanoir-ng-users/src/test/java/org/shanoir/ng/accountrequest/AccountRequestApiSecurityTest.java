@@ -20,7 +20,6 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.accountrequest.controller.AccountRequestApi;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;

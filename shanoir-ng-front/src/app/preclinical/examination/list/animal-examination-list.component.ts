@@ -11,6 +11,8 @@ import { TableComponent } from '../../../shared/components/table/table.component
 import { EntityListComponent } from '../../../shared/components/entity/entity-list.component.abstract';
 import { ShanoirError } from '../../../shared/models/error.model';
 import { ServiceLocator } from '../../../utils/locator.service';
+import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
+
 
 @Component({
     selector: 'animal-examination-list',
@@ -75,7 +77,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     }
 
     protected openDeleteConfirmDialog = (entity: Examination) => {
-        if (this.keycloakService.isUserGuest()) return;
+        if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.getSelectedExamination(entity.id).then(selectedExamination => {
         this.confirmDialogService
             .confirm(

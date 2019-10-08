@@ -371,10 +371,6 @@ public class ImporterApiController implements ImporterApi {
 			LOG.error(e.getMessage(), e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
-		} catch (ShanoirException e) {
-			LOG.error(e.getMessage(), e);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file.", null));
 		}
 	}
 	
