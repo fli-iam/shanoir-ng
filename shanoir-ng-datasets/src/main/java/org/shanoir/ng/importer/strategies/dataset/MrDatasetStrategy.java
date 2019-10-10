@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.MrDatasetMetadata;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
@@ -216,6 +217,13 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			datasetExpression.setDataset(mrDataset);
 			mrDataset.getDatasetExpressions().add(datasetExpression);
 		}
+		
+		// TODO by studycard: set updatedMetadata and updatedMrMetadata
+		DatasetMetadata originalDM = mrDataset.getOriginMetadata();
+		mrDataset.setUpdatedMetadata(originalDM);
+		MrDatasetMetadata originalMDM = mrDataset.getOriginMrMetadata();
+		mrDataset.setUpdatedMrMetadata(originalMDM);
+		
 		return mrDataset;
 	}
 

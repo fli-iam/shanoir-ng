@@ -11,24 +11,51 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+package org.shanoir.ng.shared.model;
 
-package org.shanoir.ng.shared.common;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
- * Shared service.
- * 
- * @author ifakhfakh
+ * @author yyao
  *
  */
-public interface CommonService {
+@Entity
+@Table(name = "center")
+public class Center {
 	
+	@Id
+	private long id;
+	 
+	private String name;
+
 	/**
-	 * Find study name, subject name and center name by their ids.
-	 * 
-	 * @param commonIdsDTO
-	 * 			DTO with ids.
-	 * @return corresponding data.
+	 * @return the id
 	 */
-	CommonIdNamesDTO findByIds(CommonIdsDTO commonIdsDTO);
+	public long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
 }

@@ -45,6 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <menu-item label="Pink mode" (click)="togglePink()" [boolVar]="this.mode == 'pink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>
                     <menu-item label="Extreme pink mode" (click)="toggleXtremPink()" [boolVar]="this.mode == 'xtremPink'" [icon]="ImagesUrlUtil.USER_5_ICON_PATH"></menu-item>
                 </menu-item>
+                <menu-item label="Index to Solr" i18n-label="Administration menu|Index to Solr@@navbarIndexSolr" (click)="indexToSolr()" [icon]="ImagesUrlUtil.SOLR_IMAGE_PATH"></menu-item>
             </dropdown-menu>
 
             <dropdown-menu label="Tasks">

@@ -53,6 +53,9 @@ export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils
 const BACKEND_API_DATASET_MS_URL: string = process.env.BACKEND_API_DATASET_MS_URL;
 export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/datasets';
 
+// Solr http api
+export const BACKEND_API_SOLR_URL: string = BACKEND_API_DATASET_MS_URL + '/solr';
+
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
 

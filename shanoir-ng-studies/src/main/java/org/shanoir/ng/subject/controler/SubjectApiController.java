@@ -107,7 +107,13 @@ public class SubjectApiController implements SubjectApi {
 		
 		validate(subject, result);
 
-		final Subject createdSubject = subjectService.create(subject);
+		Subject createdSubject;
+		try {
+			createdSubject = subjectService.create(subject);
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
+		}
 		return new ResponseEntity<SubjectDTO>(subjectMapper.subjectToSubjectDTO(createdSubject), HttpStatus.OK);
 	}
 
@@ -133,7 +139,13 @@ public class SubjectApiController implements SubjectApi {
 		else
 			subject.setName(commonName);
 		
-		final Subject createdSubject = subjectService.create(subject);
+		Subject createdSubject;
+		try {
+			createdSubject = subjectService.create(subject);
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
+		}
 		return new ResponseEntity<Subject>(createdSubject, HttpStatus.OK);
 
 	}
@@ -151,6 +163,9 @@ public class SubjectApiController implements SubjectApi {
 			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
 		}
 
 	}
@@ -196,7 +211,13 @@ public class SubjectApiController implements SubjectApi {
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Communication error beetween microservices"));
 		}
 		
-		final Subject createdSubject = subjectService.create(subject);
+		Subject createdSubject;
+		try {
+			createdSubject = subjectService.create(subject);
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
+		}
 		return new ResponseEntity<Long>(createdSubject.getId(), HttpStatus.OK);
 	}
 
@@ -216,6 +237,9 @@ public class SubjectApiController implements SubjectApi {
 			return new ResponseEntity<Long>(subject.getId(), HttpStatus.OK);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
 		}
 	}
 	

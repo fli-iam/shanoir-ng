@@ -22,6 +22,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
@@ -107,7 +108,13 @@ public class StudyApiController implements StudyApi {
 
 		validate(study, result);
 
-		final Study createdStudy = studyService.create(study);
+		Study createdStudy;
+		try {
+			createdStudy = studyService.create(study);
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
+		}
 		return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
 	}
 
@@ -121,6 +128,9 @@ public class StudyApiController implements StudyApi {
 			studyService.update(study);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}

@@ -32,6 +32,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfiguration {
 	
+	private static final String STUDY_NAME_UPDATE = "study_name_update";
+	private static final String SUBJECT_NAME_UPDATE = "subject_name_update";
+	
 	@Autowired
 	private StudyUserListener listener;
 
@@ -41,6 +44,16 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
+    public static org.springframework.amqp.core.Queue getStudyNameUpdateQueue() {
+    		return new org.springframework.amqp.core.Queue(STUDY_NAME_UPDATE, true);
+    }
+	
+	@Bean
+    public static org.springframework.amqp.core.Queue getSubjectNameUpdateQueue() {
+    		return new org.springframework.amqp.core.Queue(SUBJECT_NAME_UPDATE, true);
+    }
+	
+	@Bean
     public FanoutExchange fanout() {
         return new FanoutExchange("study-user-exchange", true, false);
     }	
@@ -48,8 +61,7 @@ public class RabbitMQConfiguration {
 	@RabbitListener(bindings = @QueueBinding(
 	        value = @Queue(value = "study-user-queue-dataset", durable = "true"),
 	        exchange = @Exchange(value = "study-user-exchange", ignoreDeclarationExceptions = "true", 
-	        	autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT))
-	)
+	        	autoDelete = "false", durable = "true", type=ExchangeTypes.FANOUT)))	
     public void receiveMessage(String commandArrStr) throws AmqpRejectAndDontRequeueException  {
 		listener.receiveMessageImport(commandArrStr);
     }

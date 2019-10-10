@@ -12,25 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-/**
- * Shanoir application.
- *
- * @author ifakhfakh
- *
- */
-@SpringBootApplication(scanBasePackageClasses = {ShanoirImportApplication.class})
-@EnableSwagger2
-public class ShanoirImportApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(ShanoirImportApplication.class, args);
-	}
-
+export class SolrDocument {
+    datasetId: string;
+    datasetName: string;
+    datasetType: string;
+    datasetNature: string;
+    datasetCreationDate: Date;
+    examinationComment: string;
+    examinationDate: Date;
+    subjectName: string;
+    studyName: string;
+    studyId: string;
 }

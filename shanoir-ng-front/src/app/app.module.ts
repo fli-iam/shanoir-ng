@@ -12,23 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import '../assets/css/common.css';
-import '../assets/css/papaya.css';
 import { CommonModule } from '@angular/common';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'angular2-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
-
-import {
-    AcquisitionEquipmentListComponent,
-} from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
-import {
-    AcquisitionEquipmentComponent,
-} from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
+import '../assets/css/common.css';
+import '../assets/css/papaya.css';
+import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
+import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
 import { ManufacturerModelComponent } from './acquisition-equipments/manufacturer-model/manufacturer-model.component';
 import { ManufacturerComponent } from './acquisition-equipments/manufacturer/manufacturer.component';
 import { AcquisitionEquipmentPipe } from './acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -38,6 +33,8 @@ import { ManufacturerModelService } from './acquisition-equipments/shared/manufa
 import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
 import { AppComponent } from './app.component';
 import { routing } from './app.routing';
+import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
+import { TaskService } from './async-tasks/task.service';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { Router } from './breadcrumbs/router';
@@ -66,14 +63,14 @@ import { SubjectExaminationPipe } from './examinations/shared/subject-examinatio
 import { ExaminationTreeComponent } from './examinations/tree/examination-tree.component';
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
-import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
-import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ImportComponent } from './import/import.component';
+import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
+import { SelectSeriesComponent } from './import/select-series/select-series.component';
+import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { ImportDataService } from './import/shared/import.data-service';
 import { ImportService } from './import/shared/import.service';
-import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { NiftiConverterService } from './niftiConverters/nifti.converter.service';
 import { RoleService } from './roles/role.service';
 import { CheckboxComponent } from './shared/checkbox/checkbox.component';
@@ -103,6 +100,7 @@ import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { MsgBoxComponent } from './shared/msg-box/msg-box.component';
 import { MsgBoxService } from './shared/msg-box/msg-box.service';
 import { NavbarComponent } from './shared/navbar/navbar.component';
+import { NotificationsComponent } from './shared/notifications/notifications.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
@@ -111,6 +109,7 @@ import { SelectOptionComponent } from './shared/select/select.option.component';
 import { GlobalService } from './shared/services/global.service';
 import { ToggleSwitchComponent } from './shared/switch/switch.component';
 import { HandleErrorService } from './shared/utils/handle-error.service';
+import { StudyRightsService } from './studies/shared/study-rights.service';
 import { StudyService } from './studies/shared/study.service';
 import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyComponent } from './studies/study/study.component';
@@ -130,10 +129,7 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
-import { NotificationsComponent } from './shared/notifications/notifications.component';
-import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
-import { TaskService } from './async-tasks/task.service';
-import { StudyRightsService } from './studies/shared/study-rights.service';
+import { SolrService } from './solr/solr.service';
 
 //import { ModalService} from './shared/components/modal/modal.service';
 
@@ -269,7 +265,8 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         ImportDataService,
         NiftiConverterService,
         TaskService,
-        StudyRightsService
+        StudyRightsService,
+        SolrService
     ],
     bootstrap: [AppComponent],
 })

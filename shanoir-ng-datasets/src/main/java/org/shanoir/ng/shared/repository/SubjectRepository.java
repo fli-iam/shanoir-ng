@@ -11,26 +11,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+package org.shanoir.ng.shared.repository;
 
-package org.shanoir.ng;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import org.shanoir.ng.shared.model.Subject;
+import org.springframework.data.repository.CrudRepository;
 
 /**
- * Shanoir application.
- *
- * @author ifakhfakh
+ * @author yyao
  *
  */
-@SpringBootApplication(scanBasePackageClasses = {ShanoirImportApplication.class})
-@EnableSwagger2
-public class ShanoirImportApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(ShanoirImportApplication.class, args);
-	}
+public interface SubjectRepository extends CrudRepository<Subject, Long> {
 
 }

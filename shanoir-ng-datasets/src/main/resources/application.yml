@@ -79,12 +79,10 @@ keycloak:
       - name: datasets secured api
       - patterns:
         - /*
-# microservices url
-ms.url:
-  shanoir-ng-studies: http://studies:9902/
+# Data
 datasets-data: /var/datasets-data
 # Solr
-spring.data.solr.host: http://localhost:8983/solr
+spring.data.solr.host: http://solr:8983/solr/shanoir/
 # logging configuration
 logging:
   file: /var/log/shanoir-ng-logs/shanoir-ng-datasets.log

@@ -23,7 +23,9 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
+import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -34,16 +36,19 @@ import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
-import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Implementation of study service.
@@ -57,21 +62,17 @@ public class StudyServiceImpl implements StudyService {
 	private static final Logger LOG = LoggerFactory.getLogger(StudyServiceImpl.class);
 	
 	@Autowired
-	private StudyCenterRepository studyCenterRepository;
-
-	@Autowired
 	private StudyUserRepository studyUserRepository;
 	
-	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
-
 	@Autowired
 	private StudyRepository studyRepository;
 	
 	@Autowired
 	private StudyUserUpdateBroadcastService studyUserCom;
 
-
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+	
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findOne(id);
@@ -97,7 +98,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public Study create(final Study study) {
+	public Study create(final Study study) throws MicroServiceCommunicationException {
 		if (study.getStudyCenterList() != null) {
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
 				studyCenter.setStudy(study);			} 
@@ -115,6 +116,8 @@ public class StudyServiceImpl implements StudyService {
 		}
 		Study studyDb = studyRepository.save(study);
 		
+		updateStudyName(new IdName(study.getId(), study.getName()));
+		
 		if (studyDb.getStudyUserList() != null) {
 			List<StudyUserCommand> commands = new ArrayList<>();
 			for (final StudyUser studyUser: studyDb.getStudyUserList()) {
@@ -131,13 +134,16 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public Study update(final Study study) throws EntityNotFoundException {
+	public Study update(final Study study) throws EntityNotFoundException, MicroServiceCommunicationException {
 		final Study studyDb = studyRepository.findOne(study.getId());
 		if (studyDb == null) throw new EntityNotFoundException(Study.class, study.getId());
 		
 		studyDb.setClinical(study.isClinical());
 		studyDb.setDownloadableByDefault(study.isDownloadableByDefault());
 		studyDb.setEndDate(study.getEndDate());
+		if (study.getName() != studyDb.getName()) {
+			updateStudyName(new IdName(study.getId(), study.getName()));
+		}
 		studyDb.setName(study.getName());
 		studyDb.setStudyStatus(study.getStudyStatus());
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
@@ -230,5 +236,15 @@ public class StudyServiceImpl implements StudyService {
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not transmit study-user update info through RabbitMQ");
 		}
+	}
+	
+	private boolean updateStudyName(IdName study) throws MicroServiceCommunicationException{
+		try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.studyNameUpdateQueue().getName(),
+					new ObjectMapper().writeValueAsString(study));
+			return true;
+		} catch (AmqpException | JsonProcessingException e) {
+			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update study name.");
+		} 
 	}
 }

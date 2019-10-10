@@ -17,8 +17,10 @@ package org.shanoir.ng.subject.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.shanoir.ng.configuration.amqp.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
@@ -28,8 +30,13 @@ import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.ListDependencyUpdate;
 import org.shanoir.ng.utils.Utils;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Subject service implementation.
@@ -51,6 +58,9 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Autowired
 	private SubjectStudyDecorator subjectStudyMapper;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -91,17 +101,19 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 	
 	@Override
-	public Subject create(final Subject subject) {
+	public Subject create(final Subject subject) throws MicroServiceCommunicationException {
 		if (subject.getSubjectStudyList() != null) {
 			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
 				subjectStudy.setSubject(subject);
 			}			
 		}
-		return subjectRepository.save(subject);
+		Subject subjectDb = subjectRepository.save(subject);
+		updateSubjectName(new IdName(subject.getId(), subject.getName()));
+		return subjectDb;
 	}
 
 	@Override
-	public Subject update(final Subject subject) throws EntityNotFoundException {
+	public Subject update(final Subject subject) throws EntityNotFoundException, MicroServiceCommunicationException {
 		final Subject subjectDb = subjectRepository.findOne(subject.getId());
 		if (subjectDb == null) throw new EntityNotFoundException(Subject.class, subject.getId());
 		updateSubjectValues(subjectDb, subject);
@@ -118,8 +130,11 @@ public class SubjectServiceImpl implements SubjectService {
 	 * @param template template with new values.
 	 * @return database template with new values.
 	 */
-	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) {
+	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws MicroServiceCommunicationException {
 
+		if (subject.getName() != subjectDb.getName()) {
+			updateSubjectName(new IdName(subject.getId(), subject.getName()));
+		}
 		subjectDb.setName(subject.getName());
 		//subjectDb.setBirthDate(subject.getBirthDate());
 		subjectDb.setIdentifier(subject.getIdentifier());
@@ -138,8 +153,6 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectDb;
 	}
 	
-	
-
 	@Override
 	public List<SimpleSubjectDTO> findAllSubjectsOfStudy(final Long studyId) {
 		List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<SimpleSubjectDTO>();
@@ -160,18 +173,26 @@ public class SubjectServiceImpl implements SubjectService {
 		return simpleSubjectDTOList;
 	}
 	
-
 	@Override
 	public Subject findByIdentifier(String identifier) {
 		return subjectRepository.findByIdentifier(identifier);
 	}
 
-	
 	@Override
 	public Subject findSubjectFromCenterCode(final String centerCode) {
 		if (centerCode == null || "".equals(centerCode)) {
 			return null;
 		}
 		return subjectRepository.findFromCenterCode(centerCode);
+	}
+	
+	private boolean updateSubjectName(IdName subject) throws MicroServiceCommunicationException{
+		try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.subjectNameUpdateQueue().getName(),
+					new ObjectMapper().writeValueAsString(subject));
+			return true;
+		} catch (AmqpException | JsonProcessingException e) {
+			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");
+		} 
 	}
 }

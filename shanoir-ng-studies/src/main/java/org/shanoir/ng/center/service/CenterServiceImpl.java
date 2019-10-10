@@ -39,8 +39,7 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 
 	@Autowired
 	private CenterRepository centerRepository;
-
-
+	
 	@Override
 	public void deleteByIdCheckDependencies(final Long id) throws EntityNotFoundException, UndeletableDependenciesException {
 		final Center center = centerRepository.findOne(id);
