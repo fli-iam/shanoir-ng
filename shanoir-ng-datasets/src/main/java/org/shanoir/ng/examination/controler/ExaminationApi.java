@@ -81,6 +81,17 @@ public interface ExaminationApi {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<Page<ExaminationDTO>> findExaminations(Pageable pageable);
 
+	@ApiOperation(value = "", notes = "Returns all the examinations", response = Examination.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found examinations", response = Examination.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no examination found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/preclinical/{isPreclinical}", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
+			@ApiParam(value = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable);
+
 	@ApiOperation(value = "", notes = "Returns the list of examinations by subject id and study id", response = Examination.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found examinations", response = Examination.class, responseContainer = "List"),

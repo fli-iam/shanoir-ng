@@ -179,4 +179,10 @@ public class ExaminationServiceImpl implements ExaminationService {
 		return examinationRepository.findBySubjectIdAndStudyId(subjectId, studyId);
 	}
 
+	@Override
+	public Page<Examination> findPreclinicalPage(final boolean isPreclinical, final Pageable pageable) {
+		// Get list of studies reachable by connected user
+		return examinationRepository.findByStudyIdInAndPreclinical(getStudiesForUser(), isPreclinical, pageable);
+	}
+
 }

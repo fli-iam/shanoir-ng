@@ -88,6 +88,19 @@ public class ExaminationApiController implements ExaminationApi {
 		}
 		return new ResponseEntity<Page<ExaminationDTO>>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
 	}
+	
+	@Override
+	public ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
+			@ApiParam(value = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable) {
+		Page<Examination> examinations;
+
+		// Get examinations reachable by connected user
+		examinations = examinationService.findPreclinicalPage(isPreclinical, pageable);
+		if (examinations.getContent().size() == 0) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<Page<ExaminationDTO>>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+	}
 
 	@Override
 	public ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
