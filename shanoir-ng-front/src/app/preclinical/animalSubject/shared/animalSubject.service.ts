@@ -63,20 +63,20 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
     }
     
     updateSubject(id: number, subject: Subject): Promise<Subject> {
-        return this.http.put<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id, JSON.stringify(subject))
+        return this.http.put<Subject>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + id, subject.stringify())
             .map(response => response).toPromise();
     }
     
 
     createAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
-        return this.http.post<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, JSON.stringify(animalSubject))
+        return this.http.post<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, animalSubject.stringify())
             .map(res => res).toPromise();
     }
 
     
     
     createSubject(subject: Subject): Promise<Subject> {
-        return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, JSON.stringify(subject))
+        return this.http.post<Subject>(AppUtils.BACKEND_API_SUBJECT_URL, subject.stringify())
             .toPromise();
     }
     

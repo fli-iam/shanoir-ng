@@ -38,7 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select-box formControlName="imagedObjectCategory" [(ngModel)]="preclinicalSubject.subject.imagedObjectCategory" (change)="buildForm()">
-									<select-option *ngFor="let cat of ImagedObjectCategory.allPreClinical(false)" [value]="cat" [ngSwitch]="cat"
+									<select-option *ngFor="let cat of ImagedObjectCategory.allPreClinical(true)" [value]="cat" [ngSwitch]="cat"
 										i18n="Imaged Object Category {{cat}}|Category label@@ImagedObjectCategory{{cat}}">
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.PHANTOM">Phantom</ng-template>
 											<ng-template [ngSwitchCase]="ImagedObjectCategory.LIVING_HUMAN_BEING">Living human being</ng-template>

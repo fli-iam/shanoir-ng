@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.shanoir.ng.importer.model.Dataset;
@@ -561,6 +562,41 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		removeUnusedFiles();
 		return niftiFileResult;
 	}
+	
+	/**
+	 * adapt to generated folders by dicom2nifti converter
+	 * 
+	 * @param converter
+	 * @param niiFiles
+	 * @param directory
+	 * @return
+	 */
+	private List<File> niftiFileSortingDicom2Nifti(NIfTIConverter converter, List<File> niiFiles, File directory) {
+		// Have to adapt to generated folders by dicom2nifti converter
+		if (converter.isDicom2Nifti()) {
+			List<File> existingFiles = Arrays.asList(directory.listFiles());
+			// copy all files into the directory
+			for (File niiFile : niiFiles) {
+				ImportUtils.copyAllFiles(niiFile, directory);
+			}
+			// delete folder hierarchy created by dicomifier
+			for (File niiFile : niiFiles) {
+				try {
+					if (niiFile.isDirectory()) {
+						FileUtils.deleteDirectory(niiFile);
+					} else {
+						niiFile.delete();
+					}
+				} catch (Exception e) {
+					LOG.error("Error while deleting dicom2nifti generated folder " + e.getMessage());
+				}
+			}
+			// nii files are the diff
+			niiFiles = diff(existingFiles, directory.getPath());
+		}
+		return niiFiles;
+	}
+
 	
 	/**
 	 * This method generates the nifti files of serie  in proper datasets for an entire serie.

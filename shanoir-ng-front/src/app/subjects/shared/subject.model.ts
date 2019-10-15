@@ -36,7 +36,7 @@ export class Subject extends Entity {
     selected: boolean = false;
     subjectStudyList: SubjectStudy[] = [];
 
-	public static makeSubject(id: number, name: string, identifier: string, subjectStudy: SubjectStudy): Subject {
+    public static makeSubject(id: number, name: string, identifier: string, subjectStudy: SubjectStudy): Subject {
         let subject = new Subject();
         subject.id = id;
         subject.name = name;

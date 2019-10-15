@@ -27,6 +27,25 @@ export class PreclinicalSubject extends Entity {
   pathologies: SubjectPathology[];
   therapies: SubjectTherapy[];
 
-  service: AnimalSubjectService = ServiceLocator.injector.get(AnimalSubjectService);
-  
+  service: AnimalSubjectService = ServiceLocator.injector.get(AnimalSubjectService);  
+
+    // Override
+    public stringify() {
+        return JSON.stringify(new PreclinicalSubjectDTO(this), this.replacer);
+    }
+}
+
+export class PreclinicalSubjectDTO {
+
+    id: number;
+	animalSubject: AnimalSubject;
+	pathologies: SubjectPathology[];
+	therapies: SubjectTherapy[];
+	
+    constructor(subject: PreclinicalSubject) {
+        this.id = subject.id;
+		this.animalSubject = subject.animalSubject;
+		this.pathologies = subject.pathologies;
+		this.therapies = subject.therapies;
+    }
 }
