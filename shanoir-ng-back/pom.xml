@@ -39,6 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<module>../shanoir-ng-studies</module>
 		<module>../shanoir-ng-datasets</module>
 		<module>../shanoir-ng-import</module>
+		<module>../shanoir-ng-boutiques</module>
 	</modules>
 
 	<properties>

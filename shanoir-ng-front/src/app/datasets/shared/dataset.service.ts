@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpResponse } from '@angular/common/http';
+import { HttpResponse, HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
@@ -20,11 +20,16 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { Dataset } from './dataset.model';
+import 'rxjs/add/operator/map'
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
 
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
+
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
 
     getEntityInstance(entity: Dataset) { 
         return AppUtils.getEntityInstance(entity);

@@ -30,7 +30,7 @@ import { CenterService } from '../shared/center.service';
 
 export class CenterListComponent extends BrowserPaginEntityListComponent<Center> {
 
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     
     constructor(
             private centerService: CenterService) {

@@ -1,0 +1,7 @@
+<tool-descriptor-info [descriptor]="descriptor"></tool-descriptor-info>
+
+<invocation-gui [descriptor]="descriptor" (invocationChanged)="onInvocationChanged($event)"></invocation-gui>
+
+<button>Open invocation</button>
+<textarea [(ngModel)]="invocationValue" rows="10"></textarea>
+<button>Save invocation</button>

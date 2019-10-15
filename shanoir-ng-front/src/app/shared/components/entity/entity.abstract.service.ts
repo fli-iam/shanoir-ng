@@ -13,10 +13,12 @@
  */
 
 import { HttpClient } from '@angular/common/http';
+import {Injector} from '@angular/core';
 
 import { ServiceLocator } from '../../../utils/locator.service';
 import { Entity } from './entity.abstract';
 import { Page } from '../table/pageable.model';
+import { map } from 'rxjs/operators';
 
 export abstract class EntityService<T extends Entity> {
     
@@ -24,11 +26,13 @@ export abstract class EntityService<T extends Entity> {
 
     abstract getEntityInstance(entity?: T): T;
 
-    protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    // protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
+
+    constructor(protected http: HttpClient) {}
 
     getAll(): Promise<T[]> {
         return this.http.get<T[]>(this.API_URL)
-            .map(this.mapEntityList)
+            .pipe(map(this.mapEntityList))
             .toPromise();
     }
 
@@ -39,13 +43,13 @@ export abstract class EntityService<T extends Entity> {
 
     get(id: number): Promise<T> {
         return this.http.get<T>(this.API_URL + '/' + id)
-            .map(this.mapEntity)
+            .pipe(map(this.mapEntity))
             .toPromise();
     }
 
     create(entity: T): Promise<T> {
         return this.http.post<any>(this.API_URL, entity.stringify())
-            .map(this.mapEntity)
+            .pipe(map(this.mapEntity))
             .toPromise();
     }
 

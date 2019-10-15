@@ -22,8 +22,9 @@ import { ServiceLocator } from './utils/locator.service';
 
 
 @Component({
-    selector: 'shanoir-ng-app',
-    templateUrl: 'app.component.html'
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  // styleUrls: ['./app.component.css']
 })
 
 export class AppComponent {

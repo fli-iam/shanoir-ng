@@ -29,13 +29,13 @@ import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.ser
 
 export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListComponent<AcquisitionEquipment> {
 
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     private acqEquips: AcquisitionEquipment[];
 
     private createAcqEquip = false;
     private selectedAcqEquip : AcquisitionEquipment = new AcquisitionEquipment();
 
-    @ViewChild('coilModal') coilModal: ModalComponent;
+    @ViewChild('coilModal', { static: false }) coilModal: ModalComponent;
 
 
     constructor(

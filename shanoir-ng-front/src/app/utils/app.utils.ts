@@ -16,6 +16,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 import { MrDataset } from '../datasets/dataset/mr/dataset.mr.model';
 import { Dataset } from '../datasets/shared/dataset.model';
+import { process } from '../process';
+
 
 // Users http api
 const BACKEND_API_USERS_MS_URL: string = process.env.BACKEND_API_USERS_MS_URL;
@@ -27,6 +29,7 @@ export const BACKEND_API_USER_EXTENSION_REQUEST_URL: string = BACKEND_API_USER_U
 export const BACKEND_API_ROLE_ALL_URL: string = BACKEND_API_USERS_MS_URL + '/roles';
 
 const BACKEND_API_STUDIES_MS_URL: string = process.env.BACKEND_API_STUDIES_MS_URL;
+
 // Centers http api
 export const BACKEND_API_CENTER_URL: string = BACKEND_API_STUDIES_MS_URL + '/centers';
 export const BACKEND_API_CENTER_NAMES_URL: string = BACKEND_API_CENTER_URL + '/names';
@@ -75,6 +78,10 @@ export const BACKEND_API_IMAGE_VIEWER_URL: string = BACKEND_API_IMPORT_MS_URL + 
 export const BACKEND_API_QUERY_PACS: string = BACKEND_API_IMPORT_MS_URL + '/importer/query_pacs/';
 
 export const BACKEND_API_TASKS_URL: string = BACKEND_API_USERS_MS_URL + '/tasks';
+
+// Boutiques http api
+const BACKEND_API_BOUTIQUES_MS_URL: string = process.env.BACKEND_API_BOUTIQUES_MS_URL;
+export const BACKEND_API_BOUTIQUES_TOOL_URL: string = BACKEND_API_BOUTIQUES_MS_URL + '/boutiques';
 
 // Nifti Converter http api
 export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL + '/niftiConverters';

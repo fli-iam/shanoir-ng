@@ -12,15 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import '../assets/css/common.css';
-import '../assets/css/papaya.css';
+// import '../assets/css/common.css';
+// import '../assets/css/papaya.css';
+import { AppRoutingModule } from './app-routing.module';
 import { CommonModule } from '@angular/common';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ErrorHandler, Injector, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Autosize } from 'angular2-autosize';
+import { Autosize } from 'ng-autosize';
 import { MyDatePickerModule } from 'mydatepicker';
 
 import {
@@ -37,7 +38,6 @@ import { ManufacturerModelPipe } from './acquisition-equipments/shared/manufactu
 import { ManufacturerModelService } from './acquisition-equipments/shared/manufacturer-model.service';
 import { ManufacturerService } from './acquisition-equipments/shared/manufacturer.service';
 import { AppComponent } from './app.component';
-import { routing } from './app.routing';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { Router } from './breadcrumbs/router';
@@ -134,11 +134,29 @@ import { NotificationsComponent } from './shared/notifications/notifications.com
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 import { TaskService } from './async-tasks/task.service';
 import { StudyRightsService } from './studies/shared/study-rights.service';
+import { RouterModule, Routes } from '@angular/router';
+
+// Boutiques
+import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
+import { BoutiquesRxStompConfig } from './boutiques/boutiques-rx-stomp.config';
+import { BoutiquesComponent } from './boutiques/boutiques.component';
+import { ParameterComponent } from './boutiques/invocation-gui/parameter/parameter.component';
+import { ParameterGroupComponent } from './boutiques/invocation-gui/parameter-group/parameter-group.component';
+import { InvocationComponent } from './boutiques/invocation/invocation.component';
+import { InvocationGuiComponent } from './boutiques/invocation-gui/invocation-gui.component';
+import { ExecutionComponent } from './boutiques/execution/execution.component';
+import { SearchToolsComponent } from './boutiques/search-tools/search-tools.component';
+import { ToolListComponent } from './boutiques/tool-list/tool-list.component';
+import { ToolDescriptorInfoComponent } from './boutiques/tool-descriptor-info/tool-descriptor-info.component';
+import { ToolService } from './boutiques/tool.service';
+
+import { ReplaceSpacePipe } from './utils/pipes';
 
 //import { ModalService} from './shared/components/modal/modal.service';
 
 @NgModule({
     imports: [
+        AppRoutingModule,
         BrowserAnimationsModule,
         CommonModule,
         FormsModule,
@@ -146,7 +164,7 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         MatDialogModule,
         MyDatePickerModule,
         ReactiveFormsModule,
-        routing
+        RouterModule
     ],
     declarations: [
         AccountRequestComponent,
@@ -225,7 +243,17 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         AsyncTasksComponent,
         ToggleSwitchComponent,
         CheckboxComponent,
-        HelpMessageComponent
+        HelpMessageComponent,
+        BoutiquesComponent,
+        ToolListComponent,
+        InvocationComponent,
+        InvocationGuiComponent,
+        ExecutionComponent,
+        SearchToolsComponent,
+        ParameterComponent,
+        ParameterGroupComponent,
+        ToolDescriptorInfoComponent,
+        ReplaceSpacePipe
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -240,7 +268,7 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         CenterService,
         ConfirmDialogService,
         ExaminationService,
-        { 
+        {
             provide: ErrorHandler,
             useClass: HandleErrorService
         },
@@ -253,6 +281,7 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         RoleService,
         StudyService,
         CoilService,
+        // ToolService,
         SubjectService,
         UserService,
         DicomArchiveService,
@@ -269,7 +298,17 @@ import { StudyRightsService } from './studies/shared/study-rights.service';
         ImportDataService,
         NiftiConverterService,
         TaskService,
-        StudyRightsService
+        StudyRightsService,
+        ToolService,
+        {
+          provide: InjectableRxStompConfig,
+          useValue: BoutiquesRxStompConfig
+        },
+        {
+          provide: RxStompService,
+          useFactory: rxStompServiceFactory,
+          deps: [InjectableRxStompConfig]
+        }
     ],
     bootstrap: [AppComponent],
 })

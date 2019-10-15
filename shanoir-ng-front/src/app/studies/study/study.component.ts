@@ -45,7 +45,7 @@ import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
 export class StudyComponent extends EntityComponent<Study> {
     
-    @ViewChild('memberTable') table: TableComponent;
+    @ViewChild('memberTable', { static: false }) table: TableComponent;
 
     private centers: IdName[];
     private subjects: IdName[];

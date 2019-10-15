@@ -33,8 +33,8 @@ import { ExaminationService } from '../shared/examination.service';
 
 export class ExaminationComponent extends EntityComponent<Examination> {
 
-    @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
-    @ViewChild('attachNewFilesModal') attachNewFilesModal: ModalComponent;
+    @ViewChild('instAssessmentModal', { static: false }) instAssessmentModal: ModalComponent;
+    @ViewChild('attachNewFilesModal', { static: false }) attachNewFilesModal: ModalComponent;
     private centers: IdName[];
     public studies: IdName[];
     private subjects: SubjectWithSubjectStudy[];

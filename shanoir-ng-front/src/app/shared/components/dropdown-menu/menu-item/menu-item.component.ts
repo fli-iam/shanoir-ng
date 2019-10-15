@@ -17,6 +17,7 @@ import { Component, ContentChildren, forwardRef, Input, QueryList } from '@angul
 import { Observable } from 'rxjs';
 import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
 import { ImagesUrlUtil } from '../../../utils/images-url.util';
+import { timer } from 'rxjs/observable/timer';
 
 @Component({
     selector: 'menu-item',
@@ -56,7 +57,7 @@ export class MenuItemComponent {
             }
         });
 
-        let subscription = Observable.timer(0,100).subscribe (t=> {
+        let subscription = timer(0,100).subscribe (t=> {
             this.hasChildren = doHasChildren;
             this.opened = false;
             this.overflow = true;

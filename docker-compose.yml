@@ -172,6 +172,26 @@ services:
       - "rabbitmq"
       - "users"
   #
+  # Boutiques microservice
+  #
+  boutiques:
+    container_name: boutiques
+    build: ./docker-compose/boutiques
+    environment:
+      - keycloak.auth-server-url
+      - front.server.url
+      - front.server.address
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java:ro
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "9905:9905"
+     - "9915:9915"
+    depends_on:
+      - "datasets"
+  #
   # Solr microservice for Shanoir-NG search
   #
 #  solr:
@@ -253,8 +273,9 @@ services:
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
+      - "./shanoir-ng-front/dist:/etc/nginx/html"
     networks:
-      - shanoir_ng_network    
+      - shanoir_ng_network
     ports:
      - "443:443"
     depends_on:
@@ -265,6 +286,19 @@ services:
       - "datasets"
       - "dcm4chee-arc"
       - "rabbitmq"
+      - "front-dev"
+
+  front-dev:
+    container_name: front-dev
+    build: ./docker-compose/front-dev
+    volumes:
+      - "../shanoir-ng-front:/app/"
+    command: ng serve --host 0.0.0.0 --disableHostCheck
+    ports:
+     - "4200:4200"
+    tty: true
+    networks:
+      - shanoir_ng_network
 
 volumes:
   keycloak-database-data:

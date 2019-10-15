@@ -23,7 +23,7 @@ import { ImagesUrlUtil } from '../../utils/images-url.util';
 })
 export class UploaderComponent {
 
-    @ViewChild('input') private fileInput: ElementRef;
+    @ViewChild('input', { static: null }) private fileInput: ElementRef;
     @Output() fileChange = new EventEmitter<any>();
     @Input() loading: boolean = false;
     @Input() error: boolean = false;

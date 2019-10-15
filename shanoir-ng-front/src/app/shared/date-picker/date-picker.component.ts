@@ -18,15 +18,24 @@ import { IMyOptions } from 'mydatepicker';
 
 @Component({
     selector: 'datepicker',
+            // <my-date-picker 
+            //     [options]="options" 
+            //     [ngModel]="convertedDate"
+            //     (ngModelChange)="onModelChange($event)"
+            //     (inputFieldChanged)="onInputFieldChanged($event)"
+            //     (inputFocusBlur)="onTouch()">
+            // </my-date-picker>
     template: `
         <span>
-            <my-date-picker 
-                [options]="options" 
-                [ngModel]="convertedDate"
-                (ngModelChange)="onModelChange($event)"
-                (inputFieldChanged)="onInputFieldChanged($event)"
-                (inputFocusBlur)="onTouch()">
-            </my-date-picker>
+
+
+            <div class="input-box-container">
+              <input class="input-box" placeholder="Click to select a date" 
+                angular-mydatepicker name="mydate" (click)="dp.toggleCalendar()" 
+                [(ngModel)]="convertedDate" [options]="options" 
+                #dp="angular-mydatepicker" (dateChanged)="onDateChanged($event)"/>
+            </div>
+
         </span>
     `,
     styles: [

@@ -53,7 +53,8 @@ export class TableComponent implements OnInit {
 
 
     ngOnInit() {
-        let savedState = this.breadcrumbsService.currentStep.data.tableState;
+        let currentStep = this.breadcrumbsService.currentStep
+        let savedState = currentStep ? currentStep.data.tableState : null;
         if (savedState) {
             this.lastSortedCol = this.columnDefs.find(col => col && savedState.lastSortedCol && col.field == savedState.lastSortedCol.field);
             this.lastSortedAsc = savedState.lastSortedAsc;
@@ -222,7 +223,7 @@ export class TableComponent implements OnInit {
         this.getPage(this.getPageable()).then(page => {
             this.page = page;
             setTimeout(() => this.isLoading = false, 200);
-        });
+        }).catch((reason)=>console.log(reason));
     }
 
     /**
@@ -233,13 +234,16 @@ export class TableComponent implements OnInit {
     }
 
     private getPageable(): Pageable {
-        this.breadcrumbsService.currentStep.data.tableState = {
-            lastSortedCol: this.lastSortedCol,
-            lastSortedAsc: this.lastSortedAsc,
-            filter: this.filter,
-            currentPage: this.currentPage,
-            maxResults: this.maxResults
-        };
+        let currentStep = this.breadcrumbsService.currentStep
+        if(currentStep) {
+            this.breadcrumbsService.currentStep.data.tableState = {
+                lastSortedCol: this.lastSortedCol,
+                lastSortedAsc: this.lastSortedAsc,
+                filter: this.filter,
+                currentPage: this.currentPage,
+                maxResults: this.maxResults
+            };
+        }
         let orders: Order[] = [];
         if (this.lastSortedCol) {
             if (this.lastSortedCol['orderBy']) {

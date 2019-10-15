@@ -20,11 +20,16 @@ import * as AppUtils from '../../utils/app.utils';
 import { Center } from './center.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyCenter } from 'src/app/studies/shared/study-center.model';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class CenterService extends EntityService<Center> {
 
     API_URL = AppUtils.BACKEND_API_CENTER_URL;
+
+    constructor(protected http: HttpClient) {
+        super(http)
+    }
 
     getEntityInstance() { return new Center(); }
 

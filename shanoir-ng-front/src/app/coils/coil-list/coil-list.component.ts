@@ -26,7 +26,7 @@ import { CoilService } from '../shared/coil.service';
 })
 export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
     
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
             private coilService: CoilService) {

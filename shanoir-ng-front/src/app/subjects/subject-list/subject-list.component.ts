@@ -31,7 +31,7 @@ import { SubjectService } from '../shared/subject.service';
 
 export class SubjectListComponent extends BrowserPaginEntityListComponent<Subject> {
     
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     private studiesICanAdmin: number[];
 
     constructor(

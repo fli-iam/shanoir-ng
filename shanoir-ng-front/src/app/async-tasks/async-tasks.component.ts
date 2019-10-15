@@ -26,7 +26,7 @@ import { Task } from './task.model';
 
 export class AsyncTasksComponent extends BrowserPaginEntityListComponent<Task> {
     
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor() {       
         super('task');

@@ -15,6 +15,7 @@
 import { Component } from '@angular/core';
 
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
+import { process } from '../../process';
 
 @Component({
     selector: 'accountRequest',

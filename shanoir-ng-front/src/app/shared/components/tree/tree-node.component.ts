@@ -56,7 +56,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
     public loaded: boolean = false;
     public hasChildren: boolean;
     public checked: boolean | 'indeterminate';
-    @ViewChild('box') boxElt: CheckboxComponent;
+    @ViewChild('box', { static: false }) boxElt: CheckboxComponent;
     @Output() labelChange = new EventEmitter();
     @Output() labelClick = new EventEmitter();
     @Output() chkbxChange = new EventEmitter();

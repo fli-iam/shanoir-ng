@@ -22,6 +22,7 @@ import { RoleService } from '../../roles/role.service';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { process } from '../../process';
 
 @Component({
     selector: 'user-detail',

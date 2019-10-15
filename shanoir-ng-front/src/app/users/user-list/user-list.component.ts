@@ -26,7 +26,7 @@ import { UserService } from '../shared/user.service';
 })
 
 export class UserListComponent extends BrowserPaginEntityListComponent<User>{
-    @ViewChild('userTable') table: TableComponent;
+    @ViewChild('userTable', { static: false }) table: TableComponent;
 
     constructor(private userService: UserService) {
            super('user');

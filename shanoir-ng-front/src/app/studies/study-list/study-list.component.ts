@@ -29,7 +29,7 @@ import { StudyService } from '../shared/study.service';
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
-    @ViewChild('table') table: TableComponent;
+    @ViewChild('table', { static: false }) table: TableComponent;
     
     constructor(
         private studyService: StudyService) {

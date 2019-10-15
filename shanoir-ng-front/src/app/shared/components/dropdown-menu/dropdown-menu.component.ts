@@ -17,6 +17,7 @@ import { Observable } from 'rxjs';
 
 import { menuAnimDur, menuSlideDown } from '../../animations/animations';
 import { MenuItemComponent } from './menu-item/menu-item.component';
+import { timer } from 'rxjs/observable/timer';
 
 @Component({
     selector: 'dropdown-menu',
@@ -31,7 +32,7 @@ export class DropdownMenuComponent {
     @Input() link: string;
     @ContentChildren(forwardRef(() => MenuItemComponent)) itemMenus: QueryList<MenuItemComponent>;
     @Input() boolVar: boolean;
-    @ViewChild('container') container: ElementRef;
+    @ViewChild('container', { static: null }) container: ElementRef;
     @Input() mode: "top" | "tree";
 
     public opened: boolean = true;
@@ -61,7 +62,7 @@ export class DropdownMenuComponent {
             itemMenu.parent = this;
         });
 
-        let subscription = Observable.timer(0, 100).subscribe(t => {
+        let subscription = timer(0, 100).subscribe(t => {
             this.hasChildren = this.itemMenus.length > 0;
             this.opened = false;
             this.overflow = true;
