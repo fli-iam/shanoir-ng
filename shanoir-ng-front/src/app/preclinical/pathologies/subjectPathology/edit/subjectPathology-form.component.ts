@@ -284,7 +284,7 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         }
         this.preclinicalSubject.pathologies.push(this.subjectPathology);
         if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit(this.subjectPathology);
+            this.onEvent.emit([this.subjectPathology, true]);
         }
         this.toggleForm = false;
         this.subjectPathology = new SubjectPathology();
@@ -296,7 +296,7 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
             return; 
         }
         if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit(this.subjectPathology);
+            this.onEvent.emit([this.subjectPathology, false]);
         }
         this.toggleForm = false;
         this.subjectPathology = new SubjectPathology();

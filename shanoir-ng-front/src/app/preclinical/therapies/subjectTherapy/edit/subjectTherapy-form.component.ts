@@ -252,7 +252,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         }
         this.preclinicalSubject.therapies.push(this.subjectTherapy);
         if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit(this.subjectTherapy);
+            this.onEvent.emit([this.subjectTherapy, true]);
         }
         this.toggleForm = false;
         this.subjectTherapy = new SubjectTherapy();
@@ -264,7 +264,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             return; 
         }
         if (this.onEvent.observers.length > 0) {
-            this.onEvent.emit(this.subjectTherapy);
+            this.onEvent.emit([this.subjectTherapy, false]);
         }
         this.toggleForm = false;
         this.subjectTherapy = new SubjectTherapy();

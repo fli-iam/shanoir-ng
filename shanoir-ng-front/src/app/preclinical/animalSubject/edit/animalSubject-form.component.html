@@ -188,7 +188,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</div>
 				<div>
 					<subject-pathology-form [preclinicalSubject]="preclinicalSubject"  [createSPMode]="createSPMode"
-								[toggleForm]="toggleFormSP" [subjectpathoSelected]="pathoSelected"  (onEvent)="refreshDisplayPathology($event)">
+								[toggleForm]="toggleFormSP" [subjectpathoSelected]="pathoSelected"  (onEvent)="refreshDisplayPathology($event[0], $event[1])">
 					</subject-pathology-form>
 				</div>
 				<shanoir-table #subjectPathologiesTable
@@ -214,7 +214,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</div>
 				<div>
 					<subject-therapy-form [preclinicalSubject]="preclinicalSubject"  [createSTMode]="createSTMode"
-								[toggleForm]="toggleFormST" [subTherapySelected]="therapySelected"  (onEvent)="refreshDisplayTherapy($event)">
+								[toggleForm]="toggleFormST" [subTherapySelected]="therapySelected"  (onEvent)="refreshDisplayTherapy($event[0], $event[1])">
 					</subject-therapy-form>
 				</div>
 				<shanoir-table #subjectTherapiesTable
