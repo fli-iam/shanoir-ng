@@ -291,12 +291,13 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     }
     
     updatePathology(): void {
-        this.subjectPathologyService.updateSubjectPathology(this.preclinicalSubject, this.subjectPathology)
-            .then(st =>{
-                if (this.onEvent.observers.length > 0) {
-                    this.onEvent.emit(this.subjectPathology);
-                }    
-            });
+        if (!this.subjectPathology) { 
+            console.log('nothing to update');
+            return; 
+        }
+        if (this.onEvent.observers.length > 0) {
+            this.onEvent.emit(this.subjectPathology);
+        }
         this.toggleForm = false;
         this.subjectPathology = new SubjectPathology();
     }
