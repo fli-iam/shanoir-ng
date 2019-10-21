@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Input, ViewChild, Component} from '@angular/core'
+import {Input, Output, ViewChild, Component, forwardRef, EventEmitter} from '@angular/core'
 
 import { SubjectTherapy } from '../shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../shared/subjectTherapy.service';
@@ -25,23 +25,41 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
-
+import { ControlValueAccessor } from '@angular/forms';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Mode } from '../../../../shared/components/entity/entity.component.abstract';
 
 @Component({
     selector: 'subject-therapy-list',
     templateUrl: 'subjectTherapy-list.component.html',
     styleUrls: ['subjectTherapy-list.component.css'],
-    providers: [SubjectTherapyService]
+        providers: [
+        { 
+          provide: NG_VALUE_ACCESSOR,
+          useExisting: forwardRef(() => SubjectTherapiesListComponent),
+          multi: true
+        },
+        SubjectTherapyService
+    ]
 })
 
 
 @ModesAware
-export class SubjectTherapiesListComponent  extends BrowserPaginEntityListComponent<SubjectTherapy>{
+export class SubjectTherapiesListComponent  extends BrowserPaginEntityListComponent<SubjectTherapy> implements ControlValueAccessor {
+
     @Input() canModify: Boolean = false;
-    @Input() preclinicalSubject: PreclinicalSubject; 
+    @Input() preclinicalSubject: PreclinicalSubject;
+    @Input() mode: Mode;
+    @Output() onEvent = new EventEmitter();
+    protected model: any;
+    protected disabled: boolean = false;
+    protected propagateChange = (_: any) => {};
+    protected propagateTouched = () => {};
     public toggleFormST: boolean = false;
     public createSTMode: boolean = false;
     public therapySelected: SubjectTherapy;
+    private therapyList: SubjectTherapy[] = [];
+
    @ViewChild('subjectTherapiesTable') table: TableComponent;
 
     constructor(
@@ -49,16 +67,39 @@ export class SubjectTherapiesListComponent  extends BrowserPaginEntityListCompon
             super('preclinical-subject-therapy');
     }
 
+    private addToCache(key: string, toBeCached: any) {
+        if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
+            this.breadcrumbsService.currentStep.addPrefilled(key, []);
+        }
+        this.breadcrumbsService.currentStep.getPrefilledValue(key).push(toBeCached);
+    }
+
+    private getCache(key: string) {
+        if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
+           this.breadcrumbsService.currentStep.addPrefilled(key, []);
+        }
+        return this.breadcrumbsService.currentStep.getPrefilledValue(key);
+    }
+
     getEntities(): Promise<SubjectTherapy[]> {
         let subjectTherapies: SubjectTherapy[] = [];
         if (this.preclinicalSubject && this.preclinicalSubject.animalSubject && this.preclinicalSubject.animalSubject.id) {
-            this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
-                subjectTherapies = st;
-            })
+            // Initialize from breadcrumbs cache if existing
+            let ts: SubjectTherapy[];
+            if (this.breadcrumbsService.currentStep.entity != null && (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).therapies != null) {
+                ts = (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).therapies;
+                this.preclinicalSubject.therapies = ts;
+            } else {
+                return this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
+                    this.preclinicalSubject.therapies = st;
+                    return st;
+                });
+            }
+            return Promise.resolve(this.preclinicalSubject.therapies);
         }
         return Promise.resolve(subjectTherapies);
     }
-    
+
     getColumnDefs(): any[] {
         function dateRenderer(date) {
             if (date) {
@@ -81,7 +122,7 @@ export class SubjectTherapiesListComponent  extends BrowserPaginEntityListCompon
             }
             return '';
         };
-        let colDef: any[] = [
+        let colDef: any[] = [  
             { headerName: "Therapy", field: "therapy.name" },
             {
                 headerName: "Type", field: "therapy.therapyType", type: "Enum", cellRenderer: function(params: any) {
@@ -114,49 +155,46 @@ export class SubjectTherapiesListComponent  extends BrowserPaginEntityListCompon
                 }
             }     
         ];
+        setTimeout(() => {
+            if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
+                colDef.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.editSubjectTherapy(item) });
+            }
+            if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
+                colDef.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeSubjectTherapy(item) });
+            }
+        }, 100)
         return colDef;       
+    }
+
+    private editSubjectTherapy = (item: SubjectTherapy) => {
+        this.therapySelected = item;
+        this.toggleFormST = true;
+        this.createSTMode = false;
+    }
+
+    private removeSubjectTherapy = (item: SubjectTherapy) => {
+        const index: number = this.preclinicalSubject.therapies.indexOf(item);
+        if (index !== -1) {
+            this.preclinicalSubject.therapies.splice(index, 1);
+        }
+        if (item.id != null) {
+            this.addToCache("therapiesToDelete", item);
+        } else {
+            if (this.getCache("therapiesToCreate").indexOf(item) != -1) {
+                this.getCache("therapiesToCreate").splice(this.getCache("therapiesToCreate").indexOf(item), 1);
+            }
+            if (this.getCache("therapiesToCreate").indexOf(item) != -1) {
+                 this.getCache("therapiesToUpdate").splice(this.getCache("therapiesToUpdate").indexOf(item), 1);
+            }
+        }
+        this.onEvent.emit("delete");
+        this.onDelete.next(item);
+        this.table.refresh();
     }
 
     getCustomActionsDefs(): any[] {
         return [];
     }
-    
-    
-
-    refreshList(newSubTherapy: SubjectTherapy) {
-        this.getEntities(),
-        this.refreshDisplay(true);
-    }
-
-    refreshDisplay(cancel: boolean) {
-        this.toggleFormST = false;
-        this.createSTMode = false;
-    }
-
-    
-    protected openDeleteConfirmDialog = (entity: SubjectTherapy) => {
-        if (!this.keycloakService.isUserAdminOrExpert()) return;
-        this.confirmDialogService
-            .confirm(
-                'Delete', 'Are you sure you want to delete preclinical-subject-therapy n° ' + entity.id + ' ?',
-                ServiceLocator.rootViewContainerRef
-            ).subscribe(res => {
-                if (res) {
-                    this.subjectTherapyService.deleteSubjectTherapy(this.preclinicalSubject, entity).then(() => {
-                        this.onDelete.next(entity);
-                        this.table.refresh();
-                        this.msgBoxService.log('info', 'The preclinical-subject-therapy sucessfully deleted');
-                    }).catch(reason => {
-                        if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
-                            if (reason.error.code != 422) throw Error(reason);
-                        }
-                    });                    
-                }
-            })
-    }
-    
-
 
     viewSubjectTherapy = (therapy: SubjectTherapy) => {
         this.toggleFormST = true;
@@ -176,6 +214,51 @@ export class SubjectTherapiesListComponent  extends BrowserPaginEntityListCompon
         this.therapySelected = new SubjectTherapy();
     }
 
-    
+    refreshDisplayTherapy(subjectTherapy: SubjectTherapy, create: boolean){
+        this.toggleFormST = false;
+        this.createSTMode = false;
+        if (subjectTherapy && subjectTherapy != null) {
+            if (!subjectTherapy.id && create) {
+                this.addToCache("therapiesToCreate", subjectTherapy);
+                this.onAdd.next(subjectTherapy);
+                this.writeValue(subjectTherapy);
+            } else  if (subjectTherapy.id && !create) {
+                this.addToCache("therapiesToUpdate", subjectTherapy);
+            }
+        }
+        this.onEvent.emit("create");
+        this.table.refresh();
+    }
 
+    goToAddTherapy(){
+        this.therapySelected = new SubjectTherapy();
+        this.createSTMode = true;
+        if (this.toggleFormST==false) {
+            this.toggleFormST = true;
+        } else if (this.toggleFormST==true) {
+            this.toggleFormST = false;
+        } else {
+            this.toggleFormST = true;
+        }
+    }
+    
+    protected onRowClick(entity: SubjectTherapy) {
+        // do nothing to avoid wrong route
+    }
+
+    writeValue(value: any): void {
+        this.therapyList.push(value);
+    }
+
+    registerOnChange(fn: any): void {
+        this.propagateChange = fn;
+    }
+
+    registerOnTouched(fn: any): void {
+        this.propagateTouched = fn;
+    }
+
+    setDisabledState(isDisabled: boolean): void {
+        this.disabled = isDisabled;
+    }
 }

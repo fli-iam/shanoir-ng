@@ -209,7 +209,6 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             if (this.preclinicalSubject.therapies === undefined) {
                 this.preclinicalSubject.therapies = [];
             }
-            this.preclinicalSubject.therapies.push(this.subjectTherapy);
             if (this.onCreated.observers.length > 0) {
                 this.onCreated.emit(this.subjectTherapy);
             }
@@ -250,7 +249,6 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         if(this.preclinicalSubject.therapies === undefined){
             this.preclinicalSubject.therapies = [];
         }
-        this.preclinicalSubject.therapies.push(this.subjectTherapy);
         if (this.onEvent.observers.length > 0) {
             this.onEvent.emit([this.subjectTherapy, true]);
         }

@@ -12,25 +12,23 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h2 i18n="Manage subjectTherapies|Title@@subjectTherapiesListTitle">Manage subject therapies</h2>
-
  <div [ngSwitch]="mode">
-		<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
-			<button *ngIf="toggleFormST==false" (click)="toggleSubjectTherapyForm()">Add a therapy</button>
-		</ng-template>
-		<ng-template [ngSwitchCase]="'create'" *ngIf="canModify">
-			<button *ngIf="toggleFormST==false" (click)="toggleSubjectTherapyForm()">Add a therapy</button>
-		</ng-template>
-	</div>
-    
-    <div>
-    	<subject-therapy-form [preclinicalSubject]="preclinicalSubject" [createSTMode]="createSTMode"  
-			[toggleForm]="toggleFormST" [subTherapySelected]="therapySelected" (onCreated)="refreshList($event)" (onCancel)="refreshDisplay($event)"></subject-therapy-form>
-	</div>	
-	
+	<ng-template [ngSwitchCase]="'edit'">
+		<button *ngIf="toggleFormST==false" (click)="toggleSubjectTherapyForm()">Add a therapy</button>
+	</ng-template>
+	<ng-template [ngSwitchCase]="'create'">
+		<button *ngIf="toggleFormST==false" (click)="toggleSubjectTherapyForm()">Add a therapy</button>
+	</ng-template>
+</div>
+
+<div>
+    <subject-therapy-form [preclinicalSubject]="preclinicalSubject" [createSTMode]="createSTMode"
+                [toggleForm]="toggleFormST" [subTherapySelected]="therapySelected"  (onEvent)="refreshDisplayTherapy($event[0], $event[1])">
+    </subject-therapy-form>
+</div>
+
 <shanoir-table  #subjectTherapiesTable
     [getPage]="getPage.bind(this)" 
     [columnDefs]="columnDefs" 
-    [customActionDefs]="customActionDefs" 
-    (rowClick)="onRowClick($event)">
+    [customActionDefs]="customActionDefs" >
 </shanoir-table> 

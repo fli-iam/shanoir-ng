@@ -30,6 +30,7 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
             this.browserPaging = new BrowserPaging(this.entities, this.columnDefs)
         });
         this.manageAfterDelete();
+        this.manageAfterAdd();
     }
 
     getPage(pageable: FilterablePageable): Promise<Page<T>> {
@@ -47,13 +48,25 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
         this.subscribtions.push(
             this.onDelete.subscribe(response => {
                 if (this.instanceOfEntity(response)) {
-                    this.entities = this.entities.filter(item => item.id != response.id);
+                    if (response.id) {
+                        this.entities = this.entities.filter(item => item.id != response.id);
+                    } else {
+                        this.entities = this.entities.filter(item => item != response);
+                    }
                 }
+            })
+        );
+    }
+    
+    private manageAfterAdd() {
+        this.subscribtions.push(
+            this.onAdd.subscribe(response => {
+               this.entities.push(response);
             })
         );
     }
 
     private instanceOfEntity(obj: any): boolean {
-        return obj.id && obj.create && obj.delete && obj.update;
+        return obj.create && obj.delete && obj.update;
     }
 }
