@@ -12,7 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component, Input, ViewChild} from '@angular/core'
+import {Component, Input, ViewChild, forwardRef, EventEmitter} from '@angular/core'
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { SubjectPathology } from '../shared/subjectPathology.model';
 import { SubjectPathologyService } from '../shared/subjectPathology.service';
@@ -23,44 +24,62 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
-
+import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
 
 
 @Component({
     selector: 'subject-pathology-list',
     templateUrl: 'subjectPathology-list.component.html',
-    styleUrls: ['subjectPathology-list.component.css'],
-    providers: [SubjectPathologyService]
+    providers: [
+       { 
+          provide: NG_VALUE_ACCESSOR,
+          useExisting: forwardRef(() => SubjectPathologiesListComponent),
+          multi: true
+        },
+        SubjectPathologyService
+    ]
 })
+
 @ModesAware
-export class SubjectPathologiesListComponent extends BrowserPaginEntityListComponent<SubjectPathology>{
-    @Input() canModify: Boolean = false;
-    @Input() preclinicalSubject: PreclinicalSubject;
-    public toggleFormSP: boolean = false;
-    public createSPMode: boolean = false;
-    public pathoSelected: SubjectPathology;
-    
-    @ViewChild('subjectPathologiesTable') table: TableComponent;
-    
+export class SubjectPathologiesListComponent extends SubjectAbstractListInput<SubjectPathology>{
 
     constructor(
         private subjectPathologyService: SubjectPathologyService) {
             super('preclinical-subject-pathology');
     }
 
+    public getEntityName() {
+        return ('Pathology');
+    }
 
-	getEntities(): Promise<SubjectPathology[]> {
+    protected getEntity() {
+        return new SubjectPathology();
+    }
+
+    protected getEntityList() {
+        return this.preclinicalSubject.pathologies;
+    }
+
+    getEntities(): Promise<SubjectPathology[]> {
         let subjectPathologies: SubjectPathology[] = [];
         if (this.preclinicalSubject && this.preclinicalSubject.animalSubject && this.preclinicalSubject.animalSubject.id) {
-            this.subjectPathologyService.getSubjectPathologies(this.preclinicalSubject).then(st => {
-                subjectPathologies = st;
-            })
+            // Initialize from breadcrumbs cache if existing
+            let ts: SubjectPathology[];
+            if (this.breadcrumbsService.currentStep.entity != null && (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).pathologies != null) {
+                ts = (this.breadcrumbsService.currentStep.entity as PreclinicalSubject).pathologies;
+                this.preclinicalSubject.pathologies = ts;
+            } else {
+                return this.subjectPathologyService.getSubjectPathologies(this.preclinicalSubject).then(st => {
+                    this.preclinicalSubject.pathologies = st;
+                    return st;
+                });
+            }
+            return Promise.resolve(this.preclinicalSubject.pathologies);
         }
         return Promise.resolve(subjectPathologies);
     }
-    
-    
-    getColumnDefs(): any[] {
+
+     getColumnDefs(): any[] {
         function dateRenderer(date) {
             if (date) {
                 return new Date(date).toLocaleDateString();
@@ -73,7 +92,8 @@ export class SubjectPathologiesListComponent extends BrowserPaginEntityListCompo
             }
             return '';
         };
-        let colDef: any[] = [
+
+        let columnDefs: any[] = [
             { headerName: "Pathology", field: "pathology.name" },
             { headerName: "PathologyModel", field: "pathologyModel.name" },
             {
@@ -92,66 +112,14 @@ export class SubjectPathologiesListComponent extends BrowserPaginEntityListCompo
                 }
             },
         ];
-        return colDef;       
+        setTimeout(() => {
+            if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
+                this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.editSubjectEntity(item) });
+            }
+            if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
+                this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeSubjectEntity(item) });
+            }
+        }, 100)
+        return columnDefs;
     }
-
-    getCustomActionsDefs(): any[] {
-        return [];
-    }
-    
-    
-
-    refreshList(newSubPatho: SubjectPathology) {
-        this.getEntities(),
-        this.refreshDisplay(true);
-    }
-
-
-    refreshDisplay(cancel: boolean) {
-        this.toggleFormSP = false;
-        this.createSPMode = false;
-    }
-
-    protected openDeleteConfirmDialog = (entity: SubjectPathology) => {
-        if (!this.keycloakService.isUserAdminOrExpert()) return;
-        this.confirmDialogService
-            .confirm(
-                'Delete', 'Are you sure you want to delete preclinical-subject-pathology n° ' + entity.id + ' ?',
-                ServiceLocator.rootViewContainerRef
-            ).subscribe(res => {
-                if (res) {
-                    this.subjectPathologyService.deleteSubjectPathology(this.preclinicalSubject, entity).then(() => {
-                        this.onDelete.next(entity);
-                        this.table.refresh();
-                        this.msgBoxService.log('info', 'The preclinical-subject-pathology sucessfully deleted');
-                    }).catch(reason => {
-                        if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
-                            if (reason.error.code != 422) throw Error(reason);
-                        }
-                    });                    
-                }
-            })
-    }
-    
-
-
-    viewSubjectPathology = (therapy: SubjectPathology) => {
-        this.toggleFormSP = true;
-        this.createSPMode = false;
-        this.pathoSelected = therapy;
-    }
-
-    toggleSubjectPathologyForm() {
-        if (this.toggleFormSP == false) {
-            this.toggleFormSP = true;
-        } else if (this.toggleFormSP == true) {
-            this.toggleFormSP = false;
-        } else {
-            this.toggleFormSP = true;
-        }
-        this.createSPMode = true;
-        this.pathoSelected = new SubjectPathology();
-    }
-
 }

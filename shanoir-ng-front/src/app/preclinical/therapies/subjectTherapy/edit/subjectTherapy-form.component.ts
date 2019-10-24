@@ -13,7 +13,7 @@
  */
 
 import { Component, Input, Output, EventEmitter} from '@angular/core';
-import { FormGroup,  Validators } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
 
@@ -122,8 +122,6 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         });
     }
     
-    
-    
     loadTherapies() {
         this.therapyService.getAll().then(therapies => this.therapies = therapies);
     }
@@ -131,8 +129,6 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     loadUnits() {
         this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT, PreclinicalUtils.PRECLINICAL_UNIT_VOLUME).then(units => this.units = units);
     }
-
-   
 
     getEnums(): void {
         this.frequencies = this.enumUtils.getEnumArrayFor('Frequency');
@@ -173,6 +169,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         }
         if (this.toggleForm) {
             this.buildForm();
+            this.form.markAsUntouched();
         }
     }
 

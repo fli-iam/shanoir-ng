@@ -171,35 +171,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<div *ngIf="displayPathologyTherapy">
 				<fieldset>
 					<legend i18n="AniamlSubjectDetail|Pathologies label@@animalSubjectDetailPathologies">Pathologies</legend>
-				</fieldset>		
-				<div [ngSwitch]="mode">
-					<ng-template [ngSwitchCase]="'edit'">
-						<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
-							<i class="fas fa-plus-square"></i>
-							new pathology
-						</button>
-					</ng-template>
-					<ng-template [ngSwitchCase]="'create'" *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()">
-						<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
-							<i class="fas fa-plus-square"></i>
-							new pathology
-						</button>
-					</ng-template>
-				</div>
-				<div>
-					<subject-pathology-form [preclinicalSubject]="preclinicalSubject"  [createSPMode]="createSPMode"
-								[toggleForm]="toggleFormSP" [subjectpathoSelected]="pathoSelected"  (onEvent)="refreshDisplayPathology($event[0], $event[1])">
-					</subject-pathology-form>
-				</div>
-				<shanoir-table #subjectPathologiesTable
-    				[getPage]="getPagePathology.bind(this)" 
-    				[columnDefs]="columnDefsPathologies" >
-				</shanoir-table> 
+				</fieldset>
+                <subject-pathology-list #pathologiesComponent [mode]="mode" (onEvent)="validateForm($event)" [(ngModel)]="preclinicalSubject.pathologies" formControlName="pathologies" [preclinicalSubject]="preclinicalSubject"></subject-pathology-list>
     			<fieldset>
     				<legend i18n="AniamlSubjectDetail|Therapies label@@animalSubjectDetailTherapies">Therapies</legend>
     			</fieldset>
-                            <subject-therapy-list [mode]="mode" (onEvent)="validateForm($event)" [(ngModel)]="preclinicalSubject.therapies" formControlName="therapies" [preclinicalSubject]="preclinicalSubject"></subject-therapy-list>
-                        </div>
+                <subject-therapy-list #therapiesComponent [mode]="mode" (onEvent)="validateForm($event)" [(ngModel)]="preclinicalSubject.therapies" formControlName="therapies" [preclinicalSubject]="preclinicalSubject"></subject-therapy-list>
+            </div>
 			<form-footer
 				[state]="footerState"
 				(save)="save()"

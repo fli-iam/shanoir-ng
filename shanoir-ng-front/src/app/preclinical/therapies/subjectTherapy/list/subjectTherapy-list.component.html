@@ -11,23 +11,16 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-
- <div [ngSwitch]="mode">
-	<ng-template [ngSwitchCase]="'edit'">
-		<button *ngIf="toggleFormST==false" (click)="toggleSubjectTherapyForm()">Add a therapy</button>
-	</ng-template>
-	<ng-template [ngSwitchCase]="'create'">
-		<button *ngIf="toggleFormST==false" (click)="toggleSubjectTherapyForm()">Add a therapy</button>
-	</ng-template>
+<div *ngIf="mode == 'edit'">
+    <button *ngIf="toggleForm==false" (click)="toggleSubjectItemForm()">Add a {{getEntityName()}}</button>
 </div>
-
 <div>
-    <subject-therapy-form [preclinicalSubject]="preclinicalSubject" [createSTMode]="createSTMode"
-                [toggleForm]="toggleFormST" [subTherapySelected]="therapySelected"  (onEvent)="refreshDisplayTherapy($event[0], $event[1])">
+    <subject-therapy-form [preclinicalSubject]="preclinicalSubject" [createSTMode]="createMode"
+                [toggleForm]="toggleForm" [subTherapySelected]="selectedEntity"  (onEvent)="refreshDisplayEntity($event[0], $event[1])">
     </subject-therapy-form>
 </div>
 
-<shanoir-table  #subjectTherapiesTable
+<shanoir-table  #subjectEntityTable
     [getPage]="getPage.bind(this)" 
     [columnDefs]="columnDefs" 
     [customActionDefs]="customActionDefs" >

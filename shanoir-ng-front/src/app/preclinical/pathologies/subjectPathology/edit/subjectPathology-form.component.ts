@@ -31,7 +31,6 @@ import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { slideDown } from '../../../../shared/animations/animations';
 
-
 @Component({
     selector: 'subject-pathology-form',
     templateUrl: 'subjectPathology-form.component.html',
@@ -122,8 +121,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         });
     }
     
-    
-
     loadPathologies() {
         this.pathologyService.getAll().then(pathologies => this.pathologies = pathologies);
     }
@@ -135,8 +132,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
     loadReferences() {
         this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_ANATOMY, PreclinicalUtils.PRECLINICAL_ANATOMY_LOCATION).then(locations => this.locations = locations);
     }
- 
-    
 
     toggleFormSP(creation: boolean): void {
         if (this.toggleForm == false) {
@@ -148,7 +143,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
             this.toggleForm = false;
             this.onCancel.emit(false);
         }
-
         this.createSPMode = creation;
     }
     
@@ -174,8 +168,9 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         }
         if (this.toggleForm) {
             this.buildForm();
+            this.form.markAsUntouched();
         }
-    }
+   }
 
     //AS we need to have the same object reference in select and model, w have to set them from loaded lists 
     loadSubjectPathologyAttributesForSelect(selectedPatho: SubjectPathology) {
@@ -216,7 +211,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
             if (this.preclinicalSubject.pathologies === undefined) {
                 this.preclinicalSubject.pathologies = [];
             }
-            this.preclinicalSubject.pathologies.push(this.subjectPathology);
             if (this.onCreated.observers.length > 0) {
                 this.onCreated.emit(this.subjectPathology);
             }
@@ -282,7 +276,6 @@ export class SubjectPathologyFormComponent extends EntityComponent<SubjectPathol
         if(this.preclinicalSubject.pathologies === undefined){
             this.preclinicalSubject.pathologies = [];
         }
-        this.preclinicalSubject.pathologies.push(this.subjectPathology);
         if (this.onEvent.observers.length > 0) {
             this.onEvent.emit([this.subjectPathology, true]);
         }

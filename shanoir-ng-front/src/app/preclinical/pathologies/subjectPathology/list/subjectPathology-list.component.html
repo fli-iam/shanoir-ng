@@ -11,28 +11,17 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-
-<h2 i18n="Manage subjectPathologies|Title@@subjectPathologiesListTitle">Manage subject pathologies</h2>
-
-<div [ngSwitch]="mode.state">
-		<ng-template [ngSwitchCase]="Modes.edit" *ngIf="canModify">
-			<button *ngIf="toggleFormSP==false" (click)="toggleSubjectPathologyForm()">Add a pathology</button>
-		</ng-template>
-		<ng-template [ngSwitchCase]="Modes.create" *ngIf="canModify">
-			<button *ngIf="toggleFormSP==false" (click)="toggleSubjectPathologyForm()">Add a pathology</button>
-		</ng-template>
+<div *ngIf="mode == 'edit'">
+    <button *ngIf="toggleForm==false" (click)="toggleSubjectItemForm()">Add a {{getEntityName()}}</button>
 </div>
-    
 <div>
-    	<subject-pathology-form [preclinicalSubject]="preclinicalSubject" [createSPMode]="createSPMode"  [mode]="mode" [canModify]="canModify"
-			[toggleForm]="toggleFormSP" [subjectpathoSelected]="pathoSelected" (onCreated)="refreshList($event)" (onCancel)="refreshDisplay($event)"></subject-pathology-form>
+    <subject-pathology-form [preclinicalSubject]="preclinicalSubject" [createSPMode]="createMode"
+                [toggleForm]="toggleForm" [subjectpathoSelected]="selectedEntity"  (onEvent)="refreshDisplayEntity($event[0], $event[1])">
+    </subject-pathology-form>
 </div>
-	
-	
-<shanoir-table #subjectPathologiesTable
+
+<shanoir-table  #subjectEntityTable
     [getPage]="getPage.bind(this)" 
     [columnDefs]="columnDefs" 
-    [customActionDefs]="customActionDefs" 
-    (rowClick)="onRowClick($event)">
+    [customActionDefs]="customActionDefs" >
 </shanoir-table> 
-
