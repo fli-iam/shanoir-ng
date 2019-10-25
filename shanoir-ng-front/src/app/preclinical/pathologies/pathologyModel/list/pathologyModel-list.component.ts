@@ -70,6 +70,14 @@ export class PathologyModelsListComponent   extends BrowserPaginEntityListCompon
         return [];
     }
 
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
     
         
     downloadModelSpecifications = (model:PathologyModel) => {

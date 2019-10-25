@@ -41,6 +41,15 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
             super('preclinical-therapy');
         }
 
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+
     getEntities(): Promise<Therapy[]> {
         return this.therapyService.getAll();
     }

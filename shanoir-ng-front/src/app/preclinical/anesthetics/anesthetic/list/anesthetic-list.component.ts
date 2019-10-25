@@ -41,6 +41,15 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
         super('preclinical-anesthetic');
     }
     
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }    
+    
     getEntities(): Promise<Anesthetic[]> {
         return this.anestheticsService.getAll();
     }

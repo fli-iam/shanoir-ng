@@ -5,6 +5,7 @@
 *~
 *.swp
 *.map
+*.pyc
 *.metadata.json
 *.settings/
 .DS_Store

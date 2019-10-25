@@ -52,9 +52,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{enumUtils.getEnumValue(therapyTypes,therapy.therapyType)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="therapyType" required formControlName="therapyType" [(ngModel)]="therapy.therapyType">
-										<option *ngFor="let therapyType of therapyTypes" [value]="therapyType.key">{{therapyType.value}}</option>
-									</select>
+                                    <select-box formControlName="therapyType" [(ngModel)]="therapy.therapyType">
+                                        <select-option *ngFor="let therapyType of therapyTypes" [value]="therapyType.key">{{therapyType.value}}</select-option>
+                                    </select-box>
 									<label *ngIf="hasError('therapyType', ['required'])" [@slideDown]="hasError('therapyType', ['required'])" class="form-validation-alert" i18n="Edit therapy|therapyType required error@@therapyDetailTherapyTypeRequiredError">Type is required!</label>
 								</ng-template>
 							</span>

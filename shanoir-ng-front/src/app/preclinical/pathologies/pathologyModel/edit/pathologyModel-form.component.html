@@ -52,9 +52,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{model?.pathology?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<select id="pathology" required formControlName="pathology" [(ngModel)]="model.pathology">
-										<option *ngFor="let pathology of pathologies" [ngValue]="pathology">{{pathology.name}}</option>
-									</select>
+                                    <select-box formControlName="pathology" [(ngModel)]="model.pathology">
+                                        <select-option *ngFor="let pathology of pathologies" [value]="pathology">{{pathology.name}}</select-option>
+                                    </select-box>
 									<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
 										<i class="fas fa-plus-square"></i>
 										new pathology

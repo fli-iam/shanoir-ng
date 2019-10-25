@@ -41,6 +41,15 @@ export class PathologiesListComponent extends BrowserPaginEntityListComponent<Pa
             super('preclinical-pathology');
      }
     
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    }
+    
     getEntities(): Promise<Pathology[]> {
         return this.pathologyService.getAll();
     }
