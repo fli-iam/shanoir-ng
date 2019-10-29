@@ -32,7 +32,16 @@ export class ReferencesListComponent  extends BrowserPaginEntityListComponent<Re
     constructor(
         private referenceService: ReferenceService) {
             super('preclinical-reference');
-     }
+    }
+     
+    getOptions() {
+        return {
+            new: true,
+            view: true, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
+            delete: this.keycloakService.isUserAdminOrExpert()
+        };
+    } 
     
     getEntities(): Promise<Reference[]> {
         return this.referenceService.getAll();
