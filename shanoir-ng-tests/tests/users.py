@@ -50,8 +50,9 @@ def test_shanoir_ng_users(driverToUse,  shanoir_util_to_use, selenium_util_to_us
 
     shanoir_util.search(search_string=email, select_option='Email')
     edit_user(name=email)
+    shanoir_util.go_to_entity('Administration', 'Manage users')
     shanoir_util.search(search_string=email, select_option='Email')
-    shanoir_util.delete(name=email)
+    shanoir_util.delete(email)
     shanoir_util.clean_search()
 
 def add_user():
@@ -97,12 +98,6 @@ def edit_user(name):
     selenium_util.wait_to_be_present_and_click("//tr/td/span[contains(.,'"+name+"')]")
     selenium_util.wait_and_send_keys("//input[@id='email']", "edit")
     selenium_util.wait_to_be_clickable_and_click("//button[@type='submit']")
-
-
-def delete_user(t):
-    selenium_util.wait_to_be_present_and_click("//tr[td[contains(.,'"+t+"')]]//img[contains(@src,'garbage')]")
-    selenium_util.wait_to_be_clickable_and_click("//button[contains(.,'OK')]")
-
 
 def request_account():
     link_create_account_xpath = "//a[contains(.,'Create an account')]"

@@ -5,13 +5,14 @@ from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException        
 import preclinical
 import users
 import core_entities
+import import_dicom
 import shanoir_util
 import selenium_util
 import users
-from selenium.common.exceptions import NoSuchElementException        
 import random
 import traceback
 
@@ -22,7 +23,7 @@ parser.add_argument('-a', '--address', type=str, help='Shanoir address: ex. \'ht
 parser.add_argument('--remote', action='store_true', help='Launch in docker')
 parser.add_argument('-u', '--user', type=str, help='User login', required=True)
 parser.add_argument('-p', '--password', type=str, help='User password', required=True)
-parser.add_argument('-s', '--shanoir', type=str, choices=['users', 'preclinical', 'all', 'entities'], help='Shanoir to test', required=True)
+parser.add_argument('-s', '--shanoir', type=str, choices=['users', 'preclinical', 'entities', 'import', 'all'], help='Shanoir to test', required=True)
 args = parser.parse_args()
 
 path_to_downloads = os.getcwd()+"\\downloads\\"
@@ -77,6 +78,12 @@ if __name__ == "__main__":
         if args.shanoir in ["entities", "all"]:
             shanoir_utility.login(args.user, args.password)
             core_entities.test_shanoir_core_entities(driver, shanoir_utility)
+            shanoir_utility.logout()
+            print('Success!')
+        
+        if args.shanoir in ["import", "all"]:
+            shanoir_utility.login(args.user, args.password)
+            import_dicom.test_shanoir_import_dicom(driver, shanoir_utility, selenium_utility)
             shanoir_utility.logout()
             print('Success!')
             

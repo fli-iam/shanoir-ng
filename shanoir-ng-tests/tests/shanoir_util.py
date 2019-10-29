@@ -69,14 +69,16 @@ class Shanoir_util:
         assert self.check_if_shanoir_table_has_rows()
     
     def delete(self, name):
-        selenium_utility.wait_to_be_present_and_click("//shanoir-table//span/span/span/*[(local-name()='svg') and (@data-icon='trash')]")
+        selenium_utility.wait_to_be_present_and_click("//shanoir-table//tr[td/span[contains(text(), '" + name + "')]]//span/span/span/*[(local-name()='svg') and (@data-icon='trash')]")
         assert selenium_utility.wait_to_be_visible("//confirm-dialog[div[contains(.,'Are you sure you want to delete')]]")
-    
+        time.sleep(1)
         selenium_utility.wait_to_be_clickable_and_click("//button[contains(.,'OK')]")
+        time.sleep(1)
         assert self.check_if_shanoir_table_has_rows()
         
     def add_entity(self, fields):
         selenium_utility.wait_to_be_present_and_click("//span[contains(.,'New')]")
+        time.sleep(1)
         for field in fields:
             if (field['type'] == 'select'):
                 selenium_utility.wait_to_be_clickable_and_click("//select-box[@formcontrolname='"+field['name']+"']/div[@class='root']")
@@ -101,6 +103,7 @@ class Shanoir_util:
                 selenium_utility.wait_to_be_clickable_and_click("//select-box[@formcontrolname='"+field['name']+"']//select-option//div[contains(.,'"+field['valueEdited']+"')]")
             elif (field['type'] == 'text'):
                 input_xpath = "//input[@formcontrolname='"+field['name']+"']"
+                selenium_utility.clear_input(input_xpath)
                 selenium_utility.wait_and_send_keys(input_xpath, field['valueEdited'])
             elif (field['type'] == 'textarea'):
                 input_xpath = "//textarea[@formcontrolname='"+field['name']+"']"
@@ -117,6 +120,7 @@ class Shanoir_util:
         # Got to read the entity
         selenium_utility.wait_to_be_present_and_click("//tbody//span[contains(.,'" + fields[0]['value'] + "')]")
     
+        time.sleep(1)
         # Check fields value
         for field in fields:
             xpathFieldToCheck =  "//form//*[contains(., '" + field['value'] + "')]"
@@ -159,7 +163,12 @@ class Shanoir_util:
         # Delete the entity
         self.delete(fieldReferenceValue)
         
-    
-    
-    
+    def get_max_id(self, col_id):
+        assert selenium_utility.check_exists_by_xpath("//shanoir-table/thead//span[text()='" + col_id +"']")
+
+        # Dataset is ordered by Id by default (Be careful -> specific code here for dataset table)
+        if (self.check_if_shanoir_table_has_rows()):
+            xpath = "//shanoir-table/tbody/tr[1]/td[1]/span"
+            return driver.find_element_by_xpath(xpath).text
+        return 0;
     
