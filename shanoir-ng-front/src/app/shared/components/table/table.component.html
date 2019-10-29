@@ -79,7 +79,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span *ngIf="!(editMode && cellEditable(item, col)) && !col.route">{{renderCell(item, col)}}</span>
 
         <!-- link -->
-        <a class="link" *ngIf="!(editMode && cellEditable(item, col)) && col.route"
+        <a class="link" *ngIf="!(editMode && cellEditable(item, col)) && col.route && col.route(item)"
             [routerLink]="col.route(item)" routerLinkActive="active">{{renderCell(item, col)}}<i class="fas fa-external-link-alt"></i></a>
 
         <!-- editable text / number -->

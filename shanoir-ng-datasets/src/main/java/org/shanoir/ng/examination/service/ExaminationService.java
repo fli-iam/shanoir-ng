@@ -16,7 +16,6 @@ package org.shanoir.ng.examination.service;
 
 import java.util.List;
 
-import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.springframework.data.domain.Page;
@@ -49,7 +48,7 @@ public interface ExaminationService {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
-	Page<Examination> findPage(Pageable pageable);;
+	Page<Examination> findPage(Pageable pageable);
 
 	/**
 	 * Find examination by its id.
@@ -88,15 +87,6 @@ public interface ExaminationService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
 	Examination save(Examination examination);
-
-	/**
-	 * Save an examination.
-	 *
-	 * @param examinationDTO examination to create.
-	 * @return created examination.
-	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examinationDTO.getStudy().getId(), 'CAN_IMPORT'))")
-	Examination save(ExaminationDTO examinationDTO);
 	
 	/**
 	 * Update an examination.

@@ -12,10 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { IdName } from "../../shared/models/id-name.model";
+package org.shanoir.ng.studycard.model;
 
-export class ExaminationDatasetAcquisition {
-    id: number;
-    name: string;
-    datasets: IdName[];
+import javax.persistence.Entity;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+
+
+@Entity
+@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
+public class StudyCardRule extends AbstractEntity {
+
+	/** UID */
+	private static final long serialVersionUID = 6708188853533591193L;
+
+
+	
 }

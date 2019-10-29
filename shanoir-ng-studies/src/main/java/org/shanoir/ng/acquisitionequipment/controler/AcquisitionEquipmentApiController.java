@@ -77,8 +77,17 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
 	}
 	
-	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
 		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByCenterId(centerId);
+		if (equipments.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(
+				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
+	}
+	
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByStudyId(studyId);
 		if (equipments.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}

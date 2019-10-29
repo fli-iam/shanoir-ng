@@ -23,6 +23,7 @@ import { StudyUser } from './study-user.model';
 import { StudyService } from './study.service';
 import { Timepoint } from './timepoint.model';
 import { Id } from '../../shared/models/id.model';
+import { StudyCard } from '../../study-cards/shared/study-card.model';
 
 export class Study extends Entity {
     clinical: boolean;
@@ -46,6 +47,7 @@ export class Study extends Entity {
     visibleByDefault: boolean;
     withExamination: boolean;
     selected: boolean = false;
+    studyCardList: StudyCard[];
     
     private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);

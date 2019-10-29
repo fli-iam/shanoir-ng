@@ -14,11 +14,17 @@
 
 package org.shanoir.ng.utils;
 
+import java.util.ArrayList;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.studycard.model.StudyCard;
 
@@ -52,6 +58,7 @@ public final class ModelsUtil {
 	public CtDataset createCtDataset() {
 		final CtDataset dataset = new CtDataset();
 		dataset.setOriginMetadata(createDatasetSCMetadata());
+		dataset.setDatasetAcquisition(createDatasetAcq());
 		return dataset;
 	}
 
@@ -64,6 +71,7 @@ public final class ModelsUtil {
 		final MrDataset dataset = new MrDataset();
 		dataset.setStudyId(EXAMINATION_STUDY_ID);
 		dataset.setOriginMetadata(createDatasetSCMetadata());
+		dataset.setDatasetAcquisition(createDatasetAcq());
 		return dataset;
 	}
 
@@ -75,6 +83,7 @@ public final class ModelsUtil {
 	public static PetDataset createPetDataset() {
 		final PetDataset dataset = new PetDataset();
 		dataset.setOriginMetadata(createDatasetSCMetadata());
+		dataset.setDatasetAcquisition(createDatasetAcq());
 		return dataset;
 	}
 
@@ -95,6 +104,25 @@ public final class ModelsUtil {
 		examination.setPreclinical(false);
 		return examination;
 	}
+	
+	/**
+	 * Create an examination.
+	 * 
+	 * @return examination.
+	 */
+	public static DatasetAcquisition createDatasetAcq() {
+		final DatasetAcquisition dsAcq = new MrDatasetAcquisition();
+		dsAcq.setAcquisitionEquipmentId(1L);
+		dsAcq.setDatasets(new ArrayList<Dataset>());
+		dsAcq.setExamination(createExamination());
+		dsAcq.getExamination().setId(1L);
+		dsAcq.setRank(1);
+		dsAcq.setSoftwareRelease("v1.0");
+		dsAcq.setSortingIndex(1);
+		dsAcq.setStudyCard(createStudyCard());
+		dsAcq.getStudyCard().setId(1L);
+		return dsAcq;
+	}
 
 	/**
 	 * Create a template.
@@ -103,8 +131,9 @@ public final class ModelsUtil {
 	 */
 	public static StudyCard createStudyCard() {
 		final StudyCard studyCard = new StudyCard();
-		studyCard.setName(STUDY_CARD_NAME);
+		studyCard.setName(STUDY_CARD_NAME + "_" + RandomStringUtils.randomAlphanumeric(5));
 		studyCard.setDisabled(STUDY_CARD_DISABLED);
+		studyCard.setStudyId(1L);
 		return studyCard;
 	}
 	

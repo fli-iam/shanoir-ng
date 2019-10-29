@@ -42,22 +42,24 @@ public class DatasetsModalityTypeCheckValidator
 
 	@Override
 	public boolean isValid(final DatasetAcquisition datasetAcquisition, final ConstraintValidatorContext context) {
-		if (datasetAcquisition instanceof MrDatasetAcquisition) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (!(dataset instanceof MrDataset)) {
-					return false;
+		if (datasetAcquisition.getDatasets() != null && !datasetAcquisition.getDatasets().isEmpty()) {			
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				for (Dataset dataset : datasetAcquisition.getDatasets()) {
+					if (!(dataset instanceof MrDataset)) {
+						return false;
+					}
 				}
-			}
-		} else if (datasetAcquisition instanceof PetDatasetAcquisition) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (!(dataset instanceof PetDataset)) {
-					return false;
+			} else if (datasetAcquisition instanceof PetDatasetAcquisition) {
+				for (Dataset dataset : datasetAcquisition.getDatasets()) {
+					if (!(dataset instanceof PetDataset)) {
+						return false;
+					}
 				}
-			}
-		} else if (datasetAcquisition instanceof CtDatasetAcquisition) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (!(dataset instanceof CalibrationDataset)) {
-					return false;
+			} else if (datasetAcquisition instanceof CtDatasetAcquisition) {
+				for (Dataset dataset : datasetAcquisition.getDatasets()) {
+					if (!(dataset instanceof CalibrationDataset)) {
+						return false;
+					}
 				}
 			}
 		}

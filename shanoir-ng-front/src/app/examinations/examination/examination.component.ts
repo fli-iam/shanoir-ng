@@ -38,7 +38,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     private centers: IdName[];
     public studies: IdName[];
     private subjects: SubjectWithSubjectStudy[];
-    private examinationExecutives: Object[];
     private inImport: boolean; 
 
     constructor(
@@ -90,7 +89,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
             'subject': [{value: this.examination.subject, disabled: this.inImport}],
             'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
-            // 'Examination executive': [this.examination.examinationExecutive],
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
@@ -100,7 +98,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     private getCenters(): void {
         this.centerService
-            .getCentersNamesForExamination()
+            .getCentersNames()
             .then(centers => {
                 this.centers = centers;
             });

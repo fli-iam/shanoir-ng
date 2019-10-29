@@ -43,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label>Study</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{studyCard.study}}
+								{{studyCard.study.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select-box formControlName="study" [(ngModel)]="studyCard.study">
@@ -53,27 +53,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label>Center</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{studyCard.center}}
-							</ng-template> 
-							<ng-template ngSwitchDefault>
-								<select-box formControlName="center" [(ngModel)]="studyCard.center">
-									<select-option *ngFor="let center of centers" [value]="center">{{center.name}}</select-option>
-								</select-box>
-							</ng-template>
-						</span>
-					</li>
-					<li>
 						<label>Acquisition equipment</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{studyCard.acquisitionEquipment}}
+								{{studyCard.acquisitionEquipment | acqEqptLabel}}
 							</ng-template> 
 							<ng-template ngSwitchDefault>
 								<select-box formControlName="acquisitionEquipment" [(ngModel)]="studyCard.acquisitionEquipment">
-									<select-option *ngFor="let acquisitionEquipment of acquisitionEquipments" [value]="acquisitionEquipment">{{acquisitionEquipment | acqEqptLabel}}</select-option>
+									<div #optionSection class="option-section" *ngFor="let acqEntry of acquisitionEquipments | getValues">
+										<caption>{{acqEntry.key}}</caption>
+										<select-option *ngFor="let acqEq of acqEntry.val" [value]="acqEq">{{acqEq | acqEqptLabel}}</select-option>
+									</div>
 								</select-box>
 							</ng-template>
 						</span>
@@ -82,7 +72,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label>Nifti converter</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{studyCard.niftiConverter}}
+								{{studyCard.niftiConverter.name}}
 							</ng-template> 
 							<ng-template ngSwitchDefault>
 								<select-box formControlName="niftiConverter" [(ngModel)]="studyCard.niftiConverter">
@@ -92,6 +82,35 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 				</ol>
+			</fieldset>
+			<fieldset class="rules">
+				<legend>Rules</legend>
+				<study-card-rule>
+					<condition></condition>
+					<condition></condition>
+					<condition></condition>
+					<condition></condition>
+					<condition></condition>
+					<condition></condition>
+					<condition></condition>
+					<condition></condition>
+					<condition></condition>
+					<action></action>
+					<action></action>
+					<action></action>
+					<action></action>
+					<action></action>
+					<action></action>					
+				</study-card-rule>
+				<study-card-rule>
+						<condition></condition>
+						<condition></condition>
+						<action></action>
+						<action></action>
+						<action></action>
+						<action></action>
+						<action></action>					
+					</study-card-rule>
 			</fieldset>
 			<form-footer
 				[state]="footerState"

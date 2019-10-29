@@ -1,0 +1,6 @@
+:host() { display: block; overflow: hidden; white-space: nowrap; 
+    color: purple; }
+
+.var { color: blue; }
+.method { color: darkgreen; }
+.value { color: chocolate; }

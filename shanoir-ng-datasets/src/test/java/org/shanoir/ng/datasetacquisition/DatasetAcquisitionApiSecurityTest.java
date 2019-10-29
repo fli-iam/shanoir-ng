@@ -14,21 +14,28 @@
 
 package org.shanoir.ng.datasetacquisition;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.importer.controler.DatasetAcquisitionApi;
+import org.shanoir.ng.datasetacquisition.controler.DatasetAcquisitionApi;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.rights.StudyRightsService;
+import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,6 +44,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 
 /**
  * User security service test.
@@ -59,9 +68,13 @@ public class DatasetAcquisitionApiSecurityTest {
 	@MockBean
 	StudyRightsService commService;
 	
+	private BindingResult mockBindingResult;
+	
 	@Before
 	public void setup() {
-		
+		mockBindingResult = new BeanPropertyBindingResult(mockDsAcq(1L), "datasetAcquisition");
+		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
+		given(commService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
 	}
 	
 	@Test
@@ -71,25 +84,103 @@ public class DatasetAcquisitionApiSecurityTest {
 		Set<Long> ids = Mockito.anySetOf(Long.class);
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
+		assertAccessDenied(api::findDatasetAcquisitionById, 1L);
+		assertAccessDenied(api::findByStudyCard, 1L);
+		assertAccessDenied(api::findDatasetAcquisitions);
+
 		assertAccessDenied(api::createNewDatasetAcquisition, new ImportJob());
+		assertAccessDenied((t, u, v) -> { try { api.updateDatasetAcquisition(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockDsAcq(1L), mockBindingResult);
+		assertAccessDenied(t -> { try { api.deleteDatasetAcquisition(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
 	}
 	
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testAsUser() throws ShanoirException, RestServiceException {
-		// ?
+		given(commService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
+		assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
+		assertAccessDenied(api::findDatasetAcquisitionById, 3L);
+		
+		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
+		assertAccessAuthorized(api::findDatasetAcquisitions);
+		assertAccessAuthorized(api::findByStudyCard, 1L);
+		assertNull(api.findDatasetAcquisitions().getBody());
+		assertNull(api.findByStudyCard(new Long(1L)).getBody());
+		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
+		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
+		assertEquals(2, api.findDatasetAcquisitions().getBody().size());
+		assertEquals(2, api.findByStudyCard(new Long(1L)).getBody().size());
+
+		ImportJob importJob = new ImportJob(); importJob.setExaminationId(1L);
+		assertAccessDenied(api::createNewDatasetAcquisition, importJob);
+		assertAccessDenied((t, u, v) -> { try { api.updateDatasetAcquisition(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockDsAcq(1L), mockBindingResult);
+		assertAccessDenied(t -> { try { api.deleteDatasetAcquisition(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
 	}
 	
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsExpert() throws ShanoirException, RestServiceException {
-		// ?
+		given(commService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
+		assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
+		assertAccessDenied(api::findDatasetAcquisitionById, 3L);
+		
+		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
+		assertAccessAuthorized(api::findDatasetAcquisitions);
+		assertAccessAuthorized(api::findByStudyCard, 1L);
+		assertNull(api.findDatasetAcquisitions().getBody());
+		assertNull(api.findByStudyCard(new Long(1L)).getBody());
+		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
+		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
+		assertEquals(2, api.findDatasetAcquisitions().getBody().size());
+		assertEquals(2, api.findByStudyCard(new Long(1L)).getBody().size());
+		
+		given(commService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
+		Examination exam = ModelsUtil.createExamination(); exam.setId(1L);
+		ImportJob importJob = new ImportJob();
+		importJob.setExaminationId(3L);
+		assertAccessDenied(api::createNewDatasetAcquisition, importJob);
+		importJob.setExaminationId(1L);
+		assertAccessAuthorized(api::createNewDatasetAcquisition, importJob);
+		
+		DatasetAcquisition dsAcqDB = api.findDatasetAcquisitionById(1L).getBody();
+		given(commService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+		given(commService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);
+		dsAcqDB.setRank(1000);
+		dsAcqDB.getExamination().setStudyId(3L);
+		assertAccessDenied((t, u, v) -> { try { api.updateDatasetAcquisition(t, u, v); } catch (RestServiceException e1) { fail(e1.toString()); } }, 1L, dsAcqDB, mockBindingResult);
+		assertAccessDenied((t, u, v) -> { try { api.updateDatasetAcquisition(t, u, v); } catch (RestServiceException e1) { fail(e1.toString()); } }, 3L, dsAcqDB, mockBindingResult);
+		dsAcqDB.getExamination().setStudyId(1L);
+		assertAccessAuthorized((t, u, v) -> { try { api.updateDatasetAcquisition(t, u, v); } catch (RestServiceException e1) { } }, 1L, dsAcqDB, mockBindingResult);
+		
+		assertAccessDenied(t -> { try { api.deleteDatasetAcquisition(t); } catch (RestServiceException e) { fail(e.toString()); }}, 3L);
+		assertAccessAuthorized(t -> { try { api.deleteDatasetAcquisition(t); } catch (RestServiceException e) { }}, 4L);
 	}
 
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
+		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
+		Set<Long> ids = Mockito.anySetOf(Long.class);
+		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
+		
+		assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
+		assertAccessAuthorized(api::findByStudyCard, 1L);
+		assertAccessAuthorized(api::findDatasetAcquisitions);
+		assertEquals(3, api.findDatasetAcquisitions().getBody().size());
+
 		assertAccessAuthorized(api::createNewDatasetAcquisition, new ImportJob());
+		assertAccessAuthorized((t, u, v) -> { try { api.updateDatasetAcquisition(t, u, v); } catch (RestServiceException e) { }}, 1L, mockDsAcq(1L), mockBindingResult);
+		assertAccessAuthorized(t -> { try { api.deleteDatasetAcquisition(t); } catch (RestServiceException e) { }}, 4L);
+	}
+
+
+	private DatasetAcquisition mockDsAcq(Long id) {
+		DatasetAcquisition dsA = ModelsUtil.createDatasetAcq();
+		dsA.setId(id);
+		return dsA;
+	}
+	
+	private DatasetAcquisition mockDsAcq() {
+		return mockDsAcq(null);
 	}
 
 }

@@ -25,7 +25,7 @@ import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
-import { Center } from 'src/app/centers/shared/center.model';
+import { Center } from '../../centers/shared/center.model';
 
 @Component({
     selector: 'acquisition-equipment-detail',

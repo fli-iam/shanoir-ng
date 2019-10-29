@@ -15,7 +15,9 @@ import { Injectable } from '@angular/core';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
+import { StudyCardDTO, StudyCardDTOService } from './study-card.dto';
 import { StudyCard } from './study-card.model';
+import { ServiceLocator } from '../../utils/locator.service';
 
 
 @Injectable()
@@ -23,6 +25,19 @@ export class StudyCardService extends EntityService<StudyCard> {
 
     API_URL = AppUtils.BACKEND_API_STUDY_CARD_URL;
 
+    private studyCardDTOService: StudyCardDTOService = ServiceLocator.injector.get(StudyCardDTOService);
+
     getEntityInstance() { return new StudyCard(); }
 
+    protected mapEntity = (dto: StudyCardDTO): Promise<StudyCard> => {
+        let result: StudyCard = this.getEntityInstance();
+        this.studyCardDTOService.toEntity(dto, result);
+        return Promise.resolve(result);
+    }
+
+    protected mapEntityList = (dtos: StudyCardDTO[]): Promise<StudyCard[]> => {
+        let result: StudyCard[] = [];
+        this.studyCardDTOService.toEntityList(dtos, result);
+        return Promise.resolve(result);
+    }
 }

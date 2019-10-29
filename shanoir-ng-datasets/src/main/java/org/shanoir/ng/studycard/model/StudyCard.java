@@ -14,8 +14,11 @@
 
 package org.shanoir.ng.studycard.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
@@ -25,6 +28,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -47,9 +51,6 @@ public class StudyCard extends HalEntity {
 	/** The acquisition equipment. */
 	private Long acquisitionEquipmentId;
 
-	/** The center of the study card. */
-	private Long centerId;
-
 	/** A studycard might be disabled */
 	private boolean disabled;
 
@@ -64,6 +65,7 @@ public class StudyCard extends HalEntity {
 
 	/** The study for which is defined the study card. */
 	private Long studyId;
+
 
 	/**
 	 * Init HATEOAS links
@@ -88,20 +90,6 @@ public class StudyCard extends HalEntity {
 		this.acquisitionEquipmentId = acquisitionEquipmentId;
 	}
 
-	/**
-	 * @return the centerId
-	 */
-	public Long getCenterId() {
-		return centerId;
-	}
-
-	/**
-	 * @param centerId
-	 *            the centerId to set
-	 */
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
 
 	/**
 	 * @return the disabled

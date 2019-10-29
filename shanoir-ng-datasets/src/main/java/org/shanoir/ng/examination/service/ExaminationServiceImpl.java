@@ -17,7 +17,6 @@ package org.shanoir.ng.examination.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -93,11 +92,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 		return savedExamination;
 	}
 	
-	@Override
-	public Examination save(final ExaminationDTO examinationDTO) {
-		return save(examinationMapper.examinationDTOToExamination(examinationDTO));
-	}
-
 	@Override
 	public Examination update(final Examination examination) throws EntityNotFoundException {
 		final Examination examinationDb = examinationRepository.findOne(examination.getId());

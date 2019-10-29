@@ -21,7 +21,7 @@ import { ManufacturerModel } from './manufacturer-model.model';
 @Pipe({ name: "acqEqptLabel" })
 export class AcquisitionEquipmentPipe implements PipeTransform {
 
-    transform(acqEqpt: AcquisitionEquipment) {
+    transform(acqEqpt: AcquisitionEquipment): string {
         if (acqEqpt && acqEqpt.manufacturerModel) {
             let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
             return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")

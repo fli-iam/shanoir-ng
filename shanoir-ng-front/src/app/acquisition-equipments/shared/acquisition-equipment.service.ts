@@ -27,6 +27,13 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
 
     getAllByCenter(centerId: number): Promise<AcquisitionEquipment[]> {
         return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/byCenter/' + centerId)
-            .toPromise();
+            .toPromise()
+            .then(this.mapEntityList);
+    }
+
+    getAllByStudy(studyId: number): Promise<AcquisitionEquipment[]> {
+        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/byStudy/' + studyId)
+            .toPromise()
+            .then(this.mapEntityList);
     }
 }

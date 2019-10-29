@@ -108,7 +108,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 		validate(result);
 
-		final Examination createdExamination = examinationService.save(examinationDTO);
+		final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
 		return new ResponseEntity<ExaminationDTO>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 
 	}
@@ -142,18 +142,11 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<Long> saveNewExaminationFromShup(@ApiParam(value = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
-			final BindingResult result) {
+			final BindingResult result) throws RestServiceException {
 		
-		
-		// TODO : need to add a check on examination in order to see if it exists already in Shanoig Ng
-		//		Examination examination = examinationService.findByIdentifier(subjectFromShupDTO.getIdentifier());
-		//		if (subject != null) {
-		//			return new ResponseEntity<Long>(HttpStatus.FOUND);
-		//		}
-		
-		// TODO : need to add a data Validation STEP 
+		validate(result);
 
-		final Examination createdExamination = examinationService.save(examinationDTO);
+		final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
 		LOG.warn("Subject service completed");
 		return new ResponseEntity<Long>(createdExamination.getId(), HttpStatus.OK);
 

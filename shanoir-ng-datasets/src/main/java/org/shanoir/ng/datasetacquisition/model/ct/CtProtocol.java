@@ -20,6 +20,8 @@ import javax.persistence.OneToOne;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * CT protocol.
  * 
@@ -35,6 +37,7 @@ public class CtProtocol extends AbstractEntity {
 	private static final long serialVersionUID = 5062475142212117502L;
 
 	/** The MR Dataset acquisition. */
+	@JsonIgnore
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "ctProtocol")
 	private CtDatasetAcquisition ctDatasetAcquisition;
 

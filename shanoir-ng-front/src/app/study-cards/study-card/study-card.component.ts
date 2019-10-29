@@ -14,18 +14,16 @@
 import { Component } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { IdName } from 'src/app/shared/models/id-name.model';
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { IdName } from '../../shared/models/id-name.model';
 
+import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { CenterService } from '../../centers/shared/center.service';
+import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { StudyService } from '../../studies/shared/study.service';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
-import { StudyService } from '../../studies/shared/study.service';
-import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
-import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
-import { AcquisitionEquipment } from 'src/app/acquisition-equipments/shared/acquisition-equipment.model';
-
-
 
 @Component({
     selector: 'study-card',
@@ -36,7 +34,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     private centers: IdName[] = [];
     private studies: IdName[] = [];
-    private acquisitionEquipments: AcquisitionEquipment[] = [];
+    private acquisitionEquipments: Map<string, AcquisitionEquipment[]> = new Map();
     private niftiConverters: IdName[] = [];
 
     constructor(
@@ -46,7 +44,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             private studyService: StudyService,
             private acqEqService: AcquisitionEquipmentService,
             private niftiConverterService: NiftiConverterService) {
-        super(route, 'coil');
+        super(route, 'study-card');
     }
 
     get studyCard(): StudyCard { return this.entity; }
@@ -60,7 +58,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     initEdit(): Promise<void> {
         this.fetchStudies();
-        this.fetchNiftiConverters();     
+        this.fetchNiftiConverters();
         return this.studyCardService.get(this.id).then(sc => {
             this.studyCard = sc;
         });
@@ -77,13 +75,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         let form: FormGroup = this.formBuilder.group({
             'name': [this.studyCard.name, [Validators.required, Validators.minLength(2)]],
             'study': [this.studyCard.study, [Validators.required]],
-            'center': [this.studyCard.center, [Validators.required]],
             'acquisitionEquipment': [this.studyCard.acquisitionEquipment, [Validators.required]],
             'niftiConverter': [this.studyCard.niftiConverter, [Validators.required]],
         });
         this.subscribtions.push(
-            form.get('study').valueChanges.subscribe(study => this.onStudyChange(study,form)),
-            form.get('center').valueChanges.subscribe(center => this.onCenterChange(center, form)),
+            form.get('study').valueChanges.subscribe(study => this.onStudyChange(study, form))
         );
 
         return form;
@@ -98,14 +94,22 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             .then(studies => this.studies = studies);
     }
     
-    private fetchCenters(studyId: number) {
-        this.centerService.getCentersNamesByStudyId(studyId)
+    private fetchCenters(studyId: number): Promise<IdName[]> {
+        return this.centerService.getCentersNamesByStudyId(studyId)
             .then(centers => this.centers = centers);
     }
 
-    private fetchAcqEq(centerId: number) {
-        this.acqEqService.getAllByCenter(centerId)
-            .then(acqEqs => this.acquisitionEquipments = acqEqs);
+    private fetchAcqEq(studyId: number): Promise<void> {
+        return this.acqEqService.getAllByStudy(studyId)
+            .then(acqEqs => {
+                this.acquisitionEquipments = new Map();
+                for (let acqEq of acqEqs) {
+                    if (!this.acquisitionEquipments.has(acqEq.center.name)) {
+                        this.acquisitionEquipments.set(acqEq.center.name, []);
+                    }
+                    this.acquisitionEquipments.get(acqEq.center.name).push(acqEq);
+                }
+            });
     }
 
     private fetchNiftiConverters() {
@@ -114,24 +118,26 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     private onStudyChange(study: IdName, form: FormGroup) {
-        this.studyCard.center = null;
         if (study) {
-            this.fetchCenters(study.id);
-            form.get('center').enable();
-        } else {
-            form.get('center').disable();
-            this.centers = [];
-        }
-    }
-
-    private onCenterChange(center: IdName, form: FormGroup) {
-        this.studyCard.acquisitionEquipment = null;
-        if (center) {
-            this.fetchAcqEq(center.id);
+            this.fetchAcqEq(study.id).then(() => {
+                if (this.studyCard.acquisitionEquipment) {
+                    let found: boolean = false;
+                    this.acquisitionEquipments.forEach((acqEqList: AcquisitionEquipment[], centerName: string) => {
+                        for (let acqEq of acqEqList) {
+                            if (acqEq.id == this.studyCard.acquisitionEquipment.id) {
+                                found = true;
+                                return;
+                            }
+                        }
+                    });
+                    if (!found) this.studyCard.acquisitionEquipment = null;
+                }
+            });
             form.get('acquisitionEquipment').enable();
         } else {
             form.get('acquisitionEquipment').disable();
-            this.acquisitionEquipments = [];
+            this.studyCard.acquisitionEquipment = null;
+            this.acquisitionEquipments = new Map();
         }
     }
 

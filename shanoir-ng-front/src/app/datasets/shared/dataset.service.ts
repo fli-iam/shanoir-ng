@@ -38,8 +38,8 @@ export class DatasetService extends EntityService<Dataset> {
                 }
                 return page;
             })
-            .map(this.mapPage)
-            .toPromise();
+            .toPromise()
+            .then(this.mapPage);
     }
 
     download(dataset: Dataset, format: string): void {

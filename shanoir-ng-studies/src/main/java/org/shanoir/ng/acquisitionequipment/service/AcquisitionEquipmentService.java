@@ -31,4 +31,6 @@ public interface AcquisitionEquipmentService extends BasicEntityService<Acquisit
 
 	List<AcquisitionEquipment> findAllByCenterId(Long centerId);
 	
+	List<AcquisitionEquipment> findAllByStudyId(Long studyId);
+	
 }

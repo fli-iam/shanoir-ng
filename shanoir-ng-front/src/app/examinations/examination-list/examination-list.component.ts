@@ -42,7 +42,9 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
     }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
-        return this.examinationService.getPage(pageable);
+        return this.examinationService.getPage(pageable).then(page => {
+            return page;
+        });
     }
 
     getColumnDefs(): any[] {
@@ -53,10 +55,9 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
             return null;
         };
         let colDef: any[] = [
-            { headerName: "Examination id", field: "id" },
             {
                 headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {
-                    return (params.data.subject) ? params.data.subject.name : "";
+                    return (params.data.subject) ? params.data.subject.name : '';
                 }
             },{
                 headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
@@ -64,10 +65,10 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                 }, width: "100px"
             },{
                 headerName: "Research study", field: "study.name",
-                route: (examination: Examination) => '/study/details/' + examination.study.id
+                route: (examination: Examination) => examination.study ? '/study/details/' + examination.study.id : null
             },{
                 headerName: "Center", field: "center.name",
-                route: (examination: Examination) => '/center/details/' + examination.center.id
+                route: (examination: Examination) => examination.center ? '/center/details/' + examination.center.id : null
             }
         ];
         return colDef;       

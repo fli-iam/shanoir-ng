@@ -19,80 +19,38 @@ import java.util.List;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 
-/**
- * Template service.
- *
- * @author msimon
- *
- */
 public interface StudyCardService {
 
-	/**
-	 * Delete a template.
-	 *
-	 * @param id template id.
-	 * @throws EntityNotFoundException
-	 * @throws MicroServiceCommunicationException 
-	 */
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudyCard(#id, 'CAN_ADMINISTRATE'))")
 	void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
 
-	/**
-	 * Get all the template.
-	 *
-	 * @return a list of templates.
-	 */
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#studyCard.getStudyId(), 'CAN_ADMINISTRATE'))")
+	StudyCard save(StudyCard studyCard) throws MicroServiceCommunicationException;
+	
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnStudyCard(#studyCard, 'CAN_ADMINISTRATE'))")
+	StudyCard update(StudyCard studyCard) throws EntityNotFoundException, MicroServiceCommunicationException;
+	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
 	List<StudyCard> findAll();
-
-	/**
-	 * Find template by its id.
-	 *
-	 * @param id template id.
-	 * @return a template or null.
-	 */
+	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("returnObject == null || @datasetSecurityService.hasRightOnStudy(returnObject.getStudyId(), 'CAN_SEE_ALL')")
 	StudyCard findById(Long id);
 
-	/**
-	 * Save a template.
-	 *
-	 * @param template template to create.
-	 * @return created template.
-	 * @throws MicroServiceCommunicationException 
-	 */
-	StudyCard save(StudyCard template) throws MicroServiceCommunicationException;
-
-	/**
-	 * Search study cards by their study id.
-	 * 
-	 * @param studyIdList list of study ids.
-	 * @return list of study cards.
-	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
 	List<StudyCard> search(List<Long> studyIdList);
 	
-	/**
-	 * Search center id of a study card.
-	 * 
-	 * @param studyCardId the id of the study card.
-	 * @return the id of the center.
-	 */
-	Long searchCenterId(Long studyCardId);
-
-	/**
-	 * Update a template.
-	 *
-	 * @param template template to update.
-	 * @return updated template.
-	 * @throws EntityNotFoundException
-	 * @throws MicroServiceCommunicationException 
-	 */
-	StudyCard update(StudyCard template) throws EntityNotFoundException, MicroServiceCommunicationException;
-
-	/**
-	 * Update a template from the old Shanoir
-	 *
-	 * @param template template.
-	 * @throws EntityNotFoundException
-	 */
-	List<StudyCard> findStudyCardsOfStudy (Long studyId) throws EntityNotFoundException;
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
+	List<StudyCard> findStudyCardsOfStudy (Long studyId);
+	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
+	List<StudyCard> findStudyCardsByAcqEq (Long acqEqId);
 
 }

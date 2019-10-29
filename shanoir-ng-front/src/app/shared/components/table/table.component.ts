@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ApplicationRef, HostListener } from '@angular/core';
 
 import { Order, Page, Pageable, Sort, Filter, FilterablePageable } from './pageable.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
@@ -322,5 +322,11 @@ export class TableComponent implements OnInit {
 
     private rowDisabled(item): boolean {
         return this.disableCondition && this.disableCondition(item);
+    }
+
+    @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+        if (event.key == '²') {
+            console.log('table items', this.items);
+        }
     }
 }

@@ -27,5 +27,7 @@ import org.springframework.data.repository.CrudRepository;
 public interface AcquisitionEquipmentRepository extends CrudRepository<AcquisitionEquipment, Long> {
 
 	List<AcquisitionEquipment> findByCenterId(Long centerId);
-
+	
+	
+	List<AcquisitionEquipment> findByCenterStudyCenterListStudyId(Long studyId);
 }

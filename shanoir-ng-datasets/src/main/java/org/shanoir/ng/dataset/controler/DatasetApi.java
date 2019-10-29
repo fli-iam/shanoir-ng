@@ -88,7 +88,7 @@ public interface DatasetApi {
 			@ApiParam(value = "study to update", required = true) @Valid @RequestBody Dataset dataset,
 			BindingResult result) throws RestServiceException;
 	
-	@ApiOperation(value = "", notes = "Returns a datasets page", response = Page.class, responseContainer = "List", tags = {})
+	@ApiOperation(value = "", notes = "Returns a datasets page", response = Page.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found datasets", response = Page.class),
 			@ApiResponse(code = 204, message = "no user found", response = ErrorModel.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),

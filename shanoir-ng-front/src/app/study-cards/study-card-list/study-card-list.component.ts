@@ -18,6 +18,10 @@ import { BrowserPaginEntityListComponent } from '../../shared/components/entity/
 import { TableComponent } from '../../shared/components/table/table.component';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
+import { DatasetModalityType } from '../../shared/enums/dataset-modality-type';
 
 
 @Component({
@@ -30,7 +34,8 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
     @ViewChild('table') table: TableComponent;
 
     constructor(
-            private studyCardService: StudyCardService) {
+            private studyCardService: StudyCardService,
+            private acqEqptLabelPipe: AcquisitionEquipmentPipe) {
                 
         super('study-card');
     }
@@ -52,9 +57,20 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
         let colDef: any[] = [
             { headerName: "Name", field: "name" },
             { headerName: "Study", field: "study.name"},
-            { headerName: "Center", field: "center.name"}
+            { headerName: "Center", field: "acquisitionEquipment.center.name"},
+            { headerName: "Equipment", field: "acquisitionEquipment", width: '200%',
+                cellRenderer: params => this.format(params.data.acquisitionEquipment) }
         ];
         return colDef;       
+    }
+
+    format(acqEqpt: AcquisitionEquipment): string {
+        if (acqEqpt && acqEqpt.manufacturerModel) {
+            let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
+            return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
+                + " (" + DatasetModalityType[manufModel.datasetModalityType] + ") " + acqEqpt.serialNumber;
+        }
+        return "";
     }
 
     getCustomActionsDefs(): any[] {

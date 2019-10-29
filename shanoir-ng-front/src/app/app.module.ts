@@ -127,7 +127,7 @@ import { ExtensionRequestComponent } from './users/extension-request/extension-r
 import { UserService } from './users/shared/user.service';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
-import { TimesPipe } from './utils/app.utils';
+import { TimesPipe, GetValuesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
 import { NotificationsComponent } from './shared/notifications/notifications.component';
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
@@ -137,6 +137,15 @@ import { SideMenuComponent } from './shared/side-menu/side-menu.component';
 import { StudyCardComponent } from './study-cards/study-card/study-card.component';
 import { StudyCardListComponent } from './study-cards/study-card-list/study-card-list.component';
 import { StudyCardService } from './study-cards/shared/study-card.service';
+import { StudyCardRuleComponent } from './study-cards/study-card-rules/study-card-rule.component';
+import { StudyCardActionComponent } from './study-cards/study-card-rules/action/action.component';
+import { StudyCardConditionComponent } from './study-cards/study-card-rules/condition/condition.component';
+import { DatasetAcquisitionService } from './dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetAcquisitionDTOService } from './dataset-acquisitions/shared/dataset-acquisition.dto';
+import { DatasetAcquisitionListComponent } from './dataset-acquisitions/dataset-acquisition-list/dataset-acquisition-list.component';
+import { ExaminationDTOService } from './examinations/shared/examination.dto';
+import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acquisition/dataset-acquisition.component';
+import { StudyCardDTOService } from './study-cards/shared/study-card.dto';
 
 //import { ModalService} from './shared/components/modal/modal.service';
 
@@ -230,7 +239,13 @@ import { StudyCardService } from './study-cards/shared/study-card.service';
         HelpMessageComponent,
         SideMenuComponent,
         StudyCardComponent,
-        StudyCardListComponent
+        StudyCardListComponent,
+        StudyCardRuleComponent,
+        StudyCardConditionComponent,
+        StudyCardActionComponent,
+        GetValuesPipe,
+        DatasetAcquisitionListComponent,
+        DatasetAcquisitionComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -274,7 +289,12 @@ import { StudyCardService } from './study-cards/shared/study-card.service';
         NiftiConverterService,
         TaskService,
         StudyRightsService,
-        StudyCardService
+        StudyCardService,
+        AcquisitionEquipmentPipe,
+        DatasetAcquisitionService,
+        DatasetAcquisitionDTOService,
+        ExaminationDTOService,
+        StudyCardDTOService
     ],
     bootstrap: [AppComponent],
 })

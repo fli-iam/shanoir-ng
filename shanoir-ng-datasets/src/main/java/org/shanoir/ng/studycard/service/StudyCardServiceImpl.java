@@ -22,7 +22,6 @@ import org.shanoir.ng.studycard.dto.StudyStudyCardDTO;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.Utils;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,9 +33,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class StudyCardServiceImpl implements StudyCardService {
-
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
 	private StudyCardRepository studyCardRepository;
@@ -117,18 +113,21 @@ public class StudyCardServiceImpl implements StudyCardService {
 	private StudyCard updateStudyCardValues(final StudyCard studyCardDb, final StudyCard studyCard) {
 		studyCardDb.setName(studyCard.getName());
 		studyCardDb.setDisabled(studyCard.isDisabled());
+		studyCardDb.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+		studyCardDb.setId(studyCard.getId());
+		studyCardDb.setNiftiConverterId(studyCard.getNiftiConverterId());
+		studyCardDb.setStudyId(studyCard.getStudyId());
 		return studyCardDb;
 	}
 
 	@Override
 	public List<StudyCard> findStudyCardsOfStudy(Long studyId) {
-		return null;
+		return this.studyCardRepository.findByStudyId(studyId);
 	}
 
 	@Override
-	public Long searchCenterId(Long studyCardId) {
-		StudyCard studyCard = studyCardRepository.findOne(studyCardId);
-		return studyCard.getCenterId();
+	public List<StudyCard> findStudyCardsByAcqEq(Long acqEqId) {
+		return this.studyCardRepository.findByAcquisitionEquipmentId(acqEqId);
 	}
 
 }

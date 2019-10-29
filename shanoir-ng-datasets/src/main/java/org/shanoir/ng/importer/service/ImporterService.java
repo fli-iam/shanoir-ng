@@ -51,12 +51,6 @@ public class ImporterService {
 	@Autowired 
 	private DicomPersisterService dicomPersisterService;
 	
-	private ImportJob importJob;
-	
-	public void setImportJob(ImportJob importJob) {
-		this.importJob = importJob;
-	}
-	
 	// TODO 
 	public void retrieveMetadataInDicom() {
 	}
@@ -64,7 +58,7 @@ public class ImporterService {
 	public void buildDatasets() {
 	}
 	
-	public void createAllDatasetAcquisition() {
+	public void createAllDatasetAcquisition(ImportJob importJob) {
 		Examination examination = examinationService.findById(importJob.getExaminationId());
 		if (examination != null) {
 			int rank = 0;
@@ -72,7 +66,7 @@ public class ImporterService {
 				for (Study study : patient.getStudies()) {
 					for (Serie serie : study.getSeries() ) {
 						if (serie.getSelected() != null && serie.getSelected()) {
-							createDatasetAcquisitionForSerie(serie, rank, examination);
+							createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
 							rank++;
 						}
 					}
@@ -81,7 +75,7 @@ public class ImporterService {
 		}
 	}
 	
-	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination) {
+	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) {
 		if (serie.getModality() != null) {
 			// Added Temporary check on serie in order not to generate dataset acquisition for series without images.
 			if (serie.getDatasets() != null && !serie.getDatasets().isEmpty()) {

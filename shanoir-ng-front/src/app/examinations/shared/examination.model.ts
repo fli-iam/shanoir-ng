@@ -11,20 +11,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Center } from '../../centers/shared/center.model';
+import { Entity } from '../../shared/components/entity/entity.abstract';
+import { IdName } from '../../shared/models/id-name.model';
+import { Study } from '../../studies/shared/study.model';
+import { Subject } from '../../subjects/shared/subject.model';
+import { ServiceLocator } from '../../utils/locator.service';
+import { ExaminationService } from './examination.service';
 
-import { Entity } from "../../shared/components/entity/entity.abstract";
-import { IdName } from "../../shared/models/id-name.model";
-import { SubjectWithSubjectStudy } from "../../subjects/shared/subject.with.subject-study.model";
-import { ServiceLocator } from "../../utils/locator.service";
-import { ExaminationService } from "./examination.service";
 
 export class Examination extends Entity {
     id: number;
     examinationDate: Date;
-    examinationExecutive: IdName;
-    subject: SubjectWithSubjectStudy;
-    study: IdName;
-    center: IdName;
+    subject: IdName | Subject;
+    study: IdName | Study;
+    center: IdName | Center;
     comment: string;
     note: string;
     subjectWeight: number;

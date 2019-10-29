@@ -87,19 +87,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-					<!-- <li>
-						<label i18n="Examination detail|Examination executive label@@examinationDetailExaminationExecutive">Examination executive</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{examination?.examinationExecutive?.name}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<select id="examinationExecutive" required formControlName="Examination executive" [(ngModel)]="examination.examinationExecutive">
-									<option *ngFor="let examinationExecutive of examinationExecutives" [ngValue]="subject">{{examinationExecutive.name}}</option>
-								</select>
-							</ng-template>
-						</span>
-					</li> -->
 					<li>
 						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate">Examination date</label>
 						<span class="right-col" [ngSwitch]="mode">

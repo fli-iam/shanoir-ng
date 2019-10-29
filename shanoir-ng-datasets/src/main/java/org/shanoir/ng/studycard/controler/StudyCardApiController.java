@@ -70,6 +70,27 @@ public class StudyCardApiController implements StudyCardApi {
 		}
 		return new ResponseEntity<>(studyCard, HttpStatus.OK);
 	}
+	
+
+	@Override
+	public ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		final List<StudyCard> studyCards = studyCardService.findStudyCardsOfStudy(studyId);
+		if (studyCards.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(studyCards, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<StudyCard>> findStudyCardByAcqEqId(
+			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acqEqId") Long acqEqId) {
+		final List<StudyCard> studyCards = studyCardService.findStudyCardsByAcqEq(acqEqId);
+		if (studyCards.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(studyCards, HttpStatus.OK);
+	}
 
 	@Override
 	public ResponseEntity<List<StudyCard>> findStudyCards() {
@@ -127,17 +148,6 @@ public class StudyCardApiController implements StudyCardApi {
 		}
 	}
 
-	@Override
-	public ResponseEntity<Long> searchCenterId(
-			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
-		
-		final Long centerId = studyCardService.searchCenterId(studyCardId);
-		if (centerId == null) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(centerId, HttpStatus.OK);
-	}
-
 	/**
 	 * Validate a studyCard
 	 * 
@@ -154,4 +164,5 @@ public class StudyCardApiController implements StudyCardApi {
 			throw new RestServiceException(error);
 		} 
 	}
+
 }

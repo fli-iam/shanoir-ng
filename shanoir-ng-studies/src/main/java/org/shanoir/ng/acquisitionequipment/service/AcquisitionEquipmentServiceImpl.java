@@ -46,5 +46,10 @@ public class AcquisitionEquipmentServiceImpl extends BasicEntityServiceImpl<Acqu
 	public List<AcquisitionEquipment> findAllByCenterId(Long centerId) {
 		return this.repository.findByCenterId(centerId);
 	}
+	
+	@Override
+	public List<AcquisitionEquipment> findAllByStudyId(Long studyId) {
+		return this.repository.findByCenterStudyCenterListStudyId(studyId);
+	}
 
 }

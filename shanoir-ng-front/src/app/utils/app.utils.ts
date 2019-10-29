@@ -53,6 +53,9 @@ export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils
 const BACKEND_API_DATASET_MS_URL: string = process.env.BACKEND_API_DATASET_MS_URL;
 export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/datasets';
 
+// Dataset acquisition http api
+export const BACKEND_API_DATASET_ACQUISITION_URL: string = BACKEND_API_DATASET_MS_URL + '/datasetacquisition';
+
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
 
@@ -75,7 +78,7 @@ export const BACKEND_API_IMAGE_VIEWER_URL: string = BACKEND_API_IMPORT_MS_URL + 
 export const BACKEND_API_QUERY_PACS: string = BACKEND_API_IMPORT_MS_URL + '/importer/query_pacs/';
 
 export const BACKEND_API_TASKS_URL: string = BACKEND_API_USERS_MS_URL + '/tasks';
-export const BACKEND_API_STUDY_CARD_URL: string = BACKEND_API_USERS_MS_URL + '/studyCards';
+export const BACKEND_API_STUDY_CARD_URL: string = BACKEND_API_DATASET_MS_URL + '/studycards';
 
 // Nifti Converter http api
 export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL + '/niftiConverters';
@@ -134,6 +137,20 @@ export class TimesPipe implements PipeTransform {
     };
     return iterable;
   }
+}
+
+@Pipe({name: 'getValues'})
+export class GetValuesPipe implements PipeTransform {
+    transform(map: Map<any, any>): any[] {
+        let ret = [];
+        map.forEach((val, key) => {
+            ret.push({
+                key: key,
+                val: val
+            });
+        });
+        return ret;
+    }
 }
 
 export function allOfEnum<T>(enumClass): Array<T> {

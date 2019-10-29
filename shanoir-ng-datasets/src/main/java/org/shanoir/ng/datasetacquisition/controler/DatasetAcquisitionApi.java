@@ -1,0 +1,124 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+/**
+ * https://github.com/swagger-api/swagger-codegen
+ * Do not edit the class manually.
+ */
+package org.shanoir.ng.datasetacquisition.controler;
+
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.importer.dto.ImportJob;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
+@Api(value = "dataset", description = "the dataset API")
+@RequestMapping("/datasetacquisition")
+public interface DatasetAcquisitionApi {
+	
+	@ApiOperation(value = "", notes = "Creates new dataset acquisition", response = Void.class, tags={  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "created Dataset Acquitistion", response = Void.class),
+        @ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+        @ApiResponse(code = 403, message = "forbidden", response = Void.class),
+        @ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @RequestMapping(value = "",
+        produces = { "application/json" },
+        consumes = { "application/json" },
+        method = RequestMethod.POST)
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#importJob.getExaminationId(), 'CAN_IMPORT'))")
+    ResponseEntity<Void> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody ImportJob importJob);
+
+	@ApiOperation(value = "", notes = "If exists, returns the dataset acquisitions corresponding to the given study card", response = DatasetAcquisition.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found dataset acquisitions", response = DatasetAcquisition.class, responseContainer = "List"),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "none found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/byStudyCard/{studyCardId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject.getBody(), 'CAN_SEE_ALL')")
+	ResponseEntity<List<DatasetAcquisition>> findByStudyCard(
+			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
+	
+	@ApiOperation(value = "", notes = "Deletes a datasetAcquisition", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "datasetAcquisition deleted", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no datasetAcquisition found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/{datasetAcquisitionId}", produces = { "application/json" }, method = RequestMethod.DELETE)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_ADMINISTRATE')")
+	ResponseEntity<Void> deleteDatasetAcquisition(
+			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
+			throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "If exists, returns the datasetAcquisition corresponding to the given id", response = DatasetAcquisition.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found datasetAcquisition", response = DatasetAcquisition.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no datasetAcquisition found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/{datasetAcquisitionId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getExamination().getStudyId(), 'CAN_SEE_ALL')")
+	ResponseEntity<DatasetAcquisition> findDatasetAcquisitionById(
+			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId);
+
+	@ApiOperation(value = "", notes = "Returns all the datasetAcquisitions", response = DatasetAcquisition.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found datasetAcquisitions", response = DatasetAcquisition.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no datasetAcquisition found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject.getBody(), 'CAN_SEE_ALL')")
+	ResponseEntity<List<DatasetAcquisition>> findDatasetAcquisitions();
+
+	@ApiOperation(value = "", notes = "Updates a datasetAcquisition", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "datasetAcquisition updated", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/{datasetAcquisitionId}", produces = { "application/json" }, consumes = {
+			"application/json" }, method = RequestMethod.PUT)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #datasetAcquisitionId == #datasetAcquisition.getId() and @datasetSecurityService.hasUpdateRightOnDatasetAcquisition(#datasetAcquisition, 'CAN_ADMINISTRATE')")
+	ResponseEntity<Void> updateDatasetAcquisition(
+			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+			@ApiParam(value = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisition datasetAcquisition, BindingResult result)
+			throws RestServiceException;
+
+}

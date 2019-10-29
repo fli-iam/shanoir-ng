@@ -1,1 +1,6 @@
 .layout { min-width: 410px; }
+
+.rules { width: 100%; }
+
+.option-section select-option caption { display: none; }
+.option-section select-option:not(.hidden) ~ caption { display: flex; }
