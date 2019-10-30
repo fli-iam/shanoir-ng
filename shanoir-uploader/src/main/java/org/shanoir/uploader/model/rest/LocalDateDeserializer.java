@@ -1,4 +1,4 @@
-package org.shanoir.uploader.service.rest.dto;
+package org.shanoir.uploader.model.rest;
 
 import java.io.IOException;
 import java.time.LocalDate;

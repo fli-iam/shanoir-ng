@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.service;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,6 +100,28 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		return subjectRepository.save(subject);
 	}
+	
+	@Override
+	public Subject createAutoIncrement(final Subject subject, final Long centerId) {
+		if (subject.getSubjectStudyList() != null) {
+			for (final SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				subjectStudy.setSubject(subject);
+			}			
+		}
+		DecimalFormat formatterCenter = new DecimalFormat("000");
+		String commonNameCenter = formatterCenter.format(centerId);
+		int maxCommonNameNumber = 0;
+		Subject subjectOfsepCommonNameMaxFoundByCenter = findSubjectFromCenterCode(commonNameCenter);
+		if (subjectOfsepCommonNameMaxFoundByCenter != null) {
+			String maxNameToIncrement = subjectOfsepCommonNameMaxFoundByCenter.getName().substring(3);
+			maxCommonNameNumber = Integer.parseInt(maxNameToIncrement);
+		}
+		maxCommonNameNumber += 1;
+		DecimalFormat formatterSubject = new DecimalFormat("0000");
+		String subjectName = commonNameCenter + formatterSubject.format(maxCommonNameNumber);
+		subject.setName(subjectName);
+		return subjectRepository.save(subject);
+	}
 
 	@Override
 	public Subject update(final Subject subject) throws EntityNotFoundException {
@@ -108,8 +131,6 @@ public class SubjectServiceImpl implements SubjectService {
 		subjectRepository.save(subjectDb);
 		return subjectDb;
 	}
-	
-	
 
 	/*
 	 * Update some values of template to save them in database.

@@ -5,13 +5,14 @@ import java.awt.event.ItemListener;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
-import org.shanoir.uploader.model.Center;
-import org.shanoir.uploader.model.Investigator;
-import org.shanoir.uploader.model.Study;
-import org.shanoir.uploader.model.StudyCard;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Center;
+import org.shanoir.uploader.model.rest.IdName;
+import org.shanoir.uploader.model.rest.Investigator;
+import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.StudyCard;
 
 public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 
@@ -40,22 +41,14 @@ public class ImportStudyAndStudyCardCBItemListenerNG implements ItemListener {
 			if (e.getSource().equals(mainWindow.importDialog.studyCardCB)) {
 				JComboBoxMandatory comboBox = (JComboBoxMandatory) e.getSource();
 				StudyCard studyCard = (StudyCard) comboBox.getSelectedItem();
-				// add center
-				Center centerOfStudyCard = studyCard.getCenter();
+				// put center into exam using study card and acq equipment
+				AcquisitionEquipment acqEquipment = studyCard.getAcquisitionEquipment();
+				IdName center = acqEquipment.getCenter();
 				mainWindow.importDialog.mrExaminationCenterCB.removeAllItems();
-				mainWindow.importDialog.mrExaminationCenterCB.addItem(centerOfStudyCard);
+				mainWindow.importDialog.mrExaminationCenterCB.addItem(center);
 				// add investigators
-				mainWindow.importDialog.mrExaminationExamExecutiveCB.removeAllItems();
-				Study selectedStudy = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
-				List<Center> centersOfSelectedStudy = selectedStudy.getCenters();
-				for (Center center : centersOfSelectedStudy) {
-					if (center.equals(centerOfStudyCard)) {
-						List<Investigator> investigators = center.getInvestigatorList();
-						for (Investigator investigator : investigators) {
-							mainWindow.importDialog.mrExaminationExamExecutiveCB.addItem(investigator);
-						}
-					}
-				}
+				//mainWindow.importDialog.mrExaminationExamExecutiveCB.removeAllItems();
+				//mainWindow.importDialog.mrExaminationExamExecutiveCB.addItem(investigator);				
 			}			
 		} // ignore otherwise
 	}

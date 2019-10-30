@@ -342,10 +342,9 @@ public class ImportDialogOpener {
 			importDialog.mrExaminationNewExamCB.setSelected(false);
 			disableExaminationNew();
 		} else {
-			if (importDialog.studyCardCB.getItemCount() > 0) {
-				importDialog.mrExaminationNewExamCB.setEnabled(true);
-				importDialog.mrExaminationNewExamCB.setSelected(true);
-			}
+			importDialog.mrExaminationExistingExamCB.setEnabled(false);
+			importDialog.mrExaminationNewExamCB.setEnabled(true);
+			importDialog.mrExaminationNewExamCB.setSelected(true);
 		}
 		Date studyDate = ShUpConfig.formatter.parse(uploadJob.getStudyDate());
 		importDialog.mrExaminationNewDateModel.setValue(studyDate);

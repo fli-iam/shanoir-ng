@@ -1,19 +1,20 @@
 package org.shanoir.uploader.service.rest;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.model.Study;
-import org.shanoir.uploader.service.rest.dto.ExaminationDTO;
-import org.shanoir.uploader.service.rest.dto.SubjectDTO;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Examination;
+import org.shanoir.uploader.model.rest.IdList;
+import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.utils.Util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,13 +34,19 @@ public class ShanoirUploaderServiceClientNG {
 	
 	private static final String SHANOIR_SERVER_URL = "shanoir.server.url";
 
+	private static final String SERVICE_STUDIES_NAMES_CENTERS = "service.studies.names.centers";
+
+	private static final String SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS = "service.studycards.find.by.study.ids";
+
+	private static final String SERVICE_ACQUISITION_EQUIPMENT_BY_ID = "service.acquisition.equipment.find.by.id";
+	
 	private static final String SERVICE_SUBJECTS_FIND_BY_IDENTIFIER = "service.subjects.find.by.identifier";
 
-	private static final String SERVICE_STUDIES_NAMES_CENTERS = "service.studies.names.centers";
-	
 	private static final String SERVICE_EXAMINATIONS_BY_SUBJECT_ID = "service.examinations.find.by.subject.id";
 	
 	private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
+	
+	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";	
 
 	private HttpService httpService;
 	
@@ -47,27 +54,39 @@ public class ShanoirUploaderServiceClientNG {
 	
 	private String serviceURLStudiesNamesAndCenters;
 	
+	private String serviceURLStudyCardsByStudyIds;
+	
+	private String serviceURLAcquisitionEquipmentById;
+	
 	private String serviceURLSubjectsFindByIdentifier;
 	
 	private String serviceURLExaminationsBySubjectId;
 	
 	private String serviceURLSubjectsCreate;
+	
+	private String serviceURLExaminationsCreate;
 
 	public ShanoirUploaderServiceClientNG() {
 		this.httpService = new HttpService();
 		this.serverURL = ShUpConfig.shanoirNGServerProperties.getProperty(SHANOIR_SERVER_URL);
 		this.serviceURLStudiesNamesAndCenters = this.serverURL
 			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
+		this.serviceURLStudyCardsByStudyIds = this.serverURL
+				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
+		this.serviceURLAcquisitionEquipmentById = this.serverURL
+				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENT_BY_ID);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
 			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
 		this.serviceURLExaminationsBySubjectId = this.serverURL
 			+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
 		this.serviceURLSubjectsCreate = this.serverURL
-				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_CREATE);		
+				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_SUBJECTS_CREATE);
+		this.serviceURLExaminationsCreate = this.serverURL
+				+ ShUpConfig.shanoirNGServerProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
 		logger.info("ShanoirUploaderServiceNG successfully initialized.");
 	}
 	
-	public List<Study> findStudiesWithStudyCards() {
+	public List<Study> findStudiesNamesAndCenters() {
 		HttpResponse response = httpService.get(this.serviceURLStudiesNamesAndCenters);
 		int code = response.getStatusLine().getStatusCode();
 		if (code == 200) {
@@ -81,18 +100,34 @@ public class ShanoirUploaderServiceClientNG {
 		}
 	}
 
-	public SubjectDTO findSubjectBySubjectIdentifier(String subjectIdentifier) throws Exception {
+	public List<StudyCard> findStudyCardsByStudyIds(IdList studyIds) {
+		try {
+			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+			String json = ow.writeValueAsString(studyIds);
+			HttpResponse response = httpService.post(this.serviceURLStudyCardsByStudyIds, json);
+			int code = response.getStatusLine().getStatusCode();
+			if (code == 200) {
+				List<StudyCard> studyCards = Util.getMappedList(response, StudyCard.class);
+				return studyCards;
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
+
+	public Subject findSubjectBySubjectIdentifier(String subjectIdentifier) throws Exception {
 		HttpResponse response = httpService.get(this.serviceURLSubjectsFindByIdentifier + subjectIdentifier);
 		int code = response.getStatusLine().getStatusCode();
 		if (code == 200) {
-			SubjectDTO subjectDTO = Util.getMappedObject(response, SubjectDTO.class);
+			Subject subjectDTO = Util.getMappedObject(response, Subject.class);
 			return subjectDTO;
 		} else {
 			return null;
 		}
 	}
 
-	public List<ExaminationDTO> findExaminationsBySubjectId(Long subjectId) throws Exception {
+	public List<Examination> findExaminationsBySubjectId(Long subjectId) throws Exception {
 		if (subjectId != null) {
 			HttpResponse response = httpService.get(this.serviceURLExaminationsBySubjectId + subjectId);
 			int code = response.getStatusLine().getStatusCode();
@@ -100,8 +135,23 @@ public class ShanoirUploaderServiceClientNG {
 //				ResponseHandler<String> handler = new BasicResponseHandler();
 //				String body = handler.handleResponse(response);
 //				logger.info(body);
-				List<ExaminationDTO> examinations = Util.getMappedList(response, ExaminationDTO.class);
+				List<Examination> examinations = Util.getMappedList(response, Examination.class);
 				return examinations;
+			}
+		}
+		return null;
+	}
+	
+	public AcquisitionEquipment findAcquisitionEquipmentById(Long acquisitionEquipmentId) throws Exception {
+		if (acquisitionEquipmentId != null) {
+			HttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentById + acquisitionEquipmentId);
+			int code = response.getStatusLine().getStatusCode();
+			if (code == 200) {
+//				ResponseHandler<String> handler = new BasicResponseHandler();
+//				String body = handler.handleResponse(response);
+//				logger.info(body);
+				AcquisitionEquipment acquisitionEquipment = Util.getMappedObject(response, AcquisitionEquipment.class);
+				return acquisitionEquipment;
 			}
 		}
 		return null;
@@ -127,18 +177,23 @@ public class ShanoirUploaderServiceClientNG {
 	 * @param subjectDTO
 	 * @return boolean true, if success
 	 */
-	public SubjectDTO createSubject(
+	public Subject createSubject(
 			final Long studyId,
 			final Long studyCardId,
-			final boolean modeSubjectCommonName,
-			final SubjectDTO subjectDTO) {
+			final boolean modeSubjectCommonNameManual,
+			final Subject subjectDTO) {
 		try {
 			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(subjectDTO);
-			HttpResponse response = httpService.post(this.serviceURLSubjectsCreate, json);
+			HttpResponse response;
+			if (modeSubjectCommonNameManual) {
+				response = httpService.post(this.serviceURLSubjectsCreate, json);
+			} else {
+				response = httpService.post(this.serviceURLSubjectsCreate + "?centerId="+ studyCardId, json);
+			}
 			int code = response.getStatusLine().getStatusCode();
 			if (code == 200) {
-				SubjectDTO subjectDTOCreated = Util.getMappedObject(response, SubjectDTO.class);
+				Subject subjectDTOCreated = Util.getMappedObject(response, Subject.class);
 				return subjectDTOCreated;
 			}
 		} catch (JsonProcessingException e) {
@@ -150,18 +205,23 @@ public class ShanoirUploaderServiceClientNG {
 	/**
 	 * This method creates an examination on the server.
 	 * 
-	 * @param studyId
-	 * @param subjectId
-	 * @param centerId
-	 * @param investigatorId
-	 * @param examinationDate
-	 * @param examinationComment
+	 * @param examinationDTO
 	 * @return
 	 */
-	public long createExamination(final Long studyId, final Long subjectId, final Long centerId, final Long investigatorId,
-			final Date examinationDate, final String examinationComment) {
-		XMLGregorianCalendar examinationDateAsXMLGregorianCalendar = Util.toXMLGregorianCalendar(examinationDate);
-		return 1;
+	public Examination createExamination(final Examination examinationDTO) {
+		try {
+			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+			String json = ow.writeValueAsString(examinationDTO);
+			HttpResponse response = httpService.post(this.serviceURLExaminationsCreate, json);
+			int code = response.getStatusLine().getStatusCode();
+			if (code == 200) {
+				Examination examinationDTOCreated = Util.getMappedObject(response, Examination.class);
+				return examinationDTOCreated;
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
 	}
 
 }
