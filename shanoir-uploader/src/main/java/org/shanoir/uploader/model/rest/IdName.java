@@ -1,4 +1,4 @@
-package org.shanoir.uploader.service.rest.dto;
+package org.shanoir.uploader.model.rest;
 
 public class IdName {
 
@@ -53,6 +53,11 @@ public class IdName {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 
 }

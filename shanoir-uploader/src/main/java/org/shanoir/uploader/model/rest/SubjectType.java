@@ -11,27 +11,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-package org.shanoir.uploader.service.rest.dto;
+
+package org.shanoir.uploader.model.rest;
 
 /**
- * Sex.
+ * Subject type.
  * 
  * @author msimon
  *
  */
-public enum Sex {
+public enum SubjectType {
 
 	/**
-	 * Male.
+	 * Healthy volunteer.
 	 */
-	M(1),
+	HEALTHY_VOLUNTEER(1, "Healthy volunteer"),
 
 	/**
-	 * Female.
+	 * Patient.
 	 */
-	F(2);
+	PATIENT(2, "Patient"),
+
+	/**
+	 * Phantom.
+	 */
+	PHANTOM(3, "Phantom");
 
 	private int id;
+	
+	private String name;
 
 	/**
 	 * Constructor.
@@ -39,27 +47,28 @@ public enum Sex {
 	 * @param id
 	 *            id
 	 */
-	private Sex(final int id) {
+	private SubjectType(final int id, final String name) {
 		this.id = id;
+		this.name = name;
 	}
 
 	/**
-	 * Get a sex by its id.
+	 * Get a subject type by its id.
 	 * 
 	 * @param id
-	 *            sex id.
-	 * @return sex.
+	 *            type id.
+	 * @return subject type.
 	 */
-	public static Sex getSex(final Integer id) {
+	public static SubjectType getType(final Integer id) {
 		if (id == null) {
 			return null;
 		}
-		for (Sex sex : Sex.values()) {
-			if (id.equals(sex.getId())) {
-				return sex;
+		for (SubjectType type : SubjectType.values()) {
+			if (id.equals(type.getId())) {
+				return type;
 			}
 		}
-		throw new IllegalArgumentException("No matching sex for id " + id);
+		throw new IllegalArgumentException("No matching subject type for id " + id);
 	}
 
 	/**
@@ -67,6 +76,14 @@ public enum Sex {
 	 */
 	public int getId() {
 		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String toString() {
+		return this.name;
 	}
 
 }

@@ -18,15 +18,18 @@ import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
-import org.shanoir.uploader.model.Study;
-import org.shanoir.uploader.model.StudyCard;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Center;
+import org.shanoir.uploader.model.rest.Examination;
+import org.shanoir.uploader.model.rest.HemisphericDominance;
+import org.shanoir.uploader.model.rest.IdList;
+import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.Subject;
+import org.shanoir.uploader.model.rest.SubjectStudy;
+import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClientNG;
-import org.shanoir.uploader.service.rest.dto.ExaminationDTO;
-import org.shanoir.uploader.service.rest.dto.HemisphericDominance;
-import org.shanoir.uploader.service.rest.dto.ImagedObjectCategory;
-import org.shanoir.uploader.service.rest.dto.SubjectDTO;
-import org.shanoir.uploader.service.rest.dto.SubjectStudyDTO;
-import org.shanoir.uploader.service.rest.dto.SubjectType;
 
 /**
  * This class implements the logic when the start import button is clicked.
@@ -57,7 +60,7 @@ public class ImportDialogOpenerNG {
 		// login again, in case session has been expired
 //		if (shanoirUploaderServiceClient.login()) {
 			try {
-				SubjectDTO subjectDTO = getSubject(uploadJob);
+				Subject subjectDTO = getSubject(uploadJob);
 				ImportStudyAndStudyCardCBItemListenerNG importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListenerNG(this.mainWindow);
 				ImportFinishActionListenerNG importFinishAL = new ImportFinishActionListenerNG(this.mainWindow, uploadJob, uploadFolder, subjectDTO);
 				importDialog = new ImportDialog(this.mainWindow,
@@ -66,7 +69,7 @@ public class ImportDialogOpenerNG {
 				updateImportDialogForSubject(subjectDTO); // this has to be done after init of dialog
 				List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
 				updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
-				List<ExaminationDTO> examinationDTOs = getExaminations(subjectDTO);
+				List<Examination> examinationDTOs = getExaminations(subjectDTO);
 				updateImportDialogForExaminations(examinationDTOs, uploadJob);
 				updateImportDialogForMRICenter(uploadJob);
 			} catch (Exception e) {
@@ -104,13 +107,32 @@ public class ImportDialogOpenerNG {
 	 * 
 	 * @param dicomData
 	 * @param equipmentDicom
+	 * @throws Exception 
 	 */
-	private List<Study> getStudiesWithStudyCards(final UploadJob uploadJob) {
+	private List<Study> getStudiesWithStudyCards(final UploadJob uploadJob) throws Exception {
 		Serie firstSerie = uploadJob.getSeries().iterator().next();
 		String manufacturer = firstSerie.getMriInformation().getManufacturer();
 		String manufacturerModelName = firstSerie.getMriInformation().getManufacturersModelName();
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
-		List<Study> studies = shanoirUploaderServiceClientNG.findStudiesWithStudyCards();
+		List<Study> studies = shanoirUploaderServiceClientNG.findStudiesNamesAndCenters();
+		for (Iterator iterator = studies.iterator(); iterator.hasNext();) {
+			Study study = (Study) iterator.next();
+			study.setCompatible(new Boolean(false));
+			Long studyId = study.getId();
+			IdList idList = new IdList();
+			idList.getIdList().add(studyId);
+			List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idList);
+			// fill missing infos coming from other microservice studies here:
+			if (studyCards != null) {
+				for (Iterator itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
+					StudyCard studyCard = (StudyCard) itStudyCards.next();
+					Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
+					AcquisitionEquipment acquisitionEquipment = shanoirUploaderServiceClientNG.findAcquisitionEquipmentById(acquisitionEquipmentId);
+					studyCard.setAcquisitionEquipment(acquisitionEquipment);
+				}
+			}
+			study.setStudyCards(studyCards);
+		}
 		return studies;
 	}
 
@@ -118,28 +140,39 @@ public class ImportDialogOpenerNG {
 	 * @param studiesWithStudyCards
 	 */
 	private void updateImportDialogForStudyAndStudyCard(List<Study> studiesWithStudyCards) {
+		importDialog.studyCB.removeAllItems();
+		importDialog.studyCardCB.removeAllItems();
 		if (!studiesWithStudyCards.isEmpty()) {
-			importDialog.studyCB.removeAllItems();
 			boolean firstCompatibleStudyFound = false;
 			for (Study study : studiesWithStudyCards) {
 				importDialog.studyCB.addItem(study);
-				if (study.getCompatible() != null && !firstCompatibleStudyFound) {
+				if (study.getCompatible() != null
+					&& study.getCompatible()
+					&& !firstCompatibleStudyFound) {
 					importDialog.studyCB.setSelectedItem(study);
-					importDialog.studyCardCB.removeAllItems();
+					firstCompatibleStudyFound = true;
 					boolean firstCompatibleStudyCardFound = false;
 					for (StudyCard studyCard : study.getStudyCards()) {
-						importDialog.studyCardCB.addItem(studyCard);
-						if (studyCard.getCompatible() && !firstCompatibleStudyCardFound) {
+						if (studyCard.getCompatible() != null
+							&& studyCard.getCompatible()
+							&& !firstCompatibleStudyCardFound) {
 							importDialog.studyCardCB.setSelectedItem(studyCard);
 							firstCompatibleStudyCardFound = true;
 						}
 					}
-					firstCompatibleStudyFound = true;
 				}
 			}
-		} else {
-			importDialog.studyCB.removeAllItems();
-			importDialog.studyCardCB.removeAllItems();
+			if (!firstCompatibleStudyFound) {
+				// this selectItem adds study cards to the stuyCardCB in case of no
+				// compatible study found, see ImportStudyAndStudyCardCBItemListenerNG
+				Study firstStudy = studiesWithStudyCards.get(0);
+				importDialog.studyCB.setSelectedItem(firstStudy);
+				if (firstStudy.getStudyCards() != null && !firstStudy.getStudyCards().isEmpty()) {
+					StudyCard firstStudyCard = firstStudy.getStudyCards().get(0);
+					// this selectItem adds centers to the newly-create-exam
+					importDialog.studyCardCB.setSelectedItem(firstStudyCard);					
+				}
+			}
 		}
 		importDialog.studyCB.setValueSet(false);
 	}
@@ -148,8 +181,8 @@ public class ImportDialogOpenerNG {
 	 * @param dicomData
 	 * @throws Exception
 	 */
-	private SubjectDTO getSubject(final UploadJob uploadJob) throws Exception {
-		SubjectDTO foundSubject = null;
+	private Subject getSubject(final UploadJob uploadJob) throws Exception {
+		Subject foundSubject = null;
 		if (uploadJob.getSubjectIdentifier() != null) {
 			foundSubject = shanoirUploaderServiceClientNG
 					.findSubjectBySubjectIdentifier(uploadJob.getSubjectIdentifier());
@@ -157,7 +190,7 @@ public class ImportDialogOpenerNG {
 		return foundSubject;
 	}
 
-	private void updateImportDialogForSubject(SubjectDTO subjectDTO) {
+	private void updateImportDialogForSubject(Subject subjectDTO) {
 		/**
 		 * Insert subject specific items into combo boxes from model classes.
 		 * Should be there nevertheless if subject exists or not.
@@ -195,9 +228,9 @@ public class ImportDialogOpenerNG {
 			importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
 			importDialog.subjectPersonalCommentTextArea.setEditable(false);
 			// Manage subject_study values here:
-			List<SubjectStudyDTO> subjectStudyList = subjectDTO.getSubjectStudyList();
+			List<SubjectStudy> subjectStudyList = subjectDTO.getSubjectStudyList();
 			for (Iterator iterator = subjectStudyList.iterator(); iterator.hasNext();) {
-				SubjectStudyDTO subjectStudyDTO = (SubjectStudyDTO) iterator.next();
+				SubjectStudy subjectStudyDTO = (SubjectStudy) iterator.next();
 				importDialog.subjectIsPhysicallyInvolvedCB.setSelected(subjectStudyDTO.isPhysicallyInvolved());
 				importDialog.subjectIsPhysicallyInvolvedCB.setEnabled(false);
 				importDialog.subjectTypeCB.setSelectedItem(subjectStudyDTO.getSubjectType());
@@ -247,21 +280,21 @@ public class ImportDialogOpenerNG {
 		}
 	}
 
-	private List<ExaminationDTO> getExaminations(SubjectDTO subjectDTO) throws Exception {
+	private List<Examination> getExaminations(Subject subjectDTO) throws Exception {
 		if (subjectDTO != null) {
-			List<ExaminationDTO> examinationList = shanoirUploaderServiceClientNG
+			List<Examination> examinationList = shanoirUploaderServiceClientNG
 					.findExaminationsBySubjectId(subjectDTO.getId());
 			return examinationList;
 		}
 		return null;
 	}
 
-	private void updateImportDialogForExaminations(List<ExaminationDTO> examinationDTOs, UploadJob uploadJob)
+	private void updateImportDialogForExaminations(List<Examination> examinationDTOs, UploadJob uploadJob)
 			throws ParseException {
 		importDialog.mrExaminationExistingExamCB.removeAllItems();
 		if (examinationDTOs != null && !examinationDTOs.isEmpty()) {
 			for (Iterator iterator = examinationDTOs.iterator(); iterator.hasNext();) {
-				ExaminationDTO examinationDTO = (ExaminationDTO) iterator.next();
+				Examination examinationDTO = (Examination) iterator.next();
 				importDialog.mrExaminationExistingExamCB.addItem(examinationDTO);
 			}
 			importDialog.mrExaminationExistingExamCB.setEnabled(true);
@@ -269,10 +302,9 @@ public class ImportDialogOpenerNG {
 			importDialog.mrExaminationNewExamCB.setSelected(false);
 			disableExaminationNew();
 		} else {
-			if (importDialog.studyCardCB.getItemCount() > 0) {
-				importDialog.mrExaminationNewExamCB.setEnabled(true);
-				importDialog.mrExaminationNewExamCB.setSelected(true);
-			}
+			importDialog.mrExaminationExistingExamCB.setEnabled(false);
+			importDialog.mrExaminationNewExamCB.setEnabled(true);
+			importDialog.mrExaminationNewExamCB.setSelected(true);
 		}
 		Date studyDate = ShUpConfig.formatter.parse(uploadJob.getStudyDate());
 		importDialog.mrExaminationNewDateModel.setValue(studyDate);

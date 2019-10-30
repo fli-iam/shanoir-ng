@@ -12,28 +12,43 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.uploader.service.rest.dto;
+package org.shanoir.uploader.model.rest;
 
 /**
- * Hemispheric dominance.
+ * Imaged object category.
  * 
  * @author msimon
  *
  */
-public enum HemisphericDominance {
+public enum ImagedObjectCategory {
 
 	/**
-	 * Left.
+	 * Phantom
 	 */
-	Left(1, "Left"),
+	PHANTOM(1, "Phantom"),
 
 	/**
-	 * Right.
+	 * Living human being
 	 */
-	Right(2, "Right");
+	LIVING_HUMAN_BEING(2, "Living human being"),
+
+	/**
+	 * Human cadaver
+	 */
+	HUMAN_CADAVER(3, "Human cadaver"),
+
+	/**
+	 * Anatomical piece
+	 */
+	ANATOMICAL_PIECE(4, "Anatomical piece"),
+
+	/**
+	 * Animal
+	 */
+	ANIMAL(5, "Animal");
 
 	private int id;
-	
+
 	private String name;
 
 	/**
@@ -42,28 +57,28 @@ public enum HemisphericDominance {
 	 * @param id
 	 *            id
 	 */
-	private HemisphericDominance(final int id, final String name) {
+	private ImagedObjectCategory(final int id, final String name) {
 		this.id = id;
 		this.name = name;
 	}
 
 	/**
-	 * Get a hemispheric dominance by its id.
+	 * Get an imaged object category by its id.
 	 * 
 	 * @param id
-	 *            dominance id.
-	 * @return hemispheric dominance.
+	 *            category id.
+	 * @return imaged object category.
 	 */
-	public static HemisphericDominance getDominance(final Integer id) {
+	public static ImagedObjectCategory getCategory(final Integer id) {
 		if (id == null) {
 			return null;
 		}
-		for (HemisphericDominance dominance : HemisphericDominance.values()) {
-			if (id.equals(dominance.getId())) {
-				return dominance;
+		for (ImagedObjectCategory category : ImagedObjectCategory.values()) {
+			if (id.equals(category.getId())) {
+				return category;
 			}
 		}
-		throw new IllegalArgumentException("No matching hemispheric dominance for id " + id);
+		throw new IllegalArgumentException("No matching imaged object category for id " + id);
 	}
 
 	/**
@@ -75,6 +90,10 @@ public enum HemisphericDominance {
 
 	public String getName() {
 		return name;
+	}
+
+	public String toString() {
+		return this.name;
 	}
 
 }

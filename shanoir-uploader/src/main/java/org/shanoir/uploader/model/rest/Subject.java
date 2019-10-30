@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.uploader.service.rest.dto;
+package org.shanoir.uploader.model.rest;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,7 +22,7 @@ import org.shanoir.uploader.model.PseudonymusHashValues;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-public class SubjectDTO {
+public class Subject {
 
 	private Long id;
 
@@ -42,7 +42,7 @@ public class SubjectDTO {
 	
 	private Sex sex;
 
-	private List<SubjectStudyDTO> subjectStudyList;
+	private List<SubjectStudy> subjectStudyList;
 	
 	private PseudonymusHashValues pseudonymusHashValues;
 
@@ -156,7 +156,7 @@ public class SubjectDTO {
 	/**
 	 * @return the subjectStudyList
 	 */
-	public List<SubjectStudyDTO> getSubjectStudyList() {
+	public List<SubjectStudy> getSubjectStudyList() {
 		return subjectStudyList;
 	}
 
@@ -164,7 +164,7 @@ public class SubjectDTO {
 	 * @param subjectStudyList
 	 *            the subjectStudyList to set
 	 */
-	public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
+	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
 		this.subjectStudyList = subjectStudyList;
 	}
 

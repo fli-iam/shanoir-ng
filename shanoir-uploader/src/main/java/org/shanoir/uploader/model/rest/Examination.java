@@ -1,4 +1,4 @@
-package org.shanoir.uploader.service.rest.dto;
+package org.shanoir.uploader.model.rest;
 
 import java.util.Date;
 
@@ -6,7 +6,7 @@ import org.shanoir.uploader.ShUpConfig;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-public class ExaminationDTO {
+public class Examination {
 
 	private Long id;
 
@@ -14,7 +14,7 @@ public class ExaminationDTO {
 
 	private String comment;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
 	private Date examinationDate;
 
 	private String note;
@@ -27,7 +27,7 @@ public class ExaminationDTO {
 
 	private boolean preclinical;
 	
-	public ExaminationDTO() {
+	public Examination() {
 		super();
 	}
 
