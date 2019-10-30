@@ -78,8 +78,9 @@ class Shanoir_util:
         
     def add_entity(self, fields):
         selenium_utility.wait_to_be_present_and_click("//span[contains(.,'New')]")
-        time.sleep(1)
         for field in fields:
+            print field
+            time.sleep(1)
             if (field['type'] == 'select'):
                 selenium_utility.wait_to_be_clickable_and_click("//select-box[@formcontrolname='"+field['name']+"']/div[@class='root']")
                 selenium_utility.wait_to_be_clickable_and_click("//select-box[@formcontrolname='"+field['name']+"']//select-option//div[contains(.,'"+field['value']+"')]")
