@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="content-component">
+<div #formContainer class="content-component">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout">
 			<span [ngSwitch]="mode">
@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<fieldset>
 				<ol>
 					<li>
-						<label i18n="Coil detail|Coil name label@@examinationDetailName" class="required-label">Name</label>
+						<label i18n="Coil detail|Coil name label@@examinationDetailName">Name</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">	
 								{{coil.name}}
@@ -51,7 +51,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Coil detail|Coil Type label@@CoilDetailCoilType" class="required-label">Coil Type</label>
+						<label i18n="Coil detail|Coil Type label@@CoilDetailCoilType">Coil Type</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{coil.coilType}}
@@ -75,7 +75,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Coil detail|Center label@@coilDetailCenter" class="required-label">Center</label>
+						<label i18n="Coil detail|Center label@@coilDetailCenter">Center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/center/details/', coil.center?.id]">
@@ -96,7 +96,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel" class="required-label">Acquisition Equipment Model</label>
+						<label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel">Acquisition Equipment Model</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/manufacturer-model/details/', coil.manufacturerModel?.id]">

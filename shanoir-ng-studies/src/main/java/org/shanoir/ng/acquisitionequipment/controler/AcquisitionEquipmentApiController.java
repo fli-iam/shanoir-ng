@@ -14,24 +14,29 @@
 
 package org.shanoir.ng.acquisitionequipment.controler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.core.service.BasicEntityService;
+import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 import io.swagger.annotations.ApiParam;
 
@@ -79,8 +84,13 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		validate(acquisitionEquipment, result);
 		
 		/* Save acquisition equipment in db. */
-		return new ResponseEntity<>(acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(
-				acquisitionEquipmentService.create(acquisitionEquipment)), HttpStatus.OK);
+		try {
+			return new ResponseEntity<>(acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(
+					acquisitionEquipmentService.create(acquisitionEquipment)), HttpStatus.OK);			
+		} catch (DataIntegrityViolationException e) {
+			checkDataIntegrityException(e, acquisitionEquipment);
+			throw e;
+		}
 	}
 
 	public ResponseEntity<Void> updateAcquisitionEquipment(
@@ -96,6 +106,9 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (DataIntegrityViolationException e) {
+			checkDataIntegrityException(e, acquisitionEquipment);
+			throw e;
 		}
 	}
 	
@@ -105,5 +118,20 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			throw new RestServiceException(
 				new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
 		}	
+	}
+	
+	private void checkDataIntegrityException(DataIntegrityViolationException e, AcquisitionEquipment acquisitionEquipment) throws RestServiceException {
+		if (e.getRootCause() instanceof MySQLIntegrityConstraintViolationException) {
+			MySQLIntegrityConstraintViolationException rootEx = (MySQLIntegrityConstraintViolationException) e.getRootCause();
+			if (rootEx.getMessage().contains("model_number_idx")) {
+				FieldErrorMap errorMap = new FieldErrorMap();
+				List<FieldError> errors = new ArrayList<FieldError>();
+				errors.add(new FieldError("unique", "The given manufModel/serial value couple is already taken, choose another ", 
+						acquisitionEquipment.getManufacturerModel().getId() + " / " + acquisitionEquipment.getSerialNumber()));
+				errorMap.put("manufacturerModel - serialNumber", errors);
+				ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errorMap));
+				throw new RestServiceException(error);					
+			}
+		}
 	}
 }

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, forwardRef } from '@angular/core';
+import { Component, forwardRef, Output, EventEmitter } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { AbstractInput} from '../../../shared/form/input.abstract'
 
@@ -30,5 +30,7 @@ import { AbstractInput} from '../../../shared/form/input.abstract'
 })
 
 export class DatasetTypeComponent extends AbstractInput {
+
+  @Output() change = new EventEmitter();
 
 }

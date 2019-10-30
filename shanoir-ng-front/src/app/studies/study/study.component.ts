@@ -57,7 +57,7 @@ export class StudyComponent extends EntityComponent<Study> {
     
     private studyUsersPromise: Promise<any>;
     private freshlyAddedMe: boolean = false;
-    private studyUserBackup: StudyUser[];
+    private studyUserBackup: StudyUser[] = [];
 
     constructor(
             private route: ActivatedRoute, 

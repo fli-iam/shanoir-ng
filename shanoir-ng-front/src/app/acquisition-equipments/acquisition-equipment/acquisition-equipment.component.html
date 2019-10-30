@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="content-component">
+<div #formContainer class="content-component">
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 		<div class="layout">
 			<span [ngSwitch]="mode">
@@ -37,8 +37,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</a>
 						</span>
 					</li>
-					<li class="required">
-						<label i18n="AcqEquip detail|Manufacturer model label@@acqEqptDetailManufModel" class="required-label">Manufacturer model</label>
+					<li>
+						<label i18n="AcqEquip detail|Manufacturer model label@@acqEqptDetailManufModel">Manufacturer model</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								<a [routerLink]="['/manufacturer-model/details/', acqEquip.manufacturerModel?.id]">
@@ -59,8 +59,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{datasetModalityTypeEnumValue}}
 						</span>
 					</li>
-					<li class="required">
-						<label i18n="AcqEquip detail|Center label@@acqEqptDetailCenter" class="required-label">Center</label>
+					<li>
+						<label i18n="AcqEquip detail|Center label@@acqEqptDetailCenter">Center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'"> 
 								<a [routerLink]="['/center/details/', acqEquip.center?.id]">

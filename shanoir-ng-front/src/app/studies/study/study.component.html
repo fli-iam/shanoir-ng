@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="content-component detail max-content">
+<div #formContainer class="content-component detail max-content">
 	<div class="layout" [ngClass]="{'left': mode=='view'}">
 		<form *ngIf="form" [formGroup]="form" novalidate>
 			<span [ngSwitch]="mode">
@@ -30,13 +30,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend i18n="Study detail|Name label@@studyDetailGeneral">General</legend>
 				<ol>
 					<li>
-						<label i18n="Study detail|Name label@@studyDetailName" class="required-label">Name</label>
+						<label i18n="Study detail|Name label@@studyDetailName">Name</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{study.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<input type="text" id="name" required minlength="2" maxlength="200" formControlName="name" [(ngModel)]="study.name" />
+								<input type="text" formControlName="name" [(ngModel)]="study.name" />
 								<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
 								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
 								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
@@ -69,7 +69,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Study detail|Status label@@studyDetailStatus" class="required-label">Status</label>
+						<label i18n="Study detail|Status label@@studyDetailStatus">Status</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{studyStatusStr(study.studyStatus)}}
@@ -84,7 +84,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Study detail|Clinical label@@studyDetailClinical" class="required-label">Is clinical</label>
+						<label i18n="Study detail|Clinical label@@studyDetailClinical">Is clinical</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<span *ngIf="study.clinical" class="bool-true"><i class="fas fa-check"></i></span>
@@ -145,7 +145,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers and principal investigators</legend>
 				<ol>
 					<li>
-						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter" [class.required-label]="mode != view">Multi / single center</label>
+						<label i18n="Study detail|Multicenter label@@studyDetailMultiCenter">Multi / single center</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<span *ngIf="study.monoCenter">Single center</span>
