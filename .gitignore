@@ -19,3 +19,4 @@ target
 .factorypath
 .project
 bin/
+docker-compose/**/*.jar
