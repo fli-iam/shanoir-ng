@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 import org.jboss.seam.util.Hex;
 import org.shanoir.uploader.cryptography.BlowfishAlgorithm;
 import org.shanoir.uploader.gui.ShanoirServerConfigurationWindow;
-import org.shanoir.uploader.service.wsdl.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.service.soap.ShanoirUploaderServiceClient;
 
 /**
  * This class implements the logic when a new Shanoir account is introduced in

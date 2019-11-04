@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.subject.model;
+package org.shanoir.uploader.model.rest;
 
 /**
  * Imaged object category.
@@ -25,29 +25,31 @@ public enum ImagedObjectCategory {
 	/**
 	 * Phantom
 	 */
-	PHANTOM(1),
+	PHANTOM(1, "Phantom"),
 
 	/**
 	 * Living human being
 	 */
-	LIVING_HUMAN_BEING(2),
+	LIVING_HUMAN_BEING(2, "Living human being"),
 
 	/**
 	 * Human cadaver
 	 */
-	HUMAN_CADAVER(3),
+	HUMAN_CADAVER(3, "Human cadaver"),
 
 	/**
 	 * Anatomical piece
 	 */
-	ANATOMICAL_PIECE(4),
-	
+	ANATOMICAL_PIECE(4, "Anatomical piece"),
+
 	/**
 	 * Animal
 	 */
-	ANIMAL(5);
-	
+	ANIMAL(5, "Animal");
+
 	private int id;
+
+	private String name;
 
 	/**
 	 * Constructor.
@@ -55,8 +57,9 @@ public enum ImagedObjectCategory {
 	 * @param id
 	 *            id
 	 */
-	private ImagedObjectCategory(final int id) {
+	private ImagedObjectCategory(final int id, final String name) {
 		this.id = id;
+		this.name = name;
 	}
 
 	/**
@@ -83,6 +86,14 @@ public enum ImagedObjectCategory {
 	 */
 	public int getId() {
 		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String toString() {
+		return this.name;
 	}
 
 }

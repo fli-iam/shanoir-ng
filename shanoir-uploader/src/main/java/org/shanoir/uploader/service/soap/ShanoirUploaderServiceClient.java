@@ -1,4 +1,4 @@
-package org.shanoir.uploader.service.wsdl;
+package org.shanoir.uploader.service.soap;
 
 import java.io.File;
 import java.net.URL;
@@ -109,6 +109,7 @@ public class ShanoirUploaderServiceClient {
 			SubjectDTO subjectDTO = new SubjectDTO(subject.getId(), subject.getBirthDate(), subject.getName(),
 					subject.getSex(), subject.getImagedObjectCategory(), subject.getLanguageHemisphericDominance(),
 					subject.getManualHemisphericDominance(), subjectStudyListDTO, subject.getIdentifier());
+			subjectDTO.setSubjectStudyList(subjectStudyListDTO);
 			return subjectDTO;
 		} else {
 			return null;

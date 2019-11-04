@@ -12,42 +12,34 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.subject.model;
+package org.shanoir.uploader.model.rest;
 
 /**
- * Imaged object category.
+ * Subject type.
  * 
  * @author msimon
  *
  */
-public enum ImagedObjectCategory {
+public enum SubjectType {
 
 	/**
-	 * Phantom
+	 * Healthy volunteer.
 	 */
-	PHANTOM(1),
+	HEALTHY_VOLUNTEER(1, "Healthy volunteer"),
 
 	/**
-	 * Living human being
+	 * Patient.
 	 */
-	LIVING_HUMAN_BEING(2),
+	PATIENT(2, "Patient"),
 
 	/**
-	 * Human cadaver
+	 * Phantom.
 	 */
-	HUMAN_CADAVER(3),
+	PHANTOM(3, "Phantom");
 
-	/**
-	 * Anatomical piece
-	 */
-	ANATOMICAL_PIECE(4),
-	
-	/**
-	 * Animal
-	 */
-	ANIMAL(5);
-	
 	private int id;
+	
+	private String name;
 
 	/**
 	 * Constructor.
@@ -55,27 +47,28 @@ public enum ImagedObjectCategory {
 	 * @param id
 	 *            id
 	 */
-	private ImagedObjectCategory(final int id) {
+	private SubjectType(final int id, final String name) {
 		this.id = id;
+		this.name = name;
 	}
 
 	/**
-	 * Get an imaged object category by its id.
+	 * Get a subject type by its id.
 	 * 
 	 * @param id
-	 *            category id.
-	 * @return imaged object category.
+	 *            type id.
+	 * @return subject type.
 	 */
-	public static ImagedObjectCategory getCategory(final Integer id) {
+	public static SubjectType getType(final Integer id) {
 		if (id == null) {
 			return null;
 		}
-		for (ImagedObjectCategory category : ImagedObjectCategory.values()) {
-			if (id.equals(category.getId())) {
-				return category;
+		for (SubjectType type : SubjectType.values()) {
+			if (id.equals(type.getId())) {
+				return type;
 			}
 		}
-		throw new IllegalArgumentException("No matching imaged object category for id " + id);
+		throw new IllegalArgumentException("No matching subject type for id " + id);
 	}
 
 	/**
@@ -83,6 +76,14 @@ public enum ImagedObjectCategory {
 	 */
 	public int getId() {
 		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String toString() {
+		return this.name;
 	}
 
 }

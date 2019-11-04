@@ -12,10 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.subjectstudy.dto;
-
-import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.subject.model.SubjectType;
+package org.shanoir.uploader.model.rest;
 
 /**
  * DTO for subject of a study.
@@ -23,7 +20,7 @@ import org.shanoir.ng.subject.model.SubjectType;
  * @author msimon
  *
  */
-public class SubjectStudyDTO {
+public class SubjectStudy {
 
 	private Long id;
 

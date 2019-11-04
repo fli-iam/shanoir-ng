@@ -21,8 +21,6 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
-import org.shanoir.ng.subject.dto.SubjectFromShupDTO;
-import org.shanoir.ng.subject.dto.SubjectStudyCardIdDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -32,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -100,35 +99,9 @@ public interface SubjectApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
 	ResponseEntity<SubjectDTO> saveNewSubject(
 			@ApiParam(value = "subject to create", required = true) @RequestBody Subject subject,
-			final BindingResult result) throws RestServiceException;
-
-	@ApiOperation(value = "", notes = "Saves a new subject with auto generated common name", response = Subject.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created subject", response = Subject.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Subject.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
-	@RequestMapping(value = "/OFSEP/", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subjectStudyCardIdDTO.getSubject().getSubjectStudyList(), 'CAN_IMPORT'))")
-	ResponseEntity<Subject> saveNewOFSEPSubject(
-			@ApiParam(value = "subject to create and the id of the study card", required = true) @RequestBody SubjectStudyCardIdDTO subjectStudyCardIdDTO,
+			@ApiParam(value = "request param centerId as flag for auto-increment common name", required = false) @RequestParam(required = false) Long centerId,
 			final BindingResult result) throws RestServiceException;
 	
-	@ApiOperation(value = "", notes = "Saves a new subject with auto generated common name", response = Subject.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created subject", response = Subject.class),
-			@ApiResponse(code = 302, message = "found already existing subject", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Subject.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
-	@RequestMapping(value = "/OFSEP/SHUP", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and #subjectFromShupDTO.getStudyId() != null and @studySecurityService.hasRightOnStudy(#subjectFromShupDTO.getStudyId(), 'CAN_IMPORT'))")
-	ResponseEntity<Long> saveNewOFSEPSubjectFromShup(
-			@ApiParam(value = "subject to create and the id of the study card", required = true) @RequestBody SubjectFromShupDTO subjectFromShupDTO,
-			final BindingResult result) throws RestServiceException;
-
 	@ApiOperation(value = "", notes = "Updates a subject", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "subject updated", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
@@ -141,20 +114,6 @@ public interface SubjectApi {
 	ResponseEntity<Void> updateSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "subject to update", required = true) @RequestBody Subject subject,
-			final BindingResult result) throws RestServiceException;
-	
-	@ApiOperation(value = "", notes = "Updates a subject", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "subject updated", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/SHUP/{subjectId}", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasRole('ADMIN')")
-	ResponseEntity<Long> updateSubjectFromShup(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-			@ApiParam(value = "subject to update", required = true) @RequestBody SubjectFromShupDTO subjectFromShupDTO,
 			final BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the subjects of a study", response = Subject.class, tags = {})

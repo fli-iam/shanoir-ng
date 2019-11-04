@@ -12,42 +12,29 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.subject.model;
+package org.shanoir.uploader.model.rest;
 
 /**
- * Imaged object category.
+ * Hemispheric dominance.
  * 
  * @author msimon
  *
  */
-public enum ImagedObjectCategory {
+public enum HemisphericDominance {
 
 	/**
-	 * Phantom
+	 * Left.
 	 */
-	PHANTOM(1),
+	Left(1, "Left"),
 
 	/**
-	 * Living human being
+	 * Right.
 	 */
-	LIVING_HUMAN_BEING(2),
+	Right(2, "Right");
 
-	/**
-	 * Human cadaver
-	 */
-	HUMAN_CADAVER(3),
-
-	/**
-	 * Anatomical piece
-	 */
-	ANATOMICAL_PIECE(4),
-	
-	/**
-	 * Animal
-	 */
-	ANIMAL(5);
-	
 	private int id;
+	
+	private String name;
 
 	/**
 	 * Constructor.
@@ -55,27 +42,28 @@ public enum ImagedObjectCategory {
 	 * @param id
 	 *            id
 	 */
-	private ImagedObjectCategory(final int id) {
+	private HemisphericDominance(final int id, final String name) {
 		this.id = id;
+		this.name = name;
 	}
 
 	/**
-	 * Get an imaged object category by its id.
+	 * Get a hemispheric dominance by its id.
 	 * 
 	 * @param id
-	 *            category id.
-	 * @return imaged object category.
+	 *            dominance id.
+	 * @return hemispheric dominance.
 	 */
-	public static ImagedObjectCategory getCategory(final Integer id) {
+	public static HemisphericDominance getDominance(final Integer id) {
 		if (id == null) {
 			return null;
 		}
-		for (ImagedObjectCategory category : ImagedObjectCategory.values()) {
-			if (id.equals(category.getId())) {
-				return category;
+		for (HemisphericDominance dominance : HemisphericDominance.values()) {
+			if (id.equals(dominance.getId())) {
+				return dominance;
 			}
 		}
-		throw new IllegalArgumentException("No matching imaged object category for id " + id);
+		throw new IllegalArgumentException("No matching hemispheric dominance for id " + id);
 	}
 
 	/**
@@ -83,6 +71,10 @@ public enum ImagedObjectCategory {
 	 */
 	public int getId() {
 		return id;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 }

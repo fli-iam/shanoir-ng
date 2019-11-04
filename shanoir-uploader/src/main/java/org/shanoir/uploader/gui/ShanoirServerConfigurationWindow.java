@@ -24,7 +24,7 @@ import javax.swing.JTextField;
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.ShanoirServerConfigurationListener;
-import org.shanoir.uploader.service.wsdl.ServiceConfiguration;
+import org.shanoir.uploader.service.soap.ServiceConfiguration;
 
 /**
  * The Shanoir Server Configuration window of the ShanoirUploader.
