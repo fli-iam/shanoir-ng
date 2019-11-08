@@ -42,4 +42,14 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
+	@Override
+	public ResponseEntity<Void> createNewEegDatasetAcquisition(ImportJob importJob) {
+		// TODO: Iterate over Importjob.patients pour créer les dataset
+		
+		// TODO: deleteTempFile (uncomment when ready)
+		// importerService.cleanTempFiles(importJob.getWorkFolder());
+
+		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+
 }

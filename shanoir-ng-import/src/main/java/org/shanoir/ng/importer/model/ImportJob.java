@@ -33,6 +33,9 @@ public class ImportJob {
     @JsonProperty("fromPacs")
     private boolean fromPacs;
     
+    @JsonProperty("fromEeg")
+    private boolean fromeEeg;
+    
 	@JsonProperty("workFolder")
 	private String workFolder;
 
@@ -73,6 +76,14 @@ public class ImportJob {
 
 	public void setFromPacs(boolean fromPacs) {
 		this.fromPacs = fromPacs;
+	}
+
+	public boolean isFromeEeg() {
+		return fromeEeg;
+	}
+
+	public void setFromeEeg(boolean fromeEeg) {
+		this.fromeEeg = fromeEeg;
 	}
 
 	public List<Patient> getPatients() {

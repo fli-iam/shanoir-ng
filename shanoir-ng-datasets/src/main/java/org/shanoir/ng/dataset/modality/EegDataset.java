@@ -14,9 +14,17 @@
 
 package org.shanoir.ng.dataset.modality;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.eeg.model.Channel;
+import org.shanoir.ng.eeg.model.Event;
 
 /**
  * EEG dataset.
@@ -37,4 +45,58 @@ public class EegDataset extends Dataset {
 		return "Eeg";
 	}
 
+	private float samplingFrequency;
+	
+	private int channelCount;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "dataset", cascade = CascadeType.ALL)
+	private List<Channel> channelList;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "dataset", cascade = CascadeType.ALL)
+	private List<Event> eventList;
+	
+	public float getSamplingFrequency() {
+		return samplingFrequency;
+	}
+
+	public void setSamplingFrequency(float samplingFrequency) {
+		this.samplingFrequency = samplingFrequency;
+	}
+
+	public int getChannelCount() {
+		return channelCount;
+	}
+
+	public void setChannelCount(int channelCount) {
+		this.channelCount = channelCount;
+	}
+
+	/**
+	 * @return the channelList
+	 */
+	public List<Channel> getChannelList() {
+		return channelList;
+	}
+
+	/**
+	 * @param channelList the channelList to set
+	 */
+	public void setChannelList(List<Channel> channelList) {
+		this.channelList = channelList;
+	}
+
+	/**
+	 * @return the eventList
+	 */
+	public List<Event> getEventList() {
+		return eventList;
+	}
+
+	/**
+	 * @param eventList the eventList to set
+	 */
+	public void setEventList(List<Event> eventList) {
+		this.eventList = eventList;
+	}
+	
 }

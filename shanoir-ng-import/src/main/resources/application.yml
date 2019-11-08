@@ -84,6 +84,7 @@ keycloak:
 # microservices url
 ms.url:
   shanoir-ng-datasets: http://datasets:9904/datasetacquisition
+  shanoir-ng-datasets-eeg: http://datasets:9904/datasetacquisition_eeg
   dicom2nifti: http://preclinical-bruker2dicom:5000/dicom2nifti
 # logging configuration
 logging:

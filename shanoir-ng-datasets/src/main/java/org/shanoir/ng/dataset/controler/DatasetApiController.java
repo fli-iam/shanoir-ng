@@ -35,6 +35,8 @@ import javax.validation.Valid;
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDatasetNature;
@@ -104,6 +106,9 @@ public class DatasetApiController implements DatasetApi {
 	private MrDatasetMapper mrDatasetMapper;
 	
 	@Autowired
+	private EegDatasetMapper eegDatasetMapper;
+	
+	@Autowired
 	private DatasetService datasetService;
 	
 	@Autowired 
@@ -145,6 +150,9 @@ public class DatasetApiController implements DatasetApi {
 		
 		if (dataset instanceof MrDataset) {
 			return new ResponseEntity<>(mrDatasetMapper.datasetToDatasetDTO((MrDataset) dataset), HttpStatus.OK);
+		}
+		else if (dataset instanceof EegDataset) {
+			return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetDTO((EegDataset) dataset), HttpStatus.OK);
 		}
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(dataset), HttpStatus.OK);
 	}
@@ -431,5 +439,12 @@ public class DatasetApiController implements DatasetApi {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
 		} 
+	}
+
+	@Override
+	public ResponseEntity<DatasetDTO> findEegDatasetById() {
+		final EegDataset dataset = new EegDataset();
+		
+		return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetDTO(dataset), HttpStatus.OK);
 	}
 }

@@ -120,6 +120,7 @@ export class FinishImportComponent {
             importJob.workFolder = this.importJob.workFolder;
             if (this.importMode == 'DICOM') importJob.fromDicomZip = true;
             else if (this.importMode == 'PACS') importJob.fromPacs = true;
+            else if (this.importMode == 'EEG') importJob.fromEeg = true;
             importJob.examinationId = this.context.examination.id;
             importJob.frontStudyId = this.context.study.id;
             importJob.frontAcquisitionEquipmentId = this.context.acquisitionEquipment.id;

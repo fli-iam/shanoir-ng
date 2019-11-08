@@ -23,13 +23,21 @@ export class ImportService {
 
     constructor(private http: HttpClient) { }
 
-    uploadFile(formData: FormData): Promise<ImportJob> {
+    uploadFile(formData: FormData, type = "dicom"): Promise<ImportJob> {
+        if ("eeg" == type) {
+            return this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData)
+            .toPromise();
+        }
         return this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_DICOM_URL, formData)
             .toPromise();
     }
 
     async startImportJob(importJob: ImportJob): Promise<Object> {
         try {
+            if (importJob.fromEeg) {
+                return this.http.post(AppUtils.BACKEND_API_UPLOAD_EEG_START_IMPORT_JOB_URL, JSON.stringify(importJob))
+                .toPromise();
+            }
             return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
                 .toPromise();
         }

@@ -57,7 +57,7 @@ export class ClinicalContextComponent {
     private subject: SubjectWithSubjectStudy;
     private examination: SubjectExamination;
     private niftiConverter: NiftiConverter;
-    private importMode: "DICOM" | "PACS";
+    private importMode: "DICOM" | "PACS"  | "EEG";
     
     constructor(
             private studyService: StudyService,
@@ -68,7 +68,7 @@ export class ClinicalContextComponent {
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
 
-        if (!importDataService.patients || !importDataService.patients[0]) {
+        if (!this.importDataService.patientList.fromEeg &&( !importDataService.patients || !importDataService.patients[0])) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }

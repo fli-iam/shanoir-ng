@@ -25,6 +25,7 @@ import javax.annotation.Resource;
 import javax.validation.Valid;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -74,6 +75,16 @@ public interface DatasetApi {
 	ResponseEntity<DatasetDTO> findDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
 
+	@ApiOperation(value = "", notes = "If exists, returns the EEG dataset corresponding to the given id", response = EegDataset.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found dataset", response = Dataset.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/eeg}", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<DatasetDTO> findEegDatasetById();
+	
+	
 	@ApiOperation(value = "", notes = "Updates a dataset", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "dataset updated", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),

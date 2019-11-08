@@ -15,9 +15,13 @@
 package org.shanoir.ng.importer;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -27,6 +31,7 @@ import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
+import org.shanoir.ng.importer.eeg.BrainVisionReader;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -39,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -441,6 +448,54 @@ public class ImporterApiController implements ImporterApi {
 		File uploadFile = new File(userImportDir.getAbsolutePath(), Long.toString(n) + UPLOAD_FILE_SUFFIX);
 		Files.move(file.toPath(), uploadFile.toPath());
 		return uploadFile;
+	}
+
+	@Override
+	public ResponseEntity<ImportJob> importEEGZipFile(MultipartFile eegZipFilename) throws RestServiceException {
+		try {
+			// TODO: Do some checks about the file
+
+			
+			// TODO: Build the import job with patients here
+			// Convert multipart file to file
+			File convFile = new File(eegZipFilename.getOriginalFilename());
+			convFile.createNewFile();
+			FileOutputStream fos = new FileOutputStream(convFile);
+			fos.write(eegZipFilename.getBytes());
+			fos.close();
+			BrainVisionReader bvr = new BrainVisionReader(convFile);
+			
+			bvr.read(0, 0, 650);
+
+			// Create import job
+			ImportJob importJob = new ImportJob();
+			importJob.setFromeEeg(true);
+
+			// TODO: Get patient from imported file (how ? A quoi correspond un patient ?)
+			List<Patient> patients = new ArrayList<>();
+			importJob.setPatients(patients);
+
+			// TODO: Create temp folder with initial data
+			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
+		} catch (IOException ioe) {
+			// PRAY: Hope this does not happen
+			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
+		}
+	}
+
+	@Override
+	public ResponseEntity<Void> startImportEEGJob(ImportJob importJob) throws RestServiceException {
+		// TODO: Anonymisation des données (how ?)
+		// TODO: BIDS traduction only for selected patients in new DATA folder
+		// TODO Do the ASYNC call here
+
+		// TODO: delete temp folder ?
+
+		// HttpEntity represents the request
+		// final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, keycloakHeaders);
+		// Post to dataset MS to finish import
+		// ResponseEntity<String> response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody, String.class);
+		return null;
 	}
 
 }

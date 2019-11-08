@@ -24,12 +24,14 @@ import { CoilListComponent } from './coils/coil-list/coil-list.component';
 import { CoilComponent } from './coils/coil/coil.component';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
@@ -73,6 +75,10 @@ let appRoutes: Routes = [
                 path: 'upload',
                 component: DicomUploadComponent,
                 data: {importMode: 'DICOM'}
+            }, {   
+                path: 'eeg',
+                component: EegUploadComponent,
+                data: {importMode: 'EEG'}
             }, {
                 path: 'pacs',
                 component: QueryPacsComponent,
