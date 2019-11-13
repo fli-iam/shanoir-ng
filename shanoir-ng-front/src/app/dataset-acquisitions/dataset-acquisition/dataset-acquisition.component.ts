@@ -22,7 +22,7 @@ import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
-import { MrDatasetAcquisition } from '../shared/mr-dataset-acquisition.model';
+import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 
 
 @Component({
@@ -77,6 +77,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             'rank': [this.datasetAcquisition.rank],
             'software-release': [this.datasetAcquisition.softwareRelease],
             'sorting-index': [this.datasetAcquisition.sortingIndex],
+            'protocol': [this.datasetAcquisition.protocol] 
         });
     }
 

@@ -146,8 +146,8 @@ import { DatasetAcquisitionListComponent } from './dataset-acquisitions/dataset-
 import { ExaminationDTOService } from './examinations/shared/examination.dto';
 import { DatasetAcquisitionComponent } from './dataset-acquisitions/dataset-acquisition/dataset-acquisition.component';
 import { StudyCardDTOService } from './study-cards/shared/study-card.dto';
-
-//import { ModalService} from './shared/components/modal/modal.service';
+import { MrProtocolComponent } from './dataset-acquisitions/modality/mr/mr-protocol.component'
+import { PetProtocolComponent } from './dataset-acquisitions/modality/pet/pet-protocol.component'
 
 @NgModule({
     imports: [
@@ -245,7 +245,9 @@ import { StudyCardDTOService } from './study-cards/shared/study-card.dto';
         StudyCardActionComponent,
         GetValuesPipe,
         DatasetAcquisitionListComponent,
-        DatasetAcquisitionComponent
+        DatasetAcquisitionComponent,
+        MrProtocolComponent,
+        PetProtocolComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

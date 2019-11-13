@@ -35,6 +35,7 @@ import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { timeout } from 'rxjs/operators';
 
 @Component({
     selector: 'study-detail',
@@ -98,11 +99,10 @@ export class StudyComponent extends EntityComponent<Study> {
         ]).then(([study, centers]) => {
             this.onMonoMultiChange();
         });
-
         return studyPromise.then(() => null);
     }
 
-    initCreate(): Promise<void> {
+    async initCreate(): Promise<void> {
         this.study = this.newStudy();
         this.getCenters();
         this.selectedCenter = null;
@@ -119,7 +119,6 @@ export class StudyComponent extends EntityComponent<Study> {
             let connectedUser: User = users.find(user => this.isMe(user));
             this.addUser(connectedUser, [StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE]);
         });
-        return Promise.resolve();
     }
 
     buildForm(): FormGroup {

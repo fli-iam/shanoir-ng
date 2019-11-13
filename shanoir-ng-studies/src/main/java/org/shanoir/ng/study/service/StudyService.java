@@ -50,7 +50,7 @@ public interface StudyService {
 	 * @throws AccessDeniedException 
 	 */
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("returnObject == null || @studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL')")
 	Study findById(Long id); 
 
 
@@ -71,7 +71,7 @@ public interface StudyService {
 	 * @return created Study
 	 * @throws ShanoirStudiesException
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.studyUsersMatchStudy(#study)")
 	Study create(Study study);
 
 	

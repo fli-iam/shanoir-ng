@@ -40,7 +40,7 @@ export class ExaminationDTOService {
         ExaminationDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
         if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
-        if (dto.subjectId) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject));
+        if (dto.subjectId) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject)); //TODO : subject is on the same ms
         if (dto.centerId) promises.push(this.centerService.get(dto.centerId).then(center => result.center = center));
         return Promise.all(promises).then(() => result);
     }

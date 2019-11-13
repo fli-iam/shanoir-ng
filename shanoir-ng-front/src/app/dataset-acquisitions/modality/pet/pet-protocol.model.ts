@@ -11,16 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * anumber with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { DatasetAcquisition } from './dataset-acquisition.model';
-
-
-export class PetDatasetAcquisition extends DatasetAcquisition {
-
-    protocol: PetProtocol;
-}
-
 
 export class PetProtocol {
+    
     attenuationCorrectionMethod: string
     convolutionKernel: string
     decayCorrection: string

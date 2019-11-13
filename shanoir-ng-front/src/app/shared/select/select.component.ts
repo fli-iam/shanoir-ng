@@ -22,12 +22,10 @@ import {
     HostBinding,
     HostListener,
     Input,
-    OnChanges,
     OnDestroy,
     Output,
     QueryList,
     Renderer2,
-    SimpleChanges,
     ViewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';

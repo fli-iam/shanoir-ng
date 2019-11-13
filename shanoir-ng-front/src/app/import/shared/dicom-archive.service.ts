@@ -13,7 +13,6 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 
 
 declare var JSZip: any;

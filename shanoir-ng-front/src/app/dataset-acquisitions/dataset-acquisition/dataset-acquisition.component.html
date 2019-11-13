@@ -110,6 +110,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
+
+			<ng-container *ngIf="datasetAcquisition.protocol">
+				<mr-protocol *ngIf="datasetAcquisition.type == 'Mr'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></mr-protocol>
+				<pet-protocol *ngIf="datasetAcquisition.type == 'Pet'" [(ngModel)]="datasetAcquisition.protocol" formControlName="protocol"></pet-protocol>
+			</ng-container>
+			
 			<form-footer
 				[state]="footerState"
 				(save)="save()"

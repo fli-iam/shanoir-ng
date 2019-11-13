@@ -100,15 +100,20 @@ export class TableComponent implements OnInit {
             let params = new Object();
             params["data"] = item;
             return col["cellRenderer"](params);
-        } else if (col.field == undefined) {
+        } else if (!col.field) {
             return null;
         } else {
-            return this.getFieldRawValue(item, col["field"]);
+            let fieldValue = this.getFieldRawValue(item, col["field"]);
+            if (fieldValue) return fieldValue;
+            else if (col.defaultField) 
+                return this.getFieldRawValue(item, col["defaultField"]);
+            else
+                return;
         }
     }
 
     public static getFieldRawValue(obj: Object, path: string): any {
-        if (path == undefined || path == null) return;
+        if (!path) return;
         function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
     }

@@ -16,11 +16,11 @@ import { Injectable } from '@angular/core';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { DatasetAcquisition } from './dataset-acquisition.model';
-import { MrDatasetAcquisition } from './mr-dataset-acquisition.model';
-import { PetDatasetAcquisition } from './pet-dataset-acquisition.model';
-import { CtDatasetAcquisition } from './ct-dataset-acquisition.model';
+import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
+import { CtDatasetAcquisition } from '../modality/ct/ct-dataset-acquisition.model';
 import { DatasetAcquisitionDTOService } from './dataset-acquisition.dto';
 import { ServiceLocator } from '../../utils/locator.service';
+import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
 
 
 @Injectable()

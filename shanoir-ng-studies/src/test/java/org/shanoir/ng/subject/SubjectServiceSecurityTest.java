@@ -247,13 +247,12 @@ public class SubjectServiceSecurityTest {
 		Study study = ModelsUtil.createStudy();
 		study.setId(id);
 		List<StudyUser> studyUserList = new ArrayList<>();
-		for (StudyUserRight right : rights) {
-			StudyUser studyUser = new StudyUser();
-			studyUser.setUserId(LOGGED_USER_ID);
-			studyUser.setStudy(study);
-			studyUser.setStudyUserRights(Arrays.asList(right));
-			studyUserList.add(studyUser);			
-		}
+		StudyUser studyUser = new StudyUser();
+		studyUser.setUserId(LOGGED_USER_ID);
+		studyUser.setUserName(LOGGED_USER_USERNAME);
+		studyUser.setStudy(study);
+		studyUser.setStudyUserRights(Arrays.asList(rights));
+		studyUserList.add(studyUser);			
 		study.setStudyUserList(studyUserList);
 		return study;		
 	}

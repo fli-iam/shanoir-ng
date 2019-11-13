@@ -56,8 +56,8 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
     getColumnDefs(): any[] {
         let colDef: any[] = [
             { headerName: "Name", field: "name" },
-            { headerName: "Study", field: "study.name"},
-            { headerName: "Center", field: "acquisitionEquipment.center.name"},
+            { headerName: "Study", field: 'study.name', defaultField: 'study.id' },
+            { headerName: "Center", field: 'acquisitionEquipment.center.name'},
             { headerName: "Equipment", field: "acquisitionEquipment", width: '200%',
                 cellRenderer: params => this.format(params.data.acquisitionEquipment) }
         ];
@@ -70,7 +70,7 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
             return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
                 + " (" + DatasetModalityType[manufModel.datasetModalityType] + ") " + acqEqpt.serialNumber;
         }
-        return "";
+        return '';
     }
 
     getCustomActionsDefs(): any[] {

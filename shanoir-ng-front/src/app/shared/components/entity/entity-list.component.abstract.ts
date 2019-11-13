@@ -165,6 +165,13 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.router.navigate([this.entityRoutes.getRouteToList()]);
     }
 
+    dateRenderer(date: number): string {
+        if (date) {
+            return new Date(date).toLocaleDateString();
+        }
+        return null;
+    };
+
     ngOnDestroy() {
         for(let subscribtion of this.subscribtions) {
             subscribtion.unsubscribe();

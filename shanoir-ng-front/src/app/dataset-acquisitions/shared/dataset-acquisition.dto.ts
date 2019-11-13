@@ -22,6 +22,12 @@ import { StudyCardDTOService, StudyCardDTO } from '../../study-cards/shared/stud
 import { DatasetAcquisition } from './dataset-acquisition.model';
 import { DatasetAcquisitionService } from './dataset-acquisition.service';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
+import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
+import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
+import { CtDatasetAcquisition } from '../modality/ct/ct-dataset-acquisition.model';
+import { PetProtocol } from '../modality/pet/pet-protocol.model';
+import { MrProtocol } from '../modality/mr/mr-protocol.model';
+import { CtProtocol } from '../modality/ct/ct-protocol.model';
 
 @Injectable()
 export class DatasetAcquisitionDTOService {
@@ -85,8 +91,23 @@ export class DatasetAcquisitionDTOService {
         entity.type = dto.type;
         entity.examination = new Examination();
         ExaminationDTOService.mapSyncFields(dto.examination, entity.examination);
+        switch(entity.type) {
+            case 'Mr': {
+                (entity as MrDatasetAcquisition).protocol = Object.assign(new MrProtocol(), (dto as MrDatasetAcquisitionDTO).mrProtocol);
+                break;
+            }
+            case 'Pet': {
+                (entity as PetDatasetAcquisition).protocol = Object.assign(new PetProtocol(), (dto as PetDatasetAcquisitionDTO).petProtocol);
+                break;
+            }
+            case 'Ct': {
+                (entity as CtDatasetAcquisition).protocol = Object.assign(new CtProtocol(), (dto as CtDatasetAcquisitionDTO).ctProtocol);
+                break;
+            }
+        }
         return entity;
     }
+
 }
 
 
@@ -117,4 +138,16 @@ export class DatasetAcquisitionDTO {
     softwareRelease: string;
     sortingIndex: number;
     type: 'Mr' | 'Pet' | 'Ct';
+}
+
+export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
+    mrProtocol: any;
+}
+
+export class PetDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
+    petProtocol: any;
+}
+
+export class CtDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
+    ctProtocol: any;
 }

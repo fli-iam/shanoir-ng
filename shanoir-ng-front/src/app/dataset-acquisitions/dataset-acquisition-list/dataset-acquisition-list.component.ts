@@ -50,24 +50,16 @@ export class DatasetAcquisitionListComponent extends BrowserPaginEntityListCompo
     }
 
     getColumnDefs(): any[] {
-        /**
-         * 
-Description
-Acquisition equipment
-Research study
-Subject
-Examination
-Rank
-Software release
-         */
         let colDef: any[] = [
             { headerName: "Acquisition Equipment", field: "acquisitionEquipment", 
                 cellRenderer: (params: any) => this.transformAcqEq(params.data.acquisitionEquipment),
                 route: (dsAcq: DatasetAcquisition) => '/acquisition-equipment/details/' + dsAcq.acquisitionEquipment.id
             },
-            { headerName: "Study", field: "examination.study.name" },
-            { headerName: "Examination date", field: "examination.examinationDate" },    
-            { headerName: "Center", field: "acquisitionEquipment.center.name" },
+            { headerName: "Study", field: "examination.study.name", defaultField: 'examination.study.id' },
+            { headerName: "Examination date", type: 'date', cellRenderer: (params: any) => {
+                return this.dateRenderer(params.data.startDate);
+            }},    
+            { headerName: "Center", field: "acquisitionEquipment.center.name"},
             { headerName: "StudyCard", field: "studyCard.name",
                 route: (dsAcq: DatasetAcquisition) => dsAcq.studyCard ? '/study-card/details/' + dsAcq.studyCard.id : null
             }
