@@ -1,0 +1,64 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+* {
+    box-sizing: border-box;
+}
+/* Create a column layout with Flexbox */
+.row {
+    display: flex;
+}
+
+/* Left column: solr search  */
+.left {
+    flex: 35%;
+    padding: 15px 0;
+}
+
+.left h2 {
+    padding-left: 8px;
+}
+
+/* Right column: results */
+.right {
+    flex: 65%;
+    padding: 15px;
+}
+
+/* Style the search bar */
+#searchBar {
+    margin-top: 20px;
+    width: 100%;
+    font-size: 18px;
+    padding: 11px;
+    border: 1px solid #ddd;
+}
+
+/* Style the facets inside the left column */
+#facet {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#facet li {
+    padding: 12px;
+    text-decoration: none;
+    display: block;
+}
+  
+#facet li:hover {
+    background-color: #eee;
+}
+  

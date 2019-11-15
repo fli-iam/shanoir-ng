@@ -130,6 +130,8 @@ import { UserComponent } from './users/user/user.component';
 import { TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
 import { SolrService } from './solr/solr.service';
+import { SolrSearchComponent } from './solr/solr.search.component';
+import { CheckboxListComponent } from './shared/checkbox-list/checkbox-list.component';
 
 //import { ModalService} from './shared/components/modal/modal.service';
 
@@ -221,7 +223,9 @@ import { SolrService } from './solr/solr.service';
         AsyncTasksComponent,
         ToggleSwitchComponent,
         CheckboxComponent,
-        HelpMessageComponent
+        HelpMessageComponent,
+        SolrSearchComponent,
+        CheckboxListComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

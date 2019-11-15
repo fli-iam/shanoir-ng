@@ -1,0 +1,85 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<form class="row">
+    <div class="left">
+        <h2>Solr Search</h2>
+        <input type="text" id="searchBar" placeholder="Search..">
+        <ol id="facet">
+            <li>
+                <label>Study Name</label> 
+                <span class="right-col">
+                    <select-box [(ngModel)]="study" [ngModelOptions]="{standalone: true}" (change)="onSelectStudy()">
+                        <select-option *ngFor="let study of studies" [value]="study">{{study?.name}}</select-option>
+                    </select-box>
+                </span>
+            </li>
+            <li>
+                <label>Subject Name</label> 
+                <span class="right-col">
+                    <input class="search-txt" [(ngModel)]="subject" [ngModelOptions]="{standalone: true}" (change)="onSelectSubject()" type="text"/> 
+                </span>
+            </li>
+            <li>
+                <label>Dataset Name</label> 
+                <span class="right-col">
+                    <input class="search-txt" [(ngModel)]="datasetName" [ngModelOptions]="{standalone: true}" (change)="onSelectDatasetName()" type="text"/> 
+                </span>
+            </li>
+            <li>
+                <label>Dataset Creation Date</label>
+                <br/>
+                <label>bewteen </label>
+                <span class="right-col">
+                    <datepicker [(ngModel)]="startDate" [ngModelOptions]="{standalone: true}"></datepicker>
+                </span>
+                <br/>
+                <label>and </label>
+                <span class="right-col">
+                    <datepicker [(ngModel)]="endDate" [ngModelOptions]="{standalone: true}"></datepicker>
+                </span>
+            </li>
+            <li>
+                <label>Examination Comment</label> 
+                <span class="right-col">
+                    <input class="search-txt" [(ngModel)]="examinationComment" [ngModelOptions]="{standalone: true}" (change)="onSelectExam()" type="text"/> 
+                </span>
+            </li>
+            <li>
+                <label>Dateset ModalityType</label>
+                <span class="right-col">
+                    <checkbox-list [(ngModel)]="datasetModalityTypes" [items]="allDatasetModalityTypes" [ngModelOptions]="{standalone: true}"></checkbox-list>
+                </span>
+            </li>
+            <li>
+                <label>Mr Dateset Nature</label>
+                <span class="right-col">
+                    <checkbox-list [(ngModel)]="mrDatasetNatures" [items]="allMrDatasetNatures" [ngModelOptions]="{standalone: true}"></checkbox-list>
+                </span>
+            </li>
+            <!-- criteres choisis -->
+            <button class="Button" (click)="search()">Search</button>
+        </ol>
+    </div>
+    <div class="right">
+        <h2>Results</h2>
+        <shanoir-table #table
+            [getPage]="getPage.bind(this)" 
+            [columnDefs]="columnDefs" 
+            [customActionDefs]="customActionDefs" 
+            (rowClick)="onRowClick($event)"
+            [browserSearch]="false">
+        </shanoir-table>
+    </div>
+</form>

@@ -11,23 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { KeycloakService } from '../shared/keycloak/keycloak.service';
-import * as AppUtils from '../utils/app.utils';
-
-
-@Injectable()
-export class SolrService {
-    
-    constructor(private http: HttpClient, private keycloakService: KeycloakService) {
-
-    }
-
-    public indexToSolr(): Promise<void> {
-        if (this.keycloakService.isUserAdmin()) {
-            return this.http.post<void>(AppUtils.BACKEND_API_SOLR_URL, {}).toPromise();
-        }
-    }
+.items {
+    max-height: 143px;
+    overflow-y: auto;
 }
