@@ -20,6 +20,7 @@ import { DicomArchiveService } from '../shared/dicom-archive.service';
 import { ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+import { EegImportJob } from '../shared/eeg-data.model';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -46,7 +47,7 @@ export class EegUploadComponent {
         breadcrumbsService.nameStep('1. Upload');
         breadcrumbsService.markMilestone();
     }
-    
+
     private uploadArchive(fileEvent: any): void {
         this.setArchiveStatus('uploading');
         this.loadInMemory(fileEvent);   
@@ -70,10 +71,9 @@ export class EegUploadComponent {
         this.modality = null;
         let formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
-        this.importService.uploadFile(formData, "eeg")
-            .then((patientDicomList: ImportJob) => {
-                //this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
-                this.importDataService.patientList = patientDicomList;
+        this.importService.uploadEegFile(formData)
+            .then((importJob: EegImportJob) => {
+                this.importDataService.eegImportJob = importJob;
                 this.setArchiveStatus('uploaded');
             }).catch(error => {
                 this.setArchiveStatus('error');
@@ -89,7 +89,7 @@ export class EegUploadComponent {
     }
 
     private next() {
-        this.router.navigate(['imports/series']);
+        this.router.navigate(['imports/eegcontext']);
     }
 
 }

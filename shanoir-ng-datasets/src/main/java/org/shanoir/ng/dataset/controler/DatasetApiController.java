@@ -440,11 +440,4 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(error);
 		} 
 	}
-
-	@Override
-	public ResponseEntity<DatasetDTO> findEegDatasetById() {
-		final EegDataset dataset = new EegDataset();
-		
-		return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetDTO(dataset), HttpStatus.OK);
-	}
 }

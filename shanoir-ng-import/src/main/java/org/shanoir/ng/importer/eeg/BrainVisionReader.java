@@ -19,18 +19,27 @@ package org.shanoir.ng.importer.eeg;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  *
@@ -41,6 +50,7 @@ public class BrainVisionReader {
 
     private File file;
     private File markerFile;
+    private File positionFile;
     private String dataFileLocation;
     private RandomAccessFile dataFile;
     private DataFormat dataFormat;
@@ -64,12 +74,40 @@ public class BrainVisionReader {
     private ByteBuffer buf;
     private long nSamples;
     private int bytes;
+    
+    private List<Channel> channels;
+    
+    private List<Event> events;
 
     public BrainVisionReader(File file) {
         this.file = file;
         if (file.getName().toLowerCase().endsWith(".vhdr")) {
             readHeaderFromVHDR();
         }
+        
+        if (markerFile != null) {
+        	// Create events
+        	readEventsFile();
+        }
+        
+        // Read .pos file if existing
+		// Get .pos file
+        File parentDir = new File(file.getParent());
+		File[] matchingFiles = parentDir.listFiles(new FilenameFilter() {
+		    public boolean accept(File dir, String name) {
+		    	System.out.println(name);
+		        return name.endsWith("pos");
+		    }
+		});
+		
+		if (matchingFiles != null && matchingFiles.length == 1) {
+			positionFile = matchingFiles[0];
+		}
+        if (positionFile != null) {
+        	readPositionFile();
+        }
+
+        
         /**
          * Has to be set to 0 initially, reflects changes in buffer size
          */
@@ -80,7 +118,7 @@ public class BrainVisionReader {
                 Logger.getLogger(BrainVisionReader.class.getName()).log(Level.ALL, null, ex);
             }
 
-            if (pnts == 0) {
+            if (pnts == 0 && dataFile != null) {
                 try {
                     pnts = (int) (dataFile.length() / bytes / (long) nbchan);
                 } catch (IOException ex) {
@@ -94,11 +132,102 @@ public class BrainVisionReader {
         isAsciiRead = false;
     }
 
-    private void readHeaderFromVHDR() {
+    /**
+     * This method reads the .pos file to complete the Channel list
+     */
+    private void readPositionFile() {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(positionFile), StandardCharsets.UTF_8))) {
+            String newLine = null;
+            int channelIndex = 1;
+
+            // Construct a list of events
+            while ((newLine = in.readLine()) != null) {
+            	if (newLine.startsWith(String.valueOf(channelIndex))) {
+            		String[] tmp = newLine.split("\\s+");
+            		
+            		// Find the channel with corresponding name
+            		Channel chan = channels
+            				.stream()
+            				.filter(channel -> channel.getName().contentEquals(tmp[1]))
+            				.findFirst()
+            				.get();
+
+            		chan.setX(Float.parseFloat(tmp[2]));
+            		chan.setY(Float.parseFloat(tmp[3]));
+            		chan.setZ(Float.parseFloat(tmp[4]));
+            		
+            		channelIndex++;
+            	}
+            }
+        } catch (FileNotFoundException e) {
+        	System.err.println("No file found on current location.");
+        } catch (IOException e) {
+        	e.printStackTrace();
+        }
+    }
+
+    /**
+     * This method reads the .vmrk markerFile to get all the events associated.
+     */
+    private void readEventsFile() {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(markerFile), StandardCharsets.UTF_8))) {
+            String newLine = null;
+            events = new ArrayList<>();
+            boolean description = false;
+
+            // Construct a list of events
+            while ((newLine = in.readLine()) != null) {
+
+            	// Check if description line exists or not
+            	if (newLine.startsWith(";")) {
+            		if (newLine.contains("<Description>")) {
+            			description = true;
+            		}
+            	}
+
+            	// Parse every new event coming
+            	else if (newLine.startsWith("Mk")) {
+                    String[] tmp = newLine.split(",");
+                	// <type>,
+                    // [<description>],
+                	// <position>,
+                    // <points>,
+                    // <channel number>,
+                    // [<date>]
+                    int stringIndex = tmp[0].indexOf("=");
+                    String eventType =  tmp[0].substring(stringIndex + 1);
+                    String descriptionValue = description? tmp[1] : null;
+                    String position = description? tmp[2] : tmp[1];
+                    int points = Integer.parseInt(description? tmp[3] : tmp[2]);
+                    int chNumber = Integer.parseInt(description? tmp[4] : tmp[3]);
+                    Date date = null;
+                    if (description && tmp.length == 6) {
+                    	date = new SimpleDateFormat("yyyyMMddhhmmssSSSSSS").parse(tmp[5]);
+                    } else if (!description && tmp.length == 5) {
+                    	date = new SimpleDateFormat("yyyyMMddhhmmssSSSSSS").parse(tmp[4]);
+                    }
+                    Event event = new Event(eventType, descriptionValue, position, points, chNumber, date);
+                    events.add(event);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.err.println("No file found on current location.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            System.err.println("Problem with parsing, you can panic now.");
+			e.printStackTrace();
+		} 
+	}
+
+	private void readHeaderFromVHDR() {
         int countChannels = 0;
 
-        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String zeile = null;
+            channels = new ArrayList<>();
+            int channelIndex = 1;
+            boolean amplifier = false;
 
             while ((zeile = in.readLine()) != null) {
 
@@ -108,12 +237,12 @@ public class BrainVisionReader {
                 }
 
                 // Open MarkerFile
-                if (zeile.startsWith("MarkerFile=")) {
+                else if (zeile.startsWith("MarkerFile=")) {
                     markerFile = new File(file.getParent() + File.separator + zeile.substring(11));
                 }
 
                 // Read DataFormat
-                if (zeile.startsWith("DataFormat=")) {
+                else if (zeile.startsWith("DataFormat=")) {
                     switch (zeile.substring(11)) {
                         case "BINARY":
                             dataFormat = DataFormat.BINARY;
@@ -128,7 +257,7 @@ public class BrainVisionReader {
                 }
 
                 // Read DataOrientation
-                if (zeile.startsWith("DataOrientation=")) {
+                else if (zeile.startsWith("DataOrientation=")) {
                     switch (zeile.substring(16)) {
                         case "MULTIPLEXED":
                             dataOrientation = DataOrientation.MULTIPLEXED;
@@ -143,7 +272,7 @@ public class BrainVisionReader {
                 }
 
                 // Read DataType
-                if (zeile.startsWith("DataType=")) {
+                else if (zeile.startsWith("DataType=")) {
                     switch (zeile.substring(9)) {
                         case "TIMEDOMAIN":
                             dataType = DataType.TIMEDOMAIN;
@@ -155,23 +284,23 @@ public class BrainVisionReader {
                 }
 
                 // Read number of channels
-                if (zeile.startsWith("NumberOfChannels=")) {
+                else if (zeile.startsWith("NumberOfChannels=")) {
                     nbchan = Integer.parseInt(zeile.substring(17));
                     channelNames = new String[nbchan];
                 }
 
                 // Read number of data points
-                if (zeile.startsWith("DataPoints=")) {
+                else if (zeile.startsWith("DataPoints=")) {
                     pnts = Integer.parseInt(zeile.substring(11));
                 }
 
                 // Read sampling intervall
-                if (zeile.startsWith("SamplingInterval")) {
+                else if (zeile.startsWith("SamplingInterval")) {
                     samplingIntervall = Integer.parseInt(zeile.substring(17));
                 }
 
                 // Read binary format
-                if (zeile.startsWith("BinaryFormat=")) {
+                else if (zeile.startsWith("BinaryFormat=")) {
                     bytes = 2; // default
                     switch (zeile.substring(13)) {
                         case "UINT_16":
@@ -197,7 +326,7 @@ public class BrainVisionReader {
                 }
 
                 // Read endian order
-                if (zeile.startsWith("UseBigEndianOrder=")) {
+                else if (zeile.startsWith("UseBigEndianOrder=")) {
                     switch (zeile.substring(18)) {
                         case "NO":
                             useBigEndianOrder = false;
@@ -212,18 +341,17 @@ public class BrainVisionReader {
                 }
 
                 // Read skip lines
-                if (zeile.startsWith("SkipLines=")) {
+                else if (zeile.startsWith("SkipLines=")) {
                     skipLines = Integer.parseInt(zeile.substring(10));
                 }
 
                 // Read skip columns
-                if (zeile.startsWith("SkipColumns=")) {
+                else if (zeile.startsWith("SkipColumns=")) {
                     skipColumns = Integer.parseInt(zeile.substring(12));
                 }
 
-                // Read channel resolution
-                // TODO: IMPORTANT: It could be possible, that each channel has a different resolution!
-                if (zeile.startsWith("Ch")) {
+                // Construct a list of channels
+                else if (zeile.startsWith("Ch")) {
                     String[] tmp = zeile.split(",");
 
                     if (tmp.length == 4) {
@@ -234,10 +362,31 @@ public class BrainVisionReader {
                         } else {
                             channelResolution = (float) Double.parseDouble(tmp[2]);
                         }
+                    	Channel chan = new Channel(tmp[0].substring(stringIndex + 1), channelResolution, tmp[3]);
+                    	// Index is index channel - 1
+                    	channels.add(chan);
                         countChannels++;
                     }
                 }
-
+                
+                else if (zeile.startsWith("A m p l i f i e r  S e t u p")) {
+                	amplifier = true;                	
+                }
+                
+                // Get the filter list
+                else if (zeile.startsWith(String.valueOf(channelIndex)) && amplifier) {
+                	/*
+                	 * #     Name      Phys. Chn.    Resolution / Unit   Low Cutoff [s]   High Cutoff [Hz]   Notch [Hz]    Series Res. [kOhm] Gradient         Offset
+					 * 1     Fp1         1                0.5 µV             DC             1000              Off                0  
+                	 */
+                	Channel channelToGet = channels.get(channelIndex - 1);
+                	// Split by spaces
+                	String[] tmp = zeile.split("\\s+");
+                	channelToGet.setHighCutoff("DC".equals(tmp[5]) ? 0 : Integer.parseInt(tmp[5]));
+                	channelToGet.setLowCutoff("DC".equals(tmp[6]) ? 0 : Integer.parseInt(tmp[6]));
+                	channelToGet.setLowCutoff("Off".equals(tmp[7]) ? 0 : Integer.parseInt(tmp[7]));
+                	channelIndex ++;
+                }
             }
 
         } catch (FileNotFoundException e) {
@@ -277,7 +426,9 @@ public class BrainVisionReader {
             System.out.print(" " + tmp[i]);
         }
         System.out.println("SamplingRate in Hertz: " + srate);
-
+        
+        System.out.println("Found " + channels == null ? 0 : channels.size() + " channels");
+        System.out.println("Found " + events == null ? 0 : events.size() + " events");
     }
 
     public void read(int channel, long from, long to) {
@@ -421,7 +572,15 @@ public class BrainVisionReader {
         return samplingIntervall;
     }
 
-    public enum BinaryFormat {
+    public List<Channel> getChannels() {
+		return channels;
+	}
+
+	public List<Event> getEvents() {
+		return events;
+	}
+
+	public enum BinaryFormat {
 
         UNKNOWN, UINT_16, INT_16, IEEE_FLOAT_32, IEEE_FLOAT_64
     }
@@ -447,5 +606,160 @@ public class BrainVisionReader {
             y[i] = (float) x[i];
         }
         return y;
+    }
+    
+    public static class Event {
+    	// <type>,[<description>],
+    	// <position>,<points>,<channel number>,[<date>]
+        @JsonProperty("type")
+    	private String type;
+        @JsonProperty("description")
+    	private String description;
+        @JsonProperty("position")
+    	private String position;
+        @JsonProperty("points")
+    	private int points;
+        @JsonProperty("channelNumber")
+    	private int channelNumber;
+        @JsonProperty("date")
+    	private Date date;
+        
+        // default constructor for jackson purpose
+        public Event() {
+        }
+    	
+    	public Event(String type, String description, String position, int points, int channelNumber, Date date) {
+			super();
+			this.type = type;
+			this.description = description;
+			this.position = position;
+			this.points = points;
+			this.channelNumber = channelNumber;
+			this.date = date;
+		}
+
+		public String getType() {
+			return type;
+		}
+		public void setType(String type) {
+			this.type = type;
+		}
+		public String getDescription() {
+			return description;
+		}
+		public void setDescription(String description) {
+			this.description = description;
+		}
+		public String getPosition() {
+			return position;
+		}
+		public void setPosition(String position) {
+			this.position = position;
+		}
+		public int getPoints() {
+			return points;
+		}
+		public void setPoints(int points) {
+			this.points = points;
+		}
+		public int getChannelNumber() {
+			return channelNumber;
+		}
+		public void setChannelNumber(int channelNumber) {
+			this.channelNumber = channelNumber;
+		}
+		public Date getDate() {
+			return date;
+		}
+		public void setDate(Date date) {
+			this.date = date;
+		}
+    }
+
+    public static class Channel {
+    	@JsonProperty("name")
+    	private String name;
+    	@JsonProperty("resolution")
+    	private float resolution;
+    	@JsonProperty("referenceUnits")
+    	private String referenceUnits;
+    	@JsonProperty("lowCutoff")
+    	private int lowCutoff = 0;
+    	@JsonProperty("highCutoff")
+    	private int highCutoff = 0;
+    	@JsonProperty("notch")
+    	private float notch = 0;
+    	@JsonProperty("x")
+    	private float x;
+    	@JsonProperty("y")
+    	private float y;
+    	@JsonProperty("z")
+    	private float z;
+    	
+    	// default constructor for jackson purpose.
+    	public Channel() {
+    	}
+    	
+		public Channel(String name, float resolution, String referenceUnit) {
+			super();
+			this.name = name;
+			this.resolution = resolution;
+			this.referenceUnits = referenceUnit;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public float getResolution() {
+			return resolution;
+		}
+		public void setResolution(float resolution) {
+			this.resolution = resolution;
+		}
+		public String getReferenceUnits() {
+			return referenceUnits;
+		}
+		public void setReferenceUnits(String referenceUnit) {
+			this.referenceUnits = referenceUnit;
+		}
+		public int getLowCutoff() {
+			return lowCutoff;
+		}
+		public void setLowCutoff(int lowCutoff) {
+			this.lowCutoff = lowCutoff;
+		}
+		public int getHighCutoff() {
+			return highCutoff;
+		}
+		public void setHighCutoff(int highCutoff) {
+			this.highCutoff = highCutoff;
+		}
+		public float getNotch() {
+			return notch;
+		}
+		public void setNotch(float notch) {
+			this.notch = notch;
+		}
+		public float getX() {
+			return x;
+		}
+		public void setX(float x) {
+			this.x = x;
+		}
+		public float getY() {
+			return y;
+		}
+		public void setY(float y) {
+			this.y = y;
+		}
+		public float getZ() {
+			return z;
+		}
+		public void setZ(float z) {
+			this.z = z;
+		}
+    	
     }
 }

@@ -16,30 +16,36 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
 import * as AppUtils from '../../utils/app.utils';
 import { ImportJob, DicomQuery } from './dicom-data.model';
-
+import { EegImportJob } from './eeg-data.model';
 
 @Injectable()
 export class ImportService {
 
     constructor(private http: HttpClient) { }
 
-    uploadFile(formData: FormData, type = "dicom"): Promise<ImportJob> {
-        if ("eeg" == type) {
-            return this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData)
-            .toPromise();
-        }
+    uploadFile(formData: FormData): Promise<ImportJob> {
         return this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_DICOM_URL, formData)
             .toPromise();
     }
 
+    uploadEegFile(formData: FormData): Promise<EegImportJob> {
+        return this.http.post<EegImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData).toPromise();
+    }
+
     async startImportJob(importJob: ImportJob): Promise<Object> {
         try {
-            if (importJob.fromEeg) {
-                return this.http.post(AppUtils.BACKEND_API_UPLOAD_EEG_START_IMPORT_JOB_URL, JSON.stringify(importJob))
-                .toPromise();
-            }
             return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
                 .toPromise();
+        }
+        catch (error) {
+            return Promise.reject(error.message || error);
+        }
+    }
+    
+    async startEegImportJob(importJob: EegImportJob): Promise<Object> {
+        try {
+            return this.http.post(AppUtils.BACKEND_API_UPLOAD_EEG_START_IMPORT_JOB_URL, JSON.stringify(importJob))
+            .toPromise();
         }
         catch (error) {
             return Promise.reject(error.message || error);

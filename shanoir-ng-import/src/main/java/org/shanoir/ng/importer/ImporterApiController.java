@@ -15,13 +15,10 @@
 package org.shanoir.ng.importer;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -32,6 +29,7 @@ import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.eeg.BrainVisionReader;
+import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -52,6 +50,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -86,9 +85,15 @@ public class ImporterApiController implements ImporterApi {
 	private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
 	private static final String ZIP_FILE_SUFFIX = ".zip";
+
+	@Value("${ms.url.shanoir-ng-datasets-eeg}")
+	private String datasetsMsUrl;
 	
 	@Value("${shanoir.import.directory}")
 	private String importDir;
+	
+	@Autowired
+	private RestTemplate restTemplate;
 	
 	@Autowired
 	private DicomDirToModelService dicomDirToModel;
@@ -144,7 +149,7 @@ public class ImporterApiController implements ImporterApi {
 			if (!userImportDir.exists()) {
 				userImportDir.mkdirs(); // create if not yet existing
 			}
-			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile);
+			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile, true);
 	
 			/**
 			 * 2. STEP: read DICOMDIR and create Shanoir model from it (== Dicom model):
@@ -190,7 +195,7 @@ public class ImporterApiController implements ImporterApi {
 			if (!userImportDir.exists()) {
 				userImportDir.mkdirs(); // create if not yet existing
 			}
-			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile);
+			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, dicomZipFile, true);
 			File importJobFile = new File(importJobDir.getAbsolutePath() + File.separator + IMPORTJOB);
 			ImportJob importJob = null;
 			if (importJobFile.exists()) {
@@ -297,9 +302,9 @@ public class ImporterApiController implements ImporterApi {
 	 * @throws IOException
 	 * @throws RestServiceException
 	 */
-	private File saveTempFileCreateFolderAndUnzip(final File userImportDir, final MultipartFile dicomZipFile) throws IOException, RestServiceException {
+	private File saveTempFileCreateFolderAndUnzip(final File userImportDir, final MultipartFile dicomZipFile, final boolean fromDicom) throws IOException, RestServiceException {
 		File tempFile = saveTempFile(userImportDir, dicomZipFile);
-		if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile))
+		if (fromDicom && !ImportUtils.checkZipContainsFile(DICOMDIR, tempFile))
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"DICOMDIR is missing in .zip file.", null));
 		String fileName = tempFile.getName();
@@ -450,33 +455,59 @@ public class ImporterApiController implements ImporterApi {
 		return uploadFile;
 	}
 
+	/*
+	 * 	public ResponseEntity<ImportJob> uploadDicomZipFile(
+			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
+			throws RestServiceException {
+	 */
 	@Override
-	public ResponseEntity<ImportJob> importEEGZipFile(MultipartFile eegZipFilename) throws RestServiceException {
+	public ResponseEntity<EegImportJob> uploadEEGZipFile(
+			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile eegZipFile)
+			throws RestServiceException {
 		try {
-			// TODO: Do some checks about the file
+			// Do some checks about the file, must be != null and must be a .zip file
+			if (eegZipFile == null) {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
+			}
+			if (!isZipFile(eegZipFile)) {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),"Wrong content type of file upload, .zip required.", null));
+			}
+			/**
+			 * 1. STEP: Handle file management.
+			 * Always create a userId specific folder in the import work folder (the root of everything):
+			 * split imports to clearly separate them into separate folders for each user
+			 */
+			final Long userId = KeycloakUtil.getTokenUserId();
+			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+			final File userImportDir = new File(userImportDirFilePath);
+			if (!userImportDir.exists()) {
+				userImportDir.mkdirs(); // create if not yet existing
+			}
 
+			// Unzip the file and get the elements
+			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, eegZipFile, false);
+			File brainvisionFileDir = new File(importJobDir.getAbsolutePath() + File.separator + eegZipFile.getOriginalFilename().replace(".zip", ""));
+			// Get .VHDR file
+			File[] matchingFiles = brainvisionFileDir.listFiles(new FilenameFilter() {
+			    public boolean accept(File dir, String name) {
+			    	System.out.println(name);
+			        return name.endsWith("vhdr");
+			    }
+			});
 			
-			// TODO: Build the import job with patients here
-			// Convert multipart file to file
-			File convFile = new File(eegZipFilename.getOriginalFilename());
-			convFile.createNewFile();
-			FileOutputStream fos = new FileOutputStream(convFile);
-			fos.write(eegZipFilename.getBytes());
-			fos.close();
-			BrainVisionReader bvr = new BrainVisionReader(convFile);
+			if (matchingFiles.length != 1) {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "File does not contains a .vhdr file or contains multiples.", null));
+			}
+			// TODO: Manage multiple files, multiple patients, for one project.
+			File vhdrFile = matchingFiles[0];
+			BrainVisionReader bvr = new BrainVisionReader(vhdrFile);
+
+			EegImportJob importJob = new EegImportJob();
+			importJob.setEvents(bvr.getEvents());
+			importJob.setChannels(bvr.getChannels());
+			importJob.setWorkFolder(userImportDir.getAbsolutePath());
 			
-			bvr.read(0, 0, 650);
-
-			// Create import job
-			ImportJob importJob = new ImportJob();
-			importJob.setFromeEeg(true);
-
-			// TODO: Get patient from imported file (how ? A quoi correspond un patient ?)
-			List<Patient> patients = new ArrayList<>();
-			importJob.setPatients(patients);
-
-			// TODO: Create temp folder with initial data
-			return new ResponseEntity<ImportJob>(importJob, HttpStatus.OK);
+			return new ResponseEntity<EegImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException ioe) {
 			// PRAY: Hope this does not happen
 			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
@@ -484,18 +515,17 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> startImportEEGJob(ImportJob importJob) throws RestServiceException {
-		// TODO: Anonymisation des données (how ?)
-		// TODO: BIDS traduction only for selected patients in new DATA folder
-		// TODO Do the ASYNC call here
+	public ResponseEntity<Void> startImportEEGJob( @ApiParam(value = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
+		// REMARK: Anonymisation des données => Not necessary for pure EEGs data
+		// REMARK: BIDS translation will probably be done during export and not during import.
 
-		// TODO: delete temp folder ?
+		// TODO Do the ASYNC call here to be able to create a dataset
 
 		// HttpEntity represents the request
-		// final HttpEntity<ImportJob> requestBody = new HttpEntity<>(importJob, keycloakHeaders);
+		final HttpEntity<EegImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
 		// Post to dataset MS to finish import
-		// ResponseEntity<String> response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody, String.class);
-		return null;
+		ResponseEntity<String> response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody, String.class);
+		return new ResponseEntity<>(response.getStatusCode());
 	}
 
 }

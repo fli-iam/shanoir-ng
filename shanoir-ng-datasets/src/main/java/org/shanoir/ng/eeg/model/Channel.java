@@ -64,21 +64,71 @@ public class Channel extends HalEntity {
 	/** Type of channel. */
 	private ChannelType referenceType;
 	
+	/** Low cutoff filter value. */
+	private int lowCutoff;
+	
+	/** High cutoff filter value. */
+	private int highCutoff;
+	
+	/** Notch filter value. */
+	private float notch;
+	
+	/** X position in space. */
+	private int x;
+	
+	/** Y position in space. */
+	private int y;
+	
+	/** Z position in space. */
+	private int z;
+
 	/** Associated dataset. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dataset_id")
     @JsonIgnore
 	private EegDataset dataset;
 
-	/** The set of filters applied to the channel. */
-	@OneToOne
-	@JoinColumn(name = "filter_id")
-	Filter filter;
+	/**
+	 * @return the lowCutOff
+	 */
+	public int getLowCutoff() {
+		return lowCutoff;
+	}
 
-	/** The position in space of the channel. */
-	@OneToOne
-	@JoinColumn(name = "position_id")
-	Position position;
+	/**
+	 * @param lowCutOff the lowCutOff to set
+	 */
+	public void setLowCutoff(int lowCutOff) {
+		this.lowCutoff = lowCutOff;
+	}
+
+	/**
+	 * @return the highCutOff
+	 */
+	public int getHighCutoff() {
+		return highCutoff;
+	}
+
+	/**
+	 * @param highCutOff the highCutOff to set
+	 */
+	public void setHighCutoff(int highCutOff) {
+		this.highCutoff = highCutOff;
+	}
+
+	/**
+	 * @return the notch
+	 */
+	public float getNotch() {
+		return notch;
+	}
+
+	/**
+	 * @param notch the notch to set
+	 */
+	public void setNotch(float notch) {
+		this.notch = notch;
+	}
 
 	/**
 	 * @return the name
@@ -137,31 +187,45 @@ public class Channel extends HalEntity {
 	}
 
 	/**
-	 * @return the filter
+	 * @return the x
 	 */
-	public Filter getFilter() {
-		return filter;
+	public int getX() {
+		return x;
 	}
 
 	/**
-	 * @param filter the filter to set
+	 * @param x the x to set
 	 */
-	public void setFilter(Filter filter) {
-		this.filter = filter;
+	public void setX(int x) {
+		this.x = x;
 	}
 
 	/**
-	 * @return the position
+	 * @return the y
 	 */
-	public Position getPosition() {
-		return position;
+	public int getY() {
+		return y;
 	}
 
 	/**
-	 * @param position the position to set
+	 * @param y the y to set
 	 */
-	public void setPosition(Position position) {
-		this.position = position;
+	public void setY(int y) {
+		this.y = y;
+	}
+
+	/**
+	 * @return the z
+	 */
+	public int getZ() {
+		return z;
+	}
+
+	/**
+	 * @param z the z to set
+	 */
+	public void setZ(int z) {
+		this.z = z;
 	}
 
 	/**

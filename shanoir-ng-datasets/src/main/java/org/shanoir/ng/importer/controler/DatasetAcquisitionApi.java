@@ -21,6 +21,7 @@ package org.shanoir.ng.importer.controler;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +54,7 @@ public interface DatasetAcquisitionApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getFrontStudyId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody ImportJob importJob);
 
-    @ApiOperation(value = "", notes = "Creates new dataset acquisition", response = Void.class, tags={  })
+    @ApiOperation(value = "", notes = "Creates new EEG dataset acquisition", response = Void.class, tags={  })
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "created EEG Dataset Acquitistion", response = Void.class),
         @ApiResponse(code = 401, message = "unauthorized", response = Void.class),
@@ -65,6 +66,6 @@ public interface DatasetAcquisitionApi {
         consumes = { "application/json" },
         method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getFrontStudyId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody ImportJob importJob);
+    ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob);
 
 }

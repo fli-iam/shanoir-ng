@@ -30,9 +30,11 @@ import { ExaminationComponent } from './examinations/examination/examination.com
 import { NewInstrumentComponent } from './examinations/instrument-assessment/new-instrument.component';
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
+import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
@@ -91,8 +93,15 @@ let appRoutes: Routes = [
                 path: 'context',
                 component: ClinicalContextComponent
             }, {
+                path: 'eegcontext',
+                component: EegClinicalContextComponent
+            }, {
                 path: 'finish',
                 component: FinishImportComponent
+            }
+            , {
+                path: 'eegfinish',
+                component: FinishEegImportComponent
             }
         ]
     }, {

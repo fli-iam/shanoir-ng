@@ -68,10 +68,12 @@ import { SubjectExaminationPipe } from './examinations/shared/subject-examinatio
 import { ExaminationTreeComponent } from './examinations/tree/examination-tree.component';
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
+import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ImportComponent } from './import/import.component';
 import { ImportDataService } from './import/shared/import.data-service';
@@ -264,6 +266,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         EegUploadComponent,
         QueryPacsComponent,
         ClinicalContextComponent,
+        EegClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,
         TimesPipe,
@@ -273,6 +276,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         SelectBoxComponent,
         SelectOptionComponent,
         FinishImportComponent,
+        FinishEegImportComponent,
         UploaderComponent,
         HelpMessageComponent,
         NotificationsComponent,

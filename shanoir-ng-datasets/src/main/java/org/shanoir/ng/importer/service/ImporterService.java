@@ -15,11 +15,22 @@
 package org.shanoir.ng.importer.service;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.util.Collections;
 
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.eeg.model.Channel;
+import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
@@ -119,6 +130,50 @@ public class ImporterService {
 		} else {
 			LOG.error("cleanTempFiles: workFolder is null");
 		}
+	}
+
+	/**
+	 * Create a dataset acquisition, and associated dataset.
+	 * @param importJob the import job from importer MS.
+	 */
+	public void createEegDataset(EegImportJob importJob) {
+		DatasetAcquisition datasetAcquisition = new EegDatasetAcquisition();
+		
+		// Get examination
+		Examination examination = examinationService.findById(importJob.getExaminationId());
+
+		datasetAcquisition.setExamination(examination);
+		datasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
+		datasetAcquisition.setRank(Integer.valueOf(1));
+
+		// Metadata
+		DatasetMetadata originMetadata = new DatasetMetadata();
+		originMetadata.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
+		originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
+		originMetadata.setName("Nom temporaire");
+		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+		
+		// Create the dataset with informations from job
+		EegDataset datasetToCreate = new EegDataset();
+
+		// set the dataset_Id where needed
+		for (Channel chan : importJob.getChannels()) {
+			chan.setDataset(datasetToCreate);
+		}
+		for (Event event : importJob.getEvents()) {
+			event.setDataset(datasetToCreate);
+		}
+		datasetToCreate.setChannelCount(importJob.getChannels() != null? importJob.getChannels().size() : 0);
+		datasetToCreate.setChannelList(importJob.getChannels());
+		datasetToCreate.setEventList(importJob.getEvents());
+		datasetToCreate.setCreationDate(LocalDate.now());
+		datasetToCreate.setDatasetAcquisition(datasetAcquisition);
+		datasetToCreate.setOriginMetadata(originMetadata);
+		datasetToCreate.setStudyId(importJob.getFrontStudyId());
+		datasetToCreate.setSubjectId(importJob.getSubjectId());
+
+		datasetAcquisition.setDatasets(Collections.singletonList(datasetToCreate));
+		datasetAcquisitionRepository.save(datasetAcquisition);
 	}
 
 }

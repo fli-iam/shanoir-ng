@@ -12,22 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Dataset } from "../../shared/dataset.model";
-import { allOfEnum } from '../../../utils/app.utils';
+import { SimpleSubject } from "../../subjects/shared/subject.model";
+import { Sex } from "../../subjects/shared/subject.types";
 
-export class EegDataset extends Dataset {
-    samplingFrequency: number;
-    channelCount: number;
-    channelList: Channel[];
-    eventList: Event[];
+export class EegImportJob {
+    workFolder: string;
+    examinationId: number;
+    frontStudyId: number;
+    subjectId: number;
+    frontAcquisitionEquipmentId: number;
+    channels: Channel[];
+    events: Event[];
 }
 
+/** Represents a brainvision EEG channel */
 export class Channel {
-    id: number;
     name: string;
     resolution: number;
     referenceUnits: string;
-    referenceType: string;
     lowCutoff: number;
     highCutoff: number;
     notch: number;
@@ -36,9 +38,23 @@ export class Channel {
     z: number;
 }
 
+/** Represents a brainvision event */
 export class Event {
-    id: number;
-    value: string;
-    sample: number;
     type: string;
+    description: string;
+    position: string;
+    points: number;
+    channelNumber: number;
+    date: Date;
+}
+
+export class EquipmentEeg {
+    manufacturer: string;
+    manufacturerModelName: string;
+    deviceSerialNumber: string;
+}
+
+export class InstitutionEeg {
+    institutionName: string;
+    institutionAddress: string;
 }
