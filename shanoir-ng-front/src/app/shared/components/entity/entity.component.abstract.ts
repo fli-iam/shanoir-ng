@@ -34,10 +34,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private _entity: T;
     @Input() mode: Mode;
     @Output() close: EventEmitter<any> = new EventEmitter();
-    protected footerState: FooterState;
+    footerState: FooterState;
     protected onSave: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
-    protected form: FormGroup;
+    form: FormGroup;
     protected saveError: ShanoirError;
     protected onSubmitValidatedFields: string[] = [];
     @ViewChild('formContainer', { static:null }) formContainerElement: ElementRef;
@@ -211,7 +211,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
     }
 
-    protected save(): Promise<void> {
+    save(): Promise<void> {
         this.footerState.loading = true;
         return this.modeSpecificSave()
             .then(() => {

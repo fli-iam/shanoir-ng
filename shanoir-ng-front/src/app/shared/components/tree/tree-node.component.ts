@@ -52,7 +52,7 @@ export class TreeNodeComponent implements ControlValueAccessor {
     @ContentChildren(forwardRef(() => TreeNodeComponent)) childNodes: QueryList<any>;
     @ContentChildren(forwardRef(() => DropdownMenuComponent)) menus: QueryList<any>;
     public dataLoading: boolean = false;
-    private isOpen: boolean = false;
+    public isOpen: boolean = false;
     public loaded: boolean = false;
     public hasChildren: boolean;
     public checked: boolean | 'indeterminate';
@@ -63,6 +63,8 @@ export class TreeNodeComponent implements ControlValueAccessor {
     @Output() openClick = new EventEmitter();
     private onTouchedCallback: () => void = noop;
     private onChangeCallback: (_: any) => void = noop;
+
+    buttonPicto = null;
 
     constructor(private cdr: ChangeDetectorRef) {
 

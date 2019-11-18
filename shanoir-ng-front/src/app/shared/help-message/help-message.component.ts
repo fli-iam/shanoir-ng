@@ -23,8 +23,8 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 export class HelpMessageComponent implements OnInit {
 
     @Input() help: "institution" | "equipment";
-    private message: any;
-    private inImport: boolean;
+    message: any;
+    inImport: boolean;
     
     constructor(private breadcrumbsService: BreadcrumbsService) {}
 

@@ -27,14 +27,14 @@ export class UploaderComponent {
     @Output() fileChange = new EventEmitter<any>();
     @Input() loading: boolean = false;
     @Input() error: boolean = false;
-    private readonly ImagesUrlUtil = ImagesUrlUtil;
-    private filename: string;
+    readonly ImagesUrlUtil = ImagesUrlUtil;
+    filename: string;
     
-    private click() {
+    click() {
         this.fileInput.nativeElement.click();
     }
 
-    private changeFile(file: any) {
+    changeFile(file: any) {
         this.filename = undefined;
         if (file && file.target && file.target.files && file.target.files[0]) this.filename = file.target.files[0].name;
         this.fileChange.emit(file);

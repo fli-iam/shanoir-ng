@@ -35,6 +35,7 @@ export class UploadExtraDataComponent implements OnInit {
     @Input() studies:  IdName[];
     @Output() closing: EventEmitter<any> = new EventEmitter();
     public canModify: Boolean = false;
+    examinationStudyId = null;
 
     constructor(
             private fb: FormBuilder, 
@@ -83,9 +84,20 @@ export class UploadExtraDataComponent implements OnInit {
         }
     }
 
+    create(): void {
+        
+    }
+
     add(): void {
       
     }
 
+    edit(): void {
+        
+    }
+
+    update(): void {
+
+    }
 
 }

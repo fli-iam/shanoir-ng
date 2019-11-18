@@ -47,13 +47,13 @@ export class StudyComponent extends EntityComponent<Study> {
     
     @ViewChild('memberTable', { static: false }) table: TableComponent;
 
-    private centers: IdName[];
-    private subjects: IdName[];
-    private selectedCenter: IdName;
+    centers: IdName[];
+    subjects: IdName[];
+    selectedCenter: IdName;
     
     private browserPaging: BrowserPaging<StudyUser>;
-    private columnDefs: any[];
-    private users: User[] = [];
+    columnDefs: any[];
+    users: User[] = [];
     
     private studyUsersPromise: Promise<any>;
     private freshlyAddedMe: boolean = false;
@@ -185,11 +185,11 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    private goToCenter(id: number) {
+    goToCenter(id: number) {
         this.router.navigate(['/center/details/' + id]);
     }
 
-    private onCenterAdd(): void {
+    onCenterAdd(): void {
         if (!this.selectedCenter) return;
         let studyCenter: StudyCenter = new StudyCenter();
         studyCenter.center = new Center();
@@ -200,7 +200,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').updateValueAndValidity();
     }
 
-    private onCenterChange(center: IdName): void {
+    onCenterChange(center: IdName): void {
         this.selectedCenter = center;
         if (this.study.monoCenter) {
             this.study.studyCenterList = []
@@ -215,7 +215,7 @@ export class StudyComponent extends EntityComponent<Study> {
         return null;
     }
 
-    private removeCenterFromStudy(centerId: number): void {
+    removeCenterFromStudy(centerId: number): void {
         if (!this.study.studyCenterList || this.study.studyCenterList.length < 2) return;
         this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
         if (this.study.studyCenterList.length < 2) {
@@ -225,12 +225,12 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').updateValueAndValidity();
     }
     
-    private enableAddIcon(): boolean {
+    enableAddIcon(): boolean {
         return this.selectedCenter && !this.isCenterAlreadyLinked(this.selectedCenter.id)
             && (!this.study.monoCenter || !this.study.studyCenterList || this.study.studyCenterList.length == 0);
     }    
 
-    private isCenterAlreadyLinked(centerId: number): boolean {
+    isCenterAlreadyLinked(centerId: number): boolean {
         if (!this.study.studyCenterList) return false;
         for (let studyCenter of this.study.studyCenterList) {
             if (centerId == studyCenter.center.id) {
@@ -295,7 +295,7 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
-    private onUserAdd(selectedUser: User) {
+    onUserAdd(selectedUser: User) {
         if (this.isMe(selectedUser)) this.freshlyAddedMe = true;
         this.addUser(selectedUser);
     }
@@ -335,12 +335,12 @@ export class StudyComponent extends EntityComponent<Study> {
         item.user.selected = false;
     }
 
-    private onStudyUserEdit() {
+    onStudyUserEdit() {
         this.form.get('subjectStudyList').markAsDirty();
         this.form.updateValueAndValidity();
     }
 
-    private studyStatusStr(studyStatus: string) {
+    studyStatusStr(studyStatus: string) {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 

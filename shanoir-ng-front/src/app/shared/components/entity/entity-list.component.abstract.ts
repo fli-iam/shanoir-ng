@@ -30,8 +30,8 @@ import { Entity, EntityRoutes } from './entity.abstract';
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
 
     abstract table: TableComponent;  
-    protected columnDefs: any[];
-    protected customActionDefs: any[];
+    columnDefs: any[];
+    customActionDefs: any[];
     protected router: Router;
     protected confirmDialogService: ConfirmDialogService;
     protected keycloakService: KeycloakService;
@@ -97,7 +97,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     abstract getColumnDefs(): any[];
     abstract getCustomActionsDefs(): any[];
 
-    private onRowClick(entity: T) {
+    onRowClick(entity: T) {
         this.goToView(entity.id);
     }
 

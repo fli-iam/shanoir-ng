@@ -37,8 +37,8 @@ export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: FormGroup
 
 export class QueryPacsComponent{
 
-    private dicomQuery: DicomQuery = new DicomQuery();
-    private form: FormGroup;
+    dicomQuery: DicomQuery = new DicomQuery();
+    form: FormGroup;
 
     constructor(
         private breadcrumbsService: BreadcrumbsService, private router: Router,

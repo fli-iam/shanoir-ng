@@ -25,6 +25,11 @@ export class KeycloakService {
     private tokenPromise: Promise<string>;
 
     static init(): Promise<any> {
+
+        if (window.location.href.endsWith('/account-request')) {
+            return Promise.resolve();
+        }
+
         const keycloakAuth: any = Keycloak({
             url: process.env.KEYCLOAK_BASE_URL,
             realm: 'shanoir-ng',

@@ -12,8 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-// import '../assets/css/common.css';
-// import '../assets/css/papaya.css';
+import { environment } from '../environments/environment'
 import { AppRoutingModule } from './app-routing.module';
 import { CommonModule } from '@angular/common';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
@@ -260,6 +259,10 @@ import { ReplaceSpacePipe } from './utils/pipes';
         ModalsComponent
     ],
     providers: [
+        // {
+        //     provide: APP_BASE_HREF, 
+        //     useValue: environment.production  ? '/shanoir-ng/' : '/front-dev/'
+        // },
         AccountEventsService,
         AcquisitionEquipmentService,
         AuthAdminGuard,
@@ -310,7 +313,7 @@ import { ReplaceSpacePipe } from './utils/pipes';
           deps: [InjectableRxStompConfig]
         }
     ],
-    bootstrap: [AppComponent],
+    bootstrap: [AppComponent]
 })
 export class AppModule {
 

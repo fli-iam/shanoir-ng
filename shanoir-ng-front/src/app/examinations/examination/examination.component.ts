@@ -35,11 +35,11 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     @ViewChild('instAssessmentModal', { static: false }) instAssessmentModal: ModalComponent;
     @ViewChild('attachNewFilesModal', { static: false }) attachNewFilesModal: ModalComponent;
-    private centers: IdName[];
-    public studies: IdName[];
-    private subjects: SubjectWithSubjectStudy[];
+    centers: IdName[];
+    studies: IdName[];
+    subjects: SubjectWithSubjectStudy[];
     private examinationExecutives: Object[];
-    private inImport: boolean; 
+    inImport: boolean; 
 
     constructor(
             private route: ActivatedRoute,
@@ -121,14 +121,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             .then(subjects => this.subjects = subjects);
     }
 
-    private onStudyChange() {
+    onStudyChange() {
         this.getSubjects();
     }
 
-    private instAssessment() {
+    instAssessment() {
     }
 
-    private attachNewFiles() {
+    attachNewFiles() {
     }
 
     public hasEditRight(): boolean {

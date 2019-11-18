@@ -27,6 +27,8 @@ import { ManufacturerService } from '../shared/manufacturer.service';
 
 export class ManufacturerComponent extends EntityComponent<Manufacturer> {
     
+    isNameUniqueError = null;
+
     constructor (
             private route: ActivatedRoute,
             private manufService: ManufacturerService) {
@@ -34,8 +36,8 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
         super(route, 'manufacturer');
     }
 
-    private get manuf(): Manufacturer { return this.entity; }
-    private set manuf(manuf: Manufacturer) { this.entity = manuf; }
+    get manuf(): Manufacturer { return this.entity; }
+    set manuf(manuf: Manufacturer) { this.entity = manuf; }
 
     initView(): Promise<void> {
         return this.getManufacturer();

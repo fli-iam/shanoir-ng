@@ -19,6 +19,7 @@ import { menuAnimDur, menuSlideDown } from '../../animations/animations';
 import { MenuItemComponent } from './menu-item/menu-item.component';
 import { timer } from 'rxjs/observable/timer';
 
+// @dynamic
 @Component({
     selector: 'dropdown-menu',
     templateUrl: 'dropdown-menu.component.html',

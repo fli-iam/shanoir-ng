@@ -31,11 +31,11 @@ import { DatepickerComponent } from '../../../shared/date-picker/date-picker.com
 
 export class CommonDatasetComponent implements OnChanges {
 
-    @Input() private mode: Mode;
-    @Input() private dataset: Dataset;
-    @Input() private parentFormGroup: FormGroup;
-    private subjects: Subject[] = [];
-    private studies: Study[] = [];
+    @Input() mode: Mode;
+    @Input() dataset: Dataset;
+    @Input() parentFormGroup: FormGroup;
+    subjects: Subject[] = [];
+    studies: Study[] = [];
     
 
     constructor(
@@ -100,7 +100,7 @@ export class CommonDatasetComponent implements OnChanges {
         });
     }
 
-    private getSubjectName(id: number): string {
+    getSubjectName(id: number): string {
         if (!this.subjects || this.subjects.length == 0 || !id) return null;
         for (let subject of this.subjects) {
             if (subject.id == id) return subject.name;
@@ -108,7 +108,7 @@ export class CommonDatasetComponent implements OnChanges {
         throw new Error('Cannot find subject for id = ' + id);
     }
 
-    private getStudyName(id: number): string {
+    getStudyName(id: number): string {
         if (!this.studies || this.studies.length == 0 || !id) return null;
         for (let study of this.studies) {
             if (study.id == id) return study.name;

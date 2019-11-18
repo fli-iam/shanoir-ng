@@ -24,7 +24,7 @@ export class ParameterComponent {
 
   get isValid() { return this.formGroup.controls[this.parameter.id].valid; }
 
-  selectData() {
+  selectData(event: Event) {
     this.breadcrumbsService.replace = false;
     // this.breadcrumbsService.
     this.router.navigate(['dataset/list'], {replaceUrl: false });
@@ -35,7 +35,7 @@ export class ParameterComponent {
     return this.parameter.list ? 'Add data' : 'Select data';
   }
 
-  unset() {
+  unset(event: Event) {
     let activeControl = this.formGroup.get(this.parameter.id) as FormControl;
     activeControl.markAsPristine();
     activeControl.setValue(this.parameter.type != 'Flag' ? null : false);

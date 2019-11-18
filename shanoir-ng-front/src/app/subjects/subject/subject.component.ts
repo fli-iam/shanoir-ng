@@ -34,12 +34,12 @@ import { SubjectService } from '../shared/subject.service';
 
 export class SubjectComponent extends EntityComponent<Subject> implements OnInit {
 
-    private readonly ImagedObjectCategory = ImagedObjectCategory;
+    readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
-    private studies: IdName[] = [];
-    private isAlreadyAnonymized: boolean;
-    private firstName: string = "";
-    private lastName: string = "";
+    studies: IdName[] = [];
+    isAlreadyAnonymized: boolean;
+    firstName: string = "";
+    lastName: string = "";
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64)];
 
     constructor(private route: ActivatedRoute,
@@ -159,7 +159,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         return hex;
     }
 
-    private humanSelected(): boolean {
+    humanSelected(): boolean {
         return this.subject.imagedObjectCategory != null
             && (this.subject.imagedObjectCategory == ImagedObjectCategory.HUMAN_CADAVER
                 || this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING);

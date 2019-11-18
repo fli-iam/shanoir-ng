@@ -26,7 +26,7 @@ import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 
 export class InstrumentAssessmentComponent implements OnInit {
 
-    public instAssessemntForm: FormGroup;
+    public instAssessmentForm: FormGroup;
     public mode: "view" | "edit" | "create";
     @Output() closing: EventEmitter<any> = new EventEmitter();
     public canModify: Boolean = false;
@@ -47,17 +47,17 @@ export class InstrumentAssessmentComponent implements OnInit {
 
 
     buildForm(): void {
-        this.instAssessemntForm = this.fb.group({
+        this.instAssessmentForm = this.fb.group({
             select: 'select'
         });
-        this.instAssessemntForm.valueChanges
+        this.instAssessmentForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
         this.onValueChanged(); // (re)set validation messages now
     }
 
     onValueChanged(data?: any) {
-        if (!this.instAssessemntForm) { return; }
-        const form = this.instAssessemntForm;
+        if (!this.instAssessmentForm) { return; }
+        const form = this.instAssessmentForm;
         for (const field in this.formErrors) {
             // clear previous error message (if any)
             this.formErrors[field] = '';
@@ -83,9 +83,20 @@ export class InstrumentAssessmentComponent implements OnInit {
         }
     }
 
+    create(): void {
+      
+    }
+
     add(): void {
       
     }
 
+    update(): void {
+      
+    }
+
+    edit(): void {
+      
+    }
 
 }

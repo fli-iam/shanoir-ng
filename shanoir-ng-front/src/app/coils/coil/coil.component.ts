@@ -34,9 +34,9 @@ import { CoilService } from '../shared/coil.service';
 export class CoilComponent extends EntityComponent<Coil> {
    
     @Input() acqEquip: AcquisitionEquipment;
-    private centers: Center[] = [];
-    private manufModels: ManufacturerModel[] = [];
-    private coilTypes: CoilType[] = CoilType.all();
+    centers: Center[] = [];
+    manufModels: ManufacturerModel[] = [];
+    coilTypes: CoilType[] = CoilType.all();
     private prefilledCenter: Center;
     private prefilledManuf: ManufacturerModel;
 
@@ -103,7 +103,7 @@ export class CoilComponent extends EntityComponent<Coil> {
         });
     }
 
-    private updateManufList(center: Center): void {
+    updateManufList(center: Center): void {
         this.coil.center = center;
         this.coil.manufacturerModel = null;
         if (this.form) this.form.get('acquiEquipModel').markAsUntouched();
@@ -120,7 +120,7 @@ export class CoilComponent extends EntityComponent<Coil> {
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    private openNewCenter() {
+    openNewCenter() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
@@ -129,7 +129,7 @@ export class CoilComponent extends EntityComponent<Coil> {
         });
     }
 
-    private openNewManufModel() {
+    openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {

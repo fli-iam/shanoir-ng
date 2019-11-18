@@ -31,10 +31,10 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 })
 export class DicomUploadComponent {
     
-    private archiveStatus: Status = 'none';
-    private extensionError: boolean;
-    private dicomDirMissingError: boolean;
-    private modality: string;
+    archiveStatus: Status = 'none';
+    extensionError: boolean;
+    dicomDirMissingError: boolean;
+    modality: string;
 
 
     constructor(
@@ -48,7 +48,7 @@ export class DicomUploadComponent {
         breadcrumbsService.markMilestone();
     }
     
-    private uploadArchive(fileEvent: any): void {
+    uploadArchive(fileEvent: any): void {
         this.setArchiveStatus('uploading');
         this.loadInMemory(fileEvent);   
         this.uploadToServer(fileEvent.target.files);
@@ -93,7 +93,7 @@ export class DicomUploadComponent {
         return this.archiveStatus == 'uploaded';
     }
 
-    private next() {
+    next() {
         this.router.navigate(['imports/series']);
     }
 

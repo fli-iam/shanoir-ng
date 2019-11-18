@@ -18,10 +18,10 @@ import { Mode } from '../components/entity/entity.component.abstract';
 
 export abstract class AbstractInput implements ControlValueAccessor {
 
-    @Input() protected mode: Mode;
-    protected model: any;
-    protected disabled: boolean = false;
-    protected propagateChange = (_: any) => {};
+    @Input() mode: Mode;
+    model: any;
+    disabled: boolean = false;
+    propagateChange = (_: any) => {};
     protected propagateTouched = () => {};
     
     constructor() {}

@@ -23,9 +23,9 @@ import { MrDataset, MrDatasetMetadata, MrDatasetNature } from './dataset.mr.mode
 
 export class MrDatasetComponent implements OnInit{
 
-    @Input() private mode: Mode;
-    @Input() private dataset: MrDataset;
-    private allMrDatasetNatures: any[];
+    @Input() mode: Mode;
+    @Input() dataset: MrDataset;
+    allMrDatasetNatures: any[];
     
     constructor() {
         this.allMrDatasetNatures = MrDatasetNature.getValueLabelJsonArray();

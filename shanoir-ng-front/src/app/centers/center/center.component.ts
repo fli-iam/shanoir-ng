@@ -29,9 +29,9 @@ import { CenterService } from '../shared/center.service';
 
 export class CenterComponent extends EntityComponent<Center> {
 
-    private isNameUniqueError: boolean = false;
-    private phoneNumberPatternError: boolean = false;
-    private openAcqEq: boolean = true;
+    isNameUniqueError: boolean = false;
+    phoneNumberPatternError: boolean = false;
+    openAcqEq: boolean = true;
 
     constructor(
             private route: ActivatedRoute,
@@ -72,7 +72,7 @@ export class CenterComponent extends EntityComponent<Center> {
         });
     }
 
-    private goToAcquisitionEquipment(acqE: AcquisitionEquipment) {
+    goToAcquisitionEquipment(acqE: AcquisitionEquipment) {
         this.router.navigate(['/acquisition-equipment/details/' + acqE.id]);
     }
 

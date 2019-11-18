@@ -30,13 +30,13 @@ import { ImportService } from '../shared/import.service';
 })
 export class SelectSeriesComponent {
 
-    private patients: PatientDicom[];
-    private workFolder: string;
-    private dataFiles: any;
-    private detailedPatient: Object;
-    private detailedSerie: Object;
-    private detailedStudy: Object;
-    private papayaParams: object[];
+    patients: PatientDicom[];
+    workFolder: string;
+    dataFiles: any;
+    detailedPatient: Object;
+    detailedSerie: Object;
+    detailedStudy: Object;
+    papayaParams: object[];
 
     constructor(
             private importService: ImportService,
@@ -55,7 +55,7 @@ export class SelectSeriesComponent {
     }
 
 
-    private showSerieDetails(nodeParams: any, serie: SerieDicom): void {
+    showSerieDetails(nodeParams: any, serie: SerieDicom): void {
         this.detailedPatient = null;
         this.detailedStudy = null;
         if (nodeParams && this.detailedSerie && nodeParams.seriesInstanceUID == this.detailedSerie["seriesInstanceUID"]) {
@@ -66,7 +66,7 @@ export class SelectSeriesComponent {
         }
     }
 
-    private showStudyDetails(nodeParams: any): void {
+    showStudyDetails(nodeParams: any): void {
         this.detailedSerie = null;
         this.detailedPatient = null;
         if (nodeParams && this.detailedStudy && nodeParams.studyID == this.detailedStudy["studyID"]) {
@@ -76,7 +76,7 @@ export class SelectSeriesComponent {
         }
     }
 
-    private showPatientDetails(nodeParams: any): void {
+    showPatientDetails(nodeParams: any): void {
         this.detailedSerie = null;
         this.detailedStudy = null;
         if (nodeParams && this.detailedPatient && nodeParams.patientID == this.detailedPatient["patientID"]) {
@@ -86,7 +86,7 @@ export class SelectSeriesComponent {
         }
     }
 
-    private onPatientUpdate(): void {
+    onPatientUpdate(): void {
         this.importDataService.patients = this.patients;
     }
 
@@ -122,7 +122,7 @@ export class SelectSeriesComponent {
         return false;
     }
 
-    private next() {
+    next() {
         this.router.navigate(['imports/context']);
     }
 

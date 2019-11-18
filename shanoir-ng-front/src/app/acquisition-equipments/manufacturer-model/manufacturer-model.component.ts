@@ -31,7 +31,7 @@ import { ManufacturerService } from '../shared/manufacturer.service';
 
 export class ManufacturerModelComponent extends EntityComponent<ManufacturerModel> {
 
-    private manufs: Manufacturer[];
+    manufs: Manufacturer[];
 
     constructor(
             private route: ActivatedRoute,
@@ -41,8 +41,8 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         super(route, 'manufacturer-model');
     }
 
-    private get manufModel(): ManufacturerModel { return this.entity; }
-    private set manufModel(manufModel: ManufacturerModel) { this.entity = manufModel; }
+    get manufModel(): ManufacturerModel { return this.entity; }
+    set manufModel(manufModel: ManufacturerModel) { this.entity = manufModel; }
 
 
     initView(): Promise<void> {
@@ -80,14 +80,14 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         else return;
     }
 
-    private onModalityChange(modality: string) {
+    onModalityChange(modality: string) {
         if (modality) {
             this.form.get('magneticField').setValidators(this.getMagneticFieldValidators());
             this.reloadRequiredStyles();
         }
     }
     
-    private get isMR(): boolean { 
+    get isMR(): boolean { 
         return this.manufModel && this.manufModel.datasetModalityType == 'MR_DATASET'; 
     }
 
@@ -118,7 +118,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    private openNewManuf() {
+    openNewManuf() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer/create']).then(success => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {

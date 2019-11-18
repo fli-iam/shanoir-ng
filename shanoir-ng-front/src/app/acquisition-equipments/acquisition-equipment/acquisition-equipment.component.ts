@@ -34,14 +34,14 @@ import { Center } from 'src/app/centers/shared/center.model';
 
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {
 
-    private manufModels: ManufacturerModel[];
-    private centers: IdName[];
-    private datasetModalityTypeEnumValue: string;
+    manufModels: ManufacturerModel[];
+    centers: IdName[];
+    datasetModalityTypeEnumValue: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
 
-    private get acqEquip(): AcquisitionEquipment { return this.entity; }
-    private set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
+    get acqEquip(): AcquisitionEquipment { return this.entity; }
+    set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
     
     constructor(
             private route: ActivatedRoute, 
@@ -106,7 +106,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    private openNewManufModel() {
+    openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
@@ -136,7 +136,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return super.save();
     }
 
-    private viewCenter(center: Center) {
+    viewCenter(center: Center) {
         this.router.navigate(['center/details/' + center.id]);
     }
 }

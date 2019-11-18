@@ -56,19 +56,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <table>
             <tr class="item">
                 <td class="label">Id</td>
-                <td class="value">{{detailedPatient?.patientID}}</td>
+                <td class="value">{{$any(detailedPatient)?.patientID}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Sex</td>
-                <td class="value">{{detailedPatient?.patientSex}}</td>
+                <td class="value">{{$any(detailedPatient)?.patientSex}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Name</td>
-                <td class="value">{{detailedPatient?.patientName}}</td>
+                <td class="value">{{$any(detailedPatient)?.patientName}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Birth date</td>
-                <td class="value">{{detailedPatient?.patientBirthDate | date: 'dd/MM/yyyy'}}</td>
+                <td class="value">{{$any(detailedPatient)?.patientBirthDate | date: 'dd/MM/yyyy'}}</td>
             </tr>
         </table>
     </div>
@@ -78,15 +78,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <table>
             <tr class="item">
                 <td class="label">Id</td>
-                <td class="value">{{detailedStudy?.studyInstanceUID}}</td>
+                <td class="value">{{$any(detailedStudy)?.studyInstanceUID}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Date</td>
-                <td class="value">{{detailedStudy?.studyDate}}</td>
+                <td class="value">{{$any(detailedStudy)?.studyDate}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Description</td>
-                <td class="value">{{detailedStudy?.studyDescription}}</td>
+                <td class="value">{{$any(detailedStudy)?.studyDescription}}</td>
             </tr>
         </table>
     </div>     
@@ -96,35 +96,35 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <table>
             <tr class="item">
                 <td class="label">Id</td>
-                <td class="value">{{detailedSerie?.seriesInstanceUID}}</td>
+                <td class="value">{{$any(detailedSerie)?.seriesInstanceUID}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Protocol name</td>
-                <td class="value">{{detailedSerie?.protocolName}}</td>
+                <td class="value">{{$any(detailedSerie)?.protocolName}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Description</td>
-                <td class="value">{{detailedSerie?.seriesDescription}}</td>
+                <td class="value">{{$any(detailedSerie)?.seriesDescription}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Series date</td>
-                <td class="value">{{detailedSerie?.seriesDate | date: 'dd/MM/yyyy'}}</td>
+                <td class="value">{{$any(detailedSerie)?.seriesDate | date: 'dd/MM/yyyy'}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Series number</td>
-                <td class="value">{{detailedSerie?.seriesNumber}}</td>
+                <td class="value">{{$any(detailedSerie)?.seriesNumber}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Number of images</td>
-                <td class="value">{{detailedSerie?.imagesNumber}}</td>
+                <td class="value">{{$any(detailedSerie)?.imagesNumber}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Modality</td>
-                <td class="value">{{detailedSerie?.modality}}</td>
+                <td class="value">{{$any(detailedSerie)?.modality}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Number of non-image objects</td>
-                <td class="value">{{detailedSerie?.nonImagesNumber}}</td>
+                <td class="value">{{$any(detailedSerie)?.nonImagesNumber}}</td>
             </tr>
         </table>
         <div [hidden]="!papayaParams">

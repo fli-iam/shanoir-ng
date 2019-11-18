@@ -38,9 +38,9 @@ export class SubjectStudyListComponent extends AbstractInput {
     @Input() subject: Subject;
     @Input() study: Study;
     @Input() selectableList: Subject[] | Study[];
-    private selected: any;
+    selected: any;
 
-    private get legend(): string {
+    get legend(): string {
         return this.compMode == 'study' ? 'Subjects' : 'Studies';
     }
 
@@ -59,7 +59,7 @@ export class SubjectStudyListComponent extends AbstractInput {
         }
     }
 
-    private get compMode(): 'subject' | 'study' { 
+    get compMode(): 'subject' | 'study' { 
         if (this.subject && this.study) throw Error('You cannot set both subject and study');
         if (this.subject) return 'subject';
         if (this.study) return 'study';

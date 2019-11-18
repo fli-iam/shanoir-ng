@@ -31,10 +31,10 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 
 export class DatasetComponent extends EntityComponent<Dataset> {
 
-    private papayaParams: any;
+    papayaParams: any;
     private blob: Blob;
     private filename: string;
-    private hasDownloadRight: boolean = false;
+    hasDownloadRight: boolean = false;
     private hasAdministrateRight: boolean = false;
     
     constructor(
@@ -91,7 +91,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         }
     }
     
-    private download(format: string) {
+    download(format: string) {
         this.datasetService.download(this.dataset, format);
     }
 

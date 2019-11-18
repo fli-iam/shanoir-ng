@@ -45,19 +45,19 @@ import { ContextData, ImportDataService } from '../shared/import.data-service';
 export class ClinicalContextComponent {
     
     patient: PatientDicom;
-    private studies: Study[] = [];
-    private centers: Center[] = [];
-    private acquisitionEquipments: AcquisitionEquipment[] = [];
-    private subjects: SubjectWithSubjectStudy[] = [];
-    private examinations: SubjectExamination[] = [];
-    private niftiConverters: NiftiConverter[] = [];
-    private study: Study;
-    private center: Center;
-    private acquisitionEquipment: AcquisitionEquipment;
-    private subject: SubjectWithSubjectStudy;
-    private examination: SubjectExamination;
-    private niftiConverter: NiftiConverter;
-    private importMode: "DICOM" | "PACS";
+    studies: Study[] = [];
+    centers: Center[] = [];
+    acquisitionEquipments: AcquisitionEquipment[] = [];
+    subjects: SubjectWithSubjectStudy[] = [];
+    examinations: SubjectExamination[] = [];
+    niftiConverters: NiftiConverter[] = [];
+    study: Study;
+    center: Center;
+    acquisitionEquipment: AcquisitionEquipment;
+    subject: SubjectWithSubjectStudy;
+    examination: SubjectExamination;
+    niftiConverter: NiftiConverter;
+    importMode: "DICOM" | "PACS";
     
     constructor(
             private studyService: StudyService,
@@ -169,7 +169,7 @@ export class ClinicalContextComponent {
         return Promise.all(completeStudyPromises).then(() => {});
     }
 
-    private onSelectStudy(): void {
+    onSelectStudy(): void {
         this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.study && this.study.id && this.study.studyCenterList) {
@@ -184,7 +184,7 @@ export class ClinicalContextComponent {
         }
     }
 
-    private onSelectCenter(): void {
+    onSelectCenter(): void {
         this.acquisitionEquipments = this.subjects = this.examinations = [];
         this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.center && this.center.acquisitionEquipments) {
@@ -197,7 +197,7 @@ export class ClinicalContextComponent {
         }
     }
 
-    private onSelectAcquisitonEquipment(): void {
+    onSelectAcquisitonEquipment(): void {
         this.subjects = this.examinations = [];
         this.subject = this.examination = null;
         if (this.acquisitionEquipment) {
@@ -207,7 +207,7 @@ export class ClinicalContextComponent {
         }
     }
 
-    private onSelectSubject(): void {
+    onSelectSubject(): void {
         this.examinations = [];
         this.examination = null;
         if (this.subject) {
@@ -217,17 +217,17 @@ export class ClinicalContextComponent {
         }
     }
 
-    private onSelectExam(): void {
+    onSelectExam(): void {
         this.niftiConverters = [];
         if (this.examination) {
             this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
         }
     }
 
-    private onSelectNifti(): void {
+    onSelectNifti(): void {
     }
 
-    private onContextChange() {
+    onContextChange() {
         this.importDataService.contextBackup = this.getContext();
         if (this.valid) {
             this.importDataService.contextData = this.getContext();
@@ -239,7 +239,7 @@ export class ClinicalContextComponent {
             this.subject, this.examination, this.niftiConverter);
     }
 
-    private openCreateCenter = () => {
+    openCreateCenter = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledCenter();
@@ -264,7 +264,7 @@ export class ClinicalContextComponent {
         return center;
     }
 
-    private openCreateAcqEqt() {
+    openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledAcqEqt();
@@ -281,7 +281,7 @@ export class ClinicalContextComponent {
         return acqEpt;
     }
 
-    private openCreateSubject = () => {
+    openCreateSubject = () => {
         let importStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/subject/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
@@ -331,7 +331,7 @@ export class ClinicalContextComponent {
         return subjectWithSubjectStudy;
     }
 
-    private openCreateExam = () => {
+    openCreateExam = () => {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/examination/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
@@ -361,32 +361,32 @@ export class ClinicalContextComponent {
         return subjectExam;
     }
 
-    private get hasCompatibleCenters(): boolean {
+    get hasCompatibleCenters(): boolean {
         return this.centers.find(center => center.compatible) != undefined;
     }
 
     
-    private get hasCompatibleEquipments(): boolean {
+    get hasCompatibleEquipments(): boolean {
         return this.acquisitionEquipments.find(ae => ae.compatible) != undefined;
     }
 
-    private showStudyDetails() {
+    showStudyDetails() {
         window.open('study/details/' + this.study.id, '_blank');
     }
 
-    private showCenterDetails() {
+    showCenterDetails() {
         window.open('center/details/' + this.center.id, '_blank');
     }
 
-    private showAcquistionEquipmentDetails() {
+    showAcquistionEquipmentDetails() {
         window.open('acquisition-equipment/details/' + this.acquisitionEquipment.id, '_blank');
     }
 
-    private showSubjectDetails() {
+    showSubjectDetails() {
         window.open('subject/details/' + this.subject.id, '_blank');
     }
 
-    private showExaminationDetails() {
+    showExaminationDetails() {
         window.open('examination/details/' + this.examination.id, '_blank');
     }
 
@@ -402,7 +402,7 @@ export class ClinicalContextComponent {
         );
     }
 
-    private next() {
+    next() {
         this.router.navigate(['imports/finish']);
     }
 }

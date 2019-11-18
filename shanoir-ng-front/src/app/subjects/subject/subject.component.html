@@ -160,9 +160,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
 								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64 !</label>
 								<label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
-								<label *ngIf="existingSubjectError" class="form-validation-alert" i18n="Subject detail|Existing subject error@@existingSubjectError">
+								
+								<!-- <label *ngIf="existingSubjectError" class="form-validation-alert" i18n="Subject detail|Existing subject error@@existingSubjectError">
 									This subject already exists and his common name is {{existingSubjectError}}
-								</label>
+								</label> -->
+
 							</ng-template>
 						</span>
 					</li>

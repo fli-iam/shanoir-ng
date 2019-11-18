@@ -54,13 +54,13 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() ngModel: any = null;
     @Output() ngModelChange = new EventEmitter();
     @Output() change = new EventEmitter();
-    @ContentChildren(forwardRef(() => SelectOptionComponent)) private options: QueryList<SelectOptionComponent>;
+    @ContentChildren(forwardRef(() => SelectOptionComponent)) options: QueryList<SelectOptionComponent>;
     @ViewChild('label', {read: ElementRef, static: null }) labelNode: ElementRef;
-    private selectedOption: SelectOptionComponent;
+    selectedOption: SelectOptionComponent;
     private openState: boolean = false;
     private globalClickSubscription: Subscription;
-    private way: 'up' | 'down' = 'down';
-    private hideToComputeHeight: boolean = false;
+    way: 'up' | 'down' = 'down';
+    hideToComputeHeight: boolean = false;
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     private lastSearchTime: number = 0;
@@ -168,7 +168,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         option.focus = true;
     }
 
-    private set open(open: boolean) {
+    set open(open: boolean) {
         if (open && !this.openState && this.options.length > 0) { //open
             this.subscribeToGlobalClick();
             this.openState = true;
@@ -183,7 +183,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
     }
 
-    private get open(): boolean {
+    get open(): boolean {
         return this.openState;
     }
 
@@ -241,7 +241,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     @HostListener('keydown', ['$event']) 
-    private onKeyPress(event: any) {
+    onKeyPress(event: any) {
         if ('ArrowDown' == event.key) {
             let focusIndex = this.getFocusIndex();
             if (focusIndex == -1) focusIndex = 0;
@@ -328,26 +328,26 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.onTouchedCallback = fn;
     }
 
-    @HostListener('focusout', ['$event']) 
-    private onFocusOut() {
+    @HostListener('focusout', []) 
+    onFocusOut() {
         this.open = false; 
         this.onTouchedCallback();
     }
 
     @HostBinding('attr.tabindex')
-    private get tabindex(): number {
+    get tabindex(): number {
         return this.disabled ? undefined : 0;
     } 
 
-    private clickView(): void {
+    clickView(): void {
         if(!this.viewDisabled && this.selectedOption) this.onViewClick.emit(this.selectedOption.value);
     }
 
-    private clickNew(): void {
+    clickNew(): void {
         if(!this.newDisabled) this.onNewClick.emit();
     }
 
-    private clickAdd(): void {
+    clickAdd(): void {
         if(!this.addDisabled && this.selectedOption) this.onAddClick.emit(this.selectedOption.value);
     }
 

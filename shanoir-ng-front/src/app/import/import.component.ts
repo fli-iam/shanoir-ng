@@ -26,8 +26,8 @@ import { StudyRightsService } from '../studies/shared/study-rights.service';
 })
 export class ImportComponent implements OnInit {
 
-    private importMode: "DICOM" | "PACS";
-    private hasOneStudy: boolean = true;
+    importMode: "DICOM" | "PACS";
+    hasOneStudy: boolean = true;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, 
