@@ -11,9 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
@@ -31,6 +31,9 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { Event }from '../../datasets/dataset/eeg/dataset.eeg.model';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 
 
 @Component({
@@ -39,7 +42,10 @@ import { ContextData, ImportDataService } from '../shared/import.data-service';
     styleUrls: ['eeg-clinical-context.component.css', '../shared/import.step.css'],
     animations: [slideDown]
 })
-export class EegClinicalContextComponent {
+
+export class EegClinicalContextComponent implements OnInit {
+    
+    @ViewChild('eventsTable') table: TableComponent;
     
     protected studies: Study[] = [];
     protected centers: Center[] = [];
@@ -51,6 +57,10 @@ export class EegClinicalContextComponent {
     protected examination: SubjectExamination;
     protected subjects: SubjectWithSubjectStudy[] = [];
     protected subject: SubjectWithSubjectStudy;
+    protected columnDefs: any[];
+    
+    private browserPaging: BrowserPaging<EventContext>;
+    private eventsPromise: Promise<any>;
     
     constructor(
             private studyService: StudyService,
@@ -85,6 +95,11 @@ export class EegClinicalContextComponent {
             this.onContextChange();
         });
     }
+    
+    ngOnInit(): void {
+        // Init events table
+        this.initEventsTable();
+    }
 
     private reloadSavedData() {
         if (this.importDataService.contextBackup) {
@@ -114,6 +129,48 @@ export class EegClinicalContextComponent {
                 this.onSelectExam();
             }
         }
+    }
+    
+    private initEventsTable(): void {
+        
+        this.columnDefs = [
+           {headerName: "Description", field: "description", type: "string", cellRenderer: function (params: any) {
+                    return params.data.description;
+            }},
+            {headerName: "Number", field: "number", type: "number", cellRenderer: function (params: any) {
+                    return params.data.number;
+            }},
+        ]
+        
+        let context = [];
+        let contextDict = {};
+        for (let event of this.importDataService.eegImportJob.events) {
+            if (contextDict[event.description]) {
+                // Update the context value
+                contextDict[event.description].number += 1;
+            } else {
+                // Create the context value
+                let cont: EventContext = new EventContext();
+                cont.number = 1;
+                cont.description = event.description;
+                contextDict[event.description] = cont;
+                context.push(cont);         
+            }
+        }
+        
+       this.eventsPromise = Promise.resolve().then(() => {
+            this.browserPaging = new BrowserPaging([], this.columnDefs);
+            this.browserPaging.setItems(context);
+            this.table.refresh();
+        });
+    }
+
+   protected getPage(pageable: FilterablePageable): Promise<Page<EventContext>> {
+        return new Promise((resolve) => {
+            this.eventsPromise.then(() => {
+                resolve(this.browserPaging.getPage(pageable));
+            });
+        });
     }
 
     private onSelectStudy(): void {
@@ -309,4 +366,9 @@ export class EegClinicalContextComponent {
     private next() {
         this.router.navigate(['imports/eegfinish']);
     }
+}
+
+export class EventContext {
+    public description: string;
+    public number: number;
 }

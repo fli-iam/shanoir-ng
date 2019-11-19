@@ -42,6 +42,29 @@ public class EegImportJob {
     @JsonProperty("events")
     private List<Event> events;
 
+	/** Name of the file -> name of the dataset created. */
+	@JsonProperty("name")
+	private String name;
+	
+	@JsonProperty("files")
+	private List<String> files;
+
+	public List<String> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<String> files) {
+		this.files = files;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public Long getSubjectId() {
 		return subjectId;
 	}

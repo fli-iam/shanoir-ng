@@ -19,10 +19,12 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
 
+import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
@@ -455,14 +457,11 @@ public class ImporterApiController implements ImporterApi {
 		return uploadFile;
 	}
 
-	/*
-	 * 	public ResponseEntity<ImportJob> uploadDicomZipFile(
-			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile)
-			throws RestServiceException {
-	 */
 	@Override
-	public ResponseEntity<EegImportJob> uploadEEGZipFile(
-			@ApiParam(value = "file detail") @RequestPart("file") MultipartFile eegZipFile)
+	/**
+	 * This method load an EEG file, unzip it and load an import job with the informations collected
+	 */
+	public ResponseEntity<EegImportJob> uploadEEGZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile eegZipFile)
 			throws RestServiceException {
 		try {
 			// Do some checks about the file, must be != null and must be a .zip file
@@ -487,43 +486,64 @@ public class ImporterApiController implements ImporterApi {
 			// Unzip the file and get the elements
 			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, eegZipFile, false);
 			File brainvisionFileDir = new File(importJobDir.getAbsolutePath() + File.separator + eegZipFile.getOriginalFilename().replace(".zip", ""));
+
+			// TODO: Consider .edf files here
+			// If (param.fileType == "EDF") {} else {
+
 			// Get .VHDR file
 			File[] matchingFiles = brainvisionFileDir.listFiles(new FilenameFilter() {
 			    public boolean accept(File dir, String name) {
-			    	System.out.println(name);
 			        return name.endsWith("vhdr");
 			    }
 			});
-			
+
+			// If there is 0 or 2+ vhdr files, don't consider it. Load patient by patient for the moment.
 			if (matchingFiles.length != 1) {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "File does not contains a .vhdr file or contains multiples.", null));
 			}
-			// TODO: Manage multiple files, multiple patients, for one project.
+
 			File vhdrFile = matchingFiles[0];
+			
+			// Parse the file
 			BrainVisionReader bvr = new BrainVisionReader(vhdrFile);
 
 			EegImportJob importJob = new EegImportJob();
 			importJob.setEvents(bvr.getEvents());
 			importJob.setChannels(bvr.getChannels());
-			importJob.setWorkFolder(userImportDir.getAbsolutePath());
+			importJob.setWorkFolder(importJobDir.getAbsolutePath());
+
+			// Get dataset name from VHDR file name
+			String fileNameWithOutExt = FilenameUtils.removeExtension(vhdrFile.getName());
+			importJob.setName(fileNameWithOutExt);
+			
+			// Get the list of file to save from reader
+			List<String> files = new ArrayList<>();
+			
+			matchingFiles = brainvisionFileDir.listFiles();
+			for (File fi : matchingFiles) {
+				files.add(fi.getCanonicalPath());
+			}
+
+			importJob.setFiles(files);
 			
 			return new ResponseEntity<EegImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException ioe) {
-			// PRAY: Hope this does not happen
 			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
 		}
 	}
 
+	/**
+	 * Here we had all the informations we needed (metadata, examination, study, subject, ect...) so we make a call to dataset API to create it.
+	 */
 	@Override
 	public ResponseEntity<Void> startImportEEGJob( @ApiParam(value = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
-		// REMARK: Anonymisation des données => Not necessary for pure EEGs data
-		// REMARK: BIDS translation will probably be done during export and not during import.
-
-		// TODO Do the ASYNC call here to be able to create a dataset
+		// Comment: Anonymisation is not necessary for pure brainvision EEGs data
+		// For .EDF, anonymisation could be done here.
+		// Comment: BIDS translation will be done during export and not during import.
 
 		// HttpEntity represents the request
 		final HttpEntity<EegImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
-		// Post to dataset MS to finish import
+		// Post to dataset MS to finish import and create associated datasets
 		ResponseEntity<String> response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody, String.class);
 		return new ResponseEntity<>(response.getStatusCode());
 	}

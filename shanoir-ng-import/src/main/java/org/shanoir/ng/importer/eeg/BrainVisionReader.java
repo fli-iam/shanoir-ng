@@ -42,15 +42,16 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- *
+ * This class parses and reads brainvision files.
+ * The folder in entry must at least contain a .vhdr file
+ * It may contains a .pos, a .eeg and a .vmrk file
+ * .eeg file is mandatory to call read() method
  * @author Arne
  * @author Nils Finke
+ * @author JcomeD
  */
 public class BrainVisionReader {
 
-    private File file;
-    private File markerFile;
-    private File positionFile;
     private String dataFileLocation;
     private RandomAccessFile dataFile;
     private DataFormat dataFormat;
@@ -74,18 +75,24 @@ public class BrainVisionReader {
     private ByteBuffer buf;
     private long nSamples;
     private int bytes;
-    
+
+    private File file;
+    private File markerFile;
+    private File positionFile;
+    private File eegFile;
     private List<Channel> channels;
-    
     private List<Event> events;
 
     public BrainVisionReader(File file) {
         this.file = file;
         if (file.getName().toLowerCase().endsWith(".vhdr")) {
             readHeaderFromVHDR();
+        } else {
+        	System.out.println("There is no .vhdr file");
+        	return;
         }
         
-        if (markerFile != null) {
+        if (markerFile != null && markerFile.exists()) {
         	// Create events
         	readEventsFile();
         }
@@ -103,16 +110,16 @@ public class BrainVisionReader {
 		if (matchingFiles != null && matchingFiles.length == 1) {
 			positionFile = matchingFiles[0];
 		}
-        if (positionFile != null) {
+        if (positionFile != null && positionFile.exists()) {
         	readPositionFile();
         }
-
         
         /**
          * Has to be set to 0 initially, reflects changes in buffer size
          */
         if (dataFormat.equals(DataFormat.BINARY)) {
             try {
+            	eegFile = new File(dataFileLocation);
                 dataFile = new RandomAccessFile(dataFileLocation, "r");
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(BrainVisionReader.class.getName()).log(Level.ALL, null, ex);
@@ -133,14 +140,14 @@ public class BrainVisionReader {
     }
 
     /**
-     * This method reads the .pos file to complete the Channel list
+     * This method reads the .pos file to complete the Channel list with x, y, z position if existing
      */
     private void readPositionFile() {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(positionFile), StandardCharsets.UTF_8))) {
             String newLine = null;
             int channelIndex = 1;
 
-            // Construct a list of events
+            // Iterate over the line to get the position
             while ((newLine = in.readLine()) != null) {
             	if (newLine.startsWith(String.valueOf(channelIndex))) {
             		String[] tmp = newLine.split("\\s+");
@@ -608,7 +615,19 @@ public class BrainVisionReader {
         return y;
     }
     
-    public static class Event {
+    public File getMarkerFile() {
+		return markerFile;
+	}
+
+	public File getPositionFile() {
+		return positionFile;
+	}
+	
+	public File getEegFile() {
+		return eegFile;
+	}
+
+	public static class Event {
     	// <type>,[<description>],
     	// <position>,<points>,<channel number>,[<date>]
         @JsonProperty("type")

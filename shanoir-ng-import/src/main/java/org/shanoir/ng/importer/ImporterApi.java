@@ -101,9 +101,9 @@ public interface ImporterApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getFrontStudyId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> startImportJob(@ApiParam(value = "ImportJob", required=true) @RequestBody ImportJob importJob) throws RestServiceException;
 
-    @ApiOperation(value = "Start import job", notes = "Start import job", response = Void.class, tags={ "Start import job", })
+    @ApiOperation(value = "Start import EEG job", notes = "Start import eeg job", response = Void.class, tags={ "Start import eeg job", })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "import job started", response = Void.class),
+        @ApiResponse(code = 200, message = "import eeg job started", response = Void.class),
         @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
         @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
     @RequestMapping(value = "/start_import_eeg_job/",

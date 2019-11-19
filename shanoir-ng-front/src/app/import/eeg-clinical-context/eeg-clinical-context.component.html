@@ -118,4 +118,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
     </ol>
 </fieldset>
+
+<legend> Linked events </legend>
+
+<shanoir-table #eventsTable
+    [getPage]="getPage.bind(this)" 
+    [columnDefs]="columnDefs">
+</shanoir-table>
 <button class="next" [disabled]="!valid" (click)="next()">Next</button>

@@ -13,15 +13,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <fieldset *ngIf="dataset">
-	<legend>This is a test for EEG dataset: {{dataset.name}}</legend>
-    <p *ngFor="let channel of dataset.channelList">
-    Channel position: X: {{channel.x}} Y: {{channel.y}} Z: {{channel.z}}
-    Channel Filter: {{channel.notch}}
-    </p>
-    <legend> Associated events </legend>
-    <p *ngFor="let event of dataset.eventList">
-        Event value: {{event.value}}
-        Event sample: {{event.sample}}
-        Event type: {{event.type}}
-    </p>
+	<legend>EEG dataset: {{dataset.name}}</legend>
+    
+    <shanoir-table #channelsTable
+        [getPage]="getPage.bind(this)" 
+        [columnDefs]="columnDefs">
+    </shanoir-table>
 </fieldset>

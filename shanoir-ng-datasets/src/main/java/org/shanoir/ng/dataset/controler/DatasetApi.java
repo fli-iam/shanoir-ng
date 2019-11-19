@@ -110,8 +110,8 @@ public interface DatasetApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
     ResponseEntity<ByteArrayResource> downloadDatasetById(
     		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId,
-    		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", 
-    			allowableValues = "dcm, nii", defaultValue = "dcm") @Valid 
+    		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) or eeg(eeg) files.", 
+    			allowableValues = "dcm, nii, egg", defaultValue = "dcm") @Valid 
     		@RequestParam(value = "format", required = false, defaultValue="dcm") String format) throws RestServiceException, MalformedURLException, IOException;
     
     @ApiOperation(value = "", nickname = "exportBIDSBySubjectId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given subject id", response = Resource.class, tags={})

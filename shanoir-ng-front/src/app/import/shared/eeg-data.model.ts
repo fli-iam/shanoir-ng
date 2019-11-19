@@ -23,6 +23,8 @@ export class EegImportJob {
     frontAcquisitionEquipmentId: number;
     channels: Channel[];
     events: Event[];
+    name: string;
+    files: string[];
 }
 
 /** Represents a brainvision EEG channel */

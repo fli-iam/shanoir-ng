@@ -82,6 +82,8 @@ export class FinishEegImportComponent {
     private importData(): Promise<any> {
         let importJob = new EegImportJob();
         importJob.channels = this.importJob.channels;
+        importJob.name = this.importJob.name;
+        importJob.files = this.importJob.files;
         importJob.events = this.importJob.events;
         importJob.subjectId = this.context.subject.id;
         importJob.workFolder = this.importJob.workFolder;

@@ -186,7 +186,7 @@ public class DatasetApiController implements DatasetApi {
 	@Override
 	public ResponseEntity<ByteArrayResource> downloadDatasetById(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii", defaultValue = "dcm") 
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = "dcm") 
 			@Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") String format)
 			throws RestServiceException, IOException {
 
@@ -217,6 +217,9 @@ public class DatasetApiController implements DatasetApi {
 				downloader.downloadDicomFilesForURLs(pathURLs, workFolder);
 			} else if ("nii".equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+				copyNiftiFilesForURLs(pathURLs, workFolder);
+			} else if ("eeg".equals(format)) {
+				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
 				copyNiftiFilesForURLs(pathURLs, workFolder);
 			} else {
 				throw new RestServiceException(
@@ -355,6 +358,8 @@ public class DatasetApiController implements DatasetApi {
 				}
 			}*/
 			
+			// TODO: Do something specific about EEG.
+			
 			// 8. Get modality label, nii and json of dataset
 			/* For the demo: one exam, one acq, one dataset, one modality which is T1 */
 			final Dataset dataset = examinationList.get(0).getDatasetAcquisitions().get(0).getDatasets().get(0);
@@ -365,8 +370,8 @@ public class DatasetApiController implements DatasetApi {
 			
 			// Get modality label
 			String modalityLabel = null;
-			if (((MrDataset) dataset).getUpdatedMrMetadata().getMrDatasetNature().equals(MrDatasetNature.T1_WEIGHTED_MR_DATASET)
-					|| ((MrDataset) dataset).getUpdatedMrMetadata().getMrDatasetNature().equals(MrDatasetNature.T1_WEIGHTED_DCE_MR_DATASET)) {
+			if (MrDatasetNature.T1_WEIGHTED_MR_DATASET.equals(((MrDataset) dataset).getUpdatedMrMetadata().getMrDatasetNature())
+					|| MrDatasetNature.T1_WEIGHTED_DCE_MR_DATASET.equals(((MrDataset) dataset).getUpdatedMrMetadata().getMrDatasetNature())) {
 				modalityLabel = T1w;
 			} 
 			if (StringUtils.isEmpty(modalityLabel)) {

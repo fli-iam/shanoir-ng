@@ -15,17 +15,27 @@
 package org.shanoir.ng.importer.service;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
@@ -39,6 +49,7 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +60,10 @@ public class ImporterService {
 	private static final Logger LOG = LoggerFactory.getLogger(ImporterService.class);
 	
 	private static final String UPLOAD_EXTENSION = ".upload";
-		
+	
+	@Value("${datasets-data}")
+	private String niftiStorageDir;
+
 	@Autowired
 	private ExaminationService examinationService;
 
@@ -63,6 +77,12 @@ public class ImporterService {
 	private DicomPersisterService dicomPersisterService;
 	
 	private ImportJob importJob;
+	
+	private static final String SUB_PREFIX = "sub-";
+	
+	private static final String SES_PREFIX = "ses-";
+	
+	private static final String EEG_PREFIX = "eeg";
 	
 	public void setImportJob(ImportJob importJob) {
 		this.importJob = importJob;
@@ -144,25 +164,71 @@ public class ImporterService {
 
 		datasetAcquisition.setExamination(examination);
 		datasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
-		datasetAcquisition.setRank(Integer.valueOf(1));
 
 		// Metadata
 		DatasetMetadata originMetadata = new DatasetMetadata();
-		originMetadata.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
+		originMetadata.setProcessedDatasetType(ProcessedDatasetType.NONRECONSTRUCTEDDATASET);
 		originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
-		originMetadata.setName("Nom temporaire");
+		originMetadata.setName(importJob.getName());
 		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
-		
+
 		// Create the dataset with informations from job
 		EegDataset datasetToCreate = new EegDataset();
 
-		// set the dataset_Id where needed
+		// DatasetExpression with list of files
+		DatasetExpression expression = new DatasetExpression();
+		expression.setCreationDate(LocalDateTime.now());
+		expression.setDatasetExpressionFormat(DatasetExpressionFormat.EEG);
+		expression.setDataset(datasetToCreate);
+		
+		List<DatasetFile> files = new ArrayList<>();
+
+		// Set files
+		if (importJob.getFiles() != null) {
+
+			// Copy the data somewhere else
+			final String subLabel = SUB_PREFIX + importJob.getSubjectId();
+			final String sesLabel = SES_PREFIX + importJob.getExaminationId();
+
+			final File outDir = new File(niftiStorageDir + File.separator + EEG_PREFIX + File.separator + subLabel + File.separator + sesLabel + File.separator);
+			outDir.mkdirs();
+
+			// Move file one by one to the new directory
+			for (String filePath : importJob.getFiles()) {
+
+				File srcFile = new File(filePath);
+				String originalNiftiName = srcFile.getAbsolutePath().substring(filePath.lastIndexOf('/') + 1);
+				File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
+				Path finalLocation = null;
+				try {
+					finalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					LOG.error("IOException generating EEG Dataset Expression", e);
+				}
+
+				// Create datasetExpression => Files
+				if (finalLocation != null) {
+					DatasetFile file = new DatasetFile();
+					file.setDatasetExpression(expression);
+					file.setPath(finalLocation.toUri().toString());
+					file.setPacs(false);
+					files.add(file);
+				}
+			}
+		}
+
+		expression.setDatasetFiles(files);
+		datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
+
+		// set the dataset_id where needed
 		for (Channel chan : importJob.getChannels()) {
 			chan.setDataset(datasetToCreate);
 		}
 		for (Event event : importJob.getEvents()) {
 			event.setDataset(datasetToCreate);
 		}
+		
+		// Fill dataset with informations
 		datasetToCreate.setChannelCount(importJob.getChannels() != null? importJob.getChannels().size() : 0);
 		datasetToCreate.setChannelList(importJob.getChannels());
 		datasetToCreate.setEventList(importJob.getEvents());
@@ -172,6 +238,7 @@ public class ImporterService {
 		datasetToCreate.setStudyId(importJob.getFrontStudyId());
 		datasetToCreate.setSubjectId(importJob.getSubjectId());
 
+		// Only one dataset is created.
 		datasetAcquisition.setDatasets(Collections.singletonList(datasetToCreate));
 		datasetAcquisitionRepository.save(datasetAcquisition);
 	}
