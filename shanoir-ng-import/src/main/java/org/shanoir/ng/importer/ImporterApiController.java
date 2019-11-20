@@ -488,8 +488,7 @@ public class ImporterApiController implements ImporterApi {
 			File brainvisionFileDir = new File(importJobDir.getAbsolutePath() + File.separator + eegZipFile.getOriginalFilename().replace(".zip", ""));
 
 			// TODO: Consider .edf files here
-			// If (param.fileType == "EDF") {} else {
-
+			
 			// Get .VHDR file
 			File[] matchingFiles = brainvisionFileDir.listFiles(new FilenameFilter() {
 			    public boolean accept(File dir, String name) {
@@ -498,7 +497,7 @@ public class ImporterApiController implements ImporterApi {
 			});
 
 			// If there is 0 or 2+ vhdr files, don't consider it. Load patient by patient for the moment.
-			if (matchingFiles.length != 1) {
+			if (matchingFiles == null || matchingFiles.length != 1) {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "File does not contains a .vhdr file or contains multiples.", null));
 			}
 

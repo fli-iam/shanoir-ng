@@ -85,10 +85,10 @@ public class BrainVisionReader {
 
     public BrainVisionReader(File file) {
         this.file = file;
-        if (file.getName().toLowerCase().endsWith(".vhdr")) {
+        if (file != null && file.exists() && file.getName().toLowerCase().endsWith(".vhdr")) {
             readHeaderFromVHDR();
         } else {
-        	System.out.println("There is no .vhdr file");
+        	System.out.println("No .vhdr file");
         	return;
         }
         
@@ -102,7 +102,6 @@ public class BrainVisionReader {
         File parentDir = new File(file.getParent());
 		File[] matchingFiles = parentDir.listFiles(new FilenameFilter() {
 		    public boolean accept(File dir, String name) {
-		    	System.out.println(name);
 		        return name.endsWith("pos");
 		    }
 		});
@@ -151,7 +150,9 @@ public class BrainVisionReader {
             while ((newLine = in.readLine()) != null) {
             	if (newLine.startsWith(String.valueOf(channelIndex))) {
             		String[] tmp = newLine.split("\\s+");
-            		
+            		if (tmp.length != 5) {
+            			continue;
+            		}
             		// Find the channel with corresponding name
             		Channel chan = channels
             				.stream()
