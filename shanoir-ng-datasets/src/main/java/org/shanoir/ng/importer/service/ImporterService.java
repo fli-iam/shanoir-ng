@@ -26,7 +26,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
@@ -37,6 +39,7 @@ import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.eeg.model.Channel;
+import org.shanoir.ng.eeg.model.Channel.ChannelType;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -56,11 +59,11 @@ import org.springframework.stereotype.Service;
 @Service
 @Scope("prototype")
 public class ImporterService {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(ImporterService.class);
-	
+
 	private static final String UPLOAD_EXTENSION = ".upload";
-	
+
 	@Value("${datasets-data}")
 	private String niftiStorageDir;
 
@@ -69,32 +72,32 @@ public class ImporterService {
 
 	@Autowired
 	private DatasetAcquisitionContext datasetAcquisitionContext;
-	
+
 	@Autowired
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-	
+
 	@Autowired 
 	private DicomPersisterService dicomPersisterService;
-	
+
 	private ImportJob importJob;
-	
+
 	private static final String SUB_PREFIX = "sub-";
-	
+
 	private static final String SES_PREFIX = "ses-";
-	
+
 	private static final String EEG_PREFIX = "eeg";
-	
+
 	public void setImportJob(ImportJob importJob) {
 		this.importJob = importJob;
 	}
-	
+
 	// TODO 
 	public void retrieveMetadataInDicom() {
 	}
-	
+
 	public void buildDatasets() {
 	}
-	
+
 	public void createAllDatasetAcquisition() {
 		Examination examination = examinationService.findById(importJob.getExaminationId());
 		if (examination != null) {
@@ -111,7 +114,7 @@ public class ImporterService {
 			}
 		}
 	}
-	
+
 	public void createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination) {
 		if (serie.getModality() != null) {
 			// Added Temporary check on serie in order not to generate dataset acquisition for series without images.
@@ -124,16 +127,16 @@ public class ImporterService {
 						// Persist Serie in Shanoir DB
 						DatasetAcquisition persistedDatasetAcquisition = datasetAcquisitionRepository.save(datasetAcquisition);
 						// Persist Dicom images in Shanoir Pacs
-			//			if (persistedDatasetAcquisition != null) {
-							dicomPersisterService.persistAllForSerie(serie);
+						//			if (persistedDatasetAcquisition != null) {
+						dicomPersisterService.persistAllForSerie(serie);
 					}
 				}
 			}
 		}
 	}
-	
+
 	public void cleanTempFiles(String workFolder) {
-		
+
 		if (workFolder != null) {
 			// delete workFolder.upload file
 			File uploadZipFile = new File(workFolder.concat(UPLOAD_EXTENSION));
@@ -157,89 +160,102 @@ public class ImporterService {
 	 * @param importJob the import job from importer MS.
 	 */
 	public void createEegDataset(EegImportJob importJob) {
+
+		if (importJob == null || importJob.getDatasets() == null || importJob.getDatasets().size() == 0) {
+			return;
+		}
+
 		DatasetAcquisition datasetAcquisition = new EegDatasetAcquisition();
 		
 		// Get examination
 		Examination examination = examinationService.findById(importJob.getExaminationId());
-
+		
 		datasetAcquisition.setExamination(examination);
 		datasetAcquisition.setAcquisitionEquipmentId(importJob.getFrontAcquisitionEquipmentId());
 
-		// Metadata
-		DatasetMetadata originMetadata = new DatasetMetadata();
-		originMetadata.setProcessedDatasetType(ProcessedDatasetType.NONRECONSTRUCTEDDATASET);
-		originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
-		originMetadata.setName(importJob.getName());
-		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+		List<Dataset> datasets = new ArrayList<>();
 
-		// Create the dataset with informations from job
-		EegDataset datasetToCreate = new EegDataset();
+		for (EegDatasetDTO datasetDto : importJob.getDatasets()) {
 
-		// DatasetExpression with list of files
-		DatasetExpression expression = new DatasetExpression();
-		expression.setCreationDate(LocalDateTime.now());
-		expression.setDatasetExpressionFormat(DatasetExpressionFormat.EEG);
-		expression.setDataset(datasetToCreate);
-		
-		List<DatasetFile> files = new ArrayList<>();
 
-		// Set files
-		if (importJob.getFiles() != null) {
+			// Metadata
+			DatasetMetadata originMetadata = new DatasetMetadata();
+			originMetadata.setProcessedDatasetType(ProcessedDatasetType.NONRECONSTRUCTEDDATASET);
+			originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
+			originMetadata.setName(datasetDto.getName());
+			originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
 
-			// Copy the data somewhere else
-			final String subLabel = SUB_PREFIX + importJob.getSubjectId();
-			final String sesLabel = SES_PREFIX + importJob.getExaminationId();
+			// Create the dataset with informations from job
+			EegDataset datasetToCreate = new EegDataset();
 
-			final File outDir = new File(niftiStorageDir + File.separator + EEG_PREFIX + File.separator + subLabel + File.separator + sesLabel + File.separator);
-			outDir.mkdirs();
+			// DatasetExpression with list of files
+			DatasetExpression expression = new DatasetExpression();
+			expression.setCreationDate(LocalDateTime.now());
+			expression.setDatasetExpressionFormat(DatasetExpressionFormat.EEG);
+			expression.setDataset(datasetToCreate);
 
-			// Move file one by one to the new directory
-			for (String filePath : importJob.getFiles()) {
+			List<DatasetFile> files = new ArrayList<>();
 
-				File srcFile = new File(filePath);
-				String originalNiftiName = srcFile.getAbsolutePath().substring(filePath.lastIndexOf('/') + 1);
-				File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
-				Path finalLocation = null;
-				try {
-					finalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException e) {
-					LOG.error("IOException generating EEG Dataset Expression", e);
-				}
+			// Set files
+			if (datasetDto.getFiles() != null) {
 
-				// Create datasetExpression => Files
-				if (finalLocation != null) {
-					DatasetFile file = new DatasetFile();
-					file.setDatasetExpression(expression);
-					file.setPath(finalLocation.toUri().toString());
-					file.setPacs(false);
-					files.add(file);
+				// Copy the data somewhere else
+				final String subLabel = SUB_PREFIX + importJob.getSubjectId();
+				final String sesLabel = SES_PREFIX + importJob.getExaminationId();
+
+				final File outDir = new File(niftiStorageDir + File.separator + EEG_PREFIX + File.separator + subLabel + File.separator + sesLabel + File.separator);
+				outDir.mkdirs();
+
+				// Move file one by one to the new directory
+				for (String filePath : datasetDto.getFiles()) {
+
+					File srcFile = new File(filePath);
+					String originalNiftiName = srcFile.getAbsolutePath().substring(filePath.lastIndexOf('/') + 1);
+					File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
+					Path finalLocation = null;
+					try {
+						finalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					} catch (IOException e) {
+						LOG.error("IOException generating EEG Dataset Expression", e);
+					}
+
+					// Create datasetExpression => Files
+					if (finalLocation != null) {
+						DatasetFile file = new DatasetFile();
+						file.setDatasetExpression(expression);
+						file.setPath(finalLocation.toUri().toString());
+						file.setPacs(false);
+						files.add(file);
+					}
 				}
 			}
-		}
 
-		expression.setDatasetFiles(files);
-		datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
+			expression.setDatasetFiles(files);
+			datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
 
-		// set the dataset_id where needed
-		for (Channel chan : importJob.getChannels()) {
-			chan.setDataset(datasetToCreate);
-		}
-		for (Event event : importJob.getEvents()) {
-			event.setDataset(datasetToCreate);
-		}
-		
-		// Fill dataset with informations
-		datasetToCreate.setChannelCount(importJob.getChannels() != null? importJob.getChannels().size() : 0);
-		datasetToCreate.setChannelList(importJob.getChannels());
-		datasetToCreate.setEventList(importJob.getEvents());
-		datasetToCreate.setCreationDate(LocalDate.now());
-		datasetToCreate.setDatasetAcquisition(datasetAcquisition);
-		datasetToCreate.setOriginMetadata(originMetadata);
-		datasetToCreate.setStudyId(importJob.getFrontStudyId());
-		datasetToCreate.setSubjectId(importJob.getSubjectId());
+			// set the dataset_id where needed
+			for (Channel chan : datasetDto.getChannels()) {
+				chan.setDataset(datasetToCreate);
+				chan.setReferenceType(ChannelType.EEG);
+			}
+			for (Event event : datasetDto.getEvents()) {
+				event.setDataset(datasetToCreate);
+			}
 
-		// Only one dataset is created.
-		datasetAcquisition.setDatasets(Collections.singletonList(datasetToCreate));
+			// Fill dataset with informations
+			datasetToCreate.setChannelCount(datasetDto.getChannels() != null? datasetDto.getChannels().size() : 0);
+			datasetToCreate.setChannels(datasetDto.getChannels());
+			datasetToCreate.setEvents(datasetDto.getEvents());
+			datasetToCreate.setCreationDate(LocalDate.now());
+			datasetToCreate.setDatasetAcquisition(datasetAcquisition);
+			datasetToCreate.setOriginMetadata(originMetadata);
+			datasetToCreate.setStudyId(importJob.getFrontStudyId());
+			datasetToCreate.setSubjectId(importJob.getSubjectId());
+			datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
+			
+			datasets.add(datasetToCreate);
+		}
+		datasetAcquisition.setDatasets(datasets);
 		datasetAcquisitionRepository.save(datasetAcquisition);
 	}
 

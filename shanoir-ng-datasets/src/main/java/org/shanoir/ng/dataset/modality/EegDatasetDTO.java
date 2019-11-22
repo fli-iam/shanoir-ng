@@ -6,16 +6,24 @@ import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class EegDatasetDTO extends DatasetDTO {
-	
-	private float samplingFrequency;
 	
 	private int channelCount;
 
-	private List<Channel> channelList;
+    @JsonProperty("channels")
+	private List<Channel> channels;
 
-	private List<Event> eventList;
+    @JsonProperty("events")
+	private List<Event> events;
+
+    @JsonProperty("files")
+	private List<String> files;
 	
+	@JsonProperty("samplingFrequency")
+	private float samplingFrequency;
+
 	/**
 	 * @return the samplingFrequency
 	 */
@@ -44,31 +52,28 @@ public class EegDatasetDTO extends DatasetDTO {
 		this.channelCount = channelCount;
 	}
 
-	/**
-	 * @return the channelList
-	 */
-	public List<Channel> getChannelList() {
-		return channelList;
+	public List<Channel> getChannels() {
+		return channels;
 	}
 
-	/**
-	 * @param channelList the channelList to set
-	 */
-	public void setChannelList(List<Channel> channelList) {
-		this.channelList = channelList;
+	public void setChannels(List<Channel> channels) {
+		this.channels = channels;
 	}
 
-	/**
-	 * @return the eventList
-	 */
-	public List<Event> getEventList() {
-		return eventList;
+	public List<Event> getEvents() {
+		return events;
 	}
 
-	/**
-	 * @param eventList the eventList to set
-	 */
-	public void setEventList(List<Event> eventList) {
-		this.eventList = eventList;
+	public void setEvents(List<Event> events) {
+		this.events = events;
 	}
+
+	public List<String> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<String> files) {
+		this.files = files;
+	}
+	
 }

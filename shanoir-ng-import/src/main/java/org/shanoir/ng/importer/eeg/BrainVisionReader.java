@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FilenameUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -82,6 +84,7 @@ public class BrainVisionReader {
     private File eegFile;
     private List<Channel> channels;
     private List<Event> events;
+	private int samplingFrequency;
 
     public BrainVisionReader(File file) {
         this.file = file;
@@ -100,9 +103,10 @@ public class BrainVisionReader {
         // Read .pos file if existing
 		// Get .pos file
         File parentDir = new File(file.getParent());
+		String fileNameWithOutExt = FilenameUtils.removeExtension(file.getName());
 		File[] matchingFiles = parentDir.listFiles(new FilenameFilter() {
 		    public boolean accept(File dir, String name) {
-		        return name.endsWith("pos");
+		        return name.equals(fileNameWithOutExt + ".pos");
 		    }
 		});
 		
@@ -236,6 +240,7 @@ public class BrainVisionReader {
             channels = new ArrayList<>();
             int channelIndex = 1;
             boolean amplifier = false;
+            boolean position = false;
 
             while ((zeile = in.readLine()) != null) {
 
@@ -306,6 +311,11 @@ public class BrainVisionReader {
                 else if (zeile.startsWith("SamplingInterval")) {
                     samplingIntervall = Integer.parseInt(zeile.substring(17));
                 }
+                
+                // Read sampling rate
+                else if (zeile.startsWith("Sampling Rate [Hz]: ")) {
+                    samplingFrequency = Integer.parseInt(zeile.substring(21));
+                }
 
                 // Read binary format
                 else if (zeile.startsWith("BinaryFormat=")) {
@@ -374,6 +384,12 @@ public class BrainVisionReader {
                     	// Index is index channel - 1
                     	channels.add(chan);
                         countChannels++;
+                    } else if (position && tmp.length == 3) {
+                        int stringIndex = tmp[0].indexOf("=");
+                        Channel chan = channels.get(Integer.parseInt(tmp[0].substring(2, stringIndex)) - 1);
+                        chan.setX(Integer.valueOf(tmp[0].substring(stringIndex + 1)));
+                        chan.setY(Integer.valueOf(tmp[1]));
+                        chan.setZ(Integer.valueOf(tmp[2]));
                     }
                 }
                 
@@ -390,13 +406,15 @@ public class BrainVisionReader {
                 	Channel channelToGet = channels.get(channelIndex - 1);
                 	// Split by spaces
                 	String[] tmp = zeile.split("\\s+");
-                	channelToGet.setHighCutoff("DC".equals(tmp[5]) ? 0 : Integer.parseInt(tmp[5]));
-                	channelToGet.setLowCutoff("DC".equals(tmp[6]) ? 0 : Integer.parseInt(tmp[6]));
-                	channelToGet.setLowCutoff("Off".equals(tmp[7]) ? 0 : Integer.parseInt(tmp[7]));
+                	channelToGet.setLowCutoff("DC".equals(tmp[5]) ? 0 : Integer.parseInt(tmp[5]));
+                	channelToGet.setHighCutoff("DC".equals(tmp[6]) ? 0 : Integer.parseInt(tmp[6]));
+                	channelToGet.setNotch("Off".equals(tmp[7]) ? 0 : Integer.parseInt(tmp[7]));
                 	channelIndex ++;
                 }
+                else if (zeile.startsWith("[Coordinates]")) {
+                	position = true;
+                }
             }
-
         } catch (FileNotFoundException e) {
             System.err.println("No file found on current location.");
         } catch (IOException e) {
@@ -578,6 +596,10 @@ public class BrainVisionReader {
 
     public int getSamplingIntervall() {
         return samplingIntervall;
+    }
+    
+    public int getSamplingFrequency() {
+    	return samplingFrequency;
     }
 
     public List<Channel> getChannels() {

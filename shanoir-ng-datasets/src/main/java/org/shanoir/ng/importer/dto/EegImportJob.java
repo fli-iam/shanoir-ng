@@ -2,8 +2,7 @@ package org.shanoir.ng.importer.dto;
 
 import java.util.List;
 
-import org.shanoir.ng.eeg.model.Channel;
-import org.shanoir.ng.eeg.model.Event;
+import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -34,35 +33,16 @@ public class EegImportJob {
     @JsonProperty("frontAcquisitionEquipmentId")
     private Long frontAcquisitionEquipmentId;
 
-    /** List of channels for the eeg dataset. */
-    @JsonProperty("channels")
-    private List<Channel> channels;
-
-    /** List of events for the eeg dataset. */
-    @JsonProperty("events")
-    private List<Event> events;
-
-	/** Name of the file -> name of the dataset created. */
-	@JsonProperty("name")
-	private String name;
-	
-	@JsonProperty("files")
-	private List<String> files;
-
-	public List<String> getFiles() {
-		return files;
+    /** List of associated datasets. */
+    @JsonProperty("datasets")
+    private List<EegDatasetDTO> datasets;
+        
+	public List<EegDatasetDTO> getDatasets() {
+		return datasets;
 	}
 
-	public void setFiles(List<String> files) {
-		this.files = files;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
+	public void setDatasets(List<EegDatasetDTO> datasets) {
+		this.datasets = datasets;
 	}
 
 	public Long getSubjectId() {
@@ -103,21 +83,5 @@ public class EegImportJob {
 
 	public void setWorkFolder(String workFolder) {
 		this.workFolder = workFolder;
-	}
-	
-	public List<Channel> getChannels() {
-		return channels;
-	}
-	
-	public void setChannels(List<Channel> channels) {
-		this.channels = channels;
-	}
-	
-	public List<Event> getEvents() {
-		return events;
-	}
-	
-	public void setEvents(List<Event> events) {
-		this.events = events;
 	}
 }

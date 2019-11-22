@@ -1,5 +1,7 @@
 package org.shanoir.ng.eeg.model;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -10,6 +12,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Event linked to an EEG dataset. Event happening during the acquisition of an EEG.
@@ -22,14 +25,23 @@ public class Event extends HalEntity {
 	/** Serial version ID. */
 	private static final long serialVersionUID = 1L;
 
-	/** The "result" of the event, can be successful or not. */
-	private String value;
-	
-	/** A sample of the event. */
-	private int sample;
-
-	/** The type of event: interruptino, noise, etc... */
+    @JsonProperty("type")
 	private String type;
+    
+    @JsonProperty("description")
+	private String description;
+    
+    @JsonProperty("position")
+	private String position;
+    
+    @JsonProperty("points")
+	private int points;
+    
+    @JsonProperty("channelNumber")
+	private int channelNumber;
+    
+    @JsonProperty("date")
+	private Date date;
 
 	/** Associated dataset. */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,32 +49,46 @@ public class Event extends HalEntity {
     @JsonIgnore
 	private EegDataset dataset;
 
-	/**
-	 * @return the value
-	 */
-	public String getValue() {
-		return value;
+    
+    
+	public String getDescription() {
+		return description;
 	}
 
-	/**
-	 * @param value the value to set
-	 */
-	public void setValue(String value) {
-		this.value = value;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
-	/**
-	 * @return the sample
-	 */
-	public int getSample() {
-		return sample;
+	public String getPosition() {
+		return position;
 	}
 
-	/**
-	 * @param sample the sample to set
-	 */
-	public void setSample(int sample) {
-		this.sample = sample;
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+	public int getPoints() {
+		return points;
+	}
+
+	public void setPoints(int points) {
+		this.points = points;
+	}
+
+	public int getChannelNumber() {
+		return channelNumber;
+	}
+
+	public void setChannelNumber(int channelNumber) {
+		this.channelNumber = channelNumber;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 	/**

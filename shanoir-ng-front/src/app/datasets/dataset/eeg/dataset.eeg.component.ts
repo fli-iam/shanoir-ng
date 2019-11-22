@@ -77,7 +77,7 @@ export class EegDatasetComponent implements OnInit  {
         
         this.channelPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
-            this.browserPaging.setItems(this.dataset.channelList);
+            this.browserPaging.setItems(this.dataset.channels);
             this.table.refresh();
         });
     }

@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +35,7 @@ import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
+import org.shanoir.ng.importer.model.EegDataset;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -121,7 +123,7 @@ public class ImporterApiControllerTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testUploadEEGZipFileNotZip() throws Exception {
 		// Wrong file
-		String filePath = "./src/main/resources/tests/eeg/ANSVA_elec_pos.pos";
+		String filePath = "./src/main/resources/tests/eeg/ROBEEG_BACGU020_dlpfc_l_0002.pos";
 		File f = new File(filePath);
 
 		if (f.exists() && !f.isDirectory()) {
@@ -142,7 +144,9 @@ public class ImporterApiControllerTest {
 		ArgumentCaptor<HttpEntity> captor = ArgumentCaptor.forClass(HttpEntity.class);
 
 		EegImportJob importJob = new EegImportJob();
-		importJob.setName("Ceci est un nom bien particulier");
+		EegDataset dataset = new EegDataset();
+		importJob.setDatasets(Collections.singletonList(dataset));
+		dataset.setName("Ceci est un nom bien particulier");
 
 		mvc.perform(MockMvcRequestBuilders.post(START_EEG_JOB_PATH)
 				.accept(MediaType.APPLICATION_JSON)
@@ -151,7 +155,7 @@ public class ImporterApiControllerTest {
 		
 		// Just check that the name is well transmitted and that the call is made
 		verify(restTemplate).exchange(any(String.class), eq(HttpMethod.POST), captor.capture(), eq(String.class));
-		assertEquals(importJob.getName(), ((EegImportJob)captor.getValue().getBody()).getName());
+		assertEquals(dataset.getName(), ((EegImportJob)captor.getValue().getBody()).getDatasets().get(0).getName());
 	}
 
 }

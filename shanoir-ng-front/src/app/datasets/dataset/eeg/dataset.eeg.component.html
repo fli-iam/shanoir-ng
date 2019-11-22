@@ -14,6 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <fieldset *ngIf="dataset">
 	<legend>EEG dataset: {{dataset.name}}</legend>
+    <legend>Sampling frequency (Hz): {{dataset.samplingFrequency}}</legend>
     
     <shanoir-table #channelsTable
         [getPage]="getPage.bind(this)" 

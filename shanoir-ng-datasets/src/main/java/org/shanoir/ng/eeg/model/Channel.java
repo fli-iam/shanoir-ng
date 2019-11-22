@@ -10,6 +10,7 @@ import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A channel is a single analog-to-digital converter in the recording system that regularly samples the value of a transducer,
@@ -53,33 +54,43 @@ public class Channel extends HalEntity {
 	private static final long serialVersionUID = 1L;
 
 	/** Name of the channel. */
+	@JsonProperty("name")
 	private String name;
 
 	/** Resolution of the channel. */
+	@JsonProperty("resolution")
 	private float resolution;
 
 	/** Physical unit of the data values recorded by this channel in SI units. */
+	@JsonProperty("referenceUnits")
 	private String referenceUnits;
 
 	/** Type of channel. */
+	@JsonProperty("referenceType")
 	private ChannelType referenceType;
 	
 	/** Low cutoff filter value. */
+	@JsonProperty("lowCutoff")
 	private int lowCutoff;
 	
 	/** High cutoff filter value. */
+	@JsonProperty("highCutoff")
 	private int highCutoff;
 	
 	/** Notch filter value. */
+	@JsonProperty("notch")
 	private float notch;
 	
 	/** X position in space. */
+	@JsonProperty("x")
 	private int x;
 	
 	/** Y position in space. */
+	@JsonProperty("y")
 	private int y;
 	
 	/** Z position in space. */
+	@JsonProperty("z")
 	private int z;
 
 	/** Associated dataset. */

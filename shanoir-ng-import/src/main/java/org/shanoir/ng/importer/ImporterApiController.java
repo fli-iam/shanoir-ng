@@ -31,6 +31,7 @@ import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.eeg.BrainVisionReader;
+import org.shanoir.ng.importer.model.EegDataset;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
@@ -496,34 +497,44 @@ public class ImporterApiController implements ImporterApi {
 			    }
 			});
 
+			// Manage multiple vhdr files
 			// If there is 0 or 2+ vhdr files, don't consider it. Load patient by patient for the moment.
-			if (matchingFiles == null || matchingFiles.length != 1) {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "File does not contains a .vhdr file or contains multiples.", null));
+			if (matchingFiles == null || matchingFiles.length < 1) {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "File does not contains a .vhdr file.", null));
 			}
-
-			File vhdrFile = matchingFiles[0];
-			
-			// Parse the file
-			BrainVisionReader bvr = new BrainVisionReader(vhdrFile);
 
 			EegImportJob importJob = new EegImportJob();
-			importJob.setEvents(bvr.getEvents());
-			importJob.setChannels(bvr.getChannels());
 			importJob.setWorkFolder(importJobDir.getAbsolutePath());
+			List<EegDataset> datasets = new ArrayList<>();
 
-			// Get dataset name from VHDR file name
-			String fileNameWithOutExt = FilenameUtils.removeExtension(vhdrFile.getName());
-			importJob.setName(fileNameWithOutExt);
-			
-			// Get the list of file to save from reader
-			List<String> files = new ArrayList<>();
-			
-			matchingFiles = brainvisionFileDir.listFiles();
-			for (File fi : matchingFiles) {
-				files.add(fi.getCanonicalPath());
+			for (File vhdrFile : matchingFiles) {
+				
+				// Parse the file
+				BrainVisionReader bvr = new BrainVisionReader(vhdrFile);
+
+				EegDataset dataset = new EegDataset();
+				dataset.setEvents(bvr.getEvents());
+				dataset.setChannels(bvr.getChannels());
+				// Get dataset name from VHDR file name
+				String fileNameWithOutExt = FilenameUtils.removeExtension(vhdrFile.getName());
+				dataset.setName(fileNameWithOutExt);
+				dataset.setSamplingFrequency(bvr.getSamplingFrequency());
+				
+				// Get the list of file to save from reader
+				List<String> files = new ArrayList<>();
+				
+				File[] filesToSave = brainvisionFileDir.listFiles(new FilenameFilter() {
+				    public boolean accept(File dir, String name) {
+				        return name.startsWith(fileNameWithOutExt);
+				    }
+				});
+				for (File fi : filesToSave) {
+					files.add(fi.getCanonicalPath());
+				}
+				dataset.setFiles(files);
+				datasets.add(dataset);
 			}
-
-			importJob.setFiles(files);
+			importJob.setDatasets(datasets);
 			
 			return new ResponseEntity<EegImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException ioe) {

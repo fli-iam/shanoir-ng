@@ -34,35 +34,15 @@ public class EegImportJob {
     @JsonProperty("frontAcquisitionEquipmentId")
     private Long frontAcquisitionEquipmentId;
 
-    /** List of channels for the eeg dataset. */
-    @JsonProperty("channels")
-    private List<Channel> channels;
-
-    /** List of events for the eeg dataset. */
-    @JsonProperty("events")
-    private List<Event> events;
+    @JsonProperty("datasets")
+    List<EegDataset> datasets;
     
-	/** Name of the file -> name of the dataset created. */
-	@JsonProperty("name")
-	private String name;
-
-	@JsonProperty("files")
-	private List<String> files;
-
-	public List<String> getFiles() {
-		return files;
+	public List<EegDataset> getDatasets() {
+		return datasets;
 	}
 
-	public void setFiles(List<String> files) {
-		this.files = files;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
+	public void setDatasets(List<EegDataset> datasets) {
+		this.datasets = datasets;
 	}
 
 	public Long getSubjectId() {
@@ -103,21 +83,5 @@ public class EegImportJob {
 
 	public void setWorkFolder(String workFolder) {
 		this.workFolder = workFolder;
-	}
-	
-	public List<Channel> getChannels() {
-		return channels;
-	}
-	
-	public void setChannels(List<Channel> channels) {
-		this.channels = channels;
-	}
-	
-	public List<Event> getEvents() {
-		return events;
-	}
-	
-	public void setEvents(List<Event> events) {
-		this.events = events;
 	}
 }

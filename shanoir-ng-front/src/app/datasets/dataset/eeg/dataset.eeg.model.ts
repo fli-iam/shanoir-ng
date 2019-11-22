@@ -18,16 +18,17 @@ import { allOfEnum } from '../../../utils/app.utils';
 export class EegDataset extends Dataset {
     samplingFrequency: number;
     channelCount: number;
-    channelList: Channel[];
-    eventList: Event[];
+    name: string;
+    files: string[];
+    channels: Channel[];
+    events: Event[];
 }
 
+/** Represents a brainvision EEG channel */
 export class Channel {
-    id: number;
     name: string;
     resolution: number;
     referenceUnits: string;
-    referenceType: string;
     lowCutoff: number;
     highCutoff: number;
     notch: number;
@@ -36,9 +37,12 @@ export class Channel {
     z: number;
 }
 
+/** Represents a brainvision event */
 export class Event {
-    id: number;
-    value: string;
-    sample: number;
     type: string;
+    description: string;
+    position: string;
+    points: number;
+    channelNumber: number;
+    date: Date;
 }

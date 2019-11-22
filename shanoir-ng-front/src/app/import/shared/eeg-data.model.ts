@@ -14,6 +14,7 @@
 
 import { SimpleSubject } from "../../subjects/shared/subject.model";
 import { Sex } from "../../subjects/shared/subject.types";
+import { EegDataset } from "../../datasets/dataset/eeg/dataset.eeg.model"
 
 export class EegImportJob {
     workFolder: string;
@@ -21,33 +22,7 @@ export class EegImportJob {
     frontStudyId: number;
     subjectId: number;
     frontAcquisitionEquipmentId: number;
-    channels: Channel[];
-    events: Event[];
-    name: string;
-    files: string[];
-}
-
-/** Represents a brainvision EEG channel */
-export class Channel {
-    name: string;
-    resolution: number;
-    referenceUnits: string;
-    lowCutoff: number;
-    highCutoff: number;
-    notch: number;
-    x: number;
-    y: number;
-    z: number;
-}
-
-/** Represents a brainvision event */
-export class Event {
-    type: string;
-    description: string;
-    position: string;
-    points: number;
-    channelNumber: number;
-    date: Date;
+    datasets: EegDataset[];
 }
 
 export class EquipmentEeg {

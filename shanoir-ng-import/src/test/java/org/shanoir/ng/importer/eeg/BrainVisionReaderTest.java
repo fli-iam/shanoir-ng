@@ -44,7 +44,7 @@ public class BrainVisionReaderTest {
 		Channel channel1 = reader.getChannels().get(0);
 		assertNotNull(channel1);
 		assertEquals("Fp1", channel1.getName());
-		assertEquals(0, channel1.getHighCutoff());
+		assertEquals(1000, channel1.getHighCutoff());
 		assertEquals(0, channel1.getLowCutoff());
 		assertEquals(Float.valueOf(0), Float.valueOf(channel1.getNotch()));
 		assertEquals(Float.valueOf((float)0.5), Float.valueOf(channel1.getResolution()));

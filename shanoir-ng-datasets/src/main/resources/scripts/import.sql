@@ -118,9 +118,9 @@ VALUES
     (4, 1, 1);
 
 INSERT INTO event
-    (id, type, sample, value, dataset_id)
+    (id, type, description, channel_number, points, dataset_id)
 VALUES
-    (1, "test", 1, "value", 4);
+    (1, "type", "description", 1, 1, 4);
 
 INSERT INTO channel
     (id, name, reference_type, reference_units, resolution, x, y, z, high_cutoff, low_cutoff, notch, dataset_id)

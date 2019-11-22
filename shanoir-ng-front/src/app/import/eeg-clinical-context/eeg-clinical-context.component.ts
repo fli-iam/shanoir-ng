@@ -71,7 +71,7 @@ export class EegClinicalContextComponent implements OnInit {
             private importDataService: ImportDataService) {
 
         // No channels => no import
-        if (!this.importDataService.eegImportJob.channels ) {
+        if (!this.importDataService.eegImportJob.datasets ) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
@@ -144,20 +144,22 @@ export class EegClinicalContextComponent implements OnInit {
         
         let context = [];
         let contextDict = {};
-        for (let event of this.importDataService.eegImportJob.events) {
-            if (contextDict[event.description]) {
-                // Update the context value
-                contextDict[event.description].number += 1;
-            } else {
-                // Create the context value
-                let cont: EventContext = new EventContext();
-                cont.number = 1;
-                cont.description = event.description;
-                contextDict[event.description] = cont;
-                context.push(cont);         
+        for (let dataset of this.importDataService.eegImportJob.datasets) {
+            for (let event of dataset.events) {
+                if (contextDict[event.description]) {
+                    // Update the context value
+                    contextDict[event.description].number += 1;
+                } else {
+                    // Create the context value
+                    let cont: EventContext = new EventContext();
+                    cont.number = 1;
+                    cont.description = event.description;
+                    contextDict[event.description] = cont;
+                    context.push(cont);         
+                }
             }
         }
-        
+
        this.eventsPromise = Promise.resolve().then(() => {
             this.browserPaging = new BrowserPaging([], this.columnDefs);
             this.browserPaging.setItems(context);

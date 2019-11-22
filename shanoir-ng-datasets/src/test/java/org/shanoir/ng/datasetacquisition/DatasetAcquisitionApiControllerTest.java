@@ -5,10 +5,13 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.importer.controler.DatasetAcquisitionApiController;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
@@ -51,7 +54,10 @@ public class DatasetAcquisitionApiControllerTest {
 		ArgumentCaptor<EegImportJob> captor = ArgumentCaptor.forClass(EegImportJob.class);
 		
 		EegImportJob importJob = new EegImportJob();
-		importJob.setName("Ceci est un nom bien particulier");
+		EegDatasetDTO dataset = new EegDatasetDTO();
+		importJob.setDatasets(Collections.singletonList(dataset));
+
+		dataset.setName("Ceci est un nom bien particulier");
 		importJob.setWorkFolder("other_particular_name");
 		
 		mvc.perform(MockMvcRequestBuilders.post("/datasetacquisition_eeg/")
@@ -61,7 +67,7 @@ public class DatasetAcquisitionApiControllerTest {
 		
 		// Check calls
 		verify(importerService).createEegDataset(captor.capture());
-		assertEquals(((EegImportJob)captor.getValue()).getName(), importJob.getName());
+		assertEquals(((EegImportJob)captor.getValue()).getDatasets().get(0).getName(), dataset.getName());
 		
 		verify(importerService).cleanTempFiles(eq(importJob.getWorkFolder()));
 	}

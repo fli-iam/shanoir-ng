@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
@@ -54,6 +55,8 @@ public class ImporterServiceTest {
 	public void testCreateEegDataset() {
 		// Create a complete import job with some files and channels and events...
 		EegImportJob importJob = new EegImportJob();
+		EegDatasetDTO dataset = new EegDatasetDTO();
+		importJob.setDatasets(Collections.singletonList(dataset));
 		
 		Channel chan = new Channel();
 		chan.setHighCutoff(1);
@@ -68,17 +71,17 @@ public class ImporterServiceTest {
 		chan.setX(3);
 		
 		Event event = new Event();
-		event.setSample(1);
+		event.setDescription("description");
 		event.setType("type");
-		event.setValue("Louane");
+		event.setType("type");
 		
-		importJob.setChannels(Collections.singletonList(chan));
-		importJob.setEvents(Collections.singletonList(event));
+		dataset.setChannels(Collections.singletonList(chan));
+		dataset.setEvents(Collections.singletonList(event));
 		importJob.setSubjectId(Long.valueOf(1));
 		importJob.setFrontStudyId(Long.valueOf(1));
 		importJob.setExaminationId(Long.valueOf(1));
 		importJob.setFrontAcquisitionEquipmentId(Long.valueOf(1));
-		importJob.setName("Charles Trenet");
+		dataset.setName("Charles Trenet");
 		importJob.setWorkFolder("Julien Clerc");
 		
 		service.createEegDataset(importJob );
@@ -89,14 +92,14 @@ public class ImporterServiceTest {
 		DatasetAcquisition hack = datasetAcquisitionCapturer.getValue();
 		
 		EegDataset ds = (EegDataset) hack.getDatasets().get(0);
-		assertEquals(chan, ds.getChannelList().get(0));
+		assertEquals(chan, ds.getChannels().get(0));
 		assertNotNull(chan.getDataset());
 		
-		assertEquals(event, ds.getEventList().get(0));
+		assertEquals(event, ds.getEvents().get(0));
 		assertNotNull(event.getDataset());
 		
 		assertEquals(1, ds.getChannelCount());
-		assertEquals(ds.getName(), importJob.getName());
+		assertEquals(ds.getName(), dataset.getName());
 		assertEquals(ds.getDatasetExpressions().get(0).getDatasetExpressionFormat(), DatasetExpressionFormat.EEG);
 
 		DatasetMetadata metadata = ds.getOriginMetadata();

@@ -334,10 +334,10 @@ public class DatasetApiController implements DatasetApi {
 			zipFile.createNewFile();
 			
 			// 2. Create dataset_description.json and README
-			DatasetDescription datasetDesciption = new DatasetDescription();
-			datasetDesciption.setName(studyName);
+			DatasetDescription datasetDescription = new DatasetDescription();
+			datasetDescription.setName(studyName);
 			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDesciption);
+			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDescription);
 			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + README_FILE), studyName);
 			
 			// TODO BIDS: 3. Create [ses-<label>/] folder if multi exams 

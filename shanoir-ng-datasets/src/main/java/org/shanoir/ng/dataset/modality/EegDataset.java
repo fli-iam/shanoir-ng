@@ -52,11 +52,11 @@ public class EegDataset extends Dataset {
 
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
-	private List<Channel> channelList;
+	private List<Channel> channels;
 
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
-	private List<Event> eventList;
+	private List<Event> events;
 	
 	public float getSamplingFrequency() {
 		return samplingFrequency;
@@ -77,29 +77,29 @@ public class EegDataset extends Dataset {
 	/**
 	 * @return the channelList
 	 */
-	public List<Channel> getChannelList() {
-		return channelList;
+	public List<Channel> getChannels() {
+		return channels;
 	}
 
 	/**
 	 * @param channelList the channelList to set
 	 */
-	public void setChannelList(List<Channel> channelList) {
-		this.channelList = channelList;
+	public void setChannels(List<Channel> channels) {
+		this.channels = channels;
 	}
 
 	/**
 	 * @return the eventList
 	 */
-	public List<Event> getEventList() {
-		return eventList;
+	public List<Event> getEvents() {
+		return events;
 	}
 
 	/**
 	 * @param eventList the eventList to set
 	 */
-	public void setEventList(List<Event> eventList) {
-		this.eventList = eventList;
+	public void setEvents(List<Event> events) {
+		this.events = events;
 	}
 	
 }
