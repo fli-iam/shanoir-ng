@@ -13,11 +13,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <fieldset *ngIf="dataset">
-	<legend>EEG dataset: {{dataset.name}}</legend>
-    <legend>Sampling frequency (Hz): {{dataset.samplingFrequency}}</legend>
+    <ol>
+        <legend> EEG Dataset data</legend>
+            <li>
+                <label>Name</label>
+                <span class="right-col">
+                    {{dataset.name}}
+                </span>
+            </li>
+            <li>
+                <label>Sampling frequency (Hz)</label>
+                <span class="right-col">
+                    {{dataset.samplingFrequency}}
+                </span>
+            </li>
+            <li>
+                <label>Channel count</label>
+                <span class="right-col">
+                    {{dataset.channelCount}}
+                </span>
+            </li>
     
-    <shanoir-table #channelsTable
-        [getPage]="getPage.bind(this)" 
-        [columnDefs]="columnDefs">
-    </shanoir-table>
+        <li>
+            <legend> Channels </legend>
+            <shanoir-table #channelsTable
+                [getPage]="getPage.bind(this)" 
+                [columnDefs]="columnDefs">
+            </shanoir-table>
+        </li>
+    </ol>
 </fieldset>
