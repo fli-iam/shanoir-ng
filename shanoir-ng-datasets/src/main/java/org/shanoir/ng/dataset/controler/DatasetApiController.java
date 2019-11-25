@@ -46,6 +46,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.eeg.model.Channel;
@@ -344,25 +345,21 @@ public class DatasetApiController implements DatasetApi {
 			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDescription);
 			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + README_FILE), studyName);
 
-			// TODO BIDS: 3. Create [ses-<label>/] folder if multi exams 
-			/*if (examinationList.size() > 1) {
-				for (Examination examination: examinationList) {
-					String sesLabel = examination.getId().toString();
-					final List<DatasetAcquisition> datasetAcquisitionList = examination.getDatasetAcquisitions();
-					for (DatasetAcquisition datasetAcquisition : datasetAcquisitionList) {
-						// TODO BIDS: 5. multi dataset acquisiton: add [_acq-<label>]
-						String acqLabel = datasetAcquisition.getId().toString();
-						final List<Dataset> datasetList = datasetAcquisition.getDatasets();
-						for (Dataset dataset: datasetList) {
-							// TODO BIDS: 6. multi datasets: add [_run-<index>]
-
-							// TODO BIDS: 7. multi MrDatasetNature: add _<modality_label>
+			for (Examination examination: examinationList) {
+				final List<DatasetAcquisition> datasetAcquisitionList = examination.getDatasetAcquisitions();
+				for (DatasetAcquisition datasetAcquisition : datasetAcquisitionList) {
+					final List<Dataset> datasetList = datasetAcquisition.getDatasets();
+					for (Dataset dataset: datasetList) {
+						// NB: Only for EEG for the moment
+						if (dataset instanceof EegDataset) {
+							String sesLabel = dataset.getId().toString();
+							List<URL> pathURLs = new ArrayList<URL>();
+							getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
+							exportSpecificEegFiles(((EegDataset)dataset), workFolder, pathURLs, subjectName, sesLabel, studyName);
 						}
 					}
 				}
-			}*/
-
-			// TODO: Do something specific about EEG.
+			}
 
 			// 8. Get modality label, nii and json of dataset
 			/* For the demo: one exam, one acq, one dataset, one modality which is T1 */
@@ -383,12 +380,6 @@ public class DatasetApiController implements DatasetApi {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.NOT_FOUND.value(), "No MrDatasetNature, so could not define modality label and export BIDS!", null));
 				}
-			}
-
-			if (dataset instanceof EegDataset) {
-				List<URL> pathURLs = new ArrayList<URL>();
-				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-				exportSpecificEegFiles(((EegDataset)dataset), workFolder, pathURLs, subjectName, examinationList.get(0).getId().toString(), studyName);
 			}
 
 			// Get nii and json files
