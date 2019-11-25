@@ -134,6 +134,9 @@ export class EegClinicalContextComponent implements OnInit {
     private initEventsTable(): void {
         
         this.columnDefs = [
+            {headerName: "Dataset name", field: "name", type: "string", cellRenderer: function (params: any) {
+                    return params.data.dataset_name;
+            }},
            {headerName: "Description", field: "description", type: "string", cellRenderer: function (params: any) {
                     return params.data.description;
             }},
@@ -145,16 +148,20 @@ export class EegClinicalContextComponent implements OnInit {
         let context = [];
         let contextDict = {};
         for (let dataset of this.importDataService.eegImportJob.datasets) {
+            if (!contextDict[dataset.name]) {
+                contextDict[dataset.name] = {};
+            }
             for (let event of dataset.events) {
-                if (contextDict[event.description]) {
+                if (contextDict[dataset.name][event.description]) {
                     // Update the context value
-                    contextDict[event.description].number += 1;
+                    contextDict[dataset.name][event.description].number += 1;
                 } else {
                     // Create the context value
                     let cont: EventContext = new EventContext();
                     cont.number = 1;
                     cont.description = event.description;
-                    contextDict[event.description] = cont;
+                    cont.dataset_name = dataset.name;
+                    contextDict[dataset.name][event.description] = cont;
                     context.push(cont);         
                 }
             }
@@ -373,4 +380,5 @@ export class EegClinicalContextComponent implements OnInit {
 export class EventContext {
     public description: string;
     public number: number;
+    public dataset_name: string;
 }

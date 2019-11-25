@@ -89,7 +89,7 @@ export class EegUploadComponent {
     }
 
     private next() {
-        this.router.navigate(['imports/eegcontext']);
+        this.router.navigate(['imports/eegseries']);
     }
 
 }

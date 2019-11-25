@@ -79,6 +79,7 @@ import { ImportComponent } from './import/import.component';
 import { ImportDataService } from './import/shared/import.data-service';
 import { ImportService } from './import/shared/import.service';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
+import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { NiftiConverterService } from './niftiConverters/nifti.converter.service';
 import { RoleService } from './roles/role.service';
 import { CheckboxComponent } from './shared/checkbox/checkbox.component';
@@ -262,6 +263,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         ExploredEntityComponent,
         ProcessedDatasetTypeComponent,
         SelectSeriesComponent,
+        EegSelectSeriesComponent,
         DicomUploadComponent,
         EegUploadComponent,
         QueryPacsComponent,

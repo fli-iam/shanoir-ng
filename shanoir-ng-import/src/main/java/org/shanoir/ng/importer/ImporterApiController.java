@@ -515,6 +515,7 @@ public class ImporterApiController implements ImporterApi {
 				EegDataset dataset = new EegDataset();
 				dataset.setEvents(bvr.getEvents());
 				dataset.setChannels(bvr.getChannels());
+				dataset.setChannelCount(bvr.getNbchan());
 				// Get dataset name from VHDR file name
 				String fileNameWithOutExt = FilenameUtils.removeExtension(vhdrFile.getName());
 				dataset.setName(fileNameWithOutExt);

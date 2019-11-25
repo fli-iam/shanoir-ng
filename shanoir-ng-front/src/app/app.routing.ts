@@ -38,6 +38,7 @@ import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.compone
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
+import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { AuthAdminGuard } from './shared/roles/auth-admin-guard';
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
 import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guard';
@@ -89,6 +90,9 @@ let appRoutes: Routes = [
             }, {
                 path: 'series',
                 component: SelectSeriesComponent
+            }, {
+                path: 'eegseries',
+                component: EegSelectSeriesComponent
             }, {
                 path: 'context',
                 component: ClinicalContextComponent
