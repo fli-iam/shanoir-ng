@@ -352,10 +352,18 @@ public class DatasetApiController implements DatasetApi {
 					for (Dataset dataset: datasetList) {
 						// NB: Only for EEG for the moment
 						if (dataset instanceof EegDataset) {
-							String sesLabel = dataset.getId().toString();
+							String runId = dataset.getId().toString();
+							String sesLabel;
+							// If there is only one examination, but multiple datasets, split sessions by datasets
+							// If there is multiple examinations, split sessions by examinations
+							if (examinationList.size() == 1) {
+								sesLabel = runId;
+							} else {
+								sesLabel = examination.getId().toString();
+							}
 							List<URL> pathURLs = new ArrayList<URL>();
 							getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-							exportSpecificEegFiles(((EegDataset)dataset), workFolder, pathURLs, subjectName, sesLabel, studyName);
+							exportSpecificEegFiles(((EegDataset)dataset), workFolder, pathURLs, subjectName, sesLabel, studyName, runId );
 						}
 					}
 				}
@@ -429,10 +437,11 @@ public class DatasetApiController implements DatasetApi {
 	 * @param studyName the name of associated study
 	 * @param subjectName the subject name associated
 	 * @param sessionId the session ID / examination ID associated
+	 * @param runId The run ID
 	 * @throws RestServiceException 
 	 * @throws IOException 
 	 */
-	private void exportSpecificEegFiles(EegDataset dataset, File workFolder, List<URL> pathURLs, String subjectName, String sessionId, String studyName) throws RestServiceException, IOException {
+	private void exportSpecificEegFiles(EegDataset dataset, File workFolder, List<URL> pathURLs, String subjectName, String sessionId, String studyName, String runId) throws RestServiceException, IOException {
 		// Create _eeg.json
 		String fileName = "task_" + studyName + "_eeg.json";
 		String destFile = workFolder + File.separator + fileName;
@@ -449,7 +458,7 @@ public class DatasetApiController implements DatasetApi {
 		// Create the folder where we are currently working
 		new File(destWorkFolderPath).mkdirs();
 		
-		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_channel.tsv";
+		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_" + runId + "_channel.tsv";
 		destFile = destWorkFolderPath + File.separator + fileName;
 
 		StringBuffer buffer = new StringBuffer();
@@ -467,7 +476,7 @@ public class DatasetApiController implements DatasetApi {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 
 		// Create events.tsv file
-		fileName = sessionId + "_" + sessionId + "_task_" + studyName + "_event.tsv";
+		fileName = sessionId + "_" + sessionId + "_task_" + studyName + "_" + runId + "_event.tsv";
 		destFile = destWorkFolderPath + File.separator + fileName;
 
 		buffer = new StringBuffer();
