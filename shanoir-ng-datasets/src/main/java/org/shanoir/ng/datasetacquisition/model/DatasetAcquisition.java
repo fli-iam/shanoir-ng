@@ -54,9 +54,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
 @JsonSubTypes({  
-    @Type(value = CtDatasetAcquisition.class, name = "Ct"),  
-    @Type(value = MrDatasetAcquisition.class, name = "Mr"),
-    @Type(value = PetDatasetAcquisition.class, name = "Pet"),
+	@Type(value = CtDatasetAcquisition.class, name = "Ct"),  
+	@Type(value = MrDatasetAcquisition.class, name = "Mr"),
+	@Type(value = PetDatasetAcquisition.class, name = "Pet"),
 	@Type(value = EegDatasetAcquisition.class, name = "Eeg")})
 public abstract class DatasetAcquisition extends AbstractEntity {
 
@@ -177,7 +177,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	public void setSortingIndex(Integer sortingIndex) {
 		this.sortingIndex = sortingIndex;
 	}
-	
+
 	/**
 	 * Gets the type.
 	 *

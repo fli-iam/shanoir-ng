@@ -9,25 +9,25 @@ import org.shanoir.ng.eeg.model.Event;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EegDatasetDTO extends DatasetDTO {
-	
+
 	private int channelCount;
 
-    @JsonProperty("channels")
+	@JsonProperty("channels")
 	private List<Channel> channels;
 
-    @JsonProperty("events")
+	@JsonProperty("events")
 	private List<Event> events;
 
-    @JsonProperty("files")
+	@JsonProperty("files")
 	private List<String> files;
-	
+
 	@JsonProperty("samplingFrequency")
 	private float samplingFrequency;
 
 	@JsonProperty("coordinatesSystem")
 	private String coordinatesSystem;
 
-	
+
 	/**
 	 * @return the coordinatesSystem
 	 */
@@ -93,5 +93,5 @@ public class EegDatasetDTO extends DatasetDTO {
 	public void setFiles(List<String> files) {
 		this.files = files;
 	}
-	
+
 }
