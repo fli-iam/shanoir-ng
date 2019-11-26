@@ -153,7 +153,7 @@ public class StudyServiceSecurityTest {
 		assertTrue(study != null && study.getStudyUserList() != null && study.getStudyUserList().size() > 0);
 		Study hackedStudy = new Study(); hackedStudy.setId(3L);
 		study.getStudyUserList().get(0).setStudy(hackedStudy);
-		service.update(study);
+		assertAccessDenied(service::update, study);
 	}	
 	
 	@Test
