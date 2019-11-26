@@ -150,7 +150,7 @@ public class DatasetRepositoryTest {
 	@Test
 	public void loadingStrategyTest() throws ShanoirException {
 		assertNotNull(repository.findOne(1L).getDatasetAcquisition());
-		assertNotNull(repository.findAll().iterator().next().getDatasetAcquisition());
+		assertNotNull(repository.findAll().iterator().next().getDatasetAcquisition()); 
 	}
 	
 }

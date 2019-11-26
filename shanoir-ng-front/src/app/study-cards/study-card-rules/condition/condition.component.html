@@ -12,7 +12,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span>if</span>
-<span class="var">serial number</span>
-<span class="method">starts with</span>
-<span class="value">"00145"</span>
+<ng-container *ngIf="condition">
+    <span>if</span>
+    <span class="var">{{condition.dicomTag | dicomTagLabel}}</span>
+    <span class="method">{{condition.operation}}</span>
+    <span class="value">"{{condition.dicomValue}}"</span>
+</ng-container>

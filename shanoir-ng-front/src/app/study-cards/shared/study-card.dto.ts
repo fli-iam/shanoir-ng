@@ -15,11 +15,12 @@ import { Injectable } from '@angular/core';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
-import { StudyService } from '../../studies/shared/study.service';
-import { StudyCard } from './study-card.model';
+import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { Study } from '../../studies/shared/study.model';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
+import { StudyService } from '../../studies/shared/study.service';
+import { DicomService } from './dicom.service';
+import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
 
 @Injectable()
 export class StudyCardDTOService {
@@ -27,7 +28,9 @@ export class StudyCardDTOService {
     constructor(
         private acqEqService: AcquisitionEquipmentService,
         private studyService: StudyService,
-        private niftiService: NiftiConverterService) {}
+        private niftiService: NiftiConverterService,
+        private dicomService: DicomService,
+    ) {}
 
     /**
      * Convert from DTO to Entity
@@ -40,10 +43,23 @@ export class StudyCardDTOService {
         return Promise.all([
             this.studyService.get(dto.studyId).then(study => result.study = study),
             this.acqEqService.get(dto.acquisitionEquipmentId).then(acqEq => result.acquisitionEquipment = acqEq),
-            this.niftiService.get(dto.niftiConverterId).then(nifti => result.niftiConverter = nifti)
+            this.niftiService.get(dto.niftiConverterId).then(nifti => result.niftiConverter = nifti),
+            this.dicomService.getDicomTags().then(tags => this.completeDicomTagNames(result, tags))
         ]).then(([]) => {
             return result;
         });
+    }
+
+    private completeDicomTagNames(result: StudyCard, tags: DicomTag[]) {
+        if (result.rules) {
+            for (let rule of result.rules) {
+                if (rule.conditions) {
+                    for (let condition of rule.conditions) {
+                        condition.dicomTag.label = tags.find(tag => tag.code == condition.dicomTag.code).label;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -96,6 +112,32 @@ export class StudyCardDTOService {
             entity.niftiConverter = new NiftiConverter();
             entity.niftiConverter.id = dto.niftiConverterId;
         }
+        if (dto.rules) {
+            entity.rules = [];
+            for (let ruleDTO of dto.rules) {
+                let rule: StudyCardRule = new StudyCardRule();
+                if (ruleDTO.assignments) {
+                    rule.assignments = [];
+                    for (let assigmentDTO of ruleDTO.assignments) {
+                        let assigment: StudyCardAssignment = new StudyCardAssignment();
+                        assigment.field = assigmentDTO.field;
+                        assigment.value = assigmentDTO.value;
+                        rule.assignments.push(assigment);
+                    }
+                }
+                if (ruleDTO.conditions) {
+                    rule.conditions = [];
+                    for (let conditionDTO of ruleDTO.conditions) {
+                        let condition: StudyCardCondition = new StudyCardCondition();
+                        condition.dicomTag = new DicomTag(parseInt(conditionDTO.dicomTag), null);
+                        condition.dicomValue = conditionDTO.dicomValue;
+                        condition.operation = conditionDTO.operation as Operation;
+                        rule.conditions.push(condition);
+                    }
+                }
+                entity.rules.push(rule);
+            }
+        }
         return entity;
     }
 }
@@ -108,6 +150,7 @@ export class StudyCardDTO {
     studyId: number;
     acquisitionEquipmentId: number;
     niftiConverterId: number;
+    rules: any[];
 
     constructor(studyCard?: StudyCard) {
         if (studyCard) {
@@ -116,6 +159,7 @@ export class StudyCardDTO {
             this.studyId = studyCard.study.id;
             this.acquisitionEquipmentId = studyCard.acquisitionEquipment.id;
             this.niftiConverterId = studyCard.niftiConverter.id;
+            this.rules = studyCard.rules;
         }
     }
 }

@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -137,5 +138,12 @@ public interface StudyCardApi {
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@ApiParam(value = "study card to update", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Returns all the dicom tags", response = DicomTag.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "available tags", response = DicomTag.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = StudyCard.class) })
+	@RequestMapping(value = "/dicomTags", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<List<DicomTag>> findDicomTags() throws RestServiceException;
 
 }

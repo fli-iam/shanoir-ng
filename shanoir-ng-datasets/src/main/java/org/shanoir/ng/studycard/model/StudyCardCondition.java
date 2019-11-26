@@ -15,10 +15,15 @@
 package org.shanoir.ng.studycard.model;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 @Entity
@@ -31,12 +36,24 @@ public class StudyCardCondition extends AbstractEntity {
 	@NotNull
 	private String dicomTag;
 	
-	@NotNull
 	private String dicomValue;
 	
 	@NotNull
 	private Operation operation;
 	
+	@NotNull
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.LAZY)
+	private StudyCardRule rule;
+	
+
+	public StudyCardRule getRule() {
+		return rule;
+	}
+
+	public void setRule(StudyCardRule rule) {
+		this.rule = rule;
+	}
 
 	public String getDicomTag() {
 		return dicomTag;
@@ -61,5 +78,4 @@ public class StudyCardCondition extends AbstractEntity {
 	public void setOperation(Operation operation) {
 		this.operation = operation;
 	}
-	
 }

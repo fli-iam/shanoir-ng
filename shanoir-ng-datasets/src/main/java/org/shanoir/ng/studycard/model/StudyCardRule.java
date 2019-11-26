@@ -14,7 +14,13 @@
 
 package org.shanoir.ng.studycard.model;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -24,9 +30,28 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class StudyCardRule extends AbstractEntity {
 
-	/** UID */
 	private static final long serialVersionUID = 6708188853533591193L;
 
-
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "rule")
+	private List<StudyCardAssignment> assignments;
 	
+@	OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "rule")
+	private List<StudyCardCondition> conditions;
+	
+
+	public List<StudyCardAssignment> getAssignments() {
+		return assignments;
+	}
+
+	public void setAssignments(List<StudyCardAssignment> assignments) {
+		this.assignments = assignments;
+	}
+
+	public List<StudyCardCondition> getConditions() {
+		return conditions;
+	}
+
+	public void setConditions(List<StudyCardCondition> conditions) {
+		this.conditions = conditions;
+	}
 }

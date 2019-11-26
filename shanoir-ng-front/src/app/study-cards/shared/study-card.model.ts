@@ -27,6 +27,7 @@ export class StudyCard extends Entity {
     study: Study;
     acquisitionEquipment: AcquisitionEquipment;
     niftiConverter: NiftiConverter;
+    rules: StudyCardRule[];
 
     service: StudyCardService = ServiceLocator.injector.get(StudyCardService);
 
@@ -35,3 +36,32 @@ export class StudyCard extends Entity {
         return JSON.stringify(new StudyCardDTO(this), this.replacer);
     }
 }
+
+
+export class StudyCardRule {
+
+    assignments: StudyCardAssignment[];
+    conditions: StudyCardCondition[];
+}
+
+export class StudyCardAssignment {
+    
+    field: string;
+	value: string;
+}
+
+export class StudyCardCondition {
+
+    dicomTag: DicomTag;
+	dicomValue: string;
+	operation: Operation;
+}
+
+export class DicomTag {
+
+    constructor(
+        public code: number,
+        public label: string) {};
+}
+
+export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'SMALLER_THAN' | 'BIGGER_THAN';

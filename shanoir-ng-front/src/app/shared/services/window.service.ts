@@ -11,19 +11,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input } from '@angular/core';
-
-import { StudyCardCondition } from '../../shared/study-card.model';
+import { Injectable } from '@angular/core';
 
 
-
-@Component({
-    selector: 'condition',
-    templateUrl: 'condition.component.html',
-    styleUrls: ['condition.component.css']
-})
-export class StudyCardConditionComponent {
+@Injectable()
+export class WindowService {
     
-    @Input() condition: StudyCardCondition;
+    static WIDE_WIDTH: number = 1500;
+    public width: number;
+
+    public isWide(): boolean {
+        return this.width >= WindowService.WIDE_WIDTH;
+    }
     
 }

@@ -85,32 +85,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset class="rules">
 				<legend>Rules</legend>
-				<study-card-rule>
-					<condition></condition>
-					<condition></condition>
-					<condition></condition>
-					<condition></condition>
-					<condition></condition>
-					<condition></condition>
-					<condition></condition>
-					<condition></condition>
-					<condition></condition>
-					<action></action>
-					<action></action>
-					<action></action>
-					<action></action>
-					<action></action>
-					<action></action>					
-				</study-card-rule>
-				<study-card-rule>
-						<condition></condition>
-						<condition></condition>
-						<action></action>
-						<action></action>
-						<action></action>
-						<action></action>
-						<action></action>					
+				<ng-container *ngFor="let rule of studyCard.rules">
+					<study-card-rule *ngIf="rule.assignments && rule.assignments.length > 0">
+						<condition *ngFor="let condition of rule.conditions" [condition]="condition"></condition>
+						<action *ngFor="let action of rule.assignments" [assignment]="action"></action>
 					</study-card-rule>
+				</ng-container>
 			</fieldset>
 			<form-footer
 				[state]="footerState"

@@ -82,11 +82,11 @@ VALUES
 	(3, 1, 'CTDataset1');
 
 INSERT INTO dataset
-	(id, dataset_acquisition_id, origin_metadata_id, study_id, subject_id) 
+	(id, dataset_acquisition_id, origin_metadata_id, subject_id) 
 VALUES 
-	(1, 1, 1, 1, 1),
-	(2, 2, 2, 1, 1),
-	(3, 3, 3, 1, 1);
+	(1, 1, 1, 1),
+	(2, 2, 2, 1),
+	(3, 3, 3, 1);
 
 INSERT INTO mr_dataset_metadata
 	(id, mr_dataset_nature) 
@@ -107,3 +107,25 @@ INSERT INTO ct_dataset
 	(id) 
 VALUES 
 	(3);
+	
+INSERT INTO study_card_rule
+	(id, study_card_id)
+VALUES
+	(1, 1),
+	(2, 1),
+	(3, 1);
+	
+INSERT INTO study_card_assignment
+	(id, field, value, rule_id)
+VALUES
+	(1, 'imagingFrequency', '666.666', 1),
+	(2, 'echoTrainLength', '666', 1),
+	(3, 'filters', 'my evil filter', 2);
+	
+INSERT INTO study_card_condition
+	(id, dicom_tag, dicom_value, operation, rule_id)
+VALUES
+	(1, '528446', 'utse_vfl_WIP607', 1, 1), /* description */
+	(2, '1577008', 'tse_vfl_WIP607', 2, 1), /* protocol name */
+	(3, '1609733', null, 3, 2); /* pulse sequence */
+	

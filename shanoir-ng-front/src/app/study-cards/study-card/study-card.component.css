@@ -2,5 +2,7 @@
 
 .rules { width: 100%; }
 
+study-card-rule { margin: 20px 0; }
+
 .option-section select-option caption { display: none; }
 .option-section select-option:not(.hidden) ~ caption { display: flex; }

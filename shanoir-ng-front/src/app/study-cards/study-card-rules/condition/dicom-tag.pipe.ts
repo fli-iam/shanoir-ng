@@ -11,19 +11,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input } from '@angular/core';
 
-import { StudyCardCondition } from '../../shared/study-card.model';
+import { Pipe, PipeTransform } from '@angular/core';
+import { DicomTag } from '../../shared/study-card.model';
 
 
+@Pipe({ name: "dicomTagLabel", pure: false })
+export class DicomTagPipe implements PipeTransform {
 
-@Component({
-    selector: 'condition',
-    templateUrl: 'condition.component.html',
-    styleUrls: ['condition.component.css']
-})
-export class StudyCardConditionComponent {
-    
-    @Input() condition: StudyCardCondition;
-    
+    transform(tag: DicomTag): string {
+        if (tag) {
+            if (typeof tag.code != 'number') throw new Error('dicom tag code should be a number');
+            let hexStr: string = tag.code.toString(16).padStart(8, '0').toUpperCase();
+            return tag.label + ' (' + hexStr.substr(0, 4) + ',' + hexStr.substr(4, 4) + ')';
+        }
+        return '';
+    }
+
 }

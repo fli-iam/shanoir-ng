@@ -89,7 +89,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     buildForm(): FormGroup {
         this.prefill();
         let form: FormGroup = this.formBuilder.group({
-            'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator]],
+            'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator, this.noSpacesStartAndEndValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
             'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required], 
         });
@@ -131,6 +131,14 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
                 && this.acqEquip.manufacturerModel.id == this.lastSubmittedManufAndSerial.manuf.id
                 && this.acqEquip.serialNumber == this.lastSubmittedManufAndSerial.serial) {       
             return {unique: true};
+        }
+        return null;
+    }
+
+    private noSpacesStartAndEndValidator = (control: AbstractControl): ValidationErrors | null => {
+        let valueStr: string = control.value;
+        if (valueStr && (valueStr.startsWith(' ') || valueStr.endsWith(' '))) {
+            return { spaces: true }
         }
         return null;
     }

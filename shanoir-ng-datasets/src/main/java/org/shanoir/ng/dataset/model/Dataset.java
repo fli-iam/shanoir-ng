@@ -132,8 +132,8 @@ public abstract class Dataset extends AbstractEntity {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "referencedDatasetForSuperimposition", cascade = CascadeType.ALL)
 	private List<Dataset> referencedDatasetForSuperimpositionChildrenList;
 
-	/** The study for which this dataset is a result. */
-	private Long studyId;
+	/** The study for which this dataset has been imported. Don't use it, use getStudyId() instead. */
+	private Long importedStudyId;
 	
 	
 
@@ -313,17 +313,12 @@ public abstract class Dataset extends AbstractEntity {
 	/**
 	 * @return the studyId
 	 */
+	@Transient
 	public Long getStudyId() {
-		return studyId;
+		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) return null;
+		return getDatasetAcquisition().getExamination().getStudyId();
 	}
 
-	/**
-	 * @param studyId
-	 *            the studyId to set
-	 */
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
 
 	/**
 	 * @return the subjectId
@@ -362,5 +357,23 @@ public abstract class Dataset extends AbstractEntity {
 	 */
 	@Transient
 	public abstract String getType();
+
+	/**
+	 * You probably want to use getStudyId() instead.
+	 * @return
+	 */
+	@Deprecated
+	public Long getImportedStudyId() {
+		return importedStudyId;
+	}
+
+	/**
+	 * If you want to move the dataset to another study, change its examination.
+	 * @param importedStudyId
+	 */
+	@Deprecated
+	public void setImportedStudyId(Long importedStudyId) {
+		this.importedStudyId = importedStudyId;
+	}
 
 }

@@ -11,19 +11,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input } from '@angular/core';
 
-import { StudyCardCondition } from '../../shared/study-card.model';
+package org.shanoir.ng.studycard.dto;
 
+public class DicomTag {
+	
+	private int code;
+	
+	private String label;
 
+	
+	public DicomTag(int code, String label) {
+		super();
+		this.code = code;
+		this.label = label;
+	}
 
-@Component({
-    selector: 'condition',
-    templateUrl: 'condition.component.html',
-    styleUrls: ['condition.component.css']
-})
-export class StudyCardConditionComponent {
-    
-    @Input() condition: StudyCardCondition;
-    
+	public int getCode() {
+		return code;
+	}
+
+	public void setCode(int code) {
+		this.code = code;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+	
 }

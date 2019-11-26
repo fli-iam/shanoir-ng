@@ -15,10 +15,15 @@
 package org.shanoir.ng.studycard.model;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 @Entity
@@ -35,8 +40,21 @@ public class StudyCardAssignment extends AbstractEntity {
 	/** The value to set. */
 	@NotNull
 	private String value;
+	
+	@NotNull
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.LAZY)
+	private StudyCardRule rule;
 
 	
+	public StudyCardRule getRule() {
+		return rule;
+	}
+
+	public void setRule(StudyCardRule rule) {
+		this.rule = rule;
+	}
+
 	public String getField() {
 		return field;
 	}

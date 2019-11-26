@@ -25,6 +25,7 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { Entity, EntityRoutes } from './entity.abstract';
+import { WindowService } from '../../services/window.service';
 
 
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
@@ -38,8 +39,10 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private entityRoutes: EntityRoutes;
     protected msgBoxService: MsgBoxService;
     protected breadcrumbsService: BreadcrumbsService;
+    protected windowService: WindowService;
     public onDelete: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
+    private selectedId:  number;
 
     private edit: boolean = false;
     private view: boolean = true;
@@ -55,6 +58,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.msgBoxService = ServiceLocator.injector.get(MsgBoxService);
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.keycloakService = ServiceLocator.injector.get(KeycloakService);
+        this.windowService = ServiceLocator.injector.get(WindowService);
         
         this.computeOptions();
         this.columnDefs = this.getColumnDefs();
@@ -101,7 +105,9 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     abstract getCustomActionsDefs(): any[];
 
     private onRowClick(entity: T) {
-        this.goToView(entity.id);
+        // if (this.windowService.isWide()) this.selectedId = entity.id;
+        // else 
+            this.goToView(entity.id);
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {

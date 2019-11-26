@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.studycard.controler;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdList;
@@ -23,6 +25,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
@@ -33,6 +36,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.dcm4che3.data.Tag;
 
 import io.swagger.annotations.ApiParam;
 
@@ -147,6 +151,34 @@ public class StudyCardApiController implements StudyCardApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
 		}
 	}
+	
+
+	
+	@Override
+	public ResponseEntity<List<DicomTag>> findDicomTags() throws RestServiceException {
+		Field[] declaredFields = Tag.class.getDeclaredFields();
+		List<DicomTag> dicomTags = new ArrayList<DicomTag>();
+		try {
+			for (Field field : declaredFields) {
+			    if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+			    	if (field.getType().getName() == "int")
+						dicomTags.add(new DicomTag(field.getInt(null), field.getName()));
+			    	// longs actually code a date and a time, see Tag.class
+			    	if (field.getType().getName() == "long") {
+			    		String name = field.getName().replace("DateAndTime", "");
+			    		String hexStr = String.format("%016X", field.getLong(null));
+			    		String dateStr = hexStr.substring(0, 8);
+			    		String timeStr = hexStr.substring(8);
+			    		dicomTags.add(new DicomTag(Integer.parseInt(dateStr, 16), name + "Date"));
+			    		dicomTags.add(new DicomTag(Integer.parseInt(timeStr, 16), name + "Time"));
+			    	}
+			    }
+			}
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Cannot parse the dcm4che lib Tag class static fields", e));
+		}
+		return new ResponseEntity<>(dicomTags, HttpStatus.OK);
+	}
 
 	/**
 	 * Validate a studyCard
@@ -164,5 +196,4 @@ public class StudyCardApiController implements StudyCardApi {
 			throw new RestServiceException(error);
 		} 
 	}
-
 }

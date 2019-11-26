@@ -11,7 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { Component, ViewChild } from '@angular/core';
 import { AbstractControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -24,6 +23,7 @@ import { BrowserPaging } from '../../shared/components/table/browser-paging.mode
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
@@ -34,8 +34,7 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import { timeout } from 'rxjs/operators';
+
 
 @Component({
     selector: 'study-detail',

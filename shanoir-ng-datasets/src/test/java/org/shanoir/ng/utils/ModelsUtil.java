@@ -24,7 +24,9 @@ import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.studycard.model.StudyCard;
 
@@ -58,7 +60,9 @@ public final class ModelsUtil {
 	public CtDataset createCtDataset() {
 		final CtDataset dataset = new CtDataset();
 		dataset.setOriginMetadata(createDatasetSCMetadata());
-		dataset.setDatasetAcquisition(createDatasetAcq());
+		DatasetAcquisition dsa = new CtDatasetAcquisition();
+		dsa.setId(1L);
+		dataset.setDatasetAcquisition(dsa);
 		return dataset;
 	}
 
@@ -69,9 +73,10 @@ public final class ModelsUtil {
 	 */
 	public static MrDataset createMrDataset() {
 		final MrDataset dataset = new MrDataset();
-		dataset.setStudyId(EXAMINATION_STUDY_ID);
 		dataset.setOriginMetadata(createDatasetSCMetadata());
-		dataset.setDatasetAcquisition(createDatasetAcq());
+		DatasetAcquisition dsa = createDatasetAcq();
+		dsa.setId(1L);
+		dataset.setDatasetAcquisition(dsa);
 		return dataset;
 	}
 
@@ -83,7 +88,9 @@ public final class ModelsUtil {
 	public static PetDataset createPetDataset() {
 		final PetDataset dataset = new PetDataset();
 		dataset.setOriginMetadata(createDatasetSCMetadata());
-		dataset.setDatasetAcquisition(createDatasetAcq());
+		DatasetAcquisition dsa = new PetDatasetAcquisition();
+		dsa.setId(1L);
+		dataset.setDatasetAcquisition(dsa);
 		return dataset;
 	}
 

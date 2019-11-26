@@ -13,7 +13,7 @@
  */
 
 import { Location } from '@angular/common';
-import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChildren, QueryList, ElementRef, ViewChild } from '@angular/core';
+import { EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChildren, QueryList, ElementRef, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
@@ -28,11 +28,11 @@ import { ShanoirError } from '../../models/error.model';
 import { Router } from '../../../breadcrumbs/router';
 
 export type Mode =  "view" | "edit" | "create";
-export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy {
-
-    protected id: number;
+export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy, OnChanges {
+    
     private _entity: T;
     @Input() mode: Mode;
+    @Input() id: number; // optional
     @Output() close: EventEmitter<any> = new EventEmitter();
     protected footerState: FooterState;
     protected onSave: Subject<any> =  new Subject<any>();
@@ -70,7 +70,6 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         
         this.mode = this.activatedRoute.snapshot.data['mode'];
-        this.id = +this.activatedRoute.snapshot.params['id'];
         this.addBCStep();
     }
 
@@ -83,6 +82,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     ngOnInit(): void {
+        if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
         const choose = (): Promise<void> => {
             switch (this.mode) { 
                 case 'create' : return this.initCreate();
@@ -100,6 +100,12 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             this.breadcrumbsService.currentStep.entity = this.entity;
             this.manageFormSubscriptions();
         });
+    }
+    
+    ngOnChanges(changes: SimpleChanges): void {
+        if ((changes['id'] && !changes['id'].isFirstChange())
+                || (changes['mode'] && !changes['mode'].isFirstChange())) 
+            this.ngOnInit();
     }
 
     private manageFormSubscriptions() {

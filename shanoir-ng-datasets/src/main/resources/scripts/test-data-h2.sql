@@ -103,3 +103,24 @@ INSERT INTO ct_dataset
 VALUES 
 	(3);
 	
+INSERT INTO study_card_rule
+	(id, study_card_id)
+VALUES
+	(1, 1),
+	(2, 1),
+	(3, 1);
+	
+INSERT INTO study_card_assignment
+	(id, field, value, rule_id)
+VALUES
+	(1, 'imagingFrequency', '666.666', 1),
+	(2, 'echoTrainLength', '666', 1),
+	(3, 'filters', 'my evil fil', 2);
+	
+INSERT INTO study_card_condition
+	(id, dicom_tag, dicom_value, operation, rule_id)
+VALUES
+	(1, '528446', 'utse_vfl_WIP607', 1, 1), /* description */
+	(2, '1577008', 'tse_vfl_WIP607', 2, 1), /* protocol name */
+	(3, '1609733', null, 3, 2); /* pulse sequence */
+	

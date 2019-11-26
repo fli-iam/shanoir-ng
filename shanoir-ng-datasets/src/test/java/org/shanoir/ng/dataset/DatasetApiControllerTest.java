@@ -26,6 +26,7 @@ import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -42,8 +43,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for dataset controller.
@@ -59,8 +59,6 @@ public class DatasetApiControllerTest {
 
 	private static final String REQUEST_PATH = "/datasets";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-
-	private Gson gson;
 
 	@Autowired
 	private MockMvc mvc;
@@ -83,8 +81,6 @@ public class DatasetApiControllerTest {
 
 	@Before
 	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
@@ -106,9 +102,10 @@ public class DatasetApiControllerTest {
 	@Test
 	@WithMockUser
 	public void updateDatasetTest() throws Exception {
-		String json = gson.toJson(ModelsUtil.createMrDataset());
-		// Cheat to add dataset type into json
-		json = json.substring(0, json.length() - 1) + ",\"type\":\"Mr\"}";
+		ObjectMapper mapper = new ObjectMapper();
+		Dataset ds = ModelsUtil.createMrDataset();
+		ds.setId(1L);
+		String json = mapper.writeValueAsString(ds);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isNoContent());
 	}

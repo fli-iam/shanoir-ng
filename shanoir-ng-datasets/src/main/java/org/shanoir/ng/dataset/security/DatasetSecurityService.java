@@ -258,7 +258,7 @@ public class DatasetSecurityService {
     public boolean checkDatasetPage(Page<Dataset> page, String rightStr) {
     	Set<Long> studyIds = new HashSet<Long>();
     	page.forEach((Dataset dataset) -> {
-    		studyIds.add(dataset.getDatasetAcquisition().getExamination().getStudyId());
+    		studyIds.add(dataset.getStudyId());
     	});
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr); //
     	for (Dataset dataset : page) {
@@ -297,10 +297,10 @@ public class DatasetSecurityService {
     public boolean filterDatasetList(List<Dataset> list, String rightStr) {
     	Set<Long> studyIds = new HashSet<Long>();
     	for (Dataset dataset : list) {
-    		studyIds.add(dataset.getDatasetAcquisition().getExamination().getStudyId());
+    		studyIds.add(dataset.getStudyId());
     	}
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
-		list.removeIf((Dataset dataset) -> !checkedIds.contains(dataset.getDatasetAcquisition().getExamination().getStudyId()));
+		list.removeIf((Dataset dataset) -> !checkedIds.contains(dataset.getStudyId()));
     	return true;
     }
     

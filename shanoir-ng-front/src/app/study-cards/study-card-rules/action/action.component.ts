@@ -11,7 +11,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { StudyCardAssignment } from '../../shared/study-card.model';
 
 
 
@@ -22,5 +23,6 @@ import { Component } from '@angular/core';
 })
 export class StudyCardActionComponent {
     
+    @Input() assignment: StudyCardAssignment;
     
 }
