@@ -49,6 +49,8 @@ public class EegDataset extends Dataset {
 	private float samplingFrequency;
 	
 	private int channelCount;
+	
+	private String coordinatesSystem;
 
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
@@ -57,6 +59,20 @@ public class EegDataset extends Dataset {
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
 	private List<Event> events;
+	
+	/**
+	 * @return the coordinatesSystem
+	 */
+	public String getCoordinatesSystem() {
+		return coordinatesSystem;
+	}
+
+	/**
+	 * @param coordinatesSystem the coordinatesSystem to set
+	 */
+	public void setCoordinatesSystem(String coordinatesSystem) {
+		this.coordinatesSystem = coordinatesSystem;
+	}
 	
 	public float getSamplingFrequency() {
 		return samplingFrequency;

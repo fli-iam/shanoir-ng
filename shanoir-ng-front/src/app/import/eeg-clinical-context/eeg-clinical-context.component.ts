@@ -58,7 +58,11 @@ export class EegClinicalContextComponent implements OnInit {
     protected subjects: SubjectWithSubjectStudy[] = [];
     protected subject: SubjectWithSubjectStudy;
     protected columnDefs: any[];
+    protected hasPosition: boolean;
     
+    protected CoordSystems = CoordSystems;
+    protected coordsystem : string;
+
     private browserPaging: BrowserPaging<EventContext>;
     private eventsPromise: Promise<any>;
     
@@ -76,6 +80,14 @@ export class EegClinicalContextComponent implements OnInit {
             return;
         }
         breadcrumbsService.nameStep('3. Context');
+        
+        // Check for position to know if we have to display systemCoord or not
+        this.hasPosition = false;
+        for (let dataset of this.importDataService.eegImportJob.datasets) {
+            if (dataset.coordinatesSystem == "true") {
+                this.hasPosition = true;
+            }
+        }
         
         // Initialize studies;
         Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
@@ -227,6 +239,9 @@ export class EegClinicalContextComponent implements OnInit {
     private onSelectExam(): void {
     }
 
+    private onSelectCoord(): void {
+    }
+
     private onContextChange() {
         this.importDataService.contextBackup = this.getContext();
         if (this.valid) {
@@ -236,7 +251,7 @@ export class EegClinicalContextComponent implements OnInit {
     
     private getContext(): ContextData {
         return new ContextData(this.study, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, null);
+            this.subject, this.examination, null, this.coordsystem);
     }
 
     private openCreateCenter = () => {
@@ -360,6 +375,10 @@ export class EegClinicalContextComponent implements OnInit {
     private showExaminationDetails() {
         window.open('examination/details/' + this.examination.id, '_blank');
     }
+    
+    public get systemCoordKeys() {
+        return Object.keys(CoordSystems);
+    }
 
     get valid(): boolean {
         let context = this.getContext();
@@ -369,6 +388,7 @@ export class EegClinicalContextComponent implements OnInit {
             && context.acquisitionEquipment != undefined && context.acquisitionEquipment != null
             && context.subject != undefined && context.subject != null
             && context.examination != undefined && context.examination != null
+            && ((context.coordinatesSystem != undefined && context.coordinatesSystem != null && this.hasPosition) || !(this.hasPosition))
         );
     }
 
@@ -381,4 +401,23 @@ export class EventContext {
     public description: string;
     public number: number;
     public dataset_name: string;
+}
+
+export enum CoordSystems {
+    ACPC = "ACPC",
+    Allen= "Allen",     
+    Analyze= "Analyze",  
+    BTi_4D= "BTi/4D",
+    CTF_MRI= "CTF MRI", 
+    CTF_gradiometer = "CTF gradiometer",
+    CapTrak= "CapTrak",
+    Chieti= "Chieti",
+    DICOM= "DICOM",
+    FreeSurfer= "FreeSurfer",  
+    MNI= "MNI",
+    NIfTI= "NIfTI",
+    Neuromag_Elekta= "Neuromag/Elekta",
+    Paxinos_Franklin= "Paxinos-Franklin",
+    Talairach_Tournoux= "Talairach-Tournoux", 
+    Yokogawa= "Yokogawa"
 }

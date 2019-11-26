@@ -236,7 +236,7 @@ export class ClinicalContextComponent {
     
     private getContext(): ContextData {
         return new ContextData(this.study, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, this.niftiConverter);
+            this.subject, this.examination, this.niftiConverter, null);
     }
 
     private openCreateCenter = () => {

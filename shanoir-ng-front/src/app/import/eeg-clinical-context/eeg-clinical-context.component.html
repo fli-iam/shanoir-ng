@@ -117,6 +117,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </li>
     </ol>
+    <ol *ngIf="hasPosition">
+        <legend>
+            Coordinates system
+            <tool-tip> The coordinates sytem where the electrodes are set</tool-tip>
+        </legend>
+        <li class="required">
+            <label class="required-label">Select a coordinate system</label> 
+            <span class="right-col">
+                <select-box [(ngModel)]="coordsystem" (change)="onSelectCoord(); onContextChange();">
+                    <select-option *ngFor="let system of systemCoordKeys" [value]="system">{{CoordSystems[system]}}</select-option>
+                </select-box>
+            </span>
+        </li>
+    </ol>
 </fieldset>
 
 <legend> Linked events </legend>

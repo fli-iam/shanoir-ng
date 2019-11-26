@@ -30,7 +30,8 @@ export class ContextData {
         public acquisitionEquipment: AcquisitionEquipment,
         public subject: SubjectWithSubjectStudy,
         public examination: SubjectExamination,
-        public niftiConverter: NiftiConverter
+        public niftiConverter: NiftiConverter,
+        public coordinatesSystem: string
     ) {}
 }
 

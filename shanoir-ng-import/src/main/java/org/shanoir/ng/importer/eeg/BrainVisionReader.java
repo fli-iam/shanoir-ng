@@ -85,9 +85,11 @@ public class BrainVisionReader {
     private List<Channel> channels;
     private List<Event> events;
 	private int samplingFrequency;
+	private boolean hasPosition;
 
     public BrainVisionReader(File file) {
         this.file = file;
+        hasPosition = false;
         if (file != null && file.exists() && file.getName().toLowerCase().endsWith(".vhdr")) {
             readHeaderFromVHDR();
         } else {
@@ -171,6 +173,7 @@ public class BrainVisionReader {
             		channelIndex++;
             	}
             }
+            hasPosition = true;
         } catch (FileNotFoundException e) {
         	System.err.println("No file found on current location.");
         } catch (IOException e) {
@@ -240,7 +243,6 @@ public class BrainVisionReader {
             channels = new ArrayList<>();
             int channelIndex = 1;
             boolean amplifier = false;
-            boolean position = false;
 
             while ((zeile = in.readLine()) != null) {
 
@@ -384,7 +386,7 @@ public class BrainVisionReader {
                     	// Index is index channel - 1
                     	channels.add(chan);
                         countChannels++;
-                    } else if (position && tmp.length == 3) {
+                    } else if (hasPosition && tmp.length == 3) {
                         int stringIndex = tmp[0].indexOf("=");
                         Channel chan = channels.get(Integer.parseInt(tmp[0].substring(2, stringIndex)) - 1);
                         chan.setX(Integer.valueOf(tmp[0].substring(stringIndex + 1)));
@@ -412,7 +414,7 @@ public class BrainVisionReader {
                 	channelIndex ++;
                 }
                 else if (zeile.startsWith("[Coordinates]")) {
-                	position = true;
+                	hasPosition = true;
                 }
             }
         } catch (FileNotFoundException e) {
@@ -608,6 +610,10 @@ public class BrainVisionReader {
 
 	public List<Event> getEvents() {
 		return events;
+	}
+
+	public boolean getHasPosition() {
+		return hasPosition;
 	}
 
 	public enum BinaryFormat {

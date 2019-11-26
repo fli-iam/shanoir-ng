@@ -22,6 +22,7 @@ export class EegDataset extends Dataset {
     files: string[];
     channels: Channel[];
     events: Event[];
+    coordinatesSystem: string;
 }
 
 /** Represents a brainvision EEG channel */

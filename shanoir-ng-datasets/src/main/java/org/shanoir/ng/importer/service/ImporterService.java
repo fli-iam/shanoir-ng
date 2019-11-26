@@ -252,6 +252,7 @@ public class ImporterService {
 			datasetToCreate.setStudyId(importJob.getFrontStudyId());
 			datasetToCreate.setSubjectId(importJob.getSubjectId());
 			datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
+			datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());
 			
 			datasets.add(datasetToCreate);
 		}

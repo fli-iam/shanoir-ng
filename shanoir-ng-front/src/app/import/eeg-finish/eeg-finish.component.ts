@@ -92,6 +92,7 @@ export class FinishEegImportComponent {
             datasetToSet.events = dataset.events;
             datasetToSet.samplingFrequency = dataset.samplingFrequency;
             datasetToSet.channelCount = dataset.channelCount;
+            datasetToSet.coordinatesSystem = this.context.coordinatesSystem;
             importJob.datasets.push(datasetToSet);
         }
         importJob.subjectId = this.context.subject.id;

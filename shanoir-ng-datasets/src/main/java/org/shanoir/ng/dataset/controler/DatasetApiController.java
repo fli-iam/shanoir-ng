@@ -474,6 +474,33 @@ public class DatasetApiController implements DatasetApi {
 			.append(chan.getNotch() == 0 ? "n/a" : chan.getNotch()).append("\n");
 		}
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
+		
+		// Create electrode.csv file
+		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_" + runId + "_electrodes.tsv";
+		destFile = destWorkFolderPath + File.separator + fileName;
+
+		buffer = new StringBuffer();
+		buffer.append("name \t x \t y \t z \n");
+
+		for (Channel chan: dataset.getChannels()) {
+			buffer.append(chan.getName()).append("\t")
+			.append(chan.getX()).append("\t")
+			.append(chan.getY()).append("\t")
+			.append(chan.getZ()).append("\n");
+		}
+		Files.write(Paths.get(destFile), buffer.toString().getBytes());
+		
+		// Create _coordsystem.json file
+		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_" + runId + "_coordsystem.json";
+		destFile = destWorkFolderPath + File.separator + fileName;
+
+		buffer = new StringBuffer();
+		buffer.append("{\n")
+		.append("\"EEGCoordinateSystem\": ").append("\"" + dataset.getCoordinatesSystem()).append("\",\n")
+		.append("\"EEGCoordinateUnits\": ").append("\"" +CoordinatesSystem.valueOf(dataset.getCoordinatesSystem()).getUnit()).append("\"\n")
+		.append("}");
+		
+		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 
 		// Create events.tsv file
 		fileName = sessionId + "_" + sessionId + "_task_" + studyName + "_" + runId + "_event.tsv";
@@ -540,4 +567,36 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(error);
 		} 
 	}
+	
+	/**
+	 * This enum is for coordinates system and associated units
+	 */
+	public enum CoordinatesSystem {
+	    ACPC("mm"),
+	    Allen("mm"),
+	    Analyze("mm"),
+	    BTi_4D("m"),
+	    CTF_MRI("mm"),
+	    CTF_gradiometer("cm"),
+	    CapTrak("mm"),
+	    Chieti("mm"),
+	    DICOM("mm"),
+	    FreeSurfer("mm"),  
+	    MNI("mm"),
+	    NIfTI("mm"),
+	    Neuromag_Elekta("m"),
+	    Paxinos_Franklin("mm"),
+	    Talairach_Tournoux("mm"),
+	    Yokogawa("n/a");
+	    
+	    private String unit;
+	    
+	    CoordinatesSystem(String pUnit) {
+	    	this.unit = pUnit;
+	    }
+	    public String getUnit() {
+	    	return unit;
+	    }
+	}
+	
 }

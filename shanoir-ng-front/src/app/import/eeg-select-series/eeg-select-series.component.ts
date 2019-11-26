@@ -32,7 +32,6 @@ export class EegSelectSeriesComponent {
     protected datasets: EegDataset[];
     protected selectedDatasets: EegDataset[] = [];
     protected datasetDetail: EegDataset;
-    protected CoordSystems = CoordSystems;
 
     constructor(
             private importService: ImportService,
@@ -73,23 +72,4 @@ export class EegSelectSeriesComponent {
         this.router.navigate(['imports/eegcontext']);
     }
 
-}
-
-export enum CoordSystems {
-    "ACPC",
-    "Allen",     
-    "Analyze",  
-    "BTi/4D",
-    "CTF MRI", 
-    "CTF gradiometer",
-    "CapTrak",
-    "Chieti",
-    "DICOM",
-    "FreeSurfer",  
-    "MNI",
-    "NIfTI",
-    "Neuromag/Elekta",
-    "Paxinos-Franklin",
-    "Talairach-Tournoux", 
-    "Yokogawa"
 }

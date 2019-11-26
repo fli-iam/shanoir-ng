@@ -520,6 +520,7 @@ public class ImporterApiController implements ImporterApi {
 				String fileNameWithOutExt = FilenameUtils.removeExtension(vhdrFile.getName());
 				dataset.setName(fileNameWithOutExt);
 				dataset.setSamplingFrequency(bvr.getSamplingFrequency());
+				dataset.setCoordinatesSystem(bvr.getHasPosition()? "true" : null);
 				
 				// Get the list of file to save from reader
 				List<String> files = new ArrayList<>();

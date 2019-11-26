@@ -23,6 +23,7 @@ export class EegImportJob {
     subjectId: number;
     frontAcquisitionEquipmentId: number;
     datasets: EegDataset[];
+    coordinatesSystem: String;
 }
 
 export class EquipmentEeg {

@@ -24,6 +24,24 @@ public class EegDatasetDTO extends DatasetDTO {
 	@JsonProperty("samplingFrequency")
 	private float samplingFrequency;
 
+	@JsonProperty("coordinatesSystem")
+	private String coordinatesSystem;
+
+	
+	/**
+	 * @return the coordinatesSystem
+	 */
+	public String getCoordinatesSystem() {
+		return coordinatesSystem;
+	}
+
+	/**
+	 * @param coordinatesSystem the coordinatesSystem to set
+	 */
+	public void setCoordinatesSystem(String coordinatesSystem) {
+		this.coordinatesSystem = coordinatesSystem;
+	}
+
 	/**
 	 * @return the samplingFrequency
 	 */

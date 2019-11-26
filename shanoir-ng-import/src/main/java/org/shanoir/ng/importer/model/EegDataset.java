@@ -26,6 +26,34 @@ public class EegDataset {
 	
 	@JsonProperty("samplingFrequency")
 	private int samplingFrequency;
+	
+	@JsonProperty("channelCount")
+	private int channelCount;
+	
+	@JsonProperty("coordinatesSystem")
+	private String coordinatesSystem;
+	
+	/**
+	 * @return the coordinatesSystem
+	 */
+	public String getCoordinatesSystem() {
+		return coordinatesSystem;
+	}
+
+	/**
+	 * @param coordinatesSystem the coordinatesSystem to set
+	 */
+	public void setCoordinatesSystem(String coordinatesSystem) {
+		this.coordinatesSystem = coordinatesSystem;
+	}
+	
+	public int getChannelCount() {
+		return channelCount;
+	}
+
+	public void setChannelCount(int channelCount) {
+		this.channelCount = channelCount;
+	}
 
 	public int getSamplingFrequency() {
 		return samplingFrequency;
