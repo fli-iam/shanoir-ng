@@ -14,9 +14,18 @@
 
 package org.shanoir.ng.dataset.modality;
 
-import javax.persistence.Entity;
+import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.eeg.model.Channel;
+import org.shanoir.ng.eeg.model.Event;
 
 /**
  * EEG dataset.
@@ -37,4 +46,76 @@ public class EegDataset extends Dataset {
 		return "Eeg";
 	}
 
+	private float samplingFrequency;
+	
+	private int channelCount;
+	
+	private String coordinatesSystem;
+
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
+	private List<Channel> channels;
+
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(mappedBy = "dataset", cascade = CascadeType.ALL)
+	private List<Event> events;
+	
+	/**
+	 * @return the coordinatesSystem
+	 */
+	public String getCoordinatesSystem() {
+		return coordinatesSystem;
+	}
+
+	/**
+	 * @param coordinatesSystem the coordinatesSystem to set
+	 */
+	public void setCoordinatesSystem(String coordinatesSystem) {
+		this.coordinatesSystem = coordinatesSystem;
+	}
+	
+	public float getSamplingFrequency() {
+		return samplingFrequency;
+	}
+
+	public void setSamplingFrequency(float samplingFrequency) {
+		this.samplingFrequency = samplingFrequency;
+	}
+
+	public int getChannelCount() {
+		return channelCount;
+	}
+
+	public void setChannelCount(int channelCount) {
+		this.channelCount = channelCount;
+	}
+
+	/**
+	 * @return the channelList
+	 */
+	public List<Channel> getChannels() {
+		return channels;
+	}
+
+	/**
+	 * @param channelList the channelList to set
+	 */
+	public void setChannels(List<Channel> channels) {
+		this.channels = channels;
+	}
+
+	/**
+	 * @return the eventList
+	 */
+	public List<Event> getEvents() {
+		return events;
+	}
+
+	/**
+	 * @param eventList the eventList to set
+	 */
+	public void setEvents(List<Event> events) {
+		this.events = events;
+	}
+	
 }

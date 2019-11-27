@@ -20,6 +20,7 @@ import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { Study } from '../../studies/shared/study.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ImportJob, PatientDicom } from './dicom-data.model';
+import { EegImportJob } from './eeg-data.model';
 
 export class ContextData {
     
@@ -29,7 +30,8 @@ export class ContextData {
         public acquisitionEquipment: AcquisitionEquipment,
         public subject: SubjectWithSubjectStudy,
         public examination: SubjectExamination,
-        public niftiConverter: NiftiConverter
+        public niftiConverter: NiftiConverter,
+        public coordinatesSystem: string
     ) {}
 }
 
@@ -39,6 +41,7 @@ export class ImportDataService {
     private _inMemoryExtracted: any;      // 1. upload
     private _archiveUploaded: ImportJob;  // 1. upload    
     private _patientList: ImportJob;   // 1. upload or pacs
+    private _eegImportJob: EegImportJob;   // 1. upload
     private _patients: PatientDicom[];    // 2. series
     private _contextData: ContextData;    // 3. context
     public contextBackup: ContextData;
@@ -49,6 +52,7 @@ export class ImportDataService {
         this._archiveUploaded = undefined;
         this._patientList = undefined;
         this._patients = undefined;
+        this._eegImportJob = undefined;
         this._contextData = undefined;
         this.contextBackup = undefined;
     }
@@ -68,6 +72,14 @@ export class ImportDataService {
 
     public set archiveUploaded(job: ImportJob) {
         this._archiveUploaded = job;
+    }
+
+    public get eegImportJob(): EegImportJob {
+        return this._eegImportJob;
+    }
+
+    public set eegImportJob(job: EegImportJob) {
+        this._eegImportJob = job;
     }
 
     public get patientList(): ImportJob {

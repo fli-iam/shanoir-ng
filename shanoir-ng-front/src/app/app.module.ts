@@ -51,6 +51,7 @@ import { CoilService } from './coils/shared/coil.service';
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetTypeComponent } from './datasets/shared/dataset-type/dataset-type.component';
 import { DatasetService } from './datasets/shared/dataset.service';
@@ -67,14 +68,18 @@ import { SubjectExaminationPipe } from './examinations/shared/subject-examinatio
 import { ExaminationTreeComponent } from './examinations/tree/examination-tree.component';
 import { HomeComponent } from './home/home.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
+import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { FinishImportComponent } from './import/finish/finish.component';
+import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ImportComponent } from './import/import.component';
 import { ImportDataService } from './import/shared/import.data-service';
 import { ImportService } from './import/shared/import.service';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
+import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { NiftiConverterService } from './niftiConverters/nifti.converter.service';
 import { RoleService } from './roles/role.service';
 import { CheckboxComponent } from './shared/checkbox/checkbox.component';
@@ -247,6 +252,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         SubjectTreeComponent,
         StudyNamePipe,
         DatasetComponent,
+        EegDatasetComponent,
         DatasetListComponent,
         DatepickerComponent,
         MrDatasetComponent,
@@ -257,9 +263,12 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         ExploredEntityComponent,
         ProcessedDatasetTypeComponent,
         SelectSeriesComponent,
+        EegSelectSeriesComponent,
         DicomUploadComponent,
+        EegUploadComponent,
         QueryPacsComponent,
         ClinicalContextComponent,
+        EegClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,
         TimesPipe,
@@ -269,6 +278,7 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
         SelectBoxComponent,
         SelectOptionComponent,
         FinishImportComponent,
+        FinishEegImportComponent,
         UploaderComponent,
         HelpMessageComponent,
         NotificationsComponent,

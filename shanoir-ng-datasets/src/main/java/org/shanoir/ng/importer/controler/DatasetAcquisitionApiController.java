@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.controler;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,13 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			@ApiParam(value = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) {
 		importerService.setImportJob(importJob);
 		importerService.createAllDatasetAcquisition();
+		importerService.cleanTempFiles(importJob.getWorkFolder());
+		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) {
+		importerService.createEegDataset(importJob);
 		importerService.cleanTempFiles(importJob.getWorkFolder());
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}

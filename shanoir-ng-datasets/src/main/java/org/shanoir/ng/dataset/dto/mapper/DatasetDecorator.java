@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -46,6 +48,9 @@ public abstract class DatasetDecorator implements DatasetMapper {
 	@Autowired
 	private MrDatasetMapper mrMapper;
 
+	@Autowired
+	protected EegDatasetMapper eegMapper;
+
 	@Override
 	public List<IdName> datasetsToIdNameDTOs(final List<Dataset> datasets) {
 		final List<IdName> datasetDTOs = new ArrayList<>();
@@ -62,6 +67,9 @@ public abstract class DatasetDecorator implements DatasetMapper {
 			public DatasetDTO convert(Dataset entity) {
 				if (entity instanceof MrDataset) {
 					return mrMapper.datasetToDatasetDTO((MrDataset)entity);
+				}
+				else if (entity instanceof EegDataset) {
+					return eegMapper.datasetToDatasetDTO((EegDataset)entity);
 				}
 				// TODO : Complete
 				else {
