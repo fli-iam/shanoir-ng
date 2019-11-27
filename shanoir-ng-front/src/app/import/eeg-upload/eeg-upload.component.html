@@ -14,7 +14,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="header command-zone">1. Select Brainvision archive</div>
 <fieldset>
-    <p>Please select a Brainvision zip archive to import.</p>
+    <p>Please select a Brainvision or EDF zip archive to import.</p>
+    <p>The files should be organized like this:</p>
+    <p>directory_name.zip -> directory_name/dataset_name.vhdr</p>
+    <p>directory_name.zip -> directory_name/dataset_name.edf</p>
+    <p>Other files linked to a dataset should have the same name (extension does not matter): dataset_name.other <br/>
+    Multiple datasets can be imported at once (dataset1.edf, dataset2.edf, etc...)</p>
+
     <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
     
     <label *ngIf="extensionError==true" class="form-validation-alert" i18n="Import|ExtensionError label">
