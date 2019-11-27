@@ -475,6 +475,38 @@ public class DatasetApiController implements DatasetApi {
 		}
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 		
+		// Create events.tsv file
+		fileName = sessionId + "_" + sessionId + "_task_" + studyName + "_" + runId + "_event.tsv";
+		destFile = destWorkFolderPath + File.separator + fileName;
+
+		buffer = new StringBuffer();
+		buffer.append("onset \t duration \t sample \n");
+
+		for (Event event: dataset.getEvents()) {
+			float sample = Float.valueOf(event.getPosition());
+			float samplingFrequency = dataset.getSamplingFrequency();
+			float onset = sample / samplingFrequency;
+			buffer.append(onset).append("\t")
+			.append("n/a").append("\t")
+			.append(sample).append("\n");
+		}
+		Files.write(Paths.get(destFile), buffer.toString().getBytes());
+
+		// Copy files
+		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
+			URL url =  (URL) iterator.next();
+			File srcFile = new File(url.getPath());
+			File destFolder = new File(destWorkFolderPath);
+
+			Path pathToGo = Paths.get(destFolder.getAbsolutePath() + File.separator + srcFile.getName());
+			Files.copy(srcFile.toPath(), pathToGo);
+		}
+	
+		// If no coordinates system, don't create electrode.csv & _coordsystem.json files
+		if (dataset.getCoordinatesSystem() == null) {
+			return;
+		}
+
 		// Create electrode.csv file
 		fileName = subjectName + "_" + sessionId + "_task_" + studyName + "_" + runId + "_electrodes.tsv";
 		destFile = destWorkFolderPath + File.separator + fileName;
@@ -501,34 +533,6 @@ public class DatasetApiController implements DatasetApi {
 		.append("}");
 		
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
-
-		// Create events.tsv file
-		fileName = sessionId + "_" + sessionId + "_task_" + studyName + "_" + runId + "_event.tsv";
-		destFile = destWorkFolderPath + File.separator + fileName;
-
-		buffer = new StringBuffer();
-		buffer.append("onset \t duration \t sample \n");
-
-		for (Event event: dataset.getEvents()) {
-			float sample = Float.valueOf(event.getPosition());
-			float samplingFrequency = dataset.getSamplingFrequency();
-			float onset = sample / samplingFrequency;
-			buffer.append(onset).append("\t")
-			.append("n/a").append("\t")
-			.append(sample).append("\n");
-		}
-		Files.write(Paths.get(destFile), buffer.toString().getBytes());
-
-		// MAYBE: Do electrode.tsv and coordsystem.json if position exists
-		
-		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
-			URL url =  (URL) iterator.next();
-			File srcFile = new File(url.getPath());
-			File destFolder = new File(destWorkFolderPath);
-
-			Path pathToGo = Paths.get(destFolder.getAbsolutePath() + File.separator + srcFile.getName());
-			Files.copy(srcFile.toPath(), pathToGo);
-		}
 	}
 
 	/**

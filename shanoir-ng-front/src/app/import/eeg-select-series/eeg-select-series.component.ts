@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, ViewChild} from '@angular/core';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { Router } from '../../breadcrumbs/router';
@@ -20,6 +20,7 @@ import * as AppUtils from '../../utils/app.utils';
 import { EegDataset } from '../../datasets/dataset/eeg/dataset.eeg.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 
 @Component({
     selector: 'eeg-select-series',
@@ -29,6 +30,7 @@ import { ImportService } from '../shared/import.service';
 })
 export class EegSelectSeriesComponent {
 
+    @ViewChild('selectAll') tree: TreeNodeComponent;
     protected datasets: EegDataset[];
     protected selectedDatasets: EegDataset[] = [];
     protected datasetDetail: EegDataset;
@@ -56,6 +58,14 @@ export class EegSelectSeriesComponent {
             this.selectedDatasets.splice(index, 1);
         } else {
             this.selectedDatasets.push(datasetToMove);
+        }
+    }
+
+    changeDatasets() {
+        // Check all or none
+        this.selectedDatasets = [];
+        if (this.tree.checked) {
+            this.importDataService.eegImportJob.datasets.map(dts => this.selectedDatasets.push(dts));
         }
     }
 
