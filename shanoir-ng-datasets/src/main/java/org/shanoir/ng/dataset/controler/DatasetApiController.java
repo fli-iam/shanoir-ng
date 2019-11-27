@@ -486,8 +486,9 @@ public class DatasetApiController implements DatasetApi {
 			float sample = Float.valueOf(event.getPosition());
 			float samplingFrequency = dataset.getSamplingFrequency();
 			float onset = sample / samplingFrequency;
+			int duration = event.getPoints();
 			buffer.append(onset).append("\t")
-			.append("n/a").append("\t")
+			.append(duration == 0 ? "n/a" : String.valueOf(duration)).append("\t")
 			.append(sample).append("\n");
 		}
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());

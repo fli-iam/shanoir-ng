@@ -9,8 +9,9 @@ import java.io.File;
 import java.util.List;
 
 import org.junit.Test;
-import org.shanoir.ng.importer.eeg.BrainVisionReader.Channel;
-import org.shanoir.ng.importer.eeg.BrainVisionReader.Event;
+import org.shanoir.ng.importer.eeg.brainvision.BrainVisionReader;
+import org.shanoir.ng.importer.model.Channel;
+import org.shanoir.ng.importer.model.Event;
 
 /**
  * Test class for Brainvision reader.

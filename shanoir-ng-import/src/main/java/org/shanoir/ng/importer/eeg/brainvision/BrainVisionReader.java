@@ -1,4 +1,4 @@
-package org.shanoir.ng.importer.eeg;
+package org.shanoir.ng.importer.eeg.brainvision;
 
 /*
  * Copyright (C) 2016 Arne Weigenand
@@ -40,8 +40,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FilenameUtils;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.shanoir.ng.importer.model.Channel;
+import org.shanoir.ng.importer.model.Event;
 
 /**
  * This class parses and reads brainvision files.
@@ -655,159 +655,4 @@ public class BrainVisionReader {
 	public File getEegFile() {
 		return eegFile;
 	}
-
-	public static class Event {
-    	// <type>,[<description>],
-    	// <position>,<points>,<channel number>,[<date>]
-        @JsonProperty("type")
-    	private String type;
-        @JsonProperty("description")
-    	private String description;
-        @JsonProperty("position")
-    	private String position;
-        @JsonProperty("points")
-    	private int points;
-        @JsonProperty("channelNumber")
-    	private int channelNumber;
-        @JsonProperty("date")
-    	private Date date;
-        
-        // default constructor for jackson purpose
-        public Event() {
-        }
-    	
-    	public Event(String type, String description, String position, int points, int channelNumber, Date date) {
-			super();
-			this.type = type;
-			this.description = description;
-			this.position = position;
-			this.points = points;
-			this.channelNumber = channelNumber;
-			this.date = date;
-		}
-
-		public String getType() {
-			return type;
-		}
-		public void setType(String type) {
-			this.type = type;
-		}
-		public String getDescription() {
-			return description;
-		}
-		public void setDescription(String description) {
-			this.description = description;
-		}
-		public String getPosition() {
-			return position;
-		}
-		public void setPosition(String position) {
-			this.position = position;
-		}
-		public int getPoints() {
-			return points;
-		}
-		public void setPoints(int points) {
-			this.points = points;
-		}
-		public int getChannelNumber() {
-			return channelNumber;
-		}
-		public void setChannelNumber(int channelNumber) {
-			this.channelNumber = channelNumber;
-		}
-		public Date getDate() {
-			return date;
-		}
-		public void setDate(Date date) {
-			this.date = date;
-		}
-    }
-
-    public static class Channel {
-    	@JsonProperty("name")
-    	private String name;
-    	@JsonProperty("resolution")
-    	private float resolution;
-    	@JsonProperty("referenceUnits")
-    	private String referenceUnits;
-    	@JsonProperty("lowCutoff")
-    	private int lowCutoff = 0;
-    	@JsonProperty("highCutoff")
-    	private int highCutoff = 0;
-    	@JsonProperty("notch")
-    	private float notch = 0;
-    	@JsonProperty("x")
-    	private float x;
-    	@JsonProperty("y")
-    	private float y;
-    	@JsonProperty("z")
-    	private float z;
-    	
-    	// default constructor for jackson purpose.
-    	public Channel() {
-    	}
-    	
-		public Channel(String name, float resolution, String referenceUnit) {
-			super();
-			this.name = name;
-			this.resolution = resolution;
-			this.referenceUnits = referenceUnit;
-		}
-		public String getName() {
-			return name;
-		}
-		public void setName(String name) {
-			this.name = name;
-		}
-		public float getResolution() {
-			return resolution;
-		}
-		public void setResolution(float resolution) {
-			this.resolution = resolution;
-		}
-		public String getReferenceUnits() {
-			return referenceUnits;
-		}
-		public void setReferenceUnits(String referenceUnit) {
-			this.referenceUnits = referenceUnit;
-		}
-		public int getLowCutoff() {
-			return lowCutoff;
-		}
-		public void setLowCutoff(int lowCutoff) {
-			this.lowCutoff = lowCutoff;
-		}
-		public int getHighCutoff() {
-			return highCutoff;
-		}
-		public void setHighCutoff(int highCutoff) {
-			this.highCutoff = highCutoff;
-		}
-		public float getNotch() {
-			return notch;
-		}
-		public void setNotch(float notch) {
-			this.notch = notch;
-		}
-		public float getX() {
-			return x;
-		}
-		public void setX(float x) {
-			this.x = x;
-		}
-		public float getY() {
-			return y;
-		}
-		public void setY(float y) {
-			this.y = y;
-		}
-		public float getZ() {
-			return z;
-		}
-		public void setZ(float z) {
-			this.z = z;
-		}
-    	
-    }
 }

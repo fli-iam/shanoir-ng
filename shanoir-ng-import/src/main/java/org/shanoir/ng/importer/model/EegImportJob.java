@@ -2,9 +2,6 @@ package org.shanoir.ng.importer.model;
 
 import java.util.List;
 
-import org.shanoir.ng.importer.eeg.BrainVisionReader.Channel;
-import org.shanoir.ng.importer.eeg.BrainVisionReader.Event;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**

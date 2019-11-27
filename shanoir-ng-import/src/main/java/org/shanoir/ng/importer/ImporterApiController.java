@@ -1,5 +1,5 @@
 /**
- * Shanoir NG - Import, manage and share neuroimaging data
+< * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  * 
@@ -15,12 +15,15 @@
 package org.shanoir.ng.importer;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.validation.Valid;
 
@@ -30,9 +33,14 @@ import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
-import org.shanoir.ng.importer.eeg.BrainVisionReader;
+import org.shanoir.ng.importer.eeg.brainvision.BrainVisionReader;
+import org.shanoir.ng.importer.eeg.edf.EDFAnnotation;
+import org.shanoir.ng.importer.eeg.edf.EDFParser;
+import org.shanoir.ng.importer.eeg.edf.EDFParserResult;
+import org.shanoir.ng.importer.model.Channel;
 import org.shanoir.ng.importer.model.EegDataset;
 import org.shanoir.ng.importer.model.EegImportJob;
+import org.shanoir.ng.importer.model.Event;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -462,15 +470,15 @@ public class ImporterApiController implements ImporterApi {
 	/**
 	 * This method load an EEG file, unzip it and load an import job with the informations collected
 	 */
-	public ResponseEntity<EegImportJob> uploadEEGZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile eegZipFile)
+	public ResponseEntity<EegImportJob> uploadEEGZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile eegFile)
 			throws RestServiceException {
 		try {
 			// Do some checks about the file, must be != null and must be a .zip file
-			if (eegZipFile == null) {
+			if (eegFile == null) {
 				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No file uploaded.", null));
 			}
-			if (!isZipFile(eegZipFile)) {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),"Wrong content type of file upload, .zip required.", null));
+			if (!isZipFile(eegFile)) {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),"Wrong content type of file upload, .zip or .edf required.", null));
 			}
 			/**
 			 * 1. STEP: Handle file management.
@@ -485,63 +493,161 @@ public class ImporterApiController implements ImporterApi {
 			}
 
 			// Unzip the file and get the elements
-			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, eegZipFile, false);
-			File brainvisionFileDir = new File(importJobDir.getAbsolutePath() + File.separator + eegZipFile.getOriginalFilename().replace(".zip", ""));
+			File importJobDir = saveTempFileCreateFolderAndUnzip(userImportDir, eegFile, false);
 
-			// TODO: Consider .edf files here
-			
+			EegImportJob importJob = new EegImportJob();
+			importJob.setWorkFolder(importJobDir.getAbsolutePath());
+
+			List<EegDataset> datasets = new ArrayList<>();
+
+			File dataFileDir = new File(importJobDir.getAbsolutePath() + File.separator + eegFile.getOriginalFilename().replace(".zip", ""));
+
 			// Get .VHDR file
-			File[] matchingFiles = brainvisionFileDir.listFiles(new FilenameFilter() {
+			File[] bvMatchingFiles = dataFileDir.listFiles(new FilenameFilter() {
 			    public boolean accept(File dir, String name) {
 			        return name.endsWith("vhdr");
 			    }
 			});
+			
+			// Get .edf file
+			File[] edfMatchingFiles = dataFileDir.listFiles(new FilenameFilter() {
+			    public boolean accept(File dir, String name) {
+			        return name.endsWith("edf");
+			    }
+			});
 
-			// Manage multiple vhdr files
-			// If there is 0 or 2+ vhdr files, don't consider it. Load patient by patient for the moment.
-			if (matchingFiles == null || matchingFiles.length < 1) {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "File does not contains a .vhdr file.", null));
+			if (bvMatchingFiles != null && bvMatchingFiles.length > 0) {
+				// Manage multiple vhdr files
+				// read .vhdr files
+				readBrainvisionFiles(bvMatchingFiles, dataFileDir, datasets);
+			} else if (edfMatchingFiles != null && edfMatchingFiles.length > 0) {
+				// read .edf files
+				readEdfFiles(edfMatchingFiles, dataFileDir, datasets);
+			} else {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "File does not contains a .vhdr or .edf file.", null));
 			}
 
-			EegImportJob importJob = new EegImportJob();
-			importJob.setWorkFolder(importJobDir.getAbsolutePath());
-			List<EegDataset> datasets = new ArrayList<>();
-
-			for (File vhdrFile : matchingFiles) {
-				
-				// Parse the file
-				BrainVisionReader bvr = new BrainVisionReader(vhdrFile);
-
-				EegDataset dataset = new EegDataset();
-				dataset.setEvents(bvr.getEvents());
-				dataset.setChannels(bvr.getChannels());
-				dataset.setChannelCount(bvr.getNbchan());
-				// Get dataset name from VHDR file name
-				String fileNameWithOutExt = FilenameUtils.removeExtension(vhdrFile.getName());
-				dataset.setName(fileNameWithOutExt);
-				dataset.setSamplingFrequency(bvr.getSamplingFrequency());
-				dataset.setCoordinatesSystem(bvr.getHasPosition()? "true" : null);
-				
-				// Get the list of file to save from reader
-				List<String> files = new ArrayList<>();
-				
-				File[] filesToSave = brainvisionFileDir.listFiles(new FilenameFilter() {
-				    public boolean accept(File dir, String name) {
-				        return name.startsWith(fileNameWithOutExt);
-				    }
-				});
-				for (File fi : filesToSave) {
-					files.add(fi.getCanonicalPath());
-				}
-				dataset.setFiles(files);
-				datasets.add(dataset);
-			}
 			importJob.setDatasets(datasets);
 			
 			return new ResponseEntity<EegImportJob>(importJob, HttpStatus.OK);
 		} catch (IOException ioe) {
 			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
 		}
+	}
+
+	/**
+	 * Reads a list of .edf files to generate a bunch of datasets.
+	 * @param datasets the list of datasets to import 
+	 * @param dataFileDir the file directory where we are working
+	 * @param edfMatchingFiles the list of .edf files
+	 * @throws IOException when parsing fails
+	 */
+	private void readEdfFiles(File[] edfMatchingFiles, File dataFileDir, List<EegDataset> datasets) throws IOException {
+		for (File edfFile : edfMatchingFiles) {
+			
+			// Parse the file
+			EDFParserResult result = EDFParser.parseEDF(new FileInputStream(edfFile));
+
+			// Create channels
+			List<Channel> channels = new ArrayList<>();
+			for (int i = 0; i < result.getHeader().getNumberOfChannels(); i++) {
+				Channel chan = new Channel();
+				Pattern p = Pattern.compile("HP:(\\d+)k?Hz\\sLP:(\\d+)k?Hz(\\sN:(\\d+)k?Hz)?");
+				Matcher m = p.matcher(result.getHeader().getPrefilterings()[i].trim());
+				if (m.matches()) {
+					chan.setHighCutoff(Integer.parseInt(m.group(1)));
+					chan.setLowCutoff(Integer.parseInt(m.group(2)));
+					if (m.groupCount() > 2) {
+						chan.setNotch(Integer.parseInt(m.group(4)));
+					}
+				}
+				chan.setName(result.getHeader().getChannelLabels()[i].trim());
+				chan.setReferenceUnits(result.getHeader().getDimensions()[i].trim());
+
+				channels.add(chan);
+			}
+			
+			// NOT SURE OF THIS AT ALL
+			double samplingfrequency = result.getHeader().getNumberOfRecords() / result.getHeader().getDurationOfRecords();
+
+			// Create events
+			List<Event> events = new ArrayList<>();
+			for (EDFAnnotation annotation : result.getAnnotations()) {
+				Event event = new Event();
+				
+				// This is done by default
+				event.setChannelNumber(0);
+				event.setPosition(String.valueOf((float)(samplingfrequency / annotation.getOnSet())));
+				event.setPoints((int) annotation.getDuration()); 
+				events.add(event);
+			}
+
+			EegDataset dataset = new EegDataset();
+			dataset.setEvents(events);
+			dataset.setChannels(channels);
+			dataset.setChannelCount(result.getHeader().getNumberOfChannels());
+
+			// Get dataset name from EDF file name
+			String fileNameWithOutExt = FilenameUtils.removeExtension(edfFile.getName());
+			dataset.setName(fileNameWithOutExt);
+			
+			dataset.setSamplingFrequency((int)samplingfrequency);
+			//dataset.setCoordinatesSystem(??);
+			
+			// Get the list of file to save from reader
+			List<String> files = new ArrayList<>();
+			
+			File[] filesToSave = dataFileDir.listFiles(new FilenameFilter() {
+			    public boolean accept(File dir, String name) {
+			        return name.startsWith(fileNameWithOutExt);
+			    }
+			});
+			for (File fi : filesToSave) {
+				files.add(fi.getCanonicalPath());
+			}
+			dataset.setFiles(files);
+			datasets.add(dataset);
+		};
+	}
+
+	/**
+	 * Reads a list of .vhdr files to generate a bunch of datasets.
+	 * @param dataFileDir the file directory where we are working
+	 * @param bvMatchingFiles  the list of vhdr files
+	 * @param datasets the list of datasets to import
+	 * @return a list of datasets generated from the informations of the .vhdr files
+	 * @throws IOException when parsing fails
+	 */
+	private void readBrainvisionFiles(File[] bvMatchingFiles, File dataFileDir, List<EegDataset> datasets) throws IOException {
+		for (File vhdrFile : bvMatchingFiles) {
+			
+			// Parse the file
+			BrainVisionReader bvr = new BrainVisionReader(vhdrFile);
+
+			EegDataset dataset = new EegDataset();
+			dataset.setEvents(bvr.getEvents());
+			dataset.setChannels(bvr.getChannels());
+			dataset.setChannelCount(bvr.getNbchan());
+			// Get dataset name from VHDR file name
+			String fileNameWithOutExt = FilenameUtils.removeExtension(vhdrFile.getName());
+			dataset.setName(fileNameWithOutExt);
+			dataset.setSamplingFrequency(bvr.getSamplingFrequency());
+			dataset.setCoordinatesSystem(bvr.getHasPosition()? "true" : null);
+			
+			// Get the list of file to save from reader
+			List<String> files = new ArrayList<>();
+			
+			File[] filesToSave = dataFileDir.listFiles(new FilenameFilter() {
+			    public boolean accept(File dir, String name) {
+			        return name.startsWith(fileNameWithOutExt);
+			    }
+			});
+			for (File fi : filesToSave) {
+				files.add(fi.getCanonicalPath());
+			}
+			dataset.setFiles(files);
+			datasets.add(dataset);
+		};
 	}
 
 	/**
