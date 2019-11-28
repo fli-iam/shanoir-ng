@@ -1,7 +1,11 @@
 import { Component, Input, Output, OnInit, EventEmitter } from '@angular/core';
 import { FormGroup, FormControl }                 from '@angular/forms';
+import { Router as AngularRouter } from '@angular/router';
 import { ParameterControlService }    from './parameter-control.service';
 import { ParameterGroup }    from './parameter-group/parameter-group';
+import { Parameter }     from './parameter/parameter';
+import { Router } from '../../breadcrumbs/router';
+import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 
 @Component({
   selector: 'invocation-gui',
@@ -15,7 +19,10 @@ export class InvocationGuiComponent implements OnInit {
   parameterGroups: { required: Map<string, ParameterGroup>, optional: Map<string, ParameterGroup> } = null;
   form: FormGroup = null;
 
-  constructor(private pcs: ParameterControlService) { }
+  constructor(private pcs: ParameterControlService, 
+              private router: Router, 
+              private angularRouter: AngularRouter, 
+              private breadcrumbsService: BreadcrumbsService) { }
 
   ngOnInit() {
   }
@@ -52,13 +59,24 @@ export class InvocationGuiComponent implements OnInit {
       }
 
     }
-
-    
-      
   }
 
   onChange(value: any) {
     let invocation = this.pcs.generateInvocation(this.form);
     this.invocationChanged.emit(invocation);
   }
+
+  onSelectData(parameter: Parameter<any>) {
+    // store which data we clicked on
+    this.breadcrumbsService.currentStep.data.boutiquesInvocation = this.pcs.generateInvocation(this.form);
+    this.breadcrumbsService.currentStep.data.boutiquesCurrentParameterID = parameter.id;
+    this.breadcrumbsService.replace = false;
+    // this.breadcrumbsService.nameStep('Boutiques');
+    this.router.navigate(['boutiques/dataset/list'], {replaceUrl: false });
+  }
+
+  testInvocation(invocation: any) {
+    this.pcs.setFormFromInvocation(invocation, this.form);
+  }
 }
+

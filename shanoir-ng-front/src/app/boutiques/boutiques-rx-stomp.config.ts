@@ -2,7 +2,8 @@ import { InjectableRxStompConfig } from '@stomp/ng2-stompjs';
 
 export const BoutiquesRxStompConfig: InjectableRxStompConfig = {
   
-  brokerURL: 'ws://localhost:9000/ws/websocket',
+  brokerURL: 'ws://localhost:9906/ws/websocket',
+  // brokerURL: 'ws://localhost:9906/ws',
 
   // Headers
   // Typical keys: login, passcode, host

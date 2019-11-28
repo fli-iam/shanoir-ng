@@ -47,7 +47,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private new: boolean = false;
 
     constructor(
-            private readonly ROUTING_NAME: string) {
+            private readonly ROUTING_NAME: string, milestone = true) {
         
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
         this.router = ServiceLocator.injector.get(Router);
@@ -61,7 +61,9 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.completeColDefs();
         this.customActionDefs = this.getCustomActionsDefs();
         this.completeCustomActions();
-        this.breadcrumbsService.markMilestone();
+        if(milestone) {
+            this.breadcrumbsService.markMilestone();
+        }
         this.breadcrumbsService.nameStep(capitalizeFirstLetter(ROUTING_NAME) + ' list');
     }
 

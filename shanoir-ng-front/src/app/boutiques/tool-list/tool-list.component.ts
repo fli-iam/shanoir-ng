@@ -29,7 +29,8 @@ export class ToolListComponent extends BrowserPaginEntityListComponent<ToolInfo>
   @ViewChild('table', { static: true }) table: TableComponent;
 
   constructor(private toolService: ToolService) {
-    super('boutiques tool');
+    super('boutiques');
+    this.breadcrumbsService.nameStep('Boutiques');
   }
 
   getOptions() {

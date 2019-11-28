@@ -1,7 +1,8 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ElementRef, ViewChild } from '@angular/core';
 import { ToolDescriptorInfoComponent } from '../tool-descriptor-info/tool-descriptor-info.component';
 import { ToolInfo } from '../tool.model';
 import { ToolService } from '../tool.service';
+import { InvocationGuiComponent } from '../invocation-gui/invocation-gui.component';
 import { Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -15,6 +16,8 @@ export class InvocationComponent implements OnInit {
   tool: ToolInfo = null
   
   @Output() invocationChanged = new EventEmitter<any>();
+
+  @ViewChild(InvocationGuiComponent, { static: false }) invocationGUI: InvocationGuiComponent;
 
   descriptor: any = null
   
@@ -66,4 +69,7 @@ export class InvocationComponent implements OnInit {
     this.invocationSubject.next(v);
   }
 
+  testInvocation() {
+    this.invocationGUI.testInvocation(this.invocation);
+  }
 }

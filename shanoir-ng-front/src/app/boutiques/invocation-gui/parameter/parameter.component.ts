@@ -1,10 +1,7 @@
-import { Component, Input, ElementRef, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef, ViewChild } from '@angular/core';
 import { FormGroup, FormControl }        from '@angular/forms';
 import { Parameter }     from './parameter';
 import { ReactiveFormsModule } from '@angular/forms';
-import { Router } from '../../../breadcrumbs/router';
-import { Router as AngularRouter } from '@angular/router';
-import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 
 @Component({
   selector: 'parameter',
@@ -15,9 +12,10 @@ export class ParameterComponent {
 
   @Input() parameter: Parameter<any>;
   @Input() formGroup: FormGroup;
+  @Output() selectDataClicked = new EventEmitter<Parameter<any>>();
   @ViewChild('parameterInput', { static: false }) parameterInput: ElementRef;
 
-  constructor(private router: Router, private angularRouter: AngularRouter, private breadcrumbsService: BreadcrumbsService) { }
+  constructor() { }
 
   ngOnInit() {
   }
@@ -25,10 +23,7 @@ export class ParameterComponent {
   get isValid() { return this.formGroup.controls[this.parameter.id].valid; }
 
   selectData(event: Event) {
-    this.breadcrumbsService.replace = false;
-    // this.breadcrumbsService.
-    this.router.navigate(['dataset/list'], {replaceUrl: false });
-  	return;
+    this.selectDataClicked.emit(this.parameter);
   }
 
   displaySelectData() {

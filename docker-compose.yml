@@ -174,23 +174,23 @@ services:
   #
   # Boutiques microservice
   #
-  # boutiques:
-  #   container_name: boutiques
-  #   build: ./docker-compose/boutiques
-  #   environment:
-  #     - keycloak.auth-server-url
-  #     - front.server.url
-  #     - front.server.address
-  #   volumes:
-  #     - "logs:/var/log/shanoir-ng-logs"
-  #     - certificate-share-data:/etc/ssl/certs/java:ro
-  #   networks:
-  #     - shanoir_ng_network
-  #   ports:
-  #    - "9906:9906"
-  #    - "9916:9916"
-  #   depends_on:
-  #     - "datasets"
+  boutiques:
+    container_name: boutiques
+    build: ./docker-compose/boutiques
+    environment:
+      - keycloak.auth-server-url
+      - front.server.url
+      - front.server.address
+    volumes:
+      - "logs:/var/log/shanoir-ng-logs"
+      - certificate-share-data:/etc/ssl/certs/java:ro
+    networks:
+      - shanoir_ng_network
+    ports:
+     - "9906:9906"
+     - "9916:9916"
+    depends_on:
+      - "datasets"
   #
   # Solr microservice for Shanoir-NG search
   #

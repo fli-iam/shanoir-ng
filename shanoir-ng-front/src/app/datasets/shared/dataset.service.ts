@@ -72,6 +72,16 @@ export class DatasetService extends EntityService<Dataset> {
         ).subscribe(response => {this.downloadIntoBrowser(response);});
     }
 
+    getUrls(id: number): Observable<HttpResponse<any>> {
+        if (!id) throw Error('Cannot get the urls of a dataset without an id');
+        // return this.http.get(
+        //     AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id, 
+        //     { observe: 'response', responseType: 'application/json' }
+        // ).map(response => response);
+
+        return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id);
+    }
+
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
         let contentDispHeader: string = response.headers.get('Content-Disposition');

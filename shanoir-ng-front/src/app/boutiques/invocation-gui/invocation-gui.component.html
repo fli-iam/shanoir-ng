@@ -1,13 +1,21 @@
 <form *ngIf="form" [formGroup]="form">
 
   <div *ngIf="parameterGroups['required'].size > 0" id="required-parameters">
+    
     <h3>Required parameters</h3>
-    <parameter-group *ngFor="let parameterGroup of parameterGroups['required'] | keyvalue" [parameterGroup]="parameterGroup.value" [formGroup]="$any(form.controls)['required'].controls[parameterGroup.key]" [class]="'parameter-group-' + parameterGroup.key | replaceSpace | lowercase"></parameter-group>
+    
+    <parameter-group *ngFor="let parameterGroup of parameterGroups['required'] | keyvalue" [parameterGroup]="parameterGroup.value" [formGroup]="$any(form.controls)['required'].controls[parameterGroup.key]" [class]="'parameter-group-' + parameterGroup.key | replaceSpace | lowercase" (selectDataClicked)="onSelectData($event)"></parameter-group>
+    
   </div>
 
   <div *ngIf="parameterGroups['optional'].size > 0" id="optional-parameters">
-    <h3><input id="toggle-optional-parameters" type="checkbox" (change)="onToggleOptionalParameters($event.target)" checked="true"> <label for="toggle-optional-parameters">Optional parameters</label></h3>
-    <parameter-group *ngFor="let parameterGroup of parameterGroups['optional'] | keyvalue" [parameterGroup]="parameterGroup.value" [formGroup]="$any(form.controls)['optional'].controls[parameterGroup.key]" [class]="'parameter-group-' + parameterGroup.key | replaceSpace | lowercase"></parameter-group>
+    
+    <h3>
+      <input id="toggle-optional-parameters" type="checkbox" (change)="onToggleOptionalParameters($event.target)" checked="true"> 
+      <label for="toggle-optional-parameters">Optional parameters</label>
+    </h3>
+
+    <parameter-group *ngFor="let parameterGroup of parameterGroups['optional'] | keyvalue" [parameterGroup]="parameterGroup.value" [formGroup]="$any(form.controls)['optional'].controls[parameterGroup.key]" [class]="'parameter-group-' + parameterGroup.key | replaceSpace | lowercase" (selectDataClicked)="onSelectData($event)"></parameter-group>
   </div>
 
 </form>

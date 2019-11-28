@@ -36,7 +36,10 @@ export class ParameterControlService {
   }
 
   createGroupList(groups: ParameterGroupDescription[], ungroupedParameterIds: Set<string>) {
-
+    if(!groups) {
+      return [];
+    }
+    
     let groupList = [];
     for(let group of groups) {
       for(let member of group.members) {
@@ -151,6 +154,25 @@ export class ParameterControlService {
           if(dirty) {
             invocation[parameterId] = parameter.parseValue(parameterValue);
           }
+        }
+      }
+    }
+    return invocation;
+  }
+
+  setFormFromInvocation(invocation: any, form: FormGroup) {
+    for(let superGroupName of ['required', 'optional']) {
+      for(let groupId in form.value[superGroupName]) {
+        let group = form.value[superGroupName][groupId]
+        let formGroup: FormGroup = (form.controls[superGroupName] as FormGroup).controls[groupId] as FormGroup
+        for(let parameterId in group) {
+          // let parameterValue = group[parameterId];
+          // let parameter: Parameter<any> = this.idToParameter.get(parameterId);
+          // let dirty = (formGroup.controls[parameterId] as FormControl).dirty
+          // if(dirty) {
+          //   invocation[parameterId] = parameter.parseValue(parameterValue);
+          // }
+          formGroup.setValue(invocation[parameterId]);
         }
       }
     }

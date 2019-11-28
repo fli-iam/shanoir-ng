@@ -16,19 +16,19 @@ export class ExecutionComponent implements OnInit {
   generatedCommand: string = null
   invocation: any = null
   output: string = null
-  private topicSubscription: Subscription;
+  // private topicSubscription: Subscription;
 
-  constructor(private toolService: ToolService, private rxStompService: RxStompService) { }
+  constructor(private toolService: ToolService/*, private rxStompService: RxStompService*/) { }
 
   ngOnInit() {
-    this.topicSubscription = this.rxStompService.watch('/message/messages').subscribe((message: Message) => {
-      console.log(message.body);
-      this.output += message.body + "\n";
-    });
+    // this.topicSubscription = this.rxStompService.watch('/message/messages').subscribe((message: Message) => {
+    //   console.log(message.body);
+    //   this.output += message.body + "\n";
+    // });
   }
 
   ngOnDestroy() {
-    this.topicSubscription.unsubscribe();
+    // this.topicSubscription.unsubscribe();
   }
 
   onToolSelected(toolInfo: ToolInfo) {

@@ -1,0 +1,46 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div #formContainer class="content-component">
+	<form *ngIf="dataset" class="max-content" [formGroup]="form">
+		<div class="layout">
+			<span [ngSwitch]="mode">
+				<ng-template [ngSwitchCase]="'view'">
+					<h2 class="header command-zone"i18n="View dataset|Title@@datasetDetailViewTitle">Dataset details</h2>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'edit'">
+					<h2 class="header command-zone"i18n="Edit dataset|Title@@datasetDetailEditTitle">Edit dataset</h2>
+				</ng-template>
+				<ng-template [ngSwitchCase]="'create'">
+					<h2 class="header command-zone"i18n="Create dataset|Title@@datasetDetailCreateTitle">Create dataset</h2>
+				</ng-template>
+			</span>
+
+			<common-dataset-details [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></common-dataset-details>
+			<mr-dataset-details *ngIf="dataset.type == 'Mr'" [mode]="mode" [dataset]="dataset"></mr-dataset-details>
+			<!-- TODO : other types -->
+
+			<fieldset *ngIf="mode=='view' && hasDownloadRight">
+				<legend>Preview</legend>
+				<papaya [params]="papayaParams"></papaya>
+			</fieldset>
+
+			<fieldset *ngIf="mode=='view'">
+				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Data</legend>
+				<file-tree [files]="files" (fileSelected)="onFileSelected($event)"></file-tree>
+			</fieldset>
+
+		</div>
+	</form>
+</div>

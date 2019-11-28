@@ -34,6 +34,7 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.DatasetUrlsDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
@@ -70,6 +71,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 
 import io.swagger.annotations.ApiParam;
 
@@ -231,6 +235,38 @@ public class DatasetApiController implements DatasetApi {
 				.contentType(MediaType.parseMediaType(contentType))
 				.contentLength(data.length)
 				.body(resource);
+	}
+
+	@Override
+	public ResponseEntity<DatasetUrlsDTO> getDatasetUrlsById(
+			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
+			throws RestServiceException, IOException {
+
+		final Dataset dataset = datasetService.findById(datasetId);
+		if (dataset == null) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
+		}
+		
+		DatasetUrlsDTO urls = new DatasetUrlsDTO();
+
+		try {
+			List<URL> pathURLs = new ArrayList<URL>();
+			getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+			for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
+				urls.dcm.add(iterator.next().getPath());
+			}
+			pathURLs.clear();
+			getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+			for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
+				urls.nii.add(iterator.next().getPath());
+			}
+			
+		} catch (IOException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error in WADORSDownloader.", null));
+		}
+		return new ResponseEntity<DatasetUrlsDTO>(urls, HttpStatus.OK);
 	}
 	
 	/**

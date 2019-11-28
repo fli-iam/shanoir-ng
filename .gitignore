@@ -20,3 +20,4 @@ target
 .project
 bin/
 docker-compose/**/*.jar
+docker-compose/boutiques/boutiques
